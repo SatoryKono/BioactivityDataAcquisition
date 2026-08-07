@@ -17,7 +17,7 @@ surface whose subtypes are encoded directly in
 | `internal_compatibility_launcher` | convenience launcher retained for mixed OS or bootstrap workflows, but not a canonical public route | historical example: retained Codex Windows facades before their promotion back to `active` during the 2026-04-29 parity refresh |
 | `windows_compatibility_wrapper` | Windows-side companion retained because platform-specific filenames are part of the runtime/config contract | `scripts/ai/mcp/*_wrapper.ps1` |
 | `shared_helper_module` | shared internal helper with multiple in-repo consumers, but not itself a primary command surface | `scripts/engineering/common/cli_dispatch.py`, `src/tools/neo4j_audit.py` |
-| `internal_helper_orphan` | bounded internal helper retained for module/bootstrap structure, not for direct user invocation | `scripts/docs/_compat_shim.py`, `scripts/docs/checks/_bootstrap.py`, `scripts/engineering/common/repo_paths.py` |
+| `internal_helper_orphan` | bounded internal helper retained for module/bootstrap structure, not for direct user invocation | `scripts/docs/_compat_shim.py`, `scripts/docs/common/bootstrap.py`, `scripts/engineering/common/repo_paths.py` |
 | `legacy_manual_utility` | retained historical/manual utility kept for bounded compatibility or operator context, but not for extension | `scripts/engineering/qa/py_review_orchestrator.py` |
 
 ## Governance Rule

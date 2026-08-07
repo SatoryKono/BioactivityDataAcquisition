@@ -5098,7 +5098,7 @@
       ]
     },
     {
-      "path": "scripts/diagrams/add_svg_text_fallback.py",
+      "path": "scripts/diagrams/fix/add_svg_text_fallback.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -5108,7 +5108,7 @@
           "path": "docs/02-architecture/diagrams/governance/diagram-modernization-program.md",
           "line": 135,
           "source_group": "docs",
-          "text": "1. `scripts/diagrams/add_svg_text_fallback.py`"
+          "text": "1. `scripts/diagrams/fix/add_svg_text_fallback.py`"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/diagram-regression-test-plan.md",
@@ -5120,25 +5120,25 @@
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
           "line": 578,
           "source_group": "docs",
-          "text": "\"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py\" --fix -f \"$svg_tmp\" >/dev/null 2>&1 || true"
+          "text": "\"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/fix/add_svg_text_fallback.py\" --fix -f \"$svg_tmp\" >/dev/null 2>&1 || true"
         },
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
           "line": 586,
           "source_group": "docs",
-          "text": "if ! \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py\" --fix -f \"$svg_tmp\" >/dev/null 2>&1; then"
+          "text": "if ! \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/fix/add_svg_text_fallback.py\" --fix -f \"$svg_tmp\" >/dev/null 2>&1; then"
         },
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
           "line": 656,
           "source_group": "docs",
-          "text": "\"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py\" --fix -f \"$temp_png_svg\" >/dev/null 2>&1 || true"
+          "text": "\"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/fix/add_svg_text_fallback.py\" --fix -f \"$temp_png_svg\" >/dev/null 2>&1 || true"
         },
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
           "line": 664,
           "source_group": "docs",
-          "text": "if ! \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py\" --fix -f \"$temp_png_svg\" >/dev/null 2>&1; then"
+          "text": "if ! \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/fix/add_svg_text_fallback.py\" --fix -f \"$temp_png_svg\" >/dev/null 2>&1; then"
         },
         {
           "path": "scripts/diagrams/README.md",
@@ -5155,7 +5155,7 @@
       ]
     },
     {
-      "path": "scripts/diagrams/apply_elk_layout.py",
+      "path": "scripts/diagrams/fix/apply_elk_layout.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -5165,7 +5165,7 @@
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 209,
           "source_group": "docs",
-          "text": "Утилита `scripts/diagrams/apply_elk_layout.py` автоматически добавляет ELK init к диаграммам, превышающим порог нод:"
+          "text": "Утилита `scripts/diagrams/fix/apply_elk_layout.py` автоматически добавляет ELK init к диаграммам, превышающим порог нод:"
         },
         {
           "path": "scripts/diagrams/README.md",
@@ -5183,7 +5183,7 @@
           "path": "src/tools/README.md",
           "line": 243,
           "source_group": "scripts",
-          "text": "**Canonical location:** `scripts/diagrams/apply_elk_layout.py`"
+          "text": "**Canonical location:** `scripts/diagrams/fix/apply_elk_layout.py`"
         },
         {
           "path": "src/tools/apply_elk_layout.py",
@@ -5194,7 +5194,7 @@
       ]
     },
     {
-      "path": "scripts/diagrams/check_class_method_render_integrity.py",
+      "path": "scripts/diagrams/check/check_class_method_render_integrity.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -5204,25 +5204,25 @@
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 306,
           "source_group": "docs",
-          "text": "python scripts/diagrams/check_class_method_render_integrity.py \\"
+          "text": "python scripts/diagrams/check/check_class_method_render_integrity.py \\"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 459,
           "source_group": "docs",
-          "text": "1. Выполнен `python scripts/diagrams/check_class_method_render_integrity.py --source-dir docs/02-architecture/diagrams/class-diagrams --svg-dir docs/02-architecture/diagrams/class-diagrams/svg`."
+          "text": "1. Выполнен `python scripts/diagrams/check/check_class_method_render_integrity.py --source-dir docs/02-architecture/diagrams/class-diagrams --svg-dir docs/02-architecture/diagrams/class-diagrams/svg`."
         },
         {
           "path": "docs/02-architecture/diagrams/governance/diagram-regression-test-plan.md",
           "line": 75,
           "source_group": "docs",
-          "text": "| DIAG-T033 | Class method render integrity     | Целостность сигнатур методов в classDiagram              | `scripts/diagrams/check_class_method_render_integrity.py` | Auto      | PR             | Ha"
+          "text": "| DIAG-T033 | Class method render integrity     | Целостность сигнатур методов в classDiagram              | `scripts/diagrams/check/check_class_method_render_integrity.py` | Auto      | PR             | Ha"
         },
         {
           "path": "scripts/diagrams/README.md",
           "line": 31,
           "source_group": "scripts",
-          "text": "| `check-class-methods` | `scripts/diagrams/check_class_method_render_integrity.py` | Check class method render integrity                                   |"
+          "text": "| `check-class-methods` | `scripts/diagrams/check/check_class_method_render_integrity.py` | Check class method render integrity                                   |"
         },
         {
           "path": "scripts/diagrams/__main__.py",
@@ -5234,18 +5234,18 @@
           "path": "scripts/diagrams/run_diagram_checks.sh",
           "line": 356,
           "source_group": "scripts",
-          "text": "python3 \"$REPO_ROOT/scripts/diagrams/check_class_method_render_integrity.py\" \\"
+          "text": "python3 \"$REPO_ROOT/scripts/diagrams/check/check_class_method_render_integrity.py\" \\"
         },
         {
           "path": "scripts/diagrams/run_diagram_checks.sh",
           "line": 369,
           "source_group": "scripts",
-          "text": "python3 \"$REPO_ROOT/scripts/diagrams/check_class_method_render_integrity.py\" \\"
+          "text": "python3 \"$REPO_ROOT/scripts/diagrams/check/check_class_method_render_integrity.py\" \\"
         }
       ]
     },
     {
-      "path": "scripts/diagrams/check_diagram_artifacts.py",
+      "path": "scripts/diagrams/check/check_diagram_artifacts.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -5255,31 +5255,31 @@
           "path": ".github/workflows/diagram-nightly.yml",
           "line": 44,
           "source_group": "ci",
-          "text": "python3 scripts/diagrams/check_diagram_artifacts.py \\"
+          "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
           "line": 296,
           "source_group": "ci",
-          "text": "python3 scripts/diagrams/check_diagram_artifacts.py \\"
+          "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
           "line": 377,
           "source_group": "ci",
-          "text": "python3 scripts/diagrams/check_diagram_artifacts.py \\"
+          "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 444,
           "source_group": "docs",
-          "text": "1. **Проверить обязательные SVG-артефакты:** `python scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`"
+          "text": "1. **Проверить обязательные SVG-артефакты:** `python scripts/diagrams/check/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 445,
           "source_group": "docs",
-          "text": "Для дополнительной compatibility-проверки PNG используйте curated manifest: `python scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/png-compatibility.txt"
+          "text": "Для дополнительной compatibility-проверки PNG используйте curated manifest: `python scripts/diagrams/check/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/png-compatibility.txt"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
@@ -5302,7 +5302,7 @@
       ]
     },
     {
-      "path": "scripts/diagrams/check_diagram_quality_gates.py",
+      "path": "scripts/diagrams/check/check_diagram_quality_gates.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -5312,19 +5312,19 @@
           "path": ".github/workflows/diagram-nightly.yml",
           "line": 76,
           "source_group": "ci",
-          "text": "python3 scripts/diagrams/check_diagram_quality_gates.py \\"
+          "text": "python3 scripts/diagrams/check/check_diagram_quality_gates.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
           "line": 399,
           "source_group": "ci",
-          "text": "python3 scripts/diagrams/check_diagram_quality_gates.py \\"
+          "text": "python3 scripts/diagrams/check/check_diagram_quality_gates.py \\"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 447,
           "source_group": "docs",
-          "text": "1. **Прогнать quality-gates:** `python scripts/diagrams/check_diagram_quality_gates.py --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt`"
+          "text": "1. **Прогнать quality-gates:** `python scripts/diagrams/check/check_diagram_quality_gates.py --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt`"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
@@ -5336,30 +5336,30 @@
           "path": "docs/02-architecture/diagrams/governance/diagram-regression-test-plan.md",
           "line": 60,
           "source_group": "docs",
-          "text": "| DIAG-T018 | Link style guide compliance       | Семантика линий                                          | `scripts/diagrams/check_diagram_quality_gates.py`         | Auto      | PR             | Ha"
+          "text": "| DIAG-T018 | Link style guide compliance       | Семантика линий                                          | `scripts/diagrams/check/check_diagram_quality_gates.py`         | Auto      | PR             | Ha"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/diagram-regression-test-plan.md",
           "line": 61,
           "source_group": "docs",
-          "text": "| DIAG-T019 | classDef coverage                 | Типизация узлов                                          | `scripts/diagrams/check_diagram_quality_gates.py`         | Auto      | PR             | So"
+          "text": "| DIAG-T019 | classDef coverage                 | Типизация узлов                                          | `scripts/diagrams/check/check_diagram_quality_gates.py`         | Auto      | PR             | So"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/diagram-regression-test-plan.md",
           "line": 62,
           "source_group": "docs",
-          "text": "| DIAG-T020 | Large diagram decomposition       | Наличие L1/L2/L3                                         | `scripts/diagrams/check_diagram_quality_gates.py`         | Auto      | PR             | Ha"
+          "text": "| DIAG-T020 | Large diagram decomposition       | Наличие L1/L2/L3                                         | `scripts/diagrams/check/check_diagram_quality_gates.py`         | Auto      | PR             | Ha"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/diagram-regression-test-plan.md",
           "line": 63,
           "source_group": "docs",
-          "text": "| DIAG-T021 | Legend present for large          | Пояснение семантики                                      | `scripts/diagrams/check_diagram_quality_gates.py`         | Auto      | PR             | Ha"
+          "text": "| DIAG-T021 | Legend present for large          | Пояснение семантики                                      | `scripts/diagrams/check/check_diagram_quality_gates.py`         | Auto      | PR             | Ha"
         }
       ]
     },
     {
-      "path": "scripts/diagrams/check_diagram_visual_smoke.py",
+      "path": "scripts/diagrams/check/check_diagram_visual_smoke.py",
       "type": "py",
       "status": "active",
       "agent_usage": [
@@ -5371,54 +5371,54 @@
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
           "line": 121,
           "source_group": "skills",
-          "text": "- `python scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`"
+          "text": "- `python scripts/diagrams/check/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`"
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
           "line": 56,
           "source_group": "ci",
-          "text": "python3 scripts/diagrams/check_diagram_visual_smoke.py \\"
+          "text": "python3 scripts/diagrams/check/check_diagram_visual_smoke.py \\"
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
           "line": 62,
           "source_group": "ci",
-          "text": "python3 scripts/diagrams/check_diagram_visual_smoke.py \\"
+          "text": "python3 scripts/diagrams/check/check_diagram_visual_smoke.py \\"
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
           "line": 69,
           "source_group": "ci",
-          "text": "python3 scripts/diagrams/check_diagram_visual_smoke.py \\"
+          "text": "python3 scripts/diagrams/check/check_diagram_visual_smoke.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
           "line": 388,
           "source_group": "ci",
-          "text": "python3 scripts/diagrams/check_diagram_visual_smoke.py \\"
+          "text": "python3 scripts/diagrams/check/check_diagram_visual_smoke.py \\"
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
           "line": 128,
           "source_group": "docs",
-          "text": "- `python scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`"
+          "text": "- `python scripts/diagrams/check/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
           "line": 466,
           "source_group": "docs",
-          "text": ".\\.venv-win\\Scripts\\python.exe scripts/diagrams/check_diagram_visual_smoke.py `"
+          "text": ".\\.venv-win\\Scripts\\python.exe scripts/diagrams/check/check_diagram_visual_smoke.py `"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 424,
           "source_group": "docs",
-          "text": ".\\.venv-win\\Scripts\\python.exe scripts/diagrams/check_diagram_visual_smoke.py `"
+          "text": ".\\.venv-win\\Scripts\\python.exe scripts/diagrams/check/check_diagram_visual_smoke.py `"
         }
       ]
     },
     {
-      "path": "scripts/diagrams/check_pdf_image_bounds.py",
+      "path": "scripts/diagrams/check/check_pdf_image_bounds.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -5428,7 +5428,7 @@
           "path": "docs/02-architecture/diagrams/README.md",
           "line": 396,
           "source_group": "docs",
-          "text": "- post-check: `scripts/diagrams/check_pdf_image_bounds.py`"
+          "text": "- post-check: `scripts/diagrams/check/check_pdf_image_bounds.py`"
         },
         {
           "path": "scripts/diagrams/README.md",
@@ -5443,15 +5443,15 @@
           "text": "\"check-pdf-bounds\": python_command(\"check_pdf_image_bounds.py\"),"
         },
         {
-          "path": "scripts/diagrams/generate_with_descriptions_pdf.py",
+          "path": "scripts/diagrams/render/generate_with_descriptions_pdf.py",
           "line": 36,
           "source_group": "scripts",
-          "text": "DEFAULT_BOUNDS_CHECKER = Path(\"scripts/diagrams/check_pdf_image_bounds.py\")"
+          "text": "DEFAULT_BOUNDS_CHECKER = Path(\"scripts/diagrams/check/check_pdf_image_bounds.py\")"
         }
       ]
     },
     {
-      "path": "scripts/diagrams/check_svg_text_visibility.py",
+      "path": "scripts/diagrams/check/check_svg_text_visibility.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -5461,54 +5461,54 @@
           "path": ".github/workflows/diagram-nightly.yml",
           "line": 50,
           "source_group": "ci",
-          "text": "python3 scripts/diagrams/check_svg_text_visibility.py \\"
+          "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
           "line": 231,
           "source_group": "ci",
-          "text": "python3 scripts/diagrams/check_svg_text_visibility.py --manifest \"$manifest_tmp\""
+          "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py --manifest \"$manifest_tmp\""
         },
         {
           "path": ".github/workflows/docs.yml",
           "line": 299,
           "source_group": "ci",
-          "text": "python3 scripts/diagrams/check_svg_text_visibility.py \\"
+          "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
           "line": 382,
           "source_group": "ci",
-          "text": "python3 scripts/diagrams/check_svg_text_visibility.py \\"
+          "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 353,
           "source_group": "docs",
-          "text": "Скрипт `scripts/diagrams/check_svg_text_visibility.py` валидирует smoke-набор SVG на предмет"
+          "text": "Скрипт `scripts/diagrams/check/check_svg_text_visibility.py` валидирует smoke-набор SVG на предмет"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 363,
           "source_group": "docs",
-          "text": "python scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt"
+          "text": "python scripts/diagrams/check/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 364,
           "source_group": "docs",
-          "text": "python scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt --json"
+          "text": "python scripts/diagrams/check/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt --json"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 446,
           "source_group": "docs",
-          "text": "1. **Проверить видимость текста в SVG:** `python scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`"
+          "text": "1. **Проверить видимость текста в SVG:** `python scripts/diagrams/check/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`"
         }
       ]
     },
     {
-      "path": "scripts/diagrams/diagram_paths.py",
+      "path": "scripts/diagrams/core/diagram_paths.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -5518,46 +5518,46 @@
           "path": "scripts/diagrams/README.md",
           "line": 109,
           "source_group": "scripts",
-          "text": "| `scripts/diagrams/diagram_paths.py`                          | Shared diagram path/constants helper used by rendering and validation tooling                 |"
+          "text": "| `scripts/diagrams/core/diagram_paths.py`                          | Shared diagram path/constants helper used by rendering and validation tooling                 |"
         },
         {
-          "path": "scripts/diagrams/add_svg_text_fallback.py",
+          "path": "scripts/diagrams/fix/add_svg_text_fallback.py",
           "line": 34,
           "source_group": "scripts",
           "text": "from .diagram_paths import SOURCE_FAMILIES, render_dir"
         },
         {
-          "path": "scripts/diagrams/add_svg_text_fallback.py",
+          "path": "scripts/diagrams/fix/add_svg_text_fallback.py",
           "line": 36,
           "source_group": "scripts",
-          "text": "from scripts.diagrams.diagram_paths import SOURCE_FAMILIES, render_dir"
+          "text": "from scripts.diagrams.core.diagram_paths import SOURCE_FAMILIES, render_dir"
         },
         {
-          "path": "scripts/diagrams/check_class_method_render_integrity.py",
+          "path": "scripts/diagrams/check/check_class_method_render_integrity.py",
           "line": 27,
           "source_group": "scripts",
           "text": "from .diagram_paths import source_dir as diagram_source_dir"
         },
         {
-          "path": "scripts/diagrams/check_class_method_render_integrity.py",
+          "path": "scripts/diagrams/check/check_class_method_render_integrity.py",
           "line": 29,
           "source_group": "scripts",
-          "text": "from scripts.diagrams.diagram_paths import source_dir as diagram_source_dir"
+          "text": "from scripts.diagrams.core.diagram_paths import source_dir as diagram_source_dir"
         },
         {
-          "path": "scripts/diagrams/check_diagram_artifacts.py",
+          "path": "scripts/diagrams/check/check_diagram_artifacts.py",
           "line": 25,
           "source_group": "scripts",
           "text": "from .diagram_paths import VISUAL_SMOKE_MANIFEST"
         },
         {
-          "path": "scripts/diagrams/check_diagram_artifacts.py",
+          "path": "scripts/diagrams/check/check_diagram_artifacts.py",
           "line": 27,
           "source_group": "scripts",
-          "text": "from scripts.diagrams.diagram_paths import VISUAL_SMOKE_MANIFEST"
+          "text": "from scripts.diagrams.core.diagram_paths import VISUAL_SMOKE_MANIFEST"
         },
         {
-          "path": "scripts/diagrams/check_diagram_quality_gates.py",
+          "path": "scripts/diagrams/check/check_diagram_quality_gates.py",
           "line": 23,
           "source_group": "scripts",
           "text": "from .diagram_paths import ("
@@ -5602,7 +5602,7 @@
       ]
     },
     {
-      "path": "scripts/diagrams/differentiate_linkstyle.py",
+      "path": "scripts/diagrams/fix/differentiate_linkstyle.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -5612,7 +5612,7 @@
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 242,
           "source_group": "docs",
-          "text": "Инструмент `scripts/diagrams/differentiate_linkstyle.py` классифицирует связи по 6 семантическим типам:"
+          "text": "Инструмент `scripts/diagrams/fix/differentiate_linkstyle.py` классифицирует связи по 6 семантическим типам:"
         },
         {
           "path": "scripts/diagrams/README.md",
@@ -5630,7 +5630,7 @@
           "path": "src/tools/README.md",
           "line": 258,
           "source_group": "scripts",
-          "text": "**Canonical location:** `scripts/diagrams/differentiate_linkstyle.py`"
+          "text": "**Canonical location:** `scripts/diagrams/fix/differentiate_linkstyle.py`"
         },
         {
           "path": "src/tools/differentiate_linkstyle.py",
@@ -5641,7 +5641,7 @@
       ]
     },
     {
-      "path": "scripts/diagrams/enforce_diagram_quality_budget.py",
+      "path": "scripts/diagrams/lint/enforce_diagram_quality_budget.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -5651,13 +5651,13 @@
           "path": ".github/workflows/diagram-nightly.yml",
           "line": 130,
           "source_group": "ci",
-          "text": "python3 scripts/diagrams/enforce_diagram_quality_budget.py \\"
+          "text": "python3 scripts/diagrams/lint/enforce_diagram_quality_budget.py \\"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
           "line": 539,
           "source_group": "docs",
-          "text": "`scripts/diagrams/enforce_diagram_quality_budget.py`."
+          "text": "`scripts/diagrams/lint/enforce_diagram_quality_budget.py`."
         },
         {
           "path": "scripts/diagrams/README.md",
@@ -5675,7 +5675,7 @@
           "path": "scripts/diagrams/run_diagram_checks.sh",
           "line": 378,
           "source_group": "scripts",
-          "text": "python3 \"$REPO_ROOT/scripts/diagrams/enforce_diagram_quality_budget.py\""
+          "text": "python3 \"$REPO_ROOT/scripts/diagrams/lint/enforce_diagram_quality_budget.py\""
         },
         {
           "path": "tests/architecture/test_diagram_quality_budget_security.py",
@@ -5686,7 +5686,7 @@
       ]
     },
     {
-      "path": "scripts/diagrams/fix_mermaid_operators.py",
+      "path": "scripts/diagrams/fix/fix_mermaid_operators.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -5708,19 +5708,19 @@
           "path": "scripts/diagrams/run_diagram_checks.sh",
           "line": 321,
           "source_group": "scripts",
-          "text": "python3 \"$REPO_ROOT/scripts/diagrams/fix_mermaid_operators.py\" \\"
+          "text": "python3 \"$REPO_ROOT/scripts/diagrams/fix/fix_mermaid_operators.py\" \\"
         },
         {
           "path": "scripts/diagrams/run_diagram_checks.sh",
           "line": 324,
           "source_group": "scripts",
-          "text": "python3 \"$REPO_ROOT/scripts/diagrams/fix_mermaid_operators.py\" \\"
+          "text": "python3 \"$REPO_ROOT/scripts/diagrams/fix/fix_mermaid_operators.py\" \\"
         },
         {
           "path": "tests/architecture/test_fix_mermaid_operators.py",
           "line": 11,
           "source_group": "tests",
-          "text": "\"\"\"Tests for scripts/diagrams/fix_mermaid_operators.py.\"\"\""
+          "text": "\"\"\"Tests for scripts/diagrams/fix/fix_mermaid_operators.py.\"\"\""
         },
         {
           "path": "tests/architecture/test_fix_mermaid_operators.py",
@@ -5731,7 +5731,7 @@
       ]
     },
     {
-      "path": "scripts/diagrams/fix_pagebreaks_in_bundles.py",
+      "path": "scripts/diagrams/render/fix_pagebreaks_in_bundles.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -5741,7 +5741,7 @@
           "path": "scripts/diagrams/README.md",
           "line": 48,
           "source_group": "scripts",
-          "text": "| `fix-pagebreaks`     | `scripts/diagrams/fix_pagebreaks_in_bundles.py` | Fix pagebreaks in bundles        |"
+          "text": "| `fix-pagebreaks`     | `scripts/diagrams/render/fix_pagebreaks_in_bundles.py` | Fix pagebreaks in bundles        |"
         },
         {
           "path": "scripts/diagrams/__main__.py",
@@ -5764,7 +5764,7 @@
       ]
     },
     {
-      "path": "scripts/diagrams/generate_all_bundles.py",
+      "path": "scripts/diagrams/render/generate_all_bundles.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -5774,7 +5774,7 @@
           "path": "Makefile",
           "line": 285,
           "source_group": "build",
-          "text": "$(RUN) python scripts/diagrams/generate_all_bundles.py"
+          "text": "$(RUN) python scripts/diagrams/render/generate_all_bundles.py"
         },
         {
           "path": "scripts/diagrams/README.md",
@@ -5792,13 +5792,13 @@
           "path": "scripts/diagrams/README.md",
           "line": 106,
           "source_group": "scripts",
-          "text": "| `scripts/diagrams/generate_all_bundles.py`                   | Canonical Markdown bundle generator; supports `--collection` for targeted publication refresh |"
+          "text": "| `scripts/diagrams/render/generate_all_bundles.py`                   | Canonical Markdown bundle generator; supports `--collection` for targeted publication refresh |"
         },
         {
           "path": "scripts/diagrams/README.md",
           "line": 120,
           "source_group": "scripts",
-          "text": "- `scripts/diagrams/generate_all_bundles.py` is the canonical Markdown bundle generator for `architecture`, `class-diagrams`, `foundation`, and `views`."
+          "text": "- `scripts/diagrams/render/generate_all_bundles.py` is the canonical Markdown bundle generator for `architecture`, `class-diagrams`, `foundation`, and `views`."
         },
         {
           "path": "scripts/diagrams/README.md",
@@ -5821,7 +5821,7 @@
       ]
     },
     {
-      "path": "scripts/diagrams/generate_description_indexes.py",
+      "path": "scripts/diagrams/render/generate_description_indexes.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -5831,19 +5831,19 @@
           "path": "scripts/diagrams/README.md",
           "line": 60,
           "source_group": "scripts",
-          "text": "| `render-desc-indexes` | `scripts/diagrams/generate_description_indexes.py` | Refresh family-oriented description indexes                |"
+          "text": "| `render-desc-indexes` | `scripts/diagrams/render/generate_description_indexes.py` | Refresh family-oriented description indexes                |"
         },
         {
           "path": "scripts/diagrams/README.md",
           "line": 107,
           "source_group": "scripts",
-          "text": "| `scripts/diagrams/generate_description_indexes.py`           | Canonical generator for family-oriented description indexes                                   |"
+          "text": "| `scripts/diagrams/render/generate_description_indexes.py`           | Canonical generator for family-oriented description indexes                                   |"
         },
         {
           "path": "scripts/diagrams/README.md",
           "line": 123,
           "source_group": "scripts",
-          "text": "- `scripts/diagrams/generate_description_indexes.py` is the canonical generator for `descriptions/INDEX.md` and `descriptions/class/INDEX.md`."
+          "text": "- `scripts/diagrams/render/generate_description_indexes.py` is the canonical generator for `descriptions/INDEX.md` and `descriptions/class/INDEX.md`."
         },
         {
           "path": "scripts/diagrams/__main__.py",
@@ -5866,7 +5866,7 @@
       ]
     },
     {
-      "path": "scripts/diagrams/generate_package_family_class_diagrams.py",
+      "path": "scripts/diagrams/render/generate_package_family_class_diagrams.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -5876,24 +5876,24 @@
           "path": "docs/02-architecture/diagrams/README.md",
           "line": 50,
           "source_group": "docs",
-          "text": "| `class-diagrams/90-pkg-*.mmd` | generated source | `scripts/diagrams/generate_package_family_class_diagrams.py` | Regenerate from source tree; do not hand-edit for cleanup. |"
+          "text": "| `class-diagrams/90-pkg-*.mmd` | generated source | `scripts/diagrams/render/generate_package_family_class_diagrams.py` | Regenerate from source tree; do not hand-edit for cleanup. |"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
           "line": 208,
           "source_group": "docs",
-          "text": "- Supplemental generator: `scripts/diagrams/generate_package_family_class_diagrams.py`"
+          "text": "- Supplemental generator: `scripts/diagrams/render/generate_package_family_class_diagrams.py`"
         },
         {
           "path": "scripts/diagrams/README.md",
           "line": 108,
           "source_group": "scripts",
-          "text": "| `scripts/diagrams/generate_package_family_class_diagrams.py` | Supplemental package-family class-diagram generator                                           |"
+          "text": "| `scripts/diagrams/render/generate_package_family_class_diagrams.py` | Supplemental package-family class-diagram generator                                           |"
         }
       ]
     },
     {
-      "path": "scripts/diagrams/generate_pipeline_dataflows.py",
+      "path": "scripts/diagrams/render/generate_pipeline_dataflows.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -5903,25 +5903,25 @@
           "path": "docs/00-project/governance/documentation-update-plan.md",
           "line": 34,
           "source_group": "docs",
-          "text": "- Генератор: `scripts/diagrams/generate_pipeline_dataflows.py`"
+          "text": "- Генератор: `scripts/diagrams/render/generate_pipeline_dataflows.py`"
         },
         {
           "path": "docs/03-guides/pipeline-configuration.md",
           "line": 930,
           "source_group": "docs",
-          "text": "python scripts/diagrams/generate_pipeline_dataflows.py"
+          "text": "python scripts/diagrams/render/generate_pipeline_dataflows.py"
         },
         {
           "path": "docs/03-guides/pipeline-configuration.md",
           "line": 936,
           "source_group": "docs",
-          "text": "python scripts/diagrams/generate_pipeline_dataflows.py --check-drift"
+          "text": "python scripts/diagrams/render/generate_pipeline_dataflows.py --check-drift"
         },
         {
           "path": "docs/03-guides/pipeline-configuration.md",
           "line": 946,
           "source_group": "docs",
-          "text": "run: python scripts/diagrams/generate_pipeline_dataflows.py --check-drift"
+          "text": "run: python scripts/diagrams/render/generate_pipeline_dataflows.py --check-drift"
         },
         {
           "path": "scripts/diagrams/README.md",
@@ -5933,24 +5933,24 @@
           "path": "scripts/diagrams/__main__.py",
           "line": 88,
           "source_group": "scripts",
-          "text": "\"scripts.diagrams.generate_pipeline_dataflows\""
+          "text": "\"scripts.diagrams.render.generate_pipeline_dataflows\""
         },
         {
-          "path": "scripts/diagrams/pipeline_dataflow_render.py",
+          "path": "scripts/diagrams/render/pipeline_dataflow_render.py",
           "line": 525,
           "source_group": "scripts",
-          "text": "\"<!-- Generated by scripts/diagrams/generate_pipeline_dataflows.py; do not edit manually. -->\","
+          "text": "\"<!-- Generated by scripts/diagrams/render/generate_pipeline_dataflows.py; do not edit manually. -->\","
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
           "line": 39,
           "source_group": "tests",
-          "text": "from scripts.diagrams.generate_pipeline_dataflows import main"
+          "text": "from scripts.diagrams.render.generate_pipeline_dataflows import main"
         }
       ]
     },
     {
-      "path": "scripts/diagrams/generate_with_descriptions_docx.py",
+      "path": "scripts/diagrams/render/generate_with_descriptions_docx.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -5966,7 +5966,7 @@
           "path": "docs/02-architecture/diagrams/README.md",
           "line": 393,
           "source_group": "docs",
-          "text": "- `scripts/diagrams/generate_with_descriptions_docx.py`"
+          "text": "- `scripts/diagrams/render/generate_with_descriptions_docx.py`"
         },
         {
           "path": "scripts/diagrams/README.md",
@@ -5978,7 +5978,7 @@
           "path": "scripts/diagrams/README.md",
           "line": 112,
           "source_group": "scripts",
-          "text": "| `scripts/diagrams/generate_with_descriptions_docx.py`        | Canonical DOCX exporter for description bundles                                               |"
+          "text": "| `scripts/diagrams/render/generate_with_descriptions_docx.py`        | Canonical DOCX exporter for description bundles                                               |"
         },
         {
           "path": "scripts/diagrams/README.md",
@@ -5996,12 +5996,12 @@
           "path": "scripts/diagrams/run_diagram_docs_agent.sh",
           "line": 165,
           "source_group": "scripts",
-          "text": "DOCX_CMD=(\"$PYTHON_CMD\" \"$REPO_ROOT/scripts/diagrams/generate_with_descriptions_docx.py\")"
+          "text": "DOCX_CMD=(\"$PYTHON_CMD\" \"$REPO_ROOT/scripts/diagrams/render/generate_with_descriptions_docx.py\")"
         }
       ]
     },
     {
-      "path": "scripts/diagrams/generate_with_descriptions_pdf.py",
+      "path": "scripts/diagrams/render/generate_with_descriptions_pdf.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -6017,7 +6017,7 @@
           "path": "docs/02-architecture/diagrams/README.md",
           "line": 392,
           "source_group": "docs",
-          "text": "- `scripts/diagrams/generate_with_descriptions_pdf.py`"
+          "text": "- `scripts/diagrams/render/generate_with_descriptions_pdf.py`"
         },
         {
           "path": "scripts/diagrams/README.md",
@@ -6029,7 +6029,7 @@
           "path": "scripts/diagrams/README.md",
           "line": 113,
           "source_group": "scripts",
-          "text": "| `scripts/diagrams/generate_with_descriptions_pdf.py`         | Canonical PDF exporter for description bundles                                                |"
+          "text": "| `scripts/diagrams/render/generate_with_descriptions_pdf.py`         | Canonical PDF exporter for description bundles                                                |"
         },
         {
           "path": "scripts/diagrams/README.md",
@@ -6047,12 +6047,12 @@
           "path": "scripts/diagrams/run_diagram_docs_agent.sh",
           "line": 174,
           "source_group": "scripts",
-          "text": "PDF_CMD=(\"$PYTHON_CMD\" \"$REPO_ROOT/scripts/diagrams/generate_with_descriptions_pdf.py\")"
+          "text": "PDF_CMD=(\"$PYTHON_CMD\" \"$REPO_ROOT/scripts/diagrams/render/generate_with_descriptions_pdf.py\")"
         }
       ]
     },
     {
-      "path": "scripts/diagrams/harmonize_link_styles.py",
+      "path": "scripts/diagrams/fix/harmonize_link_styles.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -6062,7 +6062,7 @@
           "path": ".github/workflows/docs.yml",
           "line": 394,
           "source_group": "ci",
-          "text": "python3 scripts/diagrams/harmonize_link_styles.py --dry-run --fail-on-errors"
+          "text": "python3 scripts/diagrams/fix/harmonize_link_styles.py --dry-run --fail-on-errors"
         },
         {
           "path": "scripts/diagrams/README.md",
@@ -6080,7 +6080,7 @@
           "path": "src/tools/README.md",
           "line": 273,
           "source_group": "scripts",
-          "text": "**Canonical location:** `scripts/diagrams/harmonize_link_styles.py`"
+          "text": "**Canonical location:** `scripts/diagrams/fix/harmonize_link_styles.py`"
         },
         {
           "path": "src/tools/harmonize_link_styles.py",
@@ -6091,7 +6091,7 @@
       ]
     },
     {
-      "path": "scripts/diagrams/inject_svg_styles.py",
+      "path": "scripts/diagrams/fix/fix_svg_styles.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -6101,19 +6101,19 @@
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
           "line": 620,
           "source_group": "docs",
-          "text": "\"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/inject_svg_styles.py\" --fix -f \"$svg_tmp\" >/dev/null 2>&1 || true"
+          "text": "\"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/fix/fix_svg_styles.py\" --fix -f \"$svg_tmp\" >/dev/null 2>&1 || true"
         },
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
           "line": 687,
           "source_group": "docs",
-          "text": "\"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/inject_svg_styles.py\" --fix -f \"$temp_png_svg\" >/dev/null 2>&1 || true"
+          "text": "\"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/fix/fix_svg_styles.py\" --fix -f \"$temp_png_svg\" >/dev/null 2>&1 || true"
         },
         {
           "path": "scripts/diagrams/README.md",
           "line": 43,
           "source_group": "scripts",
-          "text": "| `fix-svg-styles`     | `scripts/diagrams/inject_svg_styles.py`         | Inject SVG styles                |"
+          "text": "| `fix-svg-styles`     | `scripts/diagrams/fix/fix_svg_styles.py`         | Inject SVG styles                |"
         },
         {
           "path": "scripts/diagrams/__main__.py",
@@ -6124,7 +6124,7 @@
       ]
     },
     {
-      "path": "scripts/diagrams/lint_diagrams.py",
+      "path": "scripts/diagrams/lint/lint_diagrams.py",
       "type": "py",
       "status": "active",
       "agent_usage": [
@@ -6136,37 +6136,37 @@
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
           "line": 117,
           "source_group": "skills",
-          "text": "- `python scripts/diagrams/lint_diagrams.py docs`"
+          "text": "- `python scripts/diagrams/lint/lint_diagrams.py docs`"
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
           "line": 83,
           "source_group": "ci",
-          "text": "python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json \\"
+          "text": "python3 scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams --json \\"
         },
         {
           "path": ".github/workflows/docs.yml",
           "line": 334,
           "source_group": "ci",
-          "text": "python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json"
+          "text": "python3 scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json"
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
           "line": 124,
           "source_group": "docs",
-          "text": "- `python scripts/diagrams/lint_diagrams.py docs`"
+          "text": "- `python scripts/diagrams/lint/lint_diagrams.py docs`"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
           "line": 61,
           "source_group": "docs",
-          "text": "- Lint: `scripts/diagrams/lint_diagrams.py`"
+          "text": "- Lint: `scripts/diagrams/lint/lint_diagrams.py`"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
           "line": 177,
           "source_group": "docs",
-          "text": "`scripts/diagrams/lint_diagrams.py` проверяет оба каталога:"
+          "text": "`scripts/diagrams/lint/lint_diagrams.py` проверяет оба каталога:"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
@@ -6178,7 +6178,7 @@
           "path": "docs/02-architecture/diagrams/README.md",
           "line": 560,
           "source_group": "docs",
-          "text": "uv run python scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json \\"
+          "text": "uv run python scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams --json \\"
         }
       ]
     },
@@ -6234,23 +6234,23 @@
       ]
     },
     {
-      "path": "scripts/diagrams/pipeline_dataflow_ir.py",
+      "path": "scripts/diagrams/render/pipeline_dataflow_ir.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
       "reference_count": 6,
       "references": [
         {
-          "path": "scripts/diagrams/generate_pipeline_dataflows.py",
+          "path": "scripts/diagrams/render/generate_pipeline_dataflows.py",
           "line": 12,
           "source_group": "scripts",
           "text": "from .pipeline_dataflow_ir import build_pipeline_dataflow_ir"
         },
         {
-          "path": "scripts/diagrams/pipeline_dataflow_render.py",
+          "path": "scripts/diagrams/render/pipeline_dataflow_render.py",
           "line": 13,
           "source_group": "scripts",
-          "text": "from scripts.diagrams.pipeline_dataflow_ir import ("
+          "text": "from scripts.diagrams.render.pipeline_dataflow_ir import ("
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
@@ -6262,19 +6262,19 @@
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
           "line": 40,
           "source_group": "tests",
-          "text": "from scripts.diagrams.pipeline_dataflow_ir import ("
+          "text": "from scripts.diagrams.render.pipeline_dataflow_ir import ("
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
           "line": 234,
           "source_group": "tests",
-          "text": "from scripts.diagrams.pipeline_dataflow_ir import _project_fields"
+          "text": "from scripts.diagrams.render.pipeline_dataflow_ir import _project_fields"
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
           "line": 246,
           "source_group": "tests",
-          "text": "from scripts.diagrams.pipeline_dataflow_ir import _project_fields"
+          "text": "from scripts.diagrams.render.pipeline_dataflow_ir import _project_fields"
         }
       ],
       "owner": "@bioetl-platform",
@@ -6283,14 +6283,14 @@
       "next_step": "Retain as the IR builder for generated pipeline dataflow diagrams; keep it supporting unless promoted to a standalone scripts.diagrams command surface."
     },
     {
-      "path": "scripts/diagrams/pipeline_dataflow_render.py",
+      "path": "scripts/diagrams/render/pipeline_dataflow_render.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
         {
-          "path": "scripts/diagrams/generate_pipeline_dataflows.py",
+          "path": "scripts/diagrams/render/generate_pipeline_dataflows.py",
           "line": 13,
           "source_group": "scripts",
           "text": "from .pipeline_dataflow_render import render_text_outputs"
@@ -6299,7 +6299,7 @@
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
           "line": 44,
           "source_group": "tests",
-          "text": "from scripts.diagrams.pipeline_dataflow_render import ("
+          "text": "from scripts.diagrams.render.pipeline_dataflow_render import ("
         }
       ],
       "owner": "@bioetl-platform",
@@ -6308,7 +6308,7 @@
       "next_step": "Retain as the renderer for generated pipeline dataflow Mermaid/SVG artifacts; keep it supporting unless promoted to a standalone scripts.diagrams command surface."
     },
     {
-      "path": "scripts/diagrams/prune_orphan_nodes.py",
+      "path": "scripts/diagrams/fix/prune_orphan_nodes.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -6318,49 +6318,49 @@
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
           "line": 205,
           "source_group": "docs",
-          "text": "Реализован в `scripts/diagrams/prune_orphan_nodes.py`. Нода считается orphan, если:"
+          "text": "Реализован в `scripts/diagrams/fix/prune_orphan_nodes.py`. Нода считается orphan, если:"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
           "line": 220,
           "source_group": "docs",
-          "text": "python scripts/diagrams/prune_orphan_nodes.py --check      # аудит"
+          "text": "python scripts/diagrams/fix/prune_orphan_nodes.py --check      # аудит"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
           "line": 221,
           "source_group": "docs",
-          "text": "python scripts/diagrams/prune_orphan_nodes.py --fix         # удалить garbage orphans"
+          "text": "python scripts/diagrams/fix/prune_orphan_nodes.py --fix         # удалить garbage orphans"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
           "line": 222,
           "source_group": "docs",
-          "text": "python scripts/diagrams/prune_orphan_nodes.py --grandfather # exemption для всех текущих"
+          "text": "python scripts/diagrams/fix/prune_orphan_nodes.py --grandfather # exemption для всех текущих"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
           "line": 635,
           "source_group": "docs",
-          "text": "`scripts/diagrams/prune_orphan_nodes.py` detects nodes defined in a diagram but not"
+          "text": "`scripts/diagrams/fix/prune_orphan_nodes.py` detects nodes defined in a diagram but not"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
           "line": 643,
           "source_group": "docs",
-          "text": "python scripts/diagrams/prune_orphan_nodes.py --check"
+          "text": "python scripts/diagrams/fix/prune_orphan_nodes.py --check"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
           "line": 646,
           "source_group": "docs",
-          "text": "python scripts/diagrams/prune_orphan_nodes.py --check --json"
+          "text": "python scripts/diagrams/fix/prune_orphan_nodes.py --check --json"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
           "line": 649,
           "source_group": "docs",
-          "text": "python scripts/diagrams/prune_orphan_nodes.py --fix"
+          "text": "python scripts/diagrams/fix/prune_orphan_nodes.py --fix"
         }
       ]
     },
@@ -6422,7 +6422,7 @@
       ]
     },
     {
-      "path": "scripts/diagrams/report_diagram_padding.py",
+      "path": "scripts/diagrams/check/report_diagram_padding.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -6618,7 +6618,7 @@
       ]
     },
     {
-      "path": "scripts/diagrams/strip_svg_foreign_object.py",
+      "path": "scripts/diagrams/fix/strip_svg_foreign_object.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -6628,13 +6628,13 @@
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
           "line": 591,
           "source_group": "docs",
-          "text": "if ! \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/strip_svg_foreign_object.py\" --fix -f \"$svg_tmp\" >/dev/null 2>&1; then"
+          "text": "if ! \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/fix/strip_svg_foreign_object.py\" --fix -f \"$svg_tmp\" >/dev/null 2>&1; then"
         },
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
           "line": 669,
           "source_group": "docs",
-          "text": "if ! \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/strip_svg_foreign_object.py\" --fix -f \"$temp_png_svg\" >/dev/null 2>&1; then"
+          "text": "if ! \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/fix/strip_svg_foreign_object.py\" --fix -f \"$temp_png_svg\" >/dev/null 2>&1; then"
         },
         {
           "path": "scripts/diagrams/README.md",
@@ -6652,7 +6652,7 @@
           "path": "tests/architecture/test_strip_svg_foreign_object.py",
           "line": 11,
           "source_group": "tests",
-          "text": "\"\"\"Tests for scripts/diagrams/strip_svg_foreign_object.py.\"\"\""
+          "text": "\"\"\"Tests for scripts/diagrams/fix/strip_svg_foreign_object.py.\"\"\""
         },
         {
           "path": "tests/architecture/test_strip_svg_foreign_object.py",
@@ -6669,7 +6669,7 @@
       ]
     },
     {
-      "path": "scripts/diagrams/summarize_diagram_lint.py",
+      "path": "scripts/diagrams/lint/summarize_diagram_lint.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -6679,7 +6679,7 @@
           "path": ".github/workflows/docs.yml",
           "line": 337,
           "source_group": "ci",
-          "text": "python3 scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json"
+          "text": "python3 scripts/diagrams/lint/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
         {
           "path": "scripts/diagrams/README.md",
@@ -6735,7 +6735,7 @@
       ]
     },
     {
-      "path": "scripts/diagrams/uniform_diagram_sizes.py",
+      "path": "scripts/diagrams/fix/uniform_diagram_sizes.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -6745,25 +6745,25 @@
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
           "line": 195,
           "source_group": "docs",
-          "text": "Примечание по size-normalization (`scripts/diagrams/uniform_diagram_sizes.py`):"
+          "text": "Примечание по size-normalization (`scripts/diagrams/fix/uniform_diagram_sizes.py`):"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
           "line": 583,
           "source_group": "docs",
-          "text": "Use `scripts/diagrams/uniform_diagram_sizes.py` to normalize class/flowchart object sizes:"
+          "text": "Use `scripts/diagrams/fix/uniform_diagram_sizes.py` to normalize class/flowchart object sizes:"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
           "line": 587,
           "source_group": "docs",
-          "text": "python3 scripts/diagrams/uniform_diagram_sizes.py --check"
+          "text": "python3 scripts/diagrams/fix/uniform_diagram_sizes.py --check"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
           "line": 590,
           "source_group": "docs",
-          "text": "python3 scripts/diagrams/uniform_diagram_sizes.py --fix -f docs/02-architecture/diagrams/class-diagrams/07-application-core-services.mmd"
+          "text": "python3 scripts/diagrams/fix/uniform_diagram_sizes.py --fix -f docs/02-architecture/diagrams/class-diagrams/07-application-core-services.mmd"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/policy.md",
@@ -6787,7 +6787,7 @@
           "path": "tests/architecture/test_uniform_diagram_group_width.py",
           "line": 27,
           "source_group": "tests",
-          "text": "\"\"\"Load scripts/diagrams/uniform_diagram_sizes.py as a module.\"\"\""
+          "text": "\"\"\"Load scripts/diagrams/fix/uniform_diagram_sizes.py as a module.\"\"\""
         }
       ]
     },
@@ -6992,37 +6992,37 @@
           "text": "- `scripts/docs/_compat_shim.py` and other zero-reference helpers: re-review for"
         },
         {
-          "path": "scripts/docs/check_doc_drift.py",
+          "path": "scripts/docs/checks/check_drift.py",
           "line": 11,
           "source_group": "scripts",
           "text": "from scripts.docs._compat_shim import load_public_api"
         },
         {
-          "path": "scripts/docs/check_doc_drift.py",
+          "path": "scripts/docs/checks/check_drift.py",
           "line": 13,
           "source_group": "scripts",
           "text": "from ._compat_shim import load_public_api"
         },
         {
-          "path": "scripts/docs/check_docstring_coverage.py",
+          "path": "scripts/docs/checks/check_docstrings.py",
           "line": 11,
           "source_group": "scripts",
           "text": "from scripts.docs._compat_shim import load_main"
         },
         {
-          "path": "scripts/docs/check_docstring_coverage.py",
+          "path": "scripts/docs/checks/check_docstrings.py",
           "line": 13,
           "source_group": "scripts",
           "text": "from ._compat_shim import load_main"
         },
         {
-          "path": "scripts/docs/chembl_matrix_structural_contract.py",
+          "path": "scripts/docs/matrix/structural_contract.py",
           "line": 11,
           "source_group": "scripts",
           "text": "from scripts.docs._compat_shim import load_public_api"
         },
         {
-          "path": "scripts/docs/chembl_matrix_structural_contract.py",
+          "path": "scripts/docs/matrix/structural_contract.py",
           "line": 13,
           "source_group": "scripts",
           "text": "from ._compat_shim import load_public_api"
@@ -7100,7 +7100,7 @@
       ]
     },
     {
-      "path": "scripts/docs/check_doc_drift.py",
+      "path": "scripts/docs/checks/check_drift.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -7161,7 +7161,7 @@
       "next_step": "Retain as a top-level docs drift compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs check-drift."
     },
     {
-      "path": "scripts/docs/check_docstring_coverage.py",
+      "path": "scripts/docs/checks/check_docstrings.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -7201,7 +7201,7 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 27,
           "source_group": "tests",
-          "text": "\"scripts/docs/check_docstring_coverage.py\","
+          "text": "\"scripts/docs/checks/check_docstrings.py\","
         }
       ],
       "owner": "@bioetl-docs",
@@ -7210,7 +7210,7 @@
       "next_step": "Retain as a top-level docstring coverage compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs check-docstrings."
     },
     {
-      "path": "scripts/docs/checks/_bootstrap.py",
+      "path": "scripts/docs/common/bootstrap.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -7495,7 +7495,7 @@
       ]
     },
     {
-      "path": "scripts/docs/chembl_matrix_structural_contract.py",
+      "path": "scripts/docs/matrix/structural_contract.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -7505,13 +7505,13 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 28,
           "source_group": "tests",
-          "text": "\"scripts/docs/chembl_matrix_structural_contract.py\","
+          "text": "\"scripts/docs/matrix/structural_contract.py\","
         },
         {
           "path": "tests/unit/scripts/test_chembl_matrix_structural_contract.py",
           "line": 17,
           "source_group": "tests",
-          "text": "from scripts.docs.chembl_matrix_structural_contract import ("
+          "text": "from scripts.docs.matrix.structural_contract import ("
         }
       ],
       "owner": "@bioetl-docs",
@@ -7655,7 +7655,7 @@
       "next_step": "Retain as a shared workbook helper consumed by docs matrix tooling; keep it non-active unless workbook mutation becomes a documented standalone docs command surface."
     },
     {
-      "path": "scripts/docs/enrich_chembl_matrix_normalization_details.py",
+      "path": "scripts/docs/matrix/enrich_normalization_details.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -7665,7 +7665,7 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 29,
           "source_group": "tests",
-          "text": "\"scripts/docs/enrich_chembl_matrix_normalization_details.py\","
+          "text": "\"scripts/docs/matrix/enrich_normalization_details.py\","
         }
       ],
       "owner": "@bioetl-docs",
@@ -7674,7 +7674,7 @@
       "next_step": "Retain as a top-level ChEMBL matrix enrichment compatibility shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
     },
     {
-      "path": "scripts/docs/export_chembl_matrix_structural_contract.py",
+      "path": "scripts/docs/matrix/export_structural_contract.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -7684,7 +7684,7 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 30,
           "source_group": "tests",
-          "text": "\"scripts/docs/export_chembl_matrix_structural_contract.py\","
+          "text": "\"scripts/docs/matrix/export_structural_contract.py\","
         }
       ],
       "owner": "@bioetl-docs",
@@ -7693,7 +7693,7 @@
       "next_step": "Retain as a top-level ChEMBL structural contract export shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
     },
     {
-      "path": "scripts/docs/filter_chembl_matrix_rows.py",
+      "path": "scripts/docs/matrix/filter_rows.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -7703,7 +7703,7 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 31,
           "source_group": "tests",
-          "text": "\"scripts/docs/filter_chembl_matrix_rows.py\","
+          "text": "\"scripts/docs/matrix/filter_rows.py\","
         }
       ],
       "owner": "@bioetl-docs",
@@ -7712,7 +7712,7 @@
       "next_step": "Retain as a top-level ChEMBL matrix row-filter compatibility shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
     },
     {
-      "path": "scripts/docs/fix_doc_links_auto.py",
+      "path": "scripts/docs/fixers/fix_links_auto.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -7722,7 +7722,7 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 32,
           "source_group": "tests",
-          "text": "\"scripts/docs/fix_doc_links_auto.py\","
+          "text": "\"scripts/docs/fixers/fix_links_auto.py\","
         }
       ],
       "owner": "@bioetl-docs",
@@ -7731,7 +7731,7 @@
       "next_step": "Retain as a top-level docs link auto-fix compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs fix-links-auto."
     },
     {
-      "path": "scripts/docs/fix_doc_links_explicit.py",
+      "path": "scripts/docs/fixers/fix_links_explicit.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -7741,12 +7741,12 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 33,
           "source_group": "tests",
-          "text": "\"scripts/docs/fix_doc_links_explicit.py\","
+          "text": "\"scripts/docs/fixers/fix_links_explicit.py\","
         }
       ]
     },
     {
-      "path": "scripts/docs/fix_link_warnings.py",
+      "path": "scripts/docs/fixers/link_warnings.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -7756,7 +7756,7 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 34,
           "source_group": "tests",
-          "text": "\"scripts/docs/fix_link_warnings.py\","
+          "text": "\"scripts/docs/fixers/link_warnings.py\","
         }
       ]
     },
@@ -7886,7 +7886,7 @@
       "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint."
     },
     {
-      "path": "scripts/docs/generate_chembl_activity_field_matrix.py",
+      "path": "scripts/docs/matrix/generate_field_matrix.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -7896,13 +7896,13 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 35,
           "source_group": "tests",
-          "text": "\"scripts/docs/generate_chembl_activity_field_matrix.py\","
+          "text": "\"scripts/docs/matrix/generate_field_matrix.py\","
         },
         {
           "path": "tests/unit/scripts/test_generate_chembl_activity_field_matrix.py",
           "line": 26,
           "source_group": "tests",
-          "text": "from scripts.docs.generate_chembl_activity_field_matrix import ("
+          "text": "from scripts.docs.matrix.generate_field_matrix import ("
         }
       ],
       "owner": "@bioetl-docs",
@@ -7911,7 +7911,7 @@
       "next_step": "Retain as a top-level ChEMBL activity-field matrix shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
     },
     {
-      "path": "scripts/docs/generate_chembl_matrix_dictionaries.py",
+      "path": "scripts/docs/matrix/build_matrix_dicts.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -7921,12 +7921,12 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 36,
           "source_group": "tests",
-          "text": "\"scripts/docs/generate_chembl_matrix_dictionaries.py\","
+          "text": "\"scripts/docs/matrix/build_matrix_dicts.py\","
         }
       ]
     },
     {
-      "path": "scripts/docs/generate_pipeline_normalization_field_matrix.py",
+      "path": "scripts/docs/matrix/generate_pipeline_normalization_matrix.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -7936,49 +7936,49 @@
           "path": ".github/ISSUES/CHEMBL-016-Close-Remaining-Chembl-Normalization-Governance-Gaps.md",
           "line": 160,
           "source_group": "other",
-          "text": "- `scripts/docs/generate_pipeline_normalization_field_matrix.py`"
+          "text": "- `scripts/docs/matrix/generate_pipeline_normalization_matrix.py`"
         },
         {
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 37,
           "source_group": "tests",
-          "text": "\"scripts/docs/generate_pipeline_normalization_field_matrix.py\","
+          "text": "\"scripts/docs/matrix/generate_pipeline_normalization_matrix.py\","
         },
         {
           "path": "tests/architecture/test_non_chembl_json_field_typing_policy.py",
           "line": 39,
           "source_group": "tests",
-          "text": "from scripts.docs.generate_pipeline_normalization_field_matrix import ("
+          "text": "from scripts.docs.matrix.generate_pipeline_normalization_matrix import ("
         },
         {
           "path": "tests/architecture/test_normalization_surface_coverage_ratchet.py",
           "line": 23,
           "source_group": "tests",
-          "text": "from scripts.docs.generate_pipeline_normalization_field_matrix import ("
+          "text": "from scripts.docs.matrix.generate_pipeline_normalization_matrix import ("
         },
         {
           "path": "tests/contract/test_chembl_case_and_ontology_consistency.py",
           "line": 34,
           "source_group": "tests",
-          "text": "from scripts.docs.generate_pipeline_normalization_field_matrix import ("
+          "text": "from scripts.docs.matrix.generate_pipeline_normalization_matrix import ("
         },
         {
           "path": "tests/contract/test_non_chembl_cross_layer_contract_matrix.py",
           "line": 70,
           "source_group": "tests",
-          "text": "from scripts.docs.generate_pipeline_normalization_field_matrix import ("
+          "text": "from scripts.docs.matrix.generate_pipeline_normalization_matrix import ("
         },
         {
           "path": "tests/contract/test_normalization_cross_layer_contracts.py",
           "line": 38,
           "source_group": "tests",
-          "text": "from scripts.docs.generate_pipeline_normalization_field_matrix import ("
+          "text": "from scripts.docs.matrix.generate_pipeline_normalization_matrix import ("
         },
         {
           "path": "tests/integration/config/test_chembl_dq_catalog_sync.py",
           "line": 21,
           "source_group": "tests",
-          "text": "from scripts.docs.generate_pipeline_normalization_field_matrix import ("
+          "text": "from scripts.docs.matrix.generate_pipeline_normalization_matrix import ("
         }
       ],
       "owner": "@bioetl-docs",
@@ -7987,7 +7987,7 @@
       "next_step": "Retain as a top-level pipeline normalization matrix compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs generate-pipeline-normalization-matrix."
     },
     {
-      "path": "scripts/docs/matrix/_bootstrap.py",
+      "path": "scripts/docs/common/bootstrap.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -8349,7 +8349,7 @@
       ]
     },
     {
-      "path": "scripts/docs/normalize_chembl_matrix_workbook.py",
+      "path": "scripts/docs/matrix/normalize_values.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -8359,7 +8359,7 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 38,
           "source_group": "tests",
-          "text": "\"scripts/docs/normalize_chembl_matrix_workbook.py\","
+          "text": "\"scripts/docs/matrix/normalize_values.py\","
         }
       ]
     },
@@ -8609,7 +8609,7 @@
       "reference_count": 2,
       "references": [
         {
-          "path": "scripts/diagrams/pipeline_dataflow_ir.py",
+          "path": "scripts/diagrams/render/pipeline_dataflow_ir.py",
           "line": 20,
           "source_group": "scripts",
           "text": "from scripts.docs.passports.source_facts import load_effective_pipeline_facts"
@@ -8688,7 +8688,7 @@
       "next_step": "Retain as the internal passport validation helper behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
     },
     {
-      "path": "scripts/docs/report_docs_kpi.py",
+      "path": "scripts/docs/checks/report_docs_kpi.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -8704,7 +8704,7 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 39,
           "source_group": "tests",
-          "text": "\"scripts/docs/report_docs_kpi.py\","
+          "text": "\"scripts/docs/checks/report_docs_kpi.py\","
         }
       ],
       "owner": "@bioetl-docs",
@@ -8713,7 +8713,7 @@
       "next_step": "Retain as a top-level docs KPI reporting compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs check-kpi."
     },
     {
-      "path": "scripts/docs/sentence_doc_audit.py",
+      "path": "scripts/docs/fixers/sentence_audit.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -8723,12 +8723,12 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 40,
           "source_group": "tests",
-          "text": "\"scripts/docs/sentence_doc_audit.py\","
+          "text": "\"scripts/docs/fixers/sentence_audit.py\","
         }
       ]
     },
     {
-      "path": "scripts/docs/sync_chembl_matrix_structural_policy.py",
+      "path": "scripts/docs/matrix/sync_structural_policy.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -8738,12 +8738,12 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 41,
           "source_group": "tests",
-          "text": "\"scripts/docs/sync_chembl_matrix_structural_policy.py\","
+          "text": "\"scripts/docs/matrix/sync_structural_policy.py\","
         }
       ]
     },
     {
-      "path": "scripts/docs/sync_repo_identity.py",
+      "path": "scripts/docs/fixers/repo_identity.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -8753,7 +8753,7 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 42,
           "source_group": "tests",
-          "text": "\"scripts/docs/sync_repo_identity.py\","
+          "text": "\"scripts/docs/fixers/repo_identity.py\","
         }
       ],
       "owner": "@bioetl-docs",
@@ -8762,7 +8762,7 @@
       "next_step": "Retain as a top-level repo-identity compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs sync-repo-identity."
     },
     {
-      "path": "scripts/docs/verify_docs.py",
+      "path": "scripts/docs/checks/verify.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -8772,7 +8772,7 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 43,
           "source_group": "tests",
-          "text": "\"scripts/docs/verify_docs.py\","
+          "text": "\"scripts/docs/checks/verify.py\","
         }
       ]
     },
@@ -20964,7 +20964,7 @@
           "text": "- 'scripts/schema/analysis/generate_unified_schema_map.py'"
         },
         {
-          "path": "scripts/diagrams/pipeline_dataflow_ir.py",
+          "path": "scripts/diagrams/render/pipeline_dataflow_ir.py",
           "line": 21,
           "source_group": "scripts",
           "text": "from scripts.schema.analysis.generate_unified_schema_map import build_unified_schema_row"
@@ -21274,7 +21274,7 @@
           "path": "src/tools/README.md",
           "line": 243,
           "source_group": "scripts",
-          "text": "**Canonical location:** `scripts/diagrams/apply_elk_layout.py`"
+          "text": "**Canonical location:** `scripts/diagrams/fix/apply_elk_layout.py`"
         },
         {
           "path": "src/tools/README.md",
@@ -21383,7 +21383,7 @@
           "path": "src/tools/README.md",
           "line": 258,
           "source_group": "scripts",
-          "text": "**Canonical location:** `scripts/diagrams/differentiate_linkstyle.py`"
+          "text": "**Canonical location:** `scripts/diagrams/fix/differentiate_linkstyle.py`"
         },
         {
           "path": "src/tools/README.md",
@@ -21555,7 +21555,7 @@
           "path": "src/tools/README.md",
           "line": 273,
           "source_group": "scripts",
-          "text": "**Canonical location:** `scripts/diagrams/harmonize_link_styles.py`"
+          "text": "**Canonical location:** `scripts/diagrams/fix/harmonize_link_styles.py`"
         },
         {
           "path": "src/tools/README.md",

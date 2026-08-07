@@ -18,7 +18,7 @@ from typing import Any
 import pytest
 import yaml
 
-from scripts.docs.generate_pipeline_normalization_field_matrix import (
+from scripts.docs.matrix.generate_pipeline_normalization_matrix import (
     build_field_matrix_rows,
 )
 

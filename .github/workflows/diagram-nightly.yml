@@ -41,46 +41,46 @@ jobs:
 
       - name: Validate rendered artifacts (DIAG-T010..T012)
         run: |
-          python3 scripts/diagrams/check_diagram_artifacts.py \
+          python3 scripts/diagrams/check/check_diagram_artifacts.py \
             --manifest docs/02-architecture/diagrams/manifests/png-compatibility.txt \
             --require-png
 
       - name: Validate SVG text visibility (DIAG-T014..T015)
         run: |
-          python3 scripts/diagrams/check_svg_text_visibility.py \
+          python3 scripts/diagrams/check/check_svg_text_visibility.py \
             --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
 
       - name: Visual smoke baseline drift (DIAG-T026)
         run: |
           mkdir -p reports/diagrams
-          python3 scripts/diagrams/check_diagram_visual_smoke.py \
+          python3 scripts/diagrams/check/check_diagram_visual_smoke.py \
             --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt \
             --json-out reports/diagrams/diagram-visual-smoke-nightly.json
 
       - name: Visual smoke extended tier drift
         run: |
-          python3 scripts/diagrams/check_diagram_visual_smoke.py \
+          python3 scripts/diagrams/check/check_diagram_visual_smoke.py \
             --manifest docs/02-architecture/diagrams/manifests/visual-smoke-extended.txt \
             --json-out reports/diagrams/diagram-visual-smoke-extended-nightly.json
 
       - name: Visual smoke broad tier drift
         continue-on-error: true
         run: |
-          python3 scripts/diagrams/check_diagram_visual_smoke.py \
+          python3 scripts/diagrams/check/check_diagram_visual_smoke.py \
             --manifest docs/02-architecture/diagrams/manifests/visual-smoke-broad.txt \
             --json-out reports/diagrams/diagram-visual-smoke-broad-nightly.json
 
       - name: Run PR quality-gates baseline (DIAG-T018..T023)
         run: |
           mkdir -p reports/diagrams
-          python3 scripts/diagrams/check_diagram_quality_gates.py \
+          python3 scripts/diagrams/check/check_diagram_quality_gates.py \
             --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt \
             --json-out reports/diagrams/diagram-quality-report-nightly.json \
             --markdown-out reports/diagrams/diagram-quality-report-nightly.md
 
       - name: Diagram policy lint report for nightly budget checks
         run: |
-          python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json \
+          python3 scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams --json \
             > reports/diagrams/diagram-lint-report-nightly.json || true
 
       - name: Maintain stale diagram alert issue
@@ -127,7 +127,7 @@ jobs:
 
       - name: Diagram quality budget enforcement (nightly)
         run: |
-          python3 scripts/diagrams/enforce_diagram_quality_budget.py \
+          python3 scripts/diagrams/lint/enforce_diagram_quality_budget.py \
             --mode nightly \
             --quality-report reports/diagrams/diagram-quality-report-nightly.json \
             --lint-report reports/diagrams/diagram-lint-report-nightly.json \
@@ -228,7 +228,7 @@ jobs:
         run: |
           manifest_tmp="/tmp/diagram-canary-manifest.txt"
           find /tmp/diagram-canary/svg -type f -name '*.svg' | sort > "$manifest_tmp"
-          python3 scripts/diagrams/check_svg_text_visibility.py --manifest "$manifest_tmp"
+          python3 scripts/diagrams/check/check_svg_text_visibility.py --manifest "$manifest_tmp"
 
       - name: Upload canary report artifacts
         if: always()

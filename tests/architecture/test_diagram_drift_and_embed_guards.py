@@ -40,7 +40,7 @@ _PARENT_SOURCE_RE = re.compile(r"^%%\s*Parent source:\s*(.+?)\s*$")
 
 
 def _load_apply_elk_layout() -> ModuleType:
-    module_path = REPO_ROOT / "scripts" / "diagrams" / "apply_elk_layout.py"
+    module_path = REPO_ROOT / "scripts" / "diagrams" / "fix" / "apply_elk_layout.py"
     spec = importlib.util.spec_from_file_location(
         "apply_elk_layout_module", module_path
     )

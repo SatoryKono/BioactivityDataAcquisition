@@ -20,7 +20,7 @@ import pytest
 from bioetl.domain.normalization.profiles.chembl_json_ordering_policy import (
     CHEMBL_JSON_ORDERING_POLICY,
 )
-from scripts.docs.generate_pipeline_normalization_field_matrix import (
+from scripts.docs.matrix.generate_pipeline_normalization_matrix import (
     PROFILE_META_PASSTHROUGH_KPI,
     PROFILE_NON_META_PASSTHROUGH_FREE_KPI,
     PROFILE_SET_LIKE_JSON_STRING_KPI,

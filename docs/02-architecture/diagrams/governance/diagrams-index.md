@@ -71,7 +71,7 @@ scripts/diagrams/run_diagram_checks.sh --profile pr --diagram docs/02-architectu
 
 # Or run checks individually:
 uv run python -m scripts.diagrams lint docs
-uv run python scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json
+uv run python scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json
 uv run python -m scripts.diagrams lint-summarize /tmp/diagram-lint.json
 uv run python -m scripts.docs check-links --links
 bash scripts/diagrams/validate_mermaid_syntax.sh

@@ -25,7 +25,7 @@ pytestmark = pytest.mark.architecture
 
 def _load_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[2]
-    module_path = repo_root / "scripts" / "diagrams" / "generate_description_indexes.py"
+    module_path = repo_root / "scripts" / "diagrams" / "render" / "generate_description_indexes.py"
     script_dir = str(module_path.parent)
     if script_dir not in sys.path:
         sys.path.insert(0, script_dir)

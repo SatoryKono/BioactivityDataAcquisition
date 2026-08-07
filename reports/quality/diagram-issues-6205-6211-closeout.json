@@ -62,7 +62,7 @@
       "title": "DIAG-005: Add JSON output to standalone visual smoke regression check",
       "decision": "check_diagram_visual_smoke.py emits diagram-visual-smoke-report-v1 via --json-out; docs.yml and nightly upload the report.",
       "evidence": [
-        "scripts/diagrams/check_diagram_visual_smoke.py",
+        "scripts/diagrams/check/check_diagram_visual_smoke.py",
         ".github/workflows/docs.yml",
         ".github/workflows/diagram-nightly.yml",
         "scripts/diagrams/run_diagram_checks.sh",

@@ -42,8 +42,8 @@ These remain retained as internal docs-support helpers rather than public CLI
 surfaces:
 
 - `scripts/docs/_compat_shim.py`
-- `scripts/docs/checks/_bootstrap.py`
-- `scripts/docs/matrix/_bootstrap.py`
+- `scripts/docs/common/bootstrap.py`
+- `scripts/docs/common/bootstrap.py`
 
 Trigger for future deletion:
 

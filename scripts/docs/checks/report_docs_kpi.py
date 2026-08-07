@@ -25,9 +25,9 @@ from pathlib import Path
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from scripts.docs.checks._bootstrap import ensure_repo_imports
+    from scripts.docs.common.bootstrap import ensure_repo_imports
 else:
-    from scripts.docs.checks._bootstrap import ensure_repo_imports
+    from scripts.docs.common.bootstrap import ensure_repo_imports
 
 ensure_repo_imports()
 
