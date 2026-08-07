@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import pytest
 
-from scripts.memory.query import (
+from scripts.memory.queries.query import (
     _claim_trace_statement,
     _cli_semantics_statement,
     _current_cycle_code_statement,
