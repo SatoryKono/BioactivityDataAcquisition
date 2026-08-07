@@ -1,595 +1,129 @@
-> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
+> Mirror status: This file is published under `docs/00-project/ai/**` and is not a canonical runtime surface.
 > Canonical runtime source: `.codex/agents/ORCHESTRATION.md`
-> Governance: [AI Runtime Mirror Ownership](../policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../guides/MEMORY_USAGE.md), [Post-Change Validation](../policy/POST_CHANGE_VALIDATION.md).
+> Governance: `docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md`
 > Edit the runtime source first, then refresh this mirror.
 ______________________________________________________________________
 
 ## Canonical Sources
 
-Read before planning or editing:
+- Runtime contract and precedence: `AGENTS.md`
+- Normative source index: `docs/00-project/NORMATIVE_SOURCES.md`
 
+Load only the role- and risk-relevant sources selected by those contracts.
+
+# BioETL Codex orchestration
+
+Status: active runtime source. Owner: BioETL Team. Last verified: 2026-08-07.
+
+## Authority and bootstrap
+
+`AGENTS.md` defines repository-wide runtime behavior and precedence. Before
+planning, auditing, or editing, complete its required context and memory loop.
+Use `docs/00-project/NORMATIVE_SOURCES.md` to select the applicable RULES,
+requirements, ADRs, and policies. This file only defines Codex routing; it does
+not restate project governance.
+
+For a role-specific task, read the matching `.codex/agents/py-*.md`, wrapper
+skill, and `docs/00-project/ai/memory/memory-py-*.md`. Load additional sources
+only when the task touches their governed surface.
+
+## Governed roles
+
+| Role | Default authority | Purpose |
+| --- | --- | --- |
+| `py-audit-bot` | read-only | Independent evidence and compliance audit |
+| `py-config-bot` | workspace write | Config, schema, generated-config, and contract remediation |
+| `py-debug-bot` | read-only | Reproduction, isolation, root cause, remediation guidance |
+| `py-doc-bot` | workspace write | Canonical docs, contributor guidance, and mirror sync |
+| `py-plan-bot` | read-only | Scoped, dependency-aware implementation plans |
+| `py-test-bot` | workspace write | Focused tests, failure classification, regression evidence |
+
+Native descriptors inherit the parent model. A role never expands user
+authority, filesystem scope, network access, or destructive-action permission.
+
+## Risk tiers and routing
+
+Classify the task before loading optional context:
+
+| Tier | Typical change | Route |
+| --- | --- | --- |
+| V1 | docs-only or one low-risk metadata surface | Direct root/single-agent execution |
+| V2 | focused code, test, config, or tooling change | Direct root/single-agent execution; load one matching role when useful |
+| V3 | cross-surface config/runtime contract, migration, or CI behavior | Explicit plan; matching specialist; targeted audit/test gates |
+| V4 | architecture, security, broad refactor, release/governance change | Baseline evidence, dependency-aware plan, implementation, final tests/docs/audit |
+
+V1/V2 do not require a subagent chain or formal report bundle unless the user,
+active skill, or touched contract requires one. V3/V4 retain orchestration and
+post-change validation. When delegation is unavailable or unnecessary, the
+root agent performs the same responsibilities directly.
+
+## Standard task loop
+
+1. Resolve user intent, mutation authority, scope, and risk tier.
+1. Run the canonical memory `pre-task` workflow with runtime/agent identity.
+1. Inspect current evidence: target files, related tests, contracts, configs,
+   docs, mirrors, and debt registries.
+1. For V3/V4, maintain an explicit plan with at most one active step.
+1. Make the smallest authorized change; preserve unrelated worktree changes.
+1. Validate proportionately and follow
+   `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md` for writes.
+1. Synchronize runtime/docs/generated mirrors only from their canonical owner.
+1. Run the memory `post-task` workflow and report evidence, skips, mirror
+   status, and debt outcome.
+
+Diagnosis and review remain read-only unless implementation was also requested.
+`py-debug-bot` never applies fixes: it returns a reproduction, root cause,
+confidence, remediation options, and exact regression checks to an authorized
+write-capable parent.
+
+## Evidence and decisions
+
+- Prefer repository evidence and executable checks over remembered counts.
+- Each blocking finding needs a location, governing source, reproducible
+  evidence, severity, and remediation.
+- Audit findings require two independent verification methods when feasible.
+- Package or file count alone is not architecture debt; calibrate against the
+  current topology/governance evidence and debt registries.
+- If evidence conflicts, follow canonical precedence and record the conflict.
+- Never solve a failure by increasing a debt budget, exemption cap, threshold,
+  or hotspot allowance.
+
+## Validation by risk
+
+| Tier | Minimum closeout |
+| --- | --- |
+| V1 | targeted docs/link/drift check; mirror check when applicable |
+| V2 | focused lint/type/test checks for touched behavior |
+| V3 | schema/runtime/architecture contract checks plus focused regressions |
+| V4 | applicable architecture, lint, type, security, broad test, docs, and debt gates |
+
+A lower tier cannot bypass a gate required by the touched surface. Report every
+skipped check with its reason and exact follow-up command. Changes under
+Codex/Junie runtime trees must satisfy the repository mirror contract.
+
+## MCP and external evidence
+
+Use MCP by current capability discovery, not historical server names. Daily
+readiness is the bounded, read-only `stable` profile. Optional monitoring,
+Docker, graph, browser, and external services are started only when the user or
+task explicitly requires them. External research supplements but never
+replaces tracked contracts.
+
+## Escalation and safety
+
+Stop and request direction when completion requires materially broader scope,
+new authority, a destructive action with unclear targets, or an `.env` change.
+Do not create, edit, rename, move, overwrite, or delete `.env` files without
+explicit per-task approval. Keep secret-bearing and machine-local values out of
+tracked files, reports, logs, and tool output.
+
+## Canonical references
+
+- `AGENTS.md`
+- `.codex/agents/CODEX-RUNTIME.md`
+- `.codex/agents/py-*.md`
+- `.codex/skills/py-*/SKILL.md`
 - `docs/00-project/NORMATIVE_SOURCES.md`
-- `docs/00-project/RULES.md`
-- `docs/01-requirements/REQUIREMENTS.md`
-- `docs/02-architecture/decisions/`
 - `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
-- `AGENTS.md`
-
-# ORCHESTRATION.md — Оркестрация команды subagent-ов BioETL
-
-*Версия: 4.3 | Дата: 2026-07-24 | Supersedes v4.2 | Платформа: Codex CLI*
-
-## 1. Обзор
-
-Команда из **6 активных субагентов** обеспечивает полный жизненный цикл задачи
-разработки BioETL. Основной агент (Codex) выступает оркестратором, делегируя
-работу через native agent roles (`default` / `explorer` / `worker`) с привязкой
-к логическим профилям `py-*`. Production-код пишется напрямую оркестратором.
-
-**Запуск логического профиля в Codex runtime:**
-
-```
-spawn_agent(
-  agent_type="default",
-  message="Follow .codex/agents/py-audit-bot.md for task_id=AUD-001, phase=baseline, scope=src/bioetl/application/."
-)
-```
-
-> Runtime mapping: см. `.codex/agents/CODEX-RUNTIME.md`.
-
-|  #   | Субагент (`subagent_type`)   | Model  | Роль                                                                                   | Артефакт                                               |
-| :--: | ---------------------------- | ------ | -------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| I | **py-audit-bot** | inherited | Audit, review, debt, reproducibility | `review_py-audit-bot_{YYYYMMDD}_{HHMM}_{phase}.md` |
-| II | **py-plan-bot** | inherited | Planning and decomposition | `review_py-plan-bot_{YYYYMMDD}_{HHMM}.md` |
-| III | **py-test-bot** | inherited | Focused tests and broad campaigns | `review_py-test-bot_{YYYYMMDD}_{HHMM}.md` |
-| IV | **py-config-bot** | inherited | Pipeline, DQ, filter, composite config | `review_py-config-bot_{YYYYMMDD}_{HHMM}.md` |
-| V | **py-debug-bot** | inherited | Failure diagnosis and fixes | `review_py-debug-bot_{YYYYMMDD}_{HHMM}.md` |
-| VI | **py-doc-bot** | inherited | Docs, broad docs audits, Mermaid | `review_py-doc-bot_{YYYYMMDD}_{HHMM}.md` |
-
-> **Note:** production code is written directly by the orchestrator. Broad test,
-> review, debt, reproducibility, and documentation-audit work use modes of the
-> six active profiles; no standalone orchestration profiles are retained.
-
-### Разделение ответственности (файловые зоны)
-
-| Субагент                 | Зона записи                                                           | Только чтение                         |
-| ------------------------ | --------------------------------------------------------------------- | ------------------------------------- |
-| orchestrator (direct)    | `src/bioetl/`, `tests/`                                               | `configs/`, `docs/`                   |
-| py-config-bot            | `configs/`                                                            | `src/bioetl/`, `docs/`                |
-| py-doc-bot               | `docs/`, docstrings, `docs/00-project/ai/agents/scripts/diagrams/`    | `configs/`, `tests/`                  |
-| py-test-bot              | `tests/`                                                              | `src/bioetl/`, `configs/`             |
-| py-debug-bot             | `src/bioetl/`, `tests/` (fixes)                                       | `configs/`, `docs/`                   |
-| py-audit-bot             | — (read-only)                                                         | всё                                   |
-| py-plan-bot              | — (read-only)                                                         | всё                                   |
-
-### Определения субагентов
-
-Файлы: `.codex/agents/py-*.md` — каждый содержит YAML-frontmatter (`name`, `description`, `model`) + полную спецификацию с инлайнированными знаниями.
-
-## 1.0 Technical Debt Guardrail
-
-- **ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА.**
-- Это правило обязательно для оркестратора и для всех `py-*` subagent profiles.
-- Под запрет попадают `scorecard budgets`, exemption limits, hotspot
-  thresholds, hotspot family caps и любые аналогичные budget/threshold
-  поверхности.
-- Если очередная волна работ упирается в лимит, оркестратор обязан
-  декомпозировать scope, уменьшить объём изменения или эскалировать, а не
-  повышать лимит.
-
-## 1.1 Evidence Calibration
-
-Перед repo-wide structural выводами, hotspot-программами и package-reorg
-инициативами сверяйся только с активными evidence surfaces:
-
-- `docs/reports/evidence/project-package-topology/SUMMARY.md`
-- `docs/02-architecture/current-state-inventory.md`
-- `reports/quality/architecture-quality-scorecard.json`
-- `reports/quality/debt-governance-gates.json`
-
-Operational defaults:
-
-- package count сам по себе не является refactor trigger;
-- family-level topology важнее whole-layer breadth;
-- topology показывает, где смотреть, а governance signals — где реально действовать.
-
-## 1.2 Memory-Enabled Task Loop
-
-Перед стандартным subagent workflow оркестратор и role-specific profiles должны
-использовать canonical memory loop из `src/memory/DAILY_WORKFLOW.md`.
-
-Минимальный порядок:
-
-1. `python -m memory.tooling.workflow pre-task --task-id <id> --title "<task>"`
-1. retrieval order: `catalog -> graph -> rag -> source`
-1. baseline/profile-specific work
-1. `python -m memory.tooling.workflow post-task --task-id <id> --title "<task>" --summary "<result>"`
-1. promotion только для durable knowledge
-
-Это не заменяет runtime source или `.codex/agents/*.md`, а стандартизирует:
-
-- pre-task retrieval
-- session-note creation
-- post-task summary
-- refresh rebuild-only memory artifacts
-- optional promotion into curated memory
-- periodic curated review via `python -m memory.tooling.workflow review-curated`
-- archive of superseded curated notes instead of silent stale accumulation
-
-Regular ritual rule:
-
-- run `review-curated` on a recurring engineering cadence
-- run it again before release-readiness, governance, or architecture-review checkpoints
-- treat `due` notes as verification work and `stale` notes as review-or-archive candidates
-
-______________________________________________________________________
-
-## 2. Стандартный workflow задачи
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        СТАРТ ЗАДАЧИ                                 │
-│                     task_id назначен                                │
-└─────────────────┬───────────────────────────────────────────────────┘
-                  │
-                  ▼
-┌─────────────────────────────┐
-│  ① py-audit-bot (baseline)   │──→ review_py-audit-bot_{YYYYMMDD}_{HHMM}_baseline.md
-│  Аудит целевого фрагмента   │
-└─────────────────┬───────────┘
-                  │
-                  ▼
-┌─────────────────────────────┐
-│  ② py-plan-bot (initial)     │──→ review_py-plan-bot_{YYYYMMDD}_{HHMM}.md
-│  Формирование плана RF-*    │
-│  (+консолидация с user plan)│
-└─────────────────┬───────────┘
-                  │
-                  ▼
-┌─────────────────────────────┐
-│  ③ py-test-bot (baseline)    │──→ review_py-test-bot_{YYYYMMDD}_{HHMM}.md
-│  Фиксация состояния тестов  │
-└─────────────┬───────────────┘
-              │
-         ┌────┴────┐
-         │  FAIL?  │
-         └────┬────┘
-        yes   │   no
-         ▼    │    │
-┌─────────────┤    │
-│ py-debug-bot│    │
-│→ py-test-bot│    │
-│ (цикл)      │──→ review_py-debug-bot_{YYYYMMDD}_{HHMM}.md
-└──────┬──────┘    │
-       │           │
-       ▼           │
-┌──────────────┐   │
-│ py-plan-bot  │   │
-│ (update)     │──→ review_py-plan-bot_{YYYYMMDD}_{HHMM}.md
-└──────┬───────┘   │
-       │           │
-       ◄───────────┘
-       │
-       ▼
-┌─────────────────────────────────────────────────────┐
-│  ④ РЕАЛИЗАЦИЯ (параллельно по зонам ответственности) │
-│                                                       │
-│  orchestrator ─→ src/bioetl/ ──→ direct edits in scope │
-│       │                                                │
-│       ├─ (entity scaffolding?) ──→ py-config-bot        │
-│       │                                                │
-│  py-config-bot → configs/  ──→ review_py-config-bot_{YYYYMMDD}_{HHMM}.md │
-└─────────────────────┬───────────────────────────────┘
-                      │
-                      ▼
-┌─────────────────────────────┐
-│  ⑤ py-test-bot (final)       │──→ review_py-test-bot_{YYYYMMDD}_{HHMM}.md
-│  Финальный прогон тестов    │
-└─────────────┬───────────────┘
-              │
-         ┌────┴────┐
-         │  FAIL?  │
-         └────┬────┘
-        yes   │   no
-         ▼    │    │
-┌─────────────┤    │
-│ py-debug-bot│    │
-│→ py-test-bot│    │
-│ (цикл ≤5)  │    │
-└──────┬──────┘    │
-       │           │
-       ◄───────────┘
-       │
-       ▼
-┌─────────────────────────────┐
-│  ⑥ py-doc-bot                │──→ review_py-doc-bot_{YYYYMMDD}_{HHMM}.md
-│  Обновление docs/docstrings │
-└─────────────────┬───────────┘
-                  │
-                  ▼
-┌─────────────────────────────┐
-│  ⑦ py-audit-bot (final)      │──→ review_py-audit-bot_{YYYYMMDD}_{HHMM}_final.md
-│  Финальная верификация       │
-└─────────────────┬───────────┘
-                  │
-         ┌────────┴────────┐
-         │ MUST findings?  │
-         └────────┬────────┘
-           yes    │    no
-            ▼     │     │
-┌───────────┤     │     │
-│ Возврат к │     │     │
-│ py-debug-bot│     │     │
-│ / pyPlan  │     │     │
-└───────────┘     │     │
-                  │     │
-                  ◄─────┘
-                  │
-                  ▼
-┌─────────────────────────────┐
-│          ЗАДАЧА ЗАВЕРШЕНА    │
-└─────────────────────────────┘
-```
-
-______________________________________________________________________
-
-## 3. Матрица взаимодействий
-
-|   Отправитель →   |   py-plan-bot    |  py-test-bot   | py-config-bot | py-debug-bot |    py-doc-bot     |   py-audit-bot    |
-| :---------------: | :--------------: | :------------: | :-----------: | :----------: | :---------------: | :---------------: |
-| **py-audit-bot**  | findings → RF-\* |       —        |  config gaps  |      —       |  drift findings   |         —         |
-|  **py-plan-bot**  |        —         |  scope RF-\*   | config RF-\*  |      —       |         —         |       scope       |
-|  **py-test-bot**  |        —         |       —        |       —       | FAIL report  |         —         |         —         |
-| **py-config-bot** |        —         |  config tests  |       —       |      —       | DQ migration docs |         —         |
-| **py-debug-bot**  |   plan update    | retest trigger |  fix config   |      —       |     fix → doc     |  fix → re-audit   |
-|  **py-doc-bot**   |        —         |       —        |       —       |      —       |         —         | terminology check |
-
-### Ключевые потоки данных
-
-```
-py-plan-bot (RF-*)
-    ├──→ orchestrator (type=refactor|feature|bugfix → src/)
-    ├──→ py-config-bot (type=config → configs/)
-    └──→ py-test-bot (test impact → tests/)
-
-orchestrator (entity scaffolding)
-    └──→ py-config-bot (pipeline + DQ + filter configs)
-
-py-audit-bot (config findings)
-    └──→ py-config-bot (gap remediation)
-
-py-config-bot (DQ migration)
-    └──→ py-doc-bot (update DQ documentation)
-```
-
-______________________________________________________________________
-
-## 4. Структура артефактов
-
-```
-reports/{LLM}/review_{agent}_{YYYYMMDD}_{HHMM}[_{phase}].md
-```
-
-Правило: любой агент/субагент формирует итоговый отчёт только по этому пути
-(LLM = вызывающая модель, agent = профиль/skill, `phase` — опциональный
-суффикс для baseline/final/targeted, если это закреплено в contract
-конкретного `py-*` профиля). Дополнительные артефакты (телеметрия, метрики,
-промежуточные планы) сохраняйте рядом в той же директории, но итоговый отчёт
-должен соответствовать шаблону
-`reports/{LLM}/review_{agent}_{YYYYMMDD}_{HHMM}[_{phase}].md`.
-
-Требования к каждому файлу (минимум):
-
-- Дата/время создания (UTC), LLM, agent
-- Scope (файлы/модули)
-- Команды верификации
-- Ссылки на `RF-*` / `DBG-*` / `AUD-*` / `DOC-*` / `CFG-*` идентификаторы
-- Severity (если применимо): `MUST` / `SHOULD` / `MAY`
-- Статус: `done` / `in_progress` / `blocked` / `escalated`
-
-______________________________________________________________________
-
-## 5. Протоколы принятия решений
-
-### 5.1. Когда пропустить шаг
-
-| Шаг                   | Можно пропустить если                                 |
-| --------------------- | ----------------------------------------------------- |
-| py-audit-bot baseline | Задача = чистый bugfix одного файла, scope очевиден   |
-| py-plan-bot           | Задача = single-file doc update                       |
-| py-test-bot baseline  | Нет существующих тестов для scope (→ сразу new_tests) |
-| orchestrator code     | Задача = чистый config/doc change                     |
-| py-config-bot         | Задача не затрагивает configs/                        |
-| py-debug-bot          | Все тесты проходят                                    |
-| py-doc-bot            | Задача не меняет публичный API / поведение            |
-| py-audit-bot final    | Задача = чистый doc update без code changes           |
-
-### 5.2. Маршрутизация RF-\* по типу
-
-| RF type    |      Primary subagent       |                Secondary                |
-| ---------- | :-------------------------: | :-------------------------------------: |
-| `refactor` |        orchestrator         |   py-config-bot (если config impact)    |
-| `feature`  |        orchestrator         |    py-config-bot (если новый entity)    |
-| `bugfix`   | orchestrator / py-debug-bot | py-config-bot (если config-related bug) |
-| `config`   |        py-config-bot        |                    —                    |
-| `doc`      |         py-doc-bot          |                    —                    |
-
-### 5.3. Эскалация
-
-| Ситуация                                 | Действие                                           |
-| ---------------------------------------- | -------------------------------------------------- |
-| py-debug-bot: 5 итераций без fix         | → `Requires Manual Review`, уведомить пользователя |
-| py-audit-bot final: новый MUST           | → Блокер, возврат к py-debug-bot/py-plan-bot       |
-| py-test-bot: coverage < 85%              | → MUST: разработка тестов (phase=new_tests)        |
-| py-plan-bot: цикл зависимостей RF-\*     | → Пересмотр декомпозиции задачи                    |
-| py-config-bot: gap_analysis critical > 0 | → Блокер, возврат к py-config-bot/py-plan-bot      |
-
-### 5.4. Параллелизация
-
-В Claude Code субагенты могут запускаться как параллельно (`run_in_background: true`), так и последовательно. Допустимые параллельные запуски:
-
-- `py-test-bot` (baseline) ∥ `py-audit-bot` (baseline) — оба read-only
-- `orchestrator` ∥ `py-config-bot` — разные файловые зоны (src/ vs configs/)
-- `py-doc-bot` ∥ `py-audit-bot` (final) — если doc changes не влияют на code audit scope
-
-______________________________________________________________________
-
-## 6. ID-системы
-
-| Prefix  | Subagent      | Формат     | Пример   | Описание                |
-| ------- | ------------- | ---------- | -------- | ----------------------- |
-| `RF-`   | py-plan-bot   | `RF-001`   | RF-001   | Рефакторинг / изменение |
-| `DBG-`  | py-debug-bot  | `DBG-001`  | DBG-001  | Debug-итерация          |
-| `AUD-`  | py-audit-bot  | `AUD-001`  | AUD-001  | Audit finding           |
-| `DOC-`  | py-doc-bot    | `DOC-001`  | DOC-001  | Обновление документации |
-| `FAIL-` | py-test-bot   | `FAIL-001` | FAIL-001 | Упавший тест (в отчёте) |
-| `CFG-`  | py-config-bot | `CFG-001`  | CFG-001  | Изменение конфигурации  |
-
-Все ID уникальны в пределах `task_id`. Cross-references: `DBG-001 → RF-002`, `DOC-003 → RF-001`, `CFG-001 → RF-003`.
-
-______________________________________________________________________
-
-## 7. Гарантии и инварианты
-
-1. **Traceability**: каждое изменение в коде привязано к `RF-*`, каждый fix — к `DBG-*`, каждый doc update — к `DOC-*`, каждый config change — к `CFG-*`.
-1. **Baseline/Final symmetry**: для каждого baseline-артефакта существует final-артефакт.
-1. **No blind changes**: код не меняется без предварительного плана (`RF-*`).
-1. **No untested changes**: каждый `RF-*` проверяется через `py-test-bot`.
-1. **Architecture gate**: финальный аудит (`py-audit-bot`) является обязательным gate перед завершением задачи.
-1. **Config compliance gate**: `py-config-bot-1.py` MUST иметь 0 critical findings после `py-config-bot`.
-1. **Zone isolation**: orchestrator writes `src/`, py-config-bot — только в `configs/`, py-doc-bot — только в `docs/` + docstrings + diagrams.
-
-______________________________________________________________________
-
-## 8. Упрощённые режимы
-
-### 8.1. Quick-fix (single bug, low risk)
-
-```
-py-test-bot (baseline, scope=1 file)
-→ orchestrator (fix)
-→ py-test-bot (final)
-→ py-doc-bot (docstring only)
-```
-
-### 8.2. Doc-only
-
-```
-py-doc-bot (создание/обновление)
-  → py-audit-bot (targeted, audit_type=docs)
-```
-
-### 8.3. Config-only
-
-```
-py-audit-bot (targeted, audit_type=config)
-  → py-plan-bot (plan)
-  → py-config-bot (изменение configs)
-  → py-test-bot (final, scope=config-related tests)
-  → py-audit-bot (final)
-```
-
-### 8.4. New entity (full scaffolding)
-
-```
-py-plan-bot (plan)
-  → orchestrator (domain entity + transformer + schema + adapter)
-  → py-config-bot (pipeline + DQ + filter + source configs)
-  → py-test-bot (new_tests + final)
-  → py-doc-bot (docstrings + provider docs)
-  → py-audit-bot (final)
-```
-
-### 8.5. Composite pipeline
-
-```
-py-audit-bot (baseline, scope=seed + enricher pipelines)
-  → py-plan-bot (composite plan)
-  → py-config-bot (composite config: seed/enrichers/merge)
-  → orchestrator (composite orchestrator, если требуется новый код)
-  → py-test-bot (integration tests)
-  → py-doc-bot (composite pipeline docs)
-  → py-audit-bot (final)
-```
-
-______________________________________________________________________
-
-## 9. Опорные документы
-
-| Документ                                               | Описание                                 |
-| ------------------------------------------------------ | ---------------------------------------- |
-| `.codex/agents/py-*.md`                                | Спецификации субагентов для Codex CLI    |
-| `.codex/agents/ORCHESTRATION.md`                       | Каноническая orchestration карта рантайма |
-| `docs/00-project/RULES.md`                             | Архитектурные правила проекта            |
-| `docs/02-architecture/decisions/`                      | ADR-001..ADR-047                         |
-| `docs/00-project/glossary.md`                          | Терминология                             |
-| `tests/architecture/`                                  | Автоматические проверки инвариантов      |
-| `docs/00-project/ai/agents/scripts/py-config-bot-1.py` | Автоматическая проверка конфигов         |
-
-______________________________________________________________________
-
-## 9a. Инлайнированные знания
-
-В Codex CLI ключевые знания для BioETL-профилей инлайнированы непосредственно в файлы субагентов (`.codex/agents/py-*.md`) и подключаются через skill wrappers в `.codex/skills/`.
-
-### 9a.1 Маппинг знаний на субагенты
-
-|  #  | Субагент      | Основные знания                  | Дополнительные                                  |
-| :-: | ------------- | -------------------------------- | ----------------------------------------------- |
-|  I  | py-audit-bot  | ETL system auditing, code review | Software architecture, REST API validation      |
-| II  | py-plan-bot   | Software architecture            | REST API, data engineering, composite pipelines |
-| III | py-test-bot   | Python testing (pytest, VCR.py)  | Data engineering (Pandera, DQ)                  |
-| IV  | py-config-bot | Data engineering, YAML configs   | REST API config                                 |
-|  V  | py-debug-bot  | Python debugging, RCA            | REST API debugging, Pandera issues              |
-| VI  | py-doc-bot    | Technical writing, ADR, diagrams | Bioinformatics terminology, Mermaid             |
-
-### 9a.2 Rule References
-
-Каждый файл субагента содержит секцию `## Rule References` с таблицами:
-
-| Тип              | Формат         | Пример                                  |
-| ---------------- | -------------- | --------------------------------------- |
-| Правило RULES.md | `[RULES-§X.Y]` | `[RULES-§2.1]` — Hexagonal Architecture |
-| ADR              | `[ADR-NNN]`    | `[ADR-010]` — Local-only deployment     |
-| Инвариант        | `[INV:name]`   | `[INV:IMPORT_DOMAIN]` — domain → ничего |
-
-**Verification:** каждый rule reference сопровождается командой проверки (bash).
-
-______________________________________________________________________
-
-## 10. MCP & Tools Integration
-
-### 10.1 Профили readiness
-
-Трековый полный inventory и live readiness — разные слои доказательств.
-Матрица required/optional определена в `scripts/ai/codex/setup_mcp.py` и
-проверяется статически без сети или локальных сервисов.
-
-| Профиль | Required для live readiness | Optional |
-| --- | --- | --- |
-| `stable` | ежедневный host/HTTP набор | remote/auth-managed endpoints пропускаются |
-| `shared` | тот же ежедневный набор, что `stable` | Mermaid, Neo4j, monitoring и прочие расширения |
-| `core` | `stable` + Mermaid | remote/auth-managed endpoints |
-| `ops` | `stable` + Prometheus, Grafana, GitHub Actions | Mermaid и остальные расширения |
-| `graph` | `stable` + оба Neo4j endpoint | Mermaid, monitoring и прочие расширения |
-| `full` | весь явно выбранный inventory | нет |
-
-### 10.2 Протокол использования
-
-1. Использовать runtime tool discovery и выбирать только нужные задаче
-   capability; не предполагать наличие удалённого provider по старому имени.
-1. Для CI запускать
-   `python3 scripts/ai/codex/doctor.py static --no-write`.
-1. Для bounded live smoke запускать
-   `bash scripts/ai/codex/run-codex.sh mcp-check --profile <profile>`.
-1. `FAIL` означает недоступный required server, `WARN` — optional server,
-   `SKIP` — remote/auth-managed endpoint, проверяемый отдельно через
-   `codex mcp list`.
-1. MCP используется для верификации и исследования, а не для production data
-   flow. Никакой monitoring или Docker Compose stack не стартует неявно.
-
-### 10.3 Типовые маршруты
-
-| Задача | Capability | Профиль |
-| --- | --- | --- |
-| Repository evidence | filesystem, AST/code analysis, memory | `stable` |
-| External technical reference | Context7, Ref, DeepWiki или bounded web source | `stable` |
-| Pull request / CI evidence | GitHub, GitHub Actions | `stable` / `ops` |
-| Mermaid validation/render | Mermaid | `core` |
-| Monitoring investigation | Prometheus, Grafana | `ops` |
-| Graph research | Neo4j Cypher/Memory | `graph` |
-
-______________________________________________________________________
-
-## 11. Changelog (ORCHESTRATION.md)
-
-### v4.2 (2026-03-26)
-
-- **CHANGED**: active agent table no longer lists the legacy documentation-only subagent
-- **CHANGED**: repo-wide docs audits now point to `documentation-audit` / `documentation-cascade-audit`
-- **CHANGED**: active agent count updated to 8 (6 core + 2 orchestrator/swarm)
-
-### v4.1 (2026-03-10)
-
-- **PLATFORM**: основной runtime зафиксирован как Codex CLI
-- **ADDED**: `.codex/agents/CODEX-RUNTIME.md` для маппинга logical profiles → native agent roles
-- **CHANGED**: source-of-truth ссылки переключены на `.codex/agents/`
-- **CHANGED**: примеры запуска адаптированы под `spawn_agent(...)`
-
-### v4.0 (2026-03-04)
-
-> Исторический changelog ниже является non-normative. Для текущего workflow ориентируйся на разделы выше и на note о том, что production-код пишет orchestrator напрямую.
-
-- **REMOVED**: `py-code-bot` — production code now written directly by orchestrator
-- **MERGED**: `py-diagram-bot` into `py-doc-bot` (diagrams are documentation artifacts)
-- **ADDED**: `py-test-swarm`, docs-audit orchestration track, `py-review-orchestrator` to agent table
-- **REMOVED**: `.claude/agents/subagents/` reference (deleted in Phase 1)
-- **CHANGED**: Agent count: 8 → 9 (6 core + 3 orchestrator/swarm)
-- **CHANGED**: All workflow references updated: py-code-bot → orchestrator
-- **CHANGED**: MCP matrices reduced from 7×7 to 6×6
-
-### v3.0 (2026-02-08)
-
-- **PLATFORM**: Адаптация для legacy assistant CLI (до текущего Codex runtime)
-- **CHANGED**: Все субагенты переименованы: `pyXxxBot` → `py-xxx-bot` (для `subagent_type` в Task tool)
-- **CHANGED**: 8 старых Claude Code агентов заменены на 7 унифицированных: `py-audit-bot`, `py-plan-bot`, `py-test-bot`, `py-code-bot`, `py-config-bot`, `py-debug-bot`, `py-doc-bot`
-- **CHANGED**: Навыки из skills directory инлайнированы в файлы субагентов (секция `## Инлайнированные знания`)
-- **REMOVED**: `google_drive_search`, `message_compose`, `ask_user_input` (недоступны в CLI)
-- **CHANGED**: `web_search` / `web_fetch` → `WebSearch` / `WebFetch` (встроенные инструменты Claude Code)
-- **CHANGED**: MCP инструменты использовали legacy deferred-loading contract
-- **CHANGED**: §9a — Skill Activation Protocol → Инлайнированные знания
-- **NEW**: Ссылки на `.claude/agents/py-*.md` вместо `SUBAGENT.md`
-
-### v2.2 (2026-02-07)
-
-- **NEW**: §10 — MCP & Tools Integration (матрицы 7×7 для MCP-серверов и Platform Tools)
-- **NEW**: Секция `## MCP Tools` добавлена во все 7 SUBAGENT.md (сценарии, workflows, параметры)
-- **NEW**: Секция `## Platform Tools` добавлена во все 7 SUBAGENT.md (web_search, ask_user_input, google_drive_search)
-- **NEW**: §10.3 — протокол использования MCP (опциональность, верификация, fallback)
-- **NEW**: §10.4 — 8 типовых MCP workflows (schema drift, golden data, contract testing, etc.)
-- **CHANGED**: §10 (Changelog) → §11 (ренумерация)
-
-### v2.1 (2026-02-07)
-
-- **NEW**: §9a — Skill Activation Protocol (маппинг 7 навыков на 7 субагентов)
-- **NEW**: Секция `## Skills` добавлена во все 7 SUBAGENT.md (primary + secondary skills с путями и триггерами)
-- **NEW**: Секция `## Rule References` добавлена во все 7 SUBAGENT.md ([RULES-§], [ADR-], [INV:], [GLOSS:])
-- **NEW**: §9a.3 — формат ссылок на правила с verification-командами
-
-### v2.0 (2026-02-07)
-
-- **NEW**: `py-code-bot` — написание production-кода (`src/bioetl/`), файловая зона `src/`
-- **NEW**: `py-config-bot` — управление конфигурациями (`configs/`), файловая зона `configs/`
-- **NEW**: ID-prefix `CFG-` для config changes
-- **NEW**: Артефакт `04a-config-log.md`
-- **NEW**: Упрощённые режимы: `new-entity` (§8.4), `composite-pipeline` (§8.5)
-- **NEW**: §5.2 — маршрутизация RF-\* по типу изменения
-- **NEW**: §7.6 — config compliance gate
-- **NEW**: §7.7 — zone isolation
-- **CHANGED**: Шаг ⑤ (ранее «рефакторинг») → шаг ④ «реализация» с параллельным py-code-bot + py-config-bot
-- **CHANGED**: Матрица взаимодействий расширена до 7×7
-- **CHANGED**: Счёт subagent-ов: 5 → 7
-
-### v1.0 (2026-02-07)
-
-- Initial release: py-audit-bot, py-plan-bot, py-test-bot, py-debug-bot, py-doc-bot
-
-### v4.3 (2026-07-24)
-
-- **UPDATED**: Memory sheets synchronization — all `memory-py-*.md` updated to v1.0.1-v1.0.3
-- **UPDATED**: MCP memory configuration extended with new entities (agent-memory, memory-usage-policy, daily-workflow, orchestration-map, normative-sources)
-- **UPDATED**: Skill documentation (agent-orchestration) now references memory sheets and daily workflow
-- **UPDATED**: agent-memory.md synchronized to v1.0.17 with ORCHESTRATION.md v4.3
-- **CHANGED**: Memory workflow integration in agent-orchestration skill
-- **CHANGED**: Version references in memory sheets updated to 2026-07-24
-
-### v4.2 (2026-03-26)
-
-- Env file guardrail added (moved to end of changelog in v4.3)
-
-## Env File Guardrail
-
-- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
-- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
-- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.
+- `src/memory/DAILY_WORKFLOW.md`

@@ -25,6 +25,49 @@ READ_ONLY_AGENTS = {
     "py-debug-bot",
     "py-plan-bot",
 }
+BOOTSTRAP_BASELINE_BYTES = 465_721
+BOOTSTRAP_BASELINE_LINES = 8_324
+BOOTSTRAP_MAX_BYTES = BOOTSTRAP_BASELINE_BYTES * 70 // 100
+BOOTSTRAP_CORPUS_PATHS = (
+    "AGENTS.md",
+    ".codex/agents/CODEX-RUNTIME.md",
+    ".codex/agents/ORCHESTRATION.md",
+    *tuple(f".codex/agents/{name}.md" for name in AGENT_NAMES),
+    *tuple(f".codex/skills/{name}/SKILL.md" for name in AGENT_NAMES),
+    ".codex/skills/py-audit-bot/references/wrapper-contract.md",
+    "docs/00-project/NORMATIVE_SOURCES.md",
+    "docs/00-project/RULES.md",
+    "docs/01-requirements/REQUIREMENTS.md",
+    "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+    "docs/00-project/ai/memory/agent-memory.md",
+    *tuple(
+        f"docs/00-project/ai/memory/memory-{name}.md" for name in AGENT_NAMES
+    ),
+    "src/memory/DAILY_WORKFLOW.md",
+)
+ACTIVE_RUNTIME_TEXT_PATHS = (
+    ".codex/agents/CODEX-RUNTIME.md",
+    ".codex/agents/ORCHESTRATION.md",
+    ".codex/agents/README.md",
+    *tuple(f".codex/agents/{name}.md" for name in AGENT_NAMES),
+    *tuple(f".codex/agents/{name}.toml" for name in AGENT_NAMES),
+    *tuple(f".codex/skills/{name}/SKILL.md" for name in AGENT_NAMES),
+    "docs/00-project/ai/memory/agent-memory.md",
+    *tuple(
+        f"docs/00-project/ai/memory/memory-{name}.md" for name in AGENT_NAMES
+    ),
+)
+STALE_RUNTIME_PATTERNS = {
+    "provider-specific model label": re.compile(r"\b(?:opus|sonnet)\b", re.I),
+    "obsolete runtime/tool wording": re.compile(
+        r"Claude Code|WebSearch|WebFetch|TodoWrite|Task tool|Read tool|Grep tool"
+    ),
+    "ghost skill discovery path": re.compile(r"\.agents/skills"),
+    "retired role name": re.compile(
+        r"py-review-orchestrator|py-architecture-debt-bot"
+    ),
+    "stale catalog count": re.compile(r"\b(?:nine|девять)\b", re.I),
+}
 
 GENERATED_MARKER = "<!-- generated-by: scripts.ai.codex.native_runtime_contract -->"
 
@@ -87,28 +130,63 @@ def canonical_skills(repo_root: Path = REPO_ROOT) -> dict[str, tuple[str, str]]:
     return result
 
 
-def render_skill_adapter(skill_name: str, description: str) -> str:
-    """Render a portable native-discovery adapter for one canonical skill."""
+def bootstrap_corpus_stats(repo_root: Path = REPO_ROOT) -> dict[str, int]:
+    """Measure the governed mandatory/root-plus-role bootstrap corpus."""
 
-    escaped_description = description.replace("\\", "\\\\").replace('"', '\\"')
-    return f'''---
-name: "{skill_name}"
-description: "{escaped_description}"
----
+    byte_count = 0
+    line_count = 0
+    for relative in BOOTSTRAP_CORPUS_PATHS:
+        payload = (repo_root / relative).read_bytes()
+        byte_count += len(payload)
+        line_count += len(payload.splitlines())
+    return {
+        "files": len(BOOTSTRAP_CORPUS_PATHS),
+        "bytes": byte_count,
+        "lines": line_count,
+    }
 
-# {skill_name} discovery adapter
 
-{GENERATED_MARKER}
+def validate_runtime_context(repo_root: Path = REPO_ROOT) -> list[Finding]:
+    """Guard the bootstrap budget and reject stale runtime semantics."""
 
-This file exposes the repository skill through Codex native discovery. The
-canonical operating contract remains `.codex/skills/{skill_name}/SKILL.md`.
+    findings: list[Finding] = []
+    missing = [
+        relative
+        for relative in BOOTSTRAP_CORPUS_PATHS
+        if not (repo_root / relative).is_file()
+    ]
+    for relative in missing:
+        findings.append(
+            Finding("context.missing", "bootstrap source is missing", relative)
+        )
+    if not missing:
+        stats = bootstrap_corpus_stats(repo_root)
+        if stats["bytes"] > BOOTSTRAP_MAX_BYTES:
+            findings.append(
+                Finding(
+                    "context.budget",
+                    f"bootstrap corpus is {stats['bytes']} bytes; "
+                    f"maximum is {BOOTSTRAP_MAX_BYTES}",
+                    "runtime bootstrap corpus",
+                )
+            )
 
-Before taking any task action:
-
-1. Read `.codex/skills/{skill_name}/SKILL.md` completely.
-2. Follow that canonical skill and every required reference it selects.
-3. Treat this adapter as discovery metadata only; do not redefine behavior here.
-'''
+    for relative in ACTIVE_RUNTIME_TEXT_PATHS:
+        path = repo_root / relative
+        if not path.is_file():
+            continue
+        content = path.read_text(encoding="utf-8")
+        for label, pattern in STALE_RUNTIME_PATTERNS.items():
+            match = pattern.search(content)
+            if match:
+                findings.append(
+                    Finding(
+                        "context.stale",
+                        f"contains {label}: {match.group(0)!r}",
+                        relative,
+                    )
+                )
+    return findings
 
 
 def validate_project_config(repo_root: Path = REPO_ROOT) -> list[Finding]:
@@ -259,8 +337,8 @@ def validate_agents(repo_root: Path = REPO_ROOT) -> list[Finding]:
     return findings
 
 
-def validate_skill_adapters(repo_root: Path = REPO_ROOT) -> list[Finding]:
-    """Canonical `.codex/skills` is the only project discovery surface."""
+def validate_canonical_skills(repo_root: Path = REPO_ROOT) -> list[Finding]:
+    """Validate the sole project-scoped Codex skill discovery surface."""
 
     try:
         canonical_skills(repo_root)
@@ -277,5 +355,6 @@ def validate_native_runtime(repo_root: Path = REPO_ROOT) -> list[Finding]:
     return [
         *validate_project_config(repo_root),
         *validate_agents(repo_root),
-        *validate_skill_adapters(repo_root),
+        *validate_canonical_skills(repo_root),
+        *validate_runtime_context(repo_root),
     ]

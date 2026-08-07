@@ -23,7 +23,6 @@ ______________________________________________________________________
 | Surface | Primary role | Source-of-truth status | Editable for behavior | Expected content |
 | ----------------------- | --------------------------------- | ---------------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | `.codex/**` | Codex runtime surface | Canonical for tracked runtime behavior on `main` | Yes | portable `.codex/config.toml`, native `.codex/agents/*.toml`, behavioral `.codex/agents/*.md`, skills, and Codex orchestration |
-| `.agents/skills/**` | Codex native repository discovery adapter | Generated/derived from `.codex/skills/**` | Regenerate only | thin platform-neutral `SKILL.md` adapters; never an independent behavioral source |
 | `.junie/**` | JetBrains Junie runtime surface | Canonical for tracked runtime behavior on `main` (equal peer to `.codex/**`) | Yes, keeping parity with `.codex/**` | `.junie/guidelines.md` (root contract), `.junie/agents/**` (JUNIE-RUNTIME + 9 py-* profiles + README/ORCHESTRATION mirrors), `.junie/skills/**` (mirror of `.codex/skills/**`), `.junie/plans/**` |
 | `.devin/agents/**`, `.devin/skills/**` | Devin runtime surface | Canonical for tracked Devin-specific runtime behavior | Yes, subject to Codex–Devin skill parity contracts | `DEVIN-RUNTIME`, custom profile entrypoints, orchestration, and Devin skill adaptations |
 | `.gemini/settings.json` | Gemini local config surface | Local-only runtime config; not a tracked behavior tree on `main` | Yes, for machine-local settings only | optional local checkout settings with machine-specific paths |
@@ -40,8 +39,8 @@ ______________________________________________________________________
 1. `.codex/**` is the authoritative source for tracked Codex runtime behavior.
    Project TOML config and native agent descriptors are Codex-only runtime
    files declared in `junie-mirror-contract.json`; they are not copied into
-   Junie. `.agents/skills/**` is a deterministic Codex discovery projection of
-   canonical `.codex/skills/**`.
+   Junie. `.codex/skills/**` is the sole project-scoped Codex skill discovery
+   and behavioral source.
 1. `.junie/**` is the authoritative source for tracked JetBrains Junie runtime
    behavior and is an **equal peer** to `.codex/**`. Parity between the two
    runtime trees is a governance contract enforced by

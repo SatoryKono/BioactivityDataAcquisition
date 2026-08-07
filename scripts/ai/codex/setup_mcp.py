@@ -66,13 +66,14 @@ MCP_PROFILE_STABLE = (
     "deja",
     "adr-analysis",
     "code-analyzer",
-    "deepwiki",
     "ref",
 )
 # Multi-client default: every sanctioned local server is projected to the
 # shared HTTP plane. Remote HTTP servers remain remote and are naturally
 # multi-client. Keep membership explicit so profile drift is reviewable.
 MCP_PROFILE_SHARED = MCP_PROFILE_STABLE + (
+    # Credentialed remote research is opt-in, never part of daily doctor.
+    "deepwiki",
     "brave-search",
     "prometheus",
     "grafana",
@@ -1010,11 +1011,14 @@ def _write_codex_config(
         workspace_root, profile=profile, transport_mode=transport_mode
     )
     config_dir = Path.home() / ".codex"
-    config_dir.mkdir(parents=True, exist_ok=True)
+    config_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
+    os.chmod(config_dir, 0o700)
     config_path = config_dir / "config.toml"
 
     existing = config_path.read_text(encoding="utf-8") if config_path.exists() else ""
-    managed_or_retired_names = set(servers) | set(REMOVED_MCP_SERVER_NAMES)
+    managed_or_retired_names = set(
+        _canonical_servers(workspace_root, profile="full")
+    ) | set(REMOVED_MCP_SERVER_NAMES)
     preserved = _strip_managed_mcp_blocks(existing, managed_or_retired_names)
     managed_block = _render_codex_mcp_toml(servers)
 
@@ -1024,6 +1028,7 @@ def _write_codex_config(
         rendered = managed_block
 
     config_path.write_text(rendered, encoding="utf-8")
+    os.chmod(config_path, 0o600)
     return config_path
 
 
@@ -1088,6 +1093,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Do not update ~/.codex/config.toml with the generated MCP servers.",
     )
     parser.add_argument(
+        "--codex-only",
+        action="store_true",
+        help=(
+            "Update only the managed MCP block in ~/.codex/config.toml; do not "
+            "write workspace or other client projections."
+        ),
+    )
+    parser.add_argument(
         "--skip-gemini-settings",
         action="store_true",
         help="Do not update .gemini/settings.json with the generated MCP servers.",
@@ -1146,6 +1159,23 @@ def main(argv: Sequence[str] | None = None) -> int:
     _apply_setup_mcp_flag_shortcuts(args)
     output_root = args.root.absolute()
     workspace_root = args.workspace_root.absolute()
+    if args.codex_only:
+        if args.check or args.qodo_only or args.persist_local_profile:
+            parser.error(
+                "--codex-only cannot be combined with --check, --qodo-only, "
+                "or --persist-local-profile"
+            )
+        if args.skip_codex or args.skip_codex_config:
+            parser.error("--codex-only cannot be combined with Codex skip flags")
+        _write_codex_config(
+            workspace_root,
+            profile=args.profile,
+            transport_mode=args.transport_mode,
+        )
+        print("Updated the private Codex user MCP managed block.")
+        if not args.skip_codex_validation:
+            _run_codex_validation(workspace_root)
+        return 0
     if args.check:
         return _check_tracked_portable_projections(
             output_root,

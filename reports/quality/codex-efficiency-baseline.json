@@ -1,0 +1,187 @@
+{
+  "host": {
+    "architecture": "x86_64",
+    "os": "Linux",
+    "python": "3.12.3",
+    "wsl": true
+  },
+  "policy": {
+    "captures_subprocess_output": false,
+    "runs": 3,
+    "starts_optional_services": false,
+    "timeout_seconds": 20.0
+  },
+  "probes": {
+    "codex_version": {
+      "duration_ms": {
+        "max": 65,
+        "median": 64,
+        "min": 64
+      },
+      "runs": 3,
+      "samples": [
+        {
+          "duration_ms": 64,
+          "label": "codex_version",
+          "returncode": 0,
+          "status": "passed"
+        },
+        {
+          "duration_ms": 64,
+          "label": "codex_version",
+          "returncode": 0,
+          "status": "passed"
+        },
+        {
+          "duration_ms": 65,
+          "label": "codex_version",
+          "returncode": 0,
+          "status": "passed"
+        }
+      ],
+      "status_counts": {
+        "failed": 0,
+        "passed": 3,
+        "timed_out": 0,
+        "unavailable": 0
+      }
+    },
+    "environment_check": {
+      "duration_ms": {
+        "max": 616,
+        "median": 566,
+        "min": 516
+      },
+      "runs": 3,
+      "samples": [
+        {
+          "duration_ms": 616,
+          "label": "environment_check",
+          "returncode": 0,
+          "status": "passed"
+        },
+        {
+          "duration_ms": 566,
+          "label": "environment_check",
+          "returncode": 0,
+          "status": "passed"
+        },
+        {
+          "duration_ms": 516,
+          "label": "environment_check",
+          "returncode": 0,
+          "status": "passed"
+        }
+      ],
+      "status_counts": {
+        "failed": 0,
+        "passed": 3,
+        "timed_out": 0,
+        "unavailable": 0
+      }
+    },
+    "headless_help": {
+      "duration_ms": {
+        "max": 9,
+        "median": 8,
+        "min": 8
+      },
+      "runs": 3,
+      "samples": [
+        {
+          "duration_ms": 8,
+          "label": "headless_help",
+          "returncode": 0,
+          "status": "passed"
+        },
+        {
+          "duration_ms": 8,
+          "label": "headless_help",
+          "returncode": 0,
+          "status": "passed"
+        },
+        {
+          "duration_ms": 9,
+          "label": "headless_help",
+          "returncode": 0,
+          "status": "passed"
+        }
+      ],
+      "status_counts": {
+        "failed": 0,
+        "passed": 3,
+        "timed_out": 0,
+        "unavailable": 0
+      }
+    },
+    "launcher_help": {
+      "duration_ms": {
+        "max": 16,
+        "median": 16,
+        "min": 16
+      },
+      "runs": 3,
+      "samples": [
+        {
+          "duration_ms": 16,
+          "label": "launcher_help",
+          "returncode": 0,
+          "status": "passed"
+        },
+        {
+          "duration_ms": 16,
+          "label": "launcher_help",
+          "returncode": 0,
+          "status": "passed"
+        },
+        {
+          "duration_ms": 16,
+          "label": "launcher_help",
+          "returncode": 0,
+          "status": "passed"
+        }
+      ],
+      "status_counts": {
+        "failed": 0,
+        "passed": 3,
+        "timed_out": 0,
+        "unavailable": 0
+      }
+    },
+    "mcp_ensure_check": {
+      "duration_ms": {
+        "max": 270,
+        "median": 268,
+        "min": 266
+      },
+      "runs": 3,
+      "samples": [
+        {
+          "duration_ms": 266,
+          "label": "mcp_ensure_check",
+          "returncode": 0,
+          "status": "passed"
+        },
+        {
+          "duration_ms": 270,
+          "label": "mcp_ensure_check",
+          "returncode": 0,
+          "status": "passed"
+        },
+        {
+          "duration_ms": 268,
+          "label": "mcp_ensure_check",
+          "returncode": 0,
+          "status": "passed"
+        }
+      ],
+      "status_counts": {
+        "failed": 0,
+        "passed": 3,
+        "timed_out": 0,
+        "unavailable": 0
+      }
+    }
+  },
+  "schema_version": "bioetl-codex-efficiency-baseline-v1"
+}
