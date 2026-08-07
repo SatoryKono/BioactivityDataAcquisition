@@ -12,7 +12,7 @@ pytestmark = pytest.mark.unit
 
 from bioetl.application.services.run_reports.paths import (
     REPORT_ROOT_MARKER_NAME,
-    REPORT_ROOT_MARKER_TOKEN,
+    REPORT_ROOT_MARKER_VALUE,
 )
 from bioetl.interfaces.http.report_root_config import (
     ENFORCE_REPORT_ROOT_MARKER_ENV,
@@ -53,7 +53,7 @@ def test_readiness_check_with_marker(
     root = tmp_path / "run-reports"
     root.mkdir()
     (tmp_path / REPORT_ROOT_MARKER_NAME).write_text(
-        REPORT_ROOT_MARKER_TOKEN + "\n", encoding="utf-8"
+        REPORT_ROOT_MARKER_VALUE + "\n", encoding="utf-8"
     )
     monkeypatch.setenv(REPORT_ROOT_ENV, str(root))
     monkeypatch.setenv(ENFORCE_REPORT_ROOT_MARKER_ENV, "1")

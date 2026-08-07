@@ -19,7 +19,7 @@ DEFAULT_REPORT_ROOT = Path("reports") / "run-reports"
 # Identity marker on the dashboard reports bind mount (parent of run-reports).
 # Stale Docker Desktop bind caches that point at an empty tree fail this check.
 REPORT_ROOT_MARKER_NAME = ".bioetl-report-root"
-REPORT_ROOT_MARKER_TOKEN = "bioetl-report-root-v1"
+REPORT_ROOT_MARKER_VALUE = "bioetl-report-root-v1"
 
 
 def resolve_report_root(*, root: Path | None = None) -> Path:
@@ -62,7 +62,7 @@ def inspect_report_root_marker(
     payload: dict[str, Any] = {  # Any: health diagnostic payload is JSON-heterogeneous
         "report_root": str(resolved.as_posix()),
         "marker_path": str(marker.as_posix()),
-        "marker_token_expected": REPORT_ROOT_MARKER_TOKEN,
+        "marker_token_expected": REPORT_ROOT_MARKER_VALUE,
     }
     if not marker.is_file():
         payload["status"] = "unhealthy"
@@ -80,7 +80,7 @@ def inspect_report_root_marker(
         payload["marker"] = "unreadable"
         payload["message"] = f"Report-root marker unreadable: {exc}"
         return payload
-    if token != REPORT_ROOT_MARKER_TOKEN:
+    if token != REPORT_ROOT_MARKER_VALUE:
         payload["status"] = "unhealthy"
         payload["marker"] = "mismatch"
         payload["marker_token_actual"] = token[:120]

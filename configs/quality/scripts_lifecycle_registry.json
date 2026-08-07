@@ -1252,9 +1252,9 @@
     },
     "scripts/schema/generation/generate_typed_arrow_schema_sources.py": {
       "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only for the bounded PD7-4 typed Arrow schema migration and its check mode; consolidate into the canonical schema command surface or retire it after the migration closes."
+      "decision": "shared_helper_module",
+      "review_by": "2026-12-31",
+      "next_step": "Canonical scripts.schema generate-typed-arrow surface; keep routed via python -m scripts.schema."
     },
     "scripts/shutdown.ps1": {
       "owner": "@bioetl-platform",
@@ -1399,6 +1399,12 @@
       "decision": "shared_helper_module",
       "review_by": "2026-07-15",
       "next_step": "Retain as the context-aware Neo4j audit connection helper while deployment and live-audit runbooks still reference src/tools/neo4j_audit.py; fold it into a broader canonical ops helper surface only if the audit workflow is consolidated."
+    },
+    "scripts/diagrams/cli/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-12-31",
+      "next_step": "Optional package entry for diagrams CLI; canonical router remains python -m scripts.diagrams (#8041/#CI-C1-006)."
     }
   }
 }
