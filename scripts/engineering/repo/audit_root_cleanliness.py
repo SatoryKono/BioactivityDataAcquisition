@@ -631,15 +631,28 @@ def _unexpected_local_root_temp_files(
     repo_root: Path,
     tracked_root_files: set[str],
 ) -> list[str]:
-    """Return forbidden local root temp files present on disk."""
+    """Return forbidden local root temp files present on disk.
+
+    Presence is based on the root directory listing. Do **not** require
+    ``Path.is_file()``: on Windows, reserved device basenames such as ``nul``
+    can appear in ``iterdir()`` while ``is_file()`` returns false, which would
+    otherwise hide a FORBIDDEN_LOCAL_ROOT_FILES hit from strict mode (RH7-C3).
+    Directories are excluded (handled by local-dir checks).
+    """
     violations: list[str] = []
     for entry in repo_root.iterdir():
-        if not entry.is_file():
-            continue
         if entry.name in tracked_root_files:
             continue
-        if entry.name in FORBIDDEN_LOCAL_ROOT_FILES:
-            violations.append(entry.name)
+        if entry.name not in FORBIDDEN_LOCAL_ROOT_FILES:
+            continue
+        try:
+            if entry.is_dir():
+                continue
+        except OSError:
+            # Still treat a listed forbidden basename as a violation when
+            # filesystem probes fail (device-name edge cases).
+            pass
+        violations.append(entry.name)
     return sorted(violations)
 
 

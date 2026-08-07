@@ -196,6 +196,33 @@ def test_unexpected_local_root_temp_files_reject_panel_inventory_artifacts(
     ]
 
 
+def test_unexpected_local_root_temp_files_detects_reserved_name_without_is_file() -> (
+    None
+):
+    """Win32 reserved basenames may list without is_file()==True (RH7-C3)."""
+
+    class _ReservedNameEntry:
+        def __init__(self, name: str) -> None:
+            self.name = name
+
+        def is_dir(self) -> bool:
+            return False
+
+        def is_file(self) -> bool:
+            return False
+
+    class _FakeRoot:
+        def iterdir(self):
+            return iter([_ReservedNameEntry("nul")])
+
+    violations = module._unexpected_local_root_temp_files(
+        _FakeRoot(),  # type: ignore[arg-type]
+        tracked_root_files=set(),
+    )
+
+    assert violations == ["nul"]
+
+
 def test_collect_tracked_policy_violations_allows_current_canonical_root_files() -> (
     None
 ):
