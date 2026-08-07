@@ -83,7 +83,7 @@ def _base_payload() -> dict[str, object]:
 
 
 def test_aggregation_schemas_to_domain() -> None:
-    field = AggregationFieldSchema(source="term", agg="collect_list", filter="x > 0")
+    field = AggregationFieldSchema(source="term", agg="collect_list", filter="x != 0")
     domain_field = field.to_domain("terms")
     assert domain_field.output_field == "terms"
 

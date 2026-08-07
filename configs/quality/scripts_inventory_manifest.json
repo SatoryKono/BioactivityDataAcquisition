@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-07T15:49:34.104545+00:00",
+  "generated_at": "2026-08-07T15:50:29.510738+00:00",
   "summary": {
     "total_scripts": 573,
     "status_counts": {
@@ -5915,15 +5915,15 @@
         },
         {
           "path": "tests/architecture/test_strip_svg_foreign_object.py",
-          "line": 30,
+          "line": 31,
           "source_group": "tests",
-          "text": "module_path = repo_root / \"scripts\" / \"diagrams\" / \"strip_svg_foreign_object.py\""
+          "text": "repo_root / \"scripts\" / \"diagrams\" / \"fix\" / \"strip_svg_foreign_object.py\""
         },
         {
           "path": "tests/architecture/test_strip_svg_foreign_object.py",
-          "line": 129,
+          "line": 132,
           "source_group": "tests",
-          "text": "script_path = repo_root / \"scripts\" / \"diagrams\" / \"strip_svg_foreign_object.py\""
+          "text": "repo_root / \"scripts\" / \"diagrams\" / \"fix\" / \"strip_svg_foreign_object.py\""
         }
       ]
     },

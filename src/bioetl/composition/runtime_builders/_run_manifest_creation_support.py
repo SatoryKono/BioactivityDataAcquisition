@@ -12,8 +12,6 @@ from bioetl.composition.runtime_builders._run_manifest_attr_support import (
 )
 from bioetl.composition.runtime_builders._run_manifest_creation_support_helpers import (
     RunManifestCreateRequestInputs,
-)
-from bioetl.composition.runtime_builders._run_manifest_creation_support_helpers import (
     assemble_manifest_create_spec as _assemble_manifest_create_spec,
     build_manifest_source_refs as _build_manifest_source_refs,
     create_ledger_service as _create_ledger_service,
@@ -162,24 +160,21 @@ def emit_replay_reconstructability_metric(
     """Emit replay reconstructability metrics for one manifest request."""
     if metrics is None:
         return
-
     launch_context = request.launch_context
     strict_replay_requested = bool(
         _launch_context_value(launch_context, "exact_replay", False)
     )
-    required_persistence_profile = str(
+    profile = str(
         _launch_context_value(launch_context, "required_persistence_profile")
         or DEFAULT_REQUIRED_PERSISTENCE_PROFILE
     )
-    # Prefer assessment already attached
-    # do not recompute reproducibility d
+    # Prefer the attached assessment; do not recompute reproducibility policy.
     precomputed_raw = _launch_context_value(
         launch_context, "reproducibility_policy_assessment"
     )
     precomputed = precomputed_raw if isinstance(precomputed_raw, Mapping) else None
     strict_requirement = (
-        strict_replay_requested
-        or required_persistence_profile in STRICT_PERSISTENCE_PROFILES
+        strict_replay_requested or profile in STRICT_PERSISTENCE_PROFILES
     )
     status, strict_requirement = _resolve_replay_reconstructability_status(
         request=request,

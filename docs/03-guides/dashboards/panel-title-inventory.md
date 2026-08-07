@@ -77,14 +77,24 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 9401 | Monitor Current DQ Status |
 | bioetl-dq-v2.json | 9103 | Start DQ Triage |
 | bioetl-dq-v2.json | 9101 | Monitor DQ Threshold State |
+| bioetl-dq-v2.json | 9405 | Selected Run · Identity & Accounting |
+| bioetl-dq-v2.json | 9402 | Inspect Run Identity |
+| bioetl-dq-v2.json | 9403 | Inspect Processed Records |
+| bioetl-dq-v2.json | 9404 | Selected Range · Impact & Freshness |
 | bioetl-dq-v2.json | 9102 | Inspect Current DQ Reasons |
-| bioetl-dq-v2.json | 220 | Reject Evidence |
+| bioetl-dq-v2.json | 2 | Monitor Volume-Weighted DQ Score |
+| bioetl-dq-v2.json | 5 | Monitor Worst-Entity DQ Score |
+| bioetl-dq-v2.json | 8 | Monitor Worst Freshness Age |
+| bioetl-dq-v2.json | 154 | Monitor Blocked Records |
+| bioetl-dq-v2.json | 6 | Monitor Quarantined Records |
+| bioetl-dq-v2.json | 117 | Monitor Silver Filter Rejects |
+| bioetl-dq-v2.json | 220 | Selected Range · Reject Evidence |
 | bioetl-dq-v2.json | 152 | Monitor Silver Reject Mismatch |
 | bioetl-dq-v2.json | 121 | Inspect Top Silver Reject Reasons |
 | bioetl-dq-v2.json | 122 | Inspect Top Silver Reject Fields |
 | bioetl-dq-v2.json | 118 | Inspect Silver Rejects by Pipeline |
 | bioetl-dq-v2.json | 156 | Inspect Gold Reject Outcomes by Pipeline |
-| bioetl-dq-v2.json | 221 | Validation Diagnostics |
+| bioetl-dq-v2.json | 221 | Selected Range · Validation Diagnostics |
 | bioetl-dq-v2.json | 1 | Track Record Flow by Stage |
 | bioetl-dq-v2.json | 3 | Monitor Bronze Records |
 | bioetl-dq-v2.json | 4 | Monitor Gold Records |
@@ -98,16 +108,6 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 153 | Track Volume-Weighted DQ Score |
 | bioetl-dq-v2.json | 116 | Inspect Lineage in Control Plane |
 | bioetl-dq-v2.json | 150 | Inspect Aggregate Control-Plane Issues |
-| bioetl-dq-v2.json | 9404 | Range & Debug Evidence |
-| bioetl-dq-v2.json | 2 | Monitor Volume-Weighted DQ Score |
-| bioetl-dq-v2.json | 5 | Monitor Worst-Entity DQ Score |
-| bioetl-dq-v2.json | 8 | Monitor Worst Freshness Age |
-| bioetl-dq-v2.json | 154 | Monitor Blocked Records |
-| bioetl-dq-v2.json | 6 | Monitor Quarantined Records |
-| bioetl-dq-v2.json | 117 | Monitor Silver Filter Rejects |
-| bioetl-dq-v2.json | 9405 | Run Context |
-| bioetl-dq-v2.json | 9402 | Inspect Run Identity |
-| bioetl-dq-v2.json | 9403 | Inspect Processed Records |
 | bioetl-incident-v1.json | 1000 | Navigate Dashboards |
 | bioetl-incident-v1.json | 9400 | Understand Incident Scope |
 | bioetl-incident-v1.json | 9401 | Monitor Incident Status |
@@ -120,14 +120,14 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-incident-v1.json | 2002 | Inspect Runtime Suspects |
 | bioetl-incident-v1.json | 2003 | Inspect Provider Suspects |
 | bioetl-incident-v1.json | 2004 | Inspect DQ Suspects |
-| bioetl-overview-v2.json | 9600 | Inspect Alerts |
-| bioetl-overview-v2.json | 9601 | Review Active Alerts |
 | bioetl-overview-v2.json | 1000 | Navigate Dashboards |
 | bioetl-overview-v2.json | 99 | Inspect Scope & Evidence |
 | bioetl-overview-v2.json | 214 | Monitor Fleet Health |
 | bioetl-overview-v2.json | 215 | Review First Action |
 | bioetl-overview-v2.json | 9002 | Review Domain Status |
-| bioetl-overview-v2.json | 9014 | Inspect Historical Trends |
+| bioetl-overview-v2.json | 9600 | Inspect Alerts |
+| bioetl-overview-v2.json | 9601 | Review Active Alerts |
+| bioetl-overview-v2.json | 9030 | Domain Status Tracks |
 | bioetl-overview-v2.json | 9018 | Track Runtime Blockers |
 | bioetl-overview-v2.json | 9019 | Track Data Quality Status |
 | bioetl-overview-v2.json | 9020 | Track Gold Lifecycle |

@@ -1218,20 +1218,6 @@
       ]
     },
     {
-      "id": 9014,
-      "type": "row",
-      "title": "Inspect Historical Trends",
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 22
-      },
-      "collapsed": false,
-      "panels": [],
-      "description": "Contains selected-range status trends. These panels provide historical evidence and do not determine current Fleet Health; gaps remain UNKNOWN rather than healthy."
-    },
-    {
       "type": "row",
       "id": 9030,
       "title": "Domain Status Tracks",
@@ -1240,7 +1226,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 23
+        "y": 22
       },
       "panels": [
         {
@@ -1535,13 +1521,12 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 29
+        "y": 23
       },
-      "collapsed": false,
-      "panels": [],
-      "description": "Contains selected-range run, terminal-state, and reject evidence. Empty history is not proof of current health, and these panels do not determine current Fleet Health."
-    },
-    {
+      "collapsed": true,
+      "description": "Contains selected-range run, terminal-state, and reject evidence. Empty history is not proof of current health, and these panels do not determine current Fleet Health.",
+      "panels": [
+        {
       "id": 9010,
       "type": "table",
       "title": "Review Failed Runs",
@@ -1549,7 +1534,7 @@
         "h": 6,
         "w": 8,
         "x": 0,
-        "y": 30
+        "y": 24
       },
       "datasource": {
         "type": "prometheus",
@@ -1636,7 +1621,7 @@
         "h": 6,
         "w": 8,
         "x": 8,
-        "y": 30
+        "y": 24
       },
       "datasource": {
         "type": "prometheus",
@@ -1739,7 +1724,7 @@
         "h": 6,
         "w": 8,
         "x": 16,
-        "y": 30
+        "y": 24
       },
       "datasource": {
         "type": "prometheus",
@@ -1850,22 +1835,23 @@
         "textMode": "auto"
       },
       "description": "Shows Silver reject count and rate for the selected range and scope. Zero can mean no rejects only when a run started and matching telemetry is present; no matching scope, a run not started, or missing evidence remains UNKNOWN. This panel does not determine current Fleet Health; use Data Quality or Run Explorer."
+        }
+      ]
     },
     {
       "id": 9012,
       "type": "row",
       "title": "Inspect Domain Diagnostics",
-      "collapsed": false,
+      "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 36
+        "y": 24
       },
       "description": "Contains current domain summaries and diagnostic routing. It supports the first-screen verdict and stays collapsed until Domain Status or First Action identifies an affected area.",
-      "panels": []
-    },
-    {
+      "panels": [
+        {
       "id": 9006,
       "type": "table",
       "title": "Review Control Plane Status",
@@ -1873,7 +1859,7 @@
         "h": 5,
         "w": 5,
         "x": 0,
-        "y": 37
+        "y": 31
       },
       "datasource": {
         "type": "prometheus",
@@ -2062,7 +2048,7 @@
         "h": 5,
         "w": 4,
         "x": 5,
-        "y": 37
+        "y": 31
       },
       "datasource": {
         "type": "prometheus",
@@ -2251,7 +2237,7 @@
         "h": 5,
         "w": 5,
         "x": 9,
-        "y": 37
+        "y": 31
       },
       "datasource": {
         "type": "prometheus",
@@ -2440,7 +2426,7 @@
         "h": 5,
         "w": 4,
         "x": 14,
-        "y": 37
+        "y": 31
       },
       "datasource": {
         "type": "prometheus",
@@ -2629,7 +2615,7 @@
         "h": 5,
         "w": 6,
         "x": 18,
-        "y": 37
+        "y": 31
       },
       "datasource": {
         "type": "prometheus",
@@ -2818,7 +2804,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 42
+        "y": 36
       },
       "datasource": {
         "type": "prometheus",
@@ -3008,7 +2994,7 @@
         "h": 3,
         "w": 24,
         "x": 0,
-        "y": 50
+        "y": 44
       },
       "options": {
         "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:12px;white-space:normal\"><strong>Next dashboard:</strong> Trust for evidence confidence · Pipeline Diagnostics for runtime blockers · Data Quality for DQ reasons · Provider Health for provider causes. Scope and time range are preserved.</div>",
@@ -3016,6 +3002,8 @@
       },
       "links": [],
       "transparent": true
+        }
+      ]
     },
     {
       "type": "row",
@@ -3025,7 +3013,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 53
+        "y": 25
       },
       "id": 9602,
       "panels": [

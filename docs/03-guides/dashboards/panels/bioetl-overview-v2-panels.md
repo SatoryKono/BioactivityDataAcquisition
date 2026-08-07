@@ -77,7 +77,7 @@ multiple runs; use RunLedger for exact reconciliation.
 - **Purpose:** Show workflow execution status.
 - **Data sources:** `bioetl_l1_workflow_global_status` (recording rule with label_replace for workflow pipeline mapping)
 
-### 12. Inspect Historical Trends
+### 12. Domain Status Tracks
 - **Type:** Row
 - **Purpose:** Collapsed row containing repeated subsystem detail and historical
   trends after the compact Inputs matrix.
@@ -100,7 +100,7 @@ multiple runs; use RunLedger for exact reconciliation.
 
 ### 16. Inspect Range Evidence
 - **Type:** Row
-- **Purpose:** Row-based range evidence workflow.
+- **Purpose:** Collapsed row-based range evidence workflow.
 - **Data sources:** `bioetl_range_evidence`
 
 ### 17. Review Failed Runs
@@ -120,7 +120,7 @@ multiple runs; use RunLedger for exact reconciliation.
 
 ### 20. Inspect Domain Diagnostics
 - **Type:** Row
-- **Purpose:** Row-based diagnostics workflow.
+- **Purpose:** Collapsed row-based diagnostics workflow.
 - **Data sources:** `bioetl_diagnostics`
 
 ### 21. Navigate Diagnostics
@@ -198,7 +198,7 @@ Exact blocker reasons live in the Control Plane, Runtime, Data Quality, Provider
 
 - This dashboard is the primary L1 entry point for incident triage.
 - It uses shared shell/status/ID/provenance contracts across all primary dashboards.
-- Row-based workflows (Inspect Historical Trends, Inspect Range Evidence, Inspect Domain Diagnostics, Inspect Alerts) provide structured triage paths.
+- Row-based workflows (Domain Status Tracks, Inspect Range Evidence, Inspect Domain Diagnostics, Inspect Alerts) provide structured triage paths.
 - The full-width `Inputs` matrix is the deviation-first subsystem summary.
   Repeated Control Plane, Runtime, Data Quality, Provider, Data Validation, and
   Workflow mirrors live in the collapsed `Inspect Domain Diagnostics` row.
