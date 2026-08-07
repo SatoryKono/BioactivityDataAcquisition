@@ -381,7 +381,9 @@
   ],
   "dashboarded_without_declaration": [],
   "dashboarded_without_emission": [],
-  "dead_metrics": [],
+  "dead_metrics": [
+    "bioetl_adapter_request_p95_seconds"
+  ],
   "declared_label_contract_metrics": [
     "bioetl_adapter_batch_size",
     "bioetl_adapter_fallback_attempts_total",
@@ -457,6 +459,7 @@
     "bioetl_adapter_fallback_hit_rate",
     "bioetl_adapter_fallback_hits_total",
     "bioetl_adapter_request_duration_seconds",
+    "bioetl_adapter_request_p95_seconds",
     "bioetl_adapter_requests_total",
     "bioetl_alerts_active_total",
     "bioetl_alerts_firing_total",
@@ -1901,7 +1904,6 @@
     ],
     "bioetl_provider_range_operational_ok": [
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
-      "docs/03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md",
       "docs/03-guides/dashboards/variables-guide.md",
       "grafana/README.md"
     ],
@@ -2913,6 +2915,7 @@
     "bioetl_adapter_fallback_hit_rate",
     "bioetl_adapter_fallback_hits_total",
     "bioetl_adapter_request_duration_seconds",
+    "bioetl_adapter_request_p95_seconds",
     "bioetl_adapter_requests_total",
     "bioetl_alerts_active_total",
     "bioetl_alerts_firing_total",
