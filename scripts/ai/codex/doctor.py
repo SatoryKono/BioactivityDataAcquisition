@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import concurrent.futures
 import json
-import os
 import socket
 import time
 import urllib.request
@@ -31,21 +30,6 @@ def _as_str_list(value: object) -> list[str]:
 
 WINDOWS_STREAMING_MODES = {"windows_docker_streaming", "windows_npx_streaming"}
 DAILY_PROFILES = {"stable", "shared"}
-
-
-def selected_profile(repo_root: Path) -> str:
-    override = os.environ.get("CODEX_MCP_PROFILE", "").strip()
-    if override:
-        return override
-    state = repo_root / ".codex/mcp-profile.json"
-    if state.is_file():
-        try:
-            value = json.loads(state.read_text(encoding="utf-8")).get("profile")
-            if value:
-                return str(value)
-        except (OSError, json.JSONDecodeError):
-            pass
-    return setup_mcp.DEFAULT_LOCAL_PROFILE
 
 
 def run_static(repo_root: Path, *, output_json: bool = False) -> int:
@@ -110,8 +94,8 @@ def run_mcp(
     *,
     timeout: float,
     overall_timeout: float,
-    no_write: bool,
     output_json: bool,
+    output_path: Path | None = None,
 ) -> int:
     plan = profile_plan(profile, repo_root)
     catalog_path = repo_root / "scripts/ops/runtime/mcp/shared-servers.json"
@@ -172,10 +156,10 @@ def run_mcp(
         ),
         "results": results,
     }
-    if not no_write:
-        output = repo_root / "logs/mcp-shared/health.json"
+    if output_path is not None:
+        output = _governed_report_path(repo_root, output_path)
         output.parent.mkdir(parents=True, exist_ok=True)
-        temporary = output.with_suffix(".json.tmp")
+        temporary = output.with_suffix(f"{output.suffix}.tmp")
         temporary.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
         temporary.replace(output)
 
@@ -202,6 +186,19 @@ def run_mcp(
     return 1 if failed else 0
 
 
+def _governed_report_path(repo_root: Path, requested: Path) -> Path:
+    """Resolve an explicit MCP report path under governed quality reports."""
+
+    candidate = requested if requested.is_absolute() else repo_root / requested
+    resolved = candidate.resolve()
+    quality_root = (repo_root / "reports/quality").resolve()
+    if not resolved.is_relative_to(quality_root):
+        raise ValueError("--output must resolve under reports/quality")
+    if resolved.suffix != ".json":
+        raise ValueError("--output must use a .json suffix")
+    return resolved
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -210,12 +207,25 @@ def main() -> int:
     parser.add_argument("--profile", choices=sorted(setup_mcp.MCP_PROFILES))
     parser.add_argument("--timeout", type=float, default=1.0)
     parser.add_argument("--overall-timeout", type=float, default=10.0)
-    parser.add_argument("--no-write", action="store_true")
+    parser.add_argument(
+        "--no-write",
+        action="store_true",
+        help="compatibility flag; diagnostics are read-only unless --output is set",
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        help="explicit JSON report path under reports/quality",
+    )
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--repo-root", type=Path, default=REPO_ROOT)
     args = parser.parse_args()
     repo_root = args.repo_root.resolve()
-    profile = args.profile or selected_profile(repo_root)
+    profile = args.profile or setup_mcp.DEFAULT_LOCAL_PROFILE
+    if args.no_write and args.output is not None:
+        parser.error("--no-write and --output are mutually exclusive")
+    if args.output is not None and args.mode == "static":
+        parser.error("--output is only valid for mcp or all mode")
 
     static_status = 0
     if args.mode in {"static", "all"}:
@@ -227,8 +237,8 @@ def main() -> int:
             profile,
             timeout=max(0.1, args.timeout),
             overall_timeout=max(0.1, args.overall_timeout),
-            no_write=args.no_write,
             output_json=args.json,
+            output_path=args.output,
         )
     return 1 if static_status or live_status else 0
 
