@@ -39,17 +39,13 @@ collapsed progressive-disclosure row. `run_id` is never a Prometheus label.
 
 ### 5. Browse Recent Runs
 - **Type:** Table (first-screen empty-selection utility)
-- **Purpose:** Index of recent `pipeline_run_report_v1` files to pick `run_id`.
+- **Purpose:** Recent pipeline-run reports for the selected pipeline; pick a
+  row to set `run_id` and open exact-run evidence (Browse mode).
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`
-- **DSA-08:** Visible on first screen; selected-run forensics stay collapsed.
-- **Empty state:** Browse requires written
-  `reports/run-reports/pipeline/<pipeline>/<run_id>/pipeline-run-report.json`
-  artifacts. HTTP `200` with `status=ok`, `count=0`, and `items=[]` means no
-  artifacts exist for that pipeline **or** the Ops container is bound to a
-  different/empty reports tree (check `marker_status` on the list payload and
-  `/health/ready` → `checks.report_root`). `504` with
-  `contract=forensic_endpoint_error_v1` means the forensic endpoint timed out.
-  Operator verify: `python scripts/ops/runtime/docker/verify_report_bind.py`.
+- **Layout:** Visible on first screen; selected-run forensics stay collapsed.
+- **Empty states:** Valid empty when no matching reports exist. Backend
+  unavailable when Ops HTTP cannot load the index — verify `/health/live`
+  and report-root bind (`python scripts/ops/runtime/docker/verify_report_bind.py`).
 
 ### 6. Selected Run Details
 - **Type:** Row (**collapsed by default**, `id=3099`)
@@ -95,5 +91,7 @@ Nested titles (must match JSON):
 
 ### 13. Continue Run Investigation
 - **Type:** Text
-- **Purpose:** Trust / DQ / Incident / CLI forensic hops (dashboard hops via Navigation).
+- **Purpose:** Next-step CTA after browse or selection: verify identity and
+  processed records, expand Selected Run Details, then open Trust for
+  recovery/replay safety. Run Explorer is evidence-only.
 - **Data sources:** Static operator copy.

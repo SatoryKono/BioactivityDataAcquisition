@@ -1,22 +1,23 @@
 version: 1
 source: grafana/dashboards/*.json
 epic: "#6570"
-phase: "#6571"
+phase: "#6574"
 mode: error
-calibration_note: "2026-08-05 recalibrated to live densified first-screen measurements (RFA densify / expanded surface)."
+calibration_note: >-
+  2026-08-07 Phase 2 (#6574): first-screen mega-expr diet — DQ reasons and
+  Overview domain tracks moved under collapsed progressive-disclosure rows;
+  timeseries maxDataPoints/interval capped; budget tightened toward ≤200 char
+  first-screen expressions and ≤6 first-load PromQL (worst board).
 first_screen_y_max: 28
 budgets:
-  worst_first_load_promql: 16
-  overview_first_load_promql: 7
-  # Run Explorer first-paint identity cards are Ops HTTP by design (not PromQL).
+  worst_first_load_promql: 6
+  overview_first_load_promql: 6
   first_paint_ops_http_panels: 5
-  # DQ evidence card keeps one longer selected-range expression on first screen.
-  max_first_screen_expr_chars: 725
-  first_screen_range_refs: 7
+  max_first_screen_expr_chars: 200
+  first_screen_range_refs: 0
   refresh_seconds: 60
   dual_status_identical_pairs: 0
   max_primary_dashboard_count: 7
-  # Shared nav now includes Incident + Run Explorer hops across primary boards.
   max_nav_targets_per_dashboard: 6
 baseline_2026_07_27_pre_diet:
   note: Offline JSON walk before

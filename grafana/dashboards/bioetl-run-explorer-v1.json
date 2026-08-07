@@ -90,7 +90,7 @@
           "tags": []
         }
       ],
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light"
+      "description": "Open another BioETL dashboard while preserving the active time range and supported workflow, pipeline, run type, and run context. The current workspace is the disabled item. Use Trust for recovery safety and domain dashboards for current telemetry."
     },
     {
       "id": 1,
@@ -106,13 +106,13 @@
         "mode": "html",
         "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which exact run should be inspected?</div><div><b>Scope:</b> <b>BROWSE</b> = recent runs · <b>SELECTED RUN</b> = identity/accounting/actions</div><div><b>FULL PATHS</b> = report artifacts, not triage bodies</div></div></div>"
       },
-      "description": "Explains the two Run Explorer modes. BROWSE lists recent runs. SELECTED RUN uses BioETL Ops HTTP to show identity, record counts, processing outcomes, and available actions for one exact run. run_id is never a Prometheus label. Full filesystem paths point to report artifacts intended for detailed investigation"
+      "description": "Run Explorer has two modes. Browse mode lists recent run-report artifacts for the selected pipeline. Selected-run mode uses BioETL Ops HTTP to show identity, accounting, reasons, reconciliation, and artifacts for one exact run. Run ID is never a Prometheus label. Full filesystem paths belong to report-artifact Open/Copy actions, not scan-oriented cells."
     },
     {
       "id": 3010,
       "type": "table",
       "title": "Browse Recent Runs",
-      "description": "Selected-run narrative (ID/Processed/detail) is the answer path after selection. No-selection utility. Pick a run to set run_id. Ops HTTP index — not Prometheus. Valid empty: no matching recent runs for the selected pipeline. Backend unavailable is distinct; check /health/live",
+      "description": "Recent pipeline-run reports found on disk for the selected pipeline. Choose a row to set the run ID and open exact-run evidence. An empty table is valid when no matching reports exist. If reports are expected but the table cannot load, verify BioETL Ops HTTP at /health/live.",
       "gridPos": {
         "h": 7,
         "w": 24,
@@ -212,7 +212,7 @@
         "y": 14
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "Exact-run identity from Ops HTTP. Before a Run ID is selected, rows explicitly request one concrete run. A selected run with unavailable identity is VALID EMPTY; datasource/backend failure renders as QUERY ERROR. Full identifiers remain HTTP-backed and never become Prometheus labels.",
+      "description": "Exact identity for the selected run, including run, manifest, provider entity, contract, execution, replay, and checkpoint evidence. Selection required when no run ID is set. Valid empty means no matching identity was found for that run. On errors or unexpected emptiness, verify /health/live. Use existing Open/Copy actions for full values.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -368,7 +368,7 @@
         "y": 14
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "Bronze/Silver/Gold accounting from Ops HTTP. Zero is a recorded count. A selected run with no accounting rows is VALID EMPTY; datasource/backend failure renders as QUERY ERROR.",
+      "description": "Bronze, Silver, and Gold stage/outcome accounting for the selected run. Zero-valued outcomes are evidence and must not be presented as success by themselves. Selection required when no run ID is set. Valid empty means no matching accounting rows exist; unexpected empty or errors require an Ops HTTP /health/live check.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -670,7 +670,7 @@
           "id": 3011,
           "type": "table",
           "title": "Inspect Stage Funnel",
-          "description": "Stage funnel from pipeline_run_report_v1. Exact run_id required. An empty funnel is VALID EMPTY when no stage rows exist; an unexpected empty may mean backend unavailable, so verify /health/live. Not a waterfall (no start/end chronology)",
+          "description": "Stage counts from pipeline_run_report_v1 for the selected run. This is a stage funnel, not start/end chronology. Selection required when no run ID is set. Valid empty means the report has no stage rows; unexpected empty or errors require an Ops HTTP /health/live check.",
           "gridPos": {
             "h": 6,
             "w": 24,
@@ -729,7 +729,7 @@
           "id": 3012,
           "type": "table",
           "title": "Inspect Top Run Reasons",
-          "description": "Top removal/reason codes from pipeline_run_report_v1. An empty result is VALID EMPTY when no reasons exist; an unexpected empty may mean backend unavailable, so verify /health/live",
+          "description": "Top removal and outcome reason codes recorded in pipeline_run_report_v1 for the selected run. Selection required when no run ID is set. Valid empty means the run recorded no reason rows; unexpected empty or errors require an Ops HTTP /health/live check.",
           "gridPos": {
             "h": 5,
             "w": 24,
@@ -788,7 +788,7 @@
           "id": 3015,
           "type": "table",
           "title": "Inspect Reconciliation",
-          "description": "Reconciliation metrics from pipeline_run_report_v1 as parameter/value rows (stable silver→gold order). Status cells are color-text mapped (OK/FAIL). Empty is VALID when run_id is unresolved, report is missing, or recon block is absent. Unexpected empty: verify /health/live and Browse Recent Runs. Backend unavailable or datasource error: verify /health/live and run_id selection.",
+          "description": "Record-accounting reconciliation evidence from pipeline_run_report_v1 for the selected run. Selection required when no run ID is set. Valid empty means reconciliation evidence was not recorded. Review Processed Records and the raw report before escalation; verify /health/live for unexpected empty or errors.",
           "gridPos": {
             "h": 8,
             "w": 24,
@@ -907,7 +907,7 @@
           "id": 3016,
           "type": "text",
           "title": "Inspect Layer Accounting",
-          "description": "Layer counts live on pipeline_run_report_v1.layers and Processed Records panel",
+          "description": "Exact layer counts come from pipeline_run_report_v1.layers; Processed Records provides the compact stage/outcome view. Selection required when no run ID is set. Use the JSON or Markdown report and review reconciliation before escalating an accounting mismatch.",
           "gridPos": {
             "h": 3,
             "w": 24,
@@ -916,14 +916,14 @@
           },
           "options": {
             "mode": "html",
-            "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:12px;white-space:normal\"><strong>Layer accounting:</strong> use Processed Records for the compact view and <code>pipeline_run_report_v1.layers</code> for exact counts.<br>Actions: Open JSON · Open Markdown · inspect reconciliation before escalation.</div>"
+            "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:12px;white-space:normal\"><strong>Layer accounting:</strong> exact layer counts come from <code>pipeline_run_report_v1.layers</code>; use <em>Inspect Processed Records</em> for the compact stage/outcome view. Selection required without a run ID. Review reconciliation before escalating an accounting mismatch.</div>"
           }
         },
         {
           "id": 3013,
           "type": "table",
           "title": "Inspect Run Artifacts",
-          "description": "Artifact refs from pipeline_run_report_v1. An empty result is VALID EMPTY when no artifacts exist; an unexpected empty may mean backend unavailable, so verify /health/live",
+          "description": "Artifact references recorded in pipeline_run_report_v1 for the selected run. Scan-oriented cells keep paths short; use Open/Copy actions for the full location. Selection required when no run ID is set. Valid empty means no artifacts were recorded; verify /health/live for unexpected empty or errors.",
           "gridPos": {
             "h": 5,
             "w": 24,
@@ -1004,7 +1004,7 @@
           "id": 3014,
           "type": "text",
           "title": "Inspect Timings & Failure",
-          "description": "stage_timings and failure blocks are optional on pipeline_run_report_v1",
+          "description": "Optional stage-timing and failure evidence recorded for the selected run. Empty means the report did not record these optional blocks—not zero duration and not proof of success. Selection required when no run ID is set. Open the JSON or Markdown report for exact details.",
           "gridPos": {
             "h": 4,
             "w": 24,
@@ -1013,7 +1013,7 @@
           },
           "options": {
             "mode": "html",
-            "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:12px;white-space:normal\"><strong>Stage timing / failure:</strong> optional blocks appear only when the selected run report recorded them.<br>Empty means not recorded for this run, not zero duration or successful execution. Open JSON or Markdown for exact evidence.</div>"
+            "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:12px;white-space:normal\"><strong>Timings &amp; failure:</strong> optional blocks on <code>pipeline_run_report_v1</code>. Empty means not recorded — not zero duration and not proof of success. Open the JSON or Markdown report for exact details.</div>"
           }
         },
         {
@@ -1028,10 +1028,10 @@
           },
           "options": {
             "mode": "html",
-            "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:12px;overflow:hidden\"><strong>Next actions (≤4)</strong> — 1) Pick recent run · 2) Verify ID + Processed Records · 3) Expand funnel/reasons/artifacts · 4) Use Trust Review First Recovery Action for resume/replay</div>"
+            "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:12px;overflow:hidden\"><strong>Continue Run Investigation</strong> — 1) Pick a recent run · 2) Verify Run Identity and Processed Records · 3) Expand Selected Run Details · 4) Open Trust for recovery/replay safety. Run Explorer is evidence-only.</div>"
           },
           "links": [],
-          "description": "DSA-08 decision rail for empty/selected modes"
+          "description": "Choose a recent run, verify Run Identity and Processed Records, expand the stage/reason/reconciliation/artifact details, then open Trust to review recovery or replay safety. Run Explorer is evidence-only and does not execute resume or replay actions."
         }
       ],
       "description": ""

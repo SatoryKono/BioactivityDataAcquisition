@@ -30,7 +30,7 @@ when exact-run accounting is required.
 | **S1** | What needs attention? | Overview | Status + First Action on first paint; no need to open L1 |
 | **S2** | Pipeline / stage blocked? | Overview → Pipeline Diagnostics | Runtime Blockers / Error Rate ≤2 hops |
 | **S3** | Which provider / why? | Overview → Provider Health (or PD → Provider) | Severity matrix + top causes on first paint |
-| **S4** | DQ / rejects / contracts? | Overview → Data Quality | Status + reasons + threshold on first paint; rows via `bioetl quarantine inspect` |
+| **S4** | DQ / rejects / contracts? | Overview → Data Quality | Status + threshold on first paint; expand **Selected Range · Impact & Freshness** for reasons; rows via `bioetl quarantine inspect` |
 | **S5** | Safe to replay / resume? | Overview → Trust | Replay Safety, Manifest/Ledger Integrity, Telemetry Missing on first paint; identity in collapsed row |
 | **S6** | What is firing? | Overview → expand **Alert/SLO Triage** | ≤1 hop from Overview (no separate Alerts UID) |
 
@@ -41,7 +41,7 @@ when exact-run accounting is required.
 | S1 | 0 | Status + First Action present on `bioetl-overview-v2` first screen |
 | S2 | 1 | Nav → Pipeline Diagnostics; Status + Runtime Blockers + Error Rate first paint |
 | S3 | 1 | Nav not required if coming from PD; Provider first paint has matrix/causes |
-| S4 | 1 | DQ Status + Now · DQ Current Reasons + Threshold first paint |
+| S4 | 1 | DQ Status + Threshold first paint; reasons under collapsed Selected Range row |
 | S5 | 1 | Trust safety cards first paint; Identity evidence collapsed |
 | S6 | 1 | Expand Overview Alert/SLO Triage row |
 
@@ -64,3 +64,30 @@ closeout.
 - Epic: #6570
 - Budgets: `docs/03-guides/dashboards/contracts/performance-budgets.yaml`
 - Check: `python -m scripts.engineering.qa check-dashboard-performance-budgets`
+
+
+## Phase 2 PromQL diet (#6574)
+
+First-screen PromQL is budgeted by `performance-budgets.yaml` in **error** mode:
+
+- max first-screen expression length **≤200**
+- worst first-load PromQL panels **≤6**
+- first-screen `$__range` refs **0**
+- timeseries panels use `maxDataPoints` (~400) and min step `1m` where applicable
+
+Recording KPIs already live under `grafana/prometheus-rules/bioetl_observability.yml`
+(e.g. `bioetl_runtime_error_rate_30m`, alert-condition recordings). Prefer
+`max(rule)` / thin selectors on first paint; keep long multi-`label_replace`
+evidence under collapsed progressive-disclosure rows.
+
+### Operator “Explore” hops (Prometheus Explore bookmarks)
+
+| ID | Intent | Start from | Notes |
+| --- | --- | --- | --- |
+| E1 | Histogram detail (p50/p99) | Pipeline Diagnostics collapsed rows | First paint keeps p95-class cards only |
+| E2 | Errors by stage | Runtime / PD | Use `bioetl_errors_total` / stage series |
+| E3 | Retries | Runtime | Prefer existing retry counters |
+| E4 | Active alerts | Overview → Alert triage | `ALERTS` / alert condition recordings |
+| E5 | CP latency | Trust | Manifest/ledger/checkpoint series |
+| E6 | Reject topk | Data Quality collapsed range rows | Quarantine/reject series; row forensics on CLI |
+
