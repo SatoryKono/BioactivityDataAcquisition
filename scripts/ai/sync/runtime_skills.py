@@ -20,11 +20,11 @@ import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.ai import sync_ai_governance
+from scripts.ai.sync import governance as sync_ai_governance
 
 
 def _atomic_copy(source: Path, target: Path) -> None:

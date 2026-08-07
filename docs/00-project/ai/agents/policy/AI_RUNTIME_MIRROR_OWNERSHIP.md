@@ -30,7 +30,7 @@ ______________________________________________________________________
 | `.gemini/agents/**`, `.gemini/skills/**` | Gemini runtime behavior tree | Not present in the current `main` checkout | No tracked source on `main` today | if a future task adds them, they must be verified and documented in the same change |
 | `docs/00-project/ai/**` | Published/internal mirror surface | Not canonical for runtime behavior | Only for mirror/index/guidance updates | curated mirrors, navigation, contributor guidance, memory entrypoints, prompt and skill indexes |
 | `docs/00-project/ai/rules/cursor/**` | Cursor rules source | Canonical for Cursor AI guidance in-repo | Yes | thematic `.mdc` rules derived from governance stack |
-| `docs/00-project/ai/rules/windsurf/**` | Windsurf/Cascade rules mirror | Derived from `cursor/` via sync script | Regenerate via `scripts/ai/sync_windsurf_rules.py` | `.md` rules + workflows for Cascade |
+| `docs/00-project/ai/rules/windsurf/**` | Windsurf/Cascade rules mirror | Derived from `cursor/` via sync script | Regenerate via `scripts/ai/sync/windsurf.py` | `.md` rules + workflows for Cascade |
 | `.windsurf/**` | Windsurf local deploy surface | Machine-local deploy target | Deploy only | generated from `docs/00-project/ai/rules/windsurf/` |
 | `.devin/workflows/**` | Devin Cascade-style workflows | Tracked Devin guidance workflows | Yes (keep parity with Windsurf workflows) | `review`, `post-change`, `pre-commit`, `qodo-sync`, plus specialized audits |
 | `.devin/wiki.json` | Devin DeepWiki navigation | Derived discovery layer | Yes for navigation notes | MUST NOT override RULES/ADR/runtime truth |
@@ -123,7 +123,7 @@ This means:
    who owns the follow-up.
 
 For broad mechanical normalization of Codex runtime source links and docs mirror
-governance anchors, use `scripts/ai/sync_ai_governance.py --check` before
+governance anchors, use `scripts/ai/sync/governance.py --check` before
 applying changes with the same script.
 
 ## Allowed Divergence

@@ -45,7 +45,7 @@ class CursorRule:
 
 
 def _repo_root() -> Path:
-    return Path(__file__).resolve().parents[2]
+    return Path(__file__).resolve().parents[3]
 
 
 def _parse_frontmatter(text: str) -> tuple[dict[str, object], str]:

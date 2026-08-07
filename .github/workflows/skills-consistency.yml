@@ -50,8 +50,8 @@ on:
       - "scripts/ai/junie/check_junie_mirror.py"
       - "scripts/ai/junie/check_junie_mirror.sh"
       - "scripts/ai/junie/junie-mirror-contract.json"
-      - "scripts/ai/sync_ai_governance.py"
-      - "scripts/ai/runtime_skill_sync.py"
+      - "scripts/ai/sync/governance.py"
+      - "scripts/ai/sync/runtime_skills.py"
       - "scripts/ops/support/skills/check_skills_mirror.sh"
       - "scripts/ops/support/skills/check_ai_skills_layout.sh"
       - "tests/unit/scripts/test_sync_ai_governance.py"
@@ -93,8 +93,8 @@ on:
       - "scripts/ai/junie/check_junie_mirror.py"
       - "scripts/ai/junie/check_junie_mirror.sh"
       - "scripts/ai/junie/junie-mirror-contract.json"
-      - "scripts/ai/sync_ai_governance.py"
-      - "scripts/ai/runtime_skill_sync.py"
+      - "scripts/ai/sync/governance.py"
+      - "scripts/ai/sync/runtime_skills.py"
       - "scripts/ops/support/skills/check_skills_mirror.sh"
       - "scripts/ops/support/skills/check_ai_skills_layout.sh"
       - "tests/unit/scripts/test_sync_ai_governance.py"
@@ -122,7 +122,7 @@ jobs:
 
       - name: Generate runtime skill drift report
         run: >-
-          python scripts/ai/runtime_skill_sync.py
+          python -m scripts.ai.sync.runtime_skills
           --mode check
           --report reports/ai/runtime-skill-drift.json
 
@@ -143,7 +143,7 @@ jobs:
 
       - name: Run approved one-way runtime skill sync
         run: >-
-          python scripts/ai/runtime_skill_sync.py
+          python -m scripts.ai.sync.runtime_skills
           --mode sync
           --approved
           --report reports/ai/runtime-skill-sync.json

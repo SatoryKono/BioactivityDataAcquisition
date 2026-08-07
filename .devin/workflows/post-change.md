@@ -17,8 +17,8 @@ Follow `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`.
 2. If `src/bioetl/**/*.py` changed: refresh `reports/quality/module-coverage-inventory.json` (`source_tree_sha256` MUST change)
 3. If AI guidance rules changed under `docs/00-project/ai/rules/cursor/`:
    ```bash
-   uv run python scripts/ai/sync_cursor_rules.py --deploy
-   uv run python scripts/ai/sync_windsurf_rules.py
+   uv run python -m scripts.ai.sync.cursor --deploy
+   uv run python -m scripts.ai.sync.windsurf
    ```
 4. Keep Devin workflows in `.devin/workflows/` aligned with Windsurf Cascade workflows when review/post-change/pre-commit/qodo-sync guidance changes
 5. Run targeted checks:

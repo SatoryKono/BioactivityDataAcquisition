@@ -173,39 +173,39 @@
 
 | Path | Route | Exception | Kind | Generator |
 | --- | --- | --- | --- | --- |
-| `docs/00-project/ai/agents/agents/ORCHESTRATION.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/README.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/py-audit-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/py-config-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/py-debug-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/py-doc-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/py-plan-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/py-review-orchestrator.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/py-test-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/py-test-swarm.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-api-designer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-architect-reviewer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-code-reviewer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-data-engineer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-database-optimizer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-debugger.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-dependency-manager.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-git-workflow-manager.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-prompt-engineer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-refactoring-specialist.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-scientific-literature-researcher.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-test-automator.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/orchestration/ORCHESTRATION.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/orchestration/py-team-orchestration.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/policy/CONSOLIDATION_VALIDATION.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/policy/agent-orchestration-rules.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/ORCHESTRATION.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/README.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/py-audit-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/py-config-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/py-debug-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/py-doc-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/py-plan-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/py-review-orchestrator.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/py-test-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/py-test-swarm.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/sp-api-designer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/sp-architect-reviewer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/sp-code-reviewer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/sp-data-engineer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/sp-database-optimizer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/sp-debugger.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/sp-dependency-manager.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/sp-git-workflow-manager.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/sp-prompt-engineer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/sp-refactoring-specialist.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/sp-scientific-literature-researcher.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/agents/sp-test-automator.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/orchestration/ORCHESTRATION.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/orchestration/py-team-orchestration.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/policy/CONSOLIDATION_VALIDATION.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/policy/agent-orchestration-rules.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/skills/_references/README.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
 | `docs/00-project/ai/skills/_references/local/deep-research/references/critique-framework.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
 | `docs/00-project/ai/skills/_references/local/deep-research/references/report-templates.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
@@ -341,7 +341,7 @@
 | Route | Generator | Commit Policy |
 | --- | --- | --- |
 | adr-registry-generated-docs | `scripts/generate_adr_registry.py` | tracked_curated_generated_doc |
-| ai-runtime-governance-mirrors | `scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py` | tracked_mirror_surface |
+| ai-runtime-governance-mirrors | `scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py` | tracked_mirror_surface |
 | ai-skill-license-mirrors | `scripts/ai/codex/check_skills_mirror.sh` | tracked_mirror_surface |
 | ai-skill-reference-mirror | `scripts/ai/codex/check_skills_mirror.sh` | tracked_mirror_surface |
 | api-reference-generated-docs | `docs API reference generation workflow` | tracked_curated_generated_doc |

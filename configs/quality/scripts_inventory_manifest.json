@@ -4413,7 +4413,7 @@
       ]
     },
     {
-      "path": "scripts/ai/runtime_skill_sync.py",
+      "path": "scripts/ai/sync/runtime_skills.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -4423,48 +4423,48 @@
           "path": ".codex/skills/SKILLS-CATALOG.md",
           "line": 22,
           "source_group": "skills",
-          "text": "reconciliation uses `python scripts/ai/runtime_skill_sync.py --mode sync"
+          "text": "reconciliation uses `python -m scripts.ai.sync.runtime_skills --mode sync"
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
           "line": 54,
           "source_group": "ci",
-          "text": "- \"scripts/ai/runtime_skill_sync.py\""
+          "text": "- \"scripts/ai/sync/runtime_skills.py\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
           "line": 97,
           "source_group": "ci",
-          "text": "- \"scripts/ai/runtime_skill_sync.py\""
+          "text": "- \"scripts/ai/sync/runtime_skills.py\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
           "line": 125,
           "source_group": "ci",
-          "text": "python scripts/ai/runtime_skill_sync.py"
+          "text": "python -m scripts.ai.sync.runtime_skills"
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
           "line": 146,
           "source_group": "ci",
-          "text": "python scripts/ai/runtime_skill_sync.py"
+          "text": "python -m scripts.ai.sync.runtime_skills"
         },
         {
           "path": "docs/00-project/ai/skills/local/SKILLS-CATALOG.md",
           "line": 22,
           "source_group": "docs",
-          "text": "reconciliation uses `python scripts/ai/runtime_skill_sync.py --mode sync"
+          "text": "reconciliation uses `python -m scripts.ai.sync.runtime_skills --mode sync"
         },
         {
           "path": "tests/unit/scripts/test_runtime_skill_sync.py",
           "line": 10,
           "source_group": "tests",
-          "text": "from scripts.ai import runtime_skill_sync"
+          "text": "from scripts.ai.sync import runtime_skills as runtime_skill_sync"
         }
       ]
     },
     {
-      "path": "scripts/ai/sync_ai_governance.py",
+      "path": "scripts/ai/sync/governance.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -4474,25 +4474,25 @@
           "path": ".github/workflows/skills-consistency.yml",
           "line": 53,
           "source_group": "ci",
-          "text": "- \"scripts/ai/sync_ai_governance.py\""
+          "text": "- \"scripts/ai/sync/governance.py\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
           "line": 96,
           "source_group": "ci",
-          "text": "- \"scripts/ai/sync_ai_governance.py\""
+          "text": "- \"scripts/ai/sync/governance.py\""
         },
         {
           "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
           "line": 126,
           "source_group": "docs",
-          "text": "governance anchors, use `scripts/ai/sync_ai_governance.py --check` before"
+          "text": "governance anchors, use `scripts/ai/sync/governance.py --check` before"
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
           "line": 180,
           "source_group": "docs",
-          "text": "uv run python scripts/ai/sync_ai_governance.py"
+          "text": "uv run python -m scripts.ai.sync.governance"
         },
         {
           "path": "docs/00-project/ai/skills/README.md",
@@ -4504,19 +4504,19 @@
           "path": "scripts/ai/codex/check_skills_mirror.sh",
           "line": 33,
           "source_group": "scripts",
-          "text": "python scripts/ai/sync_ai_governance.py --root . --only skill-mirrors --check"
+          "text": "python -m scripts.ai.sync.governance --root . --only skill-mirrors --check"
         },
         {
           "path": "scripts/ai/codex/check_skills_mirror.sh",
           "line": 41,
           "source_group": "scripts",
-          "text": "exec \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/ai/sync_ai_governance.py\" \\"
+          "text": "exec \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/ai/sync/governance.py\" \\"
         },
         {
           "path": "scripts/ai/codex/check_skills_mirror.sh",
           "line": 45,
           "source_group": "scripts",
-          "text": "exec \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/ai/sync_ai_governance.py\" \\"
+          "text": "exec \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/ai/sync/governance.py\" \\"
         }
       ],
       "owner": "@bioetl-platform",
@@ -4525,7 +4525,7 @@
       "next_step": "Retain as the AI governance sync helper for Codex/docs agent and skill mirrors; keep it supporting unless it becomes a governed CI workflow."
     },
     {
-      "path": "scripts/ai/sync_cursor_rules.py",
+      "path": "scripts/ai/sync/cursor.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -4541,43 +4541,43 @@
           "path": "docs/00-project/ai/rules/README.md",
           "line": 181,
           "source_group": "docs",
-          "text": "uv run python scripts/ai/sync_cursor_rules.py --deploy"
+          "text": "uv run python -m scripts.ai.sync.cursor --deploy"
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
           "line": 192,
           "source_group": "docs",
-          "text": "uv run python scripts/ai/sync_cursor_rules.py --deploy"
+          "text": "uv run python -m scripts.ai.sync.cursor --deploy"
         },
         {
           "path": "docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md",
           "line": 77,
           "source_group": "docs",
-          "text": "| Cursor IDE | `.cursor/rules/*.mdc` | `scripts/ai/sync_cursor_rules.py --deploy` |"
+          "text": "| Cursor IDE | `.cursor/rules/*.mdc` | `scripts/ai/sync/cursor.py --deploy` |"
         },
         {
           "path": "docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md",
           "line": 85,
           "source_group": "docs",
-          "text": "uv run python scripts/ai/sync_cursor_rules.py --check"
+          "text": "uv run python -m scripts.ai.sync.cursor --check"
         },
         {
           "path": "docs/00-project/ai/rules/cursor/07-qodo-enforcement.mdc",
           "line": 83,
           "source_group": "docs",
-          "text": "uv run python scripts/ai/sync_cursor_rules.py --deploy"
+          "text": "uv run python -m scripts.ai.sync.cursor --deploy"
         },
         {
           "path": "docs/00-project/ai/rules/windsurf/rules/07-qodo-enforcement.md",
           "line": 82,
           "source_group": "docs",
-          "text": "uv run python scripts/ai/sync_cursor_rules.py --deploy"
+          "text": "uv run python -m scripts.ai.sync.cursor --deploy"
         },
         {
           "path": "docs/00-project/ai/rules/windsurf/workflows/post-change.md",
           "line": 20,
           "source_group": "docs",
-          "text": "uv run python scripts/ai/sync_cursor_rules.py --deploy"
+          "text": "uv run python -m scripts.ai.sync.cursor --deploy"
         }
       ],
       "owner": "@bioetl-platform",
@@ -4586,7 +4586,7 @@
       "next_step": "Retain only as a bounded manual mirror-sync utility for Cursor rule deploy surfaces while docs expose the direct script path; promote it into a governed AI-rules workflow or retire it once tracked mirrors no longer need explicit sync execution."
     },
     {
-      "path": "scripts/ai/sync_windsurf_rules.py",
+      "path": "scripts/ai/sync/windsurf.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -4596,25 +4596,25 @@
           "path": "Makefile",
           "line": 229,
           "source_group": "build",
-          "text": "$(RUN) python scripts/ai/sync_windsurf_rules.py"
+          "text": "$(RUN) python -m scripts.ai.sync.windsurf"
         },
         {
           "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
           "line": 33,
           "source_group": "docs",
-          "text": "| `docs/00-project/ai/rules/windsurf/**` | Windsurf/Cascade rules mirror | Derived from `cursor/` via sync script | Regenerate via `scripts/ai/sync_windsurf_rules.py` | `.md` rules + workflows for Cas"
+          "text": "| `docs/00-project/ai/rules/windsurf/**` | Windsurf/Cascade rules mirror | Derived from `cursor/` via sync script | Regenerate via `scripts/ai/sync/windsurf.py` | `.md` rules + workflows for Cas"
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
           "line": 85,
           "source_group": "docs",
-          "text": "uv run python scripts/ai/sync_windsurf_rules.py"
+          "text": "uv run python -m scripts.ai.sync.windsurf"
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
           "line": 88,
           "source_group": "docs",
-          "text": "uv run python scripts/ai/sync_windsurf_rules.py --check"
+          "text": "uv run python -m scripts.ai.sync.windsurf --check"
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
@@ -4626,19 +4626,19 @@
           "path": "docs/00-project/ai/rules/README.md",
           "line": 182,
           "source_group": "docs",
-          "text": "uv run python scripts/ai/sync_windsurf_rules.py"
+          "text": "uv run python -m scripts.ai.sync.windsurf"
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
           "line": 193,
           "source_group": "docs",
-          "text": "uv run python scripts/ai/sync_windsurf_rules.py"
+          "text": "uv run python -m scripts.ai.sync.windsurf"
         },
         {
           "path": "docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md",
           "line": 78,
           "source_group": "docs",
-          "text": "| Windsurf | `docs/00-project/ai/rules/windsurf/rules/*.md` | `scripts/ai/sync_windsurf_rules.py` |"
+          "text": "| Windsurf | `docs/00-project/ai/rules/windsurf/rules/*.md` | `scripts/ai/sync/windsurf.py` |"
         }
       ],
       "owner": "@bioetl-platform",

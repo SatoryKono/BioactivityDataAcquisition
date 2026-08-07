@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pytest
 
-from scripts.ai import sync_cursor_rules
+from scripts.ai.sync import cursor as sync_cursor_rules
 
 pytestmark = pytest.mark.unit
 
