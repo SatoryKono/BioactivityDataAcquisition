@@ -23,7 +23,7 @@ from pathlib import Path
 
 import yaml
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 CSV_PATH = PROJECT_ROOT / "configs" / "enums" / "publication_type_classification.csv"
 MANIFEST_PATH = (
     PROJECT_ROOT / "configs" / "enums" / "publication_type_classification.meta.yaml"

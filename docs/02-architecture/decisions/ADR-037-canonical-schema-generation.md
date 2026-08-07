@@ -36,13 +36,13 @@ ______________________________________________________________________
   композиция полей,
 - typed annotations в Silver Pandera schema classes — типовая семантика полей.
 
-На этой основе вводится единый генератор `scripts/schema/generate_schema_artifacts.py`,
+На этой основе вводится единый генератор `scripts/schema/generation/generate_schema_artifacts.py`,
 который:
 
 1. генерирует Pandera-canonical registry
    (`src/bioetl/domain/schemas/generated/registry.py`),
 1. генерирует Gold JSON contracts через существующий exporter
-   (`src/tools/scripts/schema/generate_contracts.py`),
+   (`src/tools/scripts/schema/generation/generate_contracts.py`),
 1. поддерживает режим `--check` для CI gate по stale generated artifacts.
 
 ## Consequences

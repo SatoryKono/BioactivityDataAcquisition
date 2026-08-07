@@ -6,8 +6,8 @@ from ``bioetl.infrastructure.arrow_typed`` so basedpyright stops reporting
 unknown member/type noise on schema sources.
 
 Usage:
-    python scripts/schema/generate_typed_arrow_schema_sources.py
-    python scripts/schema/generate_typed_arrow_schema_sources.py --check
+    python scripts/schema/generation/generate_typed_arrow_schema_sources.py
+    python scripts/schema/generation/generate_typed_arrow_schema_sources.py --check
 """
 
 from __future__ import annotations
@@ -17,7 +17,7 @@ import re
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 SCHEMAS = ROOT / "src" / "bioetl" / "infrastructure" / "schemas"
 
 TARGETS = [

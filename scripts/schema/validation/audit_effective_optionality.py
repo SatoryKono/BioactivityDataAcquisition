@@ -9,10 +9,10 @@ field optionality is derived from:
   - quality.key_nullability(nullable=false)
 
 Usage:
-    python scripts/schema/audit_effective_optionality.py
-    python scripts/schema/audit_effective_optionality.py --pipeline chembl_activity
-    python scripts/schema/audit_effective_optionality.py --json
-    python scripts/schema/audit_effective_optionality.py --check
+    python scripts/schema/validation/audit_effective_optionality.py
+    python scripts/schema/validation/audit_effective_optionality.py --pipeline chembl_activity
+    python scripts/schema/validation/audit_effective_optionality.py --json
+    python scripts/schema/validation/audit_effective_optionality.py --check
 
 Exit codes:
     0 - Audit printed successfully / no violations under --check
@@ -44,7 +44,7 @@ from bioetl.infrastructure.config.domain_config_resolver import (
     load_domain_pipeline_config,
 )
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 CONFIGS_DIR = PROJECT_ROOT / "configs"
 ENTITIES_DIR = CONFIGS_DIR / "entities"
 _SOURCE_ORDER: tuple[OptionalitySource, ...] = (

@@ -356,7 +356,7 @@
 | ci-quality-integral-gate-report | `scripts/engineering/ci/quality_integral_gate.py` | working_output |
 | committed-test-telemetry-baseline-summary-layer | `scripts/engineering/ci/update_test_telemetry_baseline.py` | tracked_quality_baseline |
 | compatibility-facade-snapshot-generated-doc | `scripts/engineering/qa/generate_compatibility_facade_snapshot.py` | tracked_curated_generated_doc |
-| config-comparison-matrix-generated-doc | `scripts/schema/generate_config_matrix.py` | tracked_curated_generated_doc |
+| config-comparison-matrix-generated-doc | `scripts/schema/analysis/generate_config_matrix.py` | tracked_curated_generated_doc |
 | config-contract-registry-artifact-duplication-quality-report | `scripts/engineering/qa/report_artifact_duplication_audit.py` | tracked_quality_baseline |
 | contract-identity-diagnostics-quality-report | `scripts/engineering/ci/validate_contract_identity.py` | working_output |
 | contract-registry-diagnostics-quality-report | `scripts/engineering/ci/validate_contract_registry.py` | working_output |
@@ -379,7 +379,7 @@
 | duplication-baseline-quality-report | `scripts/engineering/qa/report_duplication_baseline.py` | working_output |
 | engineering-closeout-curated-docs | `manual closeout plus architecture QA verification` | tracked_curated_generated_doc |
 | executable-unit-passport-projections | `scripts/docs/passports/cli.py` | tracked_curated_generated_doc |
-| field-level-diagnostics-quality-report | `scripts/schema/generate_field_level_diagnostics.py` | working_output |
+| field-level-diagnostics-quality-report | `scripts/schema/analysis/generate_field_level_diagnostics.py` | working_output |
 | file-merger-working-reports | `src/tools/file_merger.py` | working_output |
 | flaky-test-burndown-review-quality-baseline | `scripts/engineering/qa/report_flaky_test_burndown_review.py` | tracked_quality_baseline |
 | full-app-duplication-baseline-quality-report | `scripts/engineering/qa/report_duplication_baseline.py` | tracked_quality_baseline |
@@ -401,12 +401,12 @@
 | reproducibility-support-matrix-generated-doc | `scripts/engineering/qa/generate_reproducibility_support_matrix.py` | tracked_curated_generated_doc |
 | root-local-clutter-cleanup-governance-doc | `manual-governance-doc` | tracked_curated_generated_doc |
 | runtime-structured-log-file | `src/bioetl/infrastructure/observability/logging_config.py` | ignored_runtime_output |
-| schema-generated-source | `scripts/schema/generate_schema_artifacts.py` | tracked_generated_source |
+| schema-generated-source | `scripts/schema/generation/generate_schema_artifacts.py` | tracked_generated_source |
 | silver-filter-inventory-baseline | `scripts/data_quality/inventory_silver_filters_migration.py` | tracked_curated_generated_doc |
 | targeted-s7-governance-hotspot-telemetry | `manual closeout from bounded pytest JUnit telemetry` | tracked_quality_evidence |
 | test-governance-quality-baseline | `scripts/engineering/qa/report_test_governance_audit.py` | tracked_quality_baseline |
 | test-health-run-history | `scripts/engineering/qa/test_health.py` | ignored_local_output |
-| unified-schema-quality-report | `scripts/schema/generate_unified_schema_map.py` | working_output |
+| unified-schema-quality-report | `scripts/schema/analysis/generate_unified_schema_map.py` | working_output |
 | vcr-metadata-quality-report | `scripts/engineering/qa/report_vcr_metadata_catalog.py` | working_output |
 | weekly-quality-debt-report | `scripts/engineering/ci/report_quality_debt_weekly.py` | working_output |
 

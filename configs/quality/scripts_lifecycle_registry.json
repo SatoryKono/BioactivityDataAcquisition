@@ -1298,13 +1298,13 @@
       "review_by": "2026-09-30",
       "next_step": "Retain only as the bounded sequential runner for the current CodeRabbit leaf-review campaign; remove it after campaign completion and keep its API-dependent execution outside ordinary local test workflows."
     },
-    "scripts/schema/generate_protein_class_l1_target_type_artifacts.py": {
+    "scripts/schema/generation/generate_protein_class_l1_target_type_artifacts.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
       "review_by": "2026-09-30",
       "next_step": "Retain as the deterministic protein-class L1 target-type artifact generator consumed by generated-artifact drift tests; promote to an active scripts.schema command only if it becomes a documented public schema generation surface."
     },
-    "scripts/schema/generate_typed_arrow_schema_sources.py": {
+    "scripts/schema/generation/generate_typed_arrow_schema_sources.py": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
       "review_by": "2026-09-30",

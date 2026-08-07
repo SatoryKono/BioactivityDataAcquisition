@@ -24,7 +24,7 @@ from types import ModuleType
 
 import yaml
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 CANONICAL_DIR = PROJECT_ROOT / "configs" / "entities"
 COMPOSITES_DIR = PROJECT_ROOT / "configs" / "composites"
 PANDERA_REGISTRY_PATH = (
@@ -232,7 +232,7 @@ def _run_gold_contract_generation(check: bool) -> bool:
 
     before = _snapshot_generated_contracts()
     subprocess.run(
-        [sys.executable, "-m", "scripts.schema.generate_contracts"],
+        [sys.executable, "-m", "scripts.schema.generation.generate_contracts"],
         cwd=PROJECT_ROOT,
         check=True,
     )
@@ -254,7 +254,7 @@ def _snapshot_generated_contracts() -> dict[str, str]:
 
 def _load_generate_contracts_module() -> ModuleType:
     """Load the contract generator through its package module path."""
-    return importlib.import_module("scripts.schema.generate_contracts")
+    return importlib.import_module("scripts.schema.generation.generate_contracts")
 
 
 def _expected_generated_contracts_snapshot() -> dict[str, str]:
