@@ -146,7 +146,7 @@ def test_generated_artifact_routing_covers_core_generators() -> None:
     expected_generators = {
         "src/tools/file_merger.py",
         "src/tools/generate_docs_export.py",
-        "scripts/schema/generate_schema_artifacts.py",
+        "scripts/schema/generation/generate_schema_artifacts.py",
         "scripts/engineering/ci/validate_contract_identity.py",
         "scripts/engineering/ci/validate_contract_registry.py",
         "scripts/engineering/ci/validate_registry_dq_refs.py",

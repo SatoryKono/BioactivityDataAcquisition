@@ -19,7 +19,7 @@ if str(ROOT) not in sys.path:
 from scripts.engineering.qa.config_surface_governance import (
     is_sanctioned_partial_key,
 )
-from scripts.schema.generate_config_matrix import (
+from scripts.schema.analysis.generate_config_matrix import (
     _collect_family_configs,
     _family_metrics,
 )

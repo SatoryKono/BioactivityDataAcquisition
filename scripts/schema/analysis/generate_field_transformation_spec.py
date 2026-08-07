@@ -12,11 +12,11 @@ from typing import Any
 
 import yaml
 
-from scripts.schema.generate_field_level_diagnostics import build_field_level_rows
-from scripts.schema.generate_unified_schema_map import build_unified_schema_rows
+from scripts.schema.analysis.generate_field_level_diagnostics import build_field_level_rows
+from scripts.schema.analysis.generate_unified_schema_map import build_unified_schema_rows
 
 CURRENT_FILE = Path(__file__).resolve()
-PROJECT_ROOT = CURRENT_FILE.parents[2]
+PROJECT_ROOT = CURRENT_FILE.parents[3]
 DEFAULT_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "field_transformation_spec.csv"
 
 CSV_COLUMNS: tuple[str, ...] = (

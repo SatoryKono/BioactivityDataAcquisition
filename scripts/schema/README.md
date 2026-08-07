@@ -2,6 +2,20 @@
 
 Schema generation, validation contracts, and config invariants tooling.
 
+
+## Package layout
+
+```
+scripts/schema/
+├── validation/   # config validation and path/optionality gates
+├── generation/   # schema/contracts/codegen artifact generators
+├── analysis/     # config matrix, unified map, field diagnostics
+├── __main__.py   # unified CLI: python -m scripts.schema <command>
+└── README.md
+```
+
+Public entrypoint remains `python -m scripts.schema <command>` (stable command names).
+
 ## Unified Entry Point
 
 ```bash
@@ -12,30 +26,32 @@ python -m scripts.schema <command> [args...]
 ## Contract Source Of Truth
 
 - Shared config-governance constants live in `src/bioetl/infrastructure/config/config_ci_contract.py`.
-- `scripts/schema/check_config_invariants.py` and [test_config_ci_invariants.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/architecture/test_config_ci_invariants.py) import the same active/retired/transitional contract from that module.
+- `scripts/schema/validation/check_config_invariants.py` and [test_config_ci_invariants.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/architecture/test_config_ci_invariants.py) import the same active/retired/transitional contract from that module.
 - `check-invariants` is also the fail-fast YAML parse gate for all `configs/**/*.yaml` governance surfaces, including `configs/contracts/**/*.yaml`.
-- `scripts/schema/validate_pipeline_configs.py` is the canonical validator for `validate-configs`.
-- `docs/00-project/ai/agents/scripts/py-config-bot-2.py` is a compatibility wrapper only; runtime behavior must be updated in `scripts/schema/validate_pipeline_configs.py` first.
+- `scripts/schema/validation/validate_pipeline_configs.py` is the canonical validator for `validate-configs`.
+- `docs/00-project/ai/agents/scripts/py-config-bot-2.py` is a compatibility wrapper only; runtime behavior must be updated in `scripts/schema/validation/validate_pipeline_configs.py` first.
 
 ## Commands
 
 | Command                      | Script                                                                 | Description                                                                            |
 | ---------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `check-invariants`           | `scripts/schema/check_config_invariants.py`                            | Validate config CI invariants and YAML parse safety (naming, schemas, auth, keys)      |
-| `check-required-fields`      | `scripts/schema/check_required_filter_fields.py`                       | Validate `silver_filters.required_fields` cover explicit YAML required/not-null fields |
-| `audit-optionality`          | `scripts/schema/audit_effective_optionality.py`                        | Audit or validate `effective_optional_v1` derived from current config surface          |
-| `check-config-paths`         | `scripts/schema/lint_config_paths.py`                                  | Check for legacy dq/filter config path references                                      |
-| `generate-pipeline`          | `scripts/schema/generate_pipeline_schema.py`                           | Generate pipeline JSON schema                                                          |
-| `generate-artifacts`         | `scripts/schema/generate_schema_artifacts.py`                          | Generate schema artifacts                                                              |
-| `generate-pubtype`           | `scripts/schema/generate_publication_type_classification_artifacts.py` | Generate publication type classification artifacts                                     |
-| `generate-contracts`         | `scripts/schema/generate_contracts.py`                                 | Generate contracts                                                                     |
-| `generate-config-matrix`     | `scripts/schema/generate_config_matrix.py`                             | Canonical entity/composite config comparison matrix generator                          |
-| `generate-unified-map`       | `scripts/schema/generate_unified_schema_map.py`                        | Generate unified Bronze→Silver→Gold schema map CSV                                     |
-| `generate-field-diagnostics` | `scripts/schema/generate_field_level_diagnostics.py`                   | Generate field-level schema drift diagnostics CSV                                      |
-| `generate-field-spec`        | `scripts/schema/generate_field_transformation_spec.py`                 | Generate deterministic per-field transformation specification CSV                      |
-| `validate-configs`           | `scripts/schema/validate_pipeline_configs.py`                          | Validate unified pipeline YAML configs against JSON Schema                             |
-| `validate-unified-configs`   | `scripts/schema/validate_unified_configs.py`                           | Canonical structural unified-config validator retained for compatibility use cases     |
-| `analyze-gaps`               | `scripts/schema/config_gap_analysis.py`                                | Config gap analysis between configs and code                                           |
+| `check-invariants`           | `scripts/schema/validation/check_config_invariants.py`                            | Validate config CI invariants and YAML parse safety (naming, schemas, auth, keys)      |
+| `check-required-fields`      | `scripts/schema/validation/check_required_filter_fields.py`                       | Validate `silver_filters.required_fields` cover explicit YAML required/not-null fields |
+| `audit-optionality`          | `scripts/schema/validation/audit_effective_optionality.py`                        | Audit or validate `effective_optional_v1` derived from current config surface          |
+| `check-config-paths`         | `scripts/schema/validation/lint_config_paths.py`                                  | Check for legacy dq/filter config path references                                      |
+| `generate-pipeline`          | `scripts/schema/generation/generate_pipeline_schema.py`                           | Generate pipeline JSON schema                                                          |
+| `generate-artifacts`         | `scripts/schema/generation/generate_schema_artifacts.py`                          | Generate schema artifacts                                                              |
+| `generate-pubtype`           | `scripts/schema/generation/generate_publication_type_classification_artifacts.py` | Generate publication type classification artifacts                                     |
+| `generate-protein-class`     | `scripts/schema/generation/generate_protein_class_l1_target_type_artifacts.py`      | Generate protein class L1 → target type artifacts                                      |
+| `generate-typed-arrow`       | `scripts/schema/generation/generate_typed_arrow_schema_sources.py`                | Generate typed Arrow schema source modules                                             |
+| `generate-contracts`         | `scripts/schema/generation/generate_contracts.py`                                 | Generate contracts                                                                     |
+| `generate-config-matrix`     | `scripts/schema/analysis/generate_config_matrix.py`                             | Canonical entity/composite config comparison matrix generator                          |
+| `generate-unified-map`       | `scripts/schema/analysis/generate_unified_schema_map.py`                        | Generate unified Bronze→Silver→Gold schema map CSV                                     |
+| `generate-field-diagnostics` | `scripts/schema/analysis/generate_field_level_diagnostics.py`                   | Generate field-level schema drift diagnostics CSV                                      |
+| `generate-field-spec`        | `scripts/schema/analysis/generate_field_transformation_spec.py`                 | Generate deterministic per-field transformation specification CSV                      |
+| `validate-configs`           | `scripts/schema/validation/validate_pipeline_configs.py`                          | Validate unified pipeline YAML configs against JSON Schema                             |
+| `validate-unified-configs`   | `scripts/schema/validation/validate_unified_configs.py`                           | Canonical structural unified-config validator retained for compatibility use cases     |
+| `analyze-gaps`               | `scripts/schema/analysis/config_gap_analysis.py`                                | Config gap analysis between configs and code                                           |
 
 ## When to Use
 

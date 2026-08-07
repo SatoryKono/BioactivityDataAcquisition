@@ -31,6 +31,7 @@ GEN_SCRIPT = (
     PROJECT_ROOT
     / "scripts"
     / "schema"
+    / "generation"
     / "generate_publication_type_classification_artifacts.py"
 )
 
@@ -72,7 +73,7 @@ def test_publication_type_codegen_is_deterministic() -> None:
         "Publication type generated artifacts are stale.\n"
         f"stdout:\n{result.stdout}\n"
         f"stderr:\n{result.stderr}\n"
-        "Run: python scripts/schema/generate_publication_type_classification_artifacts.py"
+        "Run: python scripts/schema/generation/generate_publication_type_classification_artifacts.py"
     )
 
 

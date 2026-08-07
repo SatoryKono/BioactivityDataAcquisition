@@ -18,9 +18,9 @@ from pathlib import Path
 
 import pytest
 import yaml
-from scripts.schema import generate_config_matrix as generator
+from scripts.schema.analysis import generate_config_matrix as generator
 
-from scripts.schema.generate_config_matrix import (
+from scripts.schema.analysis.generate_config_matrix import (
     _collect_family_configs,
     build_config_discrepancy_evidence,
 )

@@ -72,7 +72,7 @@ Locally exclude `tests/**`, `scripts/**`, `src/memory/**` if Problems floods.
 
 Local stubs live in `configs/typing-stubs/pyarrow/`
 (`pyproject.toml` → `[tool.basedpyright].stubPath = "configs/typing-stubs"`).
-Optional rewrite generator: `scripts/schema/generate_typed_arrow_schema_sources.py`.
+Optional rewrite generator: `scripts/schema/generation/generate_typed_arrow_schema_sources.py`.
 See `reports/quality/pd7-schema-generator-implementation.md`.
 
 ## Related

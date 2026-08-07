@@ -19,7 +19,7 @@ from bioetl.domain.normalization.profiles import (
     resolve_normalization_profile_identity,
 )
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_CONTRACT_VERSION = "1.0.0"
 ENTITY_CONTRACT_VERSIONS: dict[str, str] = {
     "chembl_target": "3.0.0",

@@ -110,5 +110,5 @@ Legacy aliases допускаются только как временный mig
 ## References
 
 - [Configuration CI contract](../../../src/bioetl/infrastructure/config/config_ci_contract.py)
-- [Config invariants checker](../../../scripts/schema/check_config_invariants.py)
+- [Config invariants checker](../../../scripts/schema/validation/check_config_invariants.py)
 - [Gold contracts reference](../../04-reference/contracts/gold-schemas.md)

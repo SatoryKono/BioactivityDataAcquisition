@@ -12,7 +12,7 @@ from pathlib import Path
 
 import yaml
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 CSV_PATH = PROJECT_ROOT / "configs" / "enums" / "protein_class_l1_target_type.csv"
 MANIFEST_PATH = (
     PROJECT_ROOT / "configs" / "enums" / "protein_class_l1_target_type.meta.yaml"
@@ -154,7 +154,7 @@ def main() -> int:
     if args.check and (stale_asset or stale_manifest):
         print(
             "\nProtein class L1 target type artifacts are stale. "
-            "Run: python scripts/schema/generate_protein_class_l1_target_type_artifacts.py",
+            "Run: python scripts/schema/generation/generate_protein_class_l1_target_type_artifacts.py",
             file=sys.stderr,
         )
         return 1

@@ -30,6 +30,7 @@ GEN_SCRIPT = (
     PROJECT_ROOT
     / "scripts"
     / "schema"
+    / "generation"
     / "generate_protein_class_l1_target_type_artifacts.py"
 )
 
@@ -65,5 +66,5 @@ def test_protein_class_target_type_codegen_is_deterministic() -> None:
         "Protein class L1 target type generated artifacts are stale.\n"
         f"stdout:\n{result.stdout}\n"
         f"stderr:\n{result.stderr}\n"
-        "Run: python scripts/schema/generate_protein_class_l1_target_type_artifacts.py"
+        "Run: python scripts/schema/generation/generate_protein_class_l1_target_type_artifacts.py"
     )

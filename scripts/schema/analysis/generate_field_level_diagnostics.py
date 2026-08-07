@@ -11,12 +11,12 @@ import re
 from pathlib import Path
 from typing import Any
 
-from scripts.schema.generate_unified_schema_map import (
+from scripts.schema.analysis.generate_unified_schema_map import (
     build_unified_schema_rows,
 )
 
 CURRENT_FILE = Path(__file__).resolve()
-PROJECT_ROOT = CURRENT_FILE.parents[2]
+PROJECT_ROOT = CURRENT_FILE.parents[3]
 PUBLICATION_ALIAS_FILE = (
     PROJECT_ROOT / "src" / "bioetl" / "application" / "core" / "publication_aliases.py"
 )
