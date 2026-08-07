@@ -35,7 +35,7 @@
       "targeted_closeout_proof": 100.0
     },
     "zero_reference_supporting_scripts": {
-      "current": 4,
+      "current": 5,
       "entries_without_owner_metadata": 0,
       "max": 47,
       "source": "configs/quality/scripts_inventory_manifest.json"
@@ -98,8 +98,8 @@
       "status": "closeable"
     },
     "5794": {
-      "closeout_reason": "Shared composite merge and lineage policy blocks now live in a canonical authority surface and duplicate clusters dropped from 24 to 9.",
-      "current_value": 9,
+      "closeout_reason": "Shared composite merge and lineage policy blocks now live in a canonical authority surface and duplicate clusters dropped from 24 to 10.",
+      "current_value": 10,
       "debt_type": "composite_config_duplication",
       "evidence": [
         "configs/composites/field_groups/shared_policy.yaml",
