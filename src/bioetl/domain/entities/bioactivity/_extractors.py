@@ -141,8 +141,7 @@ def _first_truthy_value(raw_data: JsonDict, *field_names: str) -> object | None:
     for field_name in field_names:
         value = raw_data.get(field_name)
         if value:
-            resolved_value: object = value
-            return resolved_value
+            return value
     return None
 
 

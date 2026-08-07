@@ -35,6 +35,19 @@ class BioactivityState(StrEnum):
         """True if VALIDATED."""
         return self == BioactivityState.VALIDATED
 
+    def can_transition_to(self, new_state: BioactivityState) -> bool:
+        """Return True for same-state or documented forward transitions only."""
+        allowed = {
+            BioactivityState.RAW: frozenset(
+                {BioactivityState.RAW, BioactivityState.NORMALIZED}
+            ),
+            BioactivityState.NORMALIZED: frozenset(
+                {BioactivityState.NORMALIZED, BioactivityState.VALIDATED}
+            ),
+            BioactivityState.VALIDATED: frozenset({BioactivityState.VALIDATED}),
+        }
+        return new_state in allowed[self]
+
 
 @dataclass(frozen=True, kw_only=True)
 class Bioactivity(BaseEntity):
@@ -198,9 +211,16 @@ class Bioactivity(BaseEntity):
 
         Returns:
             New Bioactivity instance with all fields copied and _state updated.
+
+        Raises:
+            ValueError: If the transition is not a documented forward step.
         """
         from dataclasses import asdict
 
+        if not self._state.can_transition_to(new_state):
+            raise ValueError(
+                f"Invalid bioactivity state transition: {self._state} -> {new_state}"
+            )
         data = asdict(self)
         data["_state"] = new_state
         return Bioactivity(**data)

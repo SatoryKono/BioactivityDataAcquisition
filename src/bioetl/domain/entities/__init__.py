@@ -206,6 +206,10 @@ _ENTITY_IMPORTS = {
         "bioetl.domain.entities.openalex",
         "OpenAlexPublicationEntity",
     ),
+    "LOOKUP_METHODS": (
+        "bioetl.domain.entities.openalex",
+        "LOOKUP_METHODS",
+    ),
     "ProteinClassification": (
         _CHEMBL_STRUCTURES_MODULE,
         "ProteinClassification",
@@ -259,8 +263,6 @@ __all__: list[str] = []  # Populated lazily on first access
 
 
 def __getattr__(name: str) -> object:  # pragma: no cover
-    if TYPE_CHECKING:
-        raise AttributeError
     # Populate __all__ lazily on first access
     if not __all__:
         __all__.extend(_get_entity_imports().keys())

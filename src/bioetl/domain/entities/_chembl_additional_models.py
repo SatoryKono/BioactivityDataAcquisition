@@ -11,8 +11,8 @@ class TissueRecord(BaseModel):
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    tissue_id: str = Field(description="Unique tissue ChEMBL ID")
-    pref_name: str = Field(description="Preferred tissue name")
+    tissue_id: str = Field(min_length=1, description="Unique tissue ChEMBL ID")
+    pref_name: str = Field(min_length=1, description="Preferred tissue name")
     bto_id: str | None = Field(default=None, description="BRENDA Tissue Ontology ID")
     caloha_id: str | None = Field(default=None, description="CALOHA tissue ID")
     efo_id: str | None = Field(
@@ -27,8 +27,8 @@ class CompoundLinkRecord(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     record_id: int = Field(description="Unique compound-record surrogate key")
-    molecule_id: str = Field(description="Linked molecule ChEMBL ID")
-    publication_id: str = Field(description="Linked publication ChEMBL ID")
+    molecule_id: str = Field(min_length=1, description="Linked molecule ChEMBL ID")
+    publication_id: str = Field(min_length=1, description="Linked publication ChEMBL ID")
     compound_key: str | None = Field(
         default=None, description="Provider-native compound key"
     )
@@ -52,13 +52,20 @@ class PublicationSimilarityRecord(BaseModel):
     pubmed_id1: str | None = Field(default=None, description="Primary PubMed ID")
     pubmed_id2: str | None = Field(default=None, description="Secondary PubMed ID")
     tid_tani: float | None = Field(
-        default=None, description="Target-identifier similarity score"
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description="Target-identifier similarity score",
     )
     mol_tani: float | None = Field(
-        default=None, description="Molecule similarity score"
+        default=None, ge=0.0, le=1.0, description="Molecule similarity score"
     )
-    avg_tani: float | None = Field(default=None, description="Average similarity score")
-    max_tani: float | None = Field(default=None, description="Maximum similarity score")
+    avg_tani: float | None = Field(
+        default=None, ge=0.0, le=1.0, description="Average similarity score"
+    )
+    max_tani: float | None = Field(
+        default=None, ge=0.0, le=1.0, description="Maximum similarity score"
+    )
 
 
 __all__ = [

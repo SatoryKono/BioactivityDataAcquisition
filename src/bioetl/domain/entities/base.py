@@ -79,6 +79,12 @@ class BaseEntity:
             raise ValueError("Entity ID cannot be empty")
         if not self.content_hash:
             raise ValueError("Content hash cannot be empty")
+        if not self.run_id:
+            raise ValueError("run_id is required")
+        if not self.run_type:
+            raise ValueError("run_type is required")
+        if self.ingestion_ts is None:
+            raise ValueError("ingestion_ts is required")
         if self._index < 0:
             raise ValueError("_index cannot be negative")
         self._validate_invariants()

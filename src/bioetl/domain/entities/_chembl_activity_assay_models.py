@@ -92,7 +92,7 @@ class ActivityRecord(BaseModel):
     target_organism: str | None = Field(
         default=None, description="Target organism name"
     )
-    target_tax_id: str | None = Field(default=None, description="Target taxonomy ID")
+    target_tax_id: int | None = Field(default=None, description="Target taxonomy ID")
 
     # Assay data (denormalized)
     assay_type: str | None = Field(default=None, description="Assay type code (B/F/A)")

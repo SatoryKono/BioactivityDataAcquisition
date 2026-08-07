@@ -115,7 +115,11 @@ class CellLineRecord(BaseModel):
         default=None, description="Source organism"
     )
     cell_source_tax_id: int | None = Field(
-        default=None, description="Source organism taxonomy ID"
+        default=None,
+        description=(
+            "Source organism taxonomy ID (mirrors ChEMBL cell_source_tax_id; "
+            "NCBI Taxonomy identifier)"
+        ),
     )
 
     # External identifiers
@@ -141,7 +145,12 @@ class TargetComponentRecord(BaseModel):
     component_type: str | None = Field(default=None, description="Component type")
     description: str | None = Field(default=None, description="Component description")
     organism: str | None = Field(default=None, description="Organism name")
-    tax_id: int | None = Field(default=None, description="NCBI Taxonomy ID")
+    tax_id: int | None = Field(
+        default=None,
+        description=(
+            "NCBI Taxonomy ID (mirrors ChEMBL tax_id field on target_component)"
+        ),
+    )
 
     # Flattened fields
     protein_classification_ids: list[int] | None = Field(
