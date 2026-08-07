@@ -9,6 +9,10 @@ description: "Create, review, test, or debug BioETL Prometheus alert and recordi
 
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 - Prometheus rules and tests in the repository
 
 ## Workflow
