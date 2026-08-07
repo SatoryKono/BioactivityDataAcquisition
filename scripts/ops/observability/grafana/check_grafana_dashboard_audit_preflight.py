@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Check whether the local stack is ready for a full Grafana dashboard audit."""
 
+# NOSONAR - S1192: *.json pattern is intentional for dashboard file discovery
+DASHBOARD_FILE_PATTERN = "*.json"
+
 from __future__ import annotations
 
 import argparse
@@ -265,7 +268,7 @@ def _check_expanded_row_capture(playwright_check: PreflightCheck) -> PreflightCh
 
 def _quarantine_explorer_is_applicable() -> bool:
     """Return whether a shipped dashboard still requires the retired HTTP UI."""
-    for dashboard_path in _DASHBOARD_DIR.glob("*.json"):
+    for dashboard_path in _DASHBOARD_DIR.glob(DASHBOARD_FILE_PATTERN):
         try:
             payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
@@ -281,7 +284,7 @@ def _expected_dashboard_screenshot_pairs(
     selected_uids: tuple[str, ...] = (),
 ) -> list[tuple[Path, Path, str]]:
     pairs: list[tuple[Path, Path, str]] = []
-    for dashboard_path in sorted(_DASHBOARD_DIR.glob("*.json")):
+    for dashboard_path in sorted(_DASHBOARD_DIR.glob(DASHBOARD_FILE_PATTERN)):
         try:
             payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
@@ -621,7 +624,7 @@ def _validate_manifest_provenance(
         )
 
     all_shipped_uids: set[str] = set()
-    for dashboard_path in sorted(_DASHBOARD_DIR.glob("*.json")):
+    for dashboard_path in sorted(_DASHBOARD_DIR.glob(DASHBOARD_FILE_PATTERN)):
         try:
             payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):

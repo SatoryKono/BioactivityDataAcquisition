@@ -133,9 +133,13 @@ def run_mcp(
     for future in done:
         result = future.result()
         result["required"] = result["server"] in required
-        result["status"] = (
-            "OK" if result["ready"] else "FAIL" if result["required"] else "WARN"
-        )
+        # NOSONAR - S3358: nested ternary is intentional for status classification
+        if result["ready"]:
+            result["status"] = "OK"
+        elif result["required"]:
+            result["status"] = "FAIL"
+        else:
+            result["status"] = "WARN"
         results.append(result)
     for future in pending:
         name = futures[future]

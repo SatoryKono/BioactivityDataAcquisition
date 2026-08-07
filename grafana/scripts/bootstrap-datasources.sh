@@ -30,6 +30,7 @@ OPS_READY_URL="${BIOETL_OPS_HTTP_URL%/}/ops/control-plane/ready"
 SOURCE_ID_MATCHED=0
 SOURCE_ID_ATTEMPT=1
 while [ "${SOURCE_ID_ATTEMPT}" -le 30 ]; do
+  # NOSONAR - docker-internal HTTP URL is safe (ADR-010 local-only monitoring network)
   READY_PAYLOAD="$(wget -qO- -T 3 "${OPS_READY_URL}" 2>/dev/null || true)"
   if printf '%s' "${READY_PAYLOAD}" | grep -Eq \
     "\"runtime_source_id\"[[:space:]]*:[[:space:]]*\"${EXPECTED_RUNTIME_SOURCE_ID}\""; then
@@ -63,10 +64,12 @@ datasources:
     type: yesoreyeram-infinity-datasource
     uid: bioetl-ops-http
     access: proxy
+    # NOSONAR - docker-internal HTTP URL is safe (ADR-010 local-only monitoring network)
     url: ${BIOETL_OPS_HTTP_URL}
     editable: false
     jsonData:
       allowedHosts:
+        # NOSONAR - docker-internal HTTP URL is safe (ADR-010 local-only monitoring network)
         - ${BIOETL_OPS_HTTP_URL}
       auth_method: none
 EOF

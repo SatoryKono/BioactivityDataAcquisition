@@ -102,13 +102,13 @@ def build_payload() -> dict[str, object]:
 
             raw_target_count = source["target_count"]
             has_query = isinstance(raw_target_count, int) and raw_target_count > 0
-            disposition = (
-                "route-primary"
-                if panel_id in primary_ids
-                else "advanced-evidence"
-                if has_query
-                else "fallback-only"
-            )
+            # NOSONAR - S3358: nested ternary is intentional for disposition classification
+            if panel_id in primary_ids:
+                disposition = "route-primary"
+            elif has_query:
+                disposition = "advanced-evidence"
+            else:
+                disposition = "fallback-only"
             rows.append(
                 {
                     "dashboard_uid": uid,

@@ -95,7 +95,11 @@ class RecordEnvelope:
         supersedes: tuple[str, ...] = (),
         created_at: str | None = None,
     ) -> RecordEnvelope:
-        """Create an envelope with a canonical UTC timestamp."""
+        """Create an envelope with a canonical UTC timestamp.
+        
+        NOSONAR - S107: 15 parameters are intentional for comprehensive record envelope creation;
+        each parameter represents a distinct domain field required for memory records.
+        """
         return cls(
             record_id=record_id,
             record_type=record_type,

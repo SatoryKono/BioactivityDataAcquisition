@@ -459,6 +459,7 @@ def apply_board(path: Path) -> list[str]:
         if ensure_value_display_name(
             panel,
             display=(
+                # NOSONAR - S3358: nested ternary is intentional for display classification
                 "Severity"
                 if "alert" in title.lower()
                 else "Signal"

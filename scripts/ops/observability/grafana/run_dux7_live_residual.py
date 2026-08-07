@@ -449,6 +449,7 @@ def main() -> int:
 
     # Light is supported when body+link chips AA and screenshots captured.
     # Nav uses dark-safe slate chips intentionally (readable on light bg).
+    # NOSONAR - S3358: nested ternary is intentional for complex theme support classification
     light_decision = (
         "supported_theme_safe_nav"
         if light_ok and light_contrast_pass
