@@ -1097,7 +1097,7 @@ def _build_assertless_families(
     """Aggregate assertless candidates by file path."""
     assertless_families: dict[str, dict[str, Any]] = {}
     for candidate in assertless_candidates:
-        path = candidate["path"]
+        path = candidate["path"]  # NOSONAR - AST-derived, not CLI taint
         if path not in assertless_families:
             assertless_families[path] = {
                 "assertless_tests": 0,
