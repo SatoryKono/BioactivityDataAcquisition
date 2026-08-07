@@ -6,7 +6,7 @@ import os
 import subprocess
 import tempfile
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from pathlib import Path
 
 ROOT = Path(".").resolve()
@@ -300,14 +300,14 @@ def main() -> None:
         cr_ver = subprocess.check_output(
             ["coderabbit", "--version"], text=True, stderr=subprocess.STDOUT
         ).strip()
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         cr_ver = f"error: {exc}"
 
     over = [leaf for leaf in leaves if not leaf.get("under_cap")]
     matrix = {
         "campaign": "CR-FULL-20260806-full",
         "base_sha": sha,
-        "created_utc": datetime.now(timezone.utc).isoformat(),
+        "created_utc": datetime.now(UTC).isoformat(),
         "coderabbit": cr_ver,
         "cap": CAP,
         "leaf_count": len(leaves),
@@ -351,7 +351,7 @@ def main() -> None:
 
     pre = f"""# CR-FULL preflight — 20260806-full
 
-- **UTC:** {datetime.now(timezone.utc).isoformat()}
+- **UTC:** {datetime.now(UTC).isoformat()}
 - **BASE_SHA:** `{sha}`
 - **Branch:** main
 - **CodeRabbit CLI:** {cr_ver}

@@ -43,6 +43,12 @@ class OpenAlexId(ValueObject[str]):
     _PATTERN = re.compile(r"^W\d+$")
     _URL_PREFIX = "https://openalex.org/"
 
+    def _strip_openalex_prefix(self, normalized: str) -> str:
+        # Extract from URL if needed
+        if normalized.lower().startswith(self._URL_PREFIX.lower()):
+            return normalized[len(self._URL_PREFIX) :]
+        return normalized
+
     def _validate(self, value: str) -> str:
         """Validate and normalize OpenAlex ID."""
         if not isinstance(value, str):
@@ -52,18 +58,12 @@ class OpenAlexId(ValueObject[str]):
         if not normalized:
             raise ValueError("OpenAlexId cannot be empty")
 
-        # Extract from URL if needed
-        if normalized.lower().startswith(self._URL_PREFIX.lower()):
-            normalized = normalized[len(self._URL_PREFIX) :]
-
-        normalized = normalized.strip().upper()
-
-        if not self._PATTERN.match(normalized):
-            raise ValueError(
-                f"Invalid OpenAlex ID format: {value!r}. Expected: W<digits>"
-            )
-
-        return normalized
+        normalized = self._strip_openalex_prefix(normalized).strip().upper()
+        if self._PATTERN.match(normalized):
+            return normalized
+        raise ValueError(
+            f"Invalid OpenAlex ID format: {value!r}. Expected: W<digits>"
+        )
 
     @property
     def url(self) -> str:
@@ -85,7 +85,9 @@ class OpenAlexId(ValueObject[str]):
         Returns:
             New instance constructed from the input.
         """
-        if not raw or not raw.strip():
+        if raw is None:
+            return None
+        if not raw.strip():
             return None
         try:
             return cls(raw)
@@ -121,13 +123,12 @@ class SemanticScholarId(ValueObject[str]):
         if not normalized:
             raise ValueError("SemanticScholarId cannot be empty")
 
-        if not self._PATTERN.match(normalized):
-            raise ValueError(
-                f"Invalid Semantic Scholar ID format: {value!r}. "
-                f"Expected: 40-character hexadecimal string"
-            )
-
-        return normalized
+        if self._PATTERN.match(normalized):
+            return normalized
+        raise ValueError(
+            f"Invalid Semantic Scholar ID format: {value!r}. "
+            f"Expected: 40-character hexadecimal string"
+        )
 
     @classmethod
     def from_raw(cls, raw: str | None) -> SemanticScholarId | None:
@@ -139,7 +140,9 @@ class SemanticScholarId(ValueObject[str]):
         Returns:
             New instance constructed from the input.
         """
-        if not raw or not raw.strip():
+        if raw is None:
+            return None
+        if not raw.strip():
             return None
         try:
             return cls(raw)
@@ -166,12 +169,25 @@ class ISSN(ValueObject[str]):
     _value: str
     _PATTERN = re.compile(r"^(\d{4})-?(\d{3}[\dXx])$")
 
+    @staticmethod
+    def _require_str(value: object) -> str:
+        if isinstance(value, str):
+            return value
+        raise ValueError(f"ISSN must be str, got {type(value).__name__}")
+
+    @staticmethod
+    def _issn_check_digit(body: str) -> str:
+        total = sum((8 - i) * int(digit) for i, digit in enumerate(body))
+        remainder = total % 11
+        expected_num = 0 if remainder == 0 else 11 - remainder
+        if expected_num == 10:
+            return "X"
+        return str(expected_num)
+
     def _validate(self, value: str) -> str:
         """Validate and normalize ISSN."""
-        if not isinstance(value, str):
-            raise ValueError(f"ISSN must be str, got {type(value).__name__}")
-
-        normalized = value.strip()
+        text = self._require_str(value)
+        normalized = text.strip()
         if not normalized:
             raise ValueError("ISSN cannot be empty")
 
@@ -183,10 +199,7 @@ class ISSN(ValueObject[str]):
         second_part = match.group(2).upper()
         body = first_part + second_part[:3]
         check = second_part[3]
-        total = sum((8 - i) * int(digit) for i, digit in enumerate(body))
-        remainder = total % 11
-        expected_num = 0 if remainder == 0 else 11 - remainder
-        expected = "X" if expected_num == 10 else str(expected_num)
+        expected = self._issn_check_digit(body)
         if check != expected:
             raise ValueError(
                 f"Invalid ISSN checksum: {value!r} (expected check digit {expected})"
@@ -208,7 +221,9 @@ class ISSN(ValueObject[str]):
         Returns:
             New instance constructed from the input.
         """
-        if not raw or not raw.strip():
+        if raw is None:
+            return None
+        if not raw.strip():
             return None
         try:
             return cls(raw)
@@ -248,33 +263,45 @@ class ORCID(ValueObject[str]):
                 return value[len(prefix) :]
         return value
 
-    def _validate(self, value: str) -> str:
-        """Validate and normalize ORCID."""
-        if not isinstance(value, str):
-            raise ValueError(f"ORCID must be str, got {type(value).__name__}")
+    @staticmethod
+    def _require_str(value: object) -> str:
+        if isinstance(value, str):
+            return value
+        raise ValueError(f"ORCID must be str, got {type(value).__name__}")
 
-        normalized = value.strip()
-        if not normalized:
-            raise ValueError("ORCID cannot be empty")
-
-        normalized = self._strip_url_prefix(normalized).strip()
-
-        match = self._PATTERN.match(normalized)
-        if not match:
-            raise ValueError(
-                f"Invalid ORCID format: {value!r}. Expected: NNNN-NNNN-NNNN-NNNN"
-            )
-
-        parts = [match.group(i) for i in range(1, 5)]
-        parts[-1] = parts[-1].upper()
-        digits = "".join(parts)
-        body, check = digits[:15], digits[15]
+    @staticmethod
+    def _orcid_check_digit(body: str) -> str:
         total = 0
         for digit in body:
             total = (total + int(digit)) * 2
         remainder = total % 11
         result = (12 - remainder) % 11
-        expected = "X" if result == 10 else str(result)
+        if result == 10:
+            return "X"
+        return str(result)
+
+    def _match_orcid_parts(self, normalized: str, original: str) -> list[str]:
+        match = self._PATTERN.match(normalized)
+        if match is None:
+            raise ValueError(
+                f"Invalid ORCID format: {original!r}. Expected: NNNN-NNNN-NNNN-NNNN"
+            )
+        parts = [match.group(i) for i in range(1, 5)]
+        parts[-1] = parts[-1].upper()
+        return parts
+
+    def _validate(self, value: str) -> str:
+        """Validate and normalize ORCID."""
+        text = self._require_str(value)
+        normalized = text.strip()
+        if not normalized:
+            raise ValueError("ORCID cannot be empty")
+
+        normalized = self._strip_url_prefix(normalized).strip()
+        parts = self._match_orcid_parts(normalized, text)
+        digits = "".join(parts)
+        body, check = digits[:15], digits[15]
+        expected = self._orcid_check_digit(body)
         if check != expected:
             raise ValueError(
                 f"Invalid ORCID checksum: {value!r} (expected check digit {expected})"
@@ -301,7 +328,9 @@ class ORCID(ValueObject[str]):
         Returns:
             New instance constructed from the input.
         """
-        if not raw or not raw.strip():
+        if raw is None:
+            return None
+        if not raw.strip():
             return None
         try:
             return cls(raw)

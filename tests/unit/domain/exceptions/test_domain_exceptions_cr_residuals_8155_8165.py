@@ -177,7 +177,7 @@ def test_exceptions_package_getattr_contract() -> None:
         value = getattr(exc_pkg, name)
         assert value is not None
     with pytest.raises(AttributeError):
-        getattr(exc_pkg, "DefinitelyNotAnExceptionName")
+        exc_pkg.DefinitelyNotAnExceptionName
 
 
 def test_bioetl_domain_error_freezes_nested_context() -> None:

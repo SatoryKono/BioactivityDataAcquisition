@@ -8,21 +8,35 @@ from dataclasses import dataclass
 from bioetl.infrastructure.adapters.common import FallbackFetchOrchestrator
 from bioetl.infrastructure.adapters.openalex._client_runtime_factories import (
     create_default_openalex_cursor_flow as _create_default_openalex_cursor_flow,
+)
+from bioetl.infrastructure.adapters.openalex._client_runtime_factories import (
     create_default_openalex_fallback_orchestrator as _create_default_openalex_fallback_orchestrator,
+)
+from bioetl.infrastructure.adapters.openalex._client_runtime_factories import (
     create_default_openalex_query_executor as _create_default_openalex_query_executor,
+)
+from bioetl.infrastructure.adapters.openalex._client_runtime_factories import (
     create_default_openalex_response_mapper as _create_default_openalex_response_mapper,
+)
+from bioetl.infrastructure.adapters.openalex._client_runtime_factories import (
     create_default_openalex_title_fallback_handler as _create_default_openalex_title_fallback_handler,
 )
 from bioetl.infrastructure.adapters.openalex._client_runtime_request import (
     OpenAlexRuntimeServicesRequest,
+)
+from bioetl.infrastructure.adapters.openalex._client_runtime_request import (
     coerce_openalex_runtime_services_request as _coerce_openalex_runtime_services_request,
 )
 from bioetl.infrastructure.adapters.openalex.cursor_flow import OpenAlexCursorFlow
-from bioetl.infrastructure.adapters.openalex.fallback import OpenAlexTitleFallbackHandler
+from bioetl.infrastructure.adapters.openalex.fallback import (
+    OpenAlexTitleFallbackHandler,
+)
 from bioetl.infrastructure.adapters.openalex.fallback_orchestrator import (
     OpenAlexFallbackOrchestrator,
 )
-from bioetl.infrastructure.adapters.openalex.query_execution import OpenAlexQueryExecutor
+from bioetl.infrastructure.adapters.openalex.query_execution import (
+    OpenAlexQueryExecutor,
+)
 from bioetl.infrastructure.adapters.openalex.response_mapping import (
     OpenAlexResponseMapper,
 )

@@ -1,4 +1,3 @@
-# ruff: noqa: F401
 # Re-export seam: imports are part of the public wiring surface via __all__.
 """Stable application-core seam for composition-time runtime wiring."""
 

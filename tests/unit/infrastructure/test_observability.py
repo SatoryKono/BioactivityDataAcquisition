@@ -34,7 +34,6 @@ from typing import Any
 import pytest
 
 from bioetl.infrastructure.observability import metrics as metrics_module
-from bioetl.infrastructure.observability import metrics_collector as collector_module
 from bioetl.infrastructure.observability.metrics import MetricsCollector
 
 

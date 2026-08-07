@@ -100,18 +100,28 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
     # Override: Default source for SemanticScholar
     _source: str = "semanticscholar"
 
+    @staticmethod
+    def _is_hex40(paper_id: str) -> bool:
+        if len(paper_id) != 40:
+            return False
+        allowed = set("0123456789abcdefABCDEF")
+        return all(ch in allowed for ch in paper_id)
+
+    def _require_paper_id(self) -> str:
+        paper_id = self.paper_id.strip()
+        if paper_id:
+            return paper_id
+        raise ValueError("Semantic Scholar Paper ID is required")
+
     def _validate_invariants(self) -> None:
         """Validate Semantic Scholar-specific publication invariants."""
         super()._validate_invariants()
-        paper_id = (self.paper_id or "").strip()
-        if not paper_id:
-            raise ValueError("Semantic Scholar Paper ID is required")
-        if len(paper_id) != 40 or any(
-            ch not in "0123456789abcdefABCDEF" for ch in paper_id
-        ):
-            raise ValueError(
-                "Semantic Scholar Paper ID must be exactly 40 hexadecimal characters"
-            )
+        paper_id = self._require_paper_id()
+        if self._is_hex40(paper_id):
+            return
+        raise ValueError(
+            "Semantic Scholar Paper ID must be exactly 40 hexadecimal characters"
+        )
 
 
 __all__ = [

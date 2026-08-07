@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import re
-
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Protocol
 
@@ -101,7 +100,7 @@ def _redact_gateway_target(gateway: str) -> str:
 
 def _redact_grouping_for_log(grouping_key: dict[str, str]) -> dict[str, str]:
     """Return a log-safe copy of grouping labels (already bounded)."""
-    return {key: value for key, value in grouping_key.items()}
+    return dict(grouping_key)
 
 
 def publish_metrics_to_gateway(

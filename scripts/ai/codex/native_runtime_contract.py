@@ -26,6 +26,8 @@ READ_ONLY_AGENTS = {
     "py-plan-bot",
 }
 
+GENERATED_MARKER = "<!-- generated-by: scripts.ai.codex.native_runtime_contract -->"
+
 
 @dataclasses.dataclass(frozen=True)
 class Finding:

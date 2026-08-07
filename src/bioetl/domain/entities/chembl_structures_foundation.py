@@ -5,8 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from bioetl.domain.entities.base import BaseEntity
-from bioetl.domain.immutability import freeze_fields
 from bioetl.domain.entities.publication_base import PublicationEntityBase
+from bioetl.domain.immutability import freeze_fields
 
 _VALID_TARGET_PROTEIN_CLASSIFICATION_STATUSES = frozenset(
     {"resolved", "missing_classification", "quarantined"}

@@ -62,7 +62,7 @@ def normalize_adapter_endpoint_label(endpoint: str) -> str:
         return "/"
     # Cap path depth to limit combinatorial explosion of route templates.
     if len(normalized_segments) > 8:
-        normalized_segments = normalized_segments[:7] + ["{param}"]
+        normalized_segments = [*normalized_segments[:7], "{param}"]
     return "/" + "/".join(normalized_segments)
 
 

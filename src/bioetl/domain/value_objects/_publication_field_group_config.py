@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from types import MappingProxyType
-from typing import Final, Mapping
+from typing import Final
 
 from bioetl.domain.value_objects.publication_field_group_types import (
     FIELD_TO_GROUP_MAPPING,

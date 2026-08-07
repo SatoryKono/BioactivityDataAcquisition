@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Report VCR corpus size by provider vs soft budget (#8337)."""
 from __future__ import annotations
-import argparse, json
+import argparse
+import json
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any

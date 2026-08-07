@@ -28,11 +28,10 @@ __all__ = [
     "PipelineCreationInputs",
     "PipelineCreationRequest",
     "ServiceBundleDeps",
-    "create_pipeline_with_services_impl",
-    # Retained private aliases for in-tree callers mid-migration.
     "_BuildPipelineServicesFn",
     "_PipelineCreationInputs",
     "_PipelineCreationRequest",
     "_ServiceBundleDeps",
     "_create_pipeline_with_services_impl",
+    "create_pipeline_with_services_impl",
 ]

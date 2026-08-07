@@ -37,7 +37,7 @@ def test_resolve_target_fallback_upstream_limit_treats_zero_as_zero() -> None:
             raise AssertionError("upstream fetch must not run for pure limit math")
 
     wrapper = PublicationTermDataSource(data_source=_Src())  # type: ignore[arg-type]
-    resolve_limit = getattr(wrapper, "_resolve_target_fallback_upstream_limit")
+    resolve_limit = wrapper._resolve_target_fallback_upstream_limit
     assert callable(resolve_limit)
     assert resolve_limit(0) == 0
     assert resolve_limit(2) == (

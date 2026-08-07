@@ -88,6 +88,24 @@ def render_check_details_html(data: JsonDict) -> str:
     return f"<table>{''.join(rows)}</table>"
 
 
+def _format_dict_detail(value: dict[str, object] | dict[object, object]) -> str:
+    try:
+        payload = orjson.dumps(
+            value,
+            option=orjson.OPT_INDENT_2 | orjson.OPT_NON_STR_KEYS,
+        ).decode()
+    except (TypeError, orjson.JSONEncodeError):
+        return f"<pre>{escape(str(value))}</pre>"
+    return f"<pre>{escape(payload)}</pre>"
+
+
+def _format_sequence_detail(value: list[object] | tuple[object, ...]) -> str:
+    if not value:
+        return "[]"
+    parts = [escape(str(item)) for item in value]
+    return ", ".join(parts)
+
+
 def format_detail_value(value: object) -> str:
     """Format a detail value for HTML display.
 
@@ -96,16 +114,9 @@ def format_detail_value(value: object) -> str:
             are joined as comma-separated strings, all others are converted via str().
     """
     if isinstance(value, dict):
-        try:
-            payload = orjson.dumps(
-                value,
-                option=orjson.OPT_INDENT_2 | orjson.OPT_NON_STR_KEYS,
-            ).decode()
-        except (TypeError, orjson.JSONEncodeError):
-            return f"<pre>{escape(str(value))}</pre>"
-        return f"<pre>{escape(payload)}</pre>"
+        return _format_dict_detail(value)
     if isinstance(value, (list, tuple)):
-        return ", ".join(escape(str(item)) for item in value) if value else "[]"
+        return _format_sequence_detail(value)
     return escape(str(value))
 
 

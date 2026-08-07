@@ -59,27 +59,40 @@ class FieldComparisonSpec:
     method: ComparisonMethod
     threshold: float = 0.0
 
-    def __post_init__(self) -> None:
-        """Apply method defaults and validate specification."""
-        if not self.field_name:
-            raise ValueError("field_name cannot be empty")
+    def _coerce_method(self) -> None:
         if isinstance(self.method, str):
             object.__setattr__(self, "method", ComparisonMethod(self.method))
+
+    def _apply_default_threshold(self) -> None:
         # Deterministic defaults when callers leave threshold at zero.
-        if self.method == ComparisonMethod.FUZZY and self.threshold == 0.0:
+        if self.threshold != 0.0:
+            return
+        if self.method == ComparisonMethod.FUZZY:
             object.__setattr__(self, "threshold", 0.8)
-        elif (
-            self.method == ComparisonMethod.NUMERIC_TOLERANCE and self.threshold == 0.0
-        ):
+            return
+        if self.method == ComparisonMethod.NUMERIC_TOLERANCE:
             object.__setattr__(self, "threshold", 0.10)
+
+    def _validate_threshold_range(self) -> None:
         needs_threshold = self.method in (
             ComparisonMethod.FUZZY,
             ComparisonMethod.NUMERIC_TOLERANCE,
         )
-        if needs_threshold and not 0.0 < self.threshold <= 1.0:
-            raise ValueError(
-                f"{self.method} threshold must be in (0.0, 1.0], got {self.threshold}"
-            )
+        if not needs_threshold:
+            return
+        if 0.0 < self.threshold <= 1.0:
+            return
+        raise ValueError(
+            f"{self.method} threshold must be in (0.0, 1.0], got {self.threshold}"
+        )
+
+    def __post_init__(self) -> None:
+        """Apply method defaults and validate specification."""
+        if not self.field_name:
+            raise ValueError("field_name cannot be empty")
+        self._coerce_method()
+        self._apply_default_threshold()
+        self._validate_threshold_range()
 
 
 @dataclass(frozen=True, slots=True)
