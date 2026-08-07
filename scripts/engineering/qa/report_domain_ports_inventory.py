@@ -28,6 +28,8 @@ import json
 import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
+
+from scripts.engineering.common.repo_paths import resolve_output_path
 from typing import Any
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -211,6 +213,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
 
 
 def _write_text(path: Path, content: str) -> None:
+    path = resolve_output_path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
 

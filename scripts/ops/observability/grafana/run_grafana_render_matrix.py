@@ -9,6 +9,8 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
+from scripts.engineering.common.repo_paths import resolve_output_path
+
 if __package__ in {None, ""}:
     repo_root = Path(__file__).resolve().parents[4]
     repo_root_str = str(repo_root)
@@ -171,7 +173,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
-    output_dir = Path(args.output_dir)
+    output_dir = resolve_output_path(Path(args.output_dir))
     output_dir.mkdir(parents=True, exist_ok=True)
     profiles = build_profiles(include_kiosk=bool(args.include_kiosk))
     results: list[dict[str, object]] = []

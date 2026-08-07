@@ -9,6 +9,17 @@ import re
 import subprocess
 from pathlib import Path
 
+
+def _confine_under_root(path: Path, *, root: Path) -> Path:
+    """Resolve path and reject escapes outside root (Sonar path-taint confinement)."""
+    resolved = path.expanduser().resolve(strict=False)
+    root_resolved = root.expanduser().resolve(strict=False)
+    try:
+        resolved.relative_to(root_resolved)
+    except ValueError as exc:
+        raise ValueError(f"path escapes allowed root {root_resolved}: {path}") from exc
+    return resolved
+
 from memory.storage import atomic_write_bytes
 
 _SAFE_COMPONENT = re.compile(r"[^A-Za-z0-9_.-]")
@@ -75,8 +86,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--repo-root", type=Path, required=True)
     parser.add_argument("--seed", type=Path, required=True)
     args = parser.parse_args(argv)
-    target = memory_scope_path(args.repo_root)
-    initialize_memory_file(target, args.seed)
+    repo_root = _confine_under_root(args.repo_root, root=Path.cwd())
+    # seed must live under repo_root (no arbitrary path injection)
+    seed = _confine_under_root(args.seed, root=repo_root)
+    target = memory_scope_path(repo_root)
+    initialize_memory_file(target, seed)
     print(target)
     return 0
 
