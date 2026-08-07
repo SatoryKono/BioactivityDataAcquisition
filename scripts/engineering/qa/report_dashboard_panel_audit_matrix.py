@@ -17,6 +17,7 @@ HTTP_DATASOURCE_HINTS = (
     "bioetl-ops-http",
     "infinity",
 )
+EXPECTED_PANEL_COUNT = 218
 
 
 def _iter_panels(payload: dict[str, object]) -> list[dict[str, object]]:
@@ -132,14 +133,11 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     rows = _collect_rows()
-    # Includes collapsed row headers in shipped JSON. Updated after
-    # 2026-07-23 surface reduction (Silver Reject Explorer + Loki/Tempo panels)
-    # 2026-07-27 seven-dashboard surface reconciliation (#6687), including
-    # the Incident and Run Explorer adjunct dashboards.
-    expected_panel_count = 219
-    if args.check and len(rows) != expected_panel_count:
+    # Includes collapsed row headers in shipped JSON. Reconciled against the
+    # seven-dashboard inventory and live audit on 2026-08-07 (#8269).
+    if args.check and len(rows) != EXPECTED_PANEL_COUNT:
         print(
-            f"panel count mismatch: expected {expected_panel_count}, got {len(rows)}",
+            f"panel count mismatch: expected {EXPECTED_PANEL_COUNT}, got {len(rows)}",
             file=sys.stderr,
         )
         return 1
