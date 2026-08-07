@@ -34,6 +34,17 @@ import pytest
 from bioetl.infrastructure.observability.prometheus_metric_label_dispatch import (
     normalize_metric_dispatch_labels,
 )
+from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
+
+
+def test_prometheus_metrics_can_set_adapter_request_p95_gauge() -> None:
+    """Registered compatibility gauge accepts endpoint labels without policy error."""
+    metrics = PrometheusMetrics()
+    metrics.set_gauge(
+        "bioetl_adapter_request_p95_seconds",
+        0.42,
+        {"provider": "chembl", "endpoint": "/status"},
+    )
 
 pytestmark = pytest.mark.unit
 
@@ -53,6 +64,21 @@ def test_metric_dispatch_normalizes_pipeline_label_contract_refs() -> None:
         "run_type": "incremental",
         "status": "success",
     }
+
+
+def test_adapter_request_p95_allows_endpoint_label() -> None:
+    """Compatibility p95 gauge shares the adapter endpoint label contract.
+
+    Regression: chembl_baseline health failed when endpoint labels were
+    rejected for bioetl_adapter_request_p95_seconds.
+    """
+    labels = normalize_metric_dispatch_labels(
+        "bioetl_adapter_request_p95_seconds",
+        {"provider": "chembl", "endpoint": "/status"},
+    )
+
+    assert labels["provider"] == "chembl"
+    assert labels["endpoint"] == "/status"
 
 
 def test_metric_dispatch_normalizes_pipeline_label_after_group_normalizer() -> None:
