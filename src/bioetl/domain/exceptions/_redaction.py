@@ -114,8 +114,14 @@ def _redact_sequence(
     *,
     seen: set[int],
 ) -> list[object] | tuple[object, ...]:
-    """Redact sequence values recursively."""
-    return type(value)(_redact(v, key, seen=seen) for v in value)
+    """Redact sequence values recursively.
+
+    Always materialize plain list/tuple containers (not subclass constructors).
+    """
+    redacted = [_redact(v, key, seen=seen) for v in value]
+    if isinstance(value, tuple):
+        return tuple(redacted)
+    return redacted
 
 
 def _redact_set(

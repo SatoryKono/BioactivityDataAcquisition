@@ -49,10 +49,9 @@ class ValidationError(DataQualityError):
             field: Optional name of the field with validation error.
         """
         super().__init__(message)
-        if record_id is not None:
-            self.record_id = record_id
-        if field is not None:
-            self.field = field
+        # Always present so callers can access without AttributeError.
+        self.record_id = record_id
+        self.field = field
 
 
 class SchemaViolationError(ValidationError):
