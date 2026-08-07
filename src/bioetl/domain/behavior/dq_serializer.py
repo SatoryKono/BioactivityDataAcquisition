@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import fields, is_dataclass
 from datetime import datetime
 from enum import Enum
@@ -39,7 +40,7 @@ def to_dict(obj: object) -> JsonDict:
     """
     if is_dataclass(obj) and not isinstance(obj, type):
         return cast(JsonDict, _serialize_value(obj))
-    if isinstance(obj, dict):
+    if isinstance(obj, Mapping):
         return cast(JsonDict, _serialize_value(obj))
     return {"value": _serialize_value(obj)}
 
@@ -55,10 +56,10 @@ def _serialize_dataclass(
 
 
 def _serialize_collection(
-    value: JsonDict | list[object] | tuple[object, ...],
+    value: Mapping[str, object] | list[object] | tuple[object, ...],
 ) -> JsonDict | list[object]:  # output mirrors heterogeneous input structure
     """Serialize dict/list/tuple recursively."""
-    if isinstance(value, dict):
+    if isinstance(value, Mapping):
         return {key: _serialize_value(item) for key, item in value.items()}
     return [_serialize_value(item) for item in value]
 
@@ -78,7 +79,7 @@ def _serialize_value(
         return value.value
     if isinstance(value, datetime):
         return value.isoformat()
-    if isinstance(value, (dict, list, tuple)):
+    if isinstance(value, (Mapping, list, tuple)):
         return _serialize_collection(value)
     return value
 

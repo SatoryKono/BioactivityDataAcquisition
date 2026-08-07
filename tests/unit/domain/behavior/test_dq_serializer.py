@@ -34,6 +34,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import Enum
 
+import orjson
 import pytest
 
 from bioetl.domain.behavior.dq_serializer import DQReportSerializer, to_dict
@@ -44,6 +45,8 @@ from bioetl.domain.value_objects.dq_report import (
     DQReportFormat,
     DQReportStatus,
     DQReportSummary,
+    StatisticalMetric,
+    StatisticalProfileResult,
 )
 
 pytestmark = pytest.mark.unit
@@ -99,6 +102,27 @@ def test_to_dict_serializes_dataclass_enum_datetime_and_collections() -> None:
     assert payload["nested"]["payload"][0] == "value"
     assert payload["nested"]["when"] == "2026-06-16T00:00:00+00:00"
     assert to_dict("plain") == {"value": "plain"}
+
+
+def test_to_dict_serializes_immutable_dq_mappings() -> None:
+    result = StatisticalProfileResult(
+        baseline_period_days=30,
+        metrics={
+            "record_count_daily": StatisticalMetric(
+                current=10.0,
+                baseline=10.0,
+                ratio=1.0,
+                threshold_warning=2.0,
+                threshold_critical=3.0,
+                status=DQCheckStatus.PASS,
+            )
+        },
+    )
+
+    payload = to_dict(result)
+
+    assert payload["metrics"]["record_count_daily"]["current"] == 10.0
+    orjson.dumps(payload)
 
 
 def test_serializer_outputs_json_yaml_and_html() -> None:
