@@ -783,6 +783,21 @@ _RECOVERABLE_PREFLIGHT_CODES = frozenset(
         "CONTAINER_HEALTH",
         "CONTAINER_RESTART",
         "CONTAINER_OOM",
+        "DASHBOARD_SOURCE_MOUNT",
+        "DASHBOARD_SOURCE_IDENTITY",
+        # Windows Docker Desktop requires host drive-letter binds; preflight still
+        # flags them as discouraged, but absolute bind env + force-recreate clears
+        # the empty Desktop virtual-bind class of Browse Recent Runs failures.
+        "MOUNT_ORIGIN",
+    }
+)
+_CROSS_STACK_IGNORABLE_PREFLIGHT_CODES = frozenset(
+    {
+        "PROJECT_ORIGIN",
+        "MOUNT_ORIGIN",
+        "F003",
+        "HOST_PORT_COLLISION",
+        "CAPACITY_DOCKER_ROOT",
     }
 )
 _DAEMON_UNAVAILABLE_PREFLIGHT_CODES = frozenset(
@@ -794,11 +809,15 @@ _DAEMON_UNAVAILABLE_PREFLIGHT_CODES = frozenset(
 )
 
 
-def _preflight_errors_are_recoverable(preflight_path: Path) -> bool:
-    """Allow recover to proceed when preflight only reports live container health.
+def _preflight_errors_are_recoverable(
+    preflight_path: Path, *, stack: str | None = None
+) -> bool:
+    """Allow start/recover when remaining errors can be cleared by compose up.
 
-    Recover is invoked precisely because required services are unready/unhealthy.
-    Origin, network, capacity, and other environment gates still fail closed.
+    Recoverable classes include live container health/restart/OOM and dashboard
+    producer bind/identity drift (fixed by absolute bind env + recreate).
+    Cross-stack PROJECT_ORIGIN / MOUNT_ORIGIN / port inventory noise does not
+    block starting the selected stack.
     """
     try:
         payload = json.loads(preflight_path.read_text(encoding="utf-8"))
@@ -814,9 +833,48 @@ def _preflight_errors_are_recoverable(preflight_path: Path) -> bool:
     ]
     if not errors:
         return True
-    return all(
-        str(finding.get("code") or "") in _RECOVERABLE_PREFLIGHT_CODES
-        for finding in errors
+    for finding in errors:
+        code = str(finding.get("code") or "")
+        evidence = finding.get("evidence") if isinstance(finding, Mapping) else None
+        finding_stack: str | None = None
+        if isinstance(evidence, Mapping):
+            raw_stack = evidence.get("stack")
+            if isinstance(raw_stack, str) and raw_stack.strip():
+                finding_stack = raw_stack.strip()
+            else:
+                owner = evidence.get("actual_owner")
+                if isinstance(owner, str) and "/" in owner:
+                    finding_stack = owner.split("/", 1)[0]
+        if (
+            stack
+            and finding_stack
+            and finding_stack != stack
+            and code in _CROSS_STACK_IGNORABLE_PREFLIGHT_CODES
+        ):
+            continue
+        if code in _RECOVERABLE_PREFLIGHT_CODES:
+            continue
+        if code in _CROSS_STACK_IGNORABLE_PREFLIGHT_CODES and finding_stack is None:
+            continue
+        return False
+    return True
+
+
+def _preflight_has_dashboard_source_drift(preflight_path: Path) -> bool:
+    """True when preflight reports dashboard producer bind/identity drift."""
+    try:
+        payload = json.loads(preflight_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    findings = payload.get("findings") or []
+    if not isinstance(findings, list):
+        return False
+    return any(
+        isinstance(finding, Mapping)
+        and finding.get("severity") == "error"
+        and str(finding.get("code") or "")
+        in {"DASHBOARD_SOURCE_MOUNT", "DASHBOARD_SOURCE_IDENTITY"}
+        for finding in findings
     )
 
 
@@ -1098,12 +1156,16 @@ def _handle_daemon_error_during_attempt(
 
 
 def _compose_up_wait_args(
-    spec: StackSpec, *, attempts: int, remaining: float
+    spec: StackSpec,
+    *,
+    attempts: int,
+    remaining: float,
+    force_recreate: bool = False,
 ) -> list[str]:
     # Attempt 1: non-destructive up (covers simple kill).
-    # Later attempts: force-recreate clears sticky pause/unhealthy state.
+    # Later attempts or dashboard bind drift: force-recreate clears sticky empty binds.
     up_args: list[str] = ["up", "-d"]
-    if attempts >= 2:
+    if force_recreate or attempts >= 2:
         up_args.append("--force-recreate")
     up_args.extend(
         [
@@ -1127,6 +1189,7 @@ class _RecoveryTimingContext:
     sleep: Sleeper
     clock: Clock
     runner: Runner
+    force_recreate: bool = False
 
 
 def _evaluate_up_attempt(
@@ -1206,7 +1269,12 @@ def _run_recovery_attempts(
         if remaining <= 0:
             findings = [{"cause": "readiness_timeout", "attempt": attempts}]
             break
-        up_args = _compose_up_wait_args(spec, attempts=attempts, remaining=remaining)
+        up_args = _compose_up_wait_args(
+            spec,
+            attempts=attempts,
+            remaining=remaining,
+            force_recreate=timing.force_recreate,
+        )
         result = timing.runner(_compose(spec, *up_args), ROOT, remaining)
         history.append(
             {
@@ -1261,7 +1329,7 @@ def _bootstrap_recovery_surface(
     # Both start and recover may proceed when the only preflight errors are live
     # container health/restart/OOM — those are exactly what up --wait must clear.
     if preflight.returncode != 0 and not _preflight_errors_are_recoverable(
-        preflight_path
+        preflight_path, stack=spec.name
     ):
         findings: list[dict[str, Any]] = [
             {"cause": "preflight_failed", "stderr": preflight.stderr}
@@ -1297,6 +1365,53 @@ def _bootstrap_recovery_surface(
     )
     baseline = {row.service: row.restart_count for row in before}
     return before, [{"cause": "recovery_exhausted"}], 0, baseline
+
+
+def _post_start_report_bind_gate(*, spec: StackSpec, report_dir: Path) -> int:
+    """Fail closed when main stack Ops HTTP cannot see host run-reports.
+
+    Prevents healthy bioetl containers with empty Desktop bind caches from being
+    treated as a successful start (Browse Recent Runs would stay empty).
+    """
+    if spec.name != "main":
+        return 0
+    try:
+        from scripts.ops.runtime.docker import verify_report_bind as bind_verify
+    except ImportError:
+        return 0
+    pipeline = os.environ.get("BIOETL_VERIFY_PIPELINE", "chembl_assay").strip() or None
+    rc = bind_verify.verify(
+        repo=ROOT,
+        ops_url=os.environ.get("BIOETL_OPS_HTTP_URL", bind_verify.DEFAULT_OPS_URL),
+        container=os.environ.get(
+            "BIOETL_CONTAINER_NAME", bind_verify.DEFAULT_CONTAINER
+        ),
+        pipeline=pipeline,
+        require_ops=True,
+    )
+    if rc == 0:
+        return 0
+    incident = {
+        "schema_version": "bioetl-docker-incident-v1",
+        "generated_at": datetime.now(UTC).isoformat(),
+        "stack": spec.name,
+        "project": spec.project,
+        "action": "post_start_report_bind_gate",
+        "primary_cause": "report_bind_mismatch",
+        "findings": [
+            {
+                "cause": "report_bind_mismatch",
+                "message": (
+                    "bioetl is up but host/ops report-root bind verification failed; "
+                    "Browse Recent Runs would stay empty. Re-run start from the "
+                    "canonical checkout or set BIOETL_DASHBOARD_REPORT_ROOT to the "
+                    "absolute reports/ path."
+                ),
+            }
+        ],
+    }
+    write_report(report_dir / f"docker-incident-{spec.name}.json", incident)
+    return 1
 
 
 def start_or_recover(
@@ -1373,10 +1488,17 @@ def start_or_recover(
                 sleep=sleep,
                 clock=clock,
                 runner=runner,
+                force_recreate=(
+                    _preflight_has_dashboard_source_drift(preflight_path)
+                    or spec.name == "main"
+                ),
             ),
             desktop_recovery_attempted=desktop_recovery_attempted,
         )
         if succeeded:
+            verify_rc = _post_start_report_bind_gate(spec=spec, report_dir=report_dir)
+            if verify_rc != 0:
+                return verify_rc
             return 0
         recent_logs = _capture_recent_logs(
             spec=spec, runner=runner, deadline=deadline, clock=clock

@@ -94,6 +94,56 @@ def test_dashboard_runtime_environment_is_scoped_and_managed(tmp_path: Path) -> 
             os.environ["BIOETL_RUNTIME_SOURCE_ID"] = previous
 
 
+def test_preflight_errors_are_recoverable_for_dashboard_and_cross_stack(
+    tmp_path: Path,
+) -> None:
+    report = tmp_path / "preflight.json"
+    report.write_text(
+        json.dumps(
+            {
+                "findings": [
+                    {
+                        "code": "DASHBOARD_SOURCE_MOUNT",
+                        "severity": "error",
+                        "evidence": {"stack": "main", "target": "/app/reports"},
+                    },
+                    {
+                        "code": "PROJECT_ORIGIN",
+                        "severity": "error",
+                        "evidence": {"stack": "monitoring"},
+                    },
+                    {
+                        "code": "F003",
+                        "severity": "error",
+                        "evidence": {"actual_owner": "neo4j/neo4j", "port": 7474},
+                    },
+                    {
+                        "code": "MOUNT_ORIGIN",
+                        "severity": "error",
+                        "evidence": {"stack": "main"},
+                    },
+                    {
+                        "code": "CAPACITY_DOCKER_ROOT",
+                        "severity": "error",
+                        "evidence": {},
+                    },
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    assert (
+        runtime_manager._preflight_errors_are_recoverable(report, stack="main") is True
+    )
+
+
+def test_compose_up_force_recreates_main_stack_on_first_attempt() -> None:
+    args = runtime_manager._compose_up_wait_args(
+        _spec(), attempts=1, remaining=30.0, force_recreate=True
+    )
+    assert "--force-recreate" in args
+
+
 def test_status_origin_findings_exposes_dashboard_source_drift(
     tmp_path: Path,
 ) -> None:
@@ -500,8 +550,8 @@ def test_recover_continues_when_preflight_only_reports_container_health(
     assert result == 0
     up_calls = [call for call in calls if "up" in call]
     assert up_calls
-    # First recover attempt stays non-destructive (no force-recreate).
-    assert "--force-recreate" not in up_calls[0]
+    # Main stack force-recreates on attempt 1 so stale Desktop report binds cannot stick.
+    assert "--force-recreate" in up_calls[0]
     assert not list(tmp_path.glob("docker-incident-*.json"))
 
 
@@ -577,7 +627,8 @@ def test_recovery_force_recreates_only_after_first_failed_attempt(
 
     assert result == 0
     assert len(up_calls) >= 2
-    assert "--force-recreate" not in up_calls[0]
+    # Main stack always force-recreates; later attempts remain force-recreate too.
+    assert "--force-recreate" in up_calls[0]
     assert "--force-recreate" in up_calls[1]
 
 
