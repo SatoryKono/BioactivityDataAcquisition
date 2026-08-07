@@ -142,7 +142,9 @@ scheduled VACUUM через cron:
 
 ```bash
 #!/bin/bash
-# scripts/engineering/repo/scheduled_vacuum.sh (пример пользовательского скрипта)
+# Example operator wrapper (not shipped). Prefer repo entrypoint:
+#   python -m scripts.ops.data.vacuum_delta --help
+# or schedule a thin host cron that invokes that module.
 
 set -euo pipefail
 

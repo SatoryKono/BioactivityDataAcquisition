@@ -24,7 +24,7 @@ python -m scripts.engineering.qa.refresh_governance_artifacts --check
 
 1. Module coverage inventory `source_tree_sha256`:
    ```bash
-   python -m scripts.engineering.qa.report_module_coverage --allow-missing-coverage-xml
+   python -m scripts.engineering.qa.report_module_coverage_inventory --allow-missing-coverage-xml
    ```
    Or root helper when present:
    ```bash
