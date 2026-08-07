@@ -141,6 +141,12 @@ Guards (fail-closed):
    `verify_report_bind.py` and fails the start when host has reports but Ops
    HTTP returns `count=0`.
 4. Operator re-check: `python scripts/ops/runtime/docker/verify_report_bind.py`.
+5. After application code changes that touch Ops HTTP / `report_root` readiness,
+   refresh the image source tree (full `docker compose build bioetl` or a
+   src-overlay rebuild) so `/health/ready` exposes `checks.report_root`.
+   Host-side verify **must not** export container path
+   `BIOETL_REPORT_ROOT=/app/reports/run-reports` into the shell — that path is
+   for the container only; on Windows it becomes a bogus `E:\app\...` root.
 ```
 
 If verification fails, recreate the main stack from the canonical checkout

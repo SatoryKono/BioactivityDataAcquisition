@@ -37,6 +37,24 @@ def _load_module() -> ModuleType:
     return module
 
 
+def test_host_report_root_ignores_container_bioetl_report_root(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    mod = _load_module()
+    monkeypatch.setenv("BIOETL_REPORT_ROOT", "/app/reports/run-reports")
+    monkeypatch.delenv("BIOETL_DASHBOARD_REPORT_ROOT", raising=False)
+    root = mod._host_report_root(tmp_path)
+    assert root == (tmp_path / "reports" / "run-reports").resolve()
+    assert mod._looks_like_container_path("/app/reports/run-reports") is True
+    assert (
+        mod._looks_like_container_path(
+            r"C:\Program Files\Git\app\reports\run-reports"
+        )
+        is True
+    )
+    assert mod._looks_like_container_path(str(tmp_path / "reports")) is False
+
+
 def test_compose_host_bind_path_uses_drive_letter_forward_slashes(
     tmp_path: Path,
 ) -> None:

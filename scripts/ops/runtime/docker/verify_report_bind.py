@@ -58,16 +58,32 @@ def _repo_root() -> Path:
     return _REPO_ROOT
 
 
+def _looks_like_container_path(value: str) -> bool:
+    """True when *value* is a Linux container path, not a host bind source.
+
+    Compose injects ``BIOETL_REPORT_ROOT=/app/reports/run-reports`` for the
+    bioetl service. Operators who re-export that shell env on Windows must not
+    make host-side verify resolve to a bogus host path. Git Bash MSYS path
+    conversion rewrites ``/app/...`` to ``C:/Program Files/Git/app/...``.
+    """
+    normalized = value.strip().replace("\\", "/")
+    if normalized == "/app" or normalized.startswith("/app/"):
+        return True
+    lowered = normalized.casefold()
+    # Git Bash (MSYS) rewrite of absolute container paths under the Git install.
+    return "/git/app/" in lowered or lowered.endswith("/git/app")
+
+
 def _host_report_root(repo: Path) -> Path:
     env = os.environ.get("BIOETL_REPORT_ROOT", "").strip()
-    if env:
+    if env and not _looks_like_container_path(env):
         return Path(env).expanduser().resolve()
     return (repo / "reports" / "run-reports").resolve()
 
 
 def _host_reports_mount(repo: Path) -> Path:
     env = os.environ.get("BIOETL_DASHBOARD_REPORT_ROOT", "").strip()
-    if env:
+    if env and not _looks_like_container_path(env):
         return Path(env).expanduser().resolve()
     return (repo / "reports").resolve()
 
