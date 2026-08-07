@@ -40,6 +40,10 @@ FORBIDDEN_PROMETHEUS_LABEL_NAMES = frozenset(
 _ADAPTER_ENDPOINT_LABEL_METRICS = frozenset(
     {
         "bioetl_adapter_request_duration_seconds",
+        # Compatibility gauge shares the adapter endpoint label contract (#8013).
+        # Health/preflight paths may normalize labels for this family; keep it
+        # allowlisted so endpoint is not rejected (#chembl_baseline health).
+        "bioetl_adapter_request_p95_seconds",
         "bioetl_adapter_requests_total",
         "bioetl_adapter_batch_size",
     }
