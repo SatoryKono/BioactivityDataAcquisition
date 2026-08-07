@@ -45,7 +45,9 @@ def _plain_value(value: object) -> object:
     if isinstance(value, (list, tuple)):
         return [_plain_value(item) for item in value]
     if isinstance(value, (set, frozenset)):
-        return [_plain_value(item) for item in value]
+        # Deterministic order for set-valued attributes (JSON/export stability).
+        plain_items = [_plain_value(item) for item in value]
+        return sorted(plain_items, key=lambda item: (type(item).__name__, repr(item)))
     return value
 
 

@@ -7,10 +7,10 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2478 |
-| Tracked doc-like files | 2478 |
+| Doc-like files | 2574 |
+| Tracked doc-like files | 2574 |
 | Ignored local docs/reports files | 0 |
-| Duplicate groups | 6 |
+| Duplicate groups | 2 |
 | Generated without route or exception | 0 |
 | Generated routes | 69 |
 
@@ -18,37 +18,36 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 2478 |
-| tracked | 2478 |
+| tracked | 2574 |
 
 ## Lifecycle Counts
 
 | Lifecycle | Count |
 | --- | --- |
 | active_backlog | 1 |
-| active_draft | 264 |
+| active_draft | 265 |
 | active_quality_baseline | 47 |
-| closeout_evidence | 64 |
+| closeout_evidence | 84 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 2 |
 | docs_reports_generated_or_route_owned | 7 |
 | docs_reports_retention_sensitive_evidence | 21 |
 | generated_skill_license_mirror | 5 |
-| generated_skill_reference_mirror | 12 |
+| generated_skill_reference_mirror | 8 |
 | generated_test_run_evidence | 4 |
 | guide | 4 |
 | index | 4 |
 | issue_pack | 49 |
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
-| published_skill_reference_redirect | 33 |
-| working_report | 119 |
+| published_skill_reference_redirect | 20 |
+| working_report | 253 |
 
 ## GitHub Issue Drafts And Packs
 
 | Lifecycle | Count |
 | --- | --- |
-| active_draft | 264 |
+| active_draft | 265 |
 | guide | 4 |
 | index | 4 |
 | issue_pack | 49 |
@@ -58,38 +57,36 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 845 |
+| Active | 792 |
 | Archived | 155 |
 | Canonical | 73 |
-| Generated | 863 |
-| Working | 542 |
+| Generated | 859 |
+| Working | 695 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 845 |
+| active | 792 |
 | archive | 155 |
 | canonical | 73 |
-| generated | 863 |
-| working | 542 |
+| generated | 859 |
+| working | 695 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-github-state-check | 313 |
-| archive-after-migration | 114 |
-| generate-automatically | 863 |
-| keep | 1184 |
+| archive-after-github-state-check | 314 |
+| archive-after-migration | 246 |
+| generate-automatically | 859 |
+| keep | 1151 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
 
 | Path | Status | Inbound | Action |
 | --- | --- | --- | --- |
-| `docs/00-project/ai/skills/global/documentation-audit/references/audit-checklist.md` | Working | 0 | archive-after-migration |
-| `docs/00-project/ai/skills/global/documentation-audit/references/report-template.md` | Working | 0 | archive-after-migration |
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-05.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
@@ -138,36 +135,38 @@
 | `reports/quality/branch-coverage-gate-evidence.json` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260805/00-preflight.md` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260805/01-scope-matrix.md` | Working | 0 | archive-after-migration |
-| `reports/quality/compatibility-importer-census.json` | Working | 0 | archive-after-migration |
-| `reports/quality/compatibility-importer-census.md` | Working | 0 | archive-after-migration |
-| `reports/quality/config-compatibility-legacy-taxonomy-review.json` | Working | 0 | archive-after-migration |
-| `reports/quality/config-surface-backlog.json` | Working | 0 | archive-after-migration |
-| `reports/quality/contract-coverage-matrix.json` | Working | 0 | archive-after-migration |
-| `reports/quality/contract-coverage-matrix.md` | Working | 0 | archive-after-migration |
-| `reports/quality/control-plane-duplication.json` | Working | 0 | archive-after-migration |
-| `reports/quality/control-plane-duplication.md` | Working | 0 | archive-after-migration |
-| `reports/quality/coverage-tail-branch-gate-plan.md` | Working | 0 | archive-after-migration |
-| `reports/quality/diagram-freshness-7316-verification.md` | Working | 0 | archive-after-migration |
-| `reports/quality/domain-aggregate-invariant-registry.json` | Working | 0 | archive-after-migration |
-| `reports/quality/domain-composite-config-importer-map.md` | Working | 0 | archive-after-migration |
-| `reports/quality/hotspot-coverage-tail-owner-map.json` | Working | 0 | archive-after-migration |
-| `reports/quality/issue-6480-application-core-partial-tranche.json` | Working | 0 | archive-after-migration |
-| `reports/quality/layer-contract-coverage-matrix.json` | Working | 0 | archive-after-migration |
-| `reports/quality/layer-contract-coverage-matrix.md` | Working | 0 | archive-after-migration |
-| `reports/quality/live-residual-snapshot.json` | Working | 0 | archive-after-migration |
-| `reports/quality/low-coverage-targeted-tests-6045.json` | Working | 0 | archive-after-migration |
-| `reports/quality/partial-coverage-top50-arch-res-03.json` | Working | 0 | archive-after-migration |
-| `reports/quality/partial-coverage-top50-arch-res-03.md` | Working | 0 | archive-after-migration |
-| `reports/quality/port-adapter-factory-coverage.json` | Working | 0 | archive-after-migration |
-| `reports/quality/port-adapter-factory-coverage.md` | Working | 0 | archive-after-migration |
-| `reports/quality/reports-workspace-review.json` | Working | 0 | archive-after-migration |
-| `reports/quality/retained-public-entrypoint-burn-down-plan.json` | Working | 0 | archive-after-migration |
-| `reports/quality/root-hygiene-2026-07-28-issue-publish.json` | Working | 0 | archive-after-migration |
-| `reports/quality/root-hygiene-cleanup-classification.json` | Working | 0 | archive-after-migration |
-| `reports/quality/root-hygiene-review-evidence.json` | Working | 0 | archive-after-migration |
-| `reports/quality/runtime-builders-duplication.json` | Working | 0 | archive-after-migration |
-| `reports/quality/runtime-builders-duplication.md` | Working | 0 | archive-after-migration |
-| `reports/quality/scripts_deprecation_backlog.md` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/00-preflight.md` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/01-scope-matrix.json` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/01-scope-matrix.md` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/BLOCKER_8215_CLOSEOUT.json` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/BLOCKER_8215_CLOSEOUT.md` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/CAMPAIGN_STATUS.md` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S00-src-bioetl-residual.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S01-domain-residual-root.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S04-app-services-other.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S04b-app-residual.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S08b-infra-residual.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S11b-interfaces-residual.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S12-tests-architecture-root-1.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S12-tests-architecture-root-2.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S13-tests-unit-domain-root.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S14-tests-unit-application-root.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S14b-tests-unit-infrastructure-root.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S15c-tests-residual-1.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S15c-tests-residual-2.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S15c-tests-residual-3.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S15c-tests-residual-4.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S16b-configs-other.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S17-docs-00-project-root.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S20-scripts-root.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_diag277_by_file.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_diag_by_file.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_diag_files.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_domain_behavior_open.json` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_live_errors.json` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_live_errors_src.json` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_run_plan.json` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/findings/S01-domain-composite.findings.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -213,10 +212,6 @@
 | `docs/00-project/ai/skills/_references/local/deep-research/references/source-evaluation.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
 | `docs/00-project/ai/skills/_references/local/documentation-audit/references/audit-checklist.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
 | `docs/00-project/ai/skills/_references/local/documentation-audit/references/report-template.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/_references/local/py-test-swarm/references/l1-playbook.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/_references/local/py-test-swarm/references/l2-l3-task-brief.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/_references/local/py-test-swarm/references/report-templates.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/_references/local/py-test-swarm/references/telemetry-and-flaky-db.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
 | `docs/00-project/ai/skills/_references/local/technical-designer-mermaid/references/patterns.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
 | `docs/00-project/ai/skills/global/.system/skill-creator/SKILL.md` | ai-skill-license-mirrors |  |  | scripts/ai/codex/check_skills_mirror.sh |
 | `docs/00-project/ai/skills/global/.system/skill-creator/agents/openai.yaml` | ai-skill-license-mirrors |  |  | scripts/ai/codex/check_skills_mirror.sh |
@@ -253,6 +248,10 @@
 | `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-runner-pkg-part2.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/render/generate_package_family_class_diagrams.py |
 | `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-base-transformer.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/render/generate_package_family_class_diagrams.py |
 | `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-batch-execution.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/render/generate_package_family_class_diagrams.py |
+| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-lifecycle.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/render/generate_package_family_class_diagrams.py |
+| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-postrun.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/render/generate_package_family_class_diagrams.py |
+| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-preflight.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/render/generate_package_family_class_diagrams.py |
+| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-observability.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/render/generate_package_family_class_diagrams.py |
 
 ## GitHub Issue Evidence Examples
 
@@ -296,8 +295,8 @@
 | `.github/ISSUES/CHEMBL-020-Expand-Observed-Value-Inventory-For-Weakly-Covered-ChEMBL-Reference-Pipelines.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/CHEMBL-021-Sync-ChEMBL-Provider-Docs-With-Active-Normalization-Surfaces.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/CHEMBL-ISSUES-INDEX.md` | index |  | keep |
+| `.github/ISSUES/CODERABBIT-FULL-2026-08-FINDINGS-PACK.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/CODERABBIT-FULL-2026-08-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
-| `.github/ISSUES/CODERABBIT-REAUDIT-2026-07-27-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
 
 ## Docs Reports Evidence Examples
 
