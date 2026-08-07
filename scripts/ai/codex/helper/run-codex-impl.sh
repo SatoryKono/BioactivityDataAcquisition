@@ -10,13 +10,17 @@ REPO_ROOT="${REPO_ROOT:-$(timeout 5 git rev-parse --show-toplevel 2>/dev/null ||
 ENSURE_SCRIPT="${SCRIPT_DIR}/ensure-codex-cli.sh"
 ENSURE_MCP_SCRIPT="${SCRIPT_DIR}/ensure-mcp.sh"
 
-# Load environment
+# Load optional local API-key env (not required when ChatGPT device auth is present).
 ENV_FILE="${ROOT_DIR}/.env.codex"
 if [[ -f "${ENV_FILE}" ]]; then
     set -a
+    # shellcheck disable=SC1090
     source "${ENV_FILE}"
     set +a
 fi
+
+# shellcheck source=codex-auth-lib.sh
+source "${SCRIPT_DIR}/codex-auth-lib.sh"
 
 # Ref is a remote HTTP MCP server, so Codex itself must receive the header
 # source variable. Load ONLY that key into the Codex parent environment.
@@ -41,11 +45,17 @@ if [[ -f "${REPO_ENV_LOADER}" ]]; then
     )
 fi
 
-# Verify API key
-if [[ -z "${OPENAI_API_KEY:-}" ]]; then
-    echo "[ERROR] OPENAI_API_KEY not set in ${ENV_FILE}" >&2
-    echo "[INFO] Please edit .env.codex and add your API key from: https://platform.openai.com/api-keys" >&2
+# Accept either OPENAI_API_KEY or persisted ChatGPT tokens from `codex login`.
+if ! codex_has_usable_auth; then
+    echo "[ERROR] No usable Codex auth found." >&2
+    echo "[INFO] Prefer device auth: bash scripts/ai/codex/run-codex.sh device-login" >&2
+    echo "[INFO] Or set OPENAI_API_KEY in ${ENV_FILE} (from https://platform.openai.com/api-keys)" >&2
     exit 1
+fi
+if codex_has_env_api_key; then
+    echo "[INFO] Auth: OPENAI_API_KEY"
+else
+    echo "[INFO] Auth: ChatGPT session ($(codex_auth_file))"
 fi
 
 if [[ ! -x "${ENSURE_SCRIPT}" ]]; then
