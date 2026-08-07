@@ -19,6 +19,7 @@ Commands:
     mock-quarantine    Start mock quarantine explorer API server
     test-changed       Run tests for changed files only (Python backend)
     setup-mcp          Setup Copilot/Codex MCP integration
+    create-pipeline    Generate pipeline scaffolding boilerplate
 """
 
 from __future__ import annotations
@@ -42,6 +43,7 @@ _PYTHON_COMMANDS = {
     "run-tests": "run_tests.py",
     "mock-metrics": "metrics_mock_server.py",
     "mock-quarantine": "quarantine_explorer_mock_server.py",
+    "create-pipeline": "create_pipeline.py",
 }
 COMMAND_SPECS = {
     name: python_command(script) for name, script in _PYTHON_COMMANDS.items()

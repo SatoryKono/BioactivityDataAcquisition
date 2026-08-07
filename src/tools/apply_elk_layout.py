@@ -2,9 +2,21 @@
 
 The canonical diagram codemod lives under ``scripts/diagrams``. This module is
 retained temporarily for existing direct invocations and architecture tests.
+
+Deprecated: Use 'scripts.diagrams.fix.apply_elk_layout' instead.
+This wrapper will be removed in a future version.
 """
 
 from __future__ import annotations
+
+import warnings
+
+warnings.warn(
+    "src.tools.apply_elk_layout is deprecated. "
+    "Use 'scripts.diagrams.fix.apply_elk_layout' instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 from scripts.diagrams.fix import apply_elk_layout as _apply_elk_layout
 

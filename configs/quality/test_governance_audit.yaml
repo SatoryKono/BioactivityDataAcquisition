@@ -569,7 +569,7 @@ test_audit_closeout_2026_07_08:
     test_file_count_definition: tests/**/test_*.py from pyproject python_files
     repo_backed_unit_lane: repo-backed-unit
     repo_backed_unit_subtree: tests/unit/repo_backed/
-    repo_backed_unit_test_files: 52
+    repo_backed_unit_test_files: 54
     performance_baseline_reports:
     - reports/test-telemetry/slowest-tests.json
     - reports/test-telemetry/slowest-tests.md
@@ -787,13 +787,13 @@ oversized_test_module_inventory:
     owner: observability-dashboards
   - issue_ref: '#6326'
     source: tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py
-    source_lines_after_split: 1028
+    source_lines_after_split: 1067
     extracted_surface: tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py
     extracted_surface_lines: 1259
     owner: observability-dashboards
   - issue_ref: '#6364'
     source: tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py
-    source_lines_after_split: 1028
+    source_lines_after_split: 1067
     extracted_surface: tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py
     extracted_surface_lines: 1259
     owner: observability-dashboards

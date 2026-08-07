@@ -2,9 +2,21 @@
 
 The canonical diagram codemod lives under ``scripts/diagrams``. This module is
 retained temporarily for existing direct invocations.
+
+Deprecated: Use 'scripts.diagrams.fix.differentiate_linkstyle' instead.
+This wrapper will be removed in a future version.
 """
 
 from __future__ import annotations
+
+import warnings
+
+warnings.warn(
+    "src.tools.differentiate_linkstyle is deprecated. "
+    "Use 'scripts.diagrams.fix.differentiate_linkstyle' instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 from scripts.diagrams.fix import differentiate_linkstyle as _differentiate_linkstyle
 
