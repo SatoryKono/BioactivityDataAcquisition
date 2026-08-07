@@ -110,15 +110,15 @@ def _collect_parity_issues(
 def _print_parity_report(all_issues: list[str]) -> None:
     print("\n" + "=" * 50)
     if all_issues:
-        print("❌ DQ DSL Parity Issues Found:")
+        print("[ERROR] DQ DSL Parity Issues Found:")
         for issue in all_issues:
             print(f"  {issue}")
-        print(f"\n📈 Total issues: {len(all_issues)}")
+        print(f"\n[INFO] Total issues: {len(all_issues)}")
         return
-    print("✅ DQ DSL Parity Check Passed!")
-    print("📋 All validation structures are properly documented")
-    print("📋 No outdated patterns found")
-    print("📋 Documentation covers all config structures")
+    print("[OK] DQ DSL Parity Check Passed!")
+    print("[OK] All validation structures are properly documented")
+    print("[OK] No outdated patterns found")
+    print("[OK] Documentation covers all config structures")
 
 
 def _load_inputs() -> tuple[str, list[Path]]:
@@ -201,12 +201,12 @@ def check_documentation_coverage(
 ) -> list[str]:
     """Check that all config structures are documented."""
     issues = [
-        f"❌ Validation type not documented: '{vtype}'"
+        f"[ERROR] Validation type not documented: '{vtype}'"
         for vtype in config_analysis["validation_types"]
         if vtype not in docs_content
     ]
     issues.extend(
-        f"❌ Rule type not documented: '{rule_type}'"
+        f"[ERROR] Rule type not documented: '{rule_type}'"
         for rule_type in config_analysis["rule_types"]
         if f"type: {rule_type}" not in docs_content
         and f"`{rule_type}`" not in docs_content
@@ -224,7 +224,7 @@ def main() -> int:
 
     config_analysis = _analyze_inputs(config_files)
     _print_config_analysis(config_analysis)
-    print("\n🔎 Checking parity...")
+    print("\n[INFO] Checking parity...")
     all_issues = _check_parity(docs_content, config_analysis)
     _report_parity(all_issues)
     return 1 if all_issues else 0

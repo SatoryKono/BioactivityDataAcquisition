@@ -169,16 +169,16 @@ class ParityChecker:
         parity_score = (len(active_entities) / max(len(self.entity_configs), 1)) * 100
 
         if self.issues:
-            print(f"\n⚠️  Critical Issues Found: {len(self.issues)}")
+            print(f"\n[WARNING] Critical Issues Found: {len(self.issues)}")
             for i, issue in enumerate(self.issues, 1):
                 print(f"  {i}. {issue}")
-            print(f"\n📊 Parity Score: {parity_score:.1f}%")
+            print(f"\n[INFO] Parity Score: {parity_score:.1f}%")
             return False
         else:
-            print("\n✅ All parity checks passed!")
-            print(f"📊 Parity Score: {parity_score:.1f}%")
+            print("\n[OK] All parity checks passed!")
+            print(f"[INFO] Parity Score: {parity_score:.1f}%")
             if parity_score >= 95:
-                print("🎉 Excellent documentation coverage!")
+                print("[OK] Excellent documentation coverage!")
             return True
 
     def run(self) -> bool:
@@ -193,12 +193,12 @@ class ParityChecker:
             return False
 
 
-if __name__ == "__main__":
+def main() -> int:
+    """Main execution function."""
     checker = ParityChecker()
     success = checker.run()
+    return 0 if success else 1
 
-    # Exit with appropriate code
-    if success:
-        sys.exit(0)
-    else:
-        sys.exit(1)
+
+if __name__ == "__main__":
+    sys.exit(main())
