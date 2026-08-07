@@ -85,6 +85,14 @@ class ReferentialIntegrityResult:
     foreign_keys: Mapping[str, ForeignKeyResult] = field(default_factory=dict)
     status: DQCheckStatus = DQCheckStatus.PASS
 
+    def __post_init__(self) -> None:
+        """Freeze foreign_keys mapping."""
+        object.__setattr__(
+            self,
+            "foreign_keys",
+            MappingProxyType(dict(self.foreign_keys)),
+        )
+
 
 @dataclass(frozen=True, slots=True)
 class StatisticalMetric:
@@ -103,8 +111,16 @@ class StatisticalProfileResult:
     """Statistical profile check result."""
 
     baseline_period_days: int
-    metrics: dict[str, StatisticalMetric] = field(default_factory=dict)
+    metrics: Mapping[str, StatisticalMetric] = field(default_factory=dict)
     status: DQCheckStatus = DQCheckStatus.PASS
+
+    def __post_init__(self) -> None:
+        """Freeze metrics mapping."""
+        object.__setattr__(
+            self,
+            "metrics",
+            MappingProxyType(dict(self.metrics)),
+        )
 
 
 @dataclass(frozen=True, slots=True)
