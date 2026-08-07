@@ -121,11 +121,12 @@ class ColumnQualifier:
             >>> q.provider
             'chembl'
         """
-        parts = qualified_name.split(".")
-        if len(parts) != 3:
+        # Split from the left with maxsplit=2 so field may contain dots.
+        parts = qualified_name.split(".", 2)
+        if len(parts) != 3 or not all(p.strip() for p in parts):
             raise ValueError(
-                f"Qualified name '{qualified_name}' must have exactly 3 parts "
-                "(provider.entity.field)"
+                f"Qualified name '{qualified_name}' must have format "
+                "provider.entity.field (field may contain additional dots)"
             )
         return cls(provider=parts[0], entity=parts[1], field=parts[2])
 
@@ -139,7 +140,7 @@ class ColumnQualifier:
         Returns:
             True if column has format x.y.z (3 dot-separated parts).
         """
-        parts = column.split(".")
+        parts = column.split(".", 2)
         return len(parts) == 3 and all(p.strip() for p in parts)
 
     @staticmethod
