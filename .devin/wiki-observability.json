@@ -1,0 +1,63 @@
+{
+  "pages": [
+    {
+      "title": "Observability",
+      "purpose": "Index of observability infrastructure: logging, metrics, tracing, dashboards, alerting, and quality gates.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, src/bioetl/infrastructure/observability/, grafana/dashboards/."
+        }
+      ]
+    },
+    {
+      "title": "Logging",
+      "parent": "Observability",
+      "purpose": "Documents the UnifiedLogger, LogEvents enum, structured logging conventions, and the logger port abstraction.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/observability/logging/, docs/00-project/RULES.md."
+        }
+      ]
+    },
+    {
+      "title": "Metrics",
+      "parent": "Observability",
+      "purpose": "Covers Prometheus metrics, metric naming conventions, and the metrics port abstraction.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/observability/metrics/, docs/02-architecture/decisions/."
+        }
+      ]
+    },
+    {
+      "title": "Tracing",
+      "parent": "Observability",
+      "purpose": "Documents distributed tracing, span propagation, and the tracing port abstraction.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/infrastructure/observability/tracing/, docs/02-architecture/decisions/."
+        }
+      ]
+    },
+    {
+      "title": "Dashboards",
+      "parent": "Observability",
+      "purpose": "Index of Grafana dashboards, panel queries, and visualization conventions.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: grafana/dashboards/, scripts/ops/observability/grafana/."
+        }
+      ]
+    },
+    {
+      "title": "Alerting",
+      "parent": "Observability",
+      "purpose": "Documents Prometheus alert rules, recording rules, and alert routing.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: configs/observability/prometheus/, docs/02-architecture/decisions/."
+        }
+      ]
+    }
+  ]
+}

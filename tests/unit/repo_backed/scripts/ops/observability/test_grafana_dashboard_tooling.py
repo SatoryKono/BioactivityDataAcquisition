@@ -118,6 +118,55 @@ def test_rerender_config_uses_env_defaults(monkeypatch: Any, tmp_path: Path) -> 
     assert collapsed_config.expand_collapsed_rows is False
 
 
+def test_rerender_accepts_additional_dashboard_variables(tmp_path: Path) -> None:
+    config = rerender_subject._parse_args(
+        [
+            "--output-dir",
+            str(tmp_path),
+            "--var",
+            "provider=chembl",
+            "--var",
+            "stage=All",
+        ]
+    )
+
+    assert config.variables == (("provider", "chembl"), ("stage", "All"))
+    params = rerender_subject._scope_query_params(config)
+    assert params["var-provider"] == "chembl"
+    assert params["var-stage"] == "All"
+
+
+def test_rerender_rejects_invalid_or_conflicting_dashboard_variables() -> None:
+    with pytest.raises(SystemExit):
+        rerender_subject._parse_args(["--var", "bad-name=value"])
+    with pytest.raises(SystemExit):
+        rerender_subject._parse_args(
+            ["--var", "provider=chembl", "--var", "provider=pubchem"]
+        )
+
+
+def test_rerender_rejects_conflict_with_dedicated_scope_option(
+    tmp_path: Path,
+) -> None:
+    config = rerender_subject.RenderConfig(
+        base_url="http://localhost:3000",
+        username="admin",
+        password="changeme",
+        service_account_token="",
+        output_dir=tmp_path,
+        width=1600,
+        height=2200,
+        timeout_seconds=30.0,
+        selected_uids=(),
+        fallback="none",
+        pipeline="chembl_assay",
+        variables=(("pipeline", "pubchem_compound"),),
+    )
+
+    with pytest.raises(ValueError, match="conflicts with a dedicated scope option"):
+        rerender_subject._scope_query_params(config)
+
+
 def test_rerender_load_dashboards_filters_and_sorts(
     monkeypatch: Any, tmp_path: Path
 ) -> None:
@@ -369,6 +418,7 @@ def test_rerender_manifest_records_engine_and_run_scope(tmp_path: Path) -> None:
         "run_type": "backfill",
         "run_id": "b51986c6-870b-4457-aa70-baedac2710ad",
         "range_hours": 12,
+        "variables": {},
     }
     assert manifest["render_results"][0]["status"] == "rendered"
     assert manifest["render_results"][0]["screenshot"] == (
