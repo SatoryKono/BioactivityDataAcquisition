@@ -49,7 +49,7 @@ Run from PowerShell in the project root:
 
 ```powershell
 cd e:\g-drive\05_AI\github\BioactivityDataAcquisition
-.\scripts\engineering\dev\.setup_wsl_codex.sh
+.\scripts\ai\codex\helper\setup-wsl.sh
 ```
 
 ### 2. Interactive Mode
@@ -151,17 +151,17 @@ Install with: `npm install -g @openai/codex`
 ### "OpenAI API unreachable"
 
 - Verify wsl-vpnkit is running: `wsl -d wsl-vpnkit -- /app/wsl-vpnkit &`
-- Re-run VPN setup: `.\scripts\engineering\dev\.setup_wsl_codex.sh`
+- Re-run Codex WSL setup: `.\scripts\ai\codex\helper\setup-wsl.sh`
 
 ### "Connection timeout"
 
-- Check: `.\scripts\engineering\dev\.setup_wsl_codex.sh` for connectivity status
+- Check: `.\scripts\ai\codex\helper\setup-wsl.sh` for connectivity status
 
 ## Files Modified
 
 - `scripts/ops/launchers/codex/codex.bat` - Main launcher (interactive & prompt modes)
 - `scripts/ops/launchers/codex/codex-exec.bat` - Auto-execution launcher
-- `scripts/engineering/dev/.setup_wsl_codex.sh` - VPN setup (unchanged)
+- `scripts/ai/codex/helper/setup-wsl.sh` - Codex WSL bootstrap helper
 
 ## Best Practices
 

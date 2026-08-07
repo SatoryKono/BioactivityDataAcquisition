@@ -132,7 +132,7 @@ contracts remain stable. Provenance strips carry the operator-facing legend.
 
 - `docs/03-guides/dashboards/dux3-first-screen-inventory.json` (#7054)
 - `docs/03-guides/dashboards/dux3-audit-selection-notes.md` (#7054)
-- Apply script: `scripts/ops/observability/grafana/apply_dux3_residual.py`
+- DUX3 closeout is evidence-only (`dux3-first-screen-inventory.json`); no `apply_dux3_residual.py` in tree — later residuals use `apply_dux4_enforcement.py` / `apply_dux5_residual.py` / `apply_dux6_residual.py` / `apply_dux7_live_residual.py`
 
 ### DUX4 visual enforcement (2026-07-29, epic #7088)
 
