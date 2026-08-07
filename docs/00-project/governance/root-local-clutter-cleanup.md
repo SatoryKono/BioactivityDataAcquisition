@@ -1,8 +1,8 @@
 # Root local clutter cleanup (operator guidance)
 
 **Status:** active
-**Linked issues:** #6703 (RH), #6766 (RH2-01), #6798/#6799 (RH3), #6813/#6814/#6816 (RH4), #6876/#6877 (RH 2026-07-28), #7015–#7023 (RH5 2026-07-29); epics #6700, #6765, #6795, #6812, #6874, #7015
-**Last verified:** 2026-07-29
+**Linked issues:** #6703 (RH), #6766 (RH2-01), #6798/#6799 (RH3), #6813/#6814/#6816 (RH4), #6876/#6877 (RH 2026-07-28), #7015–#7023 (RH5 2026-07-29); RH7 #8292–#8295, #8299–#8300, #8306–#8307; epics #6700, #6765, #6795, #6812, #6874, #7015
+**Last verified:** 2026-08-07
 
 This note documents **local-only** cleanup for the repository root. It does not
 redefine runtime behavior. Canonical policy remains
@@ -40,14 +40,24 @@ inventing new allowlist entries.
    - `_tmp_*.py`, `/_cr_*.py`, `/_publish_*.py`, `_fail_*.txt`, `_a.txt`
    - `temp_closeout.json`, `.tmp_*`, `.tmp_test_run.log`, `mcp-shell.log`
    - `bash.exe.stackdump`, `nul` / `NUL` (Windows pseudo-file)
+   - empty exact-root `.worktrees/` (strict-untracked rejects it; non-empty trees hold active worktrees — do not recursive-delete)
    - `arch_fail_report.txt` / other root `*report*.txt`
    - `.gitignore~`
-4. Optional / expensive: tool caches and venvs
+4. Preferred reviewed tooling (exact root only; never secret `.env*`):
+   ```bash
+   # Safe reviewed paths (logs need --include-logs)
+   python -m scripts.engineering.repo.cleanup_root_local_clutter --include-logs --apply
+   # Empty .worktrees only (refuses non-empty)
+   python -m scripts.engineering.repo.cleanup_root_local_clutter --apply --path .worktrees
+   # Windows nul when listed in the root directory (uses listing + \\?\ helper)
+   python -m scripts.engineering.repo.cleanup_root_local_clutter --apply --path nul
+   ```
+5. Optional / expensive: tool caches and venvs
    (`.pytest_cache/`, `.mypy_cache/`, `.ruff_cache/`, `.hypothesis/`,
    `.venv*`, `node_modules/`) — purge only if you accept rebuild cost.
-5. Leave allowlisted tracked files and curated agent trees
+6. Leave allowlisted tracked files and curated agent trees
    (`.codex/`, tracked `.devin`/`.vibe`/`.zed`) alone.
-6. Re-check:
+7. Re-check:
    ```bash
    uv run python -m scripts.engineering.repo check-cleanliness --strict-untracked
    ```
@@ -101,7 +111,7 @@ when no active process depends on them:
 | root `~/` | Accidental tool home-mirror directory (not user `$HOME`) |
 | `.idea/`, `.qodo/` (local), `.ai/`, `.grok/`, `.windsurf/` | Editor/agent local state |
 | non-SKILL.md content under `.agents/` | Local agent workspace noise; curated `SKILL.md` adapters remain tracked |
-| `nul` / `NUL` | Windows reserved-name pseudo-file; ignored. Some hosts cannot unlink via `Path.unlink` |
+| `nul` / `NUL` | Windows reserved-name pseudo-file; ignored. Presence must be detected via directory listing (not `Path.exists()` / bare `is_file()`). Reviewed cleanup supports `nul`/`NUL` with a `\\?\` extended-path helper; Git Bash `rm -f ./nul` remains a fallback when Win32 denies unlink. |
 
 ## Retain while in use; safe to regenerate
 
@@ -173,6 +183,25 @@ so future runs do not recreate root `logs/` by default.
 | `.secrets.baseline` | **retain** | `tests/architecture/test_antipatterns.py::test_no_hardcoded_secrets` (detect-secrets baseline); pre-commit hook `detect-secrets-baseline`; `tests/architecture/conftest.py` inventory |
 | `.aiignore` | **retain** | Exact-root AI-client ignore surface (Cursor/compatible tooling); no hard Python importer; keep while allowlist lists it — do not grow scope; drop only with allowlist+policy+registry sync |
 
+## RH7 residual closeout (2026-08-07)
+
+Campaign branch: `grok-260807-root-hygiene-5cycle` (5 full Stage1–3 cycles).
+
+| Cycle | Issues | What landed |
+|---|---|---|
+| C1 | #8292, #8293 | Purged recreated `mcp-shell.log`; removed empty `.worktrees/` |
+| C2 | #8294, #8295 | Purged `logs/`, `test-output/`, `.coverage`; cleanup SAFE + listing-based `nul` support |
+| C3 | #8299, #8300 | Audit forbidden temps without requiring `is_file()`; empty-only `.worktrees` cleanup + registry candidate |
+| C4 | #8306, #8307 | This docs refresh; optional tool-cache purge on audit host |
+
+**Strict gate after RH7 C1–C3:** `check-cleanliness --strict-untracked` OK; tracked root **37 ≡ allowlist**.
+
+**Tooling notes (RH7):**
+
+- `Path('nul').exists()` is true on Win32 for the NUL device even when no root file is listed — cleanup/audit use **directory listing** membership.
+- Empty `.worktrees/` fails strict-untracked; cleanup deletes **only when empty** and refuses non-empty trees so exclusive worktrees are not destroyed.
+- Retain `.gitignore` rules for `*.log`, `nul`, and `.worktrees/`; do not expand the root allowlist for temps.
+
 ## Related
 
 - `.github/workflows/root-hygiene.yml`
@@ -181,5 +210,6 @@ so future runs do not recreate root `logs/` by default.
 - Epic RH3: #6795
 - Epic RH4: #6812
 - Epic RH (2026-07-28): #6874
+- RH7 issues: #8292–#8295, #8299–#8300, #8306–#8307
 - Pack: `.github/ISSUES/RH-2026-07-28-ROOT-HYGIENE-MINIMIZATION-ISSUE-PACK.md`
 - Pack RH4: `.github/ISSUES/RH4-2026-07-28-ROOT-HYGIENE-POST-RH3-RESIDUAL-ISSUE-PACK.md`
