@@ -203,3 +203,36 @@ def test_metadata_lineage_bundle_allows_legacy_missing_manifest_id_without_stric
     )
 
     assert bundle.metadata.output.artifact_id == "bronze_batch:batch-1"
+
+def test_bundle_does_not_mutate_caller_metadata() -> None:
+    """Anchors attach to a copy; caller metadata stays clean for reuse (#8169)."""
+    metadata = _make_bronze_metadata()
+    metadata.output.lineage_fragment_id = None
+    metadata.output.artifact_id = None
+    fragment_a = _make_produced_fragment(
+        artifact_id="bronze_batch:batch-a",
+        fragment_id="fragment-a",
+    )
+    fragment_b = _make_produced_fragment(
+        artifact_id="bronze_batch:batch-b",
+        fragment_id="fragment-b",
+    )
+
+    bundle_a = MetadataLineageBundleResult(
+        metadata=metadata,
+        lineage_fragment=fragment_a,
+    )
+    bundle_b = MetadataLineageBundleResult(
+        metadata=metadata,
+        lineage_fragment=fragment_b,
+    )
+
+    assert metadata.output.lineage_fragment_id in (None, "")
+    assert metadata.output.artifact_id in (None, "")
+    assert bundle_a.metadata.output.lineage_fragment_id == "fragment-a"
+    assert bundle_a.metadata.output.artifact_id == "bronze_batch:batch-a"
+    assert bundle_b.metadata.output.lineage_fragment_id == "fragment-b"
+    assert bundle_b.metadata.output.artifact_id == "bronze_batch:batch-b"
+    assert bundle_a.metadata is not metadata
+    assert bundle_b.metadata is not metadata
+
