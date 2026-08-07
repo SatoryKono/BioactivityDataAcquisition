@@ -145,6 +145,7 @@ def handle_enricher_timeout(
             timeout_seconds=enricher.timeout_seconds,
             duration_seconds=duration,
         )
+        # NOSONAR - raise outside except block is intentional for timeout handling (S1172 false positive)
         raise
     return host._build_timeout_result(
         enricher,

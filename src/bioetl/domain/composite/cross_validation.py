@@ -67,6 +67,7 @@ class FieldComparisonSpec:
 
     def _apply_default_threshold(self) -> None:
         # Deterministic defaults when callers leave threshold at zero.
+        # NOSONAR - math.isclose() is the correct way to compare floats (Sonar S1244 false positive)
         if not math.isclose(self.threshold, 0.0, abs_tol=1e-15):
             return
         if self.method == ComparisonMethod.FUZZY:

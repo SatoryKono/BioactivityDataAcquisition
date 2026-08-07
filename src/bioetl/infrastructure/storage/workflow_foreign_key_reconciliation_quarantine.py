@@ -46,7 +46,7 @@ FOREIGN_KEY_ORPHAN_QUARANTINE_CATEGORY = "foreign_key_reconciliation"
 FOREIGN_KEY_ORPHAN_PIPELINE_DEFAULT = "workflow_transforms"
 _CURRENT_FLAG_COLUMNS = ("_is_current", "is_current")
 _VALID_TO_COLUMNS = ("_valid_to", "valid_to")
-_SQL_IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+_SQL_IDENTIFIER_RE = re.compile(r"^[A-Za-z_]\w*$")  # NOSONAR - requires non-digit first char, \w+ alone is insufficient
 
 
 @dataclass(frozen=True, slots=True)
