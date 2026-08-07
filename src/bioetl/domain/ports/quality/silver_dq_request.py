@@ -40,20 +40,37 @@ class SilverDQAnalyzeRequest:
     key_nullability_rules: list[JsonDict] | None = None
 
 
-def _silver_dq_field_meta() -> tuple[tuple[str, ...], tuple[str, ...], dict[str, object], frozenset[str]]:
+def _record_silver_dq_field(
+    field: object,
+    *,
+    positional: list[str],
+    required: list[str],
+    defaults: dict[str, object],
+) -> None:
+    name = field.name  # type: ignore[attr-defined]
+    positional.append(name)
+    default = field.default  # type: ignore[attr-defined]
+    default_factory = field.default_factory  # type: ignore[attr-defined]
+    if default is MISSING and default_factory is MISSING:
+        required.append(name)
+        return
+    if default is not MISSING:
+        defaults[name] = default
+        return
+    if callable(default_factory):
+        defaults[name] = default_factory()
+
+
+def _silver_dq_field_meta() -> tuple[
+    tuple[str, ...], tuple[str, ...], dict[str, object], frozenset[str]
+]:
     positional: list[str] = []
     required: list[str] = []
     defaults: dict[str, object] = {}
     for field in fields(SilverDQAnalyzeRequest):
-        positional.append(field.name)
-        default = field.default
-        default_factory = field.default_factory
-        if default is MISSING and default_factory is MISSING:
-            required.append(field.name)
-        elif default is not MISSING:
-            defaults[field.name] = default
-        elif callable(default_factory):
-            defaults[field.name] = default_factory()
+        _record_silver_dq_field(
+            field, positional=positional, required=required, defaults=defaults
+        )
     return tuple(positional), tuple(required), defaults, frozenset(positional)
 
 

@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 __all__ = [
-    "require_positive_id",
     "require_non_empty_str",
+    "require_positive_id",
 ]
 
 

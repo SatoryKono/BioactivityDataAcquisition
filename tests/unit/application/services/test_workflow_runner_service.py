@@ -8,4 +8,4 @@ that still reference the historical location keep working.
 from __future__ import annotations
 
 # Re-export the full suite from the canonical location.
-from tests.unit.repo_backed.application.services.test_workflow_runner_service import *  # noqa: F403
+from tests.unit.repo_backed.application.services.test_workflow_runner_service import *

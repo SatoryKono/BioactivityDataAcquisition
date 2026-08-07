@@ -142,18 +142,22 @@ def require_int(value: object, field_name: str, default: int | None = None) -> i
     return value
 
 
-def require_float(value: object, field_name: str, default: float | None = None) -> float:
-    """Require a finite numeric value coercible to float."""
-    if value is None:
-        if default is None:
-            raise ValueError(f"{field_name} must be a number")
-        return default
+def _coerce_float(value: object, field_name: str) -> float:
     if isinstance(value, bool) or not isinstance(value, int | float | str):
         raise ValueError(f"{field_name} must be a number")
     try:
         return float(value)
     except (TypeError, ValueError) as exc:
         raise ValueError(f"{field_name} must be a number") from exc
+
+
+def require_float(value: object, field_name: str, default: float | None = None) -> float:
+    """Require a finite numeric value coercible to float."""
+    if value is None:
+        if default is None:
+            raise ValueError(f"{field_name} must be a number")
+        return default
+    return _coerce_float(value, field_name)
 
 
 def optional_float(value: object, field_name: str) -> float | None:

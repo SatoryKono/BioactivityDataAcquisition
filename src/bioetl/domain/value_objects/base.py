@@ -36,7 +36,7 @@ class ValueObject[T](ABC):
         _value: The validated internal value.
     """
 
-    __slots__ = ("_value", "_initialized")
+    __slots__ = ("_initialized", "_value")
 
     _value: T  # Type annotation for mypy
 

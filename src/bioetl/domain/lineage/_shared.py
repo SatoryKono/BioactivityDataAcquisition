@@ -18,18 +18,24 @@ __all__ = [
 ]
 
 
+def _detach_mapping(value: Mapping[object, object]) -> MappingProxyType:
+    return MappingProxyType(
+        {str(key): _detach_value(item) for key, item in value.items()}
+    )
+
+
+def _detach_collection(value: list[object] | tuple[object, ...] | set[object]) -> object:
+    if isinstance(value, set):
+        return frozenset(_detach_value(item) for item in value)
+    return tuple(_detach_value(item) for item in value)
+
+
 def _detach_value(value: object) -> object:
     """Return a recursively detached, immutable view of *value* when mutable."""
     if isinstance(value, Mapping):
-        return MappingProxyType(
-            {str(key): _detach_value(item) for key, item in value.items()}
-        )
-    if isinstance(value, list):
-        return tuple(_detach_value(item) for item in value)
-    if isinstance(value, tuple):
-        return tuple(_detach_value(item) for item in value)
-    if isinstance(value, set):
-        return frozenset(_detach_value(item) for item in value)
+        return _detach_mapping(value)
+    if isinstance(value, (list, tuple, set)):
+        return _detach_collection(value)
     return value
 
 
@@ -39,15 +45,19 @@ def mapping_to_plain(values: Mapping[str, object]) -> dict[str, object]:
     return {str(key): _plain_value(value) for key, value in values.items()}
 
 
+def _plain_set(value: set[object] | frozenset[object]) -> list[object]:
+    # Deterministic order for set-valued attributes (JSON/export stability).
+    plain_items = [_plain_value(item) for item in value]
+    return sorted(plain_items, key=lambda item: (type(item).__name__, repr(item)))
+
+
 def _plain_value(value: object) -> object:
     if isinstance(value, Mapping):
         return {str(key): _plain_value(item) for key, item in value.items()}
     if isinstance(value, (list, tuple)):
         return [_plain_value(item) for item in value]
     if isinstance(value, (set, frozenset)):
-        # Deterministic order for set-valued attributes (JSON/export stability).
-        plain_items = [_plain_value(item) for item in value]
-        return sorted(plain_items, key=lambda item: (type(item).__name__, repr(item)))
+        return _plain_set(value)
     return value
 
 

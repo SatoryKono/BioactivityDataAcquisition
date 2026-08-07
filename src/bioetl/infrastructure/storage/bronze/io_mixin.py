@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import tempfile
 from collections.abc import Callable, Iterator
 from pathlib import Path
@@ -117,17 +118,13 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
             )
         finally:
             if fd_owned:
-                try:
+                with contextlib.suppress(OSError):
                     os.close(fd)
-                except OSError:
-                    pass
             # Drop leftover temp on failure / idempotent-match success.
             # Successful replace renames the temp away so this is a no-op.
             if temp_path.exists():
-                try:
+                with contextlib.suppress(OSError):
                     temp_path.unlink()
-                except OSError:
-                    pass
     def _compressed_payload_matches(self, left: Path, right: Path) -> bool:
         """Compare compressed Bronze payloads by full decompressed streams.
 

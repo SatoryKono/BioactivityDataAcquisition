@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from unittest.mock import MagicMock
 
 import pytest
@@ -35,7 +35,6 @@ from bioetl.infrastructure.observability._metrics_server_state import (
 )
 from bioetl.domain.ports import (
     PipelineSnapshot,
-    StageBreakpoint,
 )
 
 pytestmark = pytest.mark.unit
@@ -59,7 +58,7 @@ def test_uuid_redaction_requires_full_string_match() -> None:
 def test_metrics_server_state_lock_roundtrip() -> None:
     reset_server_state()
     assert is_metrics_server_running() is False
-    started = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    started = datetime(2026, 1, 1, tzinfo=UTC)
     mark_metrics_server_started(port=8000, addr="127.0.0.1", started_at=started)
     assert is_metrics_server_running() is True
     status = get_metrics_server_runtime_status()
@@ -89,7 +88,7 @@ def test_debug_adapter_snapshot_buffer_is_bounded() -> None:
 
 def test_zscore_zero_stddev_flags_any_deviation() -> None:
     detector = ZScoreDetector()
-    ts = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    ts = datetime(2026, 1, 1, tzinfo=UTC)
     # constant baseline of zeros; non-zero value must be anomaly
     anomaly = detector.detect("m", 1.0, [0.0, 0.0, 0.0], threshold=2.0, timestamp=ts)
     assert anomaly is not None

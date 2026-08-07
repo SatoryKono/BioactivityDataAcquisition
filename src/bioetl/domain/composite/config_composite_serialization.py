@@ -495,26 +495,35 @@ def _build_lineage_config(lineage_data: dict[str, object]) -> LineageConfig:
     )
 
 
+def _comparison_method(raw: object) -> ComparisonMethod:
+    if isinstance(raw, ComparisonMethod):
+        return raw
+    return ComparisonMethod(str(raw if raw is not None else "exact"))
+
+
+def _one_field_comparison_spec(field: dict[str, object]) -> FieldComparisonSpec:
+    return FieldComparisonSpec(
+        field_name=str(field.get("field_name") or ""),
+        method=_comparison_method(field.get("method", "exact")),
+        threshold=float(str(field.get("threshold", 0.0))),
+    )
+
+
 def _field_comparison_specs(fields_raw: object) -> tuple[FieldComparisonSpec, ...]:
     if not isinstance(fields_raw, list | tuple):
         return ()
     fields: list[FieldComparisonSpec] = []
     for field in fields_raw:
-        if not isinstance(field, dict):
-            continue
-        method = field.get("method", "exact")
-        fields.append(
-            FieldComparisonSpec(
-                field_name=str(field.get("field_name") or ""),
-                method=(
-                    ComparisonMethod(str(method))
-                    if not isinstance(method, ComparisonMethod)
-                    else method
-                ),
-                threshold=float(field.get("threshold", 0.0)),
-            )
-        )
+        if isinstance(field, dict):
+            fields.append(_one_field_comparison_spec(field))
     return tuple(fields)
+
+
+def _one_enricher_pairing(raw: dict[str, object]) -> EnricherFieldPairing:
+    return EnricherFieldPairing(
+        enricher_pipeline=str(raw.get("enricher_pipeline") or ""),
+        fields=_field_comparison_specs(raw.get("fields") or ()),
+    )
 
 
 def _enricher_field_pairings(pairings_raw: object) -> tuple[EnricherFieldPairing, ...]:
@@ -522,14 +531,8 @@ def _enricher_field_pairings(pairings_raw: object) -> tuple[EnricherFieldPairing
         return ()
     pairings: list[EnricherFieldPairing] = []
     for raw in pairings_raw:
-        if not isinstance(raw, dict):
-            continue
-        pairings.append(
-            EnricherFieldPairing(
-                enricher_pipeline=str(raw.get("enricher_pipeline") or ""),
-                fields=_field_comparison_specs(raw.get("fields") or ()),
-            )
-        )
+        if isinstance(raw, dict):
+            pairings.append(_one_enricher_pairing(raw))
     return tuple(pairings)
 
 

@@ -13,7 +13,7 @@ _SCRIPT_DIR = Path(__file__).resolve().parent
 if str(_SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR))
 
-import setup_mcp  # noqa: E402  # pyright: ignore[reportImplicitRelativeImport]
+import setup_mcp  # pyright: ignore[reportImplicitRelativeImport]
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]

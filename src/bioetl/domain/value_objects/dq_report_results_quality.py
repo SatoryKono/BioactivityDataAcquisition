@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import datetime
 from types import MappingProxyType
-from typing import Mapping
 
 from bioetl.domain.types import GoldRejectReason
 from bioetl.domain.value_objects.dq_report_enums import DQCheckStatus

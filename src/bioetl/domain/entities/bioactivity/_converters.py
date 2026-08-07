@@ -34,7 +34,7 @@ def _safe_str(val: object) -> str | None:
         return None
     if isinstance(val, float) and val.is_integer():
         return str(int(val))
-    if isinstance(val, int) and not isinstance(val, bool):
+    if isinstance(val, int):
         return str(val)
     text = str(val).strip()
     return text or None
