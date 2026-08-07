@@ -31,7 +31,7 @@ ______________________________________________________________________
 1. `docs/00-project/ai/agents/guides/CLAUDE.md`,
 1. `docs/00-project/ai/agents/guides/GEMINI.md`,
 1. `docs/00-project/ai/memory/agent-memory.md`,
-1. `docs/03-guides/dashboards/dashboard-extension-llm.md` — если задача затрагивает `grafana/dashboards/*.json`, dashboard links или Loki/Tempo drilldown,
+1. `docs/03-guides/dashboards/dashboard-extension-llm.md` — если задача затрагивает `grafana/dashboards/*.json`, dashboard links или legacy Loki/Tempo (removed 2026-07-23; do not use),
 1. `docs/00-project/ai/agents/agents/ORCHESTRATION.md` (публикуемое Codex docs mirror для `.codex/agents/ORCHESTRATION.md`, для сложных задач).
 
 Если уверенность недостаточна — помечай **Requires Manual Review**, а не делай предположений.

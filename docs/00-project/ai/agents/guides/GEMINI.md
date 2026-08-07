@@ -94,7 +94,7 @@ bioetl run --pipeline chembl_activity --run-type incremental --limit 100
 
 - **`docs/00-project/RULES.md`**: The Project Constitution. Read before major changes.
 - **`AGENT.md`**: Specialized instructions for AI agents.
-- **`docs/03-guides/dashboards/dashboard-extension-llm.md`**: Read before changing `grafana/dashboards/*.json`, dashboard navigation, or Loki/Tempo drilldown behavior.
+- **`docs/03-guides/dashboards/dashboard-extension-llm.md`**: Read before changing `grafana/dashboards/*.json`, dashboard navigation, or legacy Loki/Tempo (removed 2026-07-23; do not use) behavior.
 
 ## 8. Operational Policies (CRITICAL)
 

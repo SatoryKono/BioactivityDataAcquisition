@@ -58,6 +58,22 @@ not_in_nav: |
   00-project/ai/skills/local/prometheus-query-debugger/SKILL.md
   00-project/ai/skills/local/prometheus-rule-testing/SKILL.md
   00-project/ai/skills/local/py-reproducibility-audit/SKILL.md
+  00-project/ai/skills/local/observability-dashboard/SKILL.md
+  00-project/ai/skills/local/observability-prometheus/SKILL.md
+  00-project/ai/skills/local/deep-research/SKILL.md
+  00-project/ai/skills/local/documentation-audit/SKILL.md
+  00-project/ai/skills/local/new-pipeline/SKILL.md
+  00-project/ai/skills/local/py-audit-bot/SKILL.md
+  00-project/ai/skills/local/py-config-bot/SKILL.md
+  00-project/ai/skills/local/py-debug-bot/SKILL.md
+  00-project/ai/skills/local/py-doc-bot/SKILL.md
+  00-project/ai/skills/local/py-plan-bot/SKILL.md
+  00-project/ai/skills/local/py-test-bot/SKILL.md
+  00-project/ai/skills/local/research-workflow/SKILL.md
+  00-project/ai/skills/local/technical-designer-mermaid/SKILL.md
+  00-project/ai/skills/local/vcr-record/SKILL.md
+  00-project/ai/skills/local/verify-architecture/SKILL.md
+  00-project/ai/skills/global/**/SKILL.md
   02-architecture/adr-registry/README.md
   04-reference/templates/adr-template.md
   04-reference/templates/contract-spec-template.md
@@ -926,58 +942,32 @@ nav:
           - "Overview": 00-project/ai/skills/README.md
           - "Practical Index": 00-project/ai/skills/SKILLS-PRACTICAL-INDEX.md
           - "Global Skills":
-              - "Skill": 00-project/ai/skills/global/agent-orchestration/SKILL.md
-              - "Skill": 00-project/ai/skills/global/documentation-audit/SKILL.md
-              - "Audit Checklist": 00-project/ai/skills/global/documentation-audit/references/audit-checklist.md
-              - "Report Template": 00-project/ai/skills/global/documentation-audit/references/report-template.md
-              - "Skill": 00-project/ai/skills/global/gh-address-comments/SKILL.md
-              - "Skill": 00-project/ai/skills/global/gh-fix-ci/SKILL.md
-              - "Skill": 00-project/ai/skills/global/new-pipeline/SKILL.md
-              - "Skill": 00-project/ai/skills/global/openai-docs/SKILL.md
-              - "Skill": 00-project/ai/skills/global/py-audit-bot/SKILL.md
+              - "Skill gh-address-comments": 00-project/ai/skills/global/gh-address-comments/SKILL.md
+              - "Skill gh-fix-ci": 00-project/ai/skills/global/gh-fix-ci/SKILL.md
+              - "Skill new-pipeline": 00-project/ai/skills/global/new-pipeline/SKILL.md
+              - "Skill openai-docs": 00-project/ai/skills/global/openai-docs/SKILL.md
+              - "Architecture Guardian": 00-project/ai/skills/global/public/architecture-guardian/SKILL.md
+              - "Skill py-audit-bot": 00-project/ai/skills/global/py-audit-bot/SKILL.md
               - "Legacy Skill py-code-bot": 00-project/ai/skills/global/py-code-bot/SKILL.md
-              - "Skill": 00-project/ai/skills/global/py-config-bot/SKILL.md
-              - "Skill": 00-project/ai/skills/global/py-debug-bot/SKILL.md
-              - "Skill": 00-project/ai/skills/global/py-doc-bot/SKILL.md
-              - "Skill": 00-project/ai/skills/global/py-plan-bot/SKILL.md
-              - "Skill": 00-project/ai/skills/global/py-review-orchestrator/SKILL.md
-              - "Skill": 00-project/ai/skills/global/py-test-bot/SKILL.md
-              - "Skill": 00-project/ai/skills/global/vcr-record/SKILL.md
-              - "Skill": 00-project/ai/skills/global/verify-architecture/SKILL.md
+              - "Skill py-config-bot": 00-project/ai/skills/global/py-config-bot/SKILL.md
+              - "Skill py-debug-bot": 00-project/ai/skills/global/py-debug-bot/SKILL.md
+              - "Skill py-doc-bot": 00-project/ai/skills/global/py-doc-bot/SKILL.md
+              - "Skill py-plan-bot": 00-project/ai/skills/global/py-plan-bot/SKILL.md
+              - "Skill py-test-bot": 00-project/ai/skills/global/py-test-bot/SKILL.md
+              - "Skill vcr-record": 00-project/ai/skills/global/vcr-record/SKILL.md
+              - "Skill verify-architecture": 00-project/ai/skills/global/verify-architecture/SKILL.md
           - "Local Skills":
               - "Skills Catalog": 00-project/ai/skills/local/SKILLS-CATALOG.md
-              - "Skill": 00-project/ai/skills/local/agent-orchestration/SKILL.md
-              - "Capability Discovery": 00-project/ai/skills/local/capability-discovery/SKILL.md
-              - "Create PR": 00-project/ai/skills/local/create-pr/SKILL.md
-              - "Deep Research": 00-project/ai/skills/local/deep-research/SKILL.md
-              - "Evidence & Decisions":
-                  - "Collecting Evidence": 00-project/ai/skills/local/collecting-evidence/SKILL.md
-                  - "Hierarchical Evidence Orchestration": 00-project/ai/skills/local/hierarchical-evidence-orchestration/SKILL.md
-                  - "Research Workflow": 00-project/ai/skills/local/research-workflow/SKILL.md
-              - "Deep Research Critique Framework": 00-project/ai/skills/local/deep-research/references/critique-framework.md
-              - "Deep Research Report Templates": 00-project/ai/skills/local/deep-research/references/report-templates.md
-              - "Deep Research Search Patterns": 00-project/ai/skills/local/deep-research/references/search-patterns.md
-              - "Deep Research Source Evaluation": 00-project/ai/skills/local/deep-research/references/source-evaluation.md
-              - "Skill": 00-project/ai/skills/local/documentation-audit/SKILL.md
-              - "Audit Checklist": 00-project/ai/skills/local/documentation-audit/references/audit-checklist.md
-              - "Report Template": 00-project/ai/skills/local/documentation-audit/references/report-template.md
-              - "Skill": 00-project/ai/skills/local/documentation-cascade-audit/SKILL.md
-              - "Skill": 00-project/ai/skills/local/new-pipeline/SKILL.md
-              - "Architecture Debt Bot": 00-project/ai/skills/local/py-architecture-debt-bot/SKILL.md
-              - "Skill": 00-project/ai/skills/local/py-audit-bot/SKILL.md
-              - "Skill": 00-project/ai/skills/local/py-config-bot/SKILL.md
-              - "Skill": 00-project/ai/skills/local/py-debug-bot/SKILL.md
-              - "Skill": 00-project/ai/skills/local/py-doc-bot/SKILL.md
-              - "Skill": 00-project/ai/skills/local/py-plan-bot/SKILL.md
-              - "Skill": 00-project/ai/skills/local/py-review-orchestrator/SKILL.md
-              - "Skill": 00-project/ai/skills/local/py-test-bot/SKILL.md
-              - "Skill": 00-project/ai/skills/local/py-test-swarm/SKILL.md
-              - "Repo Config": 00-project/ai/skills/local/repo-config/SKILL.md
-              - "L1 Playbook": 00-project/ai/skills/local/py-test-swarm/references/l1-playbook.md
-              - "L2 L3 Task Brief": 00-project/ai/skills/local/py-test-swarm/references/l2-l3-task-brief.md
-              - "Report Templates": 00-project/ai/skills/local/py-test-swarm/references/report-templates.md
-              - "Telemetry And Flaky Db": 00-project/ai/skills/local/py-test-swarm/references/telemetry-and-flaky-db.md
-              - "Skill": 00-project/ai/skills/local/technical-designer-mermaid/SKILL.md
-              - "Patterns": 00-project/ai/skills/local/technical-designer-mermaid/references/patterns.md
-              - "Skill": 00-project/ai/skills/local/vcr-record/SKILL.md
-              - "Skill": 00-project/ai/skills/local/verify-architecture/SKILL.md
+              - "Skill new-pipeline": 00-project/ai/skills/local/new-pipeline/SKILL.md
+              - "Skill observability-dashboard": 00-project/ai/skills/local/observability-dashboard/SKILL.md
+              - "Skill observability-prometheus": 00-project/ai/skills/local/observability-prometheus/SKILL.md
+              - "Skill py-audit-bot": 00-project/ai/skills/local/py-audit-bot/SKILL.md
+              - "Skill py-config-bot": 00-project/ai/skills/local/py-config-bot/SKILL.md
+              - "Skill py-debug-bot": 00-project/ai/skills/local/py-debug-bot/SKILL.md
+              - "Skill py-doc-bot": 00-project/ai/skills/local/py-doc-bot/SKILL.md
+              - "Skill py-plan-bot": 00-project/ai/skills/local/py-plan-bot/SKILL.md
+              - "Skill py-test-bot": 00-project/ai/skills/local/py-test-bot/SKILL.md
+              - "Skill research-workflow": 00-project/ai/skills/local/research-workflow/SKILL.md
+              - "Skill technical-designer-mermaid": 00-project/ai/skills/local/technical-designer-mermaid/SKILL.md
+              - "Skill vcr-record": 00-project/ai/skills/local/vcr-record/SKILL.md
+              - "Skill verify-architecture": 00-project/ai/skills/local/verify-architecture/SKILL.md
