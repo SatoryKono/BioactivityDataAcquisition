@@ -25,7 +25,7 @@ from bioetl.domain.normalization.chemical_standardization_contract import (
 from bioetl.domain.normalization.profiles.pubchem_compound import (
     PUBCHEM_COMPOUND_PROFILE,
 )
-from scripts.docs.generate_pipeline_normalization_field_matrix import (
+from scripts.docs.matrix.generate_pipeline_normalization_matrix import (
     build_field_matrix_rows,
 )
 

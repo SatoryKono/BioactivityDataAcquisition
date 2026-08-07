@@ -8,21 +8,20 @@
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
-"""Guardrails for top-level ``scripts/docs`` compatibility shims."""
+"""Guardrails for retired top-level ``scripts/docs`` compatibility shims (#8043)."""
 
 from __future__ import annotations
-
-import pytest
 
 import json
 from pathlib import Path
 
-from tests.helpers.git_index_scan import git_grep_fixed
+import pytest
 
+from tests.helpers.git_index_scan import git_grep_fixed
 
 pytestmark = pytest.mark.architecture
 
-DOCS_SHIMS = (
+RETIRED_DOCS_SHIMS = (
     "scripts/docs/check_doc_drift.py",
     "scripts/docs/check_docstring_coverage.py",
     "scripts/docs/chembl_matrix_structural_contract.py",
@@ -41,6 +40,9 @@ DOCS_SHIMS = (
     "scripts/docs/sync_chembl_matrix_structural_policy.py",
     "scripts/docs/sync_repo_identity.py",
     "scripts/docs/verify_docs.py",
+    "scripts/docs/_compat_shim.py",
+    "scripts/docs/checks/_bootstrap.py",
+    "scripts/docs/matrix/_bootstrap.py",
 )
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT_LIFECYCLE = ROOT / "configs" / "quality" / "scripts_lifecycle_registry.json"
@@ -59,21 +61,18 @@ SKIPPED_DIRECT_DISPATCH_PATH_PARTS = {
     "reports",
     "plans",
 }
-COMPATIBILITY_LIFECYCLE_WRAPPERS = {
-    "scripts/docs/_compat_shim.py",
-}
 RETIRED_COMPATIBILITY_WRAPPERS = {
     "scripts/ai/vibe/__main__.py",
+    *RETIRED_DOCS_SHIMS,
 }
 
 
-def test_docs_shims_delegate_to_shared_compat_helper() -> None:
-    for relative_path in DOCS_SHIMS:
-        source = Path(relative_path).read_text(encoding="utf-8")
-        assert "_compat_shim" in source, relative_path
-        assert "globals().update(" not in source, relative_path
-        assert "exec(compile(" not in source, relative_path
-        assert "Path(__file__).resolve().parents[2]" not in source, relative_path
+def test_docs_top_level_shims_are_removed() -> None:
+    lingering = [path for path in RETIRED_DOCS_SHIMS if (ROOT / path).exists()]
+    assert not lingering, (
+        "Top-level scripts/docs compatibility shims must stay removed (#8043):\n"
+        + "\n".join(lingering)
+    )
 
 
 def test_docs_direct_file_dispatch_does_not_regrow_in_active_surfaces() -> None:
@@ -89,30 +88,11 @@ def test_docs_direct_file_dispatch_does_not_regrow_in_active_surfaces() -> None:
         for match in matches
         if not SKIPPED_DIRECT_DISPATCH_PATH_PARTS.intersection(Path(match.path).parts)
     }
-
     assert not violations, (
         "Active surfaces must not document direct-file scripts/docs dispatch; "
         "use `python -m scripts.docs <command>` instead:\n"
         + "\n".join(sorted(violations))
     )
-
-
-def test_script_compatibility_wrappers_have_lifecycle_rows() -> None:
-    """Retained script compatibility wrappers must stay visible in lifecycle policy."""
-    payload = json.loads(SCRIPT_LIFECYCLE.read_text(encoding="utf-8"))
-    entries = payload["entries"]
-    assert isinstance(entries, dict)
-
-    missing = COMPATIBILITY_LIFECYCLE_WRAPPERS - set(entries)
-    assert not missing, (
-        "Compatibility wrappers missing scripts lifecycle rows:\n"
-        + "\n".join(sorted(missing))
-    )
-    for path in COMPATIBILITY_LIFECYCLE_WRAPPERS:
-        row = entries[path]
-        assert row["decision"] in {"compatibility_wrapper", "internal_helper_orphan"}
-        assert row["review_by"] >= "2026-07-15"
-        assert "Retain" in row["next_step"]
 
 
 def test_retired_script_compatibility_wrappers_stay_absent() -> None:
@@ -134,3 +114,12 @@ def test_retired_script_compatibility_wrappers_stay_absent() -> None:
         "Retired script compatibility wrappers must not remain lifecycle debt:\n"
         + "\n".join(lingering_registry_rows)
     )
+
+
+def test_docs_common_bootstrap_exists() -> None:
+    path = ROOT / "scripts/docs/common/bootstrap.py"
+    assert path.is_file()
+    text = path.read_text(encoding="utf-8")
+    assert "ensure_repo_imports" in text
+    assert "PROJECT_ROOT" in text
+    assert "DOCS_DIR" in text

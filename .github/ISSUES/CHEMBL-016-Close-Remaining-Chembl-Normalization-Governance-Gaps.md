@@ -157,7 +157,7 @@ Out of scope:
 - `tests/integration/config/test_chembl_policy_surface_parity.py`
 - `tests/integration/config/test_chembl_observed_value_fixtures.py`
 - `tests/fixtures/normalization/chembl_observed_values.yaml`
-- `scripts/docs/generate_pipeline_normalization_field_matrix.py`
+- `scripts/docs/matrix/generate_pipeline_normalization_matrix.py`
 - generated artifacts under
   `docs/reports/generated/pipeline_normalization_field_matrix/`
 

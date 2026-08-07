@@ -61,11 +61,11 @@
       "debt_type": "script_governance_ratchet",
       "newly_governed_supporting_scripts": [
         "scripts/ai/gemini/setup-bash-alias.sh",
-        "scripts/docs/chembl_matrix_structural_contract.py",
-        "scripts/docs/enrich_chembl_matrix_normalization_details.py",
-        "scripts/docs/export_chembl_matrix_structural_contract.py",
-        "scripts/docs/filter_chembl_matrix_rows.py",
-        "scripts/docs/generate_chembl_activity_field_matrix.py",
+        "scripts/docs/matrix/structural_contract.py",
+        "scripts/docs/matrix/enrich_normalization_details.py",
+        "scripts/docs/matrix/export_structural_contract.py",
+        "scripts/docs/matrix/filter_rows.py",
+        "scripts/docs/matrix/generate_field_matrix.py",
         "scripts/engineering/ci/apply-ci-optimizations-fixed.ps1",
         "scripts/engineering/ci/apply-ci-optimizations.ps1",
         "scripts/engineering/repo/apply_branch_cleanup_phases_0_2.sh"

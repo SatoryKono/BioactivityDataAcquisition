@@ -52,9 +52,9 @@ import yaml
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from scripts.docs.matrix._bootstrap import ensure_repo_imports
+    from scripts.docs.common.bootstrap import ensure_repo_imports
 else:
-    from scripts.docs.matrix._bootstrap import ensure_repo_imports
+    from scripts.docs.common.bootstrap import ensure_repo_imports
 
 ensure_repo_imports(include_src=True)
 

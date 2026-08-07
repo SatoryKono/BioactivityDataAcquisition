@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import pytest
 
-from scripts.docs.chembl_matrix_structural_contract import (
+from scripts.docs.matrix.structural_contract import (
     DEFAULT_REQUIRED_LABEL,
     MatrixStructuralContractRow,
     NOT_APPLICABLE,

@@ -35,7 +35,7 @@ from typing import cast
 import pytest
 import yaml
 
-from scripts.docs.generate_pipeline_normalization_field_matrix import (
+from scripts.docs.matrix.generate_pipeline_normalization_matrix import (
     CSV_NAME,
     CSV_COLUMNS,
     COMPOSITE_JOIN_KEY_COVERAGE_KPI,
@@ -398,7 +398,7 @@ def _assert_molecule_rows(rows: list[dict[str, str]]) -> None:
 
 def test_generator_uses_checkpoint_package_facade() -> None:
     source = Path(
-        "scripts/docs/generate_pipeline_normalization_field_matrix.py"
+        "scripts/docs/matrix/generate_pipeline_normalization_matrix.py"
     ).read_text(encoding="utf-8")
 
     assert "from bioetl.application.composite.checkpoint import (" in source

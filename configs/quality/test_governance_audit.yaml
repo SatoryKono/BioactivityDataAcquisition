@@ -1052,7 +1052,7 @@ repo_backed_unit_test_exceptions:
     protected_surface: src/tools/apply_entity_naming_rename_plan.py
   - path: tests/unit/repo_backed/scripts/test_generate_pipeline_normalization_field_matrix.py
     target_lane: repo-backed-unit
-    protected_surface: scripts/docs/generate_pipeline_normalization_field_matrix.py + docs/05-engineering/normalization_plan_P0_P6.md
+    protected_surface: scripts/docs/matrix/generate_pipeline_normalization_matrix.py + docs/05-engineering/normalization_plan_P0_P6.md
   - path: tests/unit/repo_backed/scripts/test_check_skills_mirror.py
     target_lane: repo-backed-unit
     protected_surface: .codex/skills/** + .agents/skills/** mirror parity contract

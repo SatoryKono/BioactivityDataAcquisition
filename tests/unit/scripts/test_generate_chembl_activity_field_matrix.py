@@ -23,7 +23,7 @@ from bioetl.domain.normalization.profiles import (
     CHEMBL_ACTIVITY_SCHEMA_FIELDS,
 )
 from bioetl.infrastructure.schemas.silver_chembl_core import CHEMBL_ACTIVITY_SCHEMA
-from scripts.docs.generate_chembl_activity_field_matrix import (
+from scripts.docs.matrix.generate_field_matrix import (
     CSV_COLUMNS,
     CSV_NAME,
     MD_NAME,

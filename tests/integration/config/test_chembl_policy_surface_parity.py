@@ -36,7 +36,7 @@ from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_confi
 from bioetl.infrastructure.config.chembl_policy_registry_loader import (
     ChemblPolicyRegistryLoader,
 )
-from scripts.docs.generate_pipeline_normalization_field_matrix import (
+from scripts.docs.matrix.generate_pipeline_normalization_matrix import (
     build_field_matrix_rows,
 )
 from scripts.docs.matrix.generate_pipeline_normalization_matrix import (
