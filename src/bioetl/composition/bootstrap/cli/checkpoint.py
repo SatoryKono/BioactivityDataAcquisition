@@ -47,11 +47,15 @@ if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (
         CheckpointRuntimeService,
     )
-    from bioetl.application.services.ops.admin_runtime_api import QuarantineRuntimeService
+    from bioetl.application.services.ops.admin_runtime_api import (
+        QuarantineRuntimeService,
+    )
     from bioetl.application.services.export_lineage.audit_inspection_service import (
         AuditInspectionService,
     )
-    from bioetl.application.services.checkpoint.checkpoint_service import CheckpointService
+    from bioetl.application.services.checkpoint.checkpoint_service import (
+        CheckpointService,
+    )
     from bioetl.application.services.workflow.observability_workflow_service import (
         ObservabilityWorkflowService,
     )

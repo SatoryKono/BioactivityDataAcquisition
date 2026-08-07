@@ -121,9 +121,7 @@ def determine_governance_impact(
     Prefer effective blocker status (policy-adjusted) over raw severity.
     """
     blocker = (
-        is_effective_blocker
-        if is_effective_blocker is not None
-        else issue.is_blocker()
+        is_effective_blocker if is_effective_blocker is not None else issue.is_blocker()
     )
     if blocker:
         if config.policy in BLOCKING_POLICIES:

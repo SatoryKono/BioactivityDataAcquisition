@@ -147,6 +147,7 @@ def test_lineage_shared_helpers_normalize_edge_case_payloads() -> None:
     assert load_optional_version({"version": 3.5}, "version") is None
     assert load_optional_int({"step_index": "7"}, "step_index") == 7
 
+
 def test_dataset_ref_node_id_encodes_delimiter_collision() -> None:
     """Names containing @ must not collide with versioned refs (#8168)."""
     with_at_in_name = DatasetRef(layer="silver", logical_name="foo@1", version=None)
@@ -178,6 +179,7 @@ def test_normalize_mapping_is_immutable_and_detached() -> None:
     except TypeError:
         pass
 
+
 def test_plain_value_serializes_sets_with_stable_order() -> None:
     """Set/frozenset attributes must serialize deterministically (#8273)."""
     from bioetl.domain.lineage._shared import mapping_to_plain
@@ -188,4 +190,3 @@ def test_plain_value_serializes_sets_with_stable_order() -> None:
     assert frozen_payload["tags"] == ["a", "b"]
     # repeated conversion is stable
     assert mapping_to_plain({"tags": {"zeta", "alpha", "mu"}}) == payload
-

@@ -110,9 +110,7 @@ class CrossRefFetchFlow:
                     return
                 batch = primary_ids[i : i + self.batch_size]
                 async for publication in self.batch_fetcher.fetch_batch(batch):
-                    yield self.response_mapper.with_lookup_method(
-                        publication, "doi"
-                    )
+                    yield self.response_mapper.with_lookup_method(publication, "doi")
                     yielded += 1
                     if request_limit is not None and yielded >= request_limit:
                         return

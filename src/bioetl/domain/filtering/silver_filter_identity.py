@@ -6,8 +6,6 @@ compatibility identity captured in run manifests and effective-config artifacts.
 
 from __future__ import annotations
 
-from typing import cast
-
 from bioetl.domain.config.runtime import (
     CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE,
     LEGACY_SILVER_FILTER_COMPATIBILITY_MODE,
@@ -45,8 +43,10 @@ def normalize_silver_filter_compatibility_mode(
     if mode is None:
         return DEFAULT_SILVER_FILTER_COMPATIBILITY_MODE
     normalized = mode.strip()
-    if normalized in SILVER_FILTER_COMPATIBILITY_MODES:
-        return cast(SilverFilterCompatibilityMode, normalized)
+    if normalized == "structural_only_compat":
+        return "structural_only_compat"
+    if normalized == "structural_only_auto_promote":
+        return "structural_only_auto_promote"
     raise ValueError(
         "Unsupported silver_filter_compatibility_mode "
         f"{mode!r}; expected one of {sorted(SILVER_FILTER_COMPATIBILITY_MODES)!r}"

@@ -93,8 +93,6 @@ class EnricherCardinality(StrEnum):
             ) from None
 
 
-
-
 def _coerce_text_sequence(value: object, name: str) -> tuple[object, ...]:
     """Coerce supported config shapes into a tuple before text normalization."""
     if isinstance(value, str):
@@ -145,9 +143,7 @@ def _try_comparison_operator(text: str, operator: str) -> bool:
     left, right = text.split(operator, 1)
     _require_filter_field(left.strip())
     if not right.strip():
-        raise ValueError(
-            "aggregation filter_condition comparison requires a value"
-        )
+        raise ValueError("aggregation filter_condition comparison requires a value")
     return True
 
 

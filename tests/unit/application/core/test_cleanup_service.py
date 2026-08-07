@@ -416,4 +416,3 @@ class TestCleanupServicePreviewThreadOffload:
             "silver_table": "test_silver",
             "gold_table": "test_gold",
         }
-

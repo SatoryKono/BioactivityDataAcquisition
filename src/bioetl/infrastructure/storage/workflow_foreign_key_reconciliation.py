@@ -56,9 +56,7 @@ class GoldReconciliationReaderPort(Protocol):
         table_name: str,
         columns: list[str] | None = None,
         current_only: bool = True,
-    ) -> (
-        Sequence[Mapping[str, object]] | Awaitable[Sequence[Mapping[str, object]]]
-    ):
+    ) -> Sequence[Mapping[str, object]] | Awaitable[Sequence[Mapping[str, object]]]:
         """Read Gold rows, optionally restricted to current SCD2 versions."""
         ...
 
@@ -297,7 +295,9 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
         )
         if inspect.isawaitable(value):
             value = await value
-        materialized = [dict(row) for row in cast(Iterable[Mapping[str, object]], value)]
+        materialized = [
+            dict(row) for row in cast(Iterable[Mapping[str, object]], value)
+        ]
         # Gold readers apply current_only internally; re-apply as a safety net when
         # payloads still carry SCD flags (sync fakes / partial adapters).
         return filter_current_rows(
@@ -384,7 +384,9 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             orphan_rows_deleted=orphan_rows_deleted,
             mutated=True,
             would_mutate=False,
-            mutation_mode=cast(Any, mutation_summary.mutation_mode),  # Any: external mutation summary compatibility
+            mutation_mode=cast(
+                Any, mutation_summary.mutation_mode
+            ),  # Any: external mutation summary compatibility
             quarantine_batch_id=mutation_summary.quarantine_batch_id,
             quarantine_rows_written=mutation_summary.quarantine_rows_written,
             quarantine_error_code=mutation_summary.quarantine_error_code,

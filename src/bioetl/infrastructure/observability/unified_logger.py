@@ -131,7 +131,9 @@ class UnifiedLogger:
         new_logger._logger = self._logger.bind(**safe_kwargs)
         return new_logger
 
-    def _strip_correlation_overrides(self, kwargs: dict[str, object]) -> dict[str, object]:
+    def _strip_correlation_overrides(
+        self, kwargs: dict[str, object]
+    ) -> dict[str, object]:
         """Drop run_id/pipeline overrides so bound correlation fields win."""
         return {
             key: value

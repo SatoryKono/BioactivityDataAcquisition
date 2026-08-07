@@ -434,7 +434,8 @@ class TestDependencyExecution:
 
         assert dependency.pipeline in result
         assert result[dependency.pipeline].status == DependencyStatus.SKIPPED
-        assert "Already completed" in (result[dependency.pipeline].error_message or "")
+        # Successful skip is not an error path; reason is not stored as error_message.
+        assert result[dependency.pipeline].error_message is None
 
     @pytest.mark.asyncio
     async def test_run_dependencies_stops_after_required_failure(

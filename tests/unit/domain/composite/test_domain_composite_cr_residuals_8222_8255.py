@@ -8,7 +8,10 @@ from datetime import UTC, datetime
 
 import pytest
 
-from bioetl.domain.composite.aggregation import AggregationFieldSpec, AggregationFunction
+from bioetl.domain.composite.aggregation import (
+    AggregationFieldSpec,
+    AggregationFunction,
+)
 from bioetl.domain.composite.config_composite_serialization import (
     _build_dependency_config,
     _build_enricher_config,
@@ -20,14 +23,20 @@ from bioetl.domain.composite.config_cross_validation import (
 )
 from bioetl.domain.composite.config_merge import MergeConfig
 from bioetl.domain.composite.config_models import DependencyConfig, EnricherConfig
-from bioetl.domain.composite.cross_validation import ComparisonMethod, FieldComparisonSpec
+from bioetl.domain.composite.cross_validation import (
+    ComparisonMethod,
+    FieldComparisonSpec,
+)
 from bioetl.domain.composite.field_groups_models import (
     FieldGroupDefinition,
     FieldGroupId,
     FieldMapping,
 )
 from bioetl.domain.composite.field_groups_registry import FieldGroupRegistry
-from bioetl.domain.composite.lineage import CompositeLineageMetadata, EnrichmentStatusRecord
+from bioetl.domain.composite.lineage import (
+    CompositeLineageMetadata,
+    EnrichmentStatusRecord,
+)
 from bioetl.domain.composite.result_enrichment import EnrichmentResult, EnrichmentStatus
 from bioetl.domain.composite.result_seed_dependency import DependencyResult
 from bioetl.domain.composite.state import CompositePipelineState
@@ -203,7 +212,9 @@ def test_aggregation_filter_condition_validated() -> None:
 
 
 def test_dependency_timeout_doc_behavior() -> None:
-    result = DependencyResult.timeout("dep", timeout_seconds=30.0, duration_seconds=12.0)
+    result = DependencyResult.timeout(
+        "dep", timeout_seconds=30.0, duration_seconds=12.0
+    )
     assert result.duration_seconds == 12.0
     defaulted = DependencyResult.timeout("dep", timeout_seconds=30.0)
     assert defaulted.duration_seconds == 30.0

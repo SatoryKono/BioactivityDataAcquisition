@@ -100,11 +100,15 @@ def test_native_skill_projection_root_is_tracked_tooling() -> None:
     assert ".agents" not in local_only
 
 
-def test_skill_negative_fixture_identifies_invalid_canonical_metadata(tmp_path: Path) -> None:
+def test_skill_negative_fixture_identifies_invalid_canonical_metadata(
+    tmp_path: Path,
+) -> None:
     shutil.copytree(ROOT / ".codex/skills", tmp_path / ".codex/skills")
     changed = tmp_path / ".codex/skills/py-test-bot/SKILL.md"
     changed.write_text(
-        changed.read_text(encoding="utf-8").replace('name: "py-test-bot"', 'name: "wrong"'),
+        changed.read_text(encoding="utf-8").replace(
+            'name: "py-test-bot"', 'name: "wrong"'
+        ),
         encoding="utf-8",
     )
 

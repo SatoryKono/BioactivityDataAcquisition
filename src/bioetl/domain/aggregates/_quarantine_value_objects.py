@@ -69,8 +69,7 @@ def _validate_resolution_type(resolution_type: str) -> None:
         return
     allowed_list = ", ".join(repr(value) for value in sorted(allowed))
     raise ValueError(
-        f"Invalid resolution_type: {resolution_type}. "
-        f"Must be one of: {allowed_list}."
+        f"Invalid resolution_type: {resolution_type}. Must be one of: {allowed_list}."
     )
 
 

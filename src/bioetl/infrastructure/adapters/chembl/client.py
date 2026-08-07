@@ -96,7 +96,9 @@ class ChemblAdapter(
     def __post_init__(self) -> None:
         """Initialize adapter with config values and metrics."""
         self._bootstrap_dataclass_http_adapter()
-        config = self.adapter_config if self.adapter_config is not None else AdapterConfig()
+        config = (
+            self.adapter_config if self.adapter_config is not None else AdapterConfig()
+        )
         self.adapter_config = config
         self._adapter_config = config
         self._page_size = config.page_size

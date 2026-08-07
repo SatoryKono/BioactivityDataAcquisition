@@ -28,7 +28,9 @@ class CompoundLinkRecord(BaseModel):
 
     record_id: int = Field(description="Unique compound-record surrogate key")
     molecule_id: str = Field(min_length=1, description="Linked molecule ChEMBL ID")
-    publication_id: str = Field(min_length=1, description="Linked publication ChEMBL ID")
+    publication_id: str = Field(
+        min_length=1, description="Linked publication ChEMBL ID"
+    )
     compound_key: str | None = Field(
         default=None, description="Provider-native compound key"
     )

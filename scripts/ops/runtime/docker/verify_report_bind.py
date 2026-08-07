@@ -241,7 +241,10 @@ def verify(
         report_check = ready.get("checks", {}).get("report_root")
         print(f"ops_ready_status={ready.get('status')!r}")
         print(f"ops_report_root_check={json.dumps(report_check, sort_keys=True)}")
-        if isinstance(report_check, Mapping) and report_check.get("status") != "healthy":
+        if (
+            isinstance(report_check, Mapping)
+            and report_check.get("status") != "healthy"
+        ):
             ok = False
             findings.append(
                 "FAIL: /health/ready report_root check is not healthy "

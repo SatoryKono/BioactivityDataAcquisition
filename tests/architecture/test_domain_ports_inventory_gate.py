@@ -47,9 +47,10 @@ def test_domain_ports_inventory_live_scan_is_consistent() -> None:
     assert summary["runtime_checkable_port_count"] == summary["port_protocol_classes"]
     assert summary["port_module_files"] >= 1
     assert summary["scanned_python_files"] >= summary["port_module_files"]
-    assert summary["runtime_checkable_decorator_count"] >= summary[
-        "runtime_checkable_port_count"
-    ]
+    assert (
+        summary["runtime_checkable_decorator_count"]
+        >= summary["runtime_checkable_port_count"]
+    )
 
     ports = payload["ports"]
     assert isinstance(ports, list)
@@ -63,8 +64,7 @@ def test_domain_ports_inventory_artifacts_match_live_scan() -> None:
     expected_md = render_markdown(payload)
 
     assert JSON_PATH.is_file(), (
-        f"missing {JSON_PATH}; run: python -m scripts.engineering.qa "
-        f"{GENERATOR_CMD}"
+        f"missing {JSON_PATH}; run: python -m scripts.engineering.qa {GENERATOR_CMD}"
     )
     assert MD_PATH.is_file(), (
         f"missing {MD_PATH}; run: python -m scripts.engineering.qa {GENERATOR_CMD}"

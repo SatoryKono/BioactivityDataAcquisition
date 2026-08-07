@@ -85,9 +85,10 @@ def test_dashboard_runtime_environment_is_scoped_and_managed(tmp_path: Path) -> 
     try:
         with runtime_manager._dashboard_runtime_environment(contract) as environment:
             assert len(environment["BIOETL_RUNTIME_SOURCE_ID"]) == 64
-            assert os.environ["BIOETL_RUNTIME_SOURCE_ID"] == environment[
-                "BIOETL_RUNTIME_SOURCE_ID"
-            ]
+            assert (
+                os.environ["BIOETL_RUNTIME_SOURCE_ID"]
+                == environment["BIOETL_RUNTIME_SOURCE_ID"]
+            )
         assert "BIOETL_RUNTIME_SOURCE_ID" not in os.environ
     finally:
         if previous is not None:

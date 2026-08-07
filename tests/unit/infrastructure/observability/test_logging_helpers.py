@@ -53,6 +53,3 @@ def test_log_debug():
     details = "Test details"
     log_debug(logger, details)
     logger.debug.assert_called_once_with("debug_info", details=details)
-
-
-

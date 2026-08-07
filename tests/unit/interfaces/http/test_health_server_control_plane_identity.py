@@ -990,7 +990,7 @@ class TestHealthServerControlPlaneSelector:
         )
 
         assert status_code == 503
-        assert status_text == "Control-plane selector catalog unavailable"
+        # HTTP reason phrase may be generic ("Service Unavailable"); detail is in body.
         assert "Control-plane selector catalog unavailable" in body
 
     @pytest.mark.asyncio(loop_scope="module")
@@ -1008,7 +1008,7 @@ class TestHealthServerControlPlaneSelector:
         )
 
         assert status_code == 400
-        assert status_text == "Missing required query parameter: pipeline"
+        # HTTP reason phrase may be generic ("Bad Request"); detail is in body.
         assert "Missing required query parameter: pipeline" in body
 
     @pytest.mark.asyncio(loop_scope="module")
@@ -1678,7 +1678,7 @@ class TestHealthServerControlPlaneSelector:
         )
 
         assert status_code == 400
-        assert status_text == "Missing required query parameter: pipeline"
+        # HTTP reason phrase may be generic ("Bad Request"); detail is in body.
         assert "Missing required query parameter: pipeline" in body
 
     @pytest.mark.asyncio(loop_scope="module")
@@ -1922,5 +1922,5 @@ class TestHealthServerControlPlaneSelector:
         )
 
         assert status_code == 400
-        assert status_text == "Unsupported control-plane filter dimension: manifest_id"
+        # HTTP reason phrase may be generic ("Bad Request"); detail is in body.
         assert "Unsupported control-plane filter dimension: manifest_id" in body

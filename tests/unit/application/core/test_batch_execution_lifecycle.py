@@ -53,9 +53,7 @@ def lifecycle_deps() -> tuple[MagicMock, MagicMock, MagicMock]:
 
 def test_prepare_execution_context_sets_resume_offset() -> None:
     ctx = prepare_execution_context(limit=5, query="q", offset=3)
-    assert ctx == BatchExecutionContext(
-        limit=5, query="q", offset=3, resume_offset=3
-    )
+    assert ctx == BatchExecutionContext(limit=5, query="q", offset=3, resume_offset=3)
 
 
 @pytest.mark.asyncio

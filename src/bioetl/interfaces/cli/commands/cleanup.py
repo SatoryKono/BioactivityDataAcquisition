@@ -42,6 +42,7 @@ def _validate_retention_days(
         raise click.BadParameter("retention-days must be a non-negative integer")
     return value
 
+
 __all__ = [
     "bronze_cleanup_command",
     "cleanup_preview_command",

@@ -104,7 +104,9 @@ class CompositeDQConfig:
             f"({soft}) must be less than effective hard_fail_threshold ({hard})"
         )
 
-    def _override_or_default(self, override_value: float | None, default: float) -> float:
+    def _override_or_default(
+        self, override_value: float | None, default: float
+    ) -> float:
         if override_value is None:
             return default
         return override_value
@@ -133,9 +135,7 @@ class CompositeDQConfig:
         )
         for enricher_name, override in self.enricher_overrides.items():
             soft, hard = self._effective_override_thresholds(override)
-            self._require_soft_less_than_hard(
-                soft, hard, enricher_name=enricher_name
-            )
+            self._require_soft_less_than_hard(soft, hard, enricher_name=enricher_name)
 
     def get_enricher_soft_threshold(self, enricher_name: str) -> float:
         """Get effective soft threshold for an enricher.

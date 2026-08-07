@@ -1,4 +1,5 @@
 """Type stub for application-core wiring.runtime re-export seam."""
+
 from __future__ import annotations
 
 from bioetl.application.core.base import BasePipeline as BasePipeline

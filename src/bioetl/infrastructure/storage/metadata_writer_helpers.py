@@ -129,6 +129,7 @@ async def load_existing_metadata_model(
         layer=layer,
     )
 
+
 def _resolve_metadata_filename(provider: str | None, entity: str | None) -> str:
     """Return the concrete metadata filename via a local typed facade."""
     return str(_operations._get_metadata_filename(provider, entity))

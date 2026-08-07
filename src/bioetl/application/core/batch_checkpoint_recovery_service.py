@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
 
+
 class BatchCheckpointRecoveryService:
     """Owns checkpoint save semantics for runtime, shutdown, and recovery."""
 

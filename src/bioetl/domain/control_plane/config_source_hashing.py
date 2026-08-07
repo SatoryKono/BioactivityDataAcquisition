@@ -33,7 +33,7 @@ def _construct_unique_mapping(
 
     seen: set[object] = set()
     for key_node, _ in node.value:
-        key = cast(object, loader.construct_object(key_node, deep=deep))  # type: ignore[no-untyped-call]
+        key: object = loader.construct_object(key_node, deep=deep)  # type: ignore[no-untyped-call]
         try:
             already_seen = key in seen
         except TypeError as exc:

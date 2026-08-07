@@ -1280,4 +1280,3 @@ class TestValidateInfrastructureKwargCompatibility:
 
         await validate_infrastructure(host)
         assert calls == [((host._services,), {})]
-

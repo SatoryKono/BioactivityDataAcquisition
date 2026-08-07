@@ -1,4 +1,5 @@
 """Rebalance open major residual issues into 5 independent streams."""
+
 from __future__ import annotations
 
 import json
@@ -90,9 +91,7 @@ def main() -> None:
     lines: list[str] = []
     lines.append("# Open CodeRabbit residual — CRITICAL + MAJOR (refreshed)")
     lines.append("")
-    lines.append(
-        "Live `gh` search, repo `SatoryKono/BioactivityDataAcquisition`."
-    )
+    lines.append("Live `gh` search, repo `SatoryKono/BioactivityDataAcquisition`.")
     lines.append("")
     lines.append("| Severity | Open |")
     lines.append("|----------|-----:|")
@@ -133,6 +132,7 @@ def main() -> None:
     lines.append("")
     lines.append("| Stream | Exclusive paths | Issues | IDs |")
     lines.append("|--------|-----------------|-------:|-----|")
+
     def _issue_number(item: dict[str, object]) -> int:
         value = item.get("number", 0)
         return value if isinstance(value, int) else 0
@@ -159,20 +159,15 @@ def main() -> None:
         "1. Один worktree/agent на stream; **path ownership не пересекается**."
     )
     lines.append(
-        "2. S1 и S2 оба под `application/core/` — **разные файлы**; "
-        "не править «чужие»."
+        "2. S1 и S2 оба под `application/core/` — **разные файлы**; не править «чужие»."
     )
-    lines.append(
-        "3. S3 и S4 оба под `observability/` — **разные файлы**."
-    )
+    lines.append("3. S3 и S4 оба под `observability/` — **разные файлы**.")
     lines.append(
         "4. S5 domain — 2 issue; можно закрыть быстро или прицепить к S4 "
         "(paths всё равно exclusive)."
     )
     lines.append("5. Не увеличивать бюджеты техдолга.")
-    lines.append(
-        "6. После PR: close issue + evidence; пересчёт inventory."
-    )
+    lines.append("6. После PR: close issue + evidence; пересчёт inventory.")
     lines.append("")
 
     text = "\n".join(lines)

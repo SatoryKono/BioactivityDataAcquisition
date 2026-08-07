@@ -18,9 +18,7 @@ def _build_configs_by_name() -> dict[str, object]:
     for config in PIPELINE_CONFIGS:
         name = config.pipeline_name
         if name in by_name:
-            raise RuntimeError(
-                f"Duplicate pipeline_name in PIPELINE_CONFIGS: {name!r}"
-            )
+            raise RuntimeError(f"Duplicate pipeline_name in PIPELINE_CONFIGS: {name!r}")
         by_name[name] = config
     return by_name
 
@@ -45,7 +43,9 @@ class LazyFactoryCatalog(Mapping[str, object]):
                 config = _CONFIGS_BY_NAME[pipeline_name]
             except KeyError as exc:
                 raise KeyError(pipeline_name) from exc
-            factory = create_factory(cast(Any, config))  # Any: heterogeneous factory config union
+            factory = create_factory(
+                cast(Any, config)
+            )  # Any: heterogeneous factory config union
             self._cache[pipeline_name] = factory
             return factory
 

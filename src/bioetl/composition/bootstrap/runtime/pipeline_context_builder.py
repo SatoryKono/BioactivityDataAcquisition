@@ -51,9 +51,7 @@ def _build_vacuum_config(options: RunOptions) -> VacuumSettings:
     falls back to the default of 7 days.
     """
     retention_days = (
-        7
-        if options.vacuum_retention_days is None
-        else options.vacuum_retention_days
+        7 if options.vacuum_retention_days is None else options.vacuum_retention_days
     )
     return VacuumSettings(
         enabled=options.vacuum_after_run,

@@ -143,9 +143,7 @@ def collect_ports_inventory(
                 "raw @runtime_checkable occurrences in scanned *.py bodies "
                 "(may include non-*Port Protocols)"
             ),
-            "port_module_files": (
-                "*.py under domain/ports excluding __init__.py"
-            ),
+            "port_module_files": ("*.py under domain/ports excluding __init__.py"),
             "scanned_python_files": (
                 "all *.py under domain/ports including __init__.py"
             ),
@@ -235,7 +233,9 @@ def main(argv: list[str] | None = None) -> int:
 
     repo_root = args.repo_root.resolve()
     payload = collect_ports_inventory(repo_root=repo_root)
-    json_out = args.json_out if args.json_out.is_absolute() else repo_root / args.json_out
+    json_out = (
+        args.json_out if args.json_out.is_absolute() else repo_root / args.json_out
+    )
     md_out = args.md_out if args.md_out.is_absolute() else repo_root / args.md_out
     expected_json = _canonical_json(payload)
     expected_md = render_markdown(payload)

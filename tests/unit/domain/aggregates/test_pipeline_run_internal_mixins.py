@@ -571,12 +571,16 @@ class TestStageResultValidationFunctions:
 
     def test_validate_stage_completion_running_allows_none_timestamp(self):
         """_validate_stage_completion should allow None for RUNNING status."""
-        _validate_stage_completion(StageStatus.RUNNING, None, None, _ts(0))  # Should not raise
+        _validate_stage_completion(
+            StageStatus.RUNNING, None, None, _ts(0)
+        )  # Should not raise
 
     def test_validate_stage_result_rejects_negative_records(self):
         """_validate_stage_result should reject negative records_processed."""
         with pytest.raises(ValueError, match="cannot be negative"):
-            _validate_stage_result("test", StageStatus.SUCCESS, None, _ts(0), -1, _ts(0))
+            _validate_stage_result(
+                "test", StageStatus.SUCCESS, None, _ts(0), -1, _ts(0)
+            )
 
 
 class TestStageResultValueObject:

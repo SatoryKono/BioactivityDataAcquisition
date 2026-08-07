@@ -101,6 +101,7 @@ class StorageRowReconciliationAdapter(RowReconciliationPort):
             columns=None,
             current_only=True,
         )
+
     async def _call_reader(
         self,
         reader: object,

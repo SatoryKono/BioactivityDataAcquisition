@@ -36,6 +36,18 @@ __all__ = [
 
 
 @dataclass(frozen=True, slots=True)
+
+def _decision_literal(raw: str) -> GoldBusinessRuleDecision | None:
+    if raw == "pass":
+        return "pass"
+    if raw == "warn":
+        return "warn"
+    if raw == "fail":
+        return "fail"
+    if raw == "quarantine":
+        return "quarantine"
+    return None
+
 class GoldBusinessRuleSpec:
     """Typed Gold DQ business rule specification."""
 
@@ -106,15 +118,22 @@ class GoldBusinessRuleSpec:
 
     @staticmethod
     def _validate_severity(raw: object) -> GoldBusinessRuleSeverity:
-        if raw not in ("error", "warn"):
-            raise ValueError("severity must be 'error' or 'warn'")
-        return cast(GoldBusinessRuleSeverity, raw)
+        if raw == "error":
+            return "error"
+        if raw == "warn":
+            return "warn"
+        raise ValueError("severity must be 'error' or 'warn'")
 
     @staticmethod
     def _validate_decision(raw: object) -> GoldBusinessRuleDecision | None:
-        if raw is not None and raw not in ("pass", "warn", "fail", "quarantine"):
+        if raw is None:
+            return None
+        if not isinstance(raw, str):
             raise ValueError("decision must be one of: pass, warn, fail, quarantine")
-        return cast(GoldBusinessRuleDecision | None, raw)
+        decision = _decision_literal(raw)
+        if decision is None:
+            raise ValueError("decision must be one of: pass, warn, fail, quarantine")
+        return decision
 
     @classmethod
     def from_mapping(
