@@ -674,6 +674,7 @@ def test_smoke_workflow_restores_caller_provenance_env(
 ) -> None:
     monkeypatch.setenv("BIOETL_AI_RUNTIME", "caller-runtime")
     monkeypatch.setenv("BIOETL_AI_AGENT", "caller-agent")
+    monkeypatch.setenv("BIOETL_AI_MEMORY_MODE", "read-only")
     monkeypatch.setattr(workflow, "validate_memory_scaffold", lambda: [])
 
     payload = workflow.smoke_workflow(validation_timeout_seconds=0)
@@ -681,6 +682,22 @@ def test_smoke_workflow_restores_caller_provenance_env(
     assert payload["ok"] is True
     assert os.environ["BIOETL_AI_RUNTIME"] == "caller-runtime"
     assert os.environ["BIOETL_AI_AGENT"] == "caller-agent"
+    assert os.environ["BIOETL_AI_MEMORY_MODE"] == "read-only"
+
+
+def test_smoke_workflow_succeeds_when_ambient_memory_mode_is_read_only(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Smoke must write temp notes even if shell default is read-only."""
+    monkeypatch.setenv("BIOETL_AI_MEMORY_MODE", "read-only")
+    monkeypatch.setattr(workflow, "validate_memory_scaffold", lambda: [])
+
+    payload = workflow.smoke_workflow(validation_timeout_seconds=0)
+
+    assert payload["ok"] is True
+    assert payload["pre_task_ok"] is True
+    assert payload["post_task_ok"] is True
+    assert os.environ["BIOETL_AI_MEMORY_MODE"] == "read-only"
 
 
 def test_compact_prune_report_accepts_minimal_stub_payload() -> None:

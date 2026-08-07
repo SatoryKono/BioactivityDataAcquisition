@@ -44,10 +44,22 @@ session note, and does not mutate repository-owned memory surfaces.
 
 ## Pre-Task
 
-Run the standard pre-task workflow:
+Run the standard pre-task workflow from the repository root. Prefer the project
+venv so `memory` resolves from `src/` (editable install or `PYTHONPATH=src`):
 
 ```bash
-python -m memory.tooling.workflow pre-task \
+# Recommended agent entrypoint (selects .venv and sets PYTHONPATH):
+bash scripts/memory/run_workflow.sh pre-task \
+  --task-id chembl-memory-audit \
+  --title "Audit chembl activity ownership" \
+  --query chembl_activity \
+  --profile audit \
+  --source-ref docs/plans/project-memory-layer-implementation-plan-2026-04-20.md \
+  --json
+
+# Equivalent direct form:
+export PYTHONPATH=src:${PYTHONPATH:-}
+.venv/bin/python -m memory.tooling.workflow pre-task \
   --task-id chembl-memory-audit \
   --title "Audit chembl activity ownership" \
   --query chembl_activity \
@@ -196,8 +208,14 @@ For a lightweight health check that exercises pre-task and post-task without
 committing rebuild-only artifacts:
 
 ```bash
-python -m memory.tooling.workflow smoke --json
+bash scripts/memory/run_workflow.sh smoke --json
+# or: .venv/bin/python -m memory.tooling.workflow smoke --json
 ```
+
+Smoke forces a temporary `BIOETL_AI_MEMORY_MODE=read-write` only for notes
+written under a temporary directory, then restores the caller's mode. Ambient
+`read-only` / `off` therefore no longer make `smoke` report `ok: false` solely
+because session notes were skipped.
 
 If the outcome is durable, promote the summary:
 
