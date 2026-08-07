@@ -257,12 +257,46 @@ def _terminal_render_manifest(
     theme: str = "light",
     width: int = 1024,
 ) -> dict[str, object]:
+    file_name = f"{uid}.png"
+    dashboard_source = {
+        "path": f"grafana/dashboards/{uid}.json",
+        "sha256": "b" * 64,
+        "version": 1,
+    }
     return {
+        "capture_id": "unit-capture",
         "engine": "playwright",
         "expand_collapsed_rows": True,
+        "file_count": 1,
+        "file_set": [file_name],
+        "immutable_manifest": (
+            "render-manifest--selected-subset--unit-capture.json"
+        ),
+        "manifest_kind": "selected-subset",
         "requested": {
+            "browser_zoom": 100,
+            "kiosk_mode": "off",
             "viewport": {"width": width, "height": 2200},
             "theme": theme,
+        },
+        "source": {
+            "commit_sha": "a" * 40,
+            "working_tree_dirty": False,
+            "dashboards": {uid: dashboard_source},
+        },
+        "capture_context": {
+            "time_range": {
+                "from": "now-12h",
+                "to": "now",
+                "timezone": "UTC",
+            },
+            "variables": {
+                "workflow": "",
+                "pipeline": "",
+                "run_type": "",
+                "run_id": "",
+            },
+            "row_state": {"expand_collapsed_rows": True},
         },
         "terminal_state_validation": {
             "status": "ok",
@@ -271,9 +305,16 @@ def _terminal_render_manifest(
         "dashboards": [
             {
                 "uid": uid,
+                "file": file_name,
                 "renderStatus": "rendered",
                 "actualViewport": {"width": width, "height": 1900},
                 "actualTheme": theme,
+                "dashboardSource": dashboard_source,
+                "browserState": {
+                    "requestedZoom": 100,
+                    "cssZoom": "1",
+                    "actualKiosk": "off",
+                },
                 "terminalStateValidation": {
                     "status": "ok",
                     "checkedPanelCount": 1,
@@ -393,10 +434,12 @@ def test_grafana_audit_preflight_screenshot_check_enforces_terminal_manifest(
         encoding="utf-8",
     )
     screenshot_path.write_bytes(b"png")
-    manifest_path.write_text(
-        json.dumps(_terminal_render_manifest(classification="loading")),
-        encoding="utf-8",
-    )
+    manifest = _terminal_render_manifest(classification="loading")
+    manifest_text = json.dumps(manifest)
+    manifest_path.write_text(manifest_text, encoding="utf-8")
+    immutable_name = manifest["immutable_manifest"]
+    assert isinstance(immutable_name, str)
+    (screenshot_dir / immutable_name).write_text(manifest_text, encoding="utf-8")
     os.utime(dashboard_path, (1, 1))
     os.utime(screenshot_path, (2, 2))
     monkeypatch.setattr(
