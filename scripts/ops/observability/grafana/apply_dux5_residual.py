@@ -145,6 +145,17 @@ TEXT_REPLACEMENTS: list[tuple[re.Pattern[str], str]] = [
 ]
 
 
+def _is_zeroish(val: object) -> bool:
+    """True for None or numeric zero without float equality on non-numbers."""
+    if val is None:
+        return True
+    if isinstance(val, bool):
+        return False
+    if isinstance(val, (int, float)):
+        return abs(float(val)) <= 1e-15
+    return False
+
+
 def walk(
     panels: list[dict[str, Any]] | None,
     parent_collapsed: bool = False,
@@ -280,7 +291,7 @@ def neutralize_red_at_zero_for_scores(panel: dict[str, Any]) -> bool:
             continue
         color = str(step.get("color") or "").lower()
         val = step.get("value")
-        if (val is None or val == 0 or val == 0.0) and "red" in color:
+        if (_is_zeroish(val)) and "red" in color:
             # Keep base step neutral; scores use continuous thresholds elsewhere
             step = dict(step)
             step["color"] = "transparent"

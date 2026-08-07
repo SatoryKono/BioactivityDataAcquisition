@@ -19,6 +19,17 @@ DOCS = ROOT / "docs" / "03-guides" / "dashboards"
 type JsonObject = dict[str, Any]
 
 
+def _is_zeroish(val: object) -> bool:
+    """True for None or numeric zero without float equality on non-numbers."""
+    if val is None:
+        return True
+    if isinstance(val, bool):
+        return False
+    if isinstance(val, (int, float)):
+        return abs(float(val)) <= 1e-15
+    return False
+
+
 def walk(
     panels: list[JsonObject] | None,
     parent_collapsed: bool = False,
@@ -82,7 +93,7 @@ def write_v0_artifacts() -> None:
                     continue
                 color = str(step.get("color") or "").lower()
                 val = step.get("value")
-                zeroish = val is None or val == 0 or val == 0.0
+                zeroish = _is_zeroish(val)
                 if zeroish and "green" in color:
                     risks.append("green_at_or_below_zero")
                 if zeroish and "red" in color:
@@ -296,7 +307,7 @@ def neutralize_zero_color_thresholds(panel: JsonObject) -> bool:
         step = dict(step)
         color = str(step.get("color") or "").lower()
         val = step.get("value")
-        zeroish = val is None or val == 0 or val == 0.0
+        zeroish = _is_zeroish(val)
         if zeroish and ("green" in color or "red" in color):
             step["color"] = "text"
             changed = True
