@@ -10,6 +10,7 @@ Commands:
     check-required-fields  Validate silver required_fields cover YAML requiredness
     audit-optionality      Audit/check effective_optional_v1 resolved from config surface
     check-config-paths     Check for legacy dq/filter config path references
+    verify-schema-parity   Verify Silver<->Gold schema parity and primary key coverage
     generate-pipeline      Generate pipeline JSON schema
     generate-artifacts     Generate schema artifacts
     generate-pubtype       Generate publication type classification artifacts
@@ -34,6 +35,7 @@ COMMANDS: dict[str, str] = {
     "check-required-fields": "scripts.schema.validation.check_required_filter_fields",
     "audit-optionality": "scripts.schema.validation.audit_effective_optionality",
     "check-config-paths": "scripts.schema.validation.lint_config_paths",
+    "verify-schema-parity": "scripts.schema.validation.verify_schema_parity",
     "generate-pipeline": "scripts.schema.generation.generate_pipeline_schema",
     "generate-artifacts": "scripts.schema.generation.generate_schema_artifacts",
     "generate-pubtype": "scripts.schema.generation.generate_publication_type_classification_artifacts",
