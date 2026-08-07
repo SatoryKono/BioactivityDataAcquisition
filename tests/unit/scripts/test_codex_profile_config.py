@@ -46,9 +46,7 @@ def test_apply_profiles_is_private_backed_up_and_restorable(tmp_path: Path) -> N
         stat.S_IMODE((codex_home / filename).stat().st_mode) == 0o600
         for filename, _profile in profile_config.PROFILE_FILES.values()
     )
-    assert "must-not-leak" in (codex_home / "config.toml").read_text(
-        encoding="utf-8"
-    )
+    assert "must-not-leak" in (codex_home / "config.toml").read_text(encoding="utf-8")
 
     restored = profile_config.restore_profiles(codex_home, backup)
 

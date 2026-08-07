@@ -234,9 +234,7 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
                 f"{dashboard_name}:{panel_title} must not use selected range for current status"
             )
 
-    dq_dashboard = load_dashboard(
-        Path("grafana/dashboards") / "bioetl-dq-v2.json"
-    )
+    dq_dashboard = load_dashboard(Path("grafana/dashboards") / "bioetl-dq-v2.json")
     dq_reason_row = next(
         panel
         for panel in dq_dashboard.get("panels", [])

@@ -176,9 +176,7 @@ def test_canonical_launcher_enforces_private_defaults_and_managed_path() -> None
 
 def test_environment_check_invokes_tracked_non_executable_helpers_via_bash() -> None:
     root = _project_root()
-    helper = (root / "scripts/ai/codex/helper/check-env.sh").read_text(
-        encoding="utf-8"
-    )
+    helper = (root / "scripts/ai/codex/helper/check-env.sh").read_text(encoding="utf-8")
 
     assert '[[ -f "${ENSURE_SCRIPT}" ]]' in helper
     assert 'timeout 10 bash "${ENSURE_SCRIPT}"' in helper
