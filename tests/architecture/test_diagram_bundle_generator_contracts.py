@@ -26,7 +26,7 @@ pytestmark = pytest.mark.architecture
 
 def _load_generate_all_bundles() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[2]
-    module_path = repo_root / "scripts" / "diagrams" / "generate_all_bundles.py"
+    module_path = repo_root / "scripts" / "diagrams" / "render" / "generate_all_bundles.py"
     script_dir = str(module_path.parent)
     if script_dir not in sys.path:
         sys.path.insert(0, script_dir)
@@ -90,9 +90,9 @@ def test_diagrams_router_exposes_collection_specific_bundle_commands() -> None:
     content = Path("scripts/diagrams/__main__.py").read_text(encoding="utf-8")
 
     assert '"render-pdf"' in content
-    assert '"generate_all_bundles.py", "--collection", "architecture"' in content
+    assert '"render/generate_all_bundles.py", "--collection", "architecture"' in content
     assert '"render-views"' in content
-    assert '"generate_all_bundles.py", "--collection", "views"' in content
+    assert '"render/generate_all_bundles.py", "--collection", "views"' in content
     assert not Path("scripts/diagrams/generate_architecture_bundle.py").exists()
     assert not Path("scripts/diagrams/generate_views_bundle.py").exists()
 

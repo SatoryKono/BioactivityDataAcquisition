@@ -6,7 +6,7 @@ retained temporarily for existing direct invocations.
 
 from __future__ import annotations
 
-from scripts.diagrams import differentiate_linkstyle as _differentiate_linkstyle
+from scripts.diagrams.fix import differentiate_linkstyle as _differentiate_linkstyle
 
 # Re-export security-relevant symbols so direct wrappers stay patchable in tests.
 MERMAID_DIR = _differentiate_linkstyle.MERMAID_DIR

@@ -60,7 +60,7 @@ def test_fix_pagebreaks_rejects_write_outside_root(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     module = _load_module(
-        _repo_root() / "scripts" / "diagrams" / "fix_pagebreaks_in_bundles.py",
+        _repo_root() / "scripts" / "diagrams" / "render" / "fix_pagebreaks_in_bundles.py",
         "fix_pagebreaks_security_module",
     )
     monkeypatch.setattr(module, "DIAGRAM_ROOT", tmp_path)
@@ -75,7 +75,7 @@ def test_fix_pagebreaks_accepts_validated_root_path(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     module = _load_module(
-        _repo_root() / "scripts" / "diagrams" / "fix_pagebreaks_in_bundles.py",
+        _repo_root() / "scripts" / "diagrams" / "render" / "fix_pagebreaks_in_bundles.py",
         "fix_pagebreaks_security_module_absolute",
     )
     monkeypatch.setattr(module, "DIAGRAM_ROOT", tmp_path)
@@ -88,7 +88,7 @@ def test_fix_pagebreaks_accepts_validated_root_path(
 
 def test_uniform_sizes_rejects_write_outside_repo(tmp_path: Path) -> None:
     module = _load_module(
-        _repo_root() / "scripts" / "diagrams" / "uniform_diagram_sizes.py",
+        _repo_root() / "scripts" / "diagrams" / "fix" / "uniform_diagram_sizes.py",
         "uniform_diagram_sizes_security_module",
     )
 
@@ -102,7 +102,7 @@ def test_uniform_sizes_accepts_validated_repo_path(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     module = _load_module(
-        _repo_root() / "scripts" / "diagrams" / "uniform_diagram_sizes.py",
+        _repo_root() / "scripts" / "diagrams" / "fix" / "uniform_diagram_sizes.py",
         "uniform_diagram_sizes_security_module_absolute",
     )
     monkeypatch.setattr(module, "SCRIPT_DIR", tmp_path)
