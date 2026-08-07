@@ -78,3 +78,11 @@ See [AI Runtime Mirror Ownership](agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
   redefine project rules by themselves.
 - When contributors need to change runtime behavior, they SHOULD edit the
   relevant runtime tree first and then refresh the docs mirror if needed.
+
+## Grok operator aids
+
+- [agents/guides/grok-operator-runbook.md](agents/guides/grok-operator-runbook.md)
+- [agents/guides/grok-tui-config-checklist.md](agents/guides/grok-tui-config-checklist.md)
+- [prompts/grok-closeout.md](prompts/grok-closeout.md)
+- [prompts/grok-audit-cycle.md](prompts/grok-audit-cycle.md)
+
