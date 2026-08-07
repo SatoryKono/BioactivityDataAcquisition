@@ -214,6 +214,53 @@ def test_gold_writer_retries_delta_commit_failures() -> None:
 
 
 @pytest.mark.asyncio
+async def test_gold_source_table_missing_skips_reconciliation() -> None:
+    logger = _Logger()
+    adapter = SilverForeignKeyReconciliationAdapter(
+        silver_writer=_SilverWriter(),  # type: ignore[arg-type]
+        gold_writer=_GoldReader(
+            {
+                "chembl.target": [
+                    {
+                        "target_id": "CHEMBL_T1",
+                        "_is_current": True,
+                    }
+                ]
+            }
+        ),
+        logger=logger,  # type: ignore[arg-type]
+    )
+
+    result = await adapter.reconcile_foreign_keys(
+        ForeignKeyReconciliationRequest(
+            source_layer="gold",
+            reference_layer="gold",
+            mutation_layer="gold",
+            source_table="chembl.assay",
+            reference_table="chembl.target",
+            source_key="target_id",
+            reference_key="target_id",
+            primary_keys=("assay_id",),
+        )
+    )
+
+    assert result.mutation_mode == "missing_source"
+    assert result.scanned_rows == 0
+    assert result.retained_rows == 0
+    assert result.orphan_rows_deleted == 0
+    assert result.mutated is False
+    assert result.would_mutate is False
+    assert any(
+        level == "warning"
+        and message
+        == "workflow foreign-key reconciliation skipped missing source table"
+        and context["source_layer"] == "gold"
+        and context["source_table"] == "chembl.assay"
+        for level, message, context in logger.events
+    )
+
+
+@pytest.mark.asyncio
 async def test_gold_expiry_retries_commit_conflict(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -274,7 +321,10 @@ async def test_gold_reference_table_missing_fails_fast() -> None:
         logger=_Logger(),  # type: ignore[arg-type]
     )
 
-    with pytest.raises(ValueError, match="reference table not found"):
+    with pytest.raises(
+        ValueError,
+        match=r"Gold foreign-key reconciliation reference table not found: chembl\.target",
+    ) as exc_info:
         await adapter.reconcile_foreign_keys(
             ForeignKeyReconciliationRequest(
                 source_layer="gold",
@@ -287,3 +337,5 @@ async def test_gold_reference_table_missing_fails_fast() -> None:
                 primary_keys=("assay_id",),
             )
         )
+
+    assert isinstance(exc_info.value.__cause__, FileNotFoundError)

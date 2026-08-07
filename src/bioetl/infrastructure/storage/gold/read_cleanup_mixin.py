@@ -64,27 +64,33 @@ class GoldWriterReadCleanupMixin:
 
         Returns:
             List of Gold record dicts, filtered to current records if current_only is True.
+
+        Raises:
+            FileNotFoundError: If the Gold Delta table does not exist.
         """
         table_path = self._resolve_table_path(table_name)
         module = _load_gold_writer_module()
-        dt = cast(
-            Any,  # Any: DeltaTable runtime type has no complete type stubs
-            await self._run_in_executor(lambda: module.DeltaTable(table_path)),
-        )
         projection = _build_read_projection(
             columns=columns,
             current_only=current_only,
         )
-        if projection is None:
-            arrow_table = cast(
-                Any,  # Any: pyarrow.Table returned via executor is untyped to mypy
-                await self._run_in_executor(dt.to_pyarrow_table),
+        try:
+            dt = cast(
+                Any,  # Any: DeltaTable runtime type has no complete type stubs
+                await self._run_in_executor(lambda: module.DeltaTable(table_path)),
             )
-        else:
-            arrow_table = cast(
-                Any,  # Any: pyarrow.Table returned via executor is untyped to mypy
-                await self._run_in_executor(dt.to_pyarrow_table, projection),
-            )
+            if projection is None:
+                arrow_table = cast(
+                    Any,  # Any: pyarrow.Table returned via executor is untyped to mypy
+                    await self._run_in_executor(dt.to_pyarrow_table),
+                )
+            else:
+                arrow_table = cast(
+                    Any,  # Any: pyarrow.Table returned via executor is untyped to mypy
+                    await self._run_in_executor(dt.to_pyarrow_table, projection),
+                )
+        except module.TableNotFoundError as exc:
+            raise FileNotFoundError(f"Gold table not found: {table_name}") from exc
         current_flag = (
             _current_flag_column(list(arrow_table.column_names))
             if current_only

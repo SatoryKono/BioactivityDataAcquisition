@@ -919,6 +919,24 @@ class TestGoldWriterRead:
     """Tests for read operations."""
 
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
+    async def test_read_gold_normalizes_missing_delta_table(
+        self,
+        mock_delta_table,
+        gold_writer,
+    ):
+        """Missing Delta tables should use the storage reader contract."""
+        delta_error = TableNotFoundError("no log files")
+        mock_delta_table.side_effect = delta_error
+
+        with pytest.raises(
+            FileNotFoundError,
+            match=r"Gold table not found: test\.table",
+        ) as exc_info:
+            await gold_writer.read_gold("test.table")
+
+        assert exc_info.value.__cause__ is delta_error
+
+    @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     async def test_read_gold_returns_records(self, mock_delta_table, gold_writer):
         """Test read_gold returns records from table."""
 
