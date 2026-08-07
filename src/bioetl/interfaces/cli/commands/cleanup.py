@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 def _validate_retention_days(
     _ctx: click.Context,
     _param: click.Parameter,
-    value: Any,
+    value: Any,  # Any: Click callback input is dynamically typed
 ) -> int:
     """Accept only non-negative integers for --retention-days."""
     if not isinstance(value, int) or isinstance(value, bool) or value < 0:

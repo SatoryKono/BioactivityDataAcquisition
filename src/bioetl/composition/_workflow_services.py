@@ -177,7 +177,7 @@ def _build_workflow_transform_registry(
             quarantine=reconciliation_quarantine,
             quarantine_pipeline_name="workflow_transforms",
             gold_writer=transform_gold_storage,
-            artifact_sink=cast(Any, artifact_sink),
+            artifact_sink=cast(Any, artifact_sink),  # Any: optional sink protocol compatibility
         ),
         row_reconciliation_port=StorageRowReconciliationAdapter(
             silver_reader=transform_storage,

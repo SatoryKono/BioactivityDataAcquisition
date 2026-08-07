@@ -169,7 +169,7 @@ class PostrunService(PostrunServiceSupportMixin):
         dq_context: DQReportContext | None,
     ) -> PostrunResult:
         """Execute compaction, DQ, reporting, metadata, and vacuum in order."""
-        host = cast(Any, self)
+        host = cast(Any, self)  # Any: phased postrun methods are supplied by mixins
         compaction = await host._run_compaction_phase()
         dq_result = host._run_dq_phase(executor)
         dq_reports = await host._run_dq_report_phase(dq_context)

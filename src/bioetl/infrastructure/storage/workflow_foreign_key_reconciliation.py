@@ -361,7 +361,7 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             return result
 
         mutation_summary = await apply_reconciliation_mutation(
-            cast(Any, self),
+            cast(Any, self),  # Any: reconciliation mutation helper uses structural host
             request,
             orphan_rows=orphan_rows,
         )
@@ -384,7 +384,7 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             orphan_rows_deleted=orphan_rows_deleted,
             mutated=True,
             would_mutate=False,
-            mutation_mode=cast(Any, mutation_summary.mutation_mode),
+            mutation_mode=cast(Any, mutation_summary.mutation_mode),  # Any: external mutation summary compatibility
             quarantine_batch_id=mutation_summary.quarantine_batch_id,
             quarantine_rows_written=mutation_summary.quarantine_rows_written,
             quarantine_error_code=mutation_summary.quarantine_error_code,

@@ -79,7 +79,7 @@ class PipelineRunnerSupportMixin:
 
     async def _cleanup_after_run(self: _PipelineRunnerCleanupHostProtocol) -> None:
         try:
-            await cast(Any, self._postrun_service).cleanup(self._tracer)
+            await cast(Any, self._postrun_service).cleanup(self._tracer)  # Any: mixin host protocol bridge
         finally:
             self._close_metrics()
 
@@ -139,7 +139,11 @@ class PipelineRunnerSupportMixin:
         await prepare_medallion_layers(self)
 
     def _check_data_quality(self: _PipelineRunnerCleanupHostProtocol) -> None:
-        cast(Any, self._postrun_service).run_dq_checks(self._executor)  # pyright: ignore[reportArgumentType]
+        postrun_service = cast(
+            Any,  # Any: mixin host protocol bridge
+            self._postrun_service,
+        )
+        postrun_service.run_dq_checks(self._executor)  # pyright: ignore[reportArgumentType]
 
     def _close_metrics(self: _PipelineRunnerCleanupHostProtocol) -> None:
         try:
