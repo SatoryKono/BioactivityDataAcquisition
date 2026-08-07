@@ -20,16 +20,8 @@ if TYPE_CHECKING:
     from bioetl.domain.types import JsonDict
 
 
-# Compatibility: keep legacy helper symbols available from this module.
+# Compatibility: keep only aliases still imported by unit tests.
 _compute_column_stats = _calc.compute_column_stats
-_collect_all_columns = _calc.collect_all_columns
-_compute_single_column_stats = _calc.compute_single_column_stats
-_filter_non_null = _calc.filter_non_null
-_calculate_null_rate = _calc.calculate_null_rate
-_make_hashable = _calc.make_hashable
-_calculate_unique_count = _calc.calculate_unique_count
-_compute_numeric_stats = _calc.compute_numeric_stats
-_is_valid_numeric = _calc.is_valid_numeric
 _extract_numeric_values = _calc.extract_numeric_values
 
 

@@ -193,7 +193,7 @@ class PubMedId(ValueObject[str]):
         if isinstance(raw, str) and not raw.strip():
             return None
         try:
-            # str() is idempotent on strings, converts int to str
-            return cls(str(raw))
-        except ValueError:
+            # Let PubMedId coercion handle typing; avoid premature str() on ints only path
+            return cls(raw)  # type: ignore[arg-type]
+        except (TypeError, ValueError):
             return None

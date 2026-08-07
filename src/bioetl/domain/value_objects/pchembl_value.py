@@ -102,7 +102,7 @@ class PChemblValue:
         """Compute hash based on value for use in sets and dicts."""
         return hash(self.value)
 
-    def __lt__(self, other: PChemblValue) -> bool:
+    def __lt__(self, other: object) -> bool:
         """Compare for ordering (lower value = less potent)."""
         if not isinstance(other, PChemblValue):
             return NotImplemented
