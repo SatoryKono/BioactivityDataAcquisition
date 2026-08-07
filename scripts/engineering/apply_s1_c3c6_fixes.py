@@ -1,5 +1,7 @@
 """Apply remaining S1 C3–C6 correctness residuals (one-shot patcher)."""
 
+# NOSONAR - S1192 duplicated literals are intentional for replace(old, new) pattern in patcher script
+
 from __future__ import annotations
 
 from pathlib import Path
