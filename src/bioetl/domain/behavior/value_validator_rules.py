@@ -76,13 +76,29 @@ def is_percent_inhibition_type(parsed_type: ActivityType | str) -> bool:
     )
 
 
-def _percent_numeric_error(value: object) -> str | None:
+def _percent_type_error(value: object) -> str | None:
+    if isinstance(value, bool):
+        return f"Percent inhibition must be numeric, got {type(value).__name__}"
+    if isinstance(value, (int, float)):
+        return None
+    return f"Percent inhibition must be numeric, got {type(value).__name__}"
+
+
+def _percent_finite_error(value: float) -> str | None:
     import math
 
-    if isinstance(value, bool) or not isinstance(value, (int, float)):
-        return f"Percent inhibition must be numeric, got {type(value).__name__}"
-    if math.isnan(value) or math.isinf(value):
+    if math.isnan(value):
         return f"Percent inhibition must be finite, got {value}"
+    if math.isinf(value):
+        return f"Percent inhibition must be finite, got {value}"
+    return None
+
+
+def _percent_range_error(value: float) -> str | None:
+    if value < 0:
+        return f"Percent inhibition must be 0-100, got {value}"
+    if value > 100:
+        return f"Percent inhibition must be 0-100, got {value}"
     return None
 
 
@@ -95,9 +111,8 @@ def validate_percent_value(value: float) -> tuple[bool, str | None]:
     Returns:
         Tuple of (is_valid, error_message). error_message is None if valid.
     """
-    type_error = _percent_numeric_error(value)
-    if type_error is not None:
-        return False, type_error
-    if value < 0 or value > 100:
-        return False, f"Percent inhibition must be 0-100, got {value}"
+    for checker in (_percent_type_error, _percent_finite_error, _percent_range_error):
+        error = checker(value)
+        if error is not None:
+            return False, error
     return True, None

@@ -130,6 +130,36 @@ class CompositeLineageMetadata:
         )
 
 
+def _status_error_message(status: dict[str, object]) -> str | None:
+    raw_message = status.get("error_message")
+    if raw_message is None:
+        return None
+    return str(raw_message)
+
+
+def _status_record_from_mapping(
+    provider_key: str,
+    status: dict[str, object],
+) -> EnrichmentStatusRecord:
+    return EnrichmentStatusRecord(
+        provider=provider_key,
+        status=str(status.get("status") or "error"),
+        timestamp=_parse_datetime(status.get("timestamp")),
+        error_message=_status_error_message(status),
+    )
+
+
+def _status_record_from_value(
+    provider_key: str,
+    status: object,
+) -> EnrichmentStatusRecord:
+    if isinstance(status, str):
+        return EnrichmentStatusRecord(provider=provider_key, status=status)
+    if isinstance(status, dict):
+        return _status_record_from_mapping(provider_key, status)
+    return EnrichmentStatusRecord(provider=provider_key, status="error")
+
+
 def _parse_enrichment_status(
     raw: object,
 ) -> dict[str, EnrichmentStatusRecord]:
@@ -138,54 +168,41 @@ def _parse_enrichment_status(
     Accepts legacy plain-string values and nested mapping payloads with
     ``status`` / ``timestamp`` / ``error_message``.
     """
-    result: dict[str, EnrichmentStatusRecord] = {}
     if not isinstance(raw, dict):
-        return result
-    for provider, status in raw.items():
-        provider_key = str(provider)
-        if isinstance(status, str):
-            result[provider_key] = EnrichmentStatusRecord(
-                provider=provider_key,
-                status=status,
-            )
-            continue
-        if isinstance(status, dict):
-            result[provider_key] = EnrichmentStatusRecord(
-                provider=provider_key,
-                status=str(status.get("status") or "error"),
-                timestamp=_parse_datetime(status.get("timestamp")),
-                error_message=(
-                    str(status["error_message"])
-                    if status.get("error_message") is not None
-                    else None
-                ),
-            )
-            continue
-        result[provider_key] = EnrichmentStatusRecord(
-            provider=provider_key,
-            status="error",
-        )
-    return result
+        return {}
+    return {
+        str(provider): _status_record_from_value(str(provider), status)
+        for provider, status in raw.items()
+    }
 
 
 def _ensure_utc(dt: datetime) -> datetime:
     """Ensure datetime is UTC-aware."""
-    return dt.replace(tzinfo=UTC) if dt.tzinfo is None else dt
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=UTC)
+    return dt
+
+
+def _parse_one_timestamp(ts: object) -> datetime | None:
+    if isinstance(ts, datetime):
+        return _ensure_utc(ts)
+    if not isinstance(ts, str):
+        return None
+    try:
+        return _ensure_utc(datetime.fromisoformat(ts))
+    except ValueError:
+        return None
 
 
 def _parse_timestamps(raw: object) -> dict[str, datetime]:
     """Parse timestamps from raw dict, skipping malformed ISO strings."""
-    result: dict[str, datetime] = {}
     if not isinstance(raw, dict):
-        return result
+        return {}
+    result: dict[str, datetime] = {}
     for provider, ts in raw.items():
-        if isinstance(ts, str):
-            try:
-                result[str(provider)] = _ensure_utc(datetime.fromisoformat(ts))
-            except ValueError:
-                continue
-        elif isinstance(ts, datetime):
-            result[str(provider)] = _ensure_utc(ts)
+        parsed = _parse_one_timestamp(ts)
+        if parsed is not None:
+            result[str(provider)] = parsed
     return result
 
 

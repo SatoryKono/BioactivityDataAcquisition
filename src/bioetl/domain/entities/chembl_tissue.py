@@ -47,10 +47,14 @@ class Tissue(BaseEntity):
     uberon_mapping_status: str | None = None
     uberon_ontology_version: str | None = None
 
+    @staticmethod
+    def _stripped_text(value: object) -> object:
+        if isinstance(value, str):
+            return value.strip()
+        return value
+
     def _validate_invariants(self) -> None:
-        tissue_id = self.tissue_id.strip() if isinstance(self.tissue_id, str) else self.tissue_id
-        pref_name = self.pref_name.strip() if isinstance(self.pref_name, str) else self.pref_name
-        if not tissue_id:
+        if not self._stripped_text(self.tissue_id):
             raise ValueError("Tissue ChEMBL ID is required")
-        if not pref_name:
+        if not self._stripped_text(self.pref_name):
             raise ValueError("Tissue pref_name is required")

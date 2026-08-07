@@ -90,7 +90,11 @@ def coerce_silver_dq_analyze_request(
 ) -> SilverDQAnalyzeRequest:
     """Normalize legacy or request-style Silver DQ analysis arguments."""
     if isinstance(request, SilverDQAnalyzeRequest):
-        if args or kwargs:
+        if args:
+            raise TypeError(
+                "SilverDQAnalyzeRequest cannot be combined with legacy args/kwargs"
+            )
+        if kwargs:
             raise TypeError(
                 "SilverDQAnalyzeRequest cannot be combined with legacy args/kwargs"
             )

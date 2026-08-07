@@ -57,6 +57,23 @@ class QuarantineStatus(StrEnum):
         return self in {QuarantineStatus.NEW, QuarantineStatus.UNDER_REVIEW}
 
 
+def _terminal_resolution_types() -> frozenset[str]:
+    return frozenset(
+        status.value for status in QuarantineStatus if status.is_terminal()
+    )
+
+
+def _validate_resolution_type(resolution_type: str) -> None:
+    allowed = _terminal_resolution_types()
+    if resolution_type in allowed:
+        return
+    allowed_list = ", ".join(repr(value) for value in sorted(allowed))
+    raise ValueError(
+        f"Invalid resolution_type: {resolution_type}. "
+        f"Must be one of: {allowed_list}."
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class ResolutionInfo:
     """Immutable value object with resolution details.
@@ -77,17 +94,7 @@ class ResolutionInfo:
 
     def __post_init__(self) -> None:
         """Validate resolution info."""
-        allowed = {
-            status.value
-            for status in QuarantineStatus
-            if status.is_terminal()
-        }
-        if self.resolution_type not in allowed:
-            allowed_list = ", ".join(repr(value) for value in sorted(allowed))
-            raise ValueError(
-                f"Invalid resolution_type: {self.resolution_type}. "
-                f"Must be one of: {allowed_list}."
-            )
+        _validate_resolution_type(self.resolution_type)
 
 
 def _validate_quarantine_required_fields(

@@ -139,18 +139,30 @@ def _validate_null_filter(text: str, upper: str, token: str) -> bool:
     return True
 
 
+def _try_comparison_operator(text: str, operator: str) -> bool:
+    if operator not in text:
+        return False
+    left, right = text.split(operator, 1)
+    _require_filter_field(left.strip())
+    if not right.strip():
+        raise ValueError(
+            "aggregation filter_condition comparison requires a value"
+        )
+    return True
+
+
 def _validate_comparison_filter(text: str) -> bool:
-    for operator in (" == ", " != "):
-        if operator not in text:
-            continue
-        left, right = text.split(operator, 1)
-        _require_filter_field(left.strip())
-        if not right.strip():
-            raise ValueError(
-                "aggregation filter_condition comparison requires a value"
-            )
+    if _try_comparison_operator(text, " == "):
         return True
-    return False
+    return _try_comparison_operator(text, " != ")
+
+
+def _validate_known_filter_forms(text: str, upper: str) -> bool:
+    if _validate_null_filter(text, upper, " IS NOT NULL"):
+        return True
+    if _validate_null_filter(text, upper, " IS NULL"):
+        return True
+    return _validate_comparison_filter(text)
 
 
 def _validate_aggregation_filter_condition(condition: str) -> None:
@@ -163,12 +175,7 @@ def _validate_aggregation_filter_condition(condition: str) -> None:
     text = condition.strip()
     if not text:
         raise ValueError("aggregation filter_condition cannot be empty")
-    upper = text.upper()
-    if _validate_null_filter(text, upper, " IS NOT NULL"):
-        return
-    if _validate_null_filter(text, upper, " IS NULL"):
-        return
-    if _validate_comparison_filter(text):
+    if _validate_known_filter_forms(text, text.upper()):
         return
     raise ValueError(
         "aggregation filter_condition uses unsupported syntax; "

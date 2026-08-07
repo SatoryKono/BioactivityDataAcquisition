@@ -71,18 +71,31 @@ class Concentration:
     value: float
     unit: ConcentrationUnit
 
-    def __post_init__(self) -> None:
-        """Validate concentration invariants."""
-        import math
-
-        if isinstance(self.value, bool) or not isinstance(self.value, (int, float)):
+    def _require_numeric_value(self) -> None:
+        if isinstance(self.value, bool):
             raise TypeError(
                 f"Concentration value must be numeric, got {type(self.value).__name__}"
             )
-        if math.isnan(self.value) or math.isinf(self.value):
+        if isinstance(self.value, (int, float)):
+            return
+        raise TypeError(
+            f"Concentration value must be numeric, got {type(self.value).__name__}"
+        )
+
+    def _require_finite_non_negative(self) -> None:
+        import math
+
+        if math.isnan(self.value):
+            raise ValueError(f"Concentration must be finite: {self.value}")
+        if math.isinf(self.value):
             raise ValueError(f"Concentration must be finite: {self.value}")
         if self.value < 0:
             raise ValueError(f"Concentration cannot be negative: {self.value}")
+
+    def __post_init__(self) -> None:
+        """Validate concentration invariants."""
+        self._require_numeric_value()
+        self._require_finite_non_negative()
 
     def to_unit(self, target_unit: ConcentrationUnit) -> Concentration:
         """Convert to a different unit.

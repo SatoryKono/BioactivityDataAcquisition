@@ -116,12 +116,9 @@ def _build_enricher_config[ConfigT](
         ),
         "limit": optional_int(enricher.get("limit"), "enrichers[].limit"),
     }
-    if enricher.get("fallback_strategy") is not None:
-        kwargs["fallback_strategy"] = enricher.get("fallback_strategy")
-    if enricher.get("cardinality") is not None:
-        kwargs["cardinality"] = enricher.get("cardinality")
-    if enricher.get("aggregation") is not None:
-        kwargs["aggregation"] = enricher.get("aggregation")
+    for optional_key in ("fallback_strategy", "cardinality", "aggregation"):
+        if enricher.get(optional_key) is not None:
+            kwargs[optional_key] = enricher.get(optional_key)
     return enricher_cls(**kwargs)
 
 
@@ -217,6 +214,25 @@ def _dependency_entry(dependency: Any) -> dict[str, object]:
 
 
 
+def _aggregation_field_entry(field: Any) -> dict[str, object]:
+    return {
+        "source_field": field.source_field,
+        "agg_function": field.agg_function.value,
+        "filter_condition": field.filter_condition,
+        "output_field": field.output_field,
+    }
+
+
+def _aggregation_to_dict(aggregation: Any) -> dict[str, object]:
+    return {
+        "group_by": aggregation.group_by,
+        "order_by": list(aggregation.order_by),
+        "fields": [
+            _aggregation_field_entry(field) for field in aggregation.fields
+        ],
+    }
+
+
 def _enricher_entry(enricher: Any) -> dict[str, object]:
     """Serialize one enricher node for composite_to_dict."""
     entry: dict[str, object] = {
@@ -232,20 +248,118 @@ def _enricher_entry(enricher: Any) -> dict[str, object]:
     }
     aggregation = getattr(enricher, "aggregation", None)
     if aggregation is not None:
-        entry["aggregation"] = {
-            "group_by": aggregation.group_by,
-            "order_by": list(aggregation.order_by),
-            "fields": [
-                {
-                    "source_field": field.source_field,
-                    "agg_function": field.agg_function.value,
-                    "filter_condition": field.filter_condition,
-                    "output_field": field.output_field,
-                }
-                for field in aggregation.fields
-            ],
-        }
+        entry["aggregation"] = _aggregation_to_dict(aggregation)
     return entry
+
+
+def _seed_to_dict(seed: Any) -> dict[str, object]:
+    return {
+        "pipeline": seed.pipeline,
+        "output_keys": list(seed.output_keys),
+        "silver_table": seed.silver_table,
+        "limit": seed.limit,
+    }
+
+
+def _column_group_entry(group: Any) -> dict[str, object]:
+    return {
+        "name": group.name,
+        "fields": list(group.fields),
+        "pattern": group.pattern,
+        "provider_order": list(group.provider_order),
+    }
+
+
+def _merge_to_dict(merge: Any) -> dict[str, object]:
+    return {
+        "strategy": merge.strategy.value,
+        "conflict_resolution": merge.conflict_resolution.value,
+        "output_silver_path": merge.output_silver_path,
+        "output_gold_path": merge.output_gold_path,
+        "sort_by_silver": list(merge.sort_by_silver),
+        "sort_by_gold": list(merge.sort_by_gold),
+        "field_priorities": {
+            key: list(value) for key, value in merge.field_priorities.items()
+        },
+        "normalization_compatibility_overrides": dict(
+            merge.normalization_compatibility_overrides
+        ),
+        "field_mappings": dict(merge.field_mappings),
+        "column_groups": [_column_group_entry(group) for group in merge.column_groups],
+        "exclude_fields": list(merge.exclude_fields),
+        "preserve_all_sources": merge.preserve_all_sources,
+    }
+
+
+def _dq_override_entry(override: Any) -> dict[str, object]:
+    return {
+        "soft_fail_threshold": override.soft_fail_threshold,
+        "hard_fail_threshold": override.hard_fail_threshold,
+    }
+
+
+def _dq_to_dict(dq: Any) -> dict[str, object]:
+    return {
+        "soft_fail_threshold": dq.soft_fail_threshold,
+        "hard_fail_threshold": dq.hard_fail_threshold,
+        "required_fields": list(dq.required_fields),
+        "enricher_overrides": {
+            name: _dq_override_entry(override)
+            for name, override in dq.enricher_overrides.items()
+        },
+    }
+
+
+def _execution_to_dict(execution: Any) -> dict[str, object]:
+    return {
+        "max_concurrency": execution.max_concurrency,
+        "checkpoint_enabled": execution.checkpoint_enabled,
+        "retry_max_attempts": execution.retry_max_attempts,
+        "retry_backoff_multiplier": execution.retry_backoff_multiplier,
+    }
+
+
+def _lineage_to_dict(lineage: Any) -> dict[str, object]:
+    return {
+        "track_field_sources": lineage.track_field_sources,
+        "track_timestamps": lineage.track_timestamps,
+        "track_status": lineage.track_status,
+        "provider_lookup_fields": {
+            provider: dict(fields)
+            for provider, fields in lineage.provider_lookup_fields.items()
+        },
+        "track_source_for_fields": list(lineage.track_source_for_fields),
+    }
+
+
+def _cv_field_entry(field: Any) -> dict[str, object]:
+    return {
+        "field_name": field.field_name,
+        "method": getattr(field.method, "value", field.method),
+        "threshold": field.threshold,
+    }
+
+
+def _cv_pairing_entry(pairing: Any) -> dict[str, object]:
+    return {
+        "enricher_pipeline": pairing.enricher_pipeline,
+        "fields": [_cv_field_entry(field) for field in pairing.fields],
+    }
+
+
+def _cross_validation_to_dict(cross_validation: Any) -> dict[str, object]:
+    return {
+        "enabled": cross_validation.enabled,
+        "warning_threshold": cross_validation.warning_threshold,
+        "error_threshold": cross_validation.error_threshold,
+        "quarantine_threshold": cross_validation.quarantine_threshold,
+        "fuzzy_threshold": cross_validation.fuzzy_threshold,
+        "numeric_tolerance": cross_validation.numeric_tolerance,
+        "enricher_pairings": [
+            _cv_pairing_entry(pairing)
+            for pairing in cross_validation.enricher_pairings
+        ],
+    }
 
 
 def composite_to_dict(config: CompositeConfigProtocol) -> dict[str, object]:
@@ -260,96 +374,16 @@ def composite_to_dict(config: CompositeConfigProtocol) -> dict[str, object]:
     return {
         "name": config.name,
         "version": config.version,
-        "seed": {
-            "pipeline": config.seed.pipeline,
-            "output_keys": list(config.seed.output_keys),
-            "silver_table": config.seed.silver_table,
-            "limit": config.seed.limit,
-        },
+        "seed": _seed_to_dict(config.seed),
         "dependencies": [
-            _dependency_entry(dependency)
-            for dependency in config.dependencies
+            _dependency_entry(dependency) for dependency in config.dependencies
         ],
-        "enrichers": [
-            _enricher_entry(enricher)
-            for enricher in config.enrichers
-        ],
-        "merge": {
-            "strategy": config.merge.strategy.value,
-            "conflict_resolution": config.merge.conflict_resolution.value,
-            "output_silver_path": config.merge.output_silver_path,
-            "output_gold_path": config.merge.output_gold_path,
-            "sort_by_silver": list(config.merge.sort_by_silver),
-            "sort_by_gold": list(config.merge.sort_by_gold),
-            "field_priorities": {
-                key: list(value) for key, value in config.merge.field_priorities.items()
-            },
-            "normalization_compatibility_overrides": dict(
-                config.merge.normalization_compatibility_overrides
-            ),
-            "field_mappings": dict(config.merge.field_mappings),
-            "column_groups": [
-                {
-                    "name": group.name,
-                    "fields": list(group.fields),
-                    "pattern": group.pattern,
-                    "provider_order": list(group.provider_order),
-                }
-                for group in config.merge.column_groups
-            ],
-            "exclude_fields": list(config.merge.exclude_fields),
-            "preserve_all_sources": config.merge.preserve_all_sources,
-        },
-        "dq": {
-            "soft_fail_threshold": config.dq.soft_fail_threshold,
-            "hard_fail_threshold": config.dq.hard_fail_threshold,
-            "required_fields": list(config.dq.required_fields),
-            "enricher_overrides": {
-                name: {
-                    "soft_fail_threshold": override.soft_fail_threshold,
-                    "hard_fail_threshold": override.hard_fail_threshold,
-                }
-                for name, override in config.dq.enricher_overrides.items()
-            },
-        },
-        "execution": {
-            "max_concurrency": config.execution.max_concurrency,
-            "checkpoint_enabled": config.execution.checkpoint_enabled,
-            "retry_max_attempts": config.execution.retry_max_attempts,
-            "retry_backoff_multiplier": config.execution.retry_backoff_multiplier,
-        },
-        "lineage": {
-            "track_field_sources": config.lineage.track_field_sources,
-            "track_timestamps": config.lineage.track_timestamps,
-            "track_status": config.lineage.track_status,
-            "provider_lookup_fields": {
-                provider: dict(fields)
-                for provider, fields in config.lineage.provider_lookup_fields.items()
-            },
-            "track_source_for_fields": list(config.lineage.track_source_for_fields),
-        },
-        "cross_validation": {
-            "enabled": config.cross_validation.enabled,
-            "warning_threshold": config.cross_validation.warning_threshold,
-            "error_threshold": config.cross_validation.error_threshold,
-            "quarantine_threshold": config.cross_validation.quarantine_threshold,
-            "fuzzy_threshold": config.cross_validation.fuzzy_threshold,
-            "numeric_tolerance": config.cross_validation.numeric_tolerance,
-            "enricher_pairings": [
-                {
-                    "enricher_pipeline": pairing.enricher_pipeline,
-                    "fields": [
-                        {
-                            "field_name": field.field_name,
-                            "method": getattr(field.method, "value", field.method),
-                            "threshold": field.threshold,
-                        }
-                        for field in pairing.fields
-                    ],
-                }
-                for pairing in config.cross_validation.enricher_pairings
-            ],
-        },
+        "enrichers": [_enricher_entry(enricher) for enricher in config.enrichers],
+        "merge": _merge_to_dict(config.merge),
+        "dq": _dq_to_dict(config.dq),
+        "execution": _execution_to_dict(config.execution),
+        "lineage": _lineage_to_dict(config.lineage),
+        "cross_validation": _cross_validation_to_dict(config.cross_validation),
     }
 
 
@@ -402,43 +436,64 @@ def composite_from_dict[
         "enrichers": enrichers,
         "merge": merge,
     }
-    if isinstance(data.get("dq"), dict):
-        kwargs["dq"] = _build_dq_config(require_object_dict(data.get("dq"), "dq"))
-    if isinstance(data.get("execution"), dict):
-        kwargs["execution"] = _build_execution_config(
-            require_object_dict(data.get("execution"), "execution")
-        )
-    if isinstance(data.get("lineage"), dict):
-        kwargs["lineage"] = _build_lineage_config(
-            require_object_dict(data.get("lineage"), "lineage")
-        )
-    if isinstance(data.get("cross_validation"), dict):
-        kwargs["cross_validation"] = _build_cross_validation_config(
-            require_object_dict(data.get("cross_validation"), "cross_validation")
-        )
+    _attach_optional_composite_sections(kwargs, data)
     return composite_cls(**kwargs)
+
+
+def _attach_optional_section(
+    kwargs: dict[str, object],
+    data: dict[str, object],
+    key: str,
+    builder: Callable[[dict[str, object]], object],
+) -> None:
+    raw = data.get(key)
+    if isinstance(raw, dict):
+        kwargs[key] = builder(require_object_dict(raw, key))
+
+
+def _attach_optional_composite_sections(
+    kwargs: dict[str, object],
+    data: dict[str, object],
+) -> None:
+    _attach_optional_section(kwargs, data, "dq", _build_dq_config)
+    _attach_optional_section(kwargs, data, "execution", _build_execution_config)
+    _attach_optional_section(kwargs, data, "lineage", _build_lineage_config)
+    _attach_optional_section(
+        kwargs, data, "cross_validation", _build_cross_validation_config
+    )
+
+
+def _one_dq_override(name: str, raw: dict[str, object]) -> DQOverrideConfig:
+    return DQOverrideConfig(
+        soft_fail_threshold=optional_float(
+            raw.get("soft_fail_threshold"),
+            f"dq.enricher_overrides[{name}].soft_fail_threshold",
+        ),
+        hard_fail_threshold=optional_float(
+            raw.get("hard_fail_threshold"),
+            f"dq.enricher_overrides[{name}].hard_fail_threshold",
+        ),
+    )
+
+
+def _build_dq_overrides(overrides_raw: dict[str, object]) -> dict[str, DQOverrideConfig]:
+    overrides: dict[str, DQOverrideConfig] = {}
+    for name, raw in overrides_raw.items():
+        if isinstance(raw, dict):
+            overrides[name] = _one_dq_override(name, raw)
+    return overrides
 
 
 def _build_dq_config(dq_data: dict[str, object]) -> CompositeDQConfig:
     overrides_raw = str_key_mapping(
         dq_data.get("enricher_overrides"), "dq.enricher_overrides"
     )
-    overrides: dict[str, DQOverrideConfig] = {}
-    for name, raw in overrides_raw.items():
-        if isinstance(raw, dict):
-            overrides[name] = DQOverrideConfig(
-                soft_fail_threshold=optional_float(
-                    raw.get("soft_fail_threshold"),
-                    f"dq.enricher_overrides[{name}].soft_fail_threshold",
-                ),
-                hard_fail_threshold=optional_float(
-                    raw.get("hard_fail_threshold"),
-                    f"dq.enricher_overrides[{name}].hard_fail_threshold",
-                ),
-            )
-    required_fields = (
-        optional_str_tuple(dq_data.get("required_fields"), "dq.required_fields") or ()
+    overrides = _build_dq_overrides(overrides_raw)
+    required_fields = optional_str_tuple(
+        dq_data.get("required_fields"), "dq.required_fields"
     )
+    if required_fields is None:
+        required_fields = ()
     return CompositeDQConfig(
         soft_fail_threshold=require_float(
             dq_data.get("soft_fail_threshold"), "dq.soft_fail_threshold", 0.10

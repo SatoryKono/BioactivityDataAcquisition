@@ -73,20 +73,24 @@ class BaseEntity:
     _dq_warn: bool = False  # Record has data quality warnings
     _dq_error: bool = False  # Record has data quality errors
 
-    def __post_init__(self) -> None:
-        """Validate shared system fields, then run subclass invariants."""
-        if not self.entity_id:
-            raise ValueError("Entity ID cannot be empty")
-        if not self.content_hash:
-            raise ValueError("Content hash cannot be empty")
-        if not self.run_id:
-            raise ValueError("run_id is required")
-        if not self.run_type:
-            raise ValueError("run_type is required")
+    def _require_truthy(self, value: object, message: str) -> None:
+        if value:
+            return
+        raise ValueError(message)
+
+    def _validate_system_fields(self) -> None:
+        self._require_truthy(self.entity_id, "Entity ID cannot be empty")
+        self._require_truthy(self.content_hash, "Content hash cannot be empty")
+        self._require_truthy(self.run_id, "run_id is required")
+        self._require_truthy(self.run_type, "run_type is required")
         if self.ingestion_ts is None:
             raise ValueError("ingestion_ts is required")
         if self._index < 0:
             raise ValueError("_index cannot be negative")
+
+    def __post_init__(self) -> None:
+        """Validate shared system fields, then run subclass invariants."""
+        self._validate_system_fields()
         self._validate_invariants()
 
     def _validate_invariants(self) -> None:

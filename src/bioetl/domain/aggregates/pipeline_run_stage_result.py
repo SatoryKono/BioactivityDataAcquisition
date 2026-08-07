@@ -14,6 +14,56 @@ def _validate_stage_name(stage: str) -> None:
         raise ValueError("Stage name cannot be empty")
 
 
+def _validate_failed_has_error(status: StageStatus, error: str | None) -> None:
+    if status != StageStatus.FAILED:
+        return
+    if error:
+        return
+    raise ValueError("Failed stage must have an error message")
+
+
+def _validate_in_progress_no_completion(
+    status: StageStatus,
+    completed_at: datetime | None,
+) -> None:
+    if status not in {StageStatus.PENDING, StageStatus.RUNNING}:
+        return
+    if completed_at is None:
+        return
+    raise ValueError(
+        f"In-progress stage must not have completed_at timestamp, "
+        f"got status={status.value}"
+    )
+
+
+def _validate_terminal_has_completion(
+    status: StageStatus,
+    completed_at: datetime | None,
+) -> None:
+    if status not in {StageStatus.SUCCESS, StageStatus.FAILED}:
+        return
+    if completed_at:
+        return
+    raise ValueError(
+        f"Completed/Failed stage must have completed_at timestamp, "
+        f"got status={status.value}"
+    )
+
+
+def _validate_completion_order(
+    completed_at: datetime | None,
+    started_at: datetime,
+) -> None:
+    if completed_at is None:
+        return
+    if completed_at >= started_at:
+        return
+    raise ValueError(
+        "completed_at cannot be earlier than started_at: "
+        f"started_at={started_at!s}, completed_at={completed_at!s}"
+    )
+
+
 def _validate_stage_completion(
     status: StageStatus,
     error: str | None,
@@ -21,24 +71,10 @@ def _validate_stage_completion(
     started_at: datetime,
 ) -> None:
     """Validate stage completion invariants."""
-    if status == StageStatus.FAILED and not error:
-        raise ValueError("Failed stage must have an error message")
-    if status in {StageStatus.PENDING, StageStatus.RUNNING} and completed_at is not None:
-        raise ValueError(
-            f"In-progress stage must not have completed_at timestamp, "
-            f"got status={status.value}"
-        )
-    needs_timestamp = status in {StageStatus.SUCCESS, StageStatus.FAILED}
-    if needs_timestamp and not completed_at:
-        raise ValueError(
-            f"Completed/Failed stage must have completed_at timestamp, "
-            f"got status={status.value}"
-        )
-    if completed_at is not None and completed_at < started_at:
-        raise ValueError(
-            "completed_at cannot be earlier than started_at: "
-            f"started_at={started_at!s}, completed_at={completed_at!s}"
-        )
+    _validate_failed_has_error(status, error)
+    _validate_in_progress_no_completion(status, completed_at)
+    _validate_terminal_has_completion(status, completed_at)
+    _validate_completion_order(completed_at, started_at)
 
 
 def _validate_stage_result(
