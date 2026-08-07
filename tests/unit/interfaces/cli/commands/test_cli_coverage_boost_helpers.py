@@ -64,6 +64,7 @@ from bioetl.interfaces.cli.commands.domains.diagnostics import contract_checks
 from bioetl.interfaces.cli.commands.domains.health import (
     observability_backend_process as backend_process,
 )
+from bioetl.interfaces.cli.exit_codes import ExitCode
 
 
 pytestmark = pytest.mark.unit
@@ -966,9 +967,11 @@ def test_config_dq_command_helpers_cover_error_and_compatibility_paths(
     service = MagicMock()
     monkeypatch.setattr(config_dq, "get_config_service", lambda: service)
 
-    config_dq.validate_dq_config_command.callback(
-        "chembl_activity", str(invalid_config)
-    )
+    with pytest.raises(SystemExit) as exit_info:
+        config_dq.validate_dq_config_command.callback(
+            "chembl_activity", str(invalid_config)
+        )
+    assert exit_info.value.code == int(ExitCode.CONFIG_ERROR)
     assert any(
         "Config file must contain a mapping" in str(args[-1]) for _, args in messages
     )
@@ -978,7 +981,9 @@ def test_config_dq_command_helpers_cover_error_and_compatibility_paths(
     artifact2 = tmp_path / "artifact2.json"
     artifact1.write_text('["invalid"]', encoding="utf-8")
     artifact2.write_text("{}", encoding="utf-8")
-    config_dq.check_compatibility_command.callback(str(artifact1), str(artifact2))
+    with pytest.raises(SystemExit) as exit_info:
+        config_dq.check_compatibility_command.callback(str(artifact1), str(artifact2))
+    assert exit_info.value.code == int(ExitCode.CONFIG_ERROR)
     assert any(
         "Artifacts must be JSON objects" in str(args[-1]) for _, args in messages
     )
@@ -1036,7 +1041,9 @@ def test_config_dq_helpers_cover_lazy_import_and_error_branches(
     service = MagicMock()
     monkeypatch.setattr(config_dq, "get_config_service", lambda: service)
     service.get_dq_config.side_effect = FileNotFoundError("missing dq")
-    config_dq.show_dq_config_command.callback("chembl_activity", "yaml")
+    with pytest.raises(SystemExit) as exit_info:
+        config_dq.show_dq_config_command.callback("chembl_activity", "yaml")
+    assert exit_info.value.code == int(ExitCode.EX_NOINPUT)
     assert any(
         kind == "error" and args[0] == "DQ Config file not found"
         for kind, args in messages
@@ -1045,7 +1052,11 @@ def test_config_dq_helpers_cover_lazy_import_and_error_branches(
     messages.clear()
     bad_yaml = tmp_path / "bad.yaml"
     bad_yaml.write_text(":\n", encoding="utf-8")
-    config_dq.validate_dq_config_command.callback("chembl_activity", str(bad_yaml))
+    with pytest.raises(SystemExit) as exit_info:
+        config_dq.validate_dq_config_command.callback(
+            "chembl_activity", str(bad_yaml)
+        )
+    assert exit_info.value.code == int(ExitCode.FAIL)
     assert any(
         kind == "error" and args[0] == "DQ Configuration validation failed"
         for kind, args in messages
@@ -1053,7 +1064,9 @@ def test_config_dq_helpers_cover_lazy_import_and_error_branches(
 
     messages.clear()
     service.get_dq_config.side_effect = ValueError("invalid dq")
-    config_dq.validate_dq_config_command.callback("chembl_activity", None)
+    with pytest.raises(SystemExit) as exit_info:
+        config_dq.validate_dq_config_command.callback("chembl_activity", None)
+    assert exit_info.value.code == int(ExitCode.CONFIG_ERROR)
     assert any(
         kind == "error" and args[0] == "DQ Configuration invalid"
         for kind, args in messages
@@ -1061,9 +1074,11 @@ def test_config_dq_helpers_cover_lazy_import_and_error_branches(
 
     messages.clear()
     service.get_effective_config_artifact.side_effect = ValueError("bad effective")
-    config_dq.show_effective_config_command.callback(
-        "chembl_activity", "json", ("bad",)
-    )
+    with pytest.raises(SystemExit) as exit_info:
+        config_dq.show_effective_config_command.callback(
+            "chembl_activity", "json", ("bad",)
+        )
+    assert exit_info.value.code == int(ExitCode.CONFIG_ERROR)
     assert any(
         kind == "error" and args[0] == "Effective config error"
         for kind, args in messages
@@ -1071,7 +1086,11 @@ def test_config_dq_helpers_cover_lazy_import_and_error_branches(
 
     messages.clear()
     service.get_effective_config_artifact.side_effect = FileNotFoundError("missing cfg")
-    config_dq.show_effective_config_command.callback("chembl_activity", "yaml", ())
+    with pytest.raises(SystemExit) as exit_info:
+        config_dq.show_effective_config_command.callback(
+            "chembl_activity", "yaml", ()
+        )
+    assert exit_info.value.code == int(ExitCode.EX_NOINPUT)
     assert any(
         kind == "error" and args[0] == "Config file not found"
         for kind, args in messages
@@ -1079,9 +1098,11 @@ def test_config_dq_helpers_cover_lazy_import_and_error_branches(
 
     messages.clear()
     service.get_effective_config_artifact.side_effect = TypeError("artifact failed")
-    config_dq.show_effective_config_command.callback(
-        "chembl_activity", "yaml", ("k=v",)
-    )
+    with pytest.raises(SystemExit) as exit_info:
+        config_dq.show_effective_config_command.callback(
+            "chembl_activity", "yaml", ("k=v",)
+        )
+    assert exit_info.value.code == int(ExitCode.FAIL)
     assert any(
         kind == "error" and args[0] == "Failed to create effective config artifact"
         for kind, args in messages
@@ -1089,7 +1110,11 @@ def test_config_dq_helpers_cover_lazy_import_and_error_branches(
 
     messages.clear()
     missing_file = tmp_path / "missing.json"
-    config_dq.check_compatibility_command.callback(str(missing_file), str(missing_file))
+    with pytest.raises(SystemExit) as exit_info:
+        config_dq.check_compatibility_command.callback(
+            str(missing_file), str(missing_file)
+        )
+    assert exit_info.value.code == int(ExitCode.EX_NOINPUT)
     assert any(
         kind == "error" and args[0] == "Artifact file not found"
         for kind, args in messages
@@ -1098,7 +1123,11 @@ def test_config_dq_helpers_cover_lazy_import_and_error_branches(
     messages.clear()
     invalid_json = tmp_path / "invalid.json"
     invalid_json.write_text("{bad", encoding="utf-8")
-    config_dq.check_compatibility_command.callback(str(invalid_json), str(invalid_json))
+    with pytest.raises(SystemExit) as exit_info:
+        config_dq.check_compatibility_command.callback(
+            str(invalid_json), str(invalid_json)
+        )
+    assert exit_info.value.code == int(ExitCode.EX_DATAERR)
     assert any(
         kind == "error" and args[0] == "Invalid JSON in artifact file"
         for kind, args in messages
@@ -1108,7 +1137,9 @@ def test_config_dq_helpers_cover_lazy_import_and_error_branches(
     artifact = tmp_path / "artifact.json"
     artifact.write_text("{}", encoding="utf-8")
     service.check_config_compatibility.side_effect = ValueError("compat failure")
-    config_dq.check_compatibility_command.callback(str(artifact), str(artifact))
+    with pytest.raises(SystemExit) as exit_info:
+        config_dq.check_compatibility_command.callback(str(artifact), str(artifact))
+    assert exit_info.value.code == int(ExitCode.FAIL)
     assert any(
         kind == "error" and args[0] == "Compatibility check failed"
         for kind, args in messages
@@ -1154,7 +1185,11 @@ def test_config_dq_helpers_cover_success_and_incompatible_branches(
 
     messages.clear()
     service.validate_dq_config.return_value = False
-    config_dq.validate_dq_config_command.callback("chembl_activity", str(config_file))
+    with pytest.raises(SystemExit) as exit_info:
+        config_dq.validate_dq_config_command.callback(
+            "chembl_activity", str(config_file)
+        )
+    assert exit_info.value.code == int(ExitCode.CONFIG_ERROR)
     assert any(
         "[ERROR] DQ configuration is invalid" in str(args[0]) for _, args in messages
     )
@@ -1165,7 +1200,9 @@ def test_config_dq_helpers_cover_success_and_incompatible_branches(
     artifact1.write_text(json.dumps({"artifact_id": "a1"}), encoding="utf-8")
     artifact2.write_text(json.dumps({"artifact_id": "a2"}), encoding="utf-8")
     service.check_config_compatibility.return_value = False
-    config_dq.check_compatibility_command.callback(str(artifact1), str(artifact2))
+    with pytest.raises(SystemExit) as exit_info:
+        config_dq.check_compatibility_command.callback(str(artifact1), str(artifact2))
+    assert exit_info.value.code == int(ExitCode.FAIL)
     assert any("NOT compatible" in str(args[0]) for _, args in messages)
 
 

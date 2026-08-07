@@ -2293,13 +2293,14 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "topk(5, bioetl_dq_current_reason{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"} > 0)",
+      "formula": "topk(5,bioetl_dq_current_reason{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}>0) or label_replace(label_replace(label_replace((bioetl_dq_current_status{pipeline=~\"$pipeline\"}==1 unless on(pipeline) max by(pipeline)(bioetl_dq_current_reason{pipeline=~\"$pipeline\"}>0)),\"reason\",\"reason_evidence_unavailable\",\"\",\"\"),\"severity\",\"warn\",\"\",\"\"),\"action_target\",\"verify_dq_reason_rules\",\"\",\"\") or label_replace(label_replace(label_replace((bioetl_dq_current_status{pipeline=~\"$pipeline\"}>=2 unless on(pipeline) max by(pipeline)(bioetl_dq_current_reason{pipeline=~\"$pipeline\"}>0)),\"reason\",\"reason_evidence_unavailable\",\"\",\"\"),\"severity\",\"crit\",\"\",\"\"),\"action_target\",\"verify_dq_reason_rules\",\"\",\"\")",
       "kind": "promql",
       "panel_id": 9102,
       "panel_title": "Inspect Current DQ Reasons",
-      "query": "topk(5, bioetl_dq_current_reason{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"} > 0)",
+      "query": "topk(5,bioetl_dq_current_reason{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}>0) or label_replace(label_replace(label_replace((bioetl_dq_current_status{pipeline=~\"$pipeline\"}==1 unless on(pipeline) max by(pipeline)(bioetl_dq_current_reason{pipeline=~\"$pipeline\"}>0)),\"reason\",\"reason_evidence_unavailable\",\"\",\"\"),\"severity\",\"warn\",\"\",\"\"),\"action_target\",\"verify_dq_reason_rules\",\"\",\"\") or label_replace(label_replace(label_replace((bioetl_dq_current_status{pipeline=~\"$pipeline\"}>=2 unless on(pipeline) max by(pipeline)(bioetl_dq_current_reason{pipeline=~\"$pipeline\"}>0)),\"reason\",\"reason_evidence_unavailable\",\"\",\"\"),\"severity\",\"crit\",\"\",\"\"),\"action_target\",\"verify_dq_reason_rules\",\"\",\"\")",
       "query_tokens": [
-        "bioetl_dq_current_reason"
+        "bioetl_dq_current_reason",
+        "bioetl_dq_current_status"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -3901,11 +3902,11 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "count(bioetl_provider_current_status{provider=~\"$provider\"}) > bool 0",
+      "formula": "max(bioetl_provider_current_status{provider=~\"$provider\"}) * 0",
       "kind": "promql",
       "panel_id": 9104,
       "panel_title": "Monitor Telemetry Freshness",
-      "query": "count(bioetl_provider_current_status{provider=~\"$provider\"}) > bool 0",
+      "query": "max(bioetl_provider_current_status{provider=~\"$provider\"}) * 0",
       "query_tokens": [
         "bioetl_provider_current_status"
       ],
@@ -4003,7 +4004,7 @@
     {
       "dashboard_uid": "bioetl-run-explorer-v1",
       "datasource_type": "yesoreyeram-infinity-datasource",
-      "documents_backend_down": true,
+      "documents_backend_down": false,
       "documents_valid_empty": true,
       "formula": "",
       "kind": "http",
@@ -4023,7 +4024,7 @@
     {
       "dashboard_uid": "bioetl-run-explorer-v1",
       "datasource_type": "yesoreyeram-infinity-datasource",
-      "documents_backend_down": true,
+      "documents_backend_down": false,
       "documents_valid_empty": true,
       "formula": "",
       "kind": "http",
@@ -4043,7 +4044,7 @@
     {
       "dashboard_uid": "bioetl-run-explorer-v1",
       "datasource_type": "yesoreyeram-infinity-datasource",
-      "documents_backend_down": true,
+      "documents_backend_down": false,
       "documents_valid_empty": true,
       "formula": "",
       "kind": "http",
@@ -4063,7 +4064,7 @@
     {
       "dashboard_uid": "bioetl-run-explorer-v1",
       "datasource_type": "yesoreyeram-infinity-datasource",
-      "documents_backend_down": true,
+      "documents_backend_down": false,
       "documents_valid_empty": true,
       "formula": "",
       "kind": "http",
@@ -4083,7 +4084,7 @@
     {
       "dashboard_uid": "bioetl-run-explorer-v1",
       "datasource_type": "yesoreyeram-infinity-datasource",
-      "documents_backend_down": true,
+      "documents_backend_down": false,
       "documents_valid_empty": true,
       "formula": "",
       "kind": "http",
@@ -4103,7 +4104,7 @@
     {
       "dashboard_uid": "bioetl-run-explorer-v1",
       "datasource_type": "yesoreyeram-infinity-datasource",
-      "documents_backend_down": true,
+      "documents_backend_down": false,
       "documents_valid_empty": true,
       "formula": "",
       "kind": "http",
@@ -4124,7 +4125,7 @@
     {
       "dashboard_uid": "bioetl-run-explorer-v1",
       "datasource_type": "yesoreyeram-infinity-datasource",
-      "documents_backend_down": true,
+      "documents_backend_down": false,
       "documents_valid_empty": true,
       "formula": "",
       "kind": "http",

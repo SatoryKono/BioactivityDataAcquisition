@@ -53,6 +53,7 @@ from bioetl.domain.control_plane.effective_config_artifact import (
     MISSING_EFFECTIVE_CONFIG_TIMESTAMP,
     ResolvedConfigSnapshot,
 )
+from bioetl.domain.immutability import deep_freeze_json
 from bioetl.domain.types.dq_contracts import DQDisposition
 
 pytestmark = pytest.mark.unit
@@ -341,6 +342,13 @@ class TestEffectiveConfigService:
         ).hexdigest()
 
         assert stable_hash(payload) == expected
+
+    def test_stable_hash_accepts_deeply_frozen_config_snapshots(self) -> None:
+        """Immutable config containers must preserve canonical hash identity."""
+        payload = {"z": [3, 2, 1], "a": {"nested": ["value"]}}
+        frozen_payload = deep_freeze_json(payload)
+
+        assert stable_hash(frozen_payload) == stable_hash(payload)
 
     def test_stable_hash_rejects_non_finite_float_values(self) -> None:
         """Effective-config hashing must fail closed like execution fingerprints."""

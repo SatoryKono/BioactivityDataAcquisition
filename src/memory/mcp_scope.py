@@ -9,6 +9,8 @@ import re
 import subprocess
 from pathlib import Path
 
+from memory.storage import atomic_write_bytes
+
 
 def _confine_under_root(path: Path, *, root: Path) -> Path:
     """Resolve path and reject escapes outside root (Sonar path-taint confinement)."""
@@ -19,8 +21,6 @@ def _confine_under_root(path: Path, *, root: Path) -> Path:
     except ValueError as exc:
         raise ValueError(f"path escapes allowed root {root_resolved}: {path}") from exc
     return resolved
-
-from memory.storage import atomic_write_bytes
 
 _SAFE_COMPONENT = re.compile(r"[^A-Za-z0-9_.-]")
 

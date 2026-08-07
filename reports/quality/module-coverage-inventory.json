@@ -47630,7 +47630,13 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-07",
+<<<<<<< HEAD
   "source_tree_sha256": "da60e20a7642d3995e523639df42679ec5bccc7c3d09793794f8851ab70fe1c9",
+||||||| c4f6cffd37
+  "source_tree_sha256": "bae8d2cbafd23b25df2588c088382cbe95b35a0f5e9a70f1e6b4e4981383aee4",
+=======
+  "source_tree_sha256": "92f7976a21939ede55f00f244540887dc0c3f0e0e17129802cb15977b003caa4",
+>>>>>>> fix/issues-8360-8364-closeout
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
