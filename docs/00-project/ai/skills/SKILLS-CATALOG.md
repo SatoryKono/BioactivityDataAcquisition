@@ -10,14 +10,14 @@
 - **Canonical runtime source**: `.codex/skills/`
 - **Published mirror**: `docs/00-project/ai/skills/local/`
 - **Curated snapshot**: `docs/00-project/ai/skills/global/`
-- **Reference mirror**: `docs/00-project/ai/skills/_references/`
+- **Reference mirror (generated)**: `docs/00-project/ai/skills/_references/` — not canonical
 
 ## Канонические Правила
 
 - `.codex/skills/` — канонический источник runtime skills для текущего Codex workflow.
 - `docs/00-project/ai/skills/local/` — опубликованное docs-mirror/compatibility layer; его нельзя считать основным authoring source.
 - `docs/00-project/ai/skills/global/` — курируемый snapshot выбранных глобальных skills.
-- `docs/00-project/ai/skills/_references/` — канонический источник reference-бандлов для overlay в `local/`.
+- `docs/00-project/ai/skills/_references/` — **generated/reference mirror** of skill `references/` bundles (not authoring SoT; regenerate via `bash scripts/ai/codex/check_skills_mirror.sh --sync`).
 - Frontmatter (`name`, `description`) в каждом `SKILL.md` считается контрактом триггера.
 
 ## Группы Skills

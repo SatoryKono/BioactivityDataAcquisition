@@ -337,8 +337,8 @@ Datasource categories:
   causes, selected-range evidence, and KPI panels.
 - **Secondary forensic datasource**: BioETL Ops HTTP HTTP API for row-level
   reject exploration and payload/detail inspection.
-- **Investigative handoff surfaces**: Loki / Tempo through `Explore Logs` and
-  `Explore Traces`; these are handoffs, not shipped dashboards.
+- **Removed investigative handoffs (2026-07-23)**: do **not** ship Loki/Tempo
+  `Explore Logs` / `Explore Traces`. Use Prometheus + file logs + CLI forensics.
 
 Normative rules:
 - Prometheus current-status and current-cause panels MUST remain fail-closed:
@@ -352,8 +352,8 @@ Normative rules:
   - valid scope with zero matching rows
   - invalid or unsupported filter chain
   - backend / datasource query failure
-- `Silver Reject Explorer` first-screen copy and detail descriptions MUST
-  explain this distinction before the operator treats an empty table as OK.
+- HTTP forensic / CLI empty-result copy MUST explain this distinction before
+  the operator treats an empty table as OK (`bioetl quarantine inspect`).
 
 ## 4.5) Missing-data semantics by panel class (обязательно)
 
@@ -391,7 +391,7 @@ datasource/query failure по роли панели.
 - Valid empty result SHOULD описываться как empty result / no matching rows.
 - Unsupported filter chain, empty denominator, invalid scope или backend
   failure MUST отличаться от empty result.
-- `Silver Reject Explorer` MUST объяснять это distinction в first-screen CTA и
+- Record forensic CLI/API surfaces MUST объяснять это distinction в first-screen CTA и
   в detail-table descriptions.
 - `Monitor Explorer Backend Health` MUST terminate as healthy, explicit error,
   or valid empty. Blank/loading and error-icon + `No data` contradictions are
@@ -506,15 +506,12 @@ Implementation guardrails:
 Источник фиксированного словаря для `links[].title`: `docs/03-guides/dashboards/navigation-contract.md`.
 
 Правила:
-- Названия top-level ссылок MUST совпадать с каноническими строками из navigation contract (например: `0. Trust`, `1. Overview`, `2. Pipeline Diagnostics`, `3. Provider Health`, `4. Data Quality`, `5. Incident Workspace`, `6. Run Explorer`, `Silver Reject Explorer`).
-- Explore-ссылки MUST использовать короткие названия: `Explore Logs` и `Explore Traces`.
-- Формулировки вида `Back to Overview`, `5. Control Plane`, `6. Workflow Overview`, `Explore Logs (Loki, tracing profile)`, `Explore Traces (Tempo, tracing profile)`, `Next Recommended Drilldown` считаются legacy-лексикой и не допускаются в shipped top navigation.
+- Названия top-level ссылок MUST совпадать с каноническими строками из navigation contract: `0. Trust`, `1. Overview`, `2. Pipeline Diagnostics`, `3. Provider Health`, `4. Data Quality`, `5. Incident Workspace`, `6. Run Explorer` (bus only; **no** `Silver Reject Explorer` / `Explore Logs` / `Explore Traces`).
+- Формулировки вида `Back to Overview`, `5. Control Plane`, `6. Workflow Overview`, `Explore Logs (Loki, tracing profile)`, `Explore Traces (Tempo, tracing profile)`, `Next Recommended Drilldown`, and reintroduced adjunct titles, считаются legacy-лексикой и не допускаются в shipped top navigation.
 
-Every navigation panel renders the same ordered composition on all eight
-shipped dashboards: bus `0..6`, `Silver Reject Explorer`, `Explore Logs`,
-`Explore Traces`. It MUST use theme-safe contrast, a visible focus state, and
-wrapping responsive layout at `1024px`; no dashboard-specific omission is
-allowed.
+Every navigation panel renders the same ordered composition on all **seven**
+shipped dashboards: bus `0..6` only. It MUST use theme-safe contrast, a visible
+focus state, and wrapping responsive layout at `1024px`.
 
 ### 7.1) Link title style-guide: Back / Open / Investigate
 

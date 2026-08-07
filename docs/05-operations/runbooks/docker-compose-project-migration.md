@@ -50,7 +50,7 @@ The machine-readable source is
 | Compose file | Project | Single-owner services |
 |---|---|---|
 | `docker-compose.yml` | `bioetl-main` | `bioetl` |
-| `docker-compose.monitoring.yml` | `bioetl-monitoring` | monitoring, logging, tracing, renderer |
+| `docker-compose.monitoring.yml` | `bioetl-monitoring` | optional Prometheus, Grafana, renderer, pushgateway (no Loki/Tempo; ADR-010) |
 | `docker-compose.neo4j.yml` | `bioetl-neo4j` | `neo4j` |
 | `docker-compose.neo4j-audit.yml` | `bioetl-neo4j-audit` | `neo4j-audit` |
 
