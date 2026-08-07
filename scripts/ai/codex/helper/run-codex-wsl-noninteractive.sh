@@ -12,19 +12,27 @@ export NPM_CONFIG_UPDATE_NOTIFIER=false
 export FORCE_COLOR=1
 export CI=true
 
-# Load .env.codex if it exists
-if [[ -f "${SCRIPT_DIR}/.env.codex" ]]; then
+# Load optional API-key env; ChatGPT device auth is also accepted.
+if [[ -f "${SCRIPT_DIR}/../.env.codex" ]]; then
     set -a
+    # shellcheck disable=SC1091
+    source "${SCRIPT_DIR}/../.env.codex"
+    set +a
+elif [[ -f "${SCRIPT_DIR}/.env.codex" ]]; then
+    set -a
+    # shellcheck disable=SC1091
     source "${SCRIPT_DIR}/.env.codex"
     set +a
 fi
 
-# Verify API key is set
-if [[ -z "${OPENAI_API_KEY:-}" ]]; then
-    echo "[ERROR] OPENAI_API_KEY not set in ${SCRIPT_DIR}/.env.codex" >&2
-    echo "[INFO] Get your key from: https://platform.openai.com/api-keys" >&2
+# shellcheck source=codex-auth-lib.sh
+source "${SCRIPT_DIR}/codex-auth-lib.sh"
+if ! codex_has_usable_auth; then
+    echo "[ERROR] No usable Codex auth (ChatGPT session or OPENAI_API_KEY)." >&2
+    echo "[INFO] Run: bash scripts/ai/codex/run-codex.sh device-login" >&2
+    echo "[INFO] Or set OPENAI_API_KEY in scripts/ai/codex/.env.codex" >&2
     exit 1
 fi
 
 # Run the main launcher without interactive mode
-exec bash "${SCRIPT_DIR}/run-codex.sh" "$@" < /dev/null
+exec bash "${SCRIPT_DIR}/../run-codex.sh" "$@" < /dev/null

@@ -78,20 +78,35 @@ else
     ALL_CHECKS=false
 fi
 
-# 4. Check API Key
-log_info "Checking API key..."
+# 4. Check auth (API key in .env.codex OR persisted ChatGPT tokens in ~/.codex/auth.json)
+# shellcheck source=codex-auth-lib.sh
+source "${SCRIPT_DIR}/codex-auth-lib.sh"
+log_info "Checking Codex authentication..."
 ENV_FILE="${ROOT_DIR}/.env.codex"
 if [[ -f "${ENV_FILE}" ]]; then
-    if grep -Eq 'OPENAI_API_KEY="?sk-' "${ENV_FILE}"; then
-        log_success "API key found in .env.codex"
-    else
-        log_warn ".env.codex exists but API key missing or invalid"
-        ALL_CHECKS=false
-    fi
-else
-    log_warn ".env.codex not found"
-    ALL_CHECKS=false
+    set -a
+    # shellcheck disable=SC1090
+    source "${ENV_FILE}"
+    set +a
 fi
+AUTH_KIND="$(codex_auth_status_label || true)"
+case "${AUTH_KIND}" in
+    api-key)
+        log_success "API key available (env/.env.codex)"
+        ;;
+    chatgpt-auth)
+        log_success "ChatGPT auth found in $(codex_auth_file)"
+        ;;
+    *)
+        if [[ -f "${ENV_FILE}" ]]; then
+            log_warn ".env.codex exists but API key missing/invalid, and no ChatGPT auth in ~/.codex/auth.json"
+        else
+            log_warn "No .env.codex API key and no ChatGPT auth in ~/.codex/auth.json"
+        fi
+        log_info "Fix: bash scripts/ai/codex/run-codex.sh device-login  OR  set OPENAI_API_KEY in scripts/ai/codex/.env.codex"
+        ALL_CHECKS=false
+        ;;
+esac
 
 # 5. Check Codex binary
 log_info "Checking Codex CLI..."
