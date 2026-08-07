@@ -8,10 +8,11 @@ from pathlib import Path
 
 import pytest
 
+from bioetl.application.services.run_reports import paths as run_report_paths
+
 pytestmark = pytest.mark.unit
 
 from bioetl.application.services.run_reports.paths import (
-    DEFAULT_REPORT_ROOT,
     REPORT_ROOT_MARKER_NAME,
     REPORT_ROOT_MARKER_VALUE,
     inspect_report_root_marker,
@@ -22,8 +23,8 @@ from bioetl.application.services.run_reports.paths import (
 
 
 def test_resolve_report_root_default() -> None:
-    assert resolve_report_root() == DEFAULT_REPORT_ROOT
-    assert resolve_report_root(root=None) == DEFAULT_REPORT_ROOT
+    assert resolve_report_root() == run_report_paths.DEFAULT_REPORT_ROOT
+    assert resolve_report_root(root=None) == run_report_paths.DEFAULT_REPORT_ROOT
 
 
 def test_resolve_report_root_explicit(tmp_path: Path) -> None:
