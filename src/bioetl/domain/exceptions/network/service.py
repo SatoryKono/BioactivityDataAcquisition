@@ -15,8 +15,6 @@ retry with exponential backoff is appropriate (per RULES.md §3.1.3).
 
 from __future__ import annotations
 
-from typing import cast
-
 from bioetl.domain.exceptions.base import RecoverableError
 from bioetl.domain.exceptions.network_rate_limit_helpers import (
     resolve_rate_limit_params as _resolve_rate_limit_params,
@@ -245,34 +243,18 @@ class ServiceAuthenticationError(ExternalServiceError):
         )
 
 
-def data_validation_error(
-    message: str,
-    service_name: str | None = None,
-    field: str | None = None,
-    value: str | None = None,
-) -> ExternalServiceError:
-    """Compatibility constructor for legacy DataValidationError.
+class DataValidationError(ExternalServiceError):
+    """Raised when an external service returns data that fails validation."""
 
-    Args:
-        message: Human-readable description of the validation failure.
-        service_name: Optional name of the external service that returned invalid data;
-            defaults to None.
-        field: Optional field name that failed validation; defaults to None.
-        value: Optional string representation of the invalid value; defaults to None.
+    error_type = ErrorType.INVALID_DATA
 
-    Returns:
-        ExternalServiceError with INVALID_DATA type and field/value context attached.
-    """
-    error = ExternalServiceError(message, service_name=service_name)
-    error = cast(
-        ExternalServiceError,
-        error.with_context(
-            field=field,
-            value=value,
-        ),
-    )
-    object.__setattr__(error, "error_type", ErrorType.INVALID_DATA)
-    return error
-
-
-DataValidationError = data_validation_error
+    def __init__(
+        self,
+        message: str,
+        service_name: str | None = None,
+        field: str | None = None,
+        value: str | None = None,
+    ) -> None:
+        self.field = field
+        self.value = value
+        super().__init__(message, service_name=service_name)

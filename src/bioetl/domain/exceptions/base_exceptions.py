@@ -16,6 +16,21 @@ from typing import Any
 from bioetl.domain.error_types import ErrorType
 
 
+def _freeze_context(value: object) -> object:
+    """Recursively freeze mapping/sequence context payloads."""
+    from types import MappingProxyType
+
+    if isinstance(value, dict):
+        return MappingProxyType(
+            {str(key): _freeze_context(item) for key, item in value.items()}
+        )
+    if isinstance(value, list):
+        return tuple(_freeze_context(item) for item in value)
+    if isinstance(value, tuple):
+        return tuple(_freeze_context(item) for item in value)
+    return value
+
+
 class BioETLError(Exception):
     """Base exception for all BioETL errors.
 
@@ -50,6 +65,11 @@ class BioETLDomainError(BioETLError):
     ] = field(default_factory=dict)
     original_exception: Exception | None = None
 
+    def __post_init__(self) -> None:
+        """Snapshot and freeze caller context for immutable diagnostics."""
+        frozen = _freeze_context(dict(self.context))
+        object.__setattr__(self, "context", frozen)
+
     def __str__(self) -> str:
         """Format exception for human-readable output."""
         base_msg = f"{self.__class__.__name__}: {self.message}"
@@ -69,7 +89,7 @@ class BioETLDomainError(BioETLError):
         result = {
             "error_type": self.__class__.__name__,
             "message": self.message,
-            "context": self.context or {},
+            "context": dict(self.context) if self.context else {},
         }
         if self.original_exception:
             result["original_exception"] = str(self.original_exception)
@@ -96,8 +116,8 @@ class BioETLValidationError(BioETLDomainError):
             context["field_name"] = self.field_name
         if self.invalid_value is not None:
             context["invalid_value"] = str(self.invalid_value)
-        # Recreate with updated context
-        object.__setattr__(self, "context", context)
+        # Recreate with updated frozen context
+        object.__setattr__(self, "context", _freeze_context(context))
 
 
 @dataclass(frozen=True)
@@ -116,7 +136,7 @@ class BioETLConfigurationError(BioETLDomainError):
         context = dict(self.context)
         if self.config_key:
             context["config_key"] = self.config_key
-        object.__setattr__(self, "context", context)
+        object.__setattr__(self, "context", _freeze_context(context))
 
 
 @dataclass(frozen=True)
@@ -140,7 +160,7 @@ class BioETLDataQualityError(BioETLDomainError):
         if self.record_id:
             context["record_id"] = self.record_id
         context["severity"] = self.severity
-        object.__setattr__(self, "context", context)
+        object.__setattr__(self, "context", _freeze_context(context))
 
 
 @dataclass(frozen=True)
@@ -164,7 +184,7 @@ class BioETLIntegrationError(BioETLDomainError):
         if self.operation:
             context["operation"] = self.operation
         context["is_retryable"] = self.is_retryable
-        object.__setattr__(self, "context", context)
+        object.__setattr__(self, "context", _freeze_context(context))
 
 
 @dataclass(frozen=True)
@@ -186,7 +206,7 @@ class BioETLNotFoundError(BioETLDomainError):
             context["entity_type"] = self.entity_type
         if self.entity_id:
             context["entity_id"] = self.entity_id
-        object.__setattr__(self, "context", context)
+        object.__setattr__(self, "context", _freeze_context(context))
 
 
 @dataclass(frozen=True)
@@ -205,4 +225,4 @@ class BioETLConflictError(BioETLDomainError):
         context = dict(self.context)
         if self.conflicting_entity:
             context["conflicting_entity"] = self.conflicting_entity
-        object.__setattr__(self, "context", context)
+        object.__setattr__(self, "context", _freeze_context(context))
