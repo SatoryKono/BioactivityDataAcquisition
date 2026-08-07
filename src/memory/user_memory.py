@@ -135,15 +135,15 @@ class UserMemoryStore:
         content: dict[str, Any],
     ) -> UserMemoryRecord:
         """Create or replace one consented user-memory record."""
+        if envelope.repo_id != context.repo_id:
+            raise ValueError("record envelope repository does not match caller")
         self._require_consent(owner_id, envelope.repo_id)
         require_access(
             context,
             action=AccessAction.CORRECT,
             owner_id=owner_id,
-            repo_id=envelope.repo_id,
+            repo_id=context.repo_id,
         )
-        if envelope.repo_id != context.repo_id:
-            raise ValueError("record envelope repository does not match caller")
         assert_safe_for_persistence(
             json.dumps(content, sort_keys=True),
             trust=envelope.trust,

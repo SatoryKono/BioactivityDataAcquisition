@@ -10,6 +10,8 @@ See plan: Pre-Merge Cross-Validation for Composite Publication Pipeline.
 
 from __future__ import annotations
 
+import math
+
 from dataclasses import dataclass
 from enum import StrEnum
 
@@ -65,7 +67,7 @@ class FieldComparisonSpec:
 
     def _apply_default_threshold(self) -> None:
         # Deterministic defaults when callers leave threshold at zero.
-        if self.threshold != 0.0:
+        if not math.isclose(self.threshold, 0.0, abs_tol=1e-15):
             return
         if self.method == ComparisonMethod.FUZZY:
             object.__setattr__(self, "threshold", 0.8)
