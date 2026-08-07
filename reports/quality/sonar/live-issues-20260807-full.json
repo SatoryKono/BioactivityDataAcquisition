@@ -1,0 +1,3536 @@
+{
+  "schema_version": 1,
+  "exported_at": "2026-08-07T14:57:38.062567+00:00",
+  "host": "https://sonarcloud.io",
+  "project": "SatoryKono_BioactivityDataAcquisition",
+  "analysis_date": "2026-08-07T14:46:26+0000",
+  "revision": "ab0bd320e53b9b9e423150f2dd98153fe686a284",
+  "total": 206,
+  "sonar_total_field": 206,
+  "issues": [
+    {
+      "key": "AZ_cs0UxjAqbcoKibq5F",
+      "rule": "python:S1244",
+      "severity": "MAJOR",
+      "type": "BUG",
+      "status": "OPEN",
+      "message": "Do not perform equality checks with floating point values.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/bioetl/domain/composite/cross_validation.py",
+      "path": "src/bioetl/domain/composite/cross_validation.py",
+      "line": 68,
+      "effort": "5min",
+      "tags": [
+        "data-science",
+        "numpy",
+        "pytorch",
+        "suspicious"
+      ],
+      "creationDate": "2026-08-07T14:31:22+0000",
+      "updateDate": "2026-08-07T14:32:37+0000"
+    },
+    {
+      "key": "AZ_cdnEdghKaXiUpqRzv",
+      "rule": "python:S8786",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Simplify this regular expression to reduce its runtime, as it has super-linear performance due to backtracking.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/qa/report_architecture_suite_burndown.py",
+      "path": "scripts/engineering/qa/report_architecture_suite_burndown.py",
+      "line": 15,
+      "effort": "20min",
+      "tags": [
+        "performance",
+        "regex"
+      ],
+      "creationDate": "2026-08-07T13:37:32+0000",
+      "updateDate": "2026-08-07T13:38:49+0000"
+    },
+    {
+      "key": "AZ_cdnQgghKaXiUpqRzw",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 25 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/qa/report_weak_assert_inventory.py",
+      "path": "scripts/engineering/qa/report_weak_assert_inventory.py",
+      "line": 41,
+      "effort": "15min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-07T13:37:32+0000",
+      "updateDate": "2026-08-07T13:38:49+0000"
+    },
+    {
+      "key": "AZ_cPH6Ubel9KZ2LznoC",
+      "rule": "shelldre:S7682",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Add an explicit return statement at the end of the function.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ai/codex/helper/codex-auth-lib.sh",
+      "path": "scripts/ai/codex/helper/codex-auth-lib.sh",
+      "line": 7,
+      "effort": "2min",
+      "tags": [
+        "best-practice",
+        "clarity",
+        "shell"
+      ],
+      "creationDate": "2026-08-07T12:31:24+0000",
+      "updateDate": "2026-08-07T12:33:04+0000"
+    },
+    {
+      "key": "AZ_cPH6Ubel9KZ2LznoD",
+      "rule": "shelldre:S7682",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Add an explicit return statement at the end of the function.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ai/codex/helper/codex-auth-lib.sh",
+      "path": "scripts/ai/codex/helper/codex-auth-lib.sh",
+      "line": 52,
+      "effort": "2min",
+      "tags": [
+        "best-practice",
+        "clarity",
+        "shell"
+      ],
+      "creationDate": "2026-08-07T12:31:24+0000",
+      "updateDate": "2026-08-07T12:33:04+0000"
+    },
+    {
+      "key": "AZ_bpzNnl9CUTBjdLWDo",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \".worktrees\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/repo/cleanup_root_local_clutter.py",
+      "path": "scripts/engineering/repo/cleanup_root_local_clutter.py",
+      "line": 55,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-07T09:49:01+0000",
+      "updateDate": "2026-08-07T09:52:43+0000"
+    },
+    {
+      "key": "AZ_bftPtnCd0JhALkH7C",
+      "rule": "python:S6353",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Use concise character class syntax '\\w' instead of '[A-Za-z0-9_]'.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
+      "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
+      "line": 40,
+      "effort": "5min",
+      "tags": [
+        "regex"
+      ],
+      "creationDate": "2026-08-07T09:06:56+0000",
+      "updateDate": "2026-08-07T09:08:43+0000"
+    },
+    {
+      "key": "AZ_bfr3QnCd0JhALkH7A",
+      "rule": "python:S6353",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Use concise character class syntax '\\w' instead of '[A-Za-z0-9_]'.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/bioetl/domain/composite/aggregation.py",
+      "path": "src/bioetl/domain/composite/aggregation.py",
+      "line": 124,
+      "effort": "5min",
+      "tags": [
+        "regex"
+      ],
+      "creationDate": "2026-08-07T09:04:00+0000",
+      "updateDate": "2026-08-07T09:08:43+0000"
+    },
+    {
+      "key": "AZ_bbHjMqrzUPnSH0eNx",
+      "rule": "docker:S6596",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Use a specific version tag for the image.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/runtime/docker/Dockerfile.bioetl-src-overlay",
+      "path": "scripts/ops/runtime/docker/Dockerfile.bioetl-src-overlay",
+      "line": 4,
+      "effort": "5min",
+      "tags": [],
+      "creationDate": "2026-08-07T08:43:22+0000",
+      "updateDate": "2026-08-07T08:47:28+0000"
+    },
+    {
+      "key": "AZ_bUYKnYLCnibBS1FDc",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 29 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/runtime/docker/runtime_manager.py",
+      "path": "scripts/ops/runtime/docker/runtime_manager.py",
+      "line": 812,
+      "effort": "19min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-07T08:16:14+0000",
+      "updateDate": "2026-08-07T08:19:03+0000"
+    },
+    {
+      "key": "AZ_a6wUTsEtYd74_fpaY",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Return a value of type \"CompositeValidationReport\" instead of \"DataclassInstance\" or update function \"validate_composite\" type hint.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/bioetl/domain/behavior/composite_validation_layer.py",
+      "path": "src/bioetl/domain/behavior/composite_validation_layer.py",
+      "line": 92,
+      "effort": "5min",
+      "tags": [
+        "typing"
+      ],
+      "creationDate": "2026-08-07T06:15:29+0000",
+      "updateDate": "2026-08-07T06:24:56+0000"
+    },
+    {
+      "key": "AZ_YbeR7NNQnFHwd25PW",
+      "rule": "pythonsecurity:S8703",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "LLMs running this code with faulty CLI arguments can cause SSRFs. Refactor this code to validate strings before using them in network requests.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/runtime/docker/verify_report_bind.py",
+      "path": "scripts/ops/runtime/docker/verify_report_bind.py",
+      "line": 93,
+      "effort": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2026-08-06T18:48:30+0000",
+      "updateDate": "2026-08-06T18:49:55+0000"
+    },
+    {
+      "key": "AZ_YbeR7NNQnFHwd25PX",
+      "rule": "pythonsecurity:S8705",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "LLMs running this code with faulty CLI arguments can escape from shell sandboxes. Refactor this code to validate untrusted data before passing them to OS commands.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/runtime/docker/verify_report_bind.py",
+      "path": "scripts/ops/runtime/docker/verify_report_bind.py",
+      "line": 103,
+      "effort": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2026-08-06T18:48:30+0000",
+      "updateDate": "2026-08-06T18:49:55+0000"
+    },
+    {
+      "key": "AZ_YbeR7NNQnFHwd25PV",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 46 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/runtime/docker/verify_report_bind.py",
+      "path": "scripts/ops/runtime/docker/verify_report_bind.py",
+      "line": 150,
+      "effort": "36min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-06T18:48:30+0000",
+      "updateDate": "2026-08-06T18:49:55+0000"
+    },
+    {
+      "key": "AZ_YZOCLF7nRZoMTH86_",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 27 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/coderabbit/run_leaves.py",
+      "path": "scripts/ops/coderabbit/run_leaves.py",
+      "line": 71,
+      "effort": "17min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-06T18:40:36+0000",
+      "updateDate": "2026-08-06T18:41:38+0000"
+    },
+    {
+      "key": "AZ_YZOSYF7nRZoMTH87A",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 18 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/quality/coderabbit/rebalance_streams.py",
+      "path": "scripts/quality/coderabbit/rebalance_streams.py",
+      "line": 52,
+      "effort": "8min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-06T18:40:36+0000",
+      "updateDate": "2026-08-06T18:41:38+0000"
+    },
+    {
+      "key": "AZ_YSNwF4VgFau8skXH2",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 25 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ai/codex/doctor.py",
+      "path": "scripts/ai/codex/doctor.py",
+      "line": 107,
+      "effort": "15min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-06T18:04:21+0000",
+      "updateDate": "2026-08-06T18:10:55+0000"
+    },
+    {
+      "key": "AZ_YRAiwYmoozYpmSpOI",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 20 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/quality/coderabbit/inventory_cm.py",
+      "path": "scripts/quality/coderabbit/inventory_cm.py",
+      "line": 16,
+      "effort": "10min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-06T18:04:21+0000",
+      "updateDate": "2026-08-06T18:05:25+0000"
+    },
+    {
+      "key": "AZ_Xpa8zYs228kFEAuNu",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 68 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/quality/coderabbit/build_matrix.py",
+      "path": "scripts/quality/coderabbit/build_matrix.py",
+      "line": 55,
+      "effort": "58min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-06T15:09:17+0000",
+      "updateDate": "2026-08-06T17:15:51+0000"
+    },
+    {
+      "key": "AZ_Xpa8IYs228kFEAuNs",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 26 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/quality/coderabbit/run_leaves.py",
+      "path": "scripts/quality/coderabbit/run_leaves.py",
+      "line": 70,
+      "effort": "16min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-06T15:09:17+0000",
+      "updateDate": "2026-08-06T17:15:51+0000"
+    },
+    {
+      "key": "AZ_Xpa8IYs228kFEAuNt",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 28 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/quality/coderabbit/run_leaves.py",
+      "path": "scripts/quality/coderabbit/run_leaves.py",
+      "line": 208,
+      "effort": "18min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-06T15:09:17+0000",
+      "updateDate": "2026-08-06T17:15:51+0000"
+    },
+    {
+      "key": "AZ_XfJJtwV_JIPbejWKK",
+      "rule": "python:S3516",
+      "severity": "BLOCKER",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this method to not always return the same value.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+      "path": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+      "line": 42,
+      "effort": "2min",
+      "tags": [
+        "confusing",
+        "design"
+      ],
+      "creationDate": "2026-08-06T14:26:10+0000",
+      "updateDate": "2026-08-06T14:27:23+0000"
+    },
+    {
+      "key": "AZ_XfAXYQUymv3g4Nw4E",
+      "rule": "shelldre:S1192",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of using the literal 'skipped' 4 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:reports/quality/coderabbit/20260806-full/run_residual_wsl.sh",
+      "path": "reports/quality/coderabbit/20260806-full/run_residual_wsl.sh",
+      "line": 177,
+      "effort": "4min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-06T14:23:42+0000",
+      "updateDate": "2026-08-06T14:24:54+0000"
+    },
+    {
+      "key": "AZ_XfAXpQUymv3g4Nw4F",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 71 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/coderabbit/build_matrix.py",
+      "path": "scripts/ops/coderabbit/build_matrix.py",
+      "line": 33,
+      "effort": "1h1min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-06T14:23:42+0000",
+      "updateDate": "2026-08-06T18:36:43+0000"
+    },
+    {
+      "key": "AZ_XfAQfQUymv3g4Nw4D",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 23 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/coderabbit/run_leaves.py",
+      "path": "scripts/ops/coderabbit/run_leaves.py",
+      "line": 228,
+      "effort": "13min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-06T14:23:42+0000",
+      "updateDate": "2026-08-06T14:38:39+0000"
+    },
+    {
+      "key": "AZ_XGBUhiYNkUC0wB_iu",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"*.json\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py",
+      "path": "scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py",
+      "line": 268,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-06T12:37:03+0000",
+      "updateDate": "2026-08-06T12:38:10+0000"
+    },
+    {
+      "key": "AZ_XGBUhiYNkUC0wB_iv",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 53 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py",
+      "path": "scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py",
+      "line": 592,
+      "effort": "43min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-06T12:37:03+0000",
+      "updateDate": "2026-08-06T13:04:10+0000"
+    },
+    {
+      "key": "AZ_W-DvBuaZo8FfnvKRp",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"S5 publication\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/quality/coderabbit/inventory_cm.py",
+      "path": "scripts/quality/coderabbit/inventory_cm.py",
+      "line": 48,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-06T12:01:21+0000",
+      "updateDate": "2026-08-06T14:27:23+0000"
+    },
+    {
+      "key": "AZ_W-DvBuaZo8FfnvKRn",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"S4 transformer\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/quality/coderabbit/inventory_cm.py",
+      "path": "scripts/quality/coderabbit/inventory_cm.py",
+      "line": 50,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-06T12:01:21+0000",
+      "updateDate": "2026-08-06T14:27:23+0000"
+    },
+    {
+      "key": "AZ_W-DvBuaZo8FfnvKRr",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"S3 record-quarantine-fetch\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/quality/coderabbit/inventory_cm.py",
+      "path": "scripts/quality/coderabbit/inventory_cm.py",
+      "line": 66,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-06T12:01:21+0000",
+      "updateDate": "2026-08-06T14:27:23+0000"
+    },
+    {
+      "key": "AZ_W-DvBuaZo8FfnvKRo",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"S2 config-services\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/quality/coderabbit/inventory_cm.py",
+      "path": "scripts/quality/coderabbit/inventory_cm.py",
+      "line": 73,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-06T12:01:21+0000",
+      "updateDate": "2026-08-06T14:27:23+0000"
+    },
+    {
+      "key": "AZ_W-DvBuaZo8FfnvKRq",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"S1 lifecycle-runner\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/quality/coderabbit/inventory_cm.py",
+      "path": "scripts/quality/coderabbit/inventory_cm.py",
+      "line": 74,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-06T12:01:21+0000",
+      "updateDate": "2026-08-06T14:27:23+0000"
+    },
+    {
+      "key": "AZ_W-DvBuaZo8FfnvKRs",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 35 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/quality/coderabbit/inventory_cm.py",
+      "path": "scripts/quality/coderabbit/inventory_cm.py",
+      "line": 82,
+      "effort": "25min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-06T12:01:21+0000",
+      "updateDate": "2026-08-06T18:05:25+0000"
+    },
+    {
+      "key": "AZ_W57DlTdXMJj1tpWpZ",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"P1 critical-storage-FK\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/quality/coderabbit/build_streams.py",
+      "path": "scripts/quality/coderabbit/build_streams.py",
+      "line": 116,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-06T11:43:54+0000",
+      "updateDate": "2026-08-06T14:27:23+0000"
+    },
+    {
+      "key": "AZ_W57DlTdXMJj1tpWpY",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"P5 observability+domain\" 5 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/quality/coderabbit/build_streams.py",
+      "path": "scripts/quality/coderabbit/build_streams.py",
+      "line": 118,
+      "effort": "10min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-06T11:43:54+0000",
+      "updateDate": "2026-08-06T14:27:23+0000"
+    },
+    {
+      "key": "AZ_W57DlTdXMJj1tpWpX",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"P2 application-batch\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/quality/coderabbit/build_streams.py",
+      "path": "scripts/quality/coderabbit/build_streams.py",
+      "line": 121,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-06T11:43:54+0000",
+      "updateDate": "2026-08-06T14:27:23+0000"
+    },
+    {
+      "key": "AZ_W57DlTdXMJj1tpWpW",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"P3 application-core-other\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/quality/coderabbit/build_streams.py",
+      "path": "scripts/quality/coderabbit/build_streams.py",
+      "line": 122,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-06T11:43:54+0000",
+      "updateDate": "2026-08-06T14:27:23+0000"
+    },
+    {
+      "key": "AZ_W57DlTdXMJj1tpWpV",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"P4 infrastructure-storage\" 4 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/quality/coderabbit/build_streams.py",
+      "path": "scripts/quality/coderabbit/build_streams.py",
+      "line": 124,
+      "effort": "8min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-06T11:43:54+0000",
+      "updateDate": "2026-08-06T14:27:23+0000"
+    },
+    {
+      "key": "AZ_W57DlTdXMJj1tpWpa",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 35 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/quality/coderabbit/build_streams.py",
+      "path": "scripts/quality/coderabbit/build_streams.py",
+      "line": 132,
+      "effort": "25min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-06T11:43:54+0000",
+      "updateDate": "2026-08-06T18:36:43+0000"
+    },
+    {
+      "key": "AZ_W57NgTdXMJj1tpWpc",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"S5 domain\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/quality/coderabbit/rebalance_streams.py",
+      "path": "scripts/quality/coderabbit/rebalance_streams.py",
+      "line": 16,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-06T11:43:54+0000",
+      "updateDate": "2026-08-06T14:27:23+0000"
+    },
+    {
+      "key": "AZ_W57NgTdXMJj1tpWpe",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"S4 obs-logging-tracing\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/quality/coderabbit/rebalance_streams.py",
+      "path": "scripts/quality/coderabbit/rebalance_streams.py",
+      "line": 29,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-06T11:43:54+0000",
+      "updateDate": "2026-08-06T14:27:23+0000"
+    },
+    {
+      "key": "AZ_W57NgTdXMJj1tpWpb",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"S3 obs-metrics\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/quality/coderabbit/rebalance_streams.py",
+      "path": "scripts/quality/coderabbit/rebalance_streams.py",
+      "line": 30,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-06T11:43:54+0000",
+      "updateDate": "2026-08-06T14:27:23+0000"
+    },
+    {
+      "key": "AZ_W57NgTdXMJj1tpWpd",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"S1 app-lifecycle-runner\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/quality/coderabbit/rebalance_streams.py",
+      "path": "scripts/quality/coderabbit/rebalance_streams.py",
+      "line": 46,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-06T11:43:54+0000",
+      "updateDate": "2026-08-06T14:27:23+0000"
+    },
+    {
+      "key": "AZ_W57NgTdXMJj1tpWpf",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"S2 app-record-transform\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/quality/coderabbit/rebalance_streams.py",
+      "path": "scripts/quality/coderabbit/rebalance_streams.py",
+      "line": 49,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-06T11:43:54+0000",
+      "updateDate": "2026-08-06T14:27:23+0000"
+    },
+    {
+      "key": "AZ_WzrLmGYkfZSx8_3Zk",
+      "rule": "python:S6353",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Use concise character class syntax '\\w' instead of '[A-Za-z0-9_]'.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py",
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py",
+      "line": 49,
+      "effort": "5min",
+      "tags": [
+        "regex"
+      ],
+      "creationDate": "2026-08-06T11:17:01+0000",
+      "updateDate": "2026-08-06T11:18:07+0000"
+    },
+    {
+      "key": "AZ_WpggDY9BZ5BAOyClL",
+      "rule": "pythonsecurity:S2083",
+      "severity": "BLOCKER",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "Change this code to not construct the path from user-controlled data.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/apply_s1_c2_fixes.py",
+      "path": "scripts/engineering/apply_s1_c2_fixes.py",
+      "line": 14,
+      "effort": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2026-08-06T10:32:05+0000",
+      "updateDate": "2026-08-06T10:33:12+0000"
+    },
+    {
+      "key": "AZ_WpgR8Y9BZ5BAOyClK",
+      "rule": "pythonsecurity:S2083",
+      "severity": "BLOCKER",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "Change this code to not construct the path from user-controlled data.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/apply_s1_c3c6_fixes.py",
+      "path": "scripts/engineering/apply_s1_c3c6_fixes.py",
+      "line": 14,
+      "effort": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2026-08-06T10:32:05+0000",
+      "updateDate": "2026-08-06T10:33:12+0000"
+    },
+    {
+      "key": "AZ_WpgR8Y9BZ5BAOyClJ",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"src/bioetl/application/core/batch_writer_columns_mixin.py\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/apply_s1_c3c6_fixes.py",
+      "path": "scripts/engineering/apply_s1_c3c6_fixes.py",
+      "line": 155,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-06T10:32:05+0000",
+      "updateDate": "2026-08-06T10:33:12+0000"
+    },
+    {
+      "key": "AZ_WpgR8Y9BZ5BAOyClI",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"src/bioetl/application/core/batch_writer_io_mixin.py\" 4 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/apply_s1_c3c6_fixes.py",
+      "path": "scripts/engineering/apply_s1_c3c6_fixes.py",
+      "line": 209,
+      "effort": "8min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-06T10:32:05+0000",
+      "updateDate": "2026-08-06T10:33:12+0000"
+    },
+    {
+      "key": "AZ_WpgR8Y9BZ5BAOyClH",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"src/bioetl/application/core/batch_executor_dq_helpers.py\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/apply_s1_c3c6_fixes.py",
+      "path": "scripts/engineering/apply_s1_c3c6_fixes.py",
+      "line": 349,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-06T10:32:05+0000",
+      "updateDate": "2026-08-06T10:33:12+0000"
+    },
+    {
+      "key": "AZ_WpgR8Y9BZ5BAOyClG",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"src/bioetl/application/core/_quarantine_metrics_support.py\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/apply_s1_c3c6_fixes.py",
+      "path": "scripts/engineering/apply_s1_c3c6_fixes.py",
+      "line": 437,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-06T10:32:05+0000",
+      "updateDate": "2026-08-06T10:33:12+0000"
+    },
+    {
+      "key": "AZ_WicVzBRESLj_E6WNV",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/bioetl/composition/runtime_builders/_context_field_binding.py",
+      "path": "src/bioetl/composition/runtime_builders/_context_field_binding.py",
+      "line": 12,
+      "effort": "9min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-06T10:00:58+0000",
+      "updateDate": "2026-08-06T10:02:25+0000"
+    },
+    {
+      "key": "AZ_WSyFRG89ZmlLNplxA",
+      "rule": "python:S7503",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Use asynchronous features in this function or remove the `async` keyword.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py",
+      "path": "src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py",
+      "line": 188,
+      "effort": "5min",
+      "tags": [
+        "async"
+      ],
+      "creationDate": "2026-08-06T07:44:56+0000",
+      "updateDate": "2026-08-06T08:54:14+0000"
+    },
+    {
+      "key": "AZ_WCeRy7PoDkl7eKTyV",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/bioetl/infrastructure/adapters/uniprot/_idmapping_retry.py",
+      "path": "src/bioetl/infrastructure/adapters/uniprot/_idmapping_retry.py",
+      "line": 64,
+      "effort": "7min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-06T07:41:30+0000",
+      "updateDate": "2026-08-06T07:42:35+0000"
+    },
+    {
+      "key": "AZ_VxLOQen4ZkXPEVpyt",
+      "rule": "shell:S5332",
+      "severity": "MINOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "Make sure that using clear-text protocols is safe here.",
+      "component": "SatoryKono_BioactivityDataAcquisition:grafana/scripts/bootstrap-datasources.sh",
+      "path": "grafana/scripts/bootstrap-datasources.sh",
+      "line": 33,
+      "effort": "30min",
+      "tags": [
+        "cwe",
+        "former-hotspot"
+      ],
+      "creationDate": "2026-08-06T06:22:51+0000",
+      "updateDate": "2026-08-06T06:24:53+0000"
+    },
+    {
+      "key": "AZ_VxLOQen4ZkXPEVpyu",
+      "rule": "shell:S5332",
+      "severity": "MINOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "Make sure that using clear-text protocols is safe here.",
+      "component": "SatoryKono_BioactivityDataAcquisition:grafana/scripts/bootstrap-datasources.sh",
+      "path": "grafana/scripts/bootstrap-datasources.sh",
+      "line": 34,
+      "effort": "30min",
+      "tags": [
+        "cwe",
+        "former-hotspot"
+      ],
+      "creationDate": "2026-08-06T06:22:51+0000",
+      "updateDate": "2026-08-06T06:24:53+0000"
+    },
+    {
+      "key": "AZ_VxLOQen4ZkXPEVpyv",
+      "rule": "shell:S5332",
+      "severity": "MINOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "Make sure that using clear-text protocols is safe here.",
+      "component": "SatoryKono_BioactivityDataAcquisition:grafana/scripts/bootstrap-datasources.sh",
+      "path": "grafana/scripts/bootstrap-datasources.sh",
+      "line": 43,
+      "effort": "30min",
+      "tags": [
+        "cwe",
+        "former-hotspot"
+      ],
+      "creationDate": "2026-08-06T06:22:51+0000",
+      "updateDate": "2026-08-06T06:24:53+0000"
+    },
+    {
+      "key": "AZ_VxKkGen4ZkXPEVpyr",
+      "rule": "python:S5869",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Remove duplicates in this character class.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/runtime/docker/docker_runtime_preflight.py",
+      "path": "scripts/ops/runtime/docker/docker_runtime_preflight.py",
+      "line": 224,
+      "effort": "5min",
+      "tags": [
+        "regex"
+      ],
+      "creationDate": "2026-08-06T06:22:51+0000",
+      "updateDate": "2026-08-06T06:24:53+0000"
+    },
+    {
+      "key": "AZ_VxKkGen4ZkXPEVpys",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 35 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/runtime/docker/docker_runtime_preflight.py",
+      "path": "scripts/ops/runtime/docker/docker_runtime_preflight.py",
+      "line": 1367,
+      "effort": "25min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-06T06:22:51+0000",
+      "updateDate": "2026-08-06T06:24:53+0000"
+    },
+    {
+      "key": "AZ_Vun5zen4ZkXPEVYdK",
+      "rule": "python:S5747",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Remove this \"raise\" statement or move it inside an \"except\" block.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/bioetl/application/composite/helpers/coordinator_execution.py",
+      "path": "src/bioetl/application/composite/helpers/coordinator_execution.py",
+      "line": 148,
+      "effort": "10min",
+      "tags": [
+        "confusing",
+        "error-handling",
+        "unpredictable"
+      ],
+      "creationDate": "2026-08-05T18:27:58+0000",
+      "updateDate": "2026-08-07T08:47:28+0000"
+    },
+    {
+      "key": "AZ_Sx7f87s3WKsGdEFu0",
+      "rule": "pythonsecurity:S8707",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "LLMs running this code with faulty CLI arguments can escape file system restrictions. Refactor this code to validate the constructed path before accessing the file system.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/qa/report_domain_ports_inventory.py",
+      "path": "scripts/engineering/qa/report_domain_ports_inventory.py",
+      "line": 217,
+      "effort": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2026-08-05T16:26:51+0000",
+      "updateDate": "2026-08-05T16:29:31+0000"
+    },
+    {
+      "key": "AZ_Sx6HA7s3WKsGdEFux",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Return a value of type \"WorkflowRunExecutionResult\" instead of \"DataclassInstance\" or update function \"attach_workflow_run_report\" type hint.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/bioetl/application/services/workflow/workflow_runner_reports.py",
+      "path": "src/bioetl/application/services/workflow/workflow_runner_reports.py",
+      "line": 137,
+      "effort": "5min",
+      "tags": [
+        "typing"
+      ],
+      "creationDate": "2026-08-05T16:26:51+0000",
+      "updateDate": "2026-08-05T16:29:31+0000"
+    },
+    {
+      "key": "AZ_Sx6HA7s3WKsGdEFuy",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Return a value of type \"WorkflowRunExecutionResult\" instead of \"DataclassInstance\" or update function \"attach_workflow_run_report\" type hint.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/bioetl/application/services/workflow/workflow_runner_reports.py",
+      "path": "src/bioetl/application/services/workflow/workflow_runner_reports.py",
+      "line": 143,
+      "effort": "5min",
+      "tags": [
+        "typing"
+      ],
+      "creationDate": "2026-08-05T16:26:51+0000",
+      "updateDate": "2026-08-05T16:29:31+0000"
+    },
+    {
+      "key": "AZ_Sx6Ri7s3WKsGdEFuz",
+      "rule": "python:S5655",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Change this argument; Function \"attach_workflow_run_report\" expects a different type",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/bioetl/application/services/workflow/workflow_runner_service.py",
+      "path": "src/bioetl/application/services/workflow/workflow_runner_service.py",
+      "line": 138,
+      "effort": "20min",
+      "tags": [
+        "suspicious",
+        "typing"
+      ],
+      "creationDate": "2026-08-05T16:26:51+0000",
+      "updateDate": "2026-08-05T16:29:31+0000"
+    },
+    {
+      "key": "AZ_RY4nIEjYS8VKJTpLU",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \".devin\" 4 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ai/codex/setup_mcp.py",
+      "path": "scripts/ai/codex/setup_mcp.py",
+      "line": 729,
+      "effort": "8min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-05T09:54:50+0000",
+      "updateDate": "2026-08-05T10:02:32+0000"
+    },
+    {
+      "key": "AZ_OEOwLYYrSSWedcFKp",
+      "rule": "powershelldre:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ai/mcp/support/uv_resolver.ps1",
+      "path": "scripts/ai/mcp/support/uv_resolver.ps1",
+      "line": 31,
+      "effort": "6min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-04T18:33:32+0000",
+      "updateDate": "2026-08-04T18:33:32+0000"
+    },
+    {
+      "key": "AZ_YSNwF4VgFau8skXH3",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Extract this nested conditional expression into an independent statement.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ai/codex/doctor.py",
+      "path": "scripts/ai/codex/doctor.py",
+      "line": 135,
+      "effort": "5min",
+      "tags": [
+        "confusing"
+      ],
+      "creationDate": "2026-08-04T17:59:04+0000",
+      "updateDate": "2026-08-06T18:10:55+0000"
+    },
+    {
+      "key": "AZ_N8oYXxx3mIXqUnt3D",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 27 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ai/codex/native_runtime_contract.py",
+      "path": "scripts/ai/codex/native_runtime_contract.py",
+      "line": 172,
+      "effort": "17min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-04T17:59:04+0000",
+      "updateDate": "2026-08-04T17:59:56+0000"
+    },
+    {
+      "key": "AZ_Nbm27jmi89DNoYhxO",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 21 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/qa/vcr/check_root_vcr_cassettes.py",
+      "path": "scripts/engineering/qa/vcr/check_root_vcr_cassettes.py",
+      "line": 55,
+      "effort": "11min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-04T15:04:36+0000",
+      "updateDate": "2026-08-04T15:55:12+0000"
+    },
+    {
+      "key": "AZ_M-jB7h8aBmfb0ufLO",
+      "rule": "shelldre:S1066",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Merge this if statement with the enclosing one.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/diagrams/validate_mermaid_syntax.sh",
+      "path": "scripts/diagrams/validate_mermaid_syntax.sh",
+      "line": 259,
+      "effort": "5min",
+      "tags": [
+        "clumsy"
+      ],
+      "creationDate": "2026-08-04T13:28:38+0000",
+      "updateDate": "2026-08-04T13:28:38+0000"
+    },
+    {
+      "key": "AZ_L1o6yb-JeFb7zDn81",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/qa/check_duplication_complexity_exemptions.py",
+      "path": "scripts/engineering/qa/check_duplication_complexity_exemptions.py",
+      "line": 44,
+      "effort": "6min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-04T08:10:04+0000",
+      "updateDate": "2026-08-04T08:10:04+0000"
+    },
+    {
+      "key": "AZ_Lsv0BMKFS_V6eqiJ5",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 18 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/check_bioetl_prometheus_scrape.py",
+      "path": "scripts/ops/observability/check_bioetl_prometheus_scrape.py",
+      "line": 46,
+      "effort": "8min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-04T07:31:32+0000",
+      "updateDate": "2026-08-04T07:31:32+0000"
+    },
+    {
+      "key": "AZ_LsvnbMKFS_V6eqiJ4",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/runtime/mcp/windows_docker_mcp_bridge.py",
+      "path": "scripts/ops/runtime/mcp/windows_docker_mcp_bridge.py",
+      "line": 152,
+      "effort": "6min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-04T07:31:32+0000",
+      "updateDate": "2026-08-04T07:31:32+0000"
+    },
+    {
+      "key": "AZ_Lsi41KItL4neUE05R",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 18 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/diagrams/render/generate_all_bundles.py",
+      "path": "scripts/diagrams/render/generate_all_bundles.py",
+      "line": 320,
+      "effort": "8min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-04T07:30:49+0000",
+      "updateDate": "2026-08-07T07:12:04+0000"
+    },
+    {
+      "key": "AZ_LrZ3EWy85S95WDwbM",
+      "rule": "shelldre:S7684",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Environment variable 'npm_config_ignore_scripts' should use ALL_CAPS naming convention.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ai/mcp/mcp_mermaid_wrapper.sh",
+      "path": "scripts/ai/mcp/mcp_mermaid_wrapper.sh",
+      "line": 17,
+      "effort": "5min",
+      "tags": [
+        "convention",
+        "naming"
+      ],
+      "creationDate": "2026-08-04T07:23:31+0000",
+      "updateDate": "2026-08-04T07:23:31+0000"
+    },
+    {
+      "key": "AZ_LnDVxZ38Bph8JOxXb",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ai/junie/check_junie_mirror.py",
+      "path": "scripts/ai/junie/check_junie_mirror.py",
+      "line": 209,
+      "effort": "9min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-04T07:06:58+0000",
+      "updateDate": "2026-08-04T07:06:58+0000"
+    },
+    {
+      "key": "AZ_LnC7HZ38Bph8JOxXa",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/docs/matrix/generate_pipeline_normalization_matrix.py",
+      "path": "scripts/docs/matrix/generate_pipeline_normalization_matrix.py",
+      "line": 1454,
+      "effort": "6min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-04T07:06:58+0000",
+      "updateDate": "2026-08-04T07:06:58+0000"
+    },
+    {
+      "key": "AZ_LcdpWH1_6HEfGWbkA",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"reports/quality/architecture-quality-scorecard.json\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/qa/report_debt_governance_gates.py",
+      "path": "scripts/engineering/qa/report_debt_governance_gates.py",
+      "line": 62,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-04T06:18:40+0000",
+      "updateDate": "2026-08-04T06:20:25+0000"
+    },
+    {
+      "key": "AZ_LcdpWH1_6HEfGWbj-",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"reports/quality/config-surface-backlog.json\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/qa/report_debt_governance_gates.py",
+      "path": "scripts/engineering/qa/report_debt_governance_gates.py",
+      "line": 65,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-04T06:18:40+0000",
+      "updateDate": "2026-08-04T06:20:25+0000"
+    },
+    {
+      "key": "AZ_LcdpWH1_6HEfGWbj_",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"reports/quality/dead-code-inventory.json\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/qa/report_debt_governance_gates.py",
+      "path": "scripts/engineering/qa/report_debt_governance_gates.py",
+      "line": 70,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-04T06:18:40+0000",
+      "updateDate": "2026-08-04T06:20:25+0000"
+    },
+    {
+      "key": "AZ_LcdqQH1_6HEfGWbkB",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 31 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/qa/report_live_residual_snapshot.py",
+      "path": "scripts/engineering/qa/report_live_residual_snapshot.py",
+      "line": 110,
+      "effort": "21min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-04T06:18:40+0000",
+      "updateDate": "2026-08-04T15:55:12+0000"
+    },
+    {
+      "key": "AZ_LW4XdRDI36FPxRLGR",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/apply_dux4_enforcement.py",
+      "path": "scripts/ops/observability/grafana/apply_dux4_enforcement.py",
+      "line": 282,
+      "effort": "7min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-04T05:55:58+0000",
+      "updateDate": "2026-08-04T05:55:58+0000"
+    },
+    {
+      "key": "AZ_IWayE1Yt1fFEn6RoX",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \".codex\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ai/codex/setup_mcp.py",
+      "path": "scripts/ai/codex/setup_mcp.py",
+      "line": 690,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-03T15:54:23+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ_IWayE1Yt1fFEn6RoW",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \".mcp.json\" 4 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ai/codex/setup_mcp.py",
+      "path": "scripts/ai/codex/setup_mcp.py",
+      "line": 794,
+      "effort": "8min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-03T15:54:23+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ_IWayE1Yt1fFEn6RoY",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 33 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ai/codex/setup_mcp.py",
+      "path": "scripts/ai/codex/setup_mcp.py",
+      "line": 1219,
+      "effort": "23min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-03T15:54:23+0000",
+      "updateDate": "2026-08-05T10:02:32+0000"
+    },
+    {
+      "key": "AZ_IWaiH1Yt1fFEn6RoT",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"--vcr-record=none\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/dev/zed_pytest_lane.py",
+      "path": "scripts/engineering/dev/zed_pytest_lane.py",
+      "line": 107,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-03T15:54:23+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ_IWaiH1Yt1fFEn6RoS",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"tests/\" 4 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/dev/zed_pytest_lane.py",
+      "path": "scripts/engineering/dev/zed_pytest_lane.py",
+      "line": 137,
+      "effort": "8min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-08-03T15:54:23+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ_IWaiH1Yt1fFEn6RoU",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 25 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/dev/zed_pytest_lane.py",
+      "path": "scripts/engineering/dev/zed_pytest_lane.py",
+      "line": 179,
+      "effort": "15min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-08-03T15:54:23+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ_IWara1Yt1fFEn6RoV",
+      "rule": "python:S5754",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Reraise this exception to stop the application as the user expects",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/dev/zed_run.py",
+      "path": "scripts/engineering/dev/zed_run.py",
+      "line": 113,
+      "effort": "5min",
+      "tags": [
+        "bad-practice",
+        "error-handling",
+        "suspicious"
+      ],
+      "creationDate": "2026-08-03T15:54:23+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-4z-__kb2krUTIfyqC",
+      "rule": "githubactions:S8264",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "Move this read permission from workflow level to job level.",
+      "component": "SatoryKono_BioactivityDataAcquisition:.github/workflows/branch-hygiene.yml",
+      "path": ".github/workflows/branch-hygiene.yml",
+      "line": 11,
+      "effort": "5min",
+      "tags": [],
+      "creationDate": "2026-07-31T15:11:03+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-4z-__kb2krUTIfyqD",
+      "rule": "githubactions:S8264",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "Move this read permission from workflow level to job level.",
+      "component": "SatoryKono_BioactivityDataAcquisition:.github/workflows/branch-hygiene.yml",
+      "path": ".github/workflows/branch-hygiene.yml",
+      "line": 12,
+      "effort": "5min",
+      "tags": [],
+      "creationDate": "2026-07-31T15:11:03+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-4z-09kb2krUTIfyqA",
+      "rule": "python:S5869",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Remove duplicates in this character class.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/diagrams/fix/strip_svg_foreign_object.py",
+      "path": "scripts/diagrams/fix/strip_svg_foreign_object.py",
+      "line": 37,
+      "effort": "5min",
+      "tags": [
+        "regex"
+      ],
+      "creationDate": "2026-07-31T15:11:03+0000",
+      "updateDate": "2026-08-07T07:12:04+0000"
+    },
+    {
+      "key": "AZ-4z-09kb2krUTIfyqB",
+      "rule": "pythonsecurity:S8707",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "LLMs running this code with faulty CLI arguments can escape file system restrictions. Refactor this code to validate the constructed path before accessing the file system.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/diagrams/fix/strip_svg_foreign_object.py",
+      "path": "scripts/diagrams/fix/strip_svg_foreign_object.py",
+      "line": 121,
+      "effort": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2026-07-31T15:11:03+0000",
+      "updateDate": "2026-08-07T07:12:04+0000"
+    },
+    {
+      "key": "AZ-4nwE2OQN6Udtp1QH0",
+      "rule": "pythonsecurity:S8707",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "LLMs running this code with faulty CLI arguments can escape file system restrictions. Refactor this code to validate the constructed path before accessing the file system.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ai/sync/runtime_skills.py",
+      "path": "scripts/ai/sync/runtime_skills.py",
+      "line": 113,
+      "effort": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2026-07-31T13:44:20+0000",
+      "updateDate": "2026-08-07T06:54:09+0000"
+    },
+    {
+      "key": "AZ-4nwE2OQN6Udtp1QHz",
+      "rule": "pythonsecurity:S8707",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "LLMs running this code with faulty CLI arguments can escape file system restrictions. Refactor this code to validate the constructed path before accessing the file system.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ai/sync/runtime_skills.py",
+      "path": "scripts/ai/sync/runtime_skills.py",
+      "line": 114,
+      "effort": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2026-07-31T13:44:20+0000",
+      "updateDate": "2026-08-07T06:54:09+0000"
+    },
+    {
+      "key": "AZ-4RoqPXF-Rs4_NuNzk",
+      "rule": "githubactions:S8541",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "Omitting \"--no-build\" can lead to the execution of setup scripts. Make sure it is safe here.",
+      "component": "SatoryKono_BioactivityDataAcquisition:.github/workflows/memory-freshness.yml",
+      "path": ".github/workflows/memory-freshness.yml",
+      "line": 35,
+      "effort": "1h",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2026-07-31T11:36:08+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-4RoqPXF-Rs4_NuNzl",
+      "rule": "githubactions:S8544",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "Using dependencies without locking resolved versions is security-sensitive.",
+      "component": "SatoryKono_BioactivityDataAcquisition:.github/workflows/memory-freshness.yml",
+      "path": ".github/workflows/memory-freshness.yml",
+      "line": 35,
+      "effort": "1h",
+      "tags": [],
+      "creationDate": "2026-07-31T11:36:08+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-3lhnyfP0insu10KpN",
+      "rule": "pythonsecurity:S2083",
+      "severity": "BLOCKER",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "Change this code to not construct the path from user-controlled data.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/docs/passports/rename_underscore_to_hyphen.py",
+      "path": "scripts/docs/passports/rename_underscore_to_hyphen.py",
+      "line": 149,
+      "effort": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2026-07-31T09:46:00+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-3lPTMpjm5KvNkTzrR",
+      "rule": "githubactions:S7637",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "Use full commit SHA hash for this dependency.",
+      "component": "SatoryKono_BioactivityDataAcquisition:.github/workflows/memory-freshness.yml",
+      "path": ".github/workflows/memory-freshness.yml",
+      "line": 22,
+      "effort": "30min",
+      "tags": [
+        "cwe",
+        "former-hotspot"
+      ],
+      "creationDate": "2026-07-31T09:45:15+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-3lPTMpjm5KvNkTzrS",
+      "rule": "githubactions:S8541",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "Omitting \"--no-build\" can lead to the execution of setup scripts. Make sure it is safe here.",
+      "component": "SatoryKono_BioactivityDataAcquisition:.github/workflows/memory-freshness.yml",
+      "path": ".github/workflows/memory-freshness.yml",
+      "line": 27,
+      "effort": "1h",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2026-07-31T09:45:15+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-3lPTMpjm5KvNkTzrT",
+      "rule": "githubactions:S8544",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "Using dependencies without locking resolved versions is security-sensitive.",
+      "component": "SatoryKono_BioactivityDataAcquisition:.github/workflows/memory-freshness.yml",
+      "path": ".github/workflows/memory-freshness.yml",
+      "line": 27,
+      "effort": "1h",
+      "tags": [],
+      "creationDate": "2026-07-31T09:45:15+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-3lPTMpjm5KvNkTzrU",
+      "rule": "githubactions:S8541",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "Omitting \"--no-build\" can lead to the execution of setup scripts. Make sure it is safe here.",
+      "component": "SatoryKono_BioactivityDataAcquisition:.github/workflows/memory-freshness.yml",
+      "path": ".github/workflows/memory-freshness.yml",
+      "line": 42,
+      "effort": "1h",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2026-07-31T09:45:15+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-3lPTMpjm5KvNkTzrV",
+      "rule": "githubactions:S8544",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "Using dependencies without locking resolved versions is security-sensitive.",
+      "component": "SatoryKono_BioactivityDataAcquisition:.github/workflows/memory-freshness.yml",
+      "path": ".github/workflows/memory-freshness.yml",
+      "line": 42,
+      "effort": "1h",
+      "tags": [],
+      "creationDate": "2026-07-31T09:45:15+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-3lWCKfP0insu10Ko9",
+      "rule": "pythonsecurity:S8707",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "LLMs running this code with faulty CLI arguments can escape file system restrictions. Refactor this code to validate the constructed path before accessing the file system.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/mcp_scope.py",
+      "path": "src/memory/mcp_scope.py",
+      "line": 64,
+      "effort": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2026-07-31T09:43:09+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-3dcLkKn56JasXihLY",
+      "rule": "python:S3626",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Remove this redundant continue.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/rag/indexing.py",
+      "path": "src/memory/rag/indexing.py",
+      "line": 365,
+      "effort": "1min",
+      "tags": [
+        "clumsy",
+        "redundant"
+      ],
+      "creationDate": "2026-07-31T09:12:34+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-3SpaJ_Gd7Vb1dA6fh",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 33 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/rag/indexing.py",
+      "path": "src/memory/rag/indexing.py",
+      "line": 278,
+      "effort": "23min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-31T08:25:34+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-27aXMMZMNM-rlOXjp",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 20 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/storage.py",
+      "path": "src/memory/storage.py",
+      "line": 82,
+      "effort": "10min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-31T06:43:52+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-3Cv6KGZAxP1c2_BeD",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/docs/passports/projector.py",
+      "path": "scripts/docs/passports/projector.py",
+      "line": 646,
+      "effort": "9min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-30T19:21:36+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-0WTtC20ESPB3h1_96",
+      "rule": "python:S6353",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Use concise character class syntax '\\w' instead of '[A-Za-z0-9_]'.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/security.py",
+      "path": "src/memory/security.py",
+      "line": 92,
+      "effort": "5min",
+      "tags": [
+        "regex"
+      ],
+      "creationDate": "2026-07-30T16:47:44+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-0WTtC20ESPB3h1_97",
+      "rule": "python:S5869",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Remove duplicates in this character class.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/security.py",
+      "path": "src/memory/security.py",
+      "line": 97,
+      "effort": "5min",
+      "tags": [
+        "regex"
+      ],
+      "creationDate": "2026-07-30T16:47:44+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-0WTtC20ESPB3h1_94",
+      "rule": "python:S6353",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Use concise character class syntax '\\d' instead of '[0-9]'.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/security.py",
+      "path": "src/memory/security.py",
+      "line": 87,
+      "effort": "5min",
+      "tags": [
+        "regex"
+      ],
+      "creationDate": "2026-07-30T16:43:49+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-0WTtC20ESPB3h1_95",
+      "rule": "python:S6353",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Use concise character class syntax '\\d' instead of '[0-9]'.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/security.py",
+      "path": "src/memory/security.py",
+      "line": 87,
+      "effort": "5min",
+      "tags": [
+        "regex"
+      ],
+      "creationDate": "2026-07-30T16:43:49+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-0WVh320ESPB3h1_98",
+      "rule": "githubactions:S8541",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "Omitting \"--no-build\" can lead to the execution of setup scripts. Make sure it is safe here.",
+      "component": "SatoryKono_BioactivityDataAcquisition:.github/workflows/memory-retention.yml",
+      "path": ".github/workflows/memory-retention.yml",
+      "line": 44,
+      "effort": "1h",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2026-07-30T16:28:03+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-zsg8uElNQa0kI7nt-",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/artifact_readiness.py",
+      "path": "src/memory/artifact_readiness.py",
+      "line": 80,
+      "effort": "6min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-30T15:39:34+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-zshFuElNQa0kI7nt_",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"decision record already exists\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/evidence.py",
+      "path": "src/memory/evidence.py",
+      "line": 203,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-07-30T15:39:34+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-yEkFqM7Xp2wwSAOpv",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \".codex\" 5 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ai/junie/check_junie_mirror.py",
+      "path": "scripts/ai/junie/check_junie_mirror.py",
+      "line": 81,
+      "effort": "10min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-07-30T08:03:20+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-yEkFqM7Xp2wwSAOpw",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \".junie\" 5 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ai/junie/check_junie_mirror.py",
+      "path": "scripts/ai/junie/check_junie_mirror.py",
+      "line": 82,
+      "effort": "10min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-07-30T08:03:20+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-yEkFqM7Xp2wwSAOpx",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"py-*.md\" 5 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ai/junie/check_junie_mirror.py",
+      "path": "scripts/ai/junie/check_junie_mirror.py",
+      "line": 84,
+      "effort": "10min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-07-30T08:03:20+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-yEkFqM7Xp2wwSAOpy",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"SKILLS-CATALOG.md\" 4 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ai/junie/check_junie_mirror.py",
+      "path": "scripts/ai/junie/check_junie_mirror.py",
+      "line": 160,
+      "effort": "8min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-07-30T08:03:20+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-xtCAxzwE2ZRrXtmhr",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 24 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ai/mcp/protocol_smoke.py",
+      "path": "scripts/ai/mcp/protocol_smoke.py",
+      "line": 470,
+      "effort": "14min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-30T06:22:45+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-xtBhLzwE2ZRrXtmhp",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/docs/passports/projector.py",
+      "path": "scripts/docs/passports/projector.py",
+      "line": 789,
+      "effort": "7min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-30T06:22:45+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-xtBhizwE2ZRrXtmhq",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 28 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/docs/passports/validation.py",
+      "path": "scripts/docs/passports/validation.py",
+      "line": 12,
+      "effort": "18min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-30T06:22:45+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-xtBZtzwE2ZRrXtmhn",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/docs/passports/pipeline_projection.py",
+      "path": "scripts/docs/passports/pipeline_projection.py",
+      "line": 89,
+      "effort": "7min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-30T06:07:46+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-vPrNqy-9S2saijLlU",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 23 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/docs/passports/validation.py",
+      "path": "scripts/docs/passports/validation.py",
+      "line": 108,
+      "effort": "13min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T18:54:09+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-vKi3OcCdNSek9-ezd",
+      "rule": "python:S1871",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Either merge this branch with the identical one on line \"178\" or change one of the implementations.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/docs/passports/validation.py",
+      "path": "scripts/docs/passports/validation.py",
+      "line": 180,
+      "effort": "10min",
+      "tags": [
+        "design",
+        "suspicious"
+      ],
+      "creationDate": "2026-07-29T18:23:25+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_O3F0C2pXrklOfnv",
+      "rule": "pythonsecurity:S8707",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "LLMs running this code with faulty CLI arguments can escape file system restrictions. Refactor this code to validate the constructed path before accessing the file system.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/bioetl/infrastructure/storage/support/_atomic_replace.py",
+      "path": "src/bioetl/infrastructure/storage/support/_atomic_replace.py",
+      "line": 70,
+      "effort": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2026-07-29T17:41:18+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_Sws0C2pXrklOfoD",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/docs/passports/projector.py",
+      "path": "scripts/docs/passports/projector.py",
+      "line": 589,
+      "effort": "7min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T17:39:55+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_QJl0C2pXrklOfnw",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"README.md\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/tooling/prune.py",
+      "path": "src/memory/tooling/prune.py",
+      "line": 148,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-07-29T17:32:44+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_QJl0C2pXrklOfnx",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/tooling/prune.py",
+      "path": "src/memory/tooling/prune.py",
+      "line": 168,
+      "effort": "6min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T17:32:44+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_TB70C2pXrklOfoH",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 30 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/qa/report_dashboard_scenes_parity.py",
+      "path": "scripts/engineering/qa/report_dashboard_scenes_parity.py",
+      "line": 68,
+      "effort": "20min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T17:27:23+0000",
+      "updateDate": "2026-08-04T08:10:04+0000"
+    },
+    {
+      "key": "AZ-u_TB70C2pXrklOfoI",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Extract this nested conditional expression into an independent statement.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/qa/report_dashboard_scenes_parity.py",
+      "path": "scripts/engineering/qa/report_dashboard_scenes_parity.py",
+      "line": 108,
+      "effort": "5min",
+      "tags": [
+        "confusing"
+      ],
+      "creationDate": "2026-07-29T17:27:23+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_TB70C2pXrklOfoJ",
+      "rule": "python:S3516",
+      "severity": "BLOCKER",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this method to not always return the same value.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/qa/report_dashboard_scenes_parity.py",
+      "path": "scripts/engineering/qa/report_dashboard_scenes_parity.py",
+      "line": 231,
+      "effort": "2min",
+      "tags": [
+        "confusing",
+        "design"
+      ],
+      "creationDate": "2026-07-29T17:27:23+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_QLT0C2pXrklOfny",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 20 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/replay.py",
+      "path": "src/memory/replay.py",
+      "line": 50,
+      "effort": "10min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T17:27:23+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_S2h0C2pXrklOfoG",
+      "rule": "pythonsecurity:S8707",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "LLMs running this code with faulty CLI arguments can escape file system restrictions. Refactor this code to validate the constructed path before accessing the file system.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/run_grafana_render_matrix.py",
+      "path": "scripts/ops/observability/grafana/run_grafana_render_matrix.py",
+      "line": 175,
+      "effort": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2026-07-29T17:02:26+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_S2h0C2pXrklOfoF",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"render-manifest.json\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/run_grafana_render_matrix.py",
+      "path": "scripts/ops/observability/grafana/run_grafana_render_matrix.py",
+      "line": 188,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-07-29T17:02:26+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_QM20C2pXrklOfn1",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/backup.py",
+      "path": "src/memory/backup.py",
+      "line": 96,
+      "effort": "7min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T17:02:26+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_QM20C2pXrklOfn2",
+      "rule": "python:S3516",
+      "severity": "BLOCKER",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this method to not always return the same value.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/backup.py",
+      "path": "src/memory/backup.py",
+      "line": 203,
+      "effort": "2min",
+      "tags": [
+        "confusing",
+        "design"
+      ],
+      "creationDate": "2026-07-29T17:02:26+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_QQL0C2pXrklOfoC",
+      "rule": "pythonsecurity:S8707",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "LLMs running this code with faulty CLI arguments can escape file system restrictions. Refactor this code to validate the constructed path before accessing the file system.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/migrations.py",
+      "path": "src/memory/migrations.py",
+      "line": 102,
+      "effort": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2026-07-29T17:02:26+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_QOR0C2pXrklOfn6",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 27 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/retention.py",
+      "path": "src/memory/retention.py",
+      "line": 78,
+      "effort": "17min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T17:02:26+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_QPr0C2pXrklOfn-",
+      "rule": "python:S5655",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Change this argument; Function \"grant_consent\" expects a different type",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/user_memory.py",
+      "path": "src/memory/user_memory.py",
+      "line": 127,
+      "effort": "20min",
+      "tags": [
+        "suspicious",
+        "typing"
+      ],
+      "creationDate": "2026-07-29T17:02:26+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_QPr0C2pXrklOfoB",
+      "rule": "pythonbugs:S2583",
+      "severity": "MAJOR",
+      "type": "BUG",
+      "status": "OPEN",
+      "message": "Fix this condition that always evaluates to false.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/user_memory.py",
+      "path": "src/memory/user_memory.py",
+      "line": 145,
+      "effort": "15min",
+      "tags": [
+        "cwe",
+        "pitfall",
+        "suspicious",
+        "unused"
+      ],
+      "creationDate": "2026-07-29T17:02:26+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_QPr0C2pXrklOfn_",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Return a value of type \"UserMemoryRecord\" instead of \"DataclassInstance\" or update function \"correct\" type hint.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/user_memory.py",
+      "path": "src/memory/user_memory.py",
+      "line": 231,
+      "effort": "5min",
+      "tags": [
+        "typing"
+      ],
+      "creationDate": "2026-07-29T17:02:26+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_QPr0C2pXrklOfoA",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Return a value of type \"UserMemoryRecord\" instead of \"DataclassInstance\" or update function \"tombstone\" type hint.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/user_memory.py",
+      "path": "src/memory/user_memory.py",
+      "line": 259,
+      "effort": "5min",
+      "tags": [
+        "typing"
+      ],
+      "creationDate": "2026-07-29T17:02:26+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_QNb0C2pXrklOfn3",
+      "rule": "python:S107",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Method \"create\" has 15 parameters, which is greater than the 13 authorized.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/records.py",
+      "path": "src/memory/records.py",
+      "line": 80,
+      "effort": "20min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T17:01:53+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_QLz0C2pXrklOfnz",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"catalog/memory_registry.yaml\" 4 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/registry.py",
+      "path": "src/memory/registry.py",
+      "line": 11,
+      "effort": "8min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-07-29T17:01:53+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_QLz0C2pXrklOfn0",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 35 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/registry.py",
+      "path": "src/memory/registry.py",
+      "line": 114,
+      "effort": "25min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T17:01:53+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_QO10C2pXrklOfn7",
+      "rule": "python:S6353",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Use concise character class syntax '\\w' instead of '[A-Za-z0-9_]'.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/security.py",
+      "path": "src/memory/security.py",
+      "line": 72,
+      "effort": "5min",
+      "tags": [
+        "regex"
+      ],
+      "creationDate": "2026-07-29T17:01:53+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_QO10C2pXrklOfn8",
+      "rule": "python:S6353",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Use concise character class syntax '\\w' instead of '[A-Za-z0-9_]'.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/security.py",
+      "path": "src/memory/security.py",
+      "line": 72,
+      "effort": "5min",
+      "tags": [
+        "regex"
+      ],
+      "creationDate": "2026-07-29T17:01:53+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_QO10C2pXrklOfn9",
+      "rule": "python:S5869",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Remove duplicates in this character class.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/security.py",
+      "path": "src/memory/security.py",
+      "line": 77,
+      "effort": "5min",
+      "tags": [
+        "regex"
+      ],
+      "creationDate": "2026-07-29T17:01:53+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_QN20C2pXrklOfn4",
+      "rule": "pythonsecurity:S8707",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "LLMs running this code with faulty CLI arguments can escape file system restrictions. Refactor this code to validate the constructed path before accessing the file system.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/storage.py",
+      "path": "src/memory/storage.py",
+      "line": 156,
+      "effort": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2026-07-29T17:01:53+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-u_QN20C2pXrklOfn5",
+      "rule": "pythonsecurity:S8707",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "LLMs running this code with faulty CLI arguments can escape file system restrictions. Refactor this code to validate the constructed path before accessing the file system.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/memory/storage.py",
+      "path": "src/memory/storage.py",
+      "line": 171,
+      "effort": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2026-07-29T17:01:53+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-ufkyf-xBUb0ex8kUL",
+      "rule": "python:S6353",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Use concise character class syntax '\\w' instead of '[A-Za-z0-9_]'.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/repo/check_scripts_inventory.py",
+      "path": "scripts/engineering/repo/check_scripts_inventory.py",
+      "line": 125,
+      "effort": "5min",
+      "tags": [
+        "regex"
+      ],
+      "creationDate": "2026-07-29T15:25:11+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-ufkyf-xBUb0ex8kUK",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"__init__.py\" 4 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/repo/check_scripts_inventory.py",
+      "path": "scripts/engineering/repo/check_scripts_inventory.py",
+      "line": 275,
+      "effort": "8min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-07-29T15:25:11+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-ufkyf-xBUb0ex8kUM",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 18 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/repo/check_scripts_inventory.py",
+      "path": "scripts/engineering/repo/check_scripts_inventory.py",
+      "line": 550,
+      "effort": "8min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T15:25:11+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-ufknc-xBUb0ex8kUJ",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 24 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py",
+      "path": "scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py",
+      "line": 216,
+      "effort": "14min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T15:25:11+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-ufikZ-xBUb0ex8kUG",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Return a value of type \"CheckpointMetadata\" instead of \"DataclassInstance\" or update function \"enrich_metadata_with_execution_identity\" type hint.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/bioetl/application/core/lifecycle/checkpoint_identity_overrides.py",
+      "path": "src/bioetl/application/core/lifecycle/checkpoint_identity_overrides.py",
+      "line": 183,
+      "effort": "5min",
+      "tags": [
+        "typing"
+      ],
+      "creationDate": "2026-07-29T15:25:11+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-ufibu-xBUb0ex8kUE",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Return a value of type \"RunResult\" instead of \"DataclassInstance\" or update function \"finalize_pipeline_run_report\" type hint.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/bioetl/application/services/execution/_pipeline_runner_support.py",
+      "path": "src/bioetl/application/services/execution/_pipeline_runner_support.py",
+      "line": 186,
+      "effort": "5min",
+      "tags": [
+        "typing"
+      ],
+      "creationDate": "2026-07-29T15:25:11+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-ufiVx-xBUb0ex8kUD",
+      "rule": "python:S5655",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Change this argument; Function \"render_pipeline_run_report_markdown\" expects a different type",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/bioetl/application/services/run_reports/writer.py",
+      "path": "src/bioetl/application/services/run_reports/writer.py",
+      "line": 223,
+      "effort": "20min",
+      "tags": [
+        "suspicious",
+        "typing"
+      ],
+      "creationDate": "2026-07-29T15:25:11+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-ufir9-xBUb0ex8kUH",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Return a value of type \"_DeltaWriteRequest\" instead of \"DataclassInstance\" or update function \"_evolve_delta_schema_with_empty_append\" type hint.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/bioetl/infrastructure/storage/silver/delta_write_execution.py",
+      "path": "src/bioetl/infrastructure/storage/silver/delta_write_execution.py",
+      "line": 349,
+      "effort": "5min",
+      "tags": [
+        "typing"
+      ],
+      "creationDate": "2026-07-29T15:25:11+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-ufjRq-xBUb0ex8kUI",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Return a value of type \"Union[RunCommandInput, RunAllCommandInput]\" instead of \"DataclassInstance\" or update function \"attach_observability_backend_to_cli_input\" type hint.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/bioetl/interfaces/cli/commands/domains/health/observability_backend_runtime.py",
+      "path": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_runtime.py",
+      "line": 193,
+      "effort": "5min",
+      "tags": [
+        "typing"
+      ],
+      "creationDate": "2026-07-29T15:25:11+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tXnvmOzcA6HMcj7kp",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"body text\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/run_dux7_live_residual.py",
+      "path": "scripts/ops/observability/grafana/run_dux7_live_residual.py",
+      "line": 172,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-07-29T10:10:25+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tXnvmOzcA6HMcj7kq",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"nav link chip\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/run_dux7_live_residual.py",
+      "path": "scripts/ops/observability/grafana/run_dux7_live_residual.py",
+      "line": 179,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-07-29T10:10:25+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tXnvmOzcA6HMcj7kr",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Extract this nested conditional expression into an independent statement.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/run_dux7_live_residual.py",
+      "path": "scripts/ops/observability/grafana/run_dux7_live_residual.py",
+      "line": 456,
+      "effort": "5min",
+      "tags": [
+        "confusing"
+      ],
+      "creationDate": "2026-07-29T10:10:25+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tXnvmOzcA6HMcj7ks",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Extract this nested conditional expression into an independent statement.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/run_dux7_live_residual.py",
+      "path": "scripts/ops/observability/grafana/run_dux7_live_residual.py",
+      "line": 466,
+      "effort": "5min",
+      "tags": [
+        "confusing"
+      ],
+      "creationDate": "2026-07-29T10:10:25+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tV-NrPituCknEHJeQ",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 20 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/run_dux7_live_residual.py",
+      "path": "scripts/ops/observability/grafana/run_dux7_live_residual.py",
+      "line": 202,
+      "effort": "10min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T10:03:51+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRYtNvvakrfsdqURp",
+      "rule": "pythonsecurity:S8707",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "LLMs running this code with faulty CLI arguments can escape file system restrictions. Refactor this code to validate the constructed path before accessing the file system.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/ci/_compatibility_registry.py",
+      "path": "scripts/engineering/ci/_compatibility_registry.py",
+      "line": 144,
+      "effort": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2026-07-29T09:43:33+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRYtNvvakrfsdqURo",
+      "rule": "pythonsecurity:S8705",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "LLMs running this code with faulty CLI arguments can escape from shell sandboxes. Refactor this code to validate untrusted data before passing them to OS commands.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/engineering/ci/_compatibility_registry.py",
+      "path": "scripts/engineering/ci/_compatibility_registry.py",
+      "line": 490,
+      "effort": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2026-07-29T09:43:33+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRjYmvvakrfsdqUR9",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 35 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/apply_dux7_live_residual.py",
+      "path": "scripts/ops/observability/grafana/apply_dux7_live_residual.py",
+      "line": 32,
+      "effort": "25min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T09:42:25+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRjchvvakrfsdqUR-",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 74 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/run_dux7_live_residual.py",
+      "path": "scripts/ops/observability/grafana/run_dux7_live_residual.py",
+      "line": 296,
+      "effort": "1h4min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T09:42:25+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRYnOvvakrfsdqURT",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 34 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/apply_dux6_residual.py",
+      "path": "scripts/ops/observability/grafana/apply_dux6_residual.py",
+      "line": 142,
+      "effort": "24min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T09:36:54+0000",
+      "updateDate": "2026-08-04T05:54:11+0000"
+    },
+    {
+      "key": "AZ-tRYnOvvakrfsdqURV",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 56 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/apply_dux6_residual.py",
+      "path": "scripts/ops/observability/grafana/apply_dux6_residual.py",
+      "line": 403,
+      "effort": "46min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T09:36:54+0000",
+      "updateDate": "2026-08-04T05:54:11+0000"
+    },
+    {
+      "key": "AZ-tRYnOvvakrfsdqURW",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Extract this nested conditional expression into an independent statement.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/apply_dux6_residual.py",
+      "path": "scripts/ops/observability/grafana/apply_dux6_residual.py",
+      "line": 464,
+      "effort": "5min",
+      "tags": [
+        "confusing"
+      ],
+      "creationDate": "2026-07-29T09:36:54+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRYnOvvakrfsdqURS",
+      "rule": "python:S1066",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Merge this if statement with the enclosing one.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/apply_dux6_residual.py",
+      "path": "scripts/ops/observability/grafana/apply_dux6_residual.py",
+      "line": 495,
+      "effort": "5min",
+      "tags": [
+        "clumsy"
+      ],
+      "creationDate": "2026-07-29T09:36:54+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRYeevvakrfsdqURP",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"feat(grafana)\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/generate_dux6_issue_pack.py",
+      "path": "scripts/ops/observability/grafana/generate_dux6_issue_pack.py",
+      "line": 37,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-07-29T09:36:54+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRYeevvakrfsdqURQ",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"refactor(grafana)\" 6 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/generate_dux6_issue_pack.py",
+      "path": "scripts/ops/observability/grafana/generate_dux6_issue_pack.py",
+      "line": 38,
+      "effort": "12min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-07-29T09:36:54+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRYeevvakrfsdqURR",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"fix(grafana)\" 4 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/generate_dux6_issue_pack.py",
+      "path": "scripts/ops/observability/grafana/generate_dux6_issue_pack.py",
+      "line": 39,
+      "effort": "8min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-07-29T09:36:54+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRYogvvakrfsdqURb",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 66 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py",
+      "path": "scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py",
+      "line": 279,
+      "effort": "56min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T09:24:27+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRYogvvakrfsdqURc",
+      "rule": "python:S7504",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Remove this unnecessary `list()` call on an already iterable object.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py",
+      "path": "scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py",
+      "line": 307,
+      "effort": "5min",
+      "tags": [],
+      "creationDate": "2026-07-29T09:24:27+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRYogvvakrfsdqURd",
+      "rule": "python:S7504",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Remove this unnecessary `list()` call on an already iterable object.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py",
+      "path": "scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py",
+      "line": 310,
+      "effort": "5min",
+      "tags": [],
+      "creationDate": "2026-07-29T09:24:27+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRYo1vvakrfsdqURn",
+      "rule": "pythonsecurity:S2083",
+      "severity": "BLOCKER",
+      "type": "VULNERABILITY",
+      "status": "OPEN",
+      "message": "Change this code to not construct the path from user-controlled data.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/apply_dux5_residual.py",
+      "path": "scripts/ops/observability/grafana/apply_dux5_residual.py",
+      "line": 169,
+      "effort": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2026-07-29T09:24:27+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRYo1vvakrfsdqURi",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 34 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/apply_dux5_residual.py",
+      "path": "scripts/ops/observability/grafana/apply_dux5_residual.py",
+      "line": 211,
+      "effort": "24min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T09:24:27+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRYo1vvakrfsdqURj",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/apply_dux5_residual.py",
+      "path": "scripts/ops/observability/grafana/apply_dux5_residual.py",
+      "line": 264,
+      "effort": "7min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T09:24:27+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRYo1vvakrfsdqURk",
+      "rule": "python:S1244",
+      "severity": "MAJOR",
+      "type": "BUG",
+      "status": "OPEN",
+      "message": "Do not perform equality checks with floating point values.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/apply_dux5_residual.py",
+      "path": "scripts/ops/observability/grafana/apply_dux5_residual.py",
+      "line": 283,
+      "effort": "5min",
+      "tags": [
+        "data-science",
+        "numpy",
+        "pytorch",
+        "suspicious"
+      ],
+      "creationDate": "2026-07-29T09:24:27+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRYo1vvakrfsdqURl",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 34 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/apply_dux5_residual.py",
+      "path": "scripts/ops/observability/grafana/apply_dux5_residual.py",
+      "line": 363,
+      "effort": "24min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T09:24:27+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRYo1vvakrfsdqURe",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"First Action\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/apply_dux5_residual.py",
+      "path": "scripts/ops/observability/grafana/apply_dux5_residual.py",
+      "line": 405,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-07-29T09:24:27+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRYo1vvakrfsdqURm",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 37 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/apply_dux5_residual.py",
+      "path": "scripts/ops/observability/grafana/apply_dux5_residual.py",
+      "line": 491,
+      "effort": "27min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T09:24:27+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRYo1vvakrfsdqURg",
+      "rule": "python:S1066",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Merge this if statement with the enclosing one.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/apply_dux5_residual.py",
+      "path": "scripts/ops/observability/grafana/apply_dux5_residual.py",
+      "line": 570,
+      "effort": "5min",
+      "tags": [
+        "clumsy"
+      ],
+      "creationDate": "2026-07-29T09:24:27+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRYo1vvakrfsdqURh",
+      "rule": "python:S1066",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Merge this if statement with the enclosing one.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/apply_dux5_residual.py",
+      "path": "scripts/ops/observability/grafana/apply_dux5_residual.py",
+      "line": 579,
+      "effort": "5min",
+      "tags": [
+        "clumsy"
+      ],
+      "creationDate": "2026-07-29T09:24:27+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRYo1vvakrfsdqURf",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"dux5-copy-dictionary.md\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/apply_dux5_residual.py",
+      "path": "scripts/ops/observability/grafana/apply_dux5_residual.py",
+      "line": 626,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-07-29T09:24:27+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRYnxvvakrfsdqURY",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"feat(grafana)\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/generate_dux5_issue_pack.py",
+      "path": "scripts/ops/observability/grafana/generate_dux5_issue_pack.py",
+      "line": 66,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-07-29T09:24:27+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRYnxvvakrfsdqURZ",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"refactor(grafana)\" 6 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/generate_dux5_issue_pack.py",
+      "path": "scripts/ops/observability/grafana/generate_dux5_issue_pack.py",
+      "line": 67,
+      "effort": "12min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-07-29T09:24:27+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-tRYnxvvakrfsdqURa",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"fix(grafana)\" 4 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/generate_dux5_issue_pack.py",
+      "path": "scripts/ops/observability/grafana/generate_dux5_issue_pack.py",
+      "line": 68,
+      "effort": "8min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-07-29T09:24:27+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-sz3wRYERovXCBi3Ig",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 135 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/apply_dux4_enforcement.py",
+      "path": "scripts/ops/observability/grafana/apply_dux4_enforcement.py",
+      "line": 68,
+      "effort": "2h5min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T07:28:09+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-sz3wRYERovXCBi3If",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"*.json\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/apply_dux4_enforcement.py",
+      "path": "scripts/ops/observability/grafana/apply_dux4_enforcement.py",
+      "line": 70,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-07-29T07:28:09+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-sz3wRYERovXCBi3Ih",
+      "rule": "python:S1244",
+      "severity": "MAJOR",
+      "type": "BUG",
+      "status": "OPEN",
+      "message": "Do not perform equality checks with floating point values.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/apply_dux4_enforcement.py",
+      "path": "scripts/ops/observability/grafana/apply_dux4_enforcement.py",
+      "line": 85,
+      "effort": "5min",
+      "tags": [
+        "data-science",
+        "numpy",
+        "pytorch",
+        "suspicious"
+      ],
+      "creationDate": "2026-07-29T07:28:09+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-sz3wRYERovXCBi3Ie",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"Processed Records\" 4 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/apply_dux4_enforcement.py",
+      "path": "scripts/ops/observability/grafana/apply_dux4_enforcement.py",
+      "line": 144,
+      "effort": "8min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-07-29T07:28:09+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-sz3wRYERovXCBi3Id",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"Metrics Evidence\" 3 times.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/apply_dux4_enforcement.py",
+      "path": "scripts/ops/observability/grafana/apply_dux4_enforcement.py",
+      "line": 146,
+      "effort": "6min",
+      "tags": [
+        "design"
+      ],
+      "creationDate": "2026-07-29T07:28:09+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-sz3wRYERovXCBi3Ij",
+      "rule": "python:S1244",
+      "severity": "MAJOR",
+      "type": "BUG",
+      "status": "OPEN",
+      "message": "Do not perform equality checks with floating point values.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/apply_dux4_enforcement.py",
+      "path": "scripts/ops/observability/grafana/apply_dux4_enforcement.py",
+      "line": 299,
+      "effort": "5min",
+      "tags": [
+        "data-science",
+        "numpy",
+        "pytorch",
+        "suspicious"
+      ],
+      "creationDate": "2026-07-29T07:28:09+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-sz3wRYERovXCBi3Ik",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 137 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/ops/observability/grafana/apply_dux4_enforcement.py",
+      "path": "scripts/ops/observability/grafana/apply_dux4_enforcement.py",
+      "line": 377,
+      "effort": "2h7min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T07:28:09+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-sz4NhYERovXCBi3Im",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 22 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/schema/generation/generate_typed_arrow_schema_sources.py",
+      "path": "scripts/schema/generation/generate_typed_arrow_schema_sources.py",
+      "line": 50,
+      "effort": "12min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T07:28:09+0000",
+      "updateDate": "2026-08-07T06:48:25+0000"
+    },
+    {
+      "key": "AZ-sz4NhYERovXCBi3In",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Refactor this function to reduce its Cognitive Complexity from 26 to the 15 allowed.",
+      "component": "SatoryKono_BioactivityDataAcquisition:scripts/schema/generation/generate_typed_arrow_schema_sources.py",
+      "path": "scripts/schema/generation/generate_typed_arrow_schema_sources.py",
+      "line": 76,
+      "effort": "16min",
+      "tags": [
+        "brain-overload"
+      ],
+      "creationDate": "2026-07-29T07:28:09+0000",
+      "updateDate": "2026-08-07T06:48:25+0000"
+    },
+    {
+      "key": "AZ-d-DeKaIb61vOhX1vG",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Return a value of type \"RunnerInputs\" instead of \"DataclassInstance\" or update function \"bind_manifest_logger_context\" type hint.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/bioetl/composition/observability.py",
+      "path": "src/bioetl/composition/observability.py",
+      "line": 166,
+      "effort": "5min",
+      "tags": [
+        "typing"
+      ],
+      "creationDate": "2026-07-26T10:25:07+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-TA2RLgxxebCimHd8W",
+      "rule": "python:S5864",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Replace this expression; Previous type checks suggest that \"raw\" has type \"object\" and isn't iterable.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/bioetl/domain/run_reports/workflow_reasons.py",
+      "path": "src/bioetl/domain/run_reports/workflow_reasons.py",
+      "line": 17,
+      "effort": "5min",
+      "tags": [
+        "confusing",
+        "typing"
+      ],
+      "creationDate": "2026-07-24T07:13:25+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ-S0k5gQbV6p1GDBv-O",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Return a value of type \"RunResult\" instead of \"DataclassInstance\" or update function \"finalize_pipeline_run_report\" type hint.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/bioetl/application/services/execution/_pipeline_runner_support.py",
+      "path": "src/bioetl/application/services/execution/_pipeline_runner_support.py",
+      "line": 181,
+      "effort": "5min",
+      "tags": [
+        "typing"
+      ],
+      "creationDate": "2026-07-24T06:27:31+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ8oxH81T3NflAFuCLDA",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Return a value of type \"TransformerDependencyContext\" instead of \"DataclassInstance\" or update function \"_merge_legacy_collaborators\" type hint.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/bioetl/application/core/base_transformer/base.py",
+      "path": "src/bioetl/application/core/base_transformer/base.py",
+      "line": 40,
+      "effort": "5min",
+      "tags": [
+        "typing"
+      ],
+      "creationDate": "2026-07-03T16:12:09+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    },
+    {
+      "key": "AZ4ayZf8E9WDp8Y-wd-X",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "status": "OPEN",
+      "message": "Return a value of type \"DQRuleOutcome\" instead of \"DataclassInstance\" or update function \"_apply_invalid_record_policy\" type hint.",
+      "component": "SatoryKono_BioactivityDataAcquisition:src/bioetl/domain/behavior/dq_rule_evaluator.py",
+      "path": "src/bioetl/domain/behavior/dq_rule_evaluator.py",
+      "line": 164,
+      "effort": "5min",
+      "tags": [
+        "typing"
+      ],
+      "creationDate": "2026-05-12T05:57:49+0000",
+      "updateDate": "2026-08-03T15:55:20+0000"
+    }
+  ]
+}

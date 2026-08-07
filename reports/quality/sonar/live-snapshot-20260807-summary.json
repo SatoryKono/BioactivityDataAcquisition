@@ -1,0 +1,376 @@
+{
+  "date": "20260807",
+  "label": "snr-r2-w0-live-rebaseline",
+  "exported_at": "2026-08-07T14:59:03.514486+00:00",
+  "analysis_date": "2026-08-07T14:46:26+0000",
+  "revision": "ab0bd320e53b9b9e423150f2dd98153fe686a284",
+  "total": 206,
+  "measures": {
+    "bugs": "5",
+    "alert_status": "ERROR",
+    "reliability_rating": "3.0",
+    "code_smells": "170",
+    "security_rating": "5.0",
+    "ncloc": "899650",
+    "vulnerabilities": "31",
+    "sqale_rating": "1.0"
+  },
+  "by_type": {
+    "BUG": 5,
+    "CODE_SMELL": 170,
+    "VULNERABILITY": 31
+  },
+  "by_severity": {
+    "MAJOR": 63,
+    "CRITICAL": 119,
+    "MINOR": 17,
+    "BLOCKER": 7
+  },
+  "by_rule": [
+    [
+      "python:S3776",
+      62
+    ],
+    [
+      "python:S1192",
+      51
+    ],
+    [
+      "python:S5886",
+      13
+    ],
+    [
+      "pythonsecurity:S8707",
+      11
+    ],
+    [
+      "python:S6353",
+      9
+    ],
+    [
+      "python:S3358",
+      5
+    ],
+    [
+      "python:S1244",
+      4
+    ],
+    [
+      "pythonsecurity:S2083",
+      4
+    ],
+    [
+      "python:S5869",
+      4
+    ],
+    [
+      "githubactions:S8541",
+      4
+    ],
+    [
+      "python:S3516",
+      3
+    ],
+    [
+      "shell:S5332",
+      3
+    ],
+    [
+      "python:S5655",
+      3
+    ],
+    [
+      "githubactions:S8544",
+      3
+    ],
+    [
+      "python:S1066",
+      3
+    ],
+    [
+      "shelldre:S7682",
+      2
+    ],
+    [
+      "pythonsecurity:S8705",
+      2
+    ],
+    [
+      "githubactions:S8264",
+      2
+    ],
+    [
+      "python:S7504",
+      2
+    ],
+    [
+      "python:S8786",
+      1
+    ],
+    [
+      "docker:S6596",
+      1
+    ],
+    [
+      "pythonsecurity:S8703",
+      1
+    ],
+    [
+      "shelldre:S1192",
+      1
+    ],
+    [
+      "python:S7503",
+      1
+    ],
+    [
+      "python:S5747",
+      1
+    ],
+    [
+      "powershelldre:S3776",
+      1
+    ],
+    [
+      "shelldre:S1066",
+      1
+    ],
+    [
+      "shelldre:S7684",
+      1
+    ],
+    [
+      "python:S5754",
+      1
+    ],
+    [
+      "githubactions:S7637",
+      1
+    ],
+    [
+      "python:S3626",
+      1
+    ],
+    [
+      "python:S1871",
+      1
+    ],
+    [
+      "pythonbugs:S2583",
+      1
+    ],
+    [
+      "python:S107",
+      1
+    ],
+    [
+      "python:S5864",
+      1
+    ]
+  ],
+  "by_bucket": [
+    [
+      "scripts/ops/observability",
+      45
+    ],
+    [
+      "src/memory",
+      29
+    ],
+    [
+      "scripts/quality/coderabbit",
+      22
+    ],
+    [
+      "scripts/engineering/qa",
+      12
+    ],
+    [
+      ".github",
+      10
+    ],
+    [
+      "scripts/ai/codex",
+      9
+    ],
+    [
+      "src/bioetl/application",
+      9
+    ],
+    [
+      "scripts/ops/runtime",
+      8
+    ],
+    [
+      "scripts/docs/passports",
+      8
+    ],
+    [
+      "src/bioetl/infrastructure",
+      6
+    ],
+    [
+      "src/bioetl/domain",
+      5
+    ],
+    [
+      "scripts/engineering/apply_s1_c3c6_fixes.py",
+      5
+    ],
+    [
+      "scripts/ai/junie",
+      5
+    ],
+    [
+      "scripts/engineering/repo",
+      4
+    ],
+    [
+      "scripts/engineering/dev",
+      4
+    ],
+    [
+      "scripts/ops/coderabbit",
+      3
+    ],
+    [
+      "docker/grafana",
+      3
+    ],
+    [
+      "scripts/ai/mcp",
+      3
+    ],
+    [
+      "src/bioetl/composition",
+      2
+    ],
+    [
+      "scripts/diagrams/fix",
+      2
+    ],
+    [
+      "scripts/ai/sync",
+      2
+    ],
+    [
+      "scripts/engineering/ci",
+      2
+    ],
+    [
+      "scripts/schema/generation",
+      2
+    ],
+    [
+      "other",
+      1
+    ],
+    [
+      "scripts/engineering/apply_s1_c2_fixes.py",
+      1
+    ],
+    [
+      "scripts/diagrams/validate_mermaid_syntax.sh",
+      1
+    ],
+    [
+      "scripts/diagrams/render",
+      1
+    ],
+    [
+      "scripts/docs/matrix",
+      1
+    ],
+    [
+      "src/bioetl/interfaces",
+      1
+    ]
+  ],
+  "src_bioetl_total": 23,
+  "src_bioetl_by_rule": [
+    [
+      "python:S5886",
+      11
+    ],
+    [
+      "python:S6353",
+      2
+    ],
+    [
+      "python:S3776",
+      2
+    ],
+    [
+      "python:S5655",
+      2
+    ],
+    [
+      "python:S1244",
+      1
+    ],
+    [
+      "python:S3516",
+      1
+    ],
+    [
+      "python:S7503",
+      1
+    ],
+    [
+      "python:S5747",
+      1
+    ],
+    [
+      "pythonsecurity:S8707",
+      1
+    ],
+    [
+      "python:S5864",
+      1
+    ]
+  ],
+  "vulnerability_count": 31,
+  "bug_count": 5,
+  "vulnerability_keys": [
+    "AZ_YbeR7NNQnFHwd25PW",
+    "AZ_YbeR7NNQnFHwd25PX",
+    "AZ_WpggDY9BZ5BAOyClL",
+    "AZ_WpgR8Y9BZ5BAOyClK",
+    "AZ_VxLOQen4ZkXPEVpyt",
+    "AZ_VxLOQen4ZkXPEVpyu",
+    "AZ_VxLOQen4ZkXPEVpyv",
+    "AZ_Sx7f87s3WKsGdEFu0",
+    "AZ-4z-__kb2krUTIfyqC",
+    "AZ-4z-__kb2krUTIfyqD",
+    "AZ-4z-09kb2krUTIfyqB",
+    "AZ-4nwE2OQN6Udtp1QH0",
+    "AZ-4nwE2OQN6Udtp1QHz",
+    "AZ-4RoqPXF-Rs4_NuNzk",
+    "AZ-4RoqPXF-Rs4_NuNzl",
+    "AZ-3lhnyfP0insu10KpN",
+    "AZ-3lPTMpjm5KvNkTzrR",
+    "AZ-3lPTMpjm5KvNkTzrS",
+    "AZ-3lPTMpjm5KvNkTzrT",
+    "AZ-3lPTMpjm5KvNkTzrU",
+    "AZ-3lPTMpjm5KvNkTzrV",
+    "AZ-3lWCKfP0insu10Ko9",
+    "AZ-0WVh320ESPB3h1_98",
+    "AZ-u_O3F0C2pXrklOfnv",
+    "AZ-u_S2h0C2pXrklOfoG",
+    "AZ-u_QQL0C2pXrklOfoC",
+    "AZ-u_QN20C2pXrklOfn4",
+    "AZ-u_QN20C2pXrklOfn5",
+    "AZ-tRYtNvvakrfsdqURp",
+    "AZ-tRYtNvvakrfsdqURo",
+    "AZ-tRYo1vvakrfsdqURn"
+  ],
+  "bug_keys": [
+    "AZ_cs0UxjAqbcoKibq5F",
+    "AZ-u_QPr0C2pXrklOfoB",
+    "AZ-tRYo1vvakrfsdqURk",
+    "AZ-sz3wRYERovXCBi3Ih",
+    "AZ-sz3wRYERovXCBi3Ij"
+  ],
+  "prior_postmerge_total": 435,
+  "delta_vs_postmerge": -229
+}
