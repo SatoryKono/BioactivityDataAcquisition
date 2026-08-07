@@ -536,60 +536,15 @@ def _enricher_field_pairings(pairings_raw: object) -> tuple[EnricherFieldPairing
 def _build_cross_validation_config(
     cv_data: dict[str, object],
 ) -> CrossValidationConfig:
-    pairings_raw = cv_data.get("enricher_pairings") or ()
-    pairings: list[EnricherFieldPairing] = []
-    if isinstance(pairings_raw, list | tuple):
-        for raw in pairings_raw:
-            if not isinstance(raw, dict):
-                continue
-            fields_raw = raw.get("fields") or ()
-            fields: list[FieldComparisonSpec] = []
-            if isinstance(fields_raw, list | tuple):
-                for field in fields_raw:
-                    if not isinstance(field, dict):
-                        continue
-                    method = field.get("method", "exact")
-                    fields.append(
-                        FieldComparisonSpec(
-                            field_name=str(field.get("field_name") or ""),
-                            method=(
-                                ComparisonMethod(str(method))
-                                if not isinstance(method, ComparisonMethod)
-                                else method
-                            ),
-                            threshold=require_float(
-                                field.get("threshold"),
-                                "cross_validation.fields[].threshold",
-                                0.0,
-                            ),
-                        )
-                    )
-            pairings.append(
-                EnricherFieldPairing(
-                    enricher_pipeline=str(raw.get("enricher_pipeline") or ""),
-                    fields=tuple(fields),
-                )
-            )
     return CrossValidationConfig(
         enabled=bool(cv_data.get("enabled", True)),
-        warning_threshold=require_int(
-            cv_data.get("warning_threshold"), "cross_validation.warning_threshold", 1
+        warning_threshold=int(str(cv_data.get("warning_threshold", 1))),
+        error_threshold=int(str(cv_data.get("error_threshold", 2))),
+        quarantine_threshold=int(str(cv_data.get("quarantine_threshold", 2))),
+        fuzzy_threshold=float(str(cv_data.get("fuzzy_threshold", 0.8))),
+        numeric_tolerance=float(str(cv_data.get("numeric_tolerance", 0.10))),
+        enricher_pairings=_enricher_field_pairings(
+            cv_data.get("enricher_pairings") or ()
         ),
-        error_threshold=require_int(
-            cv_data.get("error_threshold"), "cross_validation.error_threshold", 2
-        ),
-        quarantine_threshold=require_int(
-            cv_data.get("quarantine_threshold"),
-            "cross_validation.quarantine_threshold",
-            2,
-        ),
-        fuzzy_threshold=require_float(
-            cv_data.get("fuzzy_threshold"), "cross_validation.fuzzy_threshold", 0.8
-        ),
-        numeric_tolerance=require_float(
-            cv_data.get("numeric_tolerance"),
-            "cross_validation.numeric_tolerance",
-            0.10,
-        ),
-        enricher_pairings=tuple(pairings),
     )
+
