@@ -37,7 +37,7 @@ That does **not** imply WSL task parity; WSL development stays on repository she
 | `tasks.json` | Quality/test tasks via `.venv-win` (+ doctor-guarded launcher) |
 | `mcp.json` | Optional workspace MCP inventory (prefer shared HTTP plane; not attached to Agent profiles) |
 | `USER_SETTINGS_NO_AGENT_MCP.overlay.json` | Snippet for user-level Zed settings (disable extension MCP + thrash agents) |
-| `snippets/` | Optional copy-into-user snippets (not auto-loaded) |
+| `snippets/` | Canonical bioetl-* snippets (repo SSOT; user mirror may be needed) |
 | `README.md` | This guide |
 
 Zed loads `.zed/settings.json` and `.zed/tasks.json` from the worktree root automatically.
@@ -346,3 +346,49 @@ Scan exclusions include local venvs/caches (`.venv-win`, `.venv-wsl`, `.cache`,
 - `scripts/engineering/dev/run_pytest.ps1` / `run_pytest.sh`
 - https://zed.dev/docs/tasks
 - https://zed.dev/docs/languages/python
+
+## Canonical LSP stack (project)
+
+| Language | Server | Role | CI gate |
+|----------|--------|------|---------|
+| Python | **basedpyright** | semantic/types/navigation | IDE; product gate remains **mypy** |
+| Python | **ruff** | lint + format + organize imports | pre-commit + CI |
+| YAML | default YAML language server | schema/diagnostics | — |
+| JSON/JSONC | default JSON language server | format/diagnostics | — |
+| Docker Compose | docker-compose | compose diagnostics | — |
+
+**Not active in project Python `language_servers`:** `pylsp`, legacy `ruff-lsp` (native `ruff` server), `ty`, second pyright flavor.
+
+Do not enable multiple Python semantic servers together.
+
+## Snippets (`bioetl-*`)
+
+Tracked under `.zed/snippets/`. In current Zed builds, project snippets may need to be
+mirrored into user snippet config depending on version; the tracked files remain the
+**repo source of truth** and are guarded by `test_zed_workspace_config.py`.
+
+### Required Python prefixes
+
+| Prefix | Layer |
+|--------|--------|
+| `bioetl-vo` | domain |
+| `bioetl-port` | domain |
+| `bioetl-impl` | infrastructure |
+| `bioetl-config` | domain/config |
+| `bioetl-factory` | composition |
+| `bioetl-error` | domain |
+| `bioetl-test-unit` / `bioetl-test-async` / `bioetl-test-arch` | tests |
+| `bioetl-extract` / `bioetl-transform` / `bioetl-validate` / `bioetl-export` | pipelines |
+| `bioetl-log` | application via LoggerPort |
+| `bioetl-event` | domain events |
+
+### Required YAML prefixes
+
+| Prefix | Source shape |
+|--------|----------------|
+| `bioetl-pipeline-config` | `configs/entities/*` |
+| `bioetl-dq-rule` | entity quality ranges/required_fields |
+| `bioetl-retry-policy` / `bioetl-rate-limit` | `configs/providers/*` |
+| `bioetl-composite-enricher` / `bioetl-field-priority` | ADR-026 composites |
+
+Snippets must not invent retired paths (`bioetl.pipelines`, `data/silver`, parquet sinks) or use `print()`.
