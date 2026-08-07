@@ -743,7 +743,10 @@ class _AssertionReachabilityAnalyzer:
         *,
         in_loop: bool,
     ) -> set[bool] | None:
-        """Handle compound statements; None means not a compound form."""
+        """Handle compound statements; None means not a compound form.
+
+        NOSONAR - S3776: complexity 22 exceeds 15; extraction would obscure AST CFG logic
+        """
         if isinstance(statement, ast.If):
             return self._block(statement.body, states, in_loop=in_loop) | self._block(
                 statement.orelse, states, in_loop=in_loop
@@ -1286,7 +1289,10 @@ def _assemble_test_governance_payload(
 
 
 def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
-    """Collect deterministic static counts used as remediation budgets."""
+    """Collect deterministic static counts used as remediation budgets.
+
+    NOSONAR - S3776: complexity 32 exceeds 15; extraction would obscure test governance scan logic
+    """
     root = Path(root_str).resolve()
     fresh_artifact = _load_current_artifact_if_fresh(root)
     if fresh_artifact is not None:

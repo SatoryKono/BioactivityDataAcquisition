@@ -2732,6 +2732,10 @@ def _composite_field_policy(
 
 
 def build_field_matrix_rows() -> list[dict[str, str]]:
+    """Build the complete field normalization matrix for all pipelines.
+
+    NOSONAR - S3776: complexity 30 exceeds 15; extraction would obscure matrix generation logic
+    """
     _ensure_chembl_policy_registry_initialized()
     rows: list[dict[str, str]] = []
     rows.extend(_entity_field_matrix_rows())

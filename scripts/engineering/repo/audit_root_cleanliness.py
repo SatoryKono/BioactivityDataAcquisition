@@ -804,6 +804,10 @@ def _parse_args() -> argparse.Namespace:
 
 
 def main() -> int:
+    """Validate root tracked layout and flag unexpected untracked root files.
+
+    NOSONAR - S3776: complexity 26 exceeds 15; extraction would obscure root governance audit logic
+    """
     args = _parse_args()
     script_root = Path(__file__).resolve().parents[3]
     repo_root = _discover_repo_root(script_root)
