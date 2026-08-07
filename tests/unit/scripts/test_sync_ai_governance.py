@@ -91,7 +91,7 @@ def test_normalize_codex_agents_strips_mirror_header(tmp_path: Path) -> None:
     assert "NORMATIVE_SOURCES.md" in text
 
 
-def test_normalize_codex_agents_preserves_role_memory_requirements(
+def test_normalize_codex_agents_does_not_inject_retired_role_memory(
     tmp_path: Path,
 ) -> None:
     agents = tmp_path / ".codex" / "agents"
@@ -117,9 +117,7 @@ def test_normalize_codex_agents_preserves_role_memory_requirements(
     issues = sync_ai_governance.normalize_codex_agents(tmp_path, check_only=False)
 
     assert issues == []
-    assert "docs/00-project/ai/memory/memory-py-test-swarm.md" in path.read_text(
-        encoding="utf-8"
-    )
+    assert "memory-py-test-swarm.md" not in path.read_text(encoding="utf-8")
 
 
 def test_inject_docs_agent_sources_adds_block(tmp_path: Path) -> None:
@@ -136,6 +134,25 @@ def test_inject_docs_agent_sources_adds_block(tmp_path: Path) -> None:
     issues = sync_ai_governance.inject_docs_agent_sources(tmp_path, check_only=False)
     assert issues == []
     assert "## Canonical Sources" in path.read_text(encoding="utf-8")
+
+
+def test_inject_docs_agent_sources_syncs_canonical_runtime_body(
+    tmp_path: Path,
+) -> None:
+    canonical = tmp_path / ".codex/agents/demo.md"
+    canonical.parent.mkdir(parents=True)
+    canonical.write_text("# Demo\n\ncanonical body\n", encoding="utf-8")
+    mirror = tmp_path / "docs/00-project/ai/agents/agents/demo.md"
+    mirror.parent.mkdir(parents=True)
+    mirror.write_text("stale body\n", encoding="utf-8")
+
+    issues = sync_ai_governance.inject_docs_agent_sources(tmp_path, check_only=False)
+
+    assert issues == []
+    text = mirror.read_text(encoding="utf-8")
+    assert "not a canonical runtime surface" in text
+    assert ".codex/agents/demo.md" in text
+    assert text.endswith("# Demo\n\ncanonical body\n")
 
 
 def test_normalize_codex_skills_adds_all_governance_tokens(tmp_path: Path) -> None:

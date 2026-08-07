@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import os
+import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -326,6 +327,9 @@ def test_default_local_transport_is_shared_http(
 
     assert setup_mcp.DEFAULT_LOCAL_TRANSPORT_MODE == "shared"
     assert setup_mcp.DEFAULT_LOCAL_PROFILE == "stable"
+    assert "deepwiki" not in setup_mcp.MCP_PROFILE_STABLE
+    assert "deepwiki" in setup_mcp.MCP_PROFILE_SHARED
+    assert "ref" in setup_mcp.MCP_PROFILE_STABLE
 
     exit_code = setup_mcp.main(
         [
@@ -797,6 +801,50 @@ url = "https://retired.invalid/mcp"
     assert "?apiKey=" not in rendered
     # Filesystem is routed through a host wrapper that resolves REPO_ROOT at runtime.
     assert "filesystem" in rendered
+
+
+def test_codex_only_updates_user_managed_block_without_workspace_writes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    workspace_root = tmp_path / "workspace-root"
+    output_root = tmp_path / "must-not-exist"
+    fake_home = tmp_path / "home"
+    workspace_root.mkdir()
+    codex_dir = fake_home / ".codex"
+    codex_dir.mkdir(parents=True)
+    codex_config = codex_dir / "config.toml"
+    codex_config.write_text(
+        'model = "keep-me"\n\n'
+        "[mcp_servers.deepwiki]\n"
+        'url = "https://mcp.deepwiki.com/mcp"\n',
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(setup_mcp.Path, "home", lambda: fake_home)
+
+    exit_code = setup_mcp.main(
+        [
+            "--root",
+            str(output_root),
+            "--workspace-root",
+            str(workspace_root),
+            "--codex-only",
+            "--profile",
+            "stable",
+            "--transport-mode",
+            "shared",
+            "--skip-codex-validation",
+        ]
+    )
+
+    assert exit_code == 0
+    rendered = codex_config.read_text(encoding="utf-8")
+    assert 'model = "keep-me"' in rendered
+    assert "[mcp_servers.deepwiki]" not in rendered
+    assert "[mcp_servers.ref]" in rendered
+    assert "[mcp_servers.filesystem]" in rendered
+    assert not output_root.exists()
+    assert stat.S_IMODE(codex_dir.stat().st_mode) == 0o700
+    assert stat.S_IMODE(codex_config.stat().st_mode) == 0o600
 
 
 def test_setup_mcp_check_mode_is_read_only_and_detects_drift(
