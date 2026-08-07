@@ -226,7 +226,7 @@ FINDINGS: tuple[FindingRebaseline, ...] = (
         cited_paths=(),
         classification="implemented",
         current_source_anchors=(
-            "src/bioetl/application/services/checkpoint_compatibility_service.py",
+            "src/bioetl/application/services/checkpoint/checkpoint_compatibility_service.py",
             "src/bioetl/application/services/control_plane/manifest/diagnostics/resume_contract.py",
             "src/bioetl/application/composite/checkpoint/_anchor_context.py",
         ),
