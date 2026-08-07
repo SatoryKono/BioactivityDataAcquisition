@@ -3,8 +3,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable, Sequence
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 import orjson
 
@@ -16,9 +17,23 @@ from bioetl.application.core._batch_writer_gold_support import (
 from bioetl.application.core.batch_processing_runtime import (
     OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
 )
+from bioetl.domain.ports.storage import SilverWriteRequest
 
 if TYPE_CHECKING:
-    from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
+    from bioetl.application.core.batch_writer import BatchWriteStorageProtocol
+    from bioetl.application.core.record_processor_config import RecordProcessorConfig
+    from bioetl.domain.config import TableConfig
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.models.metadata import SourceMetadata
+    from bioetl.domain.ports import GoldValidatorPort
+    from bioetl.domain.types import (
+        ArrowSchema,
+        BatchID,
+        BronzeRecord,
+        GoldRecord,
+        GoldSchemaPolicyByVersion,
+        GoldSchemaType,
+    )
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 _WRITE_SPAN_ERRORS = SHARED_OPERATION_ERRORS
@@ -28,42 +43,49 @@ class BatchWriterIOMixin:
     """Layer write orchestration extracted from BatchWriter."""
 
     # Host attributes from BatchWriter MRO (runtime-typed by concrete class).
-    _context = _storage = _config = cast(Any, None)
+    _context: PipelineContext
+    _storage: BatchWriteStorageProtocol
+    _config: RecordProcessorConfig
     _provider = _entity_type = _silver_table_name = _gold_table_name = ""
-    _silver_schema = _gold_schema = _gold_schema_policy_by_version = cast(Any, None)
-    _gold_validator = _table_config = _silver_mode = _gold_mode = cast(Any, None)
-    _validate_lock = _start_span = _end_span = cast(Any, None)
-    _collect_record_columns = _resolve_layer_columns = cast(Any, None)
-    _project_schema_for_layer = _apply_renames_to_records = cast(Any, None)
-    _get_schema_columns = cast(Any, None)
+    _silver_schema: ArrowSchema | None
+    _gold_schema: GoldSchemaType
+    _gold_schema_policy_by_version: GoldSchemaPolicyByVersion | None
+    _gold_validator: GoldValidatorPort
+    _table_config: TableConfig
+    _silver_mode: Literal["merge", "append", "delete"]
+    _gold_mode: Literal["overwrite", "append", "scd2"]
+    _validate_lock: Callable[[str], Awaitable[None]]
+    _start_span: Callable[..., object | None]
+    _end_span: Callable[..., None]
+    _collect_record_columns: Callable[[list[GoldRecord]], list[str]]
+    _resolve_layer_columns: Callable[
+        [Literal["silver", "gold"], Sequence[str]],
+        tuple[list[str] | None, dict[str, str]],
+    ]
+    _project_schema_for_layer: Callable[
+        [Literal["silver", "gold"], object, Sequence[str] | None],
+        object,
+    ]
+    _apply_renames_to_records: Callable[
+        [list[GoldRecord], dict[str, str]], list[GoldRecord]
+    ]
+    _get_schema_columns: Callable[[object], set[str] | None]
 
     def _resolve_gold_ingestion_ts(self) -> datetime:
         """Return the deterministic timestamp anchor for Gold write side effects."""
-        replay_timestamp_anchor = getattr(
-            self._context, "replay_timestamp_anchor", None
-        )
+        replay_timestamp_anchor = self._context.replay_timestamp_anchor
         if replay_timestamp_anchor is not None:
-            return cast(datetime, replay_timestamp_anchor)
-        return cast(datetime, self._context.started_at)
+            return replay_timestamp_anchor
+        return self._context.started_at
 
     async def write_bronze(
         self,
         records: list[BronzeRecord],
         batch_id: BatchID,
         ingestion_ts: datetime,
-        source_metadata: object | None = None,
+        source_metadata: SourceMetadata | None = None,
     ) -> BronzeWriteResult:
-        """Write deterministic JSONL batch to Bronze.
-
-        Args:
-            records: Raw Bronze records to be serialized and written.
-            batch_id: Unique identifier for this batch, used for deterministic naming.
-            ingestion_ts: Timestamp marking when the batch was ingested.
-            source_metadata: Optional provider-specific metadata to attach to the batch.
-
-        Returns:
-            BronzeWriteResult with path and record count for the written batch.
-        """
+        """Write deterministic, key-sorted JSONL records to Bronze."""
         await self._validate_lock("write_bronze")
         span = self._start_span("write_bronze", "bronze", len(records), batch_id)
         try:
@@ -101,17 +123,7 @@ class BatchWriterIOMixin:
         ingestion_ts: datetime,
         bronze_refs: list[BronzeWriteResult] | None = None,
     ) -> SilverWriteResult | None:
-        """Write transformed records to Silver with metadata enrichment.
-
-        Args:
-            records: Transformed records ready for Silver layer storage.
-            batch_id: Batch identifier forwarded as explicit write provenance.
-            ingestion_ts: Ingestion timestamp forwarded to storage/audit metadata.
-            bronze_refs: Optional Bronze write results used for lineage linking.
-
-        Returns:
-            SilverWriteResult with Delta table version and row counts, or None if skipped.
-        """
+        """Write transformed records and explicit provenance to Silver."""
         await self._validate_lock("write_silver")
         span = self._start_span("write_silver", "silver", len(records), batch_id)
 
@@ -131,11 +143,11 @@ class BatchWriterIOMixin:
             if rename_map:
                 records = self._apply_renames_to_records(records, rename_map)
 
-            silver_result = await self._storage.write_silver(
+            request = SilverWriteRequest(
                 table_name=self._silver_table_name,
                 records=records,
                 primary_keys=list(self._table_config.primary_keys),
-                schema=silver_schema,
+                schema=cast("ArrowSchema", silver_schema),
                 mode=self._silver_mode,
                 partition_cols=list(self._table_config.partition_cols),
                 on_schema_mismatch=self._table_config.on_schema_mismatch,
@@ -151,6 +163,7 @@ class BatchWriterIOMixin:
                 source_batch_id=batch_id,
                 ingestion_ts=ingestion_ts,
             )
+            silver_result = await self._storage.write_silver(request)
             self._end_span(span)
             persisted_silver_result: SilverWriteResult | None = silver_result
             return persisted_silver_result
@@ -166,12 +179,7 @@ class BatchWriterIOMixin:
         records: list[GoldRecord],
         silver_refs: list[SilverWriteResult] | None = None,
     ) -> None:
-        """Write validated records to Gold.
-
-        Args:
-            records: Validated Gold-layer records projected to schema columns.
-            silver_refs: Optional Silver write results used for lineage linking.
-        """
+        """Validate and write schema-projected records to Gold."""
         await self._validate_lock("write_gold")
         span = self._start_span("write_gold", "gold", len(records))
 
@@ -236,12 +244,3 @@ class BatchWriterIOMixin:
     ) -> tuple[list[GoldRecord], list[str]]:
         """Project records to schema and compute available columns."""
         return prepare_gold_records(self, records, schema=schema)
-
-    def _validate_gold_records(
-        self,
-        records: list[GoldRecord],
-        *,
-        schema: object | None = None,
-    ) -> None:
-        """Validate Gold records against schema contract."""
-        validate_gold_records(self, records, schema=schema)

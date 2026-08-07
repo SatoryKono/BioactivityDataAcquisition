@@ -545,7 +545,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1556",
+      "line": "1574",
       "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_gold_merged_empty_records_returns"
@@ -1292,13 +1292,11 @@
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
-    "marked_test_files": 53,
+    "marked_test_files": 52,
     "marker": "pytest.mark.repo_backed",
     "subtree": "tests/unit/repo_backed/",
-    "test_files": 54,
-    "unmarked_test_files": [
-      "tests/unit/repo_backed/scripts/ops/docker/test_verify_report_bind.py"
-    ]
+    "test_files": 52,
+    "unmarked_test_files": []
   },
   "report": {
     "assertion_branch_reachability": {
@@ -1847,7 +1845,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1556",
+        "line": "1574",
         "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_gold_merged_empty_records_returns"
@@ -2284,13 +2282,11 @@
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
-      "marked_test_files": 53,
+      "marked_test_files": 52,
       "marker": "pytest.mark.repo_backed",
       "subtree": "tests/unit/repo_backed/",
-      "test_files": 54,
-      "unmarked_test_files": [
-        "tests/unit/repo_backed/scripts/ops/docker/test_verify_report_bind.py"
-      ]
+      "test_files": 52,
+      "unmarked_test_files": []
     },
     "root": ".",
     "test_file_inventory": {
@@ -2299,7 +2295,7 @@
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
       "test_glob_file_count": 2223,
-      "test_python_file_count": 2456,
+      "test_python_file_count": 2457,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2340,12 +2336,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2223,
-    "total_test_functions": 23606,
+    "total_test_functions": 23607,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "be21e7ef60aa3c326342a02e3c8520e8cf2537ee067b29638c2d0116b7508456",
+  "source_tree_sha256": "4ee7ab4f247703cc36ce0b01825354a6ad52c3b87531e254d20a93db07c12b0b",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 105,
@@ -2366,7 +2362,7 @@
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
     "test_glob_file_count": 2223,
-    "test_python_file_count": 2456,
+    "test_python_file_count": 2457,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2407,7 +2403,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2223,
-  "total_test_functions": 23606,
+  "total_test_functions": 23607,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

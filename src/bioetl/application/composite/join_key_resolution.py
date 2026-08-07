@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING
+
+import polars as pl
 
 from bioetl.application.composite.helpers.resolver_helper import ResolverHelper
 from bioetl.application.composite.join_key_resolution_helpers import (
@@ -12,10 +13,6 @@ from bioetl.application.composite.join_key_resolution_helpers import (
     resolve_join_key_names,
     resolve_join_key_names_asymmetric,
 )
-
-if TYPE_CHECKING:
-    import polars as pl
-
 
 __all__ = ["JoinKeyResolverService"]
 

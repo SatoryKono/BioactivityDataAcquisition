@@ -1,5 +1,4 @@
 # Host attrs/methods provided by concrete composition (PD2 W1).
-# Boundary object/payload typing residual at this module.
 """Support helpers for CompositePipelineRunner."""
 
 from __future__ import annotations

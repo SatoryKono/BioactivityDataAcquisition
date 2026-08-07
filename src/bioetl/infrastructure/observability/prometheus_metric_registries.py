@@ -202,8 +202,6 @@ HTTP_ADAPTER_REGISTRY = MetricRegistryFamily(
         "bioetl_provider_health_status": _metrics.PROVIDER_HEALTH_STATUS,
         "bioetl_adapter_fallback_hit_rate": _metrics.ADAPTER_FALLBACK_HIT_RATE,
         "bioetl_rate_limiter_tokens_available": _metrics.RATE_LIMITER_TOKENS_AVAILABLE,
-        # Compatibility gauge retained for legacy p95 import/emission paths (#8013).
-        "bioetl_adapter_request_p95_seconds": _metrics.ADAPTER_REQUEST_P95_SECONDS,
     },
     histograms={
         "bioetl_adapter_request_duration_seconds": _metrics.ADAPTER_REQUEST_DURATION_SECONDS,

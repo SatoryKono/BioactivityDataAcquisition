@@ -26,7 +26,6 @@
 
 | Skill                                 | Назначение                                                                                                                             |
 | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `agent-orchestration`                 | Карта координации multi-agent workflow                                                                                                 |
 | `hierarchical-evidence-orchestration` | Иерархическая evidence-wave orchestration: shard collection через `collecting-evidence` + shard synthesis через `synthesizing-pillars` |
 | `py-review-orchestrator`              | Иерархическая кампания code review                                                                                                     |
 | `py-test-swarm`                       | Иерархический test swarm (L1/L2/L3)                                                                                                    |

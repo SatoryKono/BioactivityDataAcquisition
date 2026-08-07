@@ -13,7 +13,7 @@ this directory; documentation mirrors are non-authoritative.
 ## Entry points
 
 - Root contract and precedence: `AGENTS.md`
-- Codex runtime map: `CODEX-RUNTIME.md`
+- Codex runtime map: `.codex/agents/CODEX-RUNTIME.md`
 - Risk routing and workflow: `ORCHESTRATION.md`
 - Native discovery metadata: `py-*.toml`
 - Role behavior: `py-*.md`
@@ -36,6 +36,11 @@ literal count in downstream docs or memory.
 
 V1/V2 work may route directly through the root agent. V3/V4 work follows the
 orchestration and post-change gates. Roles never broaden user authorization.
+
+Required workflow references:
+
+- Memory policy: `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 
 ## Editing contract
 

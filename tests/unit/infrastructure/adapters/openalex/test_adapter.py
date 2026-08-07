@@ -42,7 +42,9 @@ from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
 from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
-from bioetl.infrastructure.adapters.openalex.client import _create_openalex_adapter
+from bioetl.infrastructure.adapters.openalex._client_support import (
+    _create_openalex_adapter,
+)
 from bioetl.infrastructure.adapters.openalex.client_runtime_helpers import (
     OpenAlexRuntimeServicesRequest,
     build_openalex_runtime_services_from_request,

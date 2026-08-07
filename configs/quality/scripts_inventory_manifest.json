@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-07T17:13:45.420458+00:00",
+  "generated_at": "2026-08-07T20:11:58.649519+00:00",
   "summary": {
-    "total_scripts": 574,
+    "total_scripts": 573,
     "status_counts": {
       "active": 339,
-      "supporting": 231,
+      "supporting": 230,
       "temporary_diagnostic": 4
     },
     "reference_group_coverage": {
@@ -16,7 +16,7 @@
       "other": 88,
       "scripts": 465,
       "skills": 10,
-      "tests": 357
+      "tests": 355
     }
   },
   "scripts": [
@@ -247,7 +247,7 @@
       "references": [
         {
           "path": ".codex/agents/CODEX-RUNTIME.md",
-          "line": 50,
+          "line": 55,
           "source_group": "agents",
           "text": "`python3 scripts/ai/codex/doctor.py static --no-write`."
         },
@@ -471,13 +471,13 @@
         },
         {
           "path": "scripts/ai/codex/helper/setup-env.sh",
-          "line": 109,
+          "line": 111,
           "source_group": "scripts",
           "text": "# shellcheck source=codex-auth-lib.sh"
         },
         {
           "path": "scripts/ai/codex/helper/setup-env.sh",
-          "line": 110,
+          "line": 112,
           "source_group": "scripts",
           "text": "source \"${SCRIPT_DIR}/codex-auth-lib.sh\""
         }
@@ -635,19 +635,19 @@
         },
         {
           "path": "scripts/ai/codex/run-codex.sh",
-          "line": 230,
+          "line": 232,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-codex-impl.sh\" \"$@\""
         },
         {
           "path": "scripts/ai/codex/run-codex.sh",
-          "line": 238,
+          "line": 240,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-codex-impl.sh\" exec --full-auto \"$@\""
         },
         {
           "path": "scripts/ai/codex/run-codex.sh",
-          "line": 263,
+          "line": 265,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-codex-impl.sh\" \"$COMMAND\" \"$@\""
         },
@@ -3228,7 +3228,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 670,
+          "line": 665,
           "source_group": "tests",
           "text": "powershell_wrapper = (ROOT / \"scripts/ai/mcp/mcp_docker_wrapper.ps1\").read_text("
         }
@@ -4082,7 +4082,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 650,
+          "line": 645,
           "source_group": "tests",
           "text": "smoke = ROOT / \"scripts/ai/mcp/protocol_smoke.py\""
         },
@@ -4119,7 +4119,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 660,
+          "line": 655,
           "source_group": "tests",
           "text": "powershell = (ROOT / \"scripts/ai/mcp/support/docker_cli_resolver.ps1\").read_text("
         }
@@ -5128,7 +5128,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 77,
+      "reference_count": 75,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -5516,18 +5516,6 @@
       ]
     },
     {
-      "path": "scripts/diagrams/cli/__main__.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-12-31",
-      "next_step": "Optional package entry for diagrams CLI; canonical router remains python -m scripts.diagrams (#8041/#CI-C1-006)."
-    },
-    {
       "path": "scripts/diagrams/core/diagram_paths.py",
       "type": "py",
       "status": "supporting",
@@ -5771,9 +5759,9 @@
         },
         {
           "path": "tests/architecture/test_fix_mermaid_operators.py",
-          "line": 28,
+          "line": 29,
           "source_group": "tests",
-          "text": "module_path = repo_root / \"scripts\" / \"diagrams\" / \"fix_mermaid_operators.py\""
+          "text": "repo_root / \"scripts\" / \"diagrams\" / \"fix\" / \"fix_mermaid_operators.py\""
         }
       ]
     },
@@ -6041,9 +6029,9 @@
         },
         {
           "path": "tests/architecture/test_diagram_quality_budget_security.py",
-          "line": 29,
+          "line": 33,
           "source_group": "tests",
-          "text": "repo_root / \"scripts\" / \"diagrams\" / \"enforce_diagram_quality_budget.py\""
+          "text": "/ \"enforce_diagram_quality_budget.py\""
         }
       ]
     },
@@ -7849,19 +7837,19 @@
         },
         {
           "path": "docs/filters/inventory-baseline.csv",
-          "line": 169,
+          "line": 167,
           "source_group": "docs",
           "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/docs/matrix/generate_pipeline_normalization_matrix.py,5,1694,Source-profile extraction policy,extraction_"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
-          "line": 2193,
+          "line": 2171,
           "source_group": "docs",
           "text": "\"path\": \"scripts/docs/matrix/generate_pipeline_normalization_matrix.py\","
         },
         {
           "path": "docs/filters/inventory-baseline.md",
-          "line": 126,
+          "line": 124,
           "source_group": "docs",
           "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | 5 | 1694 | Source-profile extraction policy |"
         }
@@ -11913,19 +11901,19 @@
       "references": [
         {
           "path": "docs/filters/inventory-baseline.csv",
-          "line": 170,
+          "line": 168,
           "source_group": "docs",
           "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/engineering/qa/config_surface_governance.py,2,8,Source-profile extraction policy,extraction_params are pr"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
-          "line": 2204,
+          "line": 2182,
           "source_group": "docs",
           "text": "\"path\": \"scripts/engineering/qa/config_surface_governance.py\","
         },
         {
           "path": "docs/filters/inventory-baseline.md",
-          "line": 127,
+          "line": 125,
           "source_group": "docs",
           "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/engineering/qa/config_surface_governance.py` | 2 | 8 | Source-profile extraction policy |"
         },
@@ -13434,7 +13422,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -13447,12 +13435,6 @@
           "line": 182,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_dashboard_panel_audit_matrix\""
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/engineering/qa/test_report_dashboard_panel_audit_matrix.py",
-          "line": 8,
-          "source_group": "tests",
-          "text": "from scripts.engineering.qa import report_dashboard_panel_audit_matrix as subject"
         }
       ]
     },
@@ -14091,7 +14073,7 @@
         },
         {
           "path": "tests/architecture/test_observability_metric_governance.py",
-          "line": 272,
+          "line": 299,
           "source_group": "tests",
           "text": "== \"scripts/engineering/qa/report_observability_metric_inventory.py\""
         }
@@ -18538,7 +18520,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 12,
       "references": [
         {
           "path": "docs/05-operations/runbooks/docker-compose-project-migration.md",
@@ -18611,7 +18593,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 872,
+          "line": 867,
           "source_group": "tests",
           "text": "probe = (ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\").read_text("
         },
@@ -18921,7 +18903,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/03-guides/dashboards/dux4-field-override-inventory.json",
@@ -19439,7 +19421,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 421,
+          "line": 416,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1\","
         }
@@ -19500,7 +19482,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 420,
+          "line": 415,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/runtime/neo4j/neo4j_quick_start.sh\","
         }
@@ -20740,13 +20722,13 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 645,
+          "line": 640,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 809,
+          "line": 804,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -20777,7 +20759,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 645,
+          "line": 640,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },
@@ -20808,13 +20790,13 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 645,
+          "line": 640,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 809,
+          "line": 804,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -20845,7 +20827,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 645,
+          "line": 640,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },

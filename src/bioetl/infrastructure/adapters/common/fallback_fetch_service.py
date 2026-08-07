@@ -1,8 +1,4 @@
-"""Reusable fallback-fetch orchestration service for adapters.
-
-Keeps the shared skeleton (split IDs + three-phase policy execution) in one place
-while provider adapters pass only narrow hooks via protocols.
-"""
+"""Reusable fallback-fetch orchestration service for provider adapters."""
 
 from __future__ import annotations
 

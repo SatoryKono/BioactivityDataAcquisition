@@ -43,10 +43,10 @@ def normalize_silver_filter_compatibility_mode(
     if mode is None:
         return DEFAULT_SILVER_FILTER_COMPATIBILITY_MODE
     normalized = mode.strip()
-    if normalized == "structural_only_compat":
-        return "structural_only_compat"
-    if normalized == "structural_only_auto_promote":
-        return "structural_only_auto_promote"
+    if normalized == CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE:
+        return CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE
+    if normalized == LEGACY_SILVER_FILTER_COMPATIBILITY_MODE:
+        return LEGACY_SILVER_FILTER_COMPATIBILITY_MODE
     raise ValueError(
         "Unsupported silver_filter_compatibility_mode "
         f"{mode!r}; expected one of {sorted(SILVER_FILTER_COMPATIBILITY_MODES)!r}"

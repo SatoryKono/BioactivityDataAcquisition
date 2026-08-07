@@ -9,7 +9,7 @@
   "generated_by": "scripts.engineering.qa.report_domain_ports_inventory",
   "ports": [
     {
-      "line": 60,
+      "line": 69,
       "name": "AdrServicePort",
       "path": "src/bioetl/domain/ports/adr.py",
       "runtime_checkable": true
@@ -141,13 +141,13 @@
       "runtime_checkable": true
     },
     {
-      "line": 58,
+      "line": 78,
       "name": "ExportCatalogPort",
       "path": "src/bioetl/domain/ports/export.py",
       "runtime_checkable": true
     },
     {
-      "line": 82,
+      "line": 102,
       "name": "ExportWriterPort",
       "path": "src/bioetl/domain/ports/export.py",
       "runtime_checkable": true
@@ -159,19 +159,19 @@
       "runtime_checkable": true
     },
     {
-      "line": 114,
+      "line": 125,
       "name": "HealthCheckPort",
       "path": "src/bioetl/domain/ports/health_check.py",
       "runtime_checkable": true
     },
     {
-      "line": 161,
+      "line": 172,
       "name": "HealthStatePort",
       "path": "src/bioetl/domain/ports/health_check.py",
       "runtime_checkable": true
     },
     {
-      "line": 179,
+      "line": 190,
       "name": "HealthMonitorPort",
       "path": "src/bioetl/domain/ports/health_check.py",
       "runtime_checkable": true
@@ -249,7 +249,7 @@
       "runtime_checkable": true
     },
     {
-      "line": 9,
+      "line": 44,
       "name": "TracingPort",
       "path": "src/bioetl/domain/ports/observability/tracing.py",
       "runtime_checkable": true
@@ -507,13 +507,13 @@
       "runtime_checkable": true
     },
     {
-      "line": 243,
+      "line": 270,
       "name": "ForeignKeyReconciliationPort",
       "path": "src/bioetl/domain/ports/workflow_foreign_key_reconciliation.py",
       "runtime_checkable": true
     },
     {
-      "line": 215,
+      "line": 218,
       "name": "RowReconciliationPort",
       "path": "src/bioetl/domain/ports/workflow_row_reconciliation.py",
       "runtime_checkable": true
@@ -525,7 +525,7 @@
     "port_module_files": 66,
     "port_protocol_classes": 85,
     "runtime_checkable_coverage_pct": 100.0,
-    "runtime_checkable_decorator_count": 89,
+    "runtime_checkable_decorator_count": 91,
     "runtime_checkable_port_count": 85,
     "scanned_python_files": 75
   }

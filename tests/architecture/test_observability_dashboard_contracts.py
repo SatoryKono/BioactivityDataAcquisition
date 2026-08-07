@@ -176,7 +176,7 @@ def test_dq_quarantine_count_is_shipped_in_range_evidence_lane() -> None:
         (
             item
             for item in dashboard.get("panels", [])
-            if item.get("title") == "Range & Debug Evidence"
+            if item.get("title") == "Selected Range · Impact & Freshness"
         ),
         None,
     )

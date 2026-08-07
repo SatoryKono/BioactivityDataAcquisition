@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING
 from urllib.parse import parse_qs, urlsplit
 
 from bioetl.application.runtime_clock import current_utc_time
@@ -33,34 +33,18 @@ _PROMETHEUS_TEXT_CONTENT_TYPE = "text/plain; version=0.0.4; charset=utf-8"
 class HealthServerRoutingMixin:
     """Mixin for health endpoint routing and payload generation."""
 
-    _health_monitor: HealthMonitorPort | None = cast(
-        Any, None
-    )  # Any: host attr default (PD3)
-    _quarantine_service: QuarantineService | None = cast(
-        Any, None
-    )  # Any: host attr default (PD3)
-    _checkpoint_port: CheckpointPort | None = cast(
-        Any, None
-    )  # Any: host attr default (PD3)
-    _run_manifest_port: RunManifestPort | None = cast(
-        Any, None
-    )  # Any: host attr default (PD3)
-    _run_ledger_port: RunLedgerPort | None = cast(
-        Any, None
-    )  # Any: host attr default (PD3)
-    _workflow_manifest_port: WorkflowManifestPort | None = cast(
-        Any, None
-    )  # Any: host attr default (PD3)
-    _metrics_exposition: HealthMetricsExpositionPort = cast(
-        Any, None
-    )  # Any: host attr default (PD3)
-    _clock: ClockPort | None = cast(Any, None)  # Any: host attr default (PD3)
-    _data_root: str | None = cast(Any, None)  # Any: host attr default (PD3)
-    _runtime_source_id: str | None = cast(Any, None)  # Any: host attr default (PD3)
-    _prometheus_base_url: str = cast(Any, None)  # Any: host attr default (PD3)
-    _forensic_endpoint_limiter: asyncio.Semaphore = cast(
-        Any, None
-    )  # Any: host attr default (PD3)
+    _health_monitor: HealthMonitorPort | None = None
+    _quarantine_service: QuarantineService | None = None
+    _checkpoint_port: CheckpointPort | None = None
+    _run_manifest_port: RunManifestPort | None = None
+    _run_ledger_port: RunLedgerPort | None = None
+    _workflow_manifest_port: WorkflowManifestPort | None = None
+    _metrics_exposition: HealthMetricsExpositionPort
+    _clock: ClockPort | None = None
+    _data_root: str | None = None
+    _runtime_source_id: str | None = None
+    _prometheus_base_url: str
+    _forensic_endpoint_limiter: asyncio.Semaphore
 
     if TYPE_CHECKING:
         # Supplied by sibling mixins in the concrete HealthServer MRO.
@@ -334,21 +318,7 @@ class HealthServerRoutingMixin:
         )
 
     def _handle_metrics(self) -> str:
-        """Return Prometheus exposition for scrape liveness and process metrics.
-
-        Topology contract (AUD-OBS-20260727 / #6731):
-
-        - Scrape job ``bioetl`` targeting this health server is a **process
-          liveness** signal (``up{job="bioetl"}``).
-        - **Batch terminal counters** are published best-effort to Pushgateway
-          with grouping labels ``pipeline`` + ``run_type`` only after CLI runs
-          (``publish_metrics_safely``). Do not treat health scrape alone as
-          proof that pipeline runs populated data-plane series.
-        - When this process has registered Prometheus collectors, exposition
-          includes those series. Otherwise a minimal liveness metric is still
-          returned so scrapes are non-empty and not a comment-only stub.
-        - Never expose run_id, hashes, paths, URLs, or raw messages as labels.
-        """
+        """Return the low-cardinality Prometheus process exposition."""
         return self._metrics_exposition.build_exposition()
 
 

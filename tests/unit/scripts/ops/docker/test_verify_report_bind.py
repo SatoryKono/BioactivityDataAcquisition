@@ -4,12 +4,12 @@
 
 from __future__ import annotations
 
-import importlib.util
 import json
 from pathlib import Path
-from types import ModuleType
 
 import pytest
+
+from scripts.ops.runtime.docker import verify_report_bind as mod
 
 pytestmark = pytest.mark.unit
 
@@ -19,28 +19,9 @@ from bioetl.application.services.run_reports.paths import (
 )
 
 
-def _load_module() -> ModuleType:
-    # Path(__file__) = tests/unit/repo_backed/scripts/ops/docker/test_*.py
-    # parents[6] = repository root
-    path = (
-        Path(__file__).resolve().parents[6]
-        / "scripts"
-        / "ops"
-        / "runtime"
-        / "docker"
-        / "verify_report_bind.py"
-    )
-    spec = importlib.util.spec_from_file_location("verify_report_bind", path)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
 def test_host_report_root_ignores_container_bioetl_report_root(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    mod = _load_module()
     monkeypatch.setenv("BIOETL_REPORT_ROOT", "/app/reports/run-reports")
     monkeypatch.delenv("BIOETL_DASHBOARD_REPORT_ROOT", raising=False)
     root = mod._host_report_root(tmp_path)
@@ -96,7 +77,6 @@ def test_compose_host_bind_path_uses_drive_letter_forward_slashes(
 def test_verify_host_marker_ok_without_ops(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    mod = _load_module()
     reports = tmp_path / "reports"
     run_reports = reports / "run-reports"
     run_reports.mkdir(parents=True)
@@ -120,7 +100,6 @@ def test_verify_host_marker_ok_without_ops(
 def test_verify_fails_when_marker_missing(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    mod = _load_module()
     reports = tmp_path / "reports"
     run_reports = reports / "run-reports"
     run_reports.mkdir(parents=True)
@@ -141,7 +120,6 @@ def test_verify_fails_when_marker_missing(
 def test_verify_detects_bind_mismatch(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    mod = _load_module()
     reports = tmp_path / "reports"
     run_reports = reports / "run-reports"
     run_reports.mkdir(parents=True)

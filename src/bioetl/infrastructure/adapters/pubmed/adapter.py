@@ -8,7 +8,7 @@ Canonical provider adapter surface:
 
 from __future__ import annotations
 
-__all__ = ["ENTREZ_API_BASE", "PubMedAdapter", "create_pubmed_adapter"]
+__all__ = ["ENTREZ_API_BASE", "PubMedAdapter"]
 
 from dataclasses import KW_ONLY, dataclass, field
 from typing import TYPE_CHECKING, Any
@@ -174,10 +174,3 @@ class PubMedAdapter(  # pyright: ignore[reportUnsafeMultipleInheritance]
     async def aclose(self) -> None:
         """Close adapter resources."""
         await self._close_http_client_context()
-
-
-from bioetl.infrastructure.adapters.pubmed._adapter_support import (  # noqa: E402
-    _create_pubmed_adapter,
-)
-
-create_pubmed_adapter = _create_pubmed_adapter

@@ -11,6 +11,7 @@ from typing import cast
 from bioetl.composition.factories.datasource.adapter_helpers import (
     AdapterHelpersFactory,
 )
+from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
 from bioetl.infrastructure.adapters.common import SyncAdapterDependencyContext
 from bioetl.infrastructure.adapters.common.api_request_collector import (
@@ -26,6 +27,14 @@ from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
 from bioetl.infrastructure.config.source_config_loader import load_source_config
 
 __all__ = ["PubChemRuntimeDependencies", "create_pubchem_adapter"]
+
+PUBCHEM_ASSEMBLY_ERRORS = (
+    BioETLError,
+    OSError,
+    RuntimeError,
+    TypeError,
+    ValueError,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -203,7 +212,7 @@ def create_pubchem_adapter(
             entity_mapper=runtime_dependencies.entity_mapper,
             fetch_strategies=runtime_dependencies.fetch_strategies,
         )
-    except Exception:
+    except PUBCHEM_ASSEMBLY_ERRORS:
         # Composition owns the pool until the adapter is successfully constructed.
         thread_pool.shutdown(wait=False, cancel_futures=True)
         raise

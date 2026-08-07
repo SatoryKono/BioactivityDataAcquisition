@@ -50,6 +50,7 @@ from bioetl.domain.config import TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import BioETLError, SchemaViolationError
+from bioetl.domain.ports.storage import SilverWriteRequest
 from bioetl.domain.types import (
     GoldSchemaPolicyByVersion,
     GoldSchemaVersionPolicy,
@@ -266,12 +267,13 @@ class TestBatchWriterIOMixinSilver:
 
         await batch_writer.write_silver(records, batch_id, mock_context.started_at)
 
-        kwargs = mock_storage.write_silver.call_args[1]
-        assert kwargs["run_id"] == mock_context.run_id
-        assert kwargs["run_type"] == mock_context.run_type
-        assert kwargs["source_batch_id"] == batch_id
-        assert kwargs["ingestion_ts"] == mock_context.started_at
-        assert "_source_batch_id" not in kwargs["records"][0]
+        request = mock_storage.write_silver.call_args.args[0]
+        assert isinstance(request, SilverWriteRequest)
+        assert request.run_id == mock_context.run_id
+        assert request.run_type == mock_context.run_type
+        assert request.source_batch_id == batch_id
+        assert request.ingestion_ts == mock_context.started_at
+        assert "_source_batch_id" not in request.records[0]
 
     async def test_write_silver_passes_table_name(
         self, mock_storage, mock_context, mock_gold_validator
@@ -300,8 +302,9 @@ class TestBatchWriterIOMixinSilver:
             mock_context.started_at,
         )
 
-        kwargs = mock_storage.write_silver.call_args[1]
-        assert kwargs["table_name"] == "custom_silver"
+        request = mock_storage.write_silver.call_args.args[0]
+        assert isinstance(request, SilverWriteRequest)
+        assert request.table_name == "custom_silver"
 
     async def test_write_silver_passes_primary_keys(
         self, mock_storage, mock_context, mock_gold_validator
@@ -320,8 +323,9 @@ class TestBatchWriterIOMixinSilver:
             mock_context.started_at,
         )
 
-        kwargs = mock_storage.write_silver.call_args[1]
-        assert set(kwargs["primary_keys"]) == {"entity_id", "version"}
+        request = mock_storage.write_silver.call_args.args[0]
+        assert isinstance(request, SilverWriteRequest)
+        assert set(request.primary_keys) == {"entity_id", "version"}
 
     async def test_write_silver_applies_renames_from_layer_config(
         self, mock_storage, mock_context, mock_gold_validator
@@ -360,8 +364,9 @@ class TestBatchWriterIOMixinSilver:
             mock_context.started_at,
         )
 
-        kwargs = mock_storage.write_silver.call_args[1]
-        record = kwargs["records"][0]
+        request = mock_storage.write_silver.call_args.args[0]
+        assert isinstance(request, SilverWriteRequest)
+        record = request.records[0]
         assert "new_name" in record
         assert "old_name" not in record
 

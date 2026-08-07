@@ -222,16 +222,3 @@ class UniProtAdapter(
                 error=str(error),
             )
             raise
-
-
-# Registry factory re-export (tests import from this module).
-from bioetl.infrastructure.adapters.uniprot._client_support import (  # noqa: E402
-    _create_uniprot_adapter,
-)
-
-__all__ = [
-    "UNIPROT_BATCH_SIZE",
-    "UNIPROT_FETCH_ERRORS",
-    "UniProtAdapter",
-    "_create_uniprot_adapter",
-]

@@ -420,28 +420,26 @@ vcr_policy:
     - python -m scripts.engineering.qa.vcr check-secrets
     - python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90
     - python -m scripts.engineering.qa report-vcr-metadata --check
-
-  # Corpus size / GC policy (#8337) — advisory budget, no automatic deletion.
   corpus_size_budget:
     schema_version: 1
-    linked_issue: "#8337"
+    linked_issue: '#8337'
     canonical_root: tests/fixtures/vcr
-    soft_max_total_bytes: 150000000  # 150 MiB soft ceiling; current main ~122 MiB
+    soft_max_total_bytes: 150000000
     soft_max_file_count: 500
     gc_policy:
       default_action: retain
-      owner: "@bioetl-platform"
+      owner: '@bioetl-platform'
       orphan_detection_command: python -m scripts.engineering.qa report-vcr-corpus-budget
       placement_command: python -m scripts.engineering.qa.vcr check-placement
       catalog_command: python -m scripts.engineering.qa report-vcr-metadata --check
       deletion_requires:
-        - metadata_owner_signoff
-        - targeted_replay_or_contract_test_proof
-        - no_active_provider_reference
+      - metadata_owner_signoff
+      - targeted_replay_or_contract_test_proof
+      - no_active_provider_reference
       forbidden_basis:
-        - filename_age_only
-        - unreferenced_by_text_search_only
-        - local_disk_pressure_only
+      - filename_age_only
+      - unreferenced_by_text_search_only
+      - local_disk_pressure_only
 governance_rules:
   refresh_triggers:
   - missing cassette for an already-supported integration or e2e path

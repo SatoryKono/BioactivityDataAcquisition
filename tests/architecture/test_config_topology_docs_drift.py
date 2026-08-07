@@ -51,7 +51,6 @@ OBSOLETE_PATTERNS = (
 )
 
 RUNTIME_FACT_TARGET_FILES = (
-    Path(".codex/skills/agent-orchestration/SKILL.md"),
     Path(".codex/skills/py-audit-bot/SKILL.md"),
     Path(".codex/skills/py-config-bot/SKILL.md"),
     Path(".codex/skills/py-doc-bot/SKILL.md"),

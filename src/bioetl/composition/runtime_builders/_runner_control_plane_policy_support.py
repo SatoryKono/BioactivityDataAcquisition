@@ -23,10 +23,6 @@ if TYPE_CHECKING:
 _PERSISTENCE_PROFILE_ACTIVE_LAYERS = ("bronze", "silver", "gold")
 
 
-def _normalize_required_persistence_profile(required_profile: object) -> str:
-    return normalize_required_persistence_profile(required_profile)
-
-
 def _resolve_sink_layer_config(yaml_config: object, layer: str) -> object | None:
     sink = getattr(yaml_config, "sink", None)
     if sink is None:
@@ -97,7 +93,7 @@ def validate_required_persistence_profile(
     missing_artifact_lineage_layers: tuple[str, ...] = (),
 ) -> None:
     """Fail closed when static control-plane flags cannot satisfy required profile."""
-    profile = _normalize_required_persistence_profile(required_profile)
+    profile = normalize_required_persistence_profile(required_profile)
     if profile in STRICT_PERSISTENCE_PROFILES and not manifest_enabled:
         raise RuntimeError(
             f"{execution_label} requires run manifests for required persistence "

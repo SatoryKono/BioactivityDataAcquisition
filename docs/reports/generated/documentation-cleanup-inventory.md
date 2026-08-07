@@ -7,18 +7,18 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2576 |
-| Tracked doc-like files | 2576 |
+| Doc-like files | 2950 |
+| Tracked doc-like files | 2950 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 2 |
-| Generated without route or exception | 0 |
+| Generated without route or exception | 3 |
 | Generated routes | 69 |
 
 ## Tracking State
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 2576 |
+| tracked | 2950 |
 
 ## Lifecycle Counts
 
@@ -26,8 +26,8 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_draft | 265 |
-| active_quality_baseline | 47 |
-| closeout_evidence | 86 |
+| active_quality_baseline | 54 |
+| closeout_evidence | 87 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 2 |
 | docs_reports_generated_or_route_owned | 7 |
@@ -37,11 +37,11 @@
 | generated_test_run_evidence | 4 |
 | guide | 4 |
 | index | 4 |
-| issue_pack | 49 |
+| issue_pack | 50 |
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 20 |
-| working_report | 253 |
+| working_report | 264 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -50,37 +50,37 @@
 | active_draft | 265 |
 | guide | 4 |
 | index | 4 |
-| issue_pack | 49 |
+| issue_pack | 50 |
 | live_issue_mirror | 4 |
 
 ## Status Counts
 
 | Status | Count |
 | --- | --- |
-| Active | 792 |
+| Active | 1143 |
 | Archived | 155 |
 | Canonical | 73 |
-| Generated | 859 |
-| Working | 697 |
+| Generated | 862 |
+| Working | 717 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 792 |
+| active | 1143 |
 | archive | 155 |
 | canonical | 73 |
-| generated | 859 |
-| working | 697 |
+| generated | 862 |
+| working | 717 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-github-state-check | 314 |
-| archive-after-migration | 246 |
-| generate-automatically | 859 |
-| keep | 1153 |
+| archive-after-github-state-check | 315 |
+| archive-after-migration | 257 |
+| generate-automatically | 862 |
+| keep | 1512 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -133,6 +133,8 @@
 | `reports/quality/branch-coverage-gap-report.json` | Working | 0 | archive-after-migration |
 | `reports/quality/branch-coverage-gap-report.md` | Working | 0 | archive-after-migration |
 | `reports/quality/branch-coverage-gate-evidence.json` | Working | 0 | archive-after-migration |
+| `reports/quality/branch-coverage-tail-owner-map.json` | Working | 0 | archive-after-migration |
+| `reports/quality/branch-coverage-tail-owner-map.md` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260805/00-preflight.md` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260805/01-scope-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260806-full/00-preflight.md` | Working | 0 | archive-after-migration |
@@ -165,8 +167,6 @@
 | `reports/quality/coderabbit/20260806-full/_domain_behavior_open.json` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260806-full/_live_errors.json` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260806-full/_live_errors_src.json` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_run_plan.json` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/findings/S01-domain-composite.findings.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 

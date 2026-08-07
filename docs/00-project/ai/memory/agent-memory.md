@@ -71,6 +71,8 @@ or current dependency versions.
 ## Durable invariants to verify at source
 
 - Respect layer boundaries and constructor injection.
+- Direct `interfaces -> infrastructure` imports are forbidden; interfaces route
+  through Application services or public Composition entrypoints.
 - Preserve deterministic writes and current config/schema contracts.
 - Keep the default BioETL runtime local-only; optional infrastructure remains
   opt-in.

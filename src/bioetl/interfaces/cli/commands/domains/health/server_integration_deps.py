@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-import os
 import re
 import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.composition.runtime_builders.config_access import load_settings
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
 )
@@ -25,7 +25,8 @@ _RUNTIME_SOURCE_ID_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 
 def _runtime_source_id_from_environment() -> str | None:
     """Return a managed opaque source identity without exposing host paths."""
-    value = os.getenv("BIOETL_RUNTIME_SOURCE_ID", "").strip().lower()
+    configured = load_settings().runtime_source_id
+    value = configured.strip().lower() if configured is not None else ""
     return value if _RUNTIME_SOURCE_ID_PATTERN.fullmatch(value) else None
 
 

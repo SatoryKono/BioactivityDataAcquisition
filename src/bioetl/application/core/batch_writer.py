@@ -25,15 +25,13 @@ if TYPE_CHECKING:
     from bioetl.application.services.export_lineage.debug_export_service import (
         DebugExportService,
     )
-    from bioetl.domain.config import KeyNullabilityRule
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.ports import GoldValidatorPort, TracingPort
+    from bioetl.domain.ports.storage import SilverWriteRequest
     from bioetl.domain.types import (
-        ArrowSchema,
         BatchID,
-        BronzeRecord,
         GoldRecord,
         RunID,
         RunType,
@@ -63,16 +61,7 @@ class BatchWriteStorageProtocol(Protocol):
 
     async def write_silver(
         self,
-        table_name: str,
-        records: list[BronzeRecord],
-        primary_keys: list[str],
-        schema: ArrowSchema,
-        mode: Literal["merge", "append", "delete"] = "merge",
-        partition_cols: list[str] | None = None,
-        on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
-        column_order: list[str] | None = None,
-        bronze_refs: list[BronzeWriteResult] | None = None,
-        key_nullability_rules: list[KeyNullabilityRule] | None = None,
+        request: SilverWriteRequest,
     ) -> SilverWriteResult | None:
         """Persist transformed records into Silver storage."""
         ...
@@ -89,7 +78,7 @@ class BatchWriteStorageProtocol(Protocol):
         column_order: list[str] | None = None,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
-        silver_refs: list[object] | None = None,
+        silver_refs: list[SilverWriteResult] | None = None,
     ) -> None:
         """Persist validated records into Gold storage."""
         ...

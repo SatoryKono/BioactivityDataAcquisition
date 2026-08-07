@@ -3,12 +3,8 @@
 from __future__ import annotations
 
 from importlib import import_module
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from bioetl.domain.ports.observability import (
-        HealthMetricsExpositionPort as HealthMetricsExpositionPort,
-    )
+from bioetl.domain.ports._facade_support import build_export_modules
 
 _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
     "bioetl.domain.ports.adr": (
@@ -89,6 +85,8 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "MetricsPublisherPort",
         "MetricsServerPort",
         "MetricsServerRuntimeStatus",
+        "SpanHandle",
+        "TracerHandle",
         "TracingPort",
         "resolve_metric_labels",
     ),
@@ -187,24 +185,7 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
 }
 
 
-def _build_export_modules(
-    export_groups: dict[str, tuple[str, ...]],
-) -> dict[str, str]:
-    """Map export names to modules with fail-fast collision detection."""
-    export_modules: dict[str, str] = {}
-    for module_name, export_names in export_groups.items():
-        for export_name in export_names:
-            existing = export_modules.get(export_name)
-            if existing is not None and existing != module_name:
-                raise RuntimeError(
-                    f"duplicate ports export {export_name!r}: "
-                    f"{existing!r} and {module_name!r}"
-                )
-            export_modules[export_name] = module_name
-    return export_modules
-
-
-_EXPORT_MODULES = _build_export_modules(_EXPORT_GROUPS)
+_EXPORT_MODULES = build_export_modules(_EXPORT_GROUPS)
 
 __all__ = [*_EXPORT_MODULES]
 

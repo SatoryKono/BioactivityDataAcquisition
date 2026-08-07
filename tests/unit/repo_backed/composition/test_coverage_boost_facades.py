@@ -32,7 +32,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import importlib.util
 import sys
-from pathlib import Path, PureWindowsPath
+from pathlib import Path
 from types import ModuleType, SimpleNamespace
 from unittest import mock
 
@@ -653,8 +653,6 @@ def test_run_manifest_data_root_helpers_cover_explicit_and_fallback_modes(
         ),
     )
     assert data_roots._private_fallback_data_root_with_mode()[1] == "tmp"
-    assert data_roots._artifact_path_string(PureWindowsPath(r"a\b")) == "a/b"
-
     monkeypatch.setattr(
         data_roots.Path,
         "mkdir",
@@ -727,7 +725,7 @@ def test_run_manifest_data_root_helpers_cover_resolve_and_private_fallbacks(
 ) -> None:
     original_private_fallback = data_roots._private_fallback_data_root
     original_prepare_private_runtime_dir = data_roots._prepare_private_runtime_dir
-    assert data_roots._resolve_data_root(SimpleNamespace(data_dir="/explicit")) == Path(
+    assert data_roots.resolve_data_root(SimpleNamespace(data_dir="/explicit")) == Path(
         "/explicit"
     )
 
@@ -741,7 +739,7 @@ def test_run_manifest_data_root_helpers_cover_resolve_and_private_fallbacks(
     monkeypatch.setattr(
         data_roots, "_private_fallback_data_root", lambda: Path("/tmp/private")
     )
-    assert data_roots._resolve_data_root(SimpleNamespace(data_dir=None)) == Path(
+    assert data_roots.resolve_data_root(SimpleNamespace(data_dir=None)) == Path(
         "/tmp/private"
     )
 
@@ -749,7 +747,7 @@ def test_run_manifest_data_root_helpers_cover_resolve_and_private_fallbacks(
         data_roots.Path, "mkdir", lambda self, parents=True, exist_ok=True: None
     )
     monkeypatch.setattr(data_roots.os, "access", lambda path, mode: False)
-    assert data_roots._resolve_data_root(SimpleNamespace(data_dir=None)) == Path(
+    assert data_roots.resolve_data_root(SimpleNamespace(data_dir=None)) == Path(
         "/tmp/private"
     )
 
