@@ -8,6 +8,7 @@ See ADR-026 for architectural decisions.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from enum import StrEnum
 
@@ -122,6 +123,55 @@ def _coerce_text_tuple(value: object, name: str) -> tuple[str, ...]:
     return normalized
 
 
+_FILTER_FIELD_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def _validate_aggregation_filter_condition(condition: str) -> None:
+    """Fail closed on empty or unsupported aggregation filter expressions.
+
+    Supported grammar (aligned with application aggregator parser):
+    - ``field IS NULL`` / ``field IS NOT NULL``
+    - ``field == value`` / ``field != value`` (value may be quoted)
+    """
+    text = condition.strip()
+    if not text:
+        raise ValueError("aggregation filter_condition cannot be empty")
+    upper = text.upper()
+    if " IS NOT NULL" in upper:
+        field = text[: upper.find(" IS NOT NULL")].strip()
+        if not _FILTER_FIELD_RE.fullmatch(field):
+            raise ValueError(
+                f"aggregation filter_condition has invalid field name: {field!r}"
+            )
+        return
+    if " IS NULL" in upper:
+        field = text[: upper.find(" IS NULL")].strip()
+        if not _FILTER_FIELD_RE.fullmatch(field):
+            raise ValueError(
+                f"aggregation filter_condition has invalid field name: {field!r}"
+            )
+        return
+    for operator in (" == ", " != "):
+        if operator in text:
+            left, right = text.split(operator, 1)
+            field = left.strip()
+            value = right.strip()
+            if not _FILTER_FIELD_RE.fullmatch(field):
+                raise ValueError(
+                    f"aggregation filter_condition has invalid field name: {field!r}"
+                )
+            if not value:
+                raise ValueError(
+                    "aggregation filter_condition comparison requires a value"
+                )
+            return
+    raise ValueError(
+        "aggregation filter_condition uses unsupported syntax; "
+        "expected IS NULL / IS NOT NULL / == / != forms, "
+        f"got {condition!r}"
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class AggregationFieldSpec:
     """Specification for a single aggregated field.
@@ -155,6 +205,8 @@ class AggregationFieldSpec:
     def _validate(self) -> None:
         """Validate field specification."""
         _require_non_empty(self.source_field, "aggregation source_field")
+        if self.filter_condition is not None:
+            _validate_aggregation_filter_condition(self.filter_condition)
 
     @property
     def effective_output_field(self) -> str:

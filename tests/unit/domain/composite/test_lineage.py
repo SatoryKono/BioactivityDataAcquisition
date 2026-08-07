@@ -334,7 +334,13 @@ class TestCompositeLineageMetadataToDict:
         result = metadata.to_dict()
 
         assert result["_source_providers"] == ["chembl", "crossref"]
-        assert result["_enrichment_status"] == {"crossref": "success"}
+        assert result["_enrichment_status"] == {
+            "crossref": {
+                "status": "success",
+                "timestamp": None,
+                "error_message": None,
+            }
+        }
         assert "crossref" in result["_enrichment_timestamps"]
         assert result["_field_sources"] == {"doi": "crossref"}
         assert result["_seed_record_id"] == "chembl-doc-123"

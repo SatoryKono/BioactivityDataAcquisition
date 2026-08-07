@@ -168,10 +168,11 @@ class CompositePipelineState(StrEnum):
             ) from None
 
     def to_metric_value(self) -> int:
-        """Convert state to numeric value (0-9) for Prometheus metrics.
+        """Convert state to numeric value (0-11) for Prometheus metrics.
 
         Returns:
-            Integer in range 0-9 representing the current pipeline state.
+            Integer in range 0-11 representing the current pipeline state,
+            including terminal COMPLETED (10) and FAILED (11).
         """
         return _STATE_METRIC_VALUES[self]
 

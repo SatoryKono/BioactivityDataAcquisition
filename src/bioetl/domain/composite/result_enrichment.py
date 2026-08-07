@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
@@ -36,6 +37,24 @@ class EnrichmentResult:
 
     def __post_init__(self) -> None:
         """Validate result invariants."""
+        for name, value in (
+            ("records_input", self.records_input),
+            ("records_enriched", self.records_enriched),
+            ("records_not_found", self.records_not_found),
+            ("records_errored", self.records_errored),
+        ):
+            if value < 0:
+                raise ValueError(f"{name} must be >= 0, got {value}")
+        if self.records_enriched > self.records_input:
+            raise ValueError(
+                "records_enriched cannot exceed records_input: "
+                f"{self.records_enriched} > {self.records_input}"
+            )
+        if self.records_not_found > self.records_input:
+            raise ValueError(
+                "records_not_found cannot exceed records_input: "
+                f"{self.records_not_found} > {self.records_input}"
+            )
         if not 0.0 <= self.dq_error_rate <= 1.0:
             raise ValueError(f"dq_error_rate must be 0.0-1.0, got {self.dq_error_rate}")
         if self.duration_seconds < 0.0:
@@ -177,14 +196,19 @@ class EnrichmentResult:
         Returns:
             The EnrichmentResult result.
         """
+        if not math.isfinite(timeout_seconds) or timeout_seconds < 0.0:
+            raise ValueError(
+                f"timeout_seconds must be finite and >= 0, got {timeout_seconds}"
+            )
+        resolved_duration = (
+            timeout_seconds if duration_seconds is None else duration_seconds
+        )
         return cls(
             enricher_name=enricher_name,
             status=EnrichmentStatus.TIMEOUT,
             records_input=records_input,
             error_message=f"Timeout after {timeout_seconds}s",
-            duration_seconds=timeout_seconds
-            if duration_seconds is None
-            else duration_seconds,
+            duration_seconds=resolved_duration,
             started_at=started_at,
             completed_at=completed_at,
         )

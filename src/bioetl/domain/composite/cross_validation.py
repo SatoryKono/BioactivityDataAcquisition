@@ -60,17 +60,25 @@ class FieldComparisonSpec:
     threshold: float = 0.0
 
     def __post_init__(self) -> None:
-        """Validate specification."""
+        """Apply method defaults and validate specification."""
         if not self.field_name:
             raise ValueError("field_name cannot be empty")
+        if isinstance(self.method, str):
+            object.__setattr__(self, "method", ComparisonMethod(self.method))
+        # Deterministic defaults when callers leave threshold at zero.
+        if self.method == ComparisonMethod.FUZZY and self.threshold == 0.0:
+            object.__setattr__(self, "threshold", 0.8)
+        elif (
+            self.method == ComparisonMethod.NUMERIC_TOLERANCE and self.threshold == 0.0
+        ):
+            object.__setattr__(self, "threshold", 0.10)
         needs_threshold = self.method in (
             ComparisonMethod.FUZZY,
             ComparisonMethod.NUMERIC_TOLERANCE,
         )
-        if needs_threshold and self.threshold <= 0:
+        if needs_threshold and not 0.0 < self.threshold <= 1.0:
             raise ValueError(
-                f"{self.method} comparison requires positive threshold, "
-                f"got {self.threshold}"
+                f"{self.method} threshold must be in (0.0, 1.0], got {self.threshold}"
             )
 
 

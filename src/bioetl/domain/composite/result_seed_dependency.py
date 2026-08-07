@@ -168,7 +168,8 @@ class DependencyResult:
             completed_at: UTC timestamp when execution completed. Defaults to None.
 
         Returns:
-            DependencyResult with TIMEOUT status and duration set to timeout_seconds.
+            DependencyResult with TIMEOUT status. ``duration_seconds`` uses the
+            supplied value when provided; otherwise defaults to ``timeout_seconds``.
         """
         return cls(
             pipeline_name=pipeline_name,
