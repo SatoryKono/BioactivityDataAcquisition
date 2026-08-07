@@ -204,7 +204,7 @@ def deduplicate_case_insensitive(strings: list[str]) -> list[str]:
     """
     seen: dict[str, str] = {}
     for s in strings:
-        key = s.lower()
+        key = s.casefold()
         if key not in seen:
             seen[key] = s
     return list(seen.values())

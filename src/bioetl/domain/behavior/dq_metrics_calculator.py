@@ -107,8 +107,13 @@ class DQMetricsCalculator:
     def _extract_incoming_fields(
         records: list[JsonDict],  # Any: DQ check values vary by check type
     ) -> set[str]:
-        """Extract incoming field names from first record."""
-        return set(records[0].keys())
+        """Extract incoming field names from the full batch union."""
+        if not records:
+            return set()
+        fields: set[str] = set()
+        for record in records:
+            fields.update(record.keys())
+        return fields
 
     @staticmethod
     def _compute_schema_delta(

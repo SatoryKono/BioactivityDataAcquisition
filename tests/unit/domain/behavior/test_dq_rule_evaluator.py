@@ -516,7 +516,7 @@ class TestEvaluateDQRulesForRecord:
             ),
             (
                 "cross.all_present",
-                DQDisposition.WARN,
+                DQDisposition.FAIL,
                 ("field1", "field2"),
                 "contracts/chembl.activity/dq_rules.yaml",
             ),

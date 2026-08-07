@@ -118,14 +118,21 @@ def _apply_disposition_policy(
     issues: list[ValidationIssue],
     policy: CrossValidationDispositionPolicy,
 ) -> list[ValidationIssue]:
+    """Apply disposition policy while preserving original issue order.
+
+    Non-blocker issues pass through unchanged; blockers are rewritten in place.
+    """
     if not issues:
         return issues
 
-    blocker_issues = _collect_blocker_issues(issues)
-    if not blocker_issues:
-        return issues
-
-    return [_apply_policy_to_issue(issue, policy) for issue in blocker_issues]
+    return [
+        (
+            _apply_policy_to_issue(issue, policy)
+            if issue.severity == ValidationSeverity.BLOCKER
+            else issue
+        )
+        for issue in issues
+    ]
 
 
 def _collect_blocker_issues(issues: list[ValidationIssue]) -> list[ValidationIssue]:

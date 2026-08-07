@@ -80,15 +80,16 @@ def _convert_to_cross_validation_config(config: JsonDict) -> CrossValidationConf
 
 
 def _is_valid_field_priorities(priorities: JsonDict) -> bool:
-    seen_priorities: dict[str, object] = {}
+    """Reject missing priorities and duplicate priority ranks across fields."""
+    seen_by_priority: dict[object, str] = {}
     for field, priority_config in priorities.items():
         priority = _extract_priority(priority_config)
         if priority is None:
             return False
-        previous = seen_priorities.get(field)
-        if previous is not None and previous != priority:
+        owner = seen_by_priority.get(priority)
+        if owner is not None and owner != field:
             return False
-        seen_priorities[field] = priority
+        seen_by_priority[priority] = field
     return True
 
 

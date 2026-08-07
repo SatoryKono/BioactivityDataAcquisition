@@ -39,11 +39,15 @@ def generate_html_report(data: JsonDict) -> str:
     Returns:
         Complete HTML document string for the DQ report.
     """
+    summary_raw = data.get("summary")
+    summary = summary_raw if isinstance(summary_raw, dict) else {}
+    checks_raw = data.get("checks")
+    checks = checks_raw if isinstance(checks_raw, dict) else {}
+    thresholds_raw = data.get("thresholds")
+    thresholds = thresholds_raw if isinstance(thresholds_raw, dict) else {}
     layer = str(data.get("layer", "unknown")).upper()
-    status = str(data.get("summary", {}).get("overall_status", "unknown"))
-    checks_html = render_checks_html(data.get("checks", {}))
-    summary = data.get("summary", {})
-    thresholds = data.get("thresholds", {})
+    status = str(summary.get("overall_status", "unknown"))
+    checks_html = render_checks_html(checks)
     thresholds_html = render_thresholds_html(thresholds) if thresholds else ""
     header_html = _render_report_header(layer=layer, status=status, data=data)
     summary_html = _render_summary_card(summary)
