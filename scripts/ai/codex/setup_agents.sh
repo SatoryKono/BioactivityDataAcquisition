@@ -45,12 +45,6 @@ for arg in "$@"; do
     esac
 done
 
-mapfile -t agent_files < <(find "$SOURCE_DIR" -maxdepth 1 -type f -name 'py-*.toml' | sort)
-if [[ "${#agent_files[@]}" -ne 9 ]]; then
-    echo "Expected 9 native agent descriptors, found ${#agent_files[@]}" >&2
-    exit 1
-fi
-
 python3 - "$REPO_ROOT" <<'PY'
 import sys
 from pathlib import Path
@@ -65,6 +59,7 @@ for finding in findings:
 raise SystemExit(bool(findings))
 PY
 
+mapfile -t agent_files < <(find "$SOURCE_DIR" -maxdepth 1 -type f -name 'py-*.toml' | sort)
 echo "[OK] ${#agent_files[@]} repository-native Codex agent descriptors are valid"
 
 if [[ "$INSTALL_PERSONAL" -eq 0 ]]; then

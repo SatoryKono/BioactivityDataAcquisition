@@ -2,15 +2,10 @@
 
 ## Canonical Sources
 
-Read before planning or editing:
+- Runtime contract and precedence: `AGENTS.md`
+- Normative source index: `docs/00-project/NORMATIVE_SOURCES.md`
 
-- `docs/00-project/NORMATIVE_SOURCES.md`
-- `docs/00-project/RULES.md`
-- `docs/01-requirements/REQUIREMENTS.md`
-- `docs/02-architecture/decisions/`
-- `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
-- `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
-- `AGENTS.md`
+Load only the role- and risk-relevant sources selected by those contracts.
 
 ## Purpose
 
@@ -46,11 +41,11 @@ identity to repository, commit, branch, worktree, task, and source references.
 ## Native Project Discovery
 
 - `.codex/config.toml` contains portable trusted-project settings only.
-- `.codex/agents/py-*.toml` exposes the nine governed profiles to native Codex
+- `.codex/agents/py-*.toml` exposes the six governed profiles to native Codex
   custom-agent discovery. Each thin descriptor routes to its matching Markdown
   profile, skill, and memory sheet; the parent model is inherited.
 - `.codex/skills/**` is the sole project-local skill discovery and behavioral
-  source; no duplicate `.agents/skills` adapters are maintained.
+  source.
 - Validate these surfaces with
   `python3 scripts/ai/codex/doctor.py static --no-write`.
 
@@ -62,10 +57,11 @@ Use the smallest existing skill that matches the request:
 | --- | --- | --- | --- |
 | Diagnose without fixing | read-only | `py-debug-bot` | reproduction and evidence only |
 | Implement a focused fix | write in requested scope | direct implementation; `py-config-bot` when configs change | targeted lint/tests |
-| Review the current diff | read-only | `py-review-orchestrator` or `code-review` | diff inspection; no external writes |
-| Investigate and fix CI | write only after root cause | GitHub CI workflow / `py-debug-bot` | failed checks plus targeted regression |
-| Prepare a PR | branch/commit/push authorized by request | `create-pr` | repository quality gates for touched scope |
-| Audit architecture debt | read-only | `py-architecture-debt-bot` | architecture/debt gates; budgets MUST NOT increase |
+| Review the current diff | read-only | `py-audit-bot` (`review`) | diff inspection; no external writes |
+| Diagnose CI failure | read-only | `py-debug-bot` | reproduction, root cause, remediation guidance |
+| Implement diagnosed CI remediation | write in requested scope | direct parent implementation | failed check plus targeted regression |
+| Prepare a PR | branch/commit/push authorized by request | direct parent workflow | repository quality gates for touched scope |
+| Audit architecture debt | read-only | `py-audit-bot` (`debt`) | architecture/debt gates; budgets MUST NOT increase |
 
 Templates do not broaden user authority. Diagnosis and review stay read-only
 unless the user also asks for implementation. Load the selected skill and
@@ -94,7 +90,6 @@ raising a budget or exemption limit.
 - `.codex/config.toml`
 - `.codex/agents/py-*.toml`
 - `.codex/skills/`
-- `.agents/skills/`
 
 ## Env File Guardrail
 

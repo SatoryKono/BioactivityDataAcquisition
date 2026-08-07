@@ -3,6 +3,7 @@
 # Usage: ./run-codex.sh [command] [prompt]
 
 set -euo pipefail
+umask 077
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HELPER_DIR="${SCRIPT_DIR}/helper"
@@ -10,13 +11,13 @@ REPO_ROOT="${REPO_ROOT:-$(timeout 5 git rev-parse --show-toplevel 2>/dev/null ||
 USER_NPM_BIN="${HOME}/.npm-global/bin"
 LINUX_NPM_BIN="${HOME}/.cache/bioetl-codex/npm-global/bin"
 
-# Prefer Linux-native and user-scoped npm globals over stale system installs.
+# Prefer the managed Linux-native install over user-scoped and stale system installs.
 # /usr/local/bin/codex is often root-owned and lagging behind @latest.
-if [[ -d "${LINUX_NPM_BIN}" ]]; then
-    export PATH="${LINUX_NPM_BIN}:${PATH}"
-fi
 if [[ -d "${USER_NPM_BIN}" ]]; then
     export PATH="${USER_NPM_BIN}:${PATH}"
+fi
+if [[ -d "${LINUX_NPM_BIN}" ]]; then
+    export PATH="${LINUX_NPM_BIN}:${PATH}"
 fi
 
 # Colors
@@ -95,6 +96,7 @@ Commands:
   mcp-static     Check Codex MCP configuration without live services
   mcp-setup      Force-refresh Codex MCP configuration
   baseline       Measure bounded launcher and MCP overhead
+  local-audit    Audit local permissions, rules, retention, state, and PATH
   diagnose       Run canonical WSL/Codex diagnostics
   help           Show this help
 
@@ -133,6 +135,10 @@ case "$COMMAND" in
         ;;
     baseline)
         python3 "${SCRIPT_DIR}/efficiency_baseline.py" "${@:2}"
+        exit $?
+        ;;
+    local-audit)
+        python3 "${SCRIPT_DIR}/local_state_audit.py" audit "${@:2}"
         exit $?
         ;;
     diagnose)

@@ -12,7 +12,7 @@
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
       "review_by": "2026-11-30",
-      "next_step": "Retain as the static validation and adapter-rendering library behind doctor.py and sync_native_skills.py; do not expose it as another standalone setup surface."
+      "next_step": "Retain as the static validation library behind doctor.py and the optional setup validators; keep .codex as the only project-scoped discovery surface."
     },
     "scripts/ai/codex/setup_agents.sh": {
       "owner": "@bioetl-platform",
@@ -24,7 +24,13 @@
       "owner": "@bioetl-platform",
       "decision": "compatibility_wrapper",
       "review_by": "2026-11-30",
-      "next_step": "Retain as an optional validator/personal installer during native skill-discovery migration; trusted project sessions discover generated .agents/skills adapters directly."
+      "next_step": "Retain as an optional canonical validator/personal installer; trusted project sessions discover .codex/skills directly."
+    },
+    "scripts/ai/codex/sync_native_skills.py": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-11-30",
+      "next_step": "Retain only as a deprecated read-only canonical skill validator for direct legacy invocations; it must never generate discovery adapters and may be removed after callers use setup_skills.sh --check."
     },
     "scripts/ai/junie/check_junie_mirror.py": {
       "owner": "@bioetl-platform",

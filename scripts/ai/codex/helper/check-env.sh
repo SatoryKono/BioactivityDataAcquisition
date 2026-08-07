@@ -111,8 +111,8 @@ esac
 # 5. Check Codex binary
 log_info "Checking Codex CLI..."
 CODEX_BIN=""
-if [[ -x "${ENSURE_SCRIPT}" ]]; then
-    CODEX_BIN="$(timeout 10 "${ENSURE_SCRIPT}" --no-install --print-bin 2>/dev/null || true)"
+if [[ -f "${ENSURE_SCRIPT}" ]]; then
+    CODEX_BIN="$(timeout 10 bash "${ENSURE_SCRIPT}" --no-install --print-bin 2>/dev/null || true)"
 fi
 if [[ -x "${CODEX_BIN}" ]]; then
     CODEX_VER=$("${CODEX_BIN}" --version 2>/dev/null || echo "unknown")
@@ -124,8 +124,8 @@ fi
 
 # 6. Check MCP configuration
 log_info "Checking MCP configuration..."
-if [[ -x "${ENSURE_MCP_SCRIPT}" ]]; then
-    if timeout 30 bash -c "CODEX_BIN='${CODEX_BIN}' '${ENSURE_MCP_SCRIPT}' --check --codex-bin '${CODEX_BIN}'" >/dev/null 2>&1; then
+if [[ -f "${ENSURE_MCP_SCRIPT}" ]]; then
+    if timeout 30 bash "${ENSURE_MCP_SCRIPT}" --check --codex-bin "${CODEX_BIN}" >/dev/null 2>&1; then
         log_success "MCP configuration is ready"
     else
         log_warn "MCP configuration is missing or stale"

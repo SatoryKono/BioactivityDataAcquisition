@@ -2,6 +2,7 @@
 # Canonical Codex launcher that skips MCP synchronization.
 
 set -euo pipefail
+umask 077
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 

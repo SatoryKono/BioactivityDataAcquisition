@@ -10,10 +10,10 @@ WSL/Bash launcher.
 без копирования файлов в пользовательский home:
 
 - `.codex/config.toml` — portable project policy;
-- `.codex/agents/py-*.toml` — девять native custom-agent descriptors;
+- `.codex/agents/py-*.toml` — шесть native custom-agent descriptors;
 - `.codex/agents/py-*.md` — подробные behavioral profiles;
-- `.codex/skills/**` — canonical skill behavior;
-- `.agents/skills/**` — generated native discovery adapters.
+- `.codex/skills/**` — единственная project-local skill discovery и canonical
+  behavior surface.
 
 Статическая проверка не требует login, сети, Docker или live MCP:
 
@@ -58,13 +58,58 @@ bash scripts/ai/codex/run-codex.sh setup
 
 # MCP: static configuration versus bounded live readiness
 bash scripts/ai/codex/run-codex.sh mcp-static
-bash scripts/ai/codex/run-codex.sh mcp-check --profile stable
+bash scripts/ai/codex/run-codex.sh mcp-check --profile stable \
+  --timeout 1 --overall-timeout 10 --no-write
 bash scripts/ai/codex/run-codex.sh mcp-setup
 
 # Diagnostics and performance evidence
 bash scripts/ai/codex/run-codex.sh diagnose
 bash scripts/ai/codex/run-codex.sh baseline --runs 3 \
   --output reports/quality/codex-efficiency-baseline.json
+bash scripts/ai/codex/run-codex.sh local-audit \
+  --output reports/quality/codex-local-state-audit.json
+```
+
+`local-audit` reports only aggregate counts: unsafe mode categories, approval
+rule dispositions, retention classes, SQLite integrity/index counts, and PATH
+selection. It never emits rule/session bodies, credentials, or user paths.
+Remediation is a separate explicit command in `local_state_audit.py`; it
+requires `--apply` and a restricted backup directory under the local Codex
+home. Retention remains dry-run and performs no archive/delete operation.
+
+### Model profiles and benchmark
+
+The reproducible benchmark uses five secret-free fixtures, ephemeral sessions,
+a read-only sandbox, disabled plugins/apps, and a 60/40
+correctness/validation rubric:
+
+```bash
+python3 scripts/ai/codex/profile_benchmark.py \
+  --output reports/quality/codex-profile-benchmark.json
+```
+
+| Profile | Model / effort | Intended use |
+| --- | --- | --- |
+| `fast` | `gpt-5.6-luna` / `low` | navigation and low-risk iteration |
+| `balanced` | `gpt-5.6-sol` / `high` | default focused implementation and review |
+| `deep` | `gpt-5.6-sol` / `max` | V4 architecture and difficult diagnosis |
+
+Quality equivalence uses a versioned five-point non-inferiority margin. The
+selector compares quality first, then median wall time, then the billable-token
+proxy. `fast` is always explicit opt-in, and the benchmark never changes
+`agents.max_threads = 3`.
+
+Machine-local application is separate from measurement. The following command
+audits only allowlisted model fields. `apply` requires an explicit private
+backup below the local Codex backup directory; `restore` verifies checksums.
+Neither operation reads or modifies `.env` files.
+
+```bash
+python3 scripts/ai/codex/profile_config.py audit
+python3 scripts/ai/codex/profile_config.py apply --confirm \
+  --backup-dir ~/.codex/backups/profile-YYYYMMDD
+python3 scripts/ai/codex/profile_config.py restore --confirm \
+  --backup-dir ~/.codex/backups/profile-YYYYMMDD
 ```
 
 PowerShell uses the same behavior through
@@ -96,8 +141,8 @@ readiness use a selected profile:
 
 | Profile | Live gate |
 | --- | --- |
-| `stable` | daily required local set |
-| `shared` | `stable` required; heavy additions optional |
+| `stable` | daily required local set plus Ref; no credentialed DeepWiki |
+| `shared` | `stable` required; DeepWiki and heavy additions optional |
 | `core` | `stable` plus Mermaid required |
 | `ops` | `stable` plus Prometheus, Grafana, GitHub Actions required |
 | `graph` | `stable` plus Neo4j Cypher/Memory required |
@@ -106,7 +151,9 @@ readiness use a selected profile:
 `mcp-check` prints `FAIL` for unavailable required servers, `WARN` for optional
 servers, and `SKIP` for remote/auth-managed endpoints. Every network probe has
 a per-server and overall timeout. It never starts Docker Compose or the
-monitoring stack. Static CI uses:
+monitoring stack and is read-only by default. Persist evidence only by passing
+an explicit `.json` path under `reports/quality`, for example
+`--output reports/quality/codex-mcp-health.json`. Static CI uses:
 
 ```bash
 python3 scripts/ai/codex/mcp_profile_contract.py --check
@@ -120,8 +167,7 @@ python3 scripts/ai/codex/setup_mcp.py --check
 | --- | --- |
 | `.codex/config.toml` | tracked portable trusted-project behavior |
 | `.codex/agents/*.toml` | Codex-only native discovery metadata |
-| `.codex/agents/*.md`, `.codex/skills/**` | canonical Codex behavior |
-| `.agents/skills/**` | generated discovery projection |
+| `.codex/agents/*.md`, `.codex/skills/**` | canonical Codex discovery and behavior |
 | `~/.codex/config.toml` | user-owned preferences and generated local MCP block |
 | `.junie/**` | equal-peer Junie runtime under the mirror contract |
 | `.devin/**` | Devin-owned runtime behavior and tracked projections |
@@ -129,7 +175,7 @@ python3 scripts/ai/codex/setup_mcp.py --check
 После изменений runtime surfaces выполнить:
 
 ```bash
-python3 scripts/ai/codex/sync_native_skills.py --check
+bash scripts/ai/codex/setup_skills.sh --check
 bash scripts/ai/junie/check_junie_mirror.sh --check
 ```
 

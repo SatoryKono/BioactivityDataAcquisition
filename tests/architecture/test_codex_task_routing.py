@@ -30,6 +30,15 @@ def test_codex_runtime_owns_task_routing_and_validation_matrix() -> None:
         "debt outcome",
     ):
         assert anchor in runtime
+    orchestration = (root / ".codex/agents/ORCHESTRATION.md").read_text(
+        encoding="utf-8"
+    )
+    normalized_orchestration = " ".join(orchestration.split())
+    assert "V1/V2 do not require a subagent chain" in normalized_orchestration
+    assert (
+        "V3/V4 retain orchestration and post-change validation"
+        in normalized_orchestration
+    )
     assert ".codex/agents/CODEX-RUNTIME.md" in mirror
     assert "does not redefine runtime behavior" in mirror
     assert "never increase debt" in mirror

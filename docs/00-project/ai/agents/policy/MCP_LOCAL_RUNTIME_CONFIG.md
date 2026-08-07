@@ -90,9 +90,8 @@ This policy applies to:
 | User preference | user-level Codex configuration | model/provider preference, personal features, UI behavior |
 | Secret-bearing input | environment or supported credential store | API tokens and MCP authorization values; never tracked project config |
 
-The repository skill behavior remains canonical in `.codex/skills/**`; native
-discovery adapters in `.agents/skills/**` are deterministic generated metadata,
-not a second behavioral owner.
+The repository skill discovery and behavior remain canonical in
+`.codex/skills/**`; no generated project-local adapter tree is maintained.
 
 ## Materialization profiles (least privilege)
 
@@ -102,8 +101,8 @@ privilege servers are not always-on:
 
 | Profile | Membership intent | Default for daily coding? |
 | --- | --- | --- |
-| `stable` | host/HTTP MCP only (no docker/gateway thrash leaders; no neo4j/mutmut/code-interpreter) | **yes — daily default for local IDE projections** |
-| `shared` | full sanctioned local set over shared HTTP plus remote HTTP MCP | explicit multi-client heavy plane (`--profile shared`) |
+| `stable` | host/HTTP MCP only; Ref remains available, credentialed DeepWiki is excluded | **yes — daily default for local IDE projections** |
+| `shared` | full sanctioned local set over shared HTTP plus opt-in remote HTTP MCP, including DeepWiki | explicit multi-client heavy plane (`--profile shared`) |
 | `core` | `stable` + pinned Mermaid MCP | explicit legacy/local profile |
 | `ops` | `core` + prometheus, grafana, github-actions | observability / dashboard work |
 | `graph` | `ops` + neo4j-*, brave-search, mutmut, mcp-code-interpreter, docker | research / graph / mutation work |
@@ -128,8 +127,13 @@ The bounded local live probe is explicit and never starts Docker Compose or a
 monitoring stack:
 
 ```bash
-bash scripts/ai/codex/run-codex.sh mcp-check --profile stable
+bash scripts/ai/codex/run-codex.sh mcp-check --profile stable \
+  --timeout 1 --overall-timeout 10 --no-write
 ```
+
+The live doctor is read-only by default. A persisted report requires an
+explicit `.json` target under `reports/quality`; implicit writes to `logs/` are
+not part of the runtime contract.
 
 ### Why Docker MCP multiplies containers
 
