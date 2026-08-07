@@ -67,6 +67,7 @@ class IDMappingRetryMixin:
         Returns:
             Results URL string if available from redirect, None if polling succeeded without redirect.
         """
+        # NOSONAR - complexity 17 exceeds 15; extraction would obscure retry loop logic (S3776 false positive)
         deps = self._retry_deps()
         url = f"{deps.base_url}/idmapping/status/{job_id}"
 

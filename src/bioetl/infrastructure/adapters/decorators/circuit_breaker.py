@@ -186,6 +186,7 @@ class CircuitBreakerDataSourceDecorator:
         """
 
         async def _mark_success() -> None:
+            # NOSONAR - async required for circuit_breaker.call() compatibility (S7503 false positive)
             return None
 
         try:

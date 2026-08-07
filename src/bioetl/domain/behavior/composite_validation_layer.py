@@ -89,6 +89,7 @@ class CompositeValidator:
         )
         from dataclasses import replace
 
+        # NOSONAR - mypy infers correct type; Sonar S5886 false positive on dataclass.replace()
         return replace(validation_report, execution_decision=governance_decision)
 
     def _run_structural_validation(
