@@ -36,7 +36,7 @@ def load_documentation() -> str:
         with open(docs_path, "r", encoding="utf-8") as f:
             return f.read()
     except FileNotFoundError:
-        print(f"❌ Documentation file not found: {docs_path}")
+        print(f"[ERROR] Documentation file not found: {docs_path}")
         sys.exit(1)
 
 
@@ -63,7 +63,7 @@ def check_outdated_patterns(docs_content: str) -> list[str]:
     issues = []
     for pattern in outdated_patterns:
         if pattern in docs_content:
-            issues.append(f"❌ Outdated pattern found: '{pattern}'")
+            issues.append(f"[ERROR] Outdated pattern found: '{pattern}'")
 
     return issues
 
@@ -80,7 +80,7 @@ def check_current_patterns(docs_content: str) -> list[str]:
     issues = []
     for pattern in current_patterns:
         if pattern not in docs_content:
-            issues.append(f"❌ Missing current pattern: '{pattern}'")
+            issues.append(f"[ERROR] Missing current pattern: '{pattern}'")
 
     return issues
 
@@ -91,9 +91,9 @@ def _load_docs_and_configs() -> tuple[str, list[Path]]:
 
 def _print_config_analysis(config_analysis: dict[str, Any]) -> None:
     print(
-        f"📊 Found validation types: {', '.join(config_analysis['validation_types'])}"
+        f"[INFO] Found validation types: {', '.join(config_analysis['validation_types'])}"
     )
-    print(f"📊 Found rule types: {', '.join(config_analysis['rule_types'])}")
+    print(f"[INFO] Found rule types: {', '.join(config_analysis['rule_types'])}")
 
 
 def _collect_parity_issues(
@@ -216,11 +216,11 @@ def check_documentation_coverage(
 
 def main() -> int:
     """Main execution function."""
-    print("🔍 DQ DSL Parity Check")
+    print("DQ DSL Parity Check")
     print("=" * 50)
 
     docs_content, config_files = _load_inputs()
-    print(f"📁 Found {len(config_files)} entity configuration files")
+    print(f"Found {len(config_files)} entity configuration files")
 
     config_analysis = _analyze_inputs(config_files)
     _print_config_analysis(config_analysis)
