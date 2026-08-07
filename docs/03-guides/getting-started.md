@@ -73,7 +73,7 @@ uv run python -m scripts.engineering.dev setup-mcp
 If you activated `.venv` instead of using `uv`, `python -m scripts.engineering.dev setup-mcp`
 is also valid.
 
-`scripts/engineering/dev/dev_setup.sh` remains in the repository as a legacy placeholder and is not the supported onboarding path.
+Canonical bootstrap uses `uv sync` / `make install` / `python -m scripts.ops setup-plugins`. `scripts/engineering/dev/dev_setup.sh` was **removed** and is not a supported path.
 
 ### 2.2. Mixed Windows + WSL Checkout
 
@@ -123,7 +123,7 @@ pip install -e .[dev,tracing,docs]
 For the supported aggregate setup flow, run
 `uv sync --extra dev --extra tests --extra tracing` and
 `uv run python -m scripts.ops setup-plugins`. The repository-local
-`scripts/engineering/dev/dev_setup.sh` is not part of the supported path.
+`scripts/engineering/dev/dev_setup.sh` is absent; do not invoke it.
 
 ## 3. Configuration
 
