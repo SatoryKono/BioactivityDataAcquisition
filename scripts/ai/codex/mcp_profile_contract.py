@@ -79,6 +79,12 @@ def validate_profile_matrix(repo_root: Path = REPO_ROOT) -> list[str]:
             errors.append(f"{profile}: matrix does not cover selected inventory")
 
     stable_required = set(_as_str_list(profile_plan("stable", repo_root)["required"]))
+    stable_selected = set(_as_str_list(profile_plan("stable", repo_root)["selected"]))
+    shared_selected = set(_as_str_list(profile_plan("shared", repo_root)["selected"]))
+    if "deepwiki" in stable_selected:
+        errors.append("stable: credentialed DeepWiki must not be selected")
+    if "deepwiki" not in shared_selected:
+        errors.append("shared: opt-in DeepWiki must remain available")
     if (
         set(_as_str_list(profile_plan("shared", repo_root)["required"]))
         != stable_required

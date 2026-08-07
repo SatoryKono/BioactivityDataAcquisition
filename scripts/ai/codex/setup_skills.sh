@@ -7,17 +7,16 @@ PERSONAL_CODEX_ROOT="${CODEX_HOME:-$HOME/.codex}"
 SKILLS_SOURCE_DIR="$REPO_ROOT/.codex/skills"
 SKILLS_TARGET_DIR="$PERSONAL_CODEX_ROOT/skills"
 INSTALL_PERSONAL=0
-SYNC_NATIVE=0
 DRY_RUN=0
 
 usage() {
     cat <<'EOF'
-Usage: setup_skills.sh [--check] [--sync-native] [--install-personal] [--dry-run]
+Usage: setup_skills.sh [--check] [--install-personal] [--dry-run]
 
-Check the generated `.agents/skills/*/SKILL.md` discovery adapters. Codex
-discovers these repository skills directly; no user-home bootstrap is required.
+Validate the canonical `.codex/skills/*/SKILL.md` discovery surface. Codex
+discovers repository skills directly; no generated projection or user-home
+bootstrap is required.
 
-`--sync-native` refreshes the tracked adapters from canonical `.codex/skills`.
 `--install-personal` explicitly copies canonical skills to the current user's
 Codex home. `--dry-run` previews only that optional personal copy.
 EOF
@@ -26,9 +25,6 @@ EOF
 for arg in "$@"; do
     case "$arg" in
         --check)
-            ;;
-        --sync-native)
-            SYNC_NATIVE=1
             ;;
         --install-personal)
             INSTALL_PERSONAL=1
@@ -52,11 +48,21 @@ for arg in "$@"; do
     esac
 done
 
-if [[ "$SYNC_NATIVE" -eq 1 ]]; then
-    python3 "$SCRIPT_DIR/sync_native_skills.py" --sync
-else
-    python3 "$SCRIPT_DIR/sync_native_skills.py" --check
-fi
+python3 - "$REPO_ROOT" <<'PY'
+import sys
+from pathlib import Path
+
+repo_root = Path(sys.argv[1])
+sys.path.insert(0, str(repo_root / "scripts/ai/codex"))
+from native_runtime_contract import canonical_skills, validate_canonical_skills
+
+findings = validate_canonical_skills(repo_root)
+for finding in findings:
+    print(f"[FAIL] {finding.code}: {finding.message} ({finding.path})")
+if findings:
+    raise SystemExit(1)
+print(f"[OK] {len(canonical_skills(repo_root))} canonical Codex skills are valid")
+PY
 
 if [[ "$INSTALL_PERSONAL" -eq 0 ]]; then
     exit 0
