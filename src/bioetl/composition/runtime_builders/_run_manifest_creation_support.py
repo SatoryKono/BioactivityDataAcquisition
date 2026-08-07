@@ -42,7 +42,6 @@ if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
     from bioetl.domain.context import PipelineRunContext as Context
 
-
 def build_manifest_create_request(
     request_inputs: RunManifestCreateRequestInputs,
 ) -> RunManifestCreateSpec:
@@ -106,13 +105,10 @@ def build_manifest_create_request(
     )
     return request
 
-
-
 def _launch_context_value(launch_context: object, key: str, default: object = None) -> object:
     if isinstance(launch_context, Mapping):
         return launch_context.get(key, default)
     return _read_attr(launch_context, key, default)
-
 
 def _resolve_replay_reconstructability_status(
     *,
@@ -148,7 +144,6 @@ def _resolve_replay_reconstructability_status(
     )
     return ("not_reconstructable" if not_ok else "reconstructable", strict_requirement)
 
-
 def emit_replay_reconstructability_metric(
     *,
     request: RunManifestCreateSpec,
@@ -167,8 +162,8 @@ def emit_replay_reconstructability_metric(
         _launch_context_value(launch_context, "required_persistence_profile")
         or DEFAULT_REQUIRED_PERSISTENCE_PROFILE
     )
-    # Prefer assessment already attached to launch_context when present so we
-    # do not recompute reproducibility decisions independently.
+    # Prefer assessment already attached
+    # do not recompute reproducibility d
     precomputed_raw = _launch_context_value(
         launch_context, "reproducibility_policy_assessment"
     )
@@ -228,30 +223,20 @@ def emit_replay_reconstructability_metric(
             },
         )
 
-
 def _resolve_replay_lag_seconds(
     *,
     launch_context: object,
     lag_status: str,
 ) -> float | None:
-    """Return measured replay lag seconds when available; never invent 0 for blocked."""
-    raw: object | None = None
-    if isinstance(launch_context, Mapping):
-        raw = launch_context.get("replay_lag_seconds")
-        if raw is None:
-            raw = launch_context.get("parent_run_age_seconds")
-    else:
-        raw = _read_attr(launch_context, "replay_lag_seconds", None)
-        if raw is None:
-            raw = _read_attr(launch_context, "parent_run_age_seconds", None)
-    if isinstance(raw, int | float) and float(raw) >= 0.0:
-        return float(raw)
-    # Ready / not_requested with no measured lag: zero lag is meaningful.
-    if lag_status in {"ready", "not_requested"}:
-        return 0.0
-    # Blocked without measured lag: omit gauge rather than report a fake 0.0.
-    return None
+    from bioetl.composition.runtime_builders._run_manifest_creation_support_helpers import (
+        resolve_replay_lag_seconds as _resolve,
+    )
 
+    return _resolve(
+        launch_context=launch_context,
+        lag_status=lag_status,
+        read_attr=_read_attr,
+    )
 
 def create_ledger_service(inputs: RunnerInputs, ctx: Context) -> Ledger | None:
     """Keep the public ownership seam local to this support module."""

@@ -24,7 +24,6 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
-
 def emit_domain_event(
     emitter: DomainEventEmitterProtocol | None,
     event: DomainEvent,
@@ -47,7 +46,6 @@ def emit_domain_event(
                 error_type=type(error).__name__,
                 event_type=type(event).__name__,
             )
-
 
 def emit_batch_written(
     *,
@@ -73,7 +71,6 @@ def emit_batch_written(
         ),
         logger=logger,
     )
-
 
 def emit_batch_failed(
     *,

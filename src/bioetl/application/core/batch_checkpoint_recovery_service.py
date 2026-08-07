@@ -18,7 +18,6 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
 
-
 class BatchCheckpointRecoveryService:
     """Owns checkpoint save semantics for runtime, shutdown, and recovery."""
 
@@ -50,7 +49,7 @@ class BatchCheckpointRecoveryService:
         checkpoint_interval: int,
     ) -> None:
         """Save a periodic checkpoint when the interval threshold is reached."""
-        # Guard before modulo: zero would fail or never match a useful threshold.
+        # Guard before modulo: zero woul
         if checkpoint_interval <= 0 or records_fetched <= 0:
             return
         if records_fetched % checkpoint_interval != 0:
@@ -197,7 +196,7 @@ class BatchCheckpointRecoveryService:
             if isinstance(error, Exception):
                 span.record_exception(error)
         span.__exit__(None, None, None)
-        # Lifecycle/end-of-run paths own flush; per-checkpoint flush can block.
+        # Lifecycle/end-of-run paths own
 
     async def _save_checkpoint(self, total: int, *, operation: str) -> None:
         started_at = time.monotonic()
@@ -242,13 +241,6 @@ class BatchCheckpointRecoveryService:
         )
 
     def _checkpoint_payload(self, total: int) -> CheckpointMetadata | int:
-        """Build checkpoint payload, including memory trace when available."""
-        if self._memory_manager is None:
-            return total
-        memory_trace = self._memory_manager.decision_trace_dicts()
-        if not memory_trace:
-            return total
-        return CheckpointMetadata(
-            records_processed=total,
-            memory_decision_trace=memory_trace,
-        )
+        from bioetl.application.core._checkpoint_payload import build_checkpoint_payload
+
+        return build_checkpoint_payload(total, self._memory_manager)

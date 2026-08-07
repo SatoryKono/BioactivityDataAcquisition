@@ -23,34 +23,18 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 _WRITE_SPAN_ERRORS = SHARED_OPERATION_ERRORS
 
-
 class BatchWriterIOMixin:
     """Layer write orchestration extracted from BatchWriter."""
 
-    # Host attributes from BatchWriter + sibling mixins (PD3 structural host; Any:
-    # concrete MRO supplies runtime types without NotImplementedError stubs).
-    _context: Any = cast(Any, None)  # Any: BatchWriter MRO host attribute
-    _storage: Any = cast(Any, None)  # Any: BatchWriter MRO host attribute
-    _config: Any = cast(Any, None)  # Any: BatchWriter MRO host attribute
-    _provider: str = ""
-    _entity_type: str = ""
-    _silver_schema: Any = cast(Any, None)  # Any: provider-specific schema type
-    _gold_schema: Any = cast(Any, None)  # Any: provider-specific schema type
-    _gold_schema_policy_by_version: Any = cast(Any, None)  # Any: schema policy host
-    _gold_validator: Any = cast(Any, None)  # Any: provider-specific validator
-    _silver_table_name: str = ""
-    _gold_table_name: str = ""
-    _table_config: Any = cast(Any, None)  # Any: BatchWriter MRO host attribute
-    _silver_mode: Any = cast(Any, None)  # Any: storage-specific write mode
-    _gold_mode: Any = cast(Any, None)  # Any: storage-specific write mode
-    _validate_lock: Any = cast(Any, None)  # Any: sibling mixin host method
-    _start_span: Any = cast(Any, None)  # Any: sibling mixin host method
-    _end_span: Any = cast(Any, None)  # Any: sibling mixin host method
-    _collect_record_columns: Any = cast(Any, None)  # Any: sibling mixin host method
-    _resolve_layer_columns: Any = cast(Any, None)  # Any: sibling mixin host method
-    _project_schema_for_layer: Any = cast(Any, None)  # Any: sibling mixin host method
-    _apply_renames_to_records: Any = cast(Any, None)  # Any: sibling mixin host method
-    _get_schema_columns: Any = cast(Any, None)  # Any: sibling mixin host method
+    # Host attributes from BatchWriter MRO (runtime-typed by concrete class).
+    _context = _storage = _config = cast(Any, None)
+    _provider = _entity_type = _silver_table_name = _gold_table_name = ""
+    _silver_schema = _gold_schema = _gold_schema_policy_by_version = cast(Any, None)
+    _gold_validator = _table_config = _silver_mode = _gold_mode = cast(Any, None)
+    _validate_lock = _start_span = _end_span = cast(Any, None)
+    _collect_record_columns = _resolve_layer_columns = cast(Any, None)
+    _project_schema_for_layer = _apply_renames_to_records = cast(Any, None)
+    _get_schema_columns = cast(Any, None)
 
     def _resolve_gold_ingestion_ts(self) -> datetime:
         """Return the deterministic timestamp anchor for Gold write side effects."""
@@ -105,7 +89,7 @@ class BatchWriterIOMixin:
             self._end_span(span, error)
             raise
         except BaseException:
-            # asyncio.CancelledError (BaseException) must still close the span.
+            # asyncio.CancelledError (Ba
             self._end_span(span)
             raise
 
@@ -205,7 +189,7 @@ class BatchWriterIOMixin:
                     self._gold_schema,
                     column_order_preview,
                 )
-                # Re-project/validate against the layer-projected schema when available.
+                # Re-project/validate ag
                 if schema_payload is not None and schema_payload is not self._gold_schema:
                     records, available_cols = prepare_gold_records(
                         self,

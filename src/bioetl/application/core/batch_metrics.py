@@ -21,7 +21,6 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort
     from bioetl.domain.types import ErrorType, JsonDict
 
-
 class BatchMetricsRecorderService:
     """Record bounded batch-processing metrics; all methods are metrics-safe no-ops."""
 

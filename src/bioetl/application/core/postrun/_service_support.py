@@ -1,4 +1,4 @@
-# Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
+# Host attrs/methods are initialized by 
 """Private support mixin for PostrunService phase and cleanup helpers."""
 
 from __future__ import annotations
@@ -58,7 +58,6 @@ if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
 
-
 class _PostrunHostAttrSurface(Protocol):
     """Shared attribute surface for postrun host + concrete service."""
 
@@ -73,7 +72,6 @@ class _PostrunHostAttrSurface(Protocol):
     _metadata_write_orchestrator: PostrunMetadataWriteService
     _logger: LoggerPort
     _metrics: MetricsPort
-
 
 class PostrunServiceSupportHostProtocol(_PostrunHostAttrSurface, Protocol):
     """Typed host contract required by PostrunServiceSupportMixin helpers."""
@@ -106,7 +104,6 @@ class PostrunServiceSupportHostProtocol(_PostrunHostAttrSurface, Protocol):
         level: PostrunLogLevel | None = None,
         **extra: object,
     ) -> None: ...
-
 
 class PostrunServiceSupportMixin:
     """Own thin phase execution helpers outside the main postrun shell."""
@@ -243,15 +240,8 @@ class PostrunServiceSupportMixin:
         self: PostrunServiceSupportHostProtocol,
         executor: ExecutorMetricsPort,
     ) -> dict[str, float]:
-        total_records = max(1, executor.records_fetched)
-        return {
-            "record_count": float(executor.records_fetched),
-            "bronze_count": float(executor.records_bronze),
-            "silver_count": float(executor.records_silver),
-            "gold_count": float(executor.records_gold),
-            "quarantined_count": float(executor.records_quarantined),
-            "error_rate": executor.records_quarantined / total_records,
-            "silver_yield": executor.records_silver / total_records,
-            "gold_yield": executor.records_gold / total_records,
-            "freshness_anchor_timestamp": self._context.started_at.timestamp(),
-        }
+        from bioetl.application.core.postrun._batch_metrics_projection import (
+            project_batch_metrics as _project,
+        )
+
+        return _project(executor, freshness_anchor_timestamp=self._context.started_at.timestamp())
