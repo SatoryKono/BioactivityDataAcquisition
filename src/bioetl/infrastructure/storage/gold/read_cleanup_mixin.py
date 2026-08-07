@@ -6,6 +6,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
+from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
+
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.storage.gold.io_helpers import (
     load_gold_writer_module as _load_gold_writer_module,
@@ -89,7 +91,7 @@ class GoldWriterReadCleanupMixin:
                     Any,  # Any: pyarrow.Table returned via executor is untyped to mypy
                     await self._run_in_executor(dt.to_pyarrow_table, projection),
                 )
-        except module.TableNotFoundError as exc:
+        except DeltaTableNotFoundError as exc:
             raise FileNotFoundError(f"Gold table not found: {table_name}") from exc
         current_flag = (
             _current_flag_column(list(arrow_table.column_names))
