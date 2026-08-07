@@ -1447,7 +1447,7 @@
           "type": "prometheus",
           "uid": "prometheus"
         },
-        "definition": "query_result(label_replace(label_replace(label_replace(label_replace(label_replace(vector(1), \"src\", \"${pipeline}|${workflow}\", \"\", \"\"), \"hint\", \"unknown\", \"src\", \".*\"), \"hint\", \"$1\", \"src\", \"^(?:workflow_)?([^_|]+)(?:_[^|]*)?[|].*$\"), \"hint\", \"$1\", \"src\", \"^(?:unknown|[$]__all|All|[.][*]|)[|](?:workflow_)?([^_|]+)(?:_[^|]*)?$\"), \"hint\", \"unknown\", \"hint\", \"^(?:unknown|[$]__all|All|[.][*]|)$\"))",
+        "definition": "query_result(label_replace(label_replace(label_replace(label_replace(label_replace(vector(1), \"src\", \"${pipeline}|${workflow}\", \"\", \"\"), \"hint\", \"unknown\", \"src\", \".*\"), \"hint\", \"$1\", \"src\", \"^(?:workflow_)?([^_|]+)(?:_[^|]*)?[|].*$\"), \"hint\", \"$1\", \"src\", \"^(?:unknown|[$]__all|All|[.][*]|)[|](?:workflow_)?([^_|]+)(?:_[^|]*)?$\"), \"hint\", \"unknown\", \"hint\", \"^(?:unknown|[$]|[$]__all|All|[.][*]|)$\"))",
         "hide": 0,
         "includeAll": false,
         "label": "Provider",
@@ -1455,7 +1455,7 @@
         "name": "provider",
         "options": [],
         "query": {
-          "query": "query_result(label_replace(label_replace(label_replace(label_replace(label_replace(vector(1), \"src\", \"${pipeline}|${workflow}\", \"\", \"\"), \"hint\", \"unknown\", \"src\", \".*\"), \"hint\", \"$1\", \"src\", \"^(?:workflow_)?([^_|]+)(?:_[^|]*)?[|].*$\"), \"hint\", \"$1\", \"src\", \"^(?:unknown|[$]__all|All|[.][*]|)[|](?:workflow_)?([^_|]+)(?:_[^|]*)?$\"), \"hint\", \"unknown\", \"hint\", \"^(?:unknown|[$]__all|All|[.][*]|)$\"))",
+          "query": "query_result(label_replace(label_replace(label_replace(label_replace(label_replace(vector(1), \"src\", \"${pipeline}|${workflow}\", \"\", \"\"), \"hint\", \"unknown\", \"src\", \".*\"), \"hint\", \"$1\", \"src\", \"^(?:workflow_)?([^_|]+)(?:_[^|]*)?[|].*$\"), \"hint\", \"$1\", \"src\", \"^(?:unknown|[$]__all|All|[.][*]|)[|](?:workflow_)?([^_|]+)(?:_[^|]*)?$\"), \"hint\", \"unknown\", \"hint\", \"^(?:unknown|[$]|[$]__all|All|[.][*]|)$\"))",
           "refId": "StandardVariableQuery"
         },
         "refresh": 2,

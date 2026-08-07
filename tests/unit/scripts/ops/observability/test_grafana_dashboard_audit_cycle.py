@@ -282,7 +282,7 @@ def _terminal_render_manifest(
         "source": {
             "commit_sha": "a" * 40,
             "working_tree_dirty": False,
-            "dashboards": {uid: dashboard_source},
+            "dashboards": {uid: dict(dashboard_source)},
         },
         "capture_context": {
             "time_range": {
@@ -309,7 +309,7 @@ def _terminal_render_manifest(
                 "renderStatus": "rendered",
                 "actualViewport": {"width": width, "height": 1900},
                 "actualTheme": theme,
-                "dashboardSource": dashboard_source,
+                "dashboardSource": dict(dashboard_source),
                 "browserState": {
                     "requestedZoom": 100,
                     "cssZoom": "1",
@@ -336,6 +336,40 @@ def test_grafana_audit_preflight_accepts_silver_backend_terminal_states(
     )
 
     assert error is None
+
+
+def test_grafana_audit_preflight_rejects_dashboard_source_provenance_drift(
+    tmp_path: Path,
+) -> None:
+    manifest = _terminal_render_manifest()
+    dashboards = manifest["dashboards"]
+    assert isinstance(dashboards, list)
+    dashboard = dashboards[0]
+    assert isinstance(dashboard, dict)
+    dashboard_source = dashboard["dashboardSource"]
+    assert isinstance(dashboard_source, dict)
+    dashboard_source["version"] = 2
+
+    source = manifest["source"]
+    assert isinstance(source, dict)
+    source_dashboards = source["dashboards"]
+    assert isinstance(source_dashboards, dict)
+    assert source_dashboards["bioetl-dq-v2"]["version"] == 1
+
+    (tmp_path / "bioetl-dq-v2.png").write_bytes(b"png")
+    manifest_text = json.dumps(manifest)
+    (tmp_path / "render-manifest.json").write_text(manifest_text, encoding="utf-8")
+    immutable_name = manifest["immutable_manifest"]
+    assert isinstance(immutable_name, str)
+    (tmp_path / immutable_name).write_text(manifest_text, encoding="utf-8")
+
+    error = preflight_subject._validate_manifest_render_contract(
+        manifest,
+        expected_uids=("bioetl-dq-v2",),
+        screenshot_dir=tmp_path,
+    )
+
+    assert error == "render manifest dashboard bioetl-dq-v2 source provenance drift"
 
 
 @pytest.mark.parametrize(
