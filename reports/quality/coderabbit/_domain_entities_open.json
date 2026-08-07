@@ -1,0 +1,122 @@
+[
+  {
+    "number": 8151,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/semanticscholar.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8150,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/uniprot.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8144,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/entities/pubchem.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8143,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/entities/openalex.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8141,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/entities/crossref.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8139,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/entities/__init__.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8137,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/chembl.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8134,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/pubmed.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8133,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/base.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8148,
+    "state": "OPEN",
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/entities/chembl_activity.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8147,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/entities/bioactivity/_extractors.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8146,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/publication_base.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8140,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/bioactivity/_converters.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8136,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/bioactivity/_entity.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8135,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/bioactivity/__init__.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8132,
+    "state": "OPEN",
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/entities/chembl_tissue.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8154,
+    "state": "OPEN",
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/entities/_chembl_additional_models.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8153,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/_chembl_additional_models.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8149,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/entities/chembl_compound_record.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8142,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/chembl_structures_foundation.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8138,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/entities/_chembl_reference_models.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8152,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/_chembl_molecule_target_models.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8145,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/_chembl_activity_assay_models.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8131,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/_chembl_activity_target_models.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  }
+]
