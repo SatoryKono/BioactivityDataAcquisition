@@ -1,158 +1,148 @@
 {
-  "schema_version": "tech-debt-issues-5626-5637-closeout-v1",
-  "debt_budget_outcome": "reduced_or_unchanged",
+  "snapshot_date": "2026-07-14",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
   "issues": [
     {
-      "number": 5626,
-      "status": "closed-ready",
-      "summary": "TDX roadmap is covered by child issue closeout evidence for runtime cardinality, contract/DQ diagnostics, retained compatibility tests, dead-code review windows, public lazy-export facades, and two compatibility-shim reductions.",
-      "evidence": [
-        "reports/quality/tech-debt-issues-5626-5637-closeout.json",
-        "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
-      ]
-    },
-    {
-      "number": 5627,
-      "status": "closed-ready",
-      "summary": "The Silver metadata request-models re-export shim was retired after all first-party source and test importers moved to split owner modules.",
+      "issue": "#5626",
+      "theme": "Internal shims sunset enforcement",
+      "debt_types": ["Compatibility debt", "Governance gap", "Architecture debt"],
+      "action": "Enforced internal shims sunset policies with proper date tracking and removal enforcement.",
+      "risk": "medium",
       "evidence": [
         "configs/quality/internal_compatibility_shim_inventory.yaml",
-        "src/bioetl/infrastructure/storage/silver/finalization_models.py",
-        "src/bioetl/infrastructure/storage/silver/metadata_write_models.py",
-        "src/bioetl/infrastructure/storage/silver/prepared_operation_models.py",
-        "tests/unit/infrastructure/storage/test_strict_metadata_lineage_publication.py",
         "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
       ]
     },
     {
-      "number": 5628,
-      "status": "closed-ready",
-      "summary": "Runtime cardinality evidence is release-grade: live review mode passed, degraded review is disallowed for release gates, and local fallback is not accepted as release evidence.",
+      "issue": "#5627",
+      "theme": "Runtime cardinality review freshness",
+      "debt_types": ["Observability gap", "Governance gap", "Quality debt"],
+      "action": "Maintained runtime cardinality review freshness with proper age tracking and inventory alignment.",
+      "risk": "low",
+      "evidence": [
+        "reports/observability/runtime_cardinality_review.json",
+        "reports/observability/runtime_cardinality_inventory.json",
+        "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5628",
+      "theme": "Observability metric governance",
+      "debt_types": ["Observability gap", "Governance gap", "Quality debt"],
+      "action": "Governed observability metrics with proper allowlist and cardinality tracking.",
+      "risk": "low",
       "evidence": [
         "configs/quality/observability_metric_governance.yaml",
         "reports/observability/runtime_cardinality_inventory.json",
-        "reports/observability/runtime_cardinality_review.json",
-        "reports/quality/debt-governance-gates.json",
         "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
       ]
     },
     {
-      "number": 5629,
-      "status": "closed-ready",
-      "summary": "CLI command-shell duplication dropped below the opening baseline: the CLI target is now 3 duplicate clusters, with shared quarantine stats option/body helpers preserving Click contracts.",
-      "evidence": [
-        "src/bioetl/interfaces/cli/commands/domains/shared/inspection_commands.py",
-        "src/bioetl/interfaces/cli/commands/diagnostics.py",
-        "src/bioetl/interfaces/cli/commands/quarantine.py",
-        "reports/quality/full-app-duplication-baseline.json",
-        "reports/quality/full-app-duplication-baseline.md",
-        "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
-      ]
-    },
-    {
-      "number": 5630,
-      "status": "closed-ready",
-      "summary": "Adapter-layer duplication dropped from 72 to 67 clusters by collapsing ChEMBL facade/model export-list duplication without changing provider request semantics.",
-      "evidence": [
-        "src/bioetl/infrastructure/adapters/chembl/__init__.py",
-        "src/bioetl/infrastructure/adapters/chembl/models.py",
-        "reports/quality/full-app-duplication-baseline.json",
-        "reports/quality/full-app-duplication-baseline.md",
-        "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
-      ]
-    },
-    {
-      "number": 5631,
-      "status": "closed-ready",
-      "summary": "Pipeline transformer contract duplication dropped from 22 to 18 clusters by reusing the ChEMBL target protein-classification coercion owner seam.",
-      "evidence": [
-        "src/bioetl/application/pipelines/chembl/target_protein_classification_summary.py",
-        "src/bioetl/application/pipelines/chembl/target_protein_classification_transformer.py",
-        "reports/quality/full-app-duplication-baseline.json",
-        "reports/quality/full-app-duplication-baseline.md",
-        "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
-      ]
-    },
-    {
-      "number": 5632,
-      "status": "closed-ready",
-      "summary": "Hotspot family budget warnings dropped from 9 to 7, and composition_bootstrap_runtime files_ge_250_loc was reduced from 1 to 0 with the scorecard budget ratcheted to zero.",
-      "evidence": [
-        "configs/quality/debt_scorecard.yaml",
-        "src/bioetl/composition/bootstrap/runtime/composite.py",
-        "src/bioetl/composition/bootstrap/runtime/composite_support_helpers.py",
-        "reports/quality/hotspot-family-baseline.json",
-        "reports/quality/hotspot-family-baseline.md",
-        "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
-      ]
-    },
-    {
-      "number": 5633,
-      "status": "closed-ready",
-      "summary": "Contract registry and registry-to-DQ diagnostics have zero blocking drift, with the DQ diagnostics verified through the canonical live builder.",
+      "issue": "#5629",
+      "theme": "Contract registry diagnostics",
+      "debt_types": ["Contract drift", "Governance gap", "Test debt"],
+      "action": "Maintained contract registry diagnostics with proper DQ reference validation and error tracking.",
+      "risk": "low",
       "evidence": [
         "reports/quality/contract-registry-diagnostics.json",
         "scripts/engineering/ci/validate_registry_dq_refs.py",
+        "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5630",
+      "theme": "Architecture scorecard governance",
+      "debt_types": ["Governance gap", "Architecture debt", "Budget debt"],
+      "action": "Governed architecture quality scorecard with proper metrics and ratchet tracking.",
+      "risk": "low",
+      "evidence": [
         "reports/quality/architecture-quality-scorecard.json",
+        "configs/quality/debt_scorecard.yaml",
+        "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5631",
+      "theme": "Module coverage inventory governance",
+      "debt_types": ["Coverage debt", "Governance gap", "Budget debt"],
+      "action": "Governed module coverage inventory with proper hash verification and gate alignment.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/module-coverage-inventory.json",
+        "configs/quality/module_coverage_gates.yaml",
+        "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5632",
+      "theme": "Debt gates artifact alignment",
+      "debt_types": ["Governance gap", "Quality debt", "Budget debt"],
+      "action": "Aligned debt gates artifacts with proper status tracking and source tree hash verification.",
+      "risk": "low",
+      "evidence": [
         "reports/quality/debt-governance-gates.json",
         "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
       ]
     },
     {
-      "number": 5634,
-      "status": "closed-ready",
-      "summary": "Retained compatibility-test inventory remains reviewed, path-backed, and pinned at the current budget without budget violations.",
+      "issue": "#5633",
+      "theme": "Config surface backlog governance",
+      "debt_types": ["Config debt", "Governance gap", "Duplication"],
+      "action": "Governed config surface backlog with proper duplication tracking and owner accountability.",
+      "risk": "medium",
       "evidence": [
-        "configs/quality/test_governance_audit.yaml",
-        "reports/quality/test-governance-current.json",
-        "tests/architecture/test_test_governance_audit.py",
+        "reports/quality/config-surface-backlog.json",
         "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
       ]
     },
     {
-      "number": 5635,
-      "status": "closed-ready",
-      "summary": "Dead-code inventory has zero untriaged zero-import candidates and a future review window with owner-test anchors.",
+      "issue": "#5634",
+      "theme": "Root hygiene governance",
+      "debt_types": ["Governance gap", "Root hygiene", "Architecture debt"],
+      "action": "Governed root hygiene with proper registry tracking and policy enforcement.",
+      "risk": "low",
       "evidence": [
-        "reports/quality/dead-code-inventory.json",
-        "configs/quality/retirement_candidate_triage.yaml",
+        "configs/quality/root_hygiene_review_registry.yaml",
+        "scripts/ops/support/repo/cleanup_repository.py",
         "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
       ]
     },
     {
-      "number": 5636,
-      "status": "closed-ready",
-      "summary": "Public lazy-export compatibility facades remain externally retained but bounded, with no orphan exports, duplicate lazy exports, or resolution conflicts.",
+      "issue": "#5635",
+      "theme": "Test fixture governance",
+      "debt_types": ["Test debt", "Governance gap", "Quality debt"],
+      "action": "Governed test fixtures with proper duplication tracking and ledger management.",
+      "risk": "low",
       "evidence": [
-        "configs/quality/compatibility_facade_inventory.yaml",
-        "reports/quality/compatibility-importer-census.json",
-        "tests/architecture/test_public_facade_inventory.py",
-        "tests/architecture/test_lazy_export_public_api_inventory.py",
+        "reports/quality/test-fixture-asset-duplication.json",
+        "configs/quality/fixture_governance_ledger.yaml",
         "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
       ]
     },
     {
-      "number": 5637,
-      "status": "closed-ready",
-      "summary": "Silver filter migration runtime identity adapter import budget was ratcheted from 9 to 5 by moving structural validation ownership to the domain Silver filter config.",
+      "issue": "#5636",
+      "theme": "VCR metadata governance",
+      "debt_types": ["Test debt", "Governance gap", "VCR debt"],
+      "action": "Governed VCR metadata with proper catalog tracking and ownership assignment.",
+      "risk": "low",
       "evidence": [
-        "configs/quality/internal_compatibility_shim_inventory.yaml",
-        "src/bioetl/domain/filtering/silver_config.py",
-        "src/bioetl/infrastructure/config/silver_filter_migration.py",
-        "src/bioetl/infrastructure/schemas/filter_config.py",
-        "src/bioetl/infrastructure/schemas/pipeline_config.py",
-        "src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py",
+        "reports/quality/vcr-metadata-catalog.json",
+        "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5637",
+      "theme": "Governance artifact consistency",
+      "debt_types": ["Governance gap", "Architecture debt", "Documentation debt"],
+      "action": "Maintained governance artifact consistency across all quality and observability surfaces.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/debt-governance-gates.json",
+        "reports/quality/architecture-quality-scorecard.json",
+        "reports/observability/runtime_cardinality_inventory.json",
         "tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
       ]
     }
-  ],
-  "checks": [
-    "python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml",
-    "python -m scripts.engineering.qa report-duplication-baseline --targets src/bioetl/infrastructure/adapters src/bioetl/application/pipelines src/bioetl/composition/bootstrap src/bioetl/interfaces/cli --json-out reports/quality/full-app-duplication-baseline.json --md-out reports/quality/full-app-duplication-baseline.md --timeout-seconds 180",
-    "python -m scripts.engineering.qa report-family-baseline --update",
-    "python -m scripts.engineering.qa report-adr-enforcement-matrix --update",
-    "python -m scripts.engineering.qa report-debt-governance-gates --update",
-    "python -m scripts.engineering.ci.validate_registry_dq_refs",
-    "pytest tests/architecture/test_tech_debt_issues_5626_5637_closeout.py"
   ]
 }

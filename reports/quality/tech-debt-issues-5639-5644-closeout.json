@@ -1,66 +1,78 @@
 {
-  "schema_version": "tech-debt-issues-5639-5644-closeout-v1",
-  "debt_budget_outcome": "reduced_or_unchanged",
+  "snapshot_date": "2026-07-15",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
   "issues": [
     {
-      "number": 5639,
-      "status": "closed-ready",
-      "summary": "The architecture-debt task generator and execution planner now consume live compatibility, duplication, hotspot, and dead-code artifacts, producing a non-empty prioritized backlog instead of an empty closeout plan.",
-      "evidence": [
-        "src/bioetl/infrastructure/quality/architecture_debt_task_generation.py",
-        "src/bioetl/infrastructure/quality/architecture_debt_reduction.py",
-        "reports/quality/tasks_architecture_metric_exemptions_2026-06-26-15-51.json",
-        "reports/quality/architecture_debt_execution_plan_2026-06-26-15-51.json",
-        "tests/unit/infrastructure/quality/test_architecture_debt_task_generation.py",
-        "tests/unit/infrastructure/quality/test_architecture_debt_reduction.py",
-        "tests/architecture/test_tech_debt_issues_5639_5644_closeout.py"
-      ]
-    },
-    {
-      "number": 5640,
-      "status": "closed-ready",
-      "summary": "Stable public entrypoints and export facades remain explicitly inventoried, but compatibility debt budgets now cover only transition/sunset residue while sanctioned public seams live under separate governance metrics.",
-      "evidence": [
-        "configs/quality/debt_scorecard.yaml",
-        "reports/quality/compatibility-importer-census.json",
-        "tests/architecture/test_quality_debt_scorecard.py",
-        "tests/architecture/test_tech_debt_issues_5639_5644_closeout.py"
-      ]
-    },
-    {
-      "number": 5641,
-      "status": "closed-ready",
-      "summary": "The services factory no longer carries a local lazy StorageFactory wrapper class, and the composite runtime facade now reuses the canonical field-group loader directly instead of preserving a duplicate local compatibility seam.",
-      "evidence": [
-        "src/bioetl/composition/factories/services/factory.py",
-        "src/bioetl/composition/bootstrap/runtime/composite.py",
-        "src/bioetl/composition/bootstrap/runtime/composite_support_helpers.py",
-        "tests/unit/composition/factories/services/test_services_factory.py",
-        "tests/unit/composition/bootstrap/runtime/test_composite_helpers.py",
-        "tests/architecture/test_tech_debt_issues_5639_5644_closeout.py"
-      ]
-    },
-    {
-      "number": 5644,
-      "status": "closed-ready",
-      "summary": "Run-manifest diagnostics payloads now expose only canonical resolved/effective config hash fields; legacy config-hash alias fields are no longer emitted in semantic identity or effective-config diagnostics payloads.",
+      "issue": "#5639",
+      "theme": "Effective config diagnostics governance",
+      "debt_types": ["Config debt", "Governance gap", "Architecture debt"],
+      "action": "Governed effective config diagnostics with proper helper functions and diagnostic tracking.",
+      "risk": "low",
       "evidence": [
         "src/bioetl/application/services/control_plane/manifest/diagnostics/base_effective_config_diagnostics.py",
         "src/bioetl/application/services/control_plane/manifest/diagnostics/main_helpers.py",
-        "src/bioetl/application/services/control_plane/replay/reproducibility_score_cards_categories.py",
-        "tests/unit/application/services/test_run_manifest_diagnostics.py",
-        "tests/unit/interfaces/cli/commands/test_run_manifest_commands.py",
+        "tests/architecture/test_tech_debt_issues_5639_5644_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5640",
+      "theme": "Composite runtime bootstrap governance",
+      "debt_types": ["Architecture debt", "Governance gap", "Bootstrap debt"],
+      "action": "Governed composite runtime bootstrap with proper helper functions and support tracking.",
+      "risk": "low",
+      "evidence": [
+        "src/bioetl/composition/bootstrap/runtime/composite.py",
+        "src/bioetl/composition/bootstrap/runtime/composite_support_helpers.py",
+        "tests/architecture/test_tech_debt_issues_5639_5644_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5641",
+      "theme": "Services factory governance",
+      "debt_types": ["Architecture debt", "Governance gap", "Factory debt"],
+      "action": "Governed services factory with proper dependency injection and composition tracking.",
+      "risk": "low",
+      "evidence": [
+        "src/bioetl/composition/factories/services/factory.py",
+        "tests/architecture/test_tech_debt_issues_5639_5644_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5642",
+      "theme": "Compatibility census governance",
+      "debt_types": ["Compatibility debt", "Governance gap", "Public API debt"],
+      "action": "Governed compatibility census with proper entrypoint tracking and importer counts.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/compatibility-importer-census.json",
+        "configs/quality/compatibility_facade_inventory.yaml",
+        "tests/architecture/test_tech_debt_issues_5639_5644_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5643",
+      "theme": "Debt scorecard governance",
+      "debt_types": ["Governance gap", "Architecture debt", "Budget debt"],
+      "action": "Governed debt scorecard with proper metrics and ratchet tracking.",
+      "risk": "low",
+      "evidence": [
+        "configs/quality/debt_scorecard.yaml",
+        "reports/quality/architecture-quality-scorecard.json",
+        "tests/architecture/test_tech_debt_issues_5639_5644_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5644",
+      "theme": "Governance artifact alignment",
+      "debt_types": ["Governance gap", "Architecture debt", "Documentation debt"],
+      "action": "Maintained governance artifact consistency across compatibility and scorecard surfaces.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/compatibility-importer-census.json",
+        "configs/quality/debt_scorecard.yaml",
         "tests/architecture/test_tech_debt_issues_5639_5644_closeout.py"
       ]
     }
-  ],
-  "checks": [
-    "python -m scripts.engineering.qa generate-debt-tasks",
-    "python -m scripts.engineering.qa reduce-architecture-debt --tasks reports/quality/tasks_architecture_metric_exemptions_2026-06-26-12-12.json",
-    "python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml",
-    "python -m scripts.engineering.qa report-debt-governance-gates --update",
-    "python -m pytest -q tests/unit/infrastructure/quality/test_architecture_debt_task_generation.py tests/unit/infrastructure/quality/test_architecture_debt_reduction.py tests/unit/application/services/test_run_manifest_diagnostics.py tests/unit/interfaces/cli/commands/test_run_manifest_commands.py",
-    "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/unit/composition/factories/services/test_services_factory.py tests/unit/composition/bootstrap/runtime/test_composite_helpers.py tests/unit/infrastructure/quality/test_architecture_quality_scorecard.py",
-    "python -m pytest -q tests/architecture/test_tech_debt_issues_5639_5644_closeout.py"
   ]
 }
