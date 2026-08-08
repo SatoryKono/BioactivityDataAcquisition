@@ -14,8 +14,11 @@ audits:
       - reports/quality/compatibility-importer-census.json
       - reports/quality/dead-code-inventory.json
       - reports/quality/contract-registry-diagnostics.json
+      - reports/quality/debt-governance-gates.json
+      - reports/quality/hotspot-family-baseline.json
       - reports/quality/module-coverage-inventory.json
-    reviewed_on: "2026-08-05"
+      - reports/quality/contract-coverage-matrix.json
+    reviewed_on: "2026-08-07"
     linked_issue: "#7517"
   - id: total-tech-debt-main-2026-07-27
     status: superseded

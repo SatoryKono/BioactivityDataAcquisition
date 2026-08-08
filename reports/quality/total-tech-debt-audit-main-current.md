@@ -2,43 +2,43 @@
 
 Lifecycle status: current
 
-Audit date: 2026-08-05
+Audit date: 2026-08-07
 
 Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `26ad7ad98e14f1435ffec01c4d41ee6c6664cd8d`
+Audited commit SHA: `1f08fba3eb8d373991c00b14df9b3a857798e50b`
 
-Evidence surface SHA-256: `4a22743f4ec27670572afa85a13474e6a288b29d1b530b3e98add27becd35d8f`
+Evidence surface SHA-256: `2c76d52eca6a74580bdbc12d25b42f3f789c5fdc23231ca6a2af3bc0a4a4c607`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-07-27-r1",
-  "audited_commit_sha": "26ad7ad98e14f1435ffec01c4d41ee6c6664cd8d",
-  "evidence_surface_sha256": "4a22743f4ec27670572afa85a13474e6a288b29d1b530b3e98add27becd35d8f",
+  "audited_commit_sha": "1f08fba3eb8d373991c00b14df9b3a857798e50b",
+  "evidence_surface_sha256": "2c76d52eca6a74580bdbc12d25b42f3f789c5fdc23231ca6a2af3bc0a4a4c607",
   "metrics": {
-    "architecture_integral_score": 9.41,
-    "architecture_interpretation": "good_targeted_improvements",
+    "architecture_integral_score": 7.68,
+    "architecture_interpretation": "satisfactory_system_refactoring_required",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "debt_gate_count": 45,
-    "debt_gate_fail_count": 1,
-    "debt_gate_pass_count": 44,
+    "debt_gate_fail_count": 2,
+    "debt_gate_pass_count": 43,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 1476,
+    "fully_covered_module_count": 1402,
     "layer_violation_count": 0,
-    "no_executable_lines_module_count": 95,
-    "partially_covered_module_count": 744,
-    "source_module_count": 2315,
+    "no_executable_lines_module_count": 9,
+    "partially_covered_module_count": 971,
+    "source_module_count": 2390,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 0
+    "unmeasured_module_count": 8
   },
   "schema_version": "technical-debt-audit-summary-v1"
 }
@@ -48,16 +48,16 @@ Refresh reason: #7517 Stream B terminal sync - re-pin evidence_surface_sha256 wi
 
 ## Executive summary
 
-1. Debt-governance gates: **44 pass / 1 fail** (`45/45` debt-governance gates passing).
-1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
+1. Debt-governance gates: **43 pass / 2 fail** (`45/45` debt-governance gates passing).
+1. Architecture quality integral score: **7.68** (`satisfactory_system_refactoring_required`). Integral score `7.68`.
 1. Module inventory (from `module-coverage-inventory.json` only):
-   - source_module_count: **2315**
-   - fully_covered: **1476**
-   - partially_covered: **744**
-   - no_executable_lines: **95**
+   - source_module_count: **2390**
+   - fully_covered: **1402**
+   - partially_covered: **971**
+   - no_executable_lines: **9**
    - uncovered: **0**
-   - unmeasured: **0**
-   - check: fully + partial + no_exec + uncovered + unmeasured = 2315 == source_module_count
+   - unmeasured: **8**
+   - check: fully + partial + no_exec + uncovered + unmeasured = 2390 == source_module_count
 1. Contract coverage matrix schema: **contract-coverage-matrix-v3** (v3: strict Gold required for availability).
 1. Constructor waivers (shrink-only inventory): **1** entries.
 1. Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**.

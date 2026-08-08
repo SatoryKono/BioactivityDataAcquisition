@@ -43,7 +43,7 @@
 | `ADR-032` | `enforced` | 15 | 1 | - |
 | `ADR-033` | `enforced` | 7 | 2 | - |
 | `ADR-034` | `enforced` | 5 | 2 | - |
-| `ADR-035` | `enforced` | 8 | 3 | - |
+| `ADR-035` | `enforced` | 9 | 4 | - |
 | `ADR-036` | `enforced` | 55 | 1 | - |
 | `ADR-037` | `enforced` | 10 | 1 | - |
 | `ADR-038` | `enforced` | 9 | 1 | - |
