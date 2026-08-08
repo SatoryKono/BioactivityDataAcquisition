@@ -1,7 +1,7 @@
 {
   "schema_version": "architecture-suite-burndown-inventory-v1",
   "linked_issue": "#8331",
-  "generated_at_utc": "2026-08-07T13:33:18.865496+00:00",
+  "generated_at_utc": "2026-08-08T07:38:50.119215+00:00",
   "local_lane_recommendation": {
     "pr_default": "architecture-fast-boundary",
     "full_audit": "architecture or architecture-slow-governance",
@@ -13,7 +13,7 @@
   },
   "scan": {
     "file_count": 487,
-    "approx_loc": 93906,
+    "approx_loc": 94127,
     "skip_xfail_pattern_hits": 116,
     "multi_file_families_count": 0,
     "duplicate_ratchet_candidates": {},
@@ -24,15 +24,15 @@
       },
       {
         "path": "tests/architecture/test_config_ci_invariants.py",
-        "loc": 1385
+        "loc": 1389
+      },
+      {
+        "path": "tests/architecture/test_test_governance_audit.py",
+        "loc": 1217
       },
       {
         "path": "tests/architecture/test_quality_debt_scorecard.py",
         "loc": 1215
-      },
-      {
-        "path": "tests/architecture/test_test_governance_audit.py",
-        "loc": 1212
       },
       {
         "path": "tests/architecture/test_port_contracts.py",
@@ -56,7 +56,7 @@
       },
       {
         "path": "tests/architecture/test_docker_runtime_contracts.py",
-        "loc": 947
+        "loc": 942
       },
       {
         "path": "tests/architecture/test_port_contracts_hypothesis.py",
@@ -91,16 +91,16 @@
         "loc": 665
       },
       {
+        "path": "tests/architecture/test_observability_metric_governance.py",
+        "loc": 617
+      },
+      {
         "path": "tests/architecture/test_transformer_signatures.py",
         "loc": 608
       },
       {
         "path": "tests/architecture/test_aggregate_boundaries.py",
         "loc": 600
-      },
-      {
-        "path": "tests/architecture/test_observability_metric_governance.py",
-        "loc": 590
       },
       {
         "path": "tests/architecture/test_di_compliance.py",
@@ -111,12 +111,12 @@
         "loc": 580
       },
       {
-        "path": "tests/architecture/test_code_metrics.py",
-        "loc": 564
+        "path": "tests/architecture/test_interfaces_no_infrastructure.py",
+        "loc": 571
       },
       {
-        "path": "tests/architecture/test_tracing_enforcement.py",
-        "loc": 562
+        "path": "tests/architecture/test_code_metrics.py",
+        "loc": 564
       }
     ]
   },
