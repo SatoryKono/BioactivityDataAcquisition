@@ -83,7 +83,7 @@ def _silver_dq_field_meta() -> tuple[
 
 
 def coerce_silver_dq_analyze_request(
-    request: SilverDQAnalyzeRequest | DataContainer | None | object = _REQUEST_OMITTED,
+    request: SilverDQAnalyzeRequest | DataContainer | object | None = _REQUEST_OMITTED,
     *,
     args: tuple[object, ...] = (),
     kwargs: Mapping[str, object] | None = None,
@@ -124,7 +124,7 @@ def coerce_silver_dq_analyze_request(
 
 def _resolve_silver_dq_analyze_kwargs(
     *,
-    request: SilverDQAnalyzeRequest | DataContainer | None | object,
+    request: SilverDQAnalyzeRequest | DataContainer | object | None,
     args: tuple[object, ...],
     kwargs: Mapping[str, object] | None,
 ) -> dict[str, object]:

@@ -28,10 +28,15 @@ if TYPE_CHECKING:
 def _get_git_commit_cached() -> str | None:
     """Get git commit hash directly via subprocess."""
     import subprocess
+    from shutil import which
+
+    git_executable = which("git")
+    if not git_executable:
+        return None
 
     try:
-        result = subprocess.run(
-            ["git", "rev-parse", "--short", "HEAD"],
+        result = subprocess.run(  # nosec B603 - Git path resolved via which()
+            [git_executable, "rev-parse", "--short", "HEAD"],
             capture_output=True,
             text=True,
             timeout=5,  # Local git subprocess — 5s is generous

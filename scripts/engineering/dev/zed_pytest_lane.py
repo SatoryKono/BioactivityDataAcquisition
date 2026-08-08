@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 """Zed-safe pytest lane runner (Windows PowerShell argv-safe).
 
 Zed on Windows often launches tasks via ``powershell -C``, which re-tokenizes

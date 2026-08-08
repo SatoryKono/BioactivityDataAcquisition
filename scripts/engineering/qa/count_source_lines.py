@@ -15,7 +15,7 @@ def count_lines(filepath: Path) -> int:
 def main():
     src_root = Path("src/bioetl")
     py_files = list(src_root.rglob("*.py"))
-    
+
     file_counts = []
     for py_file in py_files:
         if py_file.name == "__init__.py":
@@ -23,10 +23,10 @@ def main():
         line_count = count_lines(py_file)
         if line_count > 50:  # Only track files with significant content
             file_counts.append((py_file, line_count))
-    
+
     # Sort by line count descending
     file_counts.sort(key=lambda x: x[1], reverse=True)
-    
+
     print(f"Total Python files: {len(py_files)}")
     print(f"Files with >50 lines: {len(file_counts)}")
     print("\nTop 70 largest files:")
