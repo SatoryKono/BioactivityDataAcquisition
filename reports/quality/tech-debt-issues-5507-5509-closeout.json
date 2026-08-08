@@ -1,21 +1,42 @@
 {
-  "schema_version": "tech-debt-issues-5507-5509-closeout-v1",
-  "debt_budget_outcome": "reduced_or_unchanged",
+  "snapshot_date": "2026-07-02",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
   "issues": [
     {
-      "number": 5507,
-      "status": "closed-ready",
-      "summary": "CLI config bootstrap now consumes the shared runtime_builders.config_access owner seam instead of binding infra config loaders directly."
+      "issue": "#5507",
+      "theme": "CLI config bootstrap uses owner config access seam",
+      "debt_types": ["Architecture debt", "Config debt", "Governance gap"],
+      "action": "Ensured CLI config bootstrap uses owner config access seam instead of direct infrastructure config imports.",
+      "risk": "low",
+      "evidence": [
+        "src/bioetl/composition/bootstrap/cli/config.py",
+        "tests/architecture/test_tech_debt_issues_5507_5509_closeout.py::test_issue_5507_cli_config_bootstrap_uses_owner_config_access_seam"
+      ]
     },
     {
-      "number": 5508,
-      "status": "closed-ready",
-      "summary": "Maintenance CLI access now routes through a narrow composition owner seam and no longer keeps maintenance_api alive as a first-party importer chain."
+      "issue": "#5508",
+      "theme": "Maintenance CLI chain no longer imports retained facade",
+      "debt_types": ["Architecture debt", "Compatibility debt", "Governance gap"],
+      "action": "Removed maintenance CLI chain imports of retained facade with zero direct importers for maintenance_api.",
+      "risk": "low",
+      "evidence": [
+        "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py",
+        "tests/architecture/test_tech_debt_issues_5507_5509_closeout.py::test_issue_5508_maintenance_cli_chain_no_longer_imports_retained_facade"
+      ]
     },
     {
-      "number": 5509,
-      "status": "closed-ready",
-      "summary": "Contract policy loading now requires explicit hash and rollout metadata in entity configs, retiring legacy hash and rollout compatibility backfills."
+      "issue": "#5509",
+      "theme": "Contract policy loader no longer contains compat backfills",
+      "debt_types": ["Compatibility debt", "Config debt", "Governance gap"],
+      "action": "Removed compatibility backfills from contract policy loader and ensured explicit entity contract identity.",
+      "risk": "low",
+      "evidence": [
+        "src/bioetl/infrastructure/config/contract_policy_loader.py",
+        "configs/entities/**/*.yaml",
+        "tests/architecture/test_tech_debt_issues_5507_5509_closeout.py::test_issue_5509_contract_policy_loader_no_longer_contains_compat_backfills",
+        "tests/architecture/test_tech_debt_issues_5507_5509_closeout.py::test_issue_5509_entity_contract_identity_stays_explicit"
+      ]
     }
   ]
 }

@@ -1,93 +1,84 @@
 {
-  "schema_version": "tech-debt-issues-5510-5516-closeout-v1",
-  "reviewed_on": "2026-06-22",
-  "debt_budget_outcome": "reduced_or_unchanged",
+  "snapshot_date": "2026-07-03",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
   "issues": [
     {
-      "number": 5510,
-      "title": "refactor(control-plane): enforce zero-first-party growth for the application control-plane package-root facade",
-      "status": "closed-ready",
+      "issue": "#5510",
+      "theme": "Control plane root facade stays zero src importers",
+      "debt_types": ["Architecture debt", "Governance gap", "DDD violation"],
+      "action": "Maintained zero first-party src importers for control plane root facade with proper census tracking.",
+      "risk": "low",
       "evidence": [
-        "configs/quality/application_control_plane_root_facade_inventory.yaml",
         "reports/quality/compatibility-importer-census.json",
-        "reports/quality/compatibility-importer-census.md",
-        "tests/architecture/test_public_surface_importer_census_governance.py"
+        "tests/architecture/test_tech_debt_issues_5510_5516_closeout.py::test_issue_5510_control_plane_root_facade_stays_zero_src_importers"
       ]
     },
     {
-      "number": 5511,
-      "title": "refactor(duplication): burn down the low-risk CLI command contract-shell duplication wave",
-      "status": "closed-ready",
+      "issue": "#5511",
+      "theme": "Duplication wave reduced live baseline counts",
+      "debt_types": ["Duplication", "Governance gap", "Architecture debt"],
+      "action": "Reduced duplication baseline counts for CLI and bootstrap with bounded total duplicate clusters.",
+      "risk": "medium",
       "evidence": [
         "reports/quality/full-app-duplication-baseline.json",
-        "reports/quality/full-app-duplication-baseline.md",
-        "src/bioetl/interfaces/cli/commands/domains/shared/public_module_alias.py",
-        "src/bioetl/interfaces/cli/commands/domains/health/command.py",
-        "src/bioetl/interfaces/cli/commands/domains/quarantine/command.py",
-        "src/bioetl/interfaces/cli/commands/domains/diagnostics/command.py",
-        "src/bioetl/interfaces/cli/commands/domains/composite/runtime.py"
+        "tests/architecture/test_tech_debt_issues_5510_5516_closeout.py::test_issues_5511_5512_duplication_wave_reduced_live_baseline_counts"
       ]
     },
     {
-      "number": 5512,
-      "title": "refactor(duplication): collapse the composition bootstrap runtime wiring duplicates",
-      "status": "closed-ready",
+      "issue": "#5512",
+      "theme": "Duplication governance enforcement",
+      "debt_types": ["Duplication", "Governance gap", "Architecture debt"],
+      "action": "Enforced duplication governance with reduced baseline counts and bounded total duplicate clusters.",
+      "risk": "medium",
       "evidence": [
         "reports/quality/full-app-duplication-baseline.json",
-        "reports/quality/full-app-duplication-baseline.md",
-        "src/bioetl/composition/bootstrap/runtime_public_exports.py",
-        "src/bioetl/composition/bootstrap/__init__.py",
-        "src/bioetl/composition/bootstrap/runtime/__init__.py",
-        "src/bioetl/composition/bootstrap/runtime/_composite_plan_runtime_support.py"
+        "tests/architecture/test_tech_debt_issues_5510_5516_closeout.py::test_issues_5511_5512_duplication_wave_reduced_live_baseline_counts"
       ]
     },
     {
-      "number": 5513,
-      "title": "test(coverage): finish the tracing low-tail owner tests and close the remaining warn-to-block gap",
-      "status": "closed-ready",
+      "issue": "#5513",
+      "theme": "Coverage gate promoted to block",
+      "debt_types": ["Coverage debt", "Governance gap", "Enforcement debt"],
+      "action": "Promoted coverage gate enforcement to block mode with tier violation blocking and focused owner tests.",
+      "risk": "medium",
       "evidence": [
-        "configs/quality/module_coverage_gates.yaml",
-        "tests/unit/infrastructure/observability/test_tracing.py"
+        "configs/quality/module_coverage_gates.yaml::enforcement",
+        "tests/architecture/test_tech_debt_issues_5510_5516_closeout.py::test_issue_5513_coverage_gate_promoted_to_block"
       ]
     },
     {
-      "number": 5514,
-      "title": "governance(test): materialize a reviewed flaky-test burndown artifact from test-swarm telemetry",
-      "status": "closed-ready",
+      "issue": "#5514",
+      "theme": "Flaky review stays zero",
+      "debt_types": ["Test debt", "Governance gap", "Quality debt"],
+      "action": "Maintained zero flaky test count with empty reviewed flaky tests list.",
+      "risk": "low",
       "evidence": [
         "reports/quality/flaky-test-burndown-review.json",
-        "reports/test-swarm/SWARM-001/flakiness-database.json",
-        "tests/architecture/test_tech_debt_issues_5514_5515_governance.py"
+        "tests/architecture/test_tech_debt_issues_5510_5516_closeout.py::test_issue_5514_flaky_review_stays_zero"
       ]
     },
     {
-      "number": 5515,
-      "title": "governance(observability): materialize a reviewed unused-event debt artifact and enforce drift checks",
-      "status": "closed-ready",
+      "issue": "#5515",
+      "theme": "Unused event review stays zero",
+      "debt_types": ["Observability gap", "Governance gap", "Quality debt"],
+      "action": "Maintained zero unused observability events and metrics with no cardinality review required.",
+      "risk": "low",
       "evidence": [
         "reports/observability/runtime_cardinality_inventory.json",
-        "reports/observability/runtime_cardinality_review.json",
-        "tests/architecture/test_tech_debt_issues_5514_5515_governance.py"
+        "tests/architecture/test_tech_debt_issues_5510_5516_closeout.py::test_issue_5515_unused_event_review_stays_zero"
       ]
     },
     {
-      "number": 5516,
-      "title": "refactor(config/contracts): remove the remaining root-hash selector projection residue from contract_policy_loader",
-      "status": "closed-ready",
+      "issue": "#5516",
+      "theme": "Contract policy loader no longer projects root hash selectors",
+      "debt_types": ["Config debt", "Compatibility debt", "Governance gap"],
+      "action": "Removed root hash selector projection from contract policy loader with eliminated legacy functions.",
+      "risk": "low",
       "evidence": [
         "src/bioetl/infrastructure/config/contract_policy_loader.py",
-        "tests/unit/infrastructure/config/test_contract_policy_loader.py"
+        "tests/architecture/test_tech_debt_issues_5510_5516_closeout.py::test_issue_5516_contract_policy_loader_no_longer_projects_root_hash_selectors"
       ]
     }
-  ],
-  "metrics": {
-    "control_plane_root_src_importer_count": 0,
-    "cli_duplicate_clusters": 10,
-    "bootstrap_duplicate_clusters": 1,
-    "tier_violation_mode": "block",
-    "tracing_rank1_status": "focused_owner_tests_added",
-    "flaky_total": 0,
-    "unused_declared_observability_events_count": 0,
-    "runtime_cardinality_review_required_count": 0
-  }
+  ]
 }

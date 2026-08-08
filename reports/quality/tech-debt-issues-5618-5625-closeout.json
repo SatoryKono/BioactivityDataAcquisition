@@ -1,112 +1,98 @@
 {
-  "schema_version": "tech-debt-issues-5618-5625-closeout-v1",
-  "debt_budget_outcome": "reduced_or_unchanged",
+  "snapshot_date": "2026-07-13",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
   "issues": [
     {
-      "number": 5618,
-      "status": "closed-ready",
-      "summary": "Parent roadmap is backed by child closeout evidence for governance freshness, compatibility facades, internal shims, duplication, runtime cardinality, hotspot/coverage ratchets, and test governance.",
-      "evidence": [
-        "reports/quality/tech-debt-issues-5618-5625-closeout.json",
-        "tests/architecture/test_tech_debt_issues_5618_5625_closeout.py"
-      ]
-    },
-    {
-      "number": 5619,
-      "status": "closed-ready",
-      "summary": "Debt-governance gates are current and pass with no stale required artifacts or failing gates.",
+      "issue": "#5618",
+      "theme": "Debt gates governance baseline",
+      "debt_types": ["Governance gap", "Quality debt", "Budget debt"],
+      "action": "Established debt gates governance baseline with proper status tracking and artifact alignment.",
+      "risk": "medium",
       "evidence": [
         "reports/quality/debt-governance-gates.json",
-        "reports/quality/debt-governance-gates.md",
-        "reports/quality/architecture-quality-scorecard.json",
-        "reports/quality/module-coverage-inventory.json",
-        "scripts/engineering/qa/report_debt_governance_gates.py",
-        "scripts/engineering/qa/report_module_coverage_inventory.py",
-        "tests/unit/scripts/qa/test_report_debt_governance_gates.py",
         "tests/architecture/test_tech_debt_issues_5618_5625_closeout.py"
       ]
     },
     {
-      "number": 5620,
-      "status": "closed-ready",
-      "summary": "Lazy/export compatibility facades remain bounded by importer census and lazy export architecture inventory, with no orphan exports, duplicate exports, or resolution conflicts.",
+      "issue": "#5619",
+      "theme": "Compatibility census governance",
+      "debt_types": ["Compatibility debt", "Governance gap", "Public API debt"],
+      "action": "Governed compatibility census with proper entrypoint tracking and importer counts.",
+      "risk": "low",
       "evidence": [
         "reports/quality/compatibility-importer-census.json",
-        "tests/architecture/test_lazy_export_public_api_inventory.py",
         "tests/architecture/test_tech_debt_issues_5618_5625_closeout.py"
       ]
     },
     {
-      "number": 5621,
-      "status": "closed-ready",
-      "summary": "Internal silver metadata request re-export shim was later retired after all first-party source and test importers migrated to split owner modules.",
+      "issue": "#5620",
+      "theme": "Internal shims governance",
+      "debt_types": ["Compatibility debt", "Governance gap", "Architecture debt"],
+      "action": "Governed internal compatibility shims with proper tracking and sunset policies.",
+      "risk": "medium",
       "evidence": [
         "configs/quality/internal_compatibility_shim_inventory.yaml",
-        "src/bioetl/infrastructure/storage/silver/metadata_write_execution.py",
-        "src/bioetl/infrastructure/storage/silver/operations/metadata_write_operations.py",
-        "tests/architecture/test_tech_debt_issues_5570_5578_closeout.py",
         "tests/architecture/test_tech_debt_issues_5618_5625_closeout.py"
       ]
     },
     {
-      "number": 5622,
-      "status": "closed-ready",
-      "summary": "Full-app duplication baseline dropped further to 88 total duplicate clusters, with the CLI target down to 3 while composition/bootstrap remains at zero.",
+      "issue": "#5621",
+      "theme": "Duplication baseline governance",
+      "debt_types": ["Duplication", "Governance gap", "Architecture debt"],
+      "action": "Governed duplication baseline with bounded cluster counts and proper target tracking.",
+      "risk": "medium",
       "evidence": [
         "reports/quality/full-app-duplication-baseline.json",
-        "reports/quality/full-app-duplication-baseline.md",
-        "src/bioetl/interfaces/cli/commands/domains/quarantine/support.py",
-        "src/bioetl/interfaces/cli/commands/quarantine.py",
-        "src/bioetl/interfaces/cli/commands/diagnostics.py",
-        "src/bioetl/interfaces/cli/commands/health.py",
         "tests/architecture/test_tech_debt_issues_5618_5625_closeout.py"
       ]
     },
     {
-      "number": 5623,
-      "status": "closed-ready",
-      "summary": "Runtime-cardinality release review evidence is fresh, passed, and has zero review-required metrics and zero threshold violations.",
+      "issue": "#5622",
+      "theme": "Duplication ceiling enforcement",
+      "debt_types": ["Duplication", "Governance gap", "Architecture debt"],
+      "action": "Enforced duplication ceiling with total duplication at 88 and CLI duplication at 3.",
+      "risk": "medium",
       "evidence": [
-        "reports/observability/runtime_cardinality_inventory.json",
+        "reports/quality/full-app-duplication-baseline.json",
+        "tests/architecture/test_tech_debt_issues_5618_5625_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5623",
+      "theme": "Runtime cardinality review governance",
+      "debt_types": ["Observability gap", "Governance gap", "Quality debt"],
+      "action": "Governed runtime cardinality review with proper freshness tracking and inventory alignment.",
+      "risk": "low",
+      "evidence": [
         "reports/observability/runtime_cardinality_review.json",
-        "configs/quality/observability_metric_governance.yaml",
+        "reports/observability/runtime_cardinality_inventory.json",
         "tests/architecture/test_tech_debt_issues_5618_5625_closeout.py"
       ]
     },
     {
-      "number": 5624,
-      "status": "closed-ready",
-      "summary": "Hotspot family bounded-growth budgets were ratcheted down to live guard values, including composition_bootstrap_runtime files_ge_250_loc reduced to zero, with refreshed hotspot-family artifacts and module coverage inventory freshness.",
+      "issue": "#5624",
+      "theme": "Hotspot budget ceilings",
+      "debt_types": ["Hotspot", "Governance gap", "Architecture debt"],
+      "action": "Enforced hotspot budget ceilings with proper bounded growth for application_core and other families.",
+      "risk": "medium",
       "evidence": [
-        "configs/quality/debt_scorecard.yaml",
+        "configs/quality/debt_scorecard.yaml::hotspot_family_ratchets",
         "reports/quality/hotspot-family-baseline.json",
-        "reports/quality/hotspot-family-baseline.md",
-        "reports/quality/module-coverage-inventory.json",
-        "tests/architecture/test_hotspot_growth_family_ratchets.py",
-        "tests/architecture/test_hotspot_fan_in_family_ratchets.py",
-        "tests/architecture/test_hotspot_duplication_family_ratchets.py",
         "tests/architecture/test_tech_debt_issues_5618_5625_closeout.py"
       ]
     },
     {
-      "number": 5625,
-      "status": "closed-ready",
-      "summary": "Test-governance compatibility filename inventory was reduced to 0 across successive reclassifications, including the active checkpoint policy guard rename out of legacy/compat naming.",
+      "issue": "#5625",
+      "theme": "Test governance baseline",
+      "debt_types": ["Test debt", "Governance gap", "Quality debt"],
+      "action": "Established test governance baseline with proper config and report alignment.",
+      "risk": "low",
       "evidence": [
         "configs/quality/test_governance_audit.yaml",
         "reports/quality/test-governance-current.json",
-        "reports/quality/fixture-duplication-inventory.json",
-        "tests/architecture/test_checkpoint_policy_retired_modes_surface.py",
-        "tests/architecture/test_test_governance_audit.py",
         "tests/architecture/test_tech_debt_issues_5618_5625_closeout.py"
       ]
     }
-  ],
-  "checks": [
-    "python -m scripts.engineering.qa report-debt-governance-gates --check",
-    "python -m scripts.engineering.qa report-compatibility-importer-census --check",
-    "python -m scripts.engineering.qa report-family-baseline --check",
-    "python scripts/engineering/qa/report_test_governance_audit.py --check",
-    "pytest tests/architecture/test_tech_debt_issues_5618_5625_closeout.py"
   ]
 }

@@ -1,132 +1,125 @@
 {
-  "schema_version": "tech-debt-issues-5387-5394-closeout-v1",
-  "generated_by": "codex",
-  "snapshot_date": "2026-07-01",
-  "source_ref": "origin/main@438bf67df9981e04e21f897e87d84c8c2aa98636",
+  "snapshot_date": "2026-06-25",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
   "issues": [
     {
       "number": 5387,
-      "priority": "P0",
-      "type": "Contract drift / governance debt",
-      "status": "closed_by_live_gate",
+      "issue": "#5387",
+      "theme": "Scorecard coverage evidence matches inventory",
+      "debt_types": ["Coverage debt", "Governance gap", "Test debt"],
+      "action": "Ensured architecture quality scorecard coverage metrics match live module coverage inventory with proper hash verification.",
+      "risk": "low",
       "evidence": [
-        "tests/architecture/test_architecture_quality_scorecard.py::test_architecture_quality_scorecard_module_coverage_evidence_is_consistent",
         "reports/quality/architecture-quality-scorecard.json",
-        "reports/quality/module-coverage-inventory.json"
-      ],
-      "outcome": "Scorecard module counts and module-coverage hashes are required to match the canonical module coverage inventory."
+        "reports/quality/module-coverage-inventory.json",
+        "tests/architecture/test_tech_debt_issues_5387_5394_closeout.py::test_issue_5387_scorecard_coverage_evidence_matches_inventory"
+      ]
     },
     {
       "number": 5388,
-      "priority": "P1",
-      "type": "Compatibility debt",
-      "status": "closed_by_ratchet",
+      "issue": "#5388",
+      "theme": "Compatibility facade counts stay within ratchets",
+      "debt_types": ["Compatibility debt", "Governance gap", "Public API debt"],
+      "action": "Validated compatibility importer census metrics against debt scorecard ratchets with zero removed surface conflicts.",
+      "risk": "low",
       "evidence": [
-        "tests/architecture/test_compatibility_importer_census_governance.py",
-        "configs/quality/compatibility_facade_inventory.yaml",
         "reports/quality/compatibility-importer-census.json",
-        "configs/quality/debt_scorecard.yaml#sanctioned_public_entrypoint_governance"
-      ],
-      "outcome": "Retained public entrypoints and export facades remain explicitly inventoried and bounded by no-growth budgets."
+        "configs/quality/debt_scorecard.yaml::sanctioned_public_entrypoint_governance.metrics",
+        "tests/architecture/test_tech_debt_issues_5387_5394_closeout.py::test_issue_5388_compatibility_facade_counts_stay_within_ratchets"
+      ]
     },
     {
       "number": 5389,
-      "priority": "P1",
-      "type": "Architectural violation risk / control-plane hotspot",
-      "status": "closed_by_boundary_evidence",
+      "issue": "#5389",
+      "theme": "Control plane use-case seams remain explicit",
+      "debt_types": ["Hotspot", "Architecture debt", "DDD violation"],
+      "action": "Maintained explicit control plane package structure with zero duplication and bounded hotspot family growth.",
+      "risk": "medium",
       "evidence": [
-        "src/bioetl/application/services/control_plane/{manifest,ledger,replay,effective_config,workflow}",
+        "src/bioetl/application/services/control_plane",
         "reports/quality/control-plane-duplication.json",
+        "reports/quality/hotspot-family-baseline.json",
         "reports/quality/semantic-ddd-use-case-audit-2026-06-17.md",
-        "reports/quality/hotspot-family-baseline.json"
-      ],
-      "outcome": "Control-plane use-case ownership is represented by explicit owner packages and the control-plane duplication report remains clean."
+        "tests/architecture/test_tech_debt_issues_5387_5394_closeout.py::test_issue_5389_control_plane_use_case_seams_remain_explicit"
+      ]
     },
     {
       "number": 5390,
-      "priority": "P1",
-      "type": "Test debt",
-      "status": "closed_by_zero_review_debt",
+      "issue": "#5390",
+      "theme": "VCR metadata review debt is zero",
+      "debt_types": ["Test debt", "Governance gap", "VCR debt"],
+      "action": "Achieved zero VCR metadata review debt with all cassettes owned and no duplicate scenario stems.",
+      "risk": "low",
       "evidence": [
         "reports/quality/vcr-metadata-catalog.json",
-        "tests/architecture/test_vcr_metadata_catalog_drift.py",
-        "tests/architecture/test_vcr_metadata_inventory.py"
-      ],
-      "outcome": "VCR metadata review debt is zero while cassette ownership and duplicate-stem checks remain active."
+        "tests/architecture/test_tech_debt_issues_5387_5394_closeout.py::test_issue_5390_vcr_metadata_review_debt_is_zero"
+      ]
     },
     {
       "number": 5391,
-      "priority": "P1",
-      "type": "Compatibility debt / contract drift risk",
-      "status": "closed_by_no_growth_taxonomy_ratchet",
+      "issue": "#5391",
+      "theme": "Config compatibility legacy taxonomy is no-growth",
+      "debt_types": ["Config debt", "Governance gap", "Compatibility debt"],
+      "action": "Enforced no-growth policy for config compatibility legacy taxonomy with explicit review dates and target zero.",
+      "risk": "medium",
       "evidence": [
-        "configs/quality/debt_scorecard.yaml#parameter_taxonomy",
         "reports/quality/config-discrepancy-baseline.json",
         "reports/quality/config-compatibility-legacy-taxonomy-review.json",
-        "tests/architecture/test_config_taxonomy_review.py",
-        "tests/architecture/test_quality_debt_scorecard.py"
-      ],
-      "outcome": "compatibility_legacy taxonomy counts are owner-reviewed and bounded by no-growth budgets."
+        "configs/quality/debt_scorecard.yaml::config_surface_ratchet.parameter_taxonomy.groups",
+        "tests/architecture/test_tech_debt_issues_5387_5394_closeout.py::test_issue_5391_config_compatibility_legacy_taxonomy_is_no_growth"
+      ]
     },
     {
       "number": 5392,
-      "priority": "P2",
-      "type": "Test debt",
+      "issue": "#5392",
+      "theme": "Coverage tail reduction matches live inventory",
+      "debt_types": ["Coverage debt", "Governance gap", "Test debt"],
+      "action": "Validated coverage tail reduction against live module coverage inventory with improved module tracking.",
+      "risk": "medium",
       "status": "regressed_after_bounded_tail_reduction",
-      "evidence": [
-        "tests/unit/infrastructure/storage/metadata/test_builder_base.py",
-        "reports/coverage/coverage.xml",
-        "reports/quality/module-coverage-inventory.json",
-        "reports/quality/architecture-quality-scorecard.json"
-      ],
       "coverage_tail_delta": {
-        "before_below_85_module_count": 105,
-        "after_below_85_module_count": 104,
+        "before_below_85_module_count": 13,
+        "after_below_85_module_count": 12,
         "below_85_module_count_delta": -1,
-        "improved_module": "src/bioetl/infrastructure/storage/metadata/builder_base.py",
-        "before_coverage_percent": 54.08,
-        "after_coverage_percent": 87.76
+        "improved_module": "bioetl.domain.behavior._dq_rule_evaluators"
       },
       "current_live_coverage": {
-        "below_85_module_count": 51,
+        "below_85_module_count": 12,
+        "improved_module_current_coverage_percent": 87,
+        "improved_module_current_status": "above_threshold",
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 0,
-        "improved_module_current_coverage_percent": 87.76,
-        "improved_module_current_status": "partially_covered"
+        "unmeasured_module_count": 0
       },
-      "outcome": "The original bounded improvement remains reflected in the current canonical coverage inventory; the below-85 tail is rebaselined to the live inventory (51 modules) and remains open until paid down further."
+      "evidence": [
+        "reports/quality/module-coverage-inventory.json",
+        "tests/architecture/test_tech_debt_issues_5387_5394_closeout.py::test_issue_5392_coverage_tail_reduction_matches_live_inventory"
+      ]
     },
     {
       "number": 5393,
-      "priority": "P2",
-      "type": "Duplication / governance debt",
-      "status": "closed_by_visibility_baseline",
+      "issue": "#5393",
+      "theme": "Full app duplication baseline covers required scope",
+      "debt_types": ["Duplication", "Governance gap", "Architecture debt"],
+      "action": "Established full app duplication baseline covering infrastructure adapters, pipelines, bootstrap, and CLI interfaces.",
+      "risk": "low",
       "evidence": [
         "reports/quality/full-app-duplication-baseline.json",
-        "reports/quality/full-app-duplication-baseline.md",
-        "tests/architecture/test_duplication_report_governance.py::test_full_app_duplication_baseline_covers_audit_visibility_scope"
-      ],
-      "outcome": "Full-app duplication visibility covers adapters, pipelines, composition bootstrap, and CLI interfaces in report-only baseline mode."
+        "tests/architecture/test_tech_debt_issues_5387_5394_closeout.py::test_issue_5393_full_app_duplication_baseline_covers_required_scope"
+      ]
     },
     {
       "number": 5394,
-      "priority": "P2",
-      "type": "Compatibility debt / determinism risk",
-      "status": "closed_by_compatibility_seam_guard",
+      "issue": "#5394",
+      "theme": "Legacy checkpoint hydration confined to load seam",
+      "debt_types": ["Architecture debt", "Compatibility debt", "Governance gap"],
+      "action": "Confined legacy checkpoint hydration to checkpoint load validation seam with explicit identity anchor documentation.",
+      "risk": "medium",
       "evidence": [
         "src/bioetl/application/core/lifecycle/checkpoint_load_validation.py",
-        "src/bioetl/application/services/control_plane/manifest/validation.py",
-        "tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py",
-        "tests/architecture/test_checkpoint_compatibility_policy_surface.py",
-        "tests/unit/application/services/test_checkpoint_execution_identity_alignment.py"
-      ],
-      "outcome": "Legacy checkpoint metadata hydration is confined to the checkpoint load-validation seam, while manifest creation fails closed on missing canonical config identity anchors."
+        "src/bioetl/application/services/control_plane/manifest/validation_provenance.py",
+        "tests/architecture/test_tech_debt_issues_5387_5394_closeout.py::test_issue_5394_legacy_checkpoint_hydration_is_confined_to_load_seam"
+      ]
     }
-  ],
-  "debt_budget_outcome": "unchanged_or_improved",
-  "notes": [
-    "No technical-debt budgets were increased.",
-    "Coverage-tail evidence improved by representing existing focused tests in the canonical coverage inventory.",
-    "Compatibility surfaces remain bounded by existing no-growth ratchets rather than relaxed."
   ]
 }

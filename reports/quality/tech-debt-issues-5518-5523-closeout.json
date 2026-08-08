@@ -1,82 +1,77 @@
 {
-  "schema_version": "tech-debt-issues-5518-5523-closeout-v1",
-  "reviewed_on": "2026-06-23",
-  "debt_budget_outcome": "reduced_or_unchanged",
+  "snapshot_date": "2026-07-04",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
   "issues": [
     {
-      "number": 5518,
-      "title": "refactor(config): finish the owner-seam migration for CLI bootstrap config loading",
-      "status": "closed-ready",
+      "issue": "#5518",
+      "theme": "CLI bootstrap config uses owner loader seam",
+      "debt_types": ["Architecture debt", "Config debt", "Governance gap"],
+      "action": "Ensured CLI bootstrap config uses owner loader seam instead of direct DQ config loader calls.",
+      "risk": "low",
       "evidence": [
         "src/bioetl/composition/bootstrap/cli/config.py",
         "src/bioetl/composition/runtime_builders/config_access.py",
-        "tests/unit/composition/bootstrap/cli/test_config.py",
-        "tests/architecture/test_rf014_composition_bootstrap_closeout.py"
+        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py::test_issue_5518_cli_bootstrap_config_uses_owner_loader_seam"
       ]
     },
     {
-      "number": 5519,
-      "title": "refactor(composition): eliminate the remaining first-party callers of bioetl.composition.health_api",
-      "status": "closed-ready",
+      "issue": "#5519",
+      "theme": "Health API has zero src importers",
+      "debt_types": ["Architecture debt", "Governance gap", "Public API debt"],
+      "action": "Maintained zero src importers for health API with proper internal caller tracking.",
+      "risk": "low",
       "evidence": [
-        "src/bioetl/composition/health_service_access.py",
-        "configs/quality/compatibility_facade_inventory.yaml",
         "reports/quality/compatibility-importer-census.json",
-        "tests/architecture/test_health_cli_config_seam.py"
+        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py::test_issue_5519_health_api_has_zero_src_importers"
       ]
     },
     {
-      "number": 5520,
-      "title": "refactor(domain): start the second-wave reduction of bioetl.domain.composite.config facade burden",
-      "status": "closed-ready",
+      "issue": "#5520",
+      "theme": "Domain composite config root facade stays zero src importers",
+      "debt_types": ["Architecture debt", "Config debt", "Governance gap"],
+      "action": "Maintained zero src importers for domain composite config root facade with proper import tracking.",
+      "risk": "low",
       "evidence": [
+        "reports/quality/compatibility-importer-census.json",
         "src/bioetl/domain/composite/__init__.py",
-        "src/bioetl/domain/composite/config.py",
-        "src/bioetl/domain/composite/config_models.py",
-        "reports/quality/compatibility-importer-census.json",
-        "tests/architecture/test_domain_composite_config_importer_map.py"
+        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py::test_issue_5520_domain_composite_config_root_facade_stays_zero_src_importers"
       ]
     },
     {
-      "number": 5521,
-      "title": "refactor(cli): collapse the remaining run-manifest output twin helper pair",
-      "status": "closed-ready",
+      "issue": "#5521",
+      "theme": "Run manifest output twin pair removed",
+      "debt_types": ["Duplication", "Governance gap", "Architecture debt"],
+      "action": "Removed run manifest output twin pair with deleted private helper and zero twin pair count.",
+      "risk": "low",
       "evidence": [
-        "src/bioetl/interfaces/cli/commands/run_manifest_output_support.py",
         "reports/quality/compatibility-importer-census.json",
-        "tests/architecture/test_private_module_imports.py"
+        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py::test_issue_5521_run_manifest_output_twin_pair_removed"
       ]
     },
     {
-      "number": 5522,
-      "title": "refactor(config): deduplicate the repeated entity contract metadata blocks across configs/entities",
-      "status": "closed-ready",
+      "issue": "#5522",
+      "theme": "Entity quality metadata registry replaces inline duplicates",
+      "debt_types": ["Config debt", "Duplication", "Governance gap"],
+      "action": "Replaced inline quality metadata duplicates with shared entity quality metadata registry profile.",
+      "risk": "medium",
       "evidence": [
         "configs/quality/entity_contract_metadata_registry.yaml",
         "reports/quality/config-surface-backlog.json",
-        "tests/architecture/_entity_contract_metadata_registry.py",
-        "tests/architecture/test_chembl_derived_vocabulary_policy.py",
-        "tests/architecture/test_chembl_publication_subset_policy.py"
+        "configs/entities/**/*.yaml",
+        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py::test_issue_5522_entity_quality_metadata_registry_replaces_inline_duplicates"
       ]
     },
     {
-      "number": 5523,
-      "title": "governance(observability): tighten runtime cardinality review freshness after the zero-residual debt closeout",
-      "status": "closed-ready",
+      "issue": "#5523",
+      "theme": "Observability freshness limit is tightened and passing",
+      "debt_types": ["Observability gap", "Governance gap", "Quality debt"],
+      "action": "Tightened observability release review freshness limit to 21 days with passing status.",
+      "risk": "low",
       "evidence": [
-        "scripts/engineering/qa/report_debt_governance_gates.py",
         "reports/quality/debt-governance-gates.json",
-        "reports/observability/runtime_cardinality_review.json",
-        "tests/unit/scripts/qa/test_report_debt_governance_gates.py"
+        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py::test_issue_5523_observability_freshness_limit_is_tightened_and_passing"
       ]
     }
-  ],
-  "metrics": {
-    "health_api_src_importer_count": 0,
-    "domain_composite_config_src_importer_count": 0,
-    "run_manifest_output_twin_pair_count": 0,
-    "shared_entity_quality_metadata_targets": 22,
-    "quality_metadata_duplication_clusters": 0,
-    "observability_release_review_freshness_limit_days": 21
-  }
+  ]
 }
