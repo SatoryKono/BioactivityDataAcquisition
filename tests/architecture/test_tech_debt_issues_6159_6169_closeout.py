@@ -331,7 +331,25 @@ def test_issue_6169_script_governance_ratchet_has_headroom() -> None:
     assert untriaged_gate["current"] == len(untriaged_zero_reference_rows)
     assert untriaged_gate["status"] == "pass"
 
-    for script_path in outcome["newly_governed_supporting_scripts"]:
+    expected_decisions = {
+        "scripts/ai/gemini/setup-bash-alias.sh": "legacy_manual_utility",
+        "scripts/docs/matrix/structural_contract.py": "shared_helper_module",
+        "scripts/docs/matrix/enrich_normalization_details.py": "compatibility_wrapper",
+        "scripts/docs/matrix/export_structural_contract.py": "compatibility_wrapper",
+        "scripts/docs/matrix/filter_rows.py": "compatibility_wrapper",
+        "scripts/docs/matrix/generate_field_matrix.py": "compatibility_wrapper",
+        "scripts/engineering/ci/apply-ci-optimizations-fixed.ps1": (
+            "legacy_manual_utility"
+        ),
+        "scripts/engineering/ci/apply-ci-optimizations.ps1": (
+            "legacy_manual_utility"
+        ),
+        "scripts/engineering/repo/apply_branch_cleanup_phases_0_2.sh": (
+            "legacy_manual_utility"
+        ),
+    }
+    assert outcome["newly_governed_supporting_scripts"] == list(expected_decisions)
+    for script_path, expected_decision in expected_decisions.items():
         row = rows_by_path[script_path]
         lifecycle = lifecycle_entries[script_path]
         assert row["status"] == "supporting"
@@ -340,5 +358,7 @@ def test_issue_6169_script_governance_ratchet_has_headroom() -> None:
             "legacy_manual_utility",
             "shared_helper_module",
         }
+        assert row["lifecycle_decision"] == expected_decision
+
         assert lifecycle["decision"] == row["lifecycle_decision"]
         assert lifecycle["review_by"] == "2026-09-30"

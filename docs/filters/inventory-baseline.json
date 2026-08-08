@@ -12,9 +12,11 @@
     "conflict": 0
   },
   "surface_totals": {
-    "surfaces_total": 104,
+    "surfaces_total": 103,
+
     "by_category": {
-      "consumer_alias": 26,
+      "consumer_alias": 25,
+
       "observability": 11,
       "runtime_gate": 11,
       "silver_config": 10,
@@ -22,7 +24,7 @@
     },
     "by_symbol": {
       "--silver-filter-only": 6,
-      "FILTERED_OUT_SILVER": 14,
+      "FILTERED_OUT_SILVER": 13,
       "FORBIDDEN_SILVER_SEMANTIC_FILTER_KEYS": 1,
       "SilverFilterConfig": 1,
       "SilverFiltersConfig": 1,
@@ -1607,17 +1609,6 @@
       "category": "consumer_alias",
       "surface": "legacy_silver_error_code",
       "symbol": "FILTERED_OUT_SILVER",
-      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py",
-      "occurrence_count": 1,
-      "first_line": 43,
-      "role": "Temporary legacy Silver reject alias",
-      "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
-      "notes": ""
-    },
-    {
-      "category": "consumer_alias",
-      "surface": "legacy_silver_error_code",
-      "symbol": "FILTERED_OUT_SILVER",
       "path": "src/bioetl/interfaces/cli/commands/diagnostics.py",
       "occurrence_count": 2,
       "first_line": 74,
@@ -1719,7 +1710,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "docs/04-reference/observability/metrics-catalog.md",
       "occurrence_count": 1,
-      "first_line": 88,
+      "first_line": 89,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1807,7 +1798,8 @@
       "symbol": "bioetl_silver_filter_reject_total_mismatch_15m",
       "path": "grafana/README.md",
       "occurrence_count": 2,
-      "first_line": 1265,
+      "first_line": 1266,
+
       "role": "Silver reject accounting reconciliation",
       "migration_relevance": "Recording rule reconciles stage totals with bounded Silver reject breakdowns.",
       "notes": ""
