@@ -249,7 +249,7 @@ review_lanes:
         canonical_path: null
         action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
       - path: .claude
-        current_live_state: absent_from_root_baseline
+        current_live_state: present_local_only_root_surface
         canonical_path: .codex
         action_if_reintroduced: migrate_to_codex_or_remove_root_surface
       - path: .gemini
