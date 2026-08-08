@@ -11,8 +11,8 @@
 | Tracked doc-like files | 2950 |
 | Ignored local docs/reports files | 5 |
 | Duplicate groups | 2 |
-| Generated without route or exception | 3 |
-| Generated routes | 69 |
+| Generated without route or exception | 0 |
+| Generated routes | 70 |
 
 ## Tracking State
 
@@ -58,20 +58,20 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 1143 |
+| Active | 1091 |
 | Archived | 155 |
 | Canonical | 73 |
-| Generated | 862 |
+| Generated | 914 |
 | Working | 722 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 1143 |
+| active | 1091 |
 | archive | 155 |
 | canonical | 73 |
-| generated | 862 |
+| generated | 914 |
 | working | 722 |
 
 ## Recommended Actions
@@ -80,8 +80,8 @@
 | --- | --- |
 | archive-after-github-state-check | 315 |
 | archive-after-migration | 262 |
-| generate-automatically | 862 |
-| keep | 1512 |
+| generate-automatically | 914 |
+| keep | 1460 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -206,6 +206,34 @@
 | `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/policy/agent-orchestration-rules.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/memory/MEMORY_ARCHITECTURE.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/README.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/agent-memory.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/gemini-memory.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/gh-issues-documentation-update.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/mcp-memory.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/memory-py-audit-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/memory-py-config-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/memory-py-debug-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/memory-py-doc-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/memory-py-plan-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/memory-py-test-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/neo4j-project-memory-seed.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/memory/neo4j-project-memory-seed.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/COLLECTED_PROMPTS_INDEX.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/README.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/ai_workspace_setup.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/architecture_debt_reduction_orchestration.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/architecture_metric_exemptions_tasks_json_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/architecture_review_and_refactoring_assessment.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/docs_ai_audit_planning_codex_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/documentation_diagrams_audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/grok-audit-cycle.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/grok-closeout.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/refactor_orchestration_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/scripts_inventory_consolidation_cleanup_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/test_fix_retest_loop.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/test_speed_optimization_loop.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/skills/_references/README.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
 | `docs/00-project/ai/skills/_references/local/deep-research/references/critique-framework.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
 | `docs/00-project/ai/skills/_references/local/deep-research/references/report-templates.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
@@ -224,35 +252,7 @@
 | `docs/00-project/ai/skills/global/gh-address-comments/LICENSE.txt` |  | generated_skill_license_mirror |  |  |
 | `docs/00-project/ai/skills/global/gh-fix-ci/LICENSE.txt` |  | generated_skill_license_mirror |  |  |
 | `docs/00-project/ai/skills/global/openai-docs/LICENSE.txt` |  | generated_skill_license_mirror |  |  |
-| `docs/00-project/governance/root-local-clutter-cleanup.md` | root-local-clutter-cleanup-governance-doc |  |  | manual-governance-doc |
-| `docs/02-architecture/07-compatibility-facade-snapshot.md` | compatibility-facade-snapshot-generated-doc |  |  | scripts/engineering/qa/generate_compatibility_facade_snapshot.py |
-| `docs/02-architecture/adr-registry.md` | adr-registry-generated-docs |  |  | scripts/generate_adr_registry.py |
-| `docs/02-architecture/adr-registry/README.md` | adr-registry-generated-docs |  |  | scripts/generate_adr_registry.py |
-| `docs/02-architecture/adr-registry/index.md` | adr-registry-generated-docs |  |  | scripts/generate_adr_registry.py |
-| `docs/02-architecture/adr-registry/registry.json` | adr-registry-generated-docs |  |  | scripts/generate_adr_registry.py |
-| `docs/02-architecture/adr-registry/status-dashboard.md` | adr-registry-generated-docs |  |  | scripts/generate_adr_registry.py |
-| `docs/02-architecture/diagrams/_template.mmd` |  | diagram_kind:diagram_support | diagram_support |  |
-| `docs/02-architecture/diagrams/adr-040-compliance-map.md` |  | diagram_kind:diagram_support | diagram_support |  |
-| `docs/02-architecture/diagrams/architecture/49-chembl-pipeline-activity-dataflow.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/render/generate_pipeline_dataflows.py |
-| `docs/02-architecture/diagrams/architecture/50-chembl-pipeline-activity-filter-criteria.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/render/generate_pipeline_dataflows.py |
-| `docs/02-architecture/diagrams/architecture/51a-chembl-pipeline-activity-silver-fields-1.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/render/generate_pipeline_dataflows.py |
-| `docs/02-architecture/diagrams/architecture/51b-chembl-pipeline-activity-silver-fields-2.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/render/generate_pipeline_dataflows.py |
-| `docs/02-architecture/diagrams/architecture/52a-chembl-pipeline-activity-gold-fields-1.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/render/generate_pipeline_dataflows.py |
-| `docs/02-architecture/diagrams/architecture/52b-chembl-pipeline-activity-gold-fields-2.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/render/generate_pipeline_dataflows.py |
-| `docs/02-architecture/diagrams/architecture/svg/INDEX.md` | architecture-diagram-render-artifacts |  | diagram_render_artifact | docs/02-architecture/diagrams/tooling/render.sh |
-| `docs/02-architecture/diagrams/bundles/architecture.bundle.md` | architecture-diagram-bundles |  | diagram_bundle | scripts/diagrams/render/generate_all_bundles.py |
-| `docs/02-architecture/diagrams/bundles/class.bundle.md` | architecture-diagram-bundles |  | diagram_bundle | scripts/diagrams/render/generate_all_bundles.py |
-| `docs/02-architecture/diagrams/bundles/foundation.bundle.md` | architecture-diagram-bundles |  | diagram_bundle | scripts/diagrams/render/generate_all_bundles.py |
-| `docs/02-architecture/diagrams/bundles/views.bundle.md` | architecture-diagram-bundles |  | diagram_bundle | scripts/diagrams/render/generate_all_bundles.py |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-checkpoint.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/render/generate_package_family_class_diagrams.py |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-runner-pkg-part1.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/render/generate_package_family_class_diagrams.py |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-runner-pkg-part2.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/render/generate_package_family_class_diagrams.py |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-base-transformer.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/render/generate_package_family_class_diagrams.py |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-batch-execution.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/render/generate_package_family_class_diagrams.py |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-lifecycle.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/render/generate_package_family_class_diagrams.py |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-postrun.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/render/generate_package_family_class_diagrams.py |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-preflight.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/render/generate_package_family_class_diagrams.py |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-observability.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/render/generate_package_family_class_diagrams.py |
+| `docs/00-project/ai/skills/local/SKILLS-CATALOG.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 
 ## GitHub Issue Evidence Examples
 
@@ -346,6 +346,7 @@
 | Route | Generator | Commit Policy |
 | --- | --- | --- |
 | adr-registry-generated-docs | `scripts/generate_adr_registry.py` | tracked_curated_generated_doc |
+| ai-local-generated-docs-helpers | `AI runtime memory, prompts, and local skill generators` | ignored_local_export |
 | ai-runtime-governance-mirrors | `scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py` | tracked_mirror_surface |
 | ai-skill-license-mirrors | `scripts/ai/codex/check_skills_mirror.sh` | tracked_mirror_surface |
 | ai-skill-reference-mirror | `scripts/ai/codex/check_skills_mirror.sh` | tracked_mirror_surface |
