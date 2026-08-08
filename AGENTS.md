@@ -38,6 +38,29 @@ Before planning, auditing, or editing:
    through `python -m memory.tooling.workflow pre-task ...` and
    `python -m memory.tooling.workflow post-task ...`.
 
+## Environment Configuration
+
+All AI agents and skills MUST use tokens and parameters from the repository root
+`.env` file. The `.env` file is machine-local and secret-bearing:
+
+- **MCP integrations:** Use MCP server tokens from `.env` (e.g., `DEEPWIKI_API_KEY`,
+  `DEEPWIKI_ORGANISATION_ID`, `CONTEXT7_API_KEY`, `NEEDLE_API_KEY`, etc.)
+- **GitHub operations:** Use GitHub tokens from `.env` (e.g., `GITHUB_TOKEN`,
+  `GITHUB_PERSONAL_ACCESS_TOKEN`, `GITHUB_CDX_PERSONAL_ACCESS_TOKEN`)
+- **LLM providers:** Use API keys from `.env` (e.g., `OPENAI_API_KEY`, `GROK_API_TOKEN`)
+- **Search providers:** Use search API keys from `.env` (e.g., `BRAVE_API_KEY`)
+- **Code quality tools:** Use tool tokens from `.env` (e.g., `QODO_API_KEY`, `SONARQUBE_TOKEN`)
+- **Docker registry:** Use Docker Hub credentials from `.env` (e.g., `DOCKER_API_KEY`,
+  `DOCKER_USERNAME`, `HUB_PAT_TOKEN`)
+
+**Env file guardrail:** Agents and contributors MUST NOT create, edit, rename, move,
+overwrite, or delete any `.env` file without explicit per-task user approval. If a
+task requires changes to `.env`, the agent MUST stop and request explicit user
+permission first.
+
+For the current consolidated environment configuration, see the consolidation
+history in `docs/env/` (note: `docs/env/consolidated.env` was moved to `.env`).
+
 ## Response Language
 
 - By default, answer the user in Russian when the user writes in Russian.

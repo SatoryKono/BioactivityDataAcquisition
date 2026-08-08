@@ -18,6 +18,20 @@ Create a new ETL pipeline for a provider/entity pair in BioETL.
 - Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - Post-change validation: `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 
+## Environment Configuration
+
+This skill may use provider API keys from the repository root `.env` file when scaffolding
+pipelines for providers that require authentication:
+
+- `BIOETL_UNIPROT_API_KEY` - UniProt API key (if scaffolding UniProt pipeline)
+- `BIOETL_OPENALEX_API_KEY` - OpenAlex API key (if scaffolding OpenAlex pipeline)
+- `BIOETL_PUBMED_API_KEY` - PubMed API key (if scaffolding PubMed pipeline)
+- `BIOETL_SEMANTICSCHOLAR_API_KEY` - Semantic Scholar API key (if scaffolding Semantic Scholar pipeline)
+- `BIOETL_CROSSREF_EMAIL` - CrossRef email (if scaffolding CrossRef pipeline)
+
+**Note:** Provider API keys are optional for scaffolding. The skill will create placeholder
+configuration that can be filled later. The `.env` file is machine-local and secret-bearing.
+
 ## Workflow
 
 1. Follow this skill file as the canonical Codex runtime instructions.
