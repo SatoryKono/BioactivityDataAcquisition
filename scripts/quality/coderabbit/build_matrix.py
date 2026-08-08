@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import json
-import os
 import subprocess
-import tempfile
 from collections import Counter
 from datetime import datetime, timezone, UTC
 from pathlib import Path
@@ -27,20 +25,9 @@ def git_ls(*paths: str) -> list[str]:
     return [x.decode("utf-8", "replace") for x in r.stdout.split(b"\0") if x]
 
 
-def atomic_write(path: Path, content: str) -> None:
-    fd, tmp_name = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.")
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as tmp:
-            tmp.write(content)
-        os.replace(tmp_name, path)
-    except Exception:
-        os.unlink(tmp_name)
-        raise
-
-
 def write_list(name: str, files: list[str]) -> Path:
     p = OUT / name
-    atomic_write(p, "\n".join(files) + ("\n" if files else ""))
+    p.write_text("\n".join(files) + ("\n" if files else ""), encoding="utf-8")
     return p
 
 
@@ -331,9 +318,8 @@ def main() -> None:
         "total_files_assigned": sum(_leaf_file_count(leaf) for leaf in leaves),
         "leaves": leaves,
     }
-    atomic_write(
-        OUT / "01-scope-matrix.json",
-        json.dumps(matrix, indent=2, ensure_ascii=False, sort_keys=True),
+    (OUT / "01-scope-matrix.json").write_text(
+        json.dumps(matrix, indent=2, ensure_ascii=False), encoding="utf-8"
     )
 
     lines = [
@@ -364,7 +350,7 @@ def main() -> None:
         for leaf in over:
             lines.append(f"- {leaf['id']}: {leaf['files']}")
         lines.append("")
-    atomic_write(OUT / "01-scope-matrix.md", "\n".join(lines))
+    (OUT / "01-scope-matrix.md").write_text("\n".join(lines), encoding="utf-8")
 
     pre = f"""# CR-FULL preflight — 20260806-full
 
@@ -386,7 +372,7 @@ def main() -> None:
 ## Next
 Phase 1: sequential coderabbit review per leaf
 """
-    atomic_write(OUT / "00-preflight.md", pre)
+    (OUT / "00-preflight.md").write_text(pre, encoding="utf-8")
 
     print(
         f"leaves={len(leaves)} over_cap={len(over)} "
