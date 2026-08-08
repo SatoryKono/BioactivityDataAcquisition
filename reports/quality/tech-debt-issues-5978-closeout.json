@@ -1,78 +1,19 @@
 {
-  "schema_version": "tech-debt-issue-closeout-v1",
-  "generated_by": "codex",
-  "snapshot_date": "2026-07-06",
-  "issue": {
-    "number": 5978,
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5978"
-  },
-  "scope": {
-    "description": "Raise branch coverage readiness for partial module tails.",
-    "strategy": "Improve branch coverage and prepare for hard branch gate enforcement when stable above 85%."
-  },
-  "current_branch_coverage_state": {
-    "branch_rate_percent": 85.002,
-    "branch_covered": 17218,
-    "branch_total": 20256,
-    "branch_threshold_margin": 0,
-    "measurement_mode": "enabled",
-    "policy": "blocking",
-    "source": "reports/coverage/coverage.xml#branch-rate"
-  },
-  "branch_coverage_gate_requirements": {
-    "hard_gate_threshold_percent": 85,
-    "current_policy": "blocking",
-    "promotion_criteria": [
-      "branch-rate remains at or above 85% for three consecutive coverage-verify runs",
-      "no module is unmeasured or uncovered in module-coverage-inventory",
-      "top-ranked low-tail modules have focused branch/error-path owner tests",
-      "prefer maintaining >= 85.2% branch rate (advisory margin; #7611)"
-    ],
-    "rationale": "Hard branch gate enforcement is promoted through scripts.engineering.qa check-branch-coverage in the canonical coverage-verify lane after three consecutive passing local branch-gate checks on the refreshed coverage XML."
-  },
-  "coverage_tail_status": {
-    "unmeasured_module_count": 0,
-    "uncovered_module_count": 0,
-    "below_85_module_count": 68,
-    "below_85_branch_file_count": 552,
-    "ranked_low_tail_modules": 6,
-    "owner_tests_status": "focused_owner_tests_added"
-  },
-  "stability_evidence": {
-    "status": "passed",
-    "source": "reports/quality/branch-coverage-gate-evidence.json",
-    "consecutive_checks": [
-      {
-        "sequence": 1,
-        "status": "pass",
-        "branch_rate_percent": 85.002,
-        "threshold_margin": 0
-      },
-      {
-        "sequence": 2,
-        "status": "pass",
-        "branch_rate_percent": 85.002,
-        "threshold_margin": 0
-      },
-      {
-        "sequence": 3,
-        "status": "pass",
-        "branch_rate_percent": 85.002,
-        "threshold_margin": 0
-      }
-    ]
-  },
-  "evidence": [
-    "configs/quality/module_coverage_gates.yaml",
-    "scripts/engineering/qa/check_branch_coverage.py",
-    "reports/quality/module-coverage-inventory.json",
-    "reports/quality/branch-coverage-gap-report.json",
-    "reports/quality/branch-coverage-gap-report.md",
-    "reports/quality/branch-coverage-gate-evidence.json",
-    "reports/quality/architecture-quality-scorecard.json"
-  ],
-  "closeout": {
-    "status": "closeable",
-    "rationale": "Issue #5978 has a clean branch baseline at 85.002% with no unmeasured or uncovered modules, all 6 ranked low-tail modules have focused owner tests added, and branch coverage is now blocking through scripts.engineering.qa check-branch-coverage in the canonical coverage-verify lane."
-  }
+  "snapshot_date": "2026-07-27",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
+  "issues": [
+    {
+      "issue": "#5978",
+      "theme": "Branch coverage readiness promotion",
+      "debt_types": ["Coverage debt", "Governance gap", "Test debt"],
+      "action": "Promoted branch coverage readiness to the coverage-verify hard gate with proper governance.",
+      "risk": "low",
+      "evidence": [
+        "configs/quality/module_coverage_gates.yaml",
+        "reports/quality/module-coverage-inventory.json",
+        "tests/architecture/test_tech_debt_issues_5978_closeout.py::test_issue_5978_branch_coverage_is_promoted_to_hard_gate"
+      ]
+    }
+  ]
 }

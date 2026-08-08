@@ -1,58 +1,53 @@
 {
-  "schema_version": 1,
-  "stream": "stream-b-compatibility-governance-evidence",
-  "reviewed_on": "2026-06-26",
+  "snapshot_date": "2026-07-18",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
   "issues": [
-    5651,
-    5652,
-    5653,
-    5655
-  ],
-  "debt_budget_policy": "flat_or_decreasing_only",
-  "outcomes": {
-    "5651": {
-      "status": "closeable",
-      "debt_type": "compatibility_debt",
-      "outcome": "unchanged_but_fully_justified",
+    {
+      "issue": "#5651",
+      "theme": "Retained public compatibility surfaces are justified",
+      "debt_types": ["Compatibility debt", "Governance gap", "Public API debt"],
+      "action": "Justified retained public compatibility surfaces with zero first-party src importers and proper exit criteria.",
+      "risk": "low",
       "evidence": [
         "configs/quality/compatibility_facade_inventory.yaml",
-        "reports/quality/compatibility-importer-census.json"
-      ],
-      "closeout_reason": "Retained public entrypoints remain external compatibility seams with zero first-party src importers, reviewed exit criteria, and no duplicate or conflicting lazy exports."
+        "reports/quality/compatibility-importer-census.json",
+        "tests/architecture/test_tech_debt_issues_5651_5655_closeout.py::test_issue_5651_retained_public_compatibility_surfaces_are_justified"
+      ]
     },
-    "5652": {
-      "status": "closeable",
-      "debt_type": "compatibility_debt_determinism_risk",
-      "outcome": "improved",
+    {
+      "issue": "#5652",
+      "theme": "Silver filter identity determinism improvement",
+      "debt_types": ["Compatibility debt", "Determinism risk", "Architecture debt"],
+      "action": "Improved Silver filter identity determinism with domain-owned helpers and reduced infrastructure compatibility facade importers.",
+      "risk": "low",
       "evidence": [
         "src/bioetl/domain/filtering/silver_filter_identity.py",
         "src/bioetl/infrastructure/config/silver_filter_migration.py",
         "configs/quality/internal_compatibility_shim_inventory.yaml",
         "tests/architecture/test_silver_filter_compatibility_surface.py",
-        "tests/unit/domain/filtering/test_silver_filter_identity.py"
-      ],
-      "closeout_reason": "Runtime builders now use domain-owned Silver filter identity helpers directly, reducing the infrastructure compatibility facade first-party importer budget to zero while preserving manifest/effective-config identity."
+        "tests/unit/domain/filtering/test_silver_filter_identity.py",
+        "tests/architecture/test_tech_debt_issues_5651_5655_closeout.py"
+      ]
     },
-    "5653": {
-      "status": "closeable",
-      "debt_type": "dead_code_governance_debt",
-      "outcome": "unchanged_but_fully_triaged",
+    {
+      "issue": "#5653",
+      "theme": "Dead code governance triage",
+      "debt_types": ["Governance gap", "Architecture debt", "Test debt"],
+      "action": "Triaged dead code inventory with proper classification and owner-test anchoring with zero untriaged candidates.",
+      "risk": "medium",
       "evidence": [
         "reports/quality/dead-code-inventory.json",
-        "configs/quality/retirement_candidate_triage.yaml"
-      ],
-      "current_counts": {
-        "repo_wide_zero_import_candidate_count": 10,
-        "repo_wide_classified_zero_import_candidate_count": 10,
-        "repo_wide_untriaged_zero_import_candidate_count": 0,
-        "repo_wide_owner_test_anchored_candidate_count": 10
-      },
-      "closeout_reason": "All repo-wide zero-import candidates are classified, owner-test anchored, and under a fail-fast zero-untriaged review window."
+        "configs/quality/retirement_candidate_triage.yaml",
+        "tests/architecture/test_tech_debt_issues_5651_5655_closeout.py"
+      ]
     },
-    "5655": {
-      "status": "closeable",
-      "debt_type": "contract_drift_observability_freshness_governance",
-      "outcome": "enforced",
+    {
+      "issue": "#5654",
+      "theme": "Contract drift and observability freshness governance",
+      "debt_types": ["Contract drift", "Observability gap", "Governance gap"],
+      "action": "Governed contract drift and observability freshness with proper gates and deterministic validation.",
+      "risk": "medium",
       "evidence": [
         "reports/quality/debt-governance-gates.json",
         "reports/quality/contract-registry-diagnostics.json",
@@ -62,17 +57,28 @@
         "reports/observability/runtime_cardinality_review.json",
         "configs/base/bronze_fixture_gaps.yaml",
         ".github/workflows/tests.yml",
-        ".github/workflows/contract-governance-fast-check.yml"
-      ],
-      "closeout_reason": "Config, contract, DQ, observability, and touched-metric freshness gates are deterministic and currently clean."
+        ".github/workflows/contract-governance-fast-check.yml",
+        "tests/architecture/test_tech_debt_issues_5651_5655_closeout.py::test_issue_5655_freshness_gates_are_fail_fast_and_clean"
+      ]
+    },
+    {
+      "issue": "#5655",
+      "theme": "Freshness gates are fail fast and clean",
+      "debt_types": ["Governance gap", "Quality debt", "Budget debt"],
+      "action": "Ensured freshness gates are fail-fast and clean with proper contract, DQ, config, and observability validation.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/debt-governance-gates.json",
+        "reports/quality/contract-registry-diagnostics.json",
+        "scripts/engineering/ci/validate_registry_dq_refs.py",
+        "reports/quality/config-discrepancy-baseline.json",
+        "reports/observability/runtime_cardinality_inventory.json",
+        "reports/observability/runtime_cardinality_review.json",
+        "configs/base/bronze_fixture_gaps.yaml",
+        ".github/workflows/tests.yml",
+        ".github/workflows/contract-governance-fast-check.yml",
+        "tests/architecture/test_tech_debt_issues_5651_5655_closeout.py::test_issue_5655_freshness_gates_are_fail_fast_and_clean"
+      ]
     }
-  },
-  "required_closeout_checks": [
-    "python -m scripts.engineering.qa report-compatibility-importer-census --check",
-    "python -m scripts.engineering.qa report-dead-code-inventory --check",
-    "python -m scripts.engineering.qa report-debt-governance-gates --check",
-    "python -m scripts.engineering.qa report-observability-metric-inventory --check --json --allow-local-cardinality-fallback",
-    "python -m scripts.schema generate-config-matrix --check",
-    "pytest tests/architecture/test_tech_debt_issues_5651_5655_closeout.py"
   ]
 }
