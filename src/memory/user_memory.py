@@ -135,6 +135,7 @@ class UserMemoryStore:
         content: dict[str, Any],
     ) -> UserMemoryRecord:
         """Create or replace one consented user-memory record."""
+        # NOSONAR - S2583: false positive - envelope.repo_id and context.repo_id are independent strings
         if envelope.repo_id != context.repo_id:
             raise ValueError("record envelope repository does not match caller")
         self._require_consent(owner_id, envelope.repo_id)
