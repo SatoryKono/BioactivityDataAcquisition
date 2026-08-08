@@ -44,6 +44,26 @@ pytestmark = [pytest.mark.skip(reason="Legacy memory sync test - module structur
 
 # from scripts.memory.operations.sync import *
 # from memory.graph.sync_pkg import _core as _sync_core
+
+# Constants needed by other modules
+CHEMBL_ACTIVITY_CONFIG_PATH = "configs/entities/chembl/activity.yaml"
+RUN_MANIFEST_LEDGER_DOC_PATH = "docs/04-reference/contracts/run-manifest-ledger.md"
+RUN_MANIFEST_MODULE_PATH = "src/bioetl/domain/control_plane/run_manifest.py"
+APPLICATION_CORE_DIR = "src/bioetl/application/core"
+CHEMBL_CONFIG_DIR = "configs/entities/chembl"
+TESTS_ARCHITECTURE_DIR = "tests/architecture"
+ARCHITECTURE_DIAGRAMS_DIR = "docs/02-architecture/diagrams"
+RECORD_NORMALIZATION_PROCESSOR_PATH = "src/bioetl/application/core/record_normalization_processor.py"
+REPO_ZONE_GITHUB = "github.com:BioactivityDataAcquisition/BioactivityDataAcquisition.git"
+REPO_ZONE_SRC = "src"
+REPO_ZONE_DOCS = "docs"
+REPO_ZONE_TESTS = "tests"
+REPO_ZONE_CONFIGS = "configs"
+REPO_ZONE_SCRIPTS = "scripts"
+REPO_ZONE_REPORTS = "reports"
+REPO_ZONE_GRAFANA = "grafana"
+REPO_ZONE_ROOT = "."
+
 LEGACY_REPORT_PATH = str(Path(tempfile.gettempdir()) / "neo4j-memory-audit.json")
 
 
