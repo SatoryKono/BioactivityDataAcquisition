@@ -14,8 +14,12 @@ from bioetl.application.observability.tracing_operation_helpers import traced_op
 from bioetl.domain.exceptions import BioETLError
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort, MetricsPublisherPort, TracingPort
-    from bioetl.domain.ports.observability.tracing import SpanHandle
+    from bioetl.domain.ports import (
+        LoggerPort,
+        MetricsPublisherPort,
+        SpanHandle,
+        TracingPort,
+    )
 
 _METRICS_GATEWAY_ERRORS = (
     BioETLError,

@@ -12,17 +12,19 @@ from bioetl.domain.composite.aggregation import (
     AggregationFieldSpec,
     AggregationFunction,
 )
-from bioetl.domain.composite.config_composite_serialization import (
-    _build_dependency_config,
-    _build_enricher_config,
+from bioetl.domain.composite.config import (
+    CompositeConfig,
+    DependencyConfig,
+    EnricherConfig,
+    MergeConfig,
+    SeedConfig,
+    composite_from_dict,
 )
 from bioetl.domain.composite.config_cross_validation import (
     CrossValidationConfig,
     _validate_cross_validation_thresholds,
     _validate_cross_validation_tolerances,
 )
-from bioetl.domain.composite.config_merge import MergeConfig
-from bioetl.domain.composite.config_models import DependencyConfig, EnricherConfig
 from bioetl.domain.composite.cross_validation import (
     ComparisonMethod,
     FieldComparisonSpec,
@@ -79,25 +81,37 @@ def test_cross_validation_rejects_non_finite_thresholds() -> None:
     CrossValidationConfig()  # defaults ok
 
 
-def test_serialization_preserves_zero_timeout_for_validation() -> None:
+def _deserialize_config(payload: dict[str, object]) -> CompositeConfig:
+    return composite_from_dict(
+        payload,
+        composite_cls=CompositeConfig,
+        seed_cls=SeedConfig,
+        dependency_cls=DependencyConfig,
+        enricher_cls=EnricherConfig,
+        merge_cls=MergeConfig,
+    )
+
+
+@pytest.mark.parametrize("section", ["dependencies", "enrichers"])
+def test_serialization_preserves_zero_timeout_for_validation(section: str) -> None:
+    payload: dict[str, object] = {
+        "name": "c",
+        "version": "1",
+        "seed": {"pipeline": "seed", "output_keys": ["id"], "silver_table": "s"},
+        "dependencies": [],
+        "enrichers": [],
+        "merge": {
+            "strategy": "left_outer",
+            "conflict_resolution": "seed_priority",
+            "output_silver_path": "silver/c",
+            "output_gold_path": "gold/c",
+        },
+    }
+    payload[section] = [
+        {"pipeline": "related", "join_keys": ["id"], "timeout_seconds": 0}
+    ]
     with pytest.raises(ValueError, match="timeout_seconds"):
-        _build_dependency_config(
-            {
-                "pipeline": "dep",
-                "join_keys": ["k"],
-                "timeout_seconds": 0,
-            },
-            DependencyConfig,
-        )
-    with pytest.raises(ValueError, match="timeout_seconds"):
-        _build_enricher_config(
-            {
-                "pipeline": "enr",
-                "join_keys": ["k"],
-                "timeout_seconds": 0,
-            },
-            EnricherConfig,
-        )
+        _deserialize_config(payload)
 
 
 def test_state_metric_doc_range_includes_terminals() -> None:

@@ -15,8 +15,7 @@ from bioetl.application.services.quality._quarantine_service_support import (
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort, QuarantinePort, TracingPort
-    from bioetl.domain.ports.observability.tracing import SpanHandle
+    from bioetl.domain.ports import LoggerPort, QuarantinePort, SpanHandle, TracingPort
 
 
 class _QuarantineAsyncHost(Protocol):

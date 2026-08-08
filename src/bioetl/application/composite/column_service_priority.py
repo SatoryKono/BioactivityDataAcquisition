@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
-from typing import TYPE_CHECKING
 
 import polars as pl
 
@@ -13,9 +12,7 @@ from bioetl.application.composite.column_priority_orderer import (
     order_priority_columns,
 )
 from bioetl.domain.composite import EnricherConfig
-
-if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
+from bioetl.domain.ports import LoggerPort
 
 
 class ColumnPriorityOrderingPolicy:

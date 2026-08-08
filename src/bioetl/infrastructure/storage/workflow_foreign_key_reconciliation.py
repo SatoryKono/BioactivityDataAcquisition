@@ -28,8 +28,8 @@ from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support i
 )
 
 __all__ = [
-    "GoldReconciliationReaderPort",
-    "ReconcileDebugArtifactSinkPort",
+    "GoldReconciliationReaderProtocol",
+    "ReconcileDebugArtifactSinkProtocol",
     "SilverForeignKeyReconciliationAdapter",
     "StorageForeignKeyReconciliationAdapter",
     "filter_current_rows",
@@ -44,7 +44,7 @@ _CURRENT_FLAG_COLUMNS = ("_is_current", "is_current")
 
 
 @runtime_checkable
-class GoldReconciliationReaderPort(Protocol):
+class GoldReconciliationReaderProtocol(Protocol):
     """Narrow gold reader seam required by foreign-key reconciliation.
 
     Implementations may expose a sync or async ``read_gold``; the adapter
@@ -62,7 +62,7 @@ class GoldReconciliationReaderPort(Protocol):
 
 
 @runtime_checkable
-class ReconcileDebugArtifactSinkPort(Protocol):
+class ReconcileDebugArtifactSinkProtocol(Protocol):
     """Narrow debug-artifact sink used by FK reconciliation export path."""
 
     def write_reconcile_debug_artifacts(
@@ -135,8 +135,8 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
     metrics: MetricsPort | None = None
     quarantine: QuarantinePort | None = None
     quarantine_pipeline_name: str | None = None
-    gold_writer: GoldReconciliationReaderPort | None = None
-    artifact_sink: ReconcileDebugArtifactSinkPort | None = None
+    gold_writer: GoldReconciliationReaderProtocol | None = None
+    artifact_sink: ReconcileDebugArtifactSinkProtocol | None = None
 
     async def reconcile_foreign_keys(
         self,

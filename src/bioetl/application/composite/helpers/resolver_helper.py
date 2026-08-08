@@ -3,16 +3,15 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
-from typing import TYPE_CHECKING, TypeVar
+from typing import TypeVar
+
+import polars as pl
 
 from bioetl.application.composite.join_key_normalization import (
     JOIN_KEY_NORMALIZATION_POLICIES,
     JoinKeyNormalizationPolicy,
 )
 from bioetl.domain.ports import LoggerPort
-
-if TYPE_CHECKING:
-    import polars as pl
 
 TResolver = TypeVar("TResolver")
 

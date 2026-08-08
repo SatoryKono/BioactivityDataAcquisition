@@ -5,7 +5,10 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
+from httpx import HTTPError
+
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.base_metrics import ADAPTER_REQUEST_ERRORS
 from bioetl.infrastructure.adapters.uniprot.query_builder import (
     build_uniprot_health_probe_params,
 )
@@ -14,6 +17,8 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+
+UNIPROT_HEALTH_ERRORS = (*ADAPTER_REQUEST_ERRORS, HTTPError)
 
 
 async def probe_uniprot_health(
@@ -36,7 +41,7 @@ async def probe_uniprot_health(
             response = await http_client.get_once(
                 f"{base_url}/uniprotkb/search", params=params
             )
-    except Exception as exc:
+    except UNIPROT_HEALTH_ERRORS as exc:
         # Health probes must not raise: transport, status, or unexpected
         # connection failures degrade status for operators.
         status_code = getattr(getattr(exc, "response", None), "status_code", None)

@@ -26,7 +26,11 @@ pytestmark = pytest.mark.architecture
 def _load_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[2]
     module_path = (
-        repo_root / "scripts" / "diagrams" / "enforce_diagram_quality_budget.py"
+        repo_root
+        / "scripts"
+        / "diagrams"
+        / "lint"
+        / "enforce_diagram_quality_budget.py"
     )
     spec = importlib.util.spec_from_file_location(
         "diagram_quality_budget_module", module_path

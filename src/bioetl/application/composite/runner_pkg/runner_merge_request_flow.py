@@ -5,11 +5,13 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from typing import Protocol, cast
 
-from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.merger_orchestration import (
     MergeExecutionRequest,
     build_merge_execution_request,
     resolve_merge_metadata_timestamp,
+)
+from bioetl.application.composite.runner_pkg.runner_checkpoint_contracts import (
+    CompositeCheckpointState,
 )
 from bioetl.application.composite.runner_pkg.runner_constants import (
     PIPELINE_EXECUTION_ERRORS,

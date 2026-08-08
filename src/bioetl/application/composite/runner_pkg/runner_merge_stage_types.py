@@ -5,16 +5,16 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
-from bioetl.application.composite.checkpoint import (
-    CompositeCheckpointService,
-    CompositeCheckpointState,
-)
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.lifecycle_observer_service import (
     CompositeLifecycleObserverService,
 )
 from bioetl.application.composite.merger_orchestration import (
     MergeExecutionRequest,
+)
+from bioetl.application.composite.runner_pkg.runner_checkpoint_contracts import (
+    CompositeCheckpointService,
+    CompositeCheckpointState,
 )
 from bioetl.application.composite.runtime_models import (
     CompositeMergerProtocol,

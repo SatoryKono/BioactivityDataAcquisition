@@ -1,8 +1,4 @@
-"""ChEMBL Activity Transformer.
-
-Transforms Bronze records to Silver format (Activity entity inflation).
-Uses declarative field_specs DSL for mapping where applicable.
-"""
+"""Transform ChEMBL Bronze activity records to Silver and Gold."""
 
 from __future__ import annotations
 
@@ -53,10 +49,7 @@ class ActivityTransformer(BaseChemblTransformer):
     )
 
     @override
-    def _prepare_record(
-        self,
-        record: BronzeRecord,
-    ) -> BronzeRecord:
+    def _prepare_record(self, record: BronzeRecord) -> BronzeRecord:
         """Normalize provider-native activity identifiers at the ingestion boundary."""
         return normalize_provider_aliases(record, self._PROVIDER_ALIASES)
 

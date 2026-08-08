@@ -16,6 +16,9 @@ Status: active navigational memory. Parent: `agent-memory.md`.
 - Target ownership: locate callers, tests, config, schemas, generators, docs,
   and mirrors through repository search.
 - Architecture constraints: current RULES, requirements, and accepted ADRs.
+- Boundary reminder: plans must not introduce direct
+  `interfaces -> infrastructure` imports; route through Application or public
+  Composition APIs.
 - Broad structural evidence: topology and governance summary directories.
 - Debt registries: scorecard and architecture exemption config.
 

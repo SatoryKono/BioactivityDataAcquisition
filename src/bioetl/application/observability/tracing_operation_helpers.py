@@ -24,8 +24,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator, Generator
 
+    from bioetl.domain.ports import SpanHandle as Span
     from bioetl.domain.ports import TracingPort
-    from bioetl.domain.ports.observability.tracing import SpanHandle as Span
 from bioetl.domain.types import JsonDict
 
 

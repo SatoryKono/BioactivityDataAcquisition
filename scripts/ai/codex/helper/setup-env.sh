@@ -105,7 +105,9 @@ fi
 
 echo ""
 
-# STEP 4: Auth surface (.env.codex optional when ChatGPT device auth exists)
+# STEP 4: Auth surface (.env.codex optional when ChatGPT device auth exists).
+# The default is non-mutating: without BIOETL_CREATE_LOCAL_ENV_FILES=1 this
+# helper does not create .env automatically.
 # shellcheck source=codex-auth-lib.sh
 source "${SCRIPT_DIR}/codex-auth-lib.sh"
 log_info "STEP 4: Checking Codex authentication..."

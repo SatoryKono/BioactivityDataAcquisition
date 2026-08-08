@@ -25,7 +25,9 @@ pytestmark = pytest.mark.architecture
 
 def _load_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[2]
-    module_path = repo_root / "scripts" / "diagrams" / "fix_mermaid_operators.py"
+    module_path = (
+        repo_root / "scripts" / "diagrams" / "fix" / "fix_mermaid_operators.py"
+    )
     spec = importlib.util.spec_from_file_location(
         "fix_mermaid_operators_module", module_path
     )

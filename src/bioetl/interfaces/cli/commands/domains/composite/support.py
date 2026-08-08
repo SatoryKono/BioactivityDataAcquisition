@@ -35,15 +35,25 @@ def push_metrics_to_gateway(
     pipeline_name: str | None = None,
 ) -> bool:
     """Push metrics without turning a completed CLI run into failure."""
-    from bioetl.interfaces.cli.commands.domains.health.metrics_publication_integration import (
-        publish_metrics_safely,
+    from bioetl.composition.observability_api import (
+        push_metrics_to_gateway as push_via_observability_api,
     )
 
-    # Best-effort only: never raise into composite finally / SystemExit paths.
-    return publish_metrics_safely(
-        run_label=run_label,
-        pipeline_name=pipeline_name,
-    )
+    try:
+        return push_via_observability_api(
+            run_label=run_label,
+            pipeline_name=pipeline_name,
+        )
+    except (
+        OSError,
+        ConnectionError,
+        TimeoutError,
+        RuntimeError,
+        ValueError,
+        TypeError,
+        AttributeError,
+    ):
+        return False
 
 
 def emit_composite_startup(

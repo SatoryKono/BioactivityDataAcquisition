@@ -201,12 +201,7 @@ def is_duplicate_record(
     metrics: _DuplicateMetricsPort | None = None,
     log_context: dict[str, object] | None = None,
 ) -> bool:
-    """Return ``True`` when the record is a duplicate for the configured key semantics.
-
-    Side effect: each call registers the record's key into ``seen_keys`` when a
-    usable key is present. Records without a usable key return ``False`` and are
-    not registered (remain eligible for downstream handling).
-    """
+    """Register the key and report whether it was already present."""
     return (
         register_record_dedup_key(
             record=record,
@@ -235,11 +230,7 @@ def is_new_record(
     metrics: _DuplicateMetricsPort | None = None,
     log_context: dict[str, object] | None = None,
 ) -> bool:
-    """Return ``True`` when the record registered as a new dedup key.
-
-    Side effect: each call mutates ``seen_keys`` by registering the key when
-    present. Records without a usable key return ``False`` and are not added.
-    """
+    """Register the key and report whether it is new."""
     return (
         register_record_dedup_key(
             record=record,

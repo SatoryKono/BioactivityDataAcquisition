@@ -10,7 +10,7 @@ import pytest
 pytestmark = pytest.mark.unit
 
 from bioetl.domain.types import BatchID
-from bioetl.domain.value_objects.activity_concentration import (
+from bioetl.domain.value_objects import (
     Concentration,
     ConcentrationUnit,
 )

@@ -184,18 +184,10 @@ def load_checkpoint_state(
     return None
 
 
-# Compatibility re-exports for existing import sites.
-from bioetl.application.composite.checkpoint._checkpoint_warnings import (  # noqa: E402
-    warn_if_checkpoint_exists_with_progress,
-    warn_if_checkpoint_stale,
-)
-
 __all__ = [
     "CHECKPOINT_READ_ERRORS",
     "CHECKPOINT_WRITE_ERRORS",
     "latest_checkpoint_filename",
     "load_checkpoint_state",
     "resolve_resume_checkpoint_filename",
-    "warn_if_checkpoint_exists_with_progress",
-    "warn_if_checkpoint_stale",
 ]

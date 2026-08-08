@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
-from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.checkpoint.transition_service import (
     apply_recovery_checkpoint_transition,
     apply_validated_checkpoint_transition,
+)
+from bioetl.application.composite.runner_pkg.runner_checkpoint_contracts import (
+    CompositeCheckpointState,
 )
 from bioetl.application.composite.runner_pkg.runner_constants import (
     CHECKPOINT_NON_FATAL_ERRORS,

@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.composition.runtime_builders._run_manifest_control_plane_paths import (
-    _resolve_data_root,
+    resolve_data_root,
 )
 from bioetl.domain.control_plane import RunArtifactRef
 
@@ -30,7 +30,7 @@ def build_planned_artifacts(
     debug_export_root: str | None = None,
 ) -> tuple[RunArtifactRef, ...]:
     """Capture planned layer roots for the manifest control-plane snapshot."""
-    output_root = _resolve_data_root(settings) / "output"
+    output_root = resolve_data_root(settings) / "output"
     planned = [
         RunArtifactRef(
             layer="bronze",
