@@ -22,8 +22,8 @@ def build_forwarded_fetch_kwargs(
     entity_type: str,
     limit: int | None = None,
     query: str | None = None,
-    filter_ids: list[str] | None | _FetchArgSentinel = _UNSET_FETCH_ARG,
-    filter_field: str | None | _FetchArgSentinel = _UNSET_FETCH_ARG,
+    filter_ids: list[str] | _FetchArgSentinel | None = _UNSET_FETCH_ARG,
+    filter_field: str | _FetchArgSentinel | None = _UNSET_FETCH_ARG,
     offset: int | None = None,
 ) -> dict[str, object | None]:
     """Build the canonical kwargs payload for forwarded fetch calls."""
@@ -45,8 +45,8 @@ async def forward_fetch_records(
     entity_type: str,
     limit: int | None = None,
     query: str | None = None,
-    filter_ids: list[str] | None | _FetchArgSentinel = _UNSET_FETCH_ARG,
-    filter_field: str | None | _FetchArgSentinel = _UNSET_FETCH_ARG,
+    filter_ids: list[str] | _FetchArgSentinel | None = _UNSET_FETCH_ARG,
+    filter_field: str | _FetchArgSentinel | None = _UNSET_FETCH_ARG,
     offset: int | None = None,
 ) -> AsyncIterator[JsonDict]:
     """Forward fetch arguments into a callable and yield the resulting records."""

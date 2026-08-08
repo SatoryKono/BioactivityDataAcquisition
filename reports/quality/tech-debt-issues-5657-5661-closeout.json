@@ -56,7 +56,7 @@
       "action": "Governed execution policy with proper policy tracking and enforcement.",
       "risk": "low",
       "evidence": [
-        "src/bioetl/interfaces/cli/commands/domains/run_all/execution_policy.py",
+        "src/bioetl/interfaces/cli/commands/domains/shared/execution_policy.py",
         "tests/architecture/test_tech_debt_issues_5657_5661_closeout.py"
       ]
     }

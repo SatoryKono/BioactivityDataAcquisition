@@ -6,7 +6,7 @@ from __future__ import annotations
 import sys
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(_argv: list[str] | None = None) -> int:
     """Main entry point for memory query operations."""
     print("Memory query operations - placeholder implementation")
     print("This is a stub for future memory query functionality")

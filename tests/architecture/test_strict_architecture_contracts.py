@@ -396,7 +396,7 @@ def _iter_ports_files(ports_dir: Path) -> list[Path]:
     return [
         port_file
         for port_file in ports_dir.glob("*.py")
-        if port_file.name not in ("__init__.py", "noop.py")
+        if port_file.name not in ("__init__.py", "noop.py", "_facade_support.py")
     ]
 
 

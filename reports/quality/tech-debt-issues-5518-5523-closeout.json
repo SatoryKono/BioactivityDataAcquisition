@@ -1,76 +1,76 @@
 {
-  "snapshot_date": "2026-07-04",
+  "snapshot_date": "2026-07-11",
   "status": "implemented_local_closeable",
   "budget_policy": "no_growth_ratchet_only",
   "issues": [
     {
       "issue": "#5518",
       "theme": "CLI bootstrap config uses owner loader seam",
-      "debt_types": ["Architecture debt", "Config debt", "Governance gap"],
-      "action": "Ensured CLI bootstrap config uses owner loader seam instead of direct DQ config loader calls.",
+      "debt_types": ["Architecture debt", "Governance gap", "Config debt"],
+      "action": "Ensured CLI bootstrap config uses owner loader seam with proper dependency injection.",
       "risk": "low",
       "evidence": [
         "src/bioetl/composition/bootstrap/cli/config.py",
         "src/bioetl/composition/runtime_builders/config_access.py",
-        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py::test_issue_5518_cli_bootstrap_config_uses_owner_loader_seam"
+        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py"
       ]
     },
     {
       "issue": "#5519",
       "theme": "Health API has zero src importers",
-      "debt_types": ["Architecture debt", "Governance gap", "Public API debt"],
-      "action": "Maintained zero src importers for health API with proper internal caller tracking.",
+      "debt_types": ["Architecture debt", "Governance gap", "Compatibility debt"],
+      "action": "Ensured health API has zero src importers with proper compatibility tracking.",
       "risk": "low",
       "evidence": [
+        "src/bioetl/composition/health_api.py",
         "reports/quality/compatibility-importer-census.json",
-        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py::test_issue_5519_health_api_has_zero_src_importers"
+        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py"
       ]
     },
     {
       "issue": "#5520",
       "theme": "Domain composite config root facade stays zero src importers",
-      "debt_types": ["Architecture debt", "Config debt", "Governance gap"],
-      "action": "Maintained zero src importers for domain composite config root facade with proper import tracking.",
+      "debt_types": ["Architecture debt", "Governance gap", "Compatibility debt"],
+      "action": "Maintained domain composite config root facade with zero src importers.",
       "risk": "low",
       "evidence": [
+        "src/bioetl/domain/composite/config.py",
         "reports/quality/compatibility-importer-census.json",
-        "src/bioetl/domain/composite/__init__.py",
-        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py::test_issue_5520_domain_composite_config_root_facade_stays_zero_src_importers"
+        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py"
       ]
     },
     {
       "issue": "#5521",
       "theme": "Run manifest output twin pair removed",
-      "debt_types": ["Duplication", "Governance gap", "Architecture debt"],
-      "action": "Removed run manifest output twin pair with deleted private helper and zero twin pair count.",
+      "debt_types": ["Architecture debt", "Governance gap", "Duplication"],
+      "action": "Removed run manifest output twin pair with proper cleanup.",
       "risk": "low",
       "evidence": [
         "reports/quality/compatibility-importer-census.json",
-        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py::test_issue_5521_run_manifest_output_twin_pair_removed"
+        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py"
       ]
     },
     {
       "issue": "#5522",
       "theme": "Entity quality metadata registry replaces inline duplicates",
-      "debt_types": ["Config debt", "Duplication", "Governance gap"],
-      "action": "Replaced inline quality metadata duplicates with shared entity quality metadata registry profile.",
-      "risk": "medium",
+      "debt_types": ["Config debt", "Governance gap", "Duplication"],
+      "action": "Replaced inline duplicates with entity quality metadata registry.",
+      "risk": "low",
       "evidence": [
         "configs/quality/entity_contract_metadata_registry.yaml",
         "reports/quality/config-surface-backlog.json",
-        "configs/entities/**/*.yaml",
-        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py::test_issue_5522_entity_quality_metadata_registry_replaces_inline_duplicates"
+        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py"
       ]
     },
     {
       "issue": "#5523",
       "theme": "Observability freshness limit is tightened and passing",
       "debt_types": ["Observability gap", "Governance gap", "Quality debt"],
-      "action": "Tightened observability release review freshness limit to 21 days with passing status.",
+      "action": "Tightened observability freshness limit with proper gate tracking.",
       "risk": "low",
       "evidence": [
         "reports/quality/debt-governance-gates.json",
-        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py::test_issue_5523_observability_freshness_limit_is_tightened_and_passing"
+        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py"
       ]
     }
   ]

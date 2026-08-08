@@ -1,80 +1,75 @@
 {
-  "snapshot_date": "2026-07-06",
+  "snapshot_date": "2026-07-17",
   "status": "implemented_local_closeable",
   "budget_policy": "no_growth_ratchet_only",
-  "metrics": {
-    "remote_main_sha": "0000000000000000000000000000000000000000",
-    "generated_artifact_drift_count": 0,
-    "replay_missing_context_disposition": "missing_context_hard_fail_raised"
-  },
   "issues": [
     {
       "issue": "#5553",
       "theme": "Governance artifacts are aligned to committed inventory",
-      "debt_types": ["Governance gap", "Coverage debt", "Architecture debt"],
-      "action": "Aligned governance artifacts to committed inventory with proper module coverage ratchets and remote main baseline.",
-      "risk": "medium",
+      "debt_types": ["Governance gap", "Architecture debt", "Quality debt"],
+      "action": "Aligned governance artifacts to committed inventory with proper hash verification.",
+      "risk": "low",
       "evidence": [
-        "configs/quality/module_coverage_gates.yaml::aggregate_residual_ratchets",
+        "configs/quality/module_coverage_gates.yaml",
         "reports/quality/debt-governance-gates.json",
-        "tests/architecture/test_tech_debt_issues_5553_5558_closeout.py::test_issue_5553_governance_artifacts_are_aligned_to_committed_inventory"
+        "tests/architecture/test_tech_debt_issues_5553_5558_closeout.py"
       ]
     },
     {
       "issue": "#5554",
       "theme": "Control plane public facade has zero first-party interface importers",
-      "debt_types": ["Architecture debt", "Governance gap", "DDD violation"],
-      "action": "Maintained zero first-party interface importers for control plane public facade with proper census tracking.",
+      "debt_types": ["Architecture debt", "Governance gap", "Compatibility debt"],
+      "action": "Ensured control plane public facade has zero first-party interface importers.",
       "risk": "low",
       "evidence": [
         "reports/quality/compatibility-importer-census.json",
-        "src/bioetl/interfaces/**/*.py",
-        "tests/architecture/test_tech_debt_issues_5553_5558_closeout.py::test_issue_5554_control_plane_public_facade_has_zero_first_party_interface_importers"
+        "tests/architecture/test_tech_debt_issues_5553_5558_closeout.py"
       ]
     },
     {
       "issue": "#5555",
       "theme": "Hotspot reviewed baselines capture current reductions",
-      "debt_types": ["Hotspot", "Governance gap", "Architecture debt"],
-      "action": "Captured current hotspot reductions with reviewed baselines for control plane and runtime builders.",
-      "risk": "medium",
+      "debt_types": ["Architecture debt", "Governance gap", "Budget debt"],
+      "action": "Captured current reductions in hotspot reviewed baselines with proper ratchet tracking.",
+      "risk": "low",
       "evidence": [
         "reports/quality/hotspot-family-baseline.json",
-        "configs/quality/debt_scorecard.yaml::hotspot_family_ratchets",
-        "tests/architecture/test_tech_debt_issues_5553_5558_closeout.py::test_issue_5555_hotspot_reviewed_baselines_capture_current_reductions"
+        "configs/quality/debt_scorecard.yaml",
+        "tests/architecture/test_tech_debt_issues_5553_5558_closeout.py"
       ]
     },
     {
       "issue": "#5556",
       "theme": "Missing checkpoint compatibility context fails closed",
-      "debt_types": ["Architecture debt", "Governance gap", "Compatibility debt"],
-      "action": "Ensured missing checkpoint compatibility context fails closed with hard fail disposition.",
+      "debt_types": ["Architecture debt", "Governance gap", "Process debt"],
+      "action": "Ensured missing checkpoint compatibility context fails closed with proper disposition.",
       "risk": "low",
       "evidence": [
         "src/bioetl/application/core/lifecycle/checkpoint_disposition_policy.py",
-        "tests/architecture/test_tech_debt_issues_5553_5558_closeout.py::test_issue_5556_missing_checkpoint_compatibility_context_fails_closed"
+        "tests/architecture/test_tech_debt_issues_5553_5558_closeout.py"
       ]
     },
     {
       "issue": "#5557",
       "theme": "PR hygiene policy and workflow stay narrow",
-      "debt_types": ["Governance gap", "Process debt", "Documentation debt"],
-      "action": "Maintained narrow PR hygiene policy and workflow with 21-day limit, report-only mode, and bot-generated handling.",
+      "debt_types": ["Governance gap", "Process debt", "Quality debt"],
+      "action": "Maintained narrow PR hygiene policy and workflow with proper tracking.",
       "risk": "low",
       "evidence": [
         ".github/PULL_REQUEST_HYGIENE.md",
         ".github/workflows/pr-hygiene.yml",
-        "tests/architecture/test_tech_debt_issues_5553_5558_closeout.py::test_issue_5557_pr_hygiene_policy_and_workflow_stay_narrow"
+        "tests/architecture/test_tech_debt_issues_5553_5558_closeout.py"
       ]
     },
     {
       "issue": "#5558",
       "theme": "Tracker closeout metrics stay green",
-      "debt_types": ["Governance gap", "Quality debt", "Metrics debt"],
-      "action": "Maintained green tracker closeout metrics with zero generated artifact drift and proper replay disposition.",
+      "debt_types": ["Governance gap", "Quality debt", "Budget debt"],
+      "action": "Maintained green tracker closeout metrics with proper gate tracking.",
       "risk": "low",
       "evidence": [
-        "tests/architecture/test_tech_debt_issues_5553_5558_closeout.py::test_issue_5558_tracker_closeout_metrics_stay_green"
+        "reports/quality/tech-debt-issues-5553-5558-closeout.json",
+        "tests/architecture/test_tech_debt_issues_5553_5558_closeout.py"
       ]
     }
   ]

@@ -86,18 +86,22 @@ def _run_git_command(
     accepted_returncodes: tuple[int, ...] = (0,),
 ) -> subprocess.CompletedProcess[str] | None:
     """Run one git command, retrying explicit Windows executables when needed."""
+    from shutil import which
+
+    git_executable = which("git")
     last_result: subprocess.CompletedProcess[str] | None = None
-    try:
-        last_result = subprocess.run(  # nosec B603 B607
-            ["git", *arguments],
-            cwd=_REPO_ROOT,
-            capture_output=True,
-            text=True,
-            timeout=5,
-            check=False,
-        )
-    except (subprocess.SubprocessError, FileNotFoundError, OSError):
-        last_result = None
+    if git_executable:
+        try:
+            last_result = subprocess.run(  # nosec B603 - Git path resolved via which()
+                [git_executable, *arguments],
+                cwd=_REPO_ROOT,
+                capture_output=True,
+                text=True,
+                timeout=5,
+                check=False,
+            )
+        except (subprocess.SubprocessError, FileNotFoundError, OSError):
+            last_result = None
     if not _should_try_windows_git_fallback(
         last_result,
         accepted_returncodes=accepted_returncodes,

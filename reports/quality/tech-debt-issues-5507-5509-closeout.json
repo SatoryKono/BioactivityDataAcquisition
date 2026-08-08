@@ -1,41 +1,40 @@
 {
-  "snapshot_date": "2026-07-02",
+  "snapshot_date": "2026-07-10",
   "status": "implemented_local_closeable",
   "budget_policy": "no_growth_ratchet_only",
   "issues": [
     {
       "issue": "#5507",
       "theme": "CLI config bootstrap uses owner config access seam",
-      "debt_types": ["Architecture debt", "Config debt", "Governance gap"],
-      "action": "Ensured CLI config bootstrap uses owner config access seam instead of direct infrastructure config imports.",
+      "debt_types": ["Architecture debt", "Governance gap", "Config debt"],
+      "action": "Ensured CLI config bootstrap uses owner config access seam with proper dependency injection.",
       "risk": "low",
       "evidence": [
         "src/bioetl/composition/bootstrap/cli/config.py",
-        "tests/architecture/test_tech_debt_issues_5507_5509_closeout.py::test_issue_5507_cli_config_bootstrap_uses_owner_config_access_seam"
+        "src/bioetl/composition/runtime_builders/config_access.py",
+        "tests/architecture/test_tech_debt_issues_5507_5509_closeout.py"
       ]
     },
     {
       "issue": "#5508",
       "theme": "Maintenance CLI chain no longer imports retained facade",
-      "debt_types": ["Architecture debt", "Compatibility debt", "Governance gap"],
-      "action": "Removed maintenance CLI chain imports of retained facade with zero direct importers for maintenance_api.",
+      "debt_types": ["Architecture debt", "Governance gap", "Compatibility debt"],
+      "action": "Removed retained facade imports from maintenance CLI chain with proper compatibility tracking.",
       "risk": "low",
       "evidence": [
         "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py",
-        "tests/architecture/test_tech_debt_issues_5507_5509_closeout.py::test_issue_5508_maintenance_cli_chain_no_longer_imports_retained_facade"
+        "tests/architecture/test_tech_debt_issues_5507_5509_closeout.py"
       ]
     },
     {
       "issue": "#5509",
       "theme": "Contract policy loader no longer contains compat backfills",
-      "debt_types": ["Compatibility debt", "Config debt", "Governance gap"],
-      "action": "Removed compatibility backfills from contract policy loader and ensured explicit entity contract identity.",
+      "debt_types": ["Architecture debt", "Governance gap", "Config debt"],
+      "action": "Removed compatibility backfills from contract policy loader with proper explicit identity.",
       "risk": "low",
       "evidence": [
         "src/bioetl/infrastructure/config/contract_policy_loader.py",
-        "configs/entities/**/*.yaml",
-        "tests/architecture/test_tech_debt_issues_5507_5509_closeout.py::test_issue_5509_contract_policy_loader_no_longer_contains_compat_backfills",
-        "tests/architecture/test_tech_debt_issues_5507_5509_closeout.py::test_issue_5509_entity_contract_identity_stays_explicit"
+        "tests/architecture/test_tech_debt_issues_5507_5509_closeout.py"
       ]
     }
   ]
