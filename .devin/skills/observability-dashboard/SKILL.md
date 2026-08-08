@@ -16,6 +16,24 @@ description: "Edit, render, validate, or debug BioETL Grafana dashboards and the
 - Dashboard source: `../../../grafana/dashboards/`
 - Render and validation scripts: `../../../scripts/`
 
+## Environment Configuration
+
+This skill uses Grafana credentials from the repository root `.env` file:
+
+- `GRAFANA_URL` - Grafana server URL (default: http://localhost:3000)
+- `GRAFANA_SERVICE_ACCOUNT_TOKEN` - Grafana service account token for API access
+- `GRAFANA_USERNAME` - Grafana username (fallback auth)
+- `GRAFANA_PASSWORD` - Grafana password (fallback auth)
+- `GRAFANA_ORG_ID` - Grafana organization ID
+- `GF_SECURITY_ADMIN_PASSWORD` - Admin password for local Grafana instance
+- `GF_RENDERING_RENDERER_TOKEN` - Image renderer token
+- `GRAFANA_IMAGE_RENDERER_GOMEMLIMIT` - Renderer memory limit
+- `GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT` - Renderer readiness timeout
+
+**Note:** Monitoring services are optional (ADR-010). Do not start `docker-compose.monitoring.yml`
+unless the user explicitly requests dashboard/render work. Default Docker surface is main only
+(health on :8000).
+
 ## Workflow
 
 1. Confirm that the task touches a shipped dashboard or asks for a render.

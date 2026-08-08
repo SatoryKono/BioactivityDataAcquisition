@@ -28,10 +28,19 @@ Execute exhaustive CodeRabbit code review using hybrid approach: immediate P0/cr
 ## Prerequisites
 
 1. **CodeRabbit CLI**: `coderabbit --version` (0.7.x recommended)
-2. **API Key**: `CODERABBIT_API_KEY` environment variable or auth cache
+2. **API Key**: `CODERABBIT_API_KEY` from repository root `.env` file
 3. **Clean git status**: No uncommitted changes in working directory
 4. **Baseline**: Current `main` branch SHA frozen
 5. **Output directory**: `reports/quality/coderabbit/YYYYMMDD/` created
+
+## Environment Configuration
+
+This skill uses CodeRabbit credentials from the repository root `.env` file:
+
+- `CODERABBIT_API_KEY` - CodeRabbit API key for authentication
+
+**Note:** The `.env` file is machine-local and secret-bearing. Never commit `.env` or
+paste its contents into tickets, logs, or comments.
 
 ## Workflow
 

@@ -48,6 +48,32 @@ and then invokes the installed `devin` CLI.
 - **ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА.**
 - This includes scorecard budgets, exemption limits, hotspot thresholds, hotspot family caps, and equivalent budget surfaces.
 
+## Environment Configuration
+
+Devin CLI and its MCP servers use tokens and parameters from the repository root `.env` file.
+The `.env` file is machine-local and secret-bearing:
+
+### MCP Server Configuration
+MCP servers defined in `.devin/mcp_config.json` use environment variable expansion for secrets:
+
+- `DEEPWIKI_API_KEY` / `DEEPWIKI_ORGANISATION_ID` - DeepWiki MCP server authentication
+- `CONTEXT7_API_KEY` - Context7 MCP server
+- `NEEDLE_API_KEY` - Needle MCP server
+- `REF_TOOL_API_KEY` - Ref Tool MCP server
+- Other MCP server tokens as configured in `.devin/mcp_config.json`
+
+### Common Environment Variables
+- `GITHUB_TOKEN` / `GITHUB_PERSONAL_ACCESS_TOKEN` - GitHub operations via MCP
+- `OPENAI_API_KEY` - OpenAI API for LLM operations
+- `BRAVE_API_KEY` - Brave Search API via MCP
+- `DOCKER_API_KEY` / `DOCKER_USERNAME` - Docker Hub operations
+- Provider API keys: `BIOETL_UNIPROT_API_KEY`, `BIOETL_OPENALEX_API_KEY`, etc.
+
+### Env File Guardrail
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.
+
 ## Memory Provenance
 
 Before invoking `python -m memory.tooling.workflow pre-task` or `post-task`,
