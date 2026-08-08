@@ -16,7 +16,7 @@ import pytest
 
 from pathlib import Path
 
-import scripts.check_entity_config_parity as parity_module
+import scripts.data_quality.check_entity_config_parity as parity_module
 
 
 pytestmark = pytest.mark.unit
