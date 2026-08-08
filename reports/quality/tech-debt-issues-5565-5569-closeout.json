@@ -1,71 +1,66 @@
 {
-  "schema_version": "tech-debt-issues-5565-5569-closeout-v1",
-  "snapshot_date": "2026-06-23",
-  "debt_budget_outcome": "reduced_or_unchanged",
-  "summary": "Residual Wave 2 semantic-seam, facade, config-duplication, and observability-retirement debt is converted from implicit residue into owner-governed live guards.",
+  "snapshot_date": "2026-07-09",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
+  "metrics": {
+    "max_non_composite_duplication_clusters": 8
+  },
   "issues": [
     {
-      "number": 5565,
-      "status": "closed-ready",
-      "title": "[DEBT-AUDIT-2026-06-23-WAVE2] Track residual semantic-seam and hygiene debt after #5564",
-      "outcome": "Umbrella issue is backed by live closeout guards for #5566 through #5569 with no debt-budget increase.",
-      "evidence": [
-        "reports/quality/tech-debt-issues-5565-5569-closeout.json",
-        "tests/architecture/test_tech_debt_issues_5565_5569_closeout.py",
-        "configs/quality/closeout_ratchet_triage.yaml"
-      ]
-    },
-    {
-      "number": 5566,
-      "status": "closed-ready",
-      "title": "[SEMANTIC-BOUNDARIES-002] Add role and caller guards for high-fan-in replay and runtime-builder seams",
-      "outcome": "High-fan-in semantic seams now declare role, owner, rationale, and exact source-caller guardrails.",
+      "issue": "#5565",
+      "theme": "Semantic seam role inventory governance",
+      "debt_types": ["Governance gap", "Architecture debt", "DDD violation"],
+      "action": "Governed semantic seam role inventory with proper caller guards and allowed semantic roles.",
+      "risk": "low",
       "evidence": [
         "configs/quality/semantic_seam_role_inventory.yaml",
-        "tests/architecture/test_tech_debt_issues_5565_5569_closeout.py"
+        "tests/architecture/test_tech_debt_issues_5565_5569_closeout.py::test_issue_5566_semantic_seams_have_roles_and_no_new_src_callers"
       ]
     },
     {
-      "number": 5567,
-      "status": "closed-ready",
-      "title": "[COMPOSITION-FACADES-001] Burn down retained control-plane and runtime composition wrapper debt",
-      "outcome": "Control-plane/composition facades now have explicit retained dispositions and first-party import no-growth guards.",
+      "issue": "#5566",
+      "theme": "Semantic seams have roles and no new src callers",
+      "debt_types": ["Governance gap", "Architecture debt", "DDD violation"],
+      "action": "Ensured semantic seams have proper roles and bounded src importers with fail-fast review policy.",
+      "risk": "low",
+      "evidence": [
+        "configs/quality/semantic_seam_role_inventory.yaml",
+        "tests/architecture/test_tech_debt_issues_5565_5569_closeout.py::test_issue_5566_semantic_seams_have_roles_and_no_new_src_callers"
+      ]
+    },
+    {
+      "issue": "#5567",
+      "theme": "Control plane facades have bounded first party imports",
+      "debt_types": ["Architecture debt", "Governance gap", "DDD violation"],
+      "action": "Ensured control plane facades have bounded first-party imports with proper caller guards.",
+      "risk": "low",
       "evidence": [
         "configs/quality/control_plane_facade_import_policy.yaml",
-        "reports/quality/compatibility-importer-census.json",
-        "tests/architecture/test_tech_debt_issues_5565_5569_closeout.py"
+        "tests/architecture/test_tech_debt_issues_5565_5569_closeout.py::test_issue_5567_control_plane_facades_have_bounded_first_party_imports"
       ]
     },
     {
-      "number": 5568,
-      "status": "closed-ready",
-      "title": "[CONFIG-BACKLOG-002] Resolve review-required non-composite config duplication clusters",
-      "outcome": "Non-composite config duplication clusters are owner-governed; review-required residual count is zero.",
+      "issue": "#5568",
+      "theme": "Non composite config duplication is explicitly governed",
+      "debt_types": ["Config debt", "Duplication", "Governance gap"],
+      "action": "Governed non-composite config duplication with explicit linked issues and owner accountability.",
+      "risk": "medium",
       "evidence": [
-        "scripts/engineering/qa/report_config_surface_backlog.py",
         "reports/quality/config-surface-backlog.json",
-        "tests/architecture/test_tech_debt_issues_5565_5569_closeout.py"
+        "tests/architecture/test_tech_debt_issues_5565_5569_closeout.py::test_issue_5568_non_composite_config_duplication_is_explicitly_governed"
       ]
     },
     {
-      "number": 5569,
-      "status": "closed-ready",
-      "title": "[OBSERVABILITY-HYGIENE-001] Enforce retirement lifecycle for retired declared observability events",
-      "outcome": "Retired observability events now require explicit reactivation review and remain un-emitted in runtime inventory.",
+      "issue": "#5569",
+      "theme": "Retired observability events have lifecycle guards",
+      "debt_types": ["Observability gap", "Governance gap", "Quality debt"],
+      "action": "Governed retired observability events with lifecycle guards and proper reactivation requirements.",
+      "risk": "low",
       "evidence": [
         "configs/quality/observability_metric_governance.yaml",
         "reports/observability/runtime_cardinality_inventory.json",
-        "tests/architecture/test_tech_debt_issues_5565_5569_closeout.py"
+        "tests/architecture/test_tech_debt_issues_5565_5569_closeout.py::test_issue_5569_retired_observability_events_have_lifecycle_guards"
       ]
     }
-  ],
-  "metrics": {
-    "semantic_seam_role_count": 3,
-    "control_plane_facade_guard_count": 6,
-    "max_non_composite_duplication_clusters": 20,
-    "non_composite_review_required_duplication_clusters": 0,
-    "retired_declared_observability_event_count": 12,
-    "retired_declared_observability_events_emitted": 0,
-    "control_plane_root_src_importer_count": 0
-  }
+  ]
 }
