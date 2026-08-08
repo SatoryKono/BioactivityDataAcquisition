@@ -116,7 +116,7 @@
       "files_ge_250_loc": 0,
       "opening_files_ge_250_loc": 7,
       "opening_total_loc": 22600,
-      "total_loc": 22072
+      "total_loc": 23092
     },
     "5749": {
       "assertless_total_candidates": 106,
@@ -158,12 +158,12 @@
     },
     "application_core_files_ge_250_loc": {
       "current": 0,
-      "max": 4,
+      "max": 0,
       "opening": 7
     },
     "application_core_total_loc": {
-      "current": 22072,
-      "max": 22072,
+      "current": 23092,
+      "max": 23092,
       "opening": 22360
     },
     "assertless_total_candidates": {

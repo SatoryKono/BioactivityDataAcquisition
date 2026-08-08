@@ -452,14 +452,14 @@ hotspot_family_ratchets:
     path_prefixes:
     - src/bioetl/application/core/
     bounded_growth_budgets:
-      files_ge_250_loc: 1
+      files_ge_250_loc: 0
       max_internal_fan_in: 10
     metrics:
       duplication_clusters: 0
       files: 190
-      total_loc: 23087
-      files_ge_250_loc: 1
-      helper_function_ratio: 0.363
+      total_loc: 23092
+      files_ge_250_loc: 0
+      helper_function_ratio: 0.364
       max_internal_fan_in: 8
       max_internal_fan_in_module: bioetl.application.core.batch_runtime_failure_policy
     trend:
