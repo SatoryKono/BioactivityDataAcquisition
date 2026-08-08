@@ -32,25 +32,7 @@ __all__ = [
 
 @dataclass(slots=True)
 class ValueValidator:
-    """Service for validating bioactivity measurement values.
-
-    Validates concentrations and pChEMBL values against configurable
-    ranges based on measurement type.
-
-    Attributes:
-        config: Optional configuration for custom validation ranges.
-        strict: If True, use stricter validation (typical ranges).
-
-    Example:
-        >>> validator = ValueValidator()
-        >>> valid, error = validator.validate_concentration(100.0, "nM")
-        >>> valid
-        True
-
-        >>> valid, error = validator.validate_pchembl(20.0)
-        >>> valid, error
-        (False, 'pChEMBL value 20.00 exceeds maximum 14.00')
-    """
+    """Validate bioactivity measurements against configured domain ranges."""
 
     config: NormalizationConfig | None = None
     strict: bool = False
@@ -92,23 +74,7 @@ class ValueValidator:
         value: float,
         unit: str,
     ) -> tuple[bool, str | None]:
-        """Validate concentration value is within acceptable range.
-
-        Args:
-            value: Concentration value.
-            unit: Unit string (e.g., "nM", "µM").
-
-        Returns:
-            Tuple of (is_valid, error_message).
-            error_message is None if valid.
-
-        Example:
-            >>> validator = ValueValidator()
-            >>> validator.validate_concentration(100.0, "nM")
-            (True, None)
-            >>> validator.validate_concentration(-1.0, "nM")
-            (False, 'Concentration cannot be negative: -1.0')
-        """
+        """Validate a concentration value and unit."""
         # Check basic value constraints
         basic_error = self._check_basic_concentration(value)
         if basic_error:

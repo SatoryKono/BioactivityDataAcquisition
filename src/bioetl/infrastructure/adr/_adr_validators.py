@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from bioetl.domain.ports.adr import AdrIssueSeverity, AdrValidationIssue
+from bioetl.domain.ports import AdrIssueSeverity, AdrValidationIssue
 
 from ._adr_file_utils import ADR_FILENAME_RE
 from ._adr_metadata_extractors import extract_meta, parse_h1_title

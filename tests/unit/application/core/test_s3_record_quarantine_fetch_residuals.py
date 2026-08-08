@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import collections.abc
+from datetime import UTC, datetime
 from dataclasses import dataclass, field
 from typing import Any
 from unittest.mock import AsyncMock
@@ -21,7 +22,6 @@ from bioetl.application.core._quarantine_write_support import (
 )
 from bioetl.application.core.normalization_fallbacks import __all__ as FALLBACK_ALL
 from tests.helpers.deterministic_ids import deterministic_batch_uuid
-from datetime import datetime, UTC
 
 pytestmark = pytest.mark.unit
 
@@ -132,6 +132,7 @@ async def test_fetch_records_dispatches_multi_single_and_unfiltered() -> None:
 @pytest.mark.asyncio
 async def test_write_quarantine_requests_rejects_length_mismatch() -> None:
     quarantine = AsyncMock()
+    ingestion_ts = datetime(2026, 1, 2, 3, 4, tzinfo=UTC)
     with pytest.raises(ValueError, match="equal lengths"):
         await write_quarantine_requests_with_events(
             quarantine=quarantine,
@@ -141,7 +142,7 @@ async def test_write_quarantine_requests_rejects_length_mismatch() -> None:
                     "error_code": "E",
                     "payload": {},
                     "bronze_batch_id": deterministic_batch_uuid("s3-rqf-residual-1"),
-                    "ingestion_ts": datetime.now(UTC),
+                    "ingestion_ts": ingestion_ts,
                 }
             ],  # type: ignore[list-item]
             emitter=None,
@@ -150,6 +151,6 @@ async def test_write_quarantine_requests_rejects_length_mismatch() -> None:
             error_messages=("m",),
             batch_id=deterministic_batch_uuid("s3-rqf-residual-2"),
             run_id=None,
-            ingestion_ts=datetime.now(UTC),
+            ingestion_ts=ingestion_ts,
         )
     quarantine.write_many.assert_not_called()

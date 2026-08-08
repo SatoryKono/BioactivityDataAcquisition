@@ -52,12 +52,16 @@ def test_pubmed_package_root_reexports_canonical_adapter() -> None:
 def test_pubmed_canonical_adapter_module_exposes_public_factory_alias() -> None:
     """Canonical PubMed adapter module should expose a public adapter factory."""
     package_module = import_module("bioetl.infrastructure.adapters.pubmed")
-    canonical_module = import_module("bioetl.infrastructure.adapters.pubmed.adapter")
-    canonical_factory = canonical_module.create_pubmed_adapter
+    canonical_module = import_module(
+        "bioetl.infrastructure.adapters.pubmed._adapter_support"
+    )
+    canonical_factory = canonical_module._create_pubmed_adapter
 
     assert package_module.create_pubmed_adapter is canonical_factory
-    assert hasattr(canonical_module, "_create_pubmed_adapter")
-    assert canonical_factory is canonical_module._create_pubmed_adapter
+    assert not hasattr(
+        import_module("bioetl.infrastructure.adapters.pubmed.adapter"),
+        "_create_pubmed_adapter",
+    )
 
 
 def test_semanticscholar_package_root_reexports_canonical_adapter() -> None:

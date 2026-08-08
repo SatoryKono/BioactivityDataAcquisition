@@ -1,11 +1,4 @@
-"""Base fallback handler for title-based DOI resolution.
-
-Provides common utilities for fallback search across different providers.
-Supports a three-phase fallback strategy:
-- Phase 1: batch ID lookup
-- Phase 2: title fallback for unresolved IDs
-- Phase 3: title-only lookup
-"""
+"""Three-phase title fallback orchestration shared by publication adapters."""
 
 from __future__ import annotations
 

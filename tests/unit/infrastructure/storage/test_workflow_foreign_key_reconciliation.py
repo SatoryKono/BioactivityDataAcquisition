@@ -122,6 +122,7 @@ class _MutationHost:
     silver_writer: object = field(default_factory=object)
     quarantine: object | None = None
     quarantine_pipeline_name: str | None = None
+    logger: _Logger = field(default_factory=_Logger)
 
 
 class _FakeAsyncio:

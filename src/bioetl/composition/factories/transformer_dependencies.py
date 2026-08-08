@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import os
-
 from bioetl.application.core.wiring.transformer import (
     DefaultContractPolicy,
     NoOpStructuralPolicy,
@@ -14,6 +12,7 @@ from bioetl.composition.observability_resolution import (
     resolve_metrics_port,
     resolve_tracing_port,
 )
+from bioetl.composition.runtime_builders.config_access import load_settings
 from bioetl.domain.behavior import DefaultDataNormalizer, EntityIdentityGenerator
 from bioetl.domain.ports import (
     ContractPolicyProtocol,
@@ -29,15 +28,11 @@ __all__ = ["build_transformer_dependencies"]
 
 
 def _default_pii_hasher() -> PiiHasherPort:
-    """Prefer salted SHA-256 hasher; fall back to NoOp only when salt is unset.
-
-    Production deployments MUST set BIOETL_PII_SALT_CURRENT (or inject
-    Sha256PiiHasher via composition). Unit tests without salt still construct
-    transformers safely.
-    """
-    if not os.environ.get("BIOETL_PII_SALT_CURRENT", "").strip():
+    """Return the configured PII hasher, with a salt-free safe fallback."""
+    settings = load_settings()
+    if settings.pii_salt_current is None:
         return NoOpPiiHasher()
-    return Sha256PiiHasher.from_env()
+    return Sha256PiiHasher.from_settings(settings)
 
 
 def build_transformer_dependencies(

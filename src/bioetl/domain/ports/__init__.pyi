@@ -5,6 +5,9 @@ from bioetl.domain.ports.adr import (
     AdrInfo as AdrInfo,
 )
 from bioetl.domain.ports.adr import (
+    AdrIssueSeverity as AdrIssueSeverity,
+)
+from bioetl.domain.ports.adr import (
     AdrServicePort as AdrServicePort,
 )
 from bioetl.domain.ports.adr import (
@@ -168,9 +171,9 @@ from bioetl.domain.ports.observability import (
 from bioetl.domain.ports.observability import (
     MetricsServerRuntimeStatus as MetricsServerRuntimeStatus,
 )
-from bioetl.domain.ports.observability import (
-    TracingPort as TracingPort,
-)
+from bioetl.domain.ports.observability import SpanHandle as SpanHandle
+from bioetl.domain.ports.observability import TracerHandle as TracerHandle
+from bioetl.domain.ports.observability import TracingPort as TracingPort
 from bioetl.domain.ports.observability import (
     resolve_metric_labels as resolve_metric_labels,
 )

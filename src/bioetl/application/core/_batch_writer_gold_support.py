@@ -8,7 +8,8 @@ from typing import TYPE_CHECKING, Protocol, cast, runtime_checkable
 from bioetl.domain.exceptions import SchemaViolationError
 
 if TYPE_CHECKING:
-    from bioetl.domain.types import GoldRecord
+    from bioetl.domain.ports import GoldValidatorPort
+    from bioetl.domain.types import GoldRecord, GoldSchemaType
 
 
 class _GoldValidationResult(Protocol):
@@ -29,10 +30,10 @@ class _GoldValidatorRebindProtocol(Protocol):
 class _GoldWriterHost(Protocol):
     """Minimal BatchWriter surface for Gold prepare/validate helpers."""
 
-    _gold_schema: object
-    _gold_validator: object
+    _gold_schema: GoldSchemaType
+    _gold_validator: GoldValidatorPort
 
-    def _get_schema_columns(self, schema: object) -> list[str]: ...
+    def _get_schema_columns(self, schema: object) -> set[str] | None: ...
 
     def _collect_record_columns(self, records: list[GoldRecord]) -> list[str]: ...
 

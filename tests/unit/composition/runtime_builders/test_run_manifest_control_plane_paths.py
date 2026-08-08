@@ -56,7 +56,7 @@ def test_resolve_data_root_uses_local_data_when_writable(
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(subject.os, "access", lambda _path, _mode: True)
 
-    assert subject._resolve_data_root(SimpleNamespace(data_dir=None)) == Path("data")
+    assert subject.resolve_data_root(SimpleNamespace(data_dir=None)) == Path("data")
     assert (tmp_path / "data").is_dir()
 
 
@@ -74,7 +74,7 @@ def test_resolve_data_root_falls_back_when_local_data_is_unusable(
     else:
         monkeypatch.setattr(subject.os, "access", lambda _path, _mode: False)
 
-    assert subject._resolve_data_root(SimpleNamespace(data_dir=None)) == fallback
+    assert subject.resolve_data_root(SimpleNamespace(data_dir=None)) == fallback
 
 
 def test_private_fallback_uses_uid_scoped_temp_when_home_cache_fails(

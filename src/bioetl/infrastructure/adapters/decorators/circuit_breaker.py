@@ -1,30 +1,4 @@
-"""Circuit Breaker Data Source Decorator.
-
-Implements the Decorator Pattern for DataSourcePort to add circuit breaker protection.
-Separates circuit breaker concerns from the core adapter logic per ADR-xxx.
-
-This decorator wraps any DataSourcePort implementation and adds:
-- Circuit breaker state management (CLOSED -> OPEN -> HALF_OPEN -> CLOSED)
-- Fail-fast behavior when circuit is open
-- Automatic recovery probing in HALF_OPEN state
-- Structured logging of state transitions
-- Metrics for circuit breaker events
-
-Usage:
-    from bioetl.infrastructure.adapters.decorators import CircuitBreakerDataSourceDecorator
-    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
-
-__all__ = ["CircuitBreakerDataSourceDecorator"]
-    circuit_breaker = CircuitBreakerGuard(provider="chembl", failure_threshold=5)
-    decorated = CircuitBreakerDataSourceDecorator(
-        data_source=base_adapter,
-        circuit_breaker=circuit_breaker,
-        logger=logger,
-    )
-    async with decorated:
-        async for record in decorated.fetch("activity"):
-            process(record)
-"""
+"""Circuit-breaker decorator for data-source ports."""
 
 from __future__ import annotations
 

@@ -122,16 +122,7 @@ class _BatchMutationMixin(_BatchReadModelMixin):
         entity_id: EntityID | None = None,
         content_hash: ContentHash | None = None,
     ) -> BatchRecord:
-        """Add a single record to the batch.
-
-        Args:
-            data: Raw Bronze layer record dictionary to store.
-            entity_id: Optional identifier for the entity represented by the record.
-            content_hash: Optional content hash for deduplication tracking.
-
-        Returns:
-            The newly created BatchRecord appended to this batch.
-        """
+        """Append one Bronze record and return its aggregate representation."""
         self._assert_open("add_record")
         record = BatchRecord(
             index=self.next_index,
@@ -144,14 +135,7 @@ class _BatchMutationMixin(_BatchReadModelMixin):
         return record
 
     def add_records(self, records: list[BronzeRecord]) -> list[BatchRecord]:
-        """Add multiple records to the batch.
-
-        Args:
-            records: List of raw Bronze layer record dictionaries to add.
-
-        Returns:
-            List of newly created BatchRecord objects in insertion order.
-        """
+        """Append Bronze records in input order."""
         self._assert_open("add_records")
         return [self.add_record(data) for data in records]
 

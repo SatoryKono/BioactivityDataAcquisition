@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable, Sequence
-from typing import TYPE_CHECKING
 
 import polars as pl
 
@@ -45,10 +44,7 @@ from bioetl.domain.exceptions import (
     NetworkError,
     StorageError,
 )
-from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
-
-if TYPE_CHECKING:
-    from bioetl.domain.ports import ClockPort
+from bioetl.domain.ports import ClockPort, ExecutionMetricsRunnerPort, LoggerPort
 
 _FILTER_CONDITION_ERRORS = (
     ValueError,

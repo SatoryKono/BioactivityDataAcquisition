@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-08-01",
+  "snapshot_date": "2026-08-07",
   "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
@@ -1654,7 +1654,7 @@
       "surface_id": "checkpoint_compatibility_service_v2",
       "path": "src/bioetl/application/services/checkpoint_compatibility_service_v2.py",
       "module_name": "bioetl.application.services.checkpoint_compatibility_service_v2",
-      "canonical_target": "bioetl.application.services.checkpoint_compatibility_service",
+      "canonical_target": "bioetl.application.services.checkpoint.checkpoint_compatibility_service",
       "owner": "bioetl.application.services",
       "path_exists": false,
       "src_importers": [],

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any, cast, TYPE_CHECKING, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from bioetl.composition.occurrence_identity import (
     create_runtime_occurrence_id,
@@ -31,14 +31,12 @@ if TYPE_CHECKING:
     from bioetl.application.services.workflow.workflow_runner_service import (
         WorkflowRunnerService,
     )
-    from bioetl.application.services.workflow.workflow_transform_artifacts import (
-        WorkflowTransformArtifactSinkProtocol,
-    )
     from bioetl.application.workflow.transforms import WorkflowTransformRegistry
     from bioetl.domain.control_plane import WorkflowManifest
     from bioetl.domain.ports import LockPort, MetricsPort, WorkflowLedgerPort
     from bioetl.domain.workflow import WorkflowConfig
     from bioetl.infrastructure.config.settings_api import Settings
+    from bioetl.infrastructure.control_plane import FileWorkflowTransformArtifactStore
 
 __all__ = [
     "get_workflow_execution_service",
@@ -90,7 +88,7 @@ def _default_pipeline_runner_service_factory(
 def _build_workflow_transform_registry(
     settings: Settings,
     metrics: MetricsPort,
-    artifact_sink: WorkflowTransformArtifactSinkProtocol | None = None,
+    artifact_sink: FileWorkflowTransformArtifactStore | None = None,
 ) -> WorkflowTransformRegistry:
     """Assemble workflow transform storage and builtin transform registry."""
     from bioetl.application.workflow.transforms import WorkflowTransformRegistry
@@ -177,9 +175,7 @@ def _build_workflow_transform_registry(
             quarantine=reconciliation_quarantine,
             quarantine_pipeline_name="workflow_transforms",
             gold_writer=transform_gold_storage,
-            artifact_sink=cast(
-                Any, artifact_sink
-            ),  # Any: optional sink protocol compatibility
+            artifact_sink=artifact_sink,
         ),
         row_reconciliation_port=StorageRowReconciliationAdapter(
             silver_reader=transform_storage,

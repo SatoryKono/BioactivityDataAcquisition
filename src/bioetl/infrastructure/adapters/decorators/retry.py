@@ -44,6 +44,9 @@ from bioetl.infrastructure.adapters.decorators._retry_operations import (
     retry_fetch_records,
     retry_health_check,
 )
+from bioetl.infrastructure.adapters.decorators._retry_support import (
+    default_retry_config,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
@@ -75,7 +78,7 @@ class RetryingDataSourceDecorator:
     """
 
     data_source: DataSourcePort
-    retry_config: RetryConfig = field(default_factory=RetryConfig)
+    retry_config: RetryConfig = field(default_factory=default_retry_config)
     logger: LoggerPort | None = None
     metrics: MetricsPort | None = None
 

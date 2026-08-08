@@ -56,13 +56,13 @@ Run the same commands locally and in CI:
 | Config duplication/backlog audit | `pytest tests/architecture/test_config_surface_entity_residual_plateau.py` | `python -m scripts.engineering.qa.report_config_surface_backlog` |
 | Config discrepancy drift | `pytest tests/architecture/test_config_discrepancy_report_drift.py tests/architecture/test_config_discrepancy_metrics_ratchets.py` | `python -m scripts.schema generate-config-matrix --update` |
 | Module coverage semantics (fast) | `pytest tests/architecture/test_module_coverage_inventory.py -q --tb=short` | No refresh; fix the invalid committed payload or policy. |
-| Module coverage source-tree freshness (slow) | `pytest tests/architecture/test_module_coverage_inventory_freshness.py -q --tb=short` | `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml` (preserves measured rows). |
+| Module coverage source-tree freshness (slow) | `python -m scripts.engineering.qa report-module-coverage --check --allow-missing-coverage-xml` | `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml` (preserves measured rows); verify with `pytest tests/architecture/test_module_coverage_inventory_freshness.py -q --tb=short`. |
 | Module coverage measurements | Live green `coverage-verify` with `--fail-under=85` | `python -m scripts.engineering.qa report-module-coverage --refresh-from-coverage-xml` only inside that trusted green lane. Never use a partial local `coverage.xml`. |
 | Test governance snapshots | `python -m scripts.engineering.qa.report_test_governance_audit --check` | `python -m scripts.engineering.qa.report_test_governance_audit --json-out reports/quality/test-governance-current.json --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json` |
 | Documentation cleanup inventory | `python -m scripts.docs.checks.documentation_cleanup_inventory --check` | `python -m scripts.docs.checks.documentation_cleanup_inventory --update` |
 | Architecture dependency map | `python -m scripts.engineering.qa.generate_architecture_dependency_map --check` | `python -m scripts.engineering.qa.generate_architecture_dependency_map --update` |
 | Committed test telemetry | `pytest tests/architecture/test_test_telemetry_baseline.py tests/architecture/test_test_telemetry_governance.py` | `python -m scripts.engineering.ci.update_test_telemetry_baseline --coverage-percent <percent> --source-branch main --source-commit <reachable-commit> --source-run-id <run-id>` |
-| Compatibility importer census | `python -m scripts.engineering.qa report-compatibility-importer-census --check` | `python -m scripts.engineering.qa report-compatibility-importer-census --update` |
+| Compatibility importer census | `python -m scripts.engineering.qa report-compatibility-importer-census --check` | `python -m scripts.engineering.qa report-compatibility-importer-census` |
 | Architecture artifact duplication | `python -m scripts.engineering.qa.report_artifact_duplication_audit --check` | `python -m scripts.engineering.qa.report_artifact_duplication_audit --json-out reports/quality/config-contract-registry-artifact-duplication.json` |
 | Flaky-test burndown review | `python -m scripts.engineering.qa.report_flaky_test_burndown_review --check` | `python -m scripts.engineering.qa.report_flaky_test_burndown_review` |
 | Live residual snapshot | `python -m scripts.engineering.qa.report_live_residual_snapshot --check` | `python -m scripts.engineering.qa.report_live_residual_snapshot` |
@@ -71,7 +71,7 @@ Run the same commands locally and in CI:
 | Date-only content-hash inventory | `pytest tests/architecture/test_content_hash_datetime_policy_inventory.py` | Edit `configs/quality/determinism_identity_policy.yaml`; do not add budget. |
 | Debt closeout inventory | `pytest tests/architecture/test_tech_debt_issues_5343_5346_closeout.py tests/architecture/test_tech_debt_issues_5387_5394_closeout.py` | Add issue-specific closeout evidence and guard tests. |
 | Hotspot family baseline | `python -m scripts.engineering.qa report-family-baseline --check` | `python -m scripts.engineering.qa report-family-baseline --update` |
-| Contract coverage matrix | `python -m scripts.engineering.qa report-contract-coverage-matrix --check` | `python -m scripts.engineering.qa report-contract-coverage-matrix --update` |
+| Contract coverage matrix | `python -m scripts.engineering.qa report-contract-coverage-matrix --check` | `python -m scripts.engineering.qa report-contract-coverage-matrix` |
 
 ### 3. Classify the debt outcome
 

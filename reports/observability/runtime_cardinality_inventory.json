@@ -381,9 +381,7 @@
   ],
   "dashboarded_without_declaration": [],
   "dashboarded_without_emission": [],
-  "dead_metrics": [
-    "bioetl_adapter_request_p95_seconds"
-  ],
+  "dead_metrics": [],
   "declared_label_contract_metrics": [
     "bioetl_adapter_batch_size",
     "bioetl_adapter_fallback_attempts_total",
@@ -459,7 +457,6 @@
     "bioetl_adapter_fallback_hit_rate",
     "bioetl_adapter_fallback_hits_total",
     "bioetl_adapter_request_duration_seconds",
-    "bioetl_adapter_request_p95_seconds",
     "bioetl_adapter_requests_total",
     "bioetl_alerts_active_total",
     "bioetl_alerts_firing_total",
@@ -1460,6 +1457,7 @@
     ],
     "bioetl_errors_total": [
       "docs/02-architecture/decisions/ADR-017-observability-architecture.md",
+      "docs/03-guides/dashboards/operator-scenarios-s1-s6.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
       "docs/03-guides/metrics-monitoring.md",
@@ -2141,6 +2139,7 @@
       "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_runtime_error_rate_30m": [
+      "docs/03-guides/dashboards/operator-scenarios-s1-s6.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "grafana/dashboards/bioetl-runtime.json"
     ],
@@ -2915,7 +2914,6 @@
     "bioetl_adapter_fallback_hit_rate",
     "bioetl_adapter_fallback_hits_total",
     "bioetl_adapter_request_duration_seconds",
-    "bioetl_adapter_request_p95_seconds",
     "bioetl_adapter_requests_total",
     "bioetl_alerts_active_total",
     "bioetl_alerts_firing_total",

@@ -7,7 +7,7 @@ import pytest
 
 from scripts.engineering.qa import report_dashboard_panel_audit_matrix as subject
 
-pytestmark = pytest.mark.repo_backed
+pytestmark = pytest.mark.integration
 
 
 def test_shipped_dashboard_panel_matrix_matches_baseline(tmp_path: Path) -> None:

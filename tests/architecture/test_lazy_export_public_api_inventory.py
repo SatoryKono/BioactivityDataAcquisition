@@ -48,9 +48,6 @@ EXPECTED_LAZY_EXPORT_FACADES = {
     "src/bioetl/composition/providers/__init__.py": "public_package_facade",
     "src/bioetl/composition/registry_api.py": "public_facade",
     "src/bioetl/composition/runtime_builders/__init__.py": "public_package_facade",
-    "src/bioetl/composition/runtime_builders/_run_manifest_data_roots.py": (
-        "compatibility_facade"
-    ),
     "src/bioetl/composition/runtime_builders/_run_manifest_refs.py": (
         "compatibility_facade"
     ),

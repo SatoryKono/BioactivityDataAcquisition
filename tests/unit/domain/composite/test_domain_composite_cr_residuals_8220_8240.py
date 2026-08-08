@@ -3,25 +3,21 @@
 
 from __future__ import annotations
 import pytest
-from bioetl.domain.composite.config_composite_serialization import (
+from bioetl.domain.composite.config import (
+    CompositeConfig,
+    CompositeDQConfig,
+    DependencyConfig,
+    DQOverrideConfig,
+    EnricherConfig,
+    LineageConfig,
+    MergeConfig,
+    SeedConfig,
+    DataSchemaConfig,
+    LayerColumnConfig,
     composite_from_dict,
     composite_to_dict,
-)
-from bioetl.domain.composite.config_composite_validation import (
-    validate_composite_config,
-)
-from bioetl.domain.composite.config_dq import CompositeDQConfig, DQOverrideConfig
-from bioetl.domain.composite.config_merge import MergeConfig
-from bioetl.domain.composite.config_models import (
-    CompositeConfig,
-    DependencyConfig,
-    EnricherConfig,
-    SeedConfig,
-)
-from bioetl.domain.composite.config_runtime import LineageConfig
-from bioetl.domain.composite.config_schema import DataSchemaConfig, LayerColumnConfig
-from bioetl.domain.composite.config_validators import (
     require_non_empty,
+    validate_composite_config,
     validate_positive,
 )
 from bioetl.domain.composite.field_groups_models import (

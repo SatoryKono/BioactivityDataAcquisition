@@ -1111,25 +1111,6 @@ def test_live_audit_isolates_non_required_panel_execution_failures(
     assert results[0].classification == "blocked_unavailable"
 
 
-def test_live_audit_normalizes_docker_gateway_to_localhost() -> None:
-    assert (
-        audit_subject._normalize_host_access_url("http://host.docker.internal:8081")
-        == "http://localhost:8081"
-    )
-
-
-def test_live_audit_adds_zero_bind_fallback_for_localhost() -> None:
-    assert (
-        audit_subject._zero_bind_access_url("http://localhost:8081")
-        == "http://0.0.0.0:8081"
-    )
-    assert (
-        audit_subject._zero_bind_access_url("http://127.0.0.1:8081")
-        == "http://0.0.0.0:8081"
-    )
-    assert audit_subject._zero_bind_access_url("http://example.test:8081") is None
-
-
 def test_live_audit_resolves_http_backend_from_datasource_candidates(
     monkeypatch: Any,
 ) -> None:

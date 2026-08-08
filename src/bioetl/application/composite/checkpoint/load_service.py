@@ -17,6 +17,8 @@ from bioetl.application.composite.checkpoint._checkpoint_replay_projection impor
 from bioetl.application.composite.checkpoint._checkpoint_runtime import (
     load_checkpoint_state,
     resolve_resume_checkpoint_filename,
+)
+from bioetl.application.composite.checkpoint._checkpoint_warnings import (
     warn_if_checkpoint_exists_with_progress,
     warn_if_checkpoint_stale,
 )

@@ -11,8 +11,8 @@ from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
     ForeignKeyReconciliationRequest,
 )
 from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation import (
-    GoldReconciliationReaderPort,
-    ReconcileDebugArtifactSinkPort,
+    GoldReconciliationReaderProtocol,
+    ReconcileDebugArtifactSinkProtocol,
     SilverForeignKeyReconciliationAdapter,
     filter_current_rows,
 )
@@ -87,7 +87,7 @@ class _GoldReader:
 
 def test_gold_reader_port_structural_match() -> None:
     reader = _GoldReader(rows_by_table={})
-    assert isinstance(reader, GoldReconciliationReaderPort)
+    assert isinstance(reader, GoldReconciliationReaderProtocol)
 
 
 @pytest.mark.asyncio
@@ -129,4 +129,4 @@ def test_artifact_sink_port_is_runtime_checkable() -> None:
             del kwargs
             return ()
 
-    assert isinstance(_Sink(), ReconcileDebugArtifactSinkPort)
+    assert isinstance(_Sink(), ReconcileDebugArtifactSinkProtocol)

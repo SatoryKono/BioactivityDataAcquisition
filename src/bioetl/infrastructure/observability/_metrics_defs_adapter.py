@@ -13,7 +13,6 @@ __all__ = [
     "ADAPTER_FALLBACK_HIT_RATE",
     "ADAPTER_REQUESTS_TOTAL",
     "ADAPTER_REQUEST_DURATION_SECONDS",
-    "ADAPTER_REQUEST_P95_SECONDS",
     "DATA_SOURCE_RETRIES_TOTAL",
     "DATA_SOURCE_RETRY_EXHAUSTED_TOTAL",
     "HTTP_REQUEST_DURATION_SECONDS",
@@ -30,14 +29,6 @@ ADAPTER_REQUEST_DURATION_SECONDS = Histogram(
     "Duration of adapter API requests in seconds",
     ["provider", "endpoint"],
     buckets=[0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0],
-)
-
-# Compatibility surface for older import paths that still expect a p95 gauge.
-# This is intentionally a Gauge (not a Histogram alias) so .set() remains valid.
-ADAPTER_REQUEST_P95_SECONDS = Gauge(
-    "bioetl_adapter_request_p95_seconds",
-    "Rolling p95 adapter request duration in seconds (compatibility gauge)",
-    ["provider", "endpoint"],
 )
 
 ADAPTER_REQUESTS_TOTAL = Counter(

@@ -717,7 +717,7 @@ oversized_source_module_inventory:
         "remaining: further split checkpoint policy evaluation paths only; diagnostic payload
         assembly already extracted under #5031 (checkpoint_compatibility_results.py)"
     - path: src/bioetl/infrastructure/config/_base.py
-      lines: 243
+      lines: 230
       owner: "@bioetl-config"
       target_split: separate config discovery, validation, and environment resolution helpers
     - path: src/bioetl/infrastructure/control_plane/file_run_ledger_store.py
@@ -735,7 +735,7 @@ oversized_source_module_inventory:
   completed_splits:
     - issue: "#5031"
       source: src/bioetl/application/services/checkpoint/checkpoint_compatibility_service.py
-      extracted_surface: src/bioetl/application/services/checkpoint_compatibility_results.py
+      extracted_surface: src/bioetl/application/services/checkpoint/checkpoint_compatibility_results.py
       source_lines_after_split: 182
       extracted_surface_lines: 68
       rationale:
@@ -744,7 +744,7 @@ oversized_source_module_inventory:
     - issue: "#4679"
       source: src/bioetl/domain/ports/__init__.py
       extracted_surface: src/bioetl/domain/ports/__init__.pyi
-      source_lines_after_split: 206
+      source_lines_after_split: 203
       extracted_surface_lines: 399
       rationale:
         Runtime lazy export resolution remains in the Python module while static re-export type
@@ -768,7 +768,7 @@ oversized_source_module_inventory:
         split threshold (59 lines); no further split required.
     - issue: "#6478"
       source: src/bioetl/application/services/checkpoint/checkpoint_compatibility_service.py
-      extracted_surface: src/bioetl/application/services/checkpoint_compatibility_telemetry.py
+      extracted_surface: src/bioetl/application/services/checkpoint/checkpoint_compatibility_telemetry.py
       source_lines_after_split: 182
       extracted_surface_lines: 71
       rationale:

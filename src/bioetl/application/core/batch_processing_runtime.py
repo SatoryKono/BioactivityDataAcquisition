@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 
 
 @runtime_checkable
-class SourceMetadataProvider(Protocol):
+class SourceMetadataProtocol(Protocol):
     """Optional data-source capability for typed source metadata."""
 
     def get_source_metadata(self) -> SourceMetadata | None: ...
@@ -43,7 +43,7 @@ def get_source_metadata(
 ) -> SourceMetadata | None:
     """Get source metadata and enrich it with query string when available."""
     source_metadata: SourceMetadata | None = None
-    if isinstance(data_source, SourceMetadataProvider):
+    if isinstance(data_source, SourceMetadataProtocol):
         try:
             result = data_source.get_source_metadata()
             if isinstance(result, SourceMetadata):
@@ -164,7 +164,7 @@ def build_bronze_refs(
 
 __all__ = [
     "OPERATION_ERRORS",
-    "SourceMetadataProvider",
+    "SourceMetadataProtocol",
     "build_bronze_refs",
     "execute_transform_with_span",
     "execute_with_layer_span",

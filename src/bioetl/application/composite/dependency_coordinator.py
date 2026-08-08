@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
-from typing import TYPE_CHECKING
 
 import polars as pl
 
@@ -23,6 +22,7 @@ from bioetl.application.composite.helpers.dependency_coordinator_execution impor
     run_single_dependency,
 )
 from bioetl.application.runtime_clock import resolve_runtime_clock
+from bioetl.domain.composite import DependencyConfig
 from bioetl.domain.composite.result import DependencyResult
 from bioetl.domain.ports import (
     ClockPort,
@@ -30,10 +30,6 @@ from bioetl.domain.ports import (
     ExecutionMetricsRunnerPort,
     LoggerPort,
 )
-
-if TYPE_CHECKING:
-    from bioetl.domain.composite import DependencyConfig
-
 
 __all__ = ["DependencyCoordinatorService"]
 

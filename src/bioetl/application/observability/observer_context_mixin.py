@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from types import TracebackType
 
     from bioetl.domain.ports import ClockPort, MetricsPort, TracingPort
-    from bioetl.domain.ports.observability.tracing import SpanHandle as Span
+    from bioetl.domain.ports import SpanHandle as Span
 
 
 if TYPE_CHECKING:

@@ -112,7 +112,7 @@
       "id": 3010,
       "type": "table",
       "title": "Browse Recent Runs",
-      "description": "Recent pipeline-run reports found on disk for the selected pipeline. Choose a row to set the run ID and open exact-run evidence. An empty table is valid when no matching reports exist. If reports are expected but the table cannot load, verify BioETL Ops HTTP at /health/live.",
+      "description": "Recent pipeline-run reports found on disk for the selected pipeline. Choose a row to set the run ID and open exact-run evidence. An empty table is valid when no matching reports exist. A backend failure or unexpected empty table requires verifying BioETL Ops HTTP at /health/live.",
       "gridPos": {
         "h": 7,
         "w": 24,

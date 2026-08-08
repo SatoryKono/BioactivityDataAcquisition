@@ -4,12 +4,9 @@ from __future__ import annotations
 
 import re
 from collections.abc import Callable
-from typing import TYPE_CHECKING
 
 from bioetl.domain.composite import ColumnGroupConfig
-
-if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
+from bioetl.domain.ports import LoggerPort
 
 _SortFn = Callable[[list[str], tuple[str, ...]], list[str]]
 

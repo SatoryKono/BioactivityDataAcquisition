@@ -1682,13 +1682,15 @@ def _panel_contract(
     kind = _target_kind(datasource_type=datasource_type, target=target)
     query = str(target.get("url") or target.get("expr") or target.get("query") or "")
     description = str(panel.get("description", ""))
-    description_lower = description.lower()
     field_config = panel.get("fieldConfig", {})
     defaults = (
         field_config.get("defaults", {}) if isinstance(field_config, dict) else {}
     )
     if not isinstance(defaults, dict):
         defaults = {}
+    documentation_lower = (
+        f"{description} {defaults.get('noValue', '')}"
+    ).lower()
     thresholds = defaults.get("thresholds", {})
     threshold_steps = (
         thresholds.get("steps", []) if isinstance(thresholds, dict) else []
@@ -1707,7 +1709,7 @@ def _panel_contract(
         "thresholds": threshold_steps if isinstance(threshold_steps, list) else [],
         "runbook_urls": _panel_runbook_urls(panel),
         "documents_valid_empty": any(
-            token in description_lower
+            token in documentation_lower
             for token in (
                 "valid empty",
                 "expected empty",
@@ -1723,9 +1725,10 @@ def _panel_contract(
             )
         ),
         "documents_backend_down": any(
-            token in description_lower
+            token in documentation_lower
             for token in (
                 "backend down",
+                "backend failure",
                 "backend unavailable",
                 "backend may be unavailable",
                 "backend/query failure",

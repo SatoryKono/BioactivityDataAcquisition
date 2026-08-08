@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.composition.runtime_builders._runner_control_plane_policy_support import (
-    _normalize_required_persistence_profile as _normalize_required_persistence_profile_impl,
     requires_artifact_publication_closure as _requires_artifact_publication_closure_impl,
     resolve_required_artifact_lineage_layers as _resolve_required_artifact_lineage_layers,
     validate_artifact_recorder_attachment as _validate_artifact_recorder_attachment,
@@ -18,6 +17,7 @@ from bioetl.composition.runtime_builders._runner_control_plane_policy_support im
 from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     is_critical_reproducibility_runtime,
+    normalize_required_persistence_profile,
 )
 
 if TYPE_CHECKING:
@@ -142,7 +142,7 @@ def resolve_control_plane_flags(
         if critical_runtime is None
         else critical_runtime
     )
-    if (exact_replay or critical) and _normalize_required_persistence_profile_impl(
+    if (exact_replay or critical) and normalize_required_persistence_profile(
         required_profile
     ) == "degraded_observable":
         required_profile = DEFAULT_REQUIRED_PERSISTENCE_PROFILE
@@ -188,11 +188,11 @@ def resolve_runner_control_plane_policy(
     )
     if (
         exact_replay or critical_runtime
-    ) and _normalize_required_persistence_profile_impl(
+    ) and normalize_required_persistence_profile(
         requested_profile
     ) == "degraded_observable":
         requested_profile = DEFAULT_REQUIRED_PERSISTENCE_PROFILE
-    required_profile = _normalize_required_persistence_profile_impl(requested_profile)
+    required_profile = normalize_required_persistence_profile(requested_profile)
     manifest_enabled, ledger_enabled = resolve_control_plane_flags(
         settings,
         yaml_config=yaml_config,
