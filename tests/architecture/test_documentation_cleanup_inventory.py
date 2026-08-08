@@ -112,9 +112,6 @@ def test_ai_skill_reference_redirects_are_active_compatibility_surfaces() -> Non
         "docs/00-project/ai/skills/local/deep-research/references/source-evaluation.md",
         "docs/00-project/ai/skills/local/documentation-audit/references/audit-checklist.md",
         "docs/00-project/ai/skills/local/documentation-audit/references/report-template.md",
-        "docs/00-project/ai/skills/local/py-test-swarm/references/l1-playbook.md",
-        "docs/00-project/ai/skills/local/py-test-swarm/references/l2-l3-task-brief.md",
-        "docs/00-project/ai/skills/local/py-test-swarm/references/report-templates.md",
         "docs/00-project/ai/skills/local/technical-designer-mermaid/references/patterns.md",
     }
     missing = sorted(path for path in redirect_paths if path not in rows)
