@@ -4,19 +4,17 @@ audits:
   - id: total-tech-debt-main-2026-07-27-r1
     status: current
     report_path: reports/quality/total-tech-debt-audit-main-current.md
-    audited_commit_sha: 26ad7ad98e14f1435ffec01c4d41ee6c6664cd8d
-    evidence_surface_sha256: 4a22743f4ec27670572afa85a13474e6a288b29d1b530b3e98add27becd35d8f
+    audited_commit_sha: 1f08fba3eb8d373991c00b14df9b3a857798e50b
+    evidence_surface_sha256: 2c76d52eca6a74580bdbc12d25b42f3f789c5fdc23231ca6a2af3bc0a4a4c607
     evidence_paths:
       - configs/quality/compatibility_facade_inventory.yaml
       - configs/quality/constructor_waivers.yaml
       - configs/quality/debt_scorecard.yaml
       - reports/quality/architecture-quality-scorecard.json
       - reports/quality/compatibility-importer-census.json
-      - reports/quality/contract-coverage-matrix.json
       - reports/quality/dead-code-inventory.json
-      - reports/quality/debt-governance-gates.json
+      - reports/quality/contract-registry-diagnostics.json
       - reports/quality/module-coverage-inventory.json
-      - reports/quality/test-governance-current.json
     reviewed_on: "2026-08-05"
     linked_issue: "#7517"
   - id: total-tech-debt-main-2026-07-27
