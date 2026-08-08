@@ -769,7 +769,7 @@ oversized_test_module_inventory:
     owner: application-pipelines
     target_split: PubMed transformer classification and normalization scenarios
   - path: tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py
-    lines: 1275
+    lines: 1240
     owner: observability-dashboards
     target_split: Grafana live audit tooling functional families
   completed_splits:
@@ -788,14 +788,16 @@ oversized_test_module_inventory:
   - issue_ref: '#6326'
     source: tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py
     source_lines_after_split: 1067
+
     extracted_surface: tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py
-    extracted_surface_lines: 1259
+    extracted_surface_lines: 1240
     owner: observability-dashboards
   - issue_ref: '#6364'
     source: tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py
     source_lines_after_split: 1067
+
     extracted_surface: tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py
-    extracted_surface_lines: 1259
+    extracted_surface_lines: 1240
     owner: observability-dashboards
     note: Oversized test module inventory updated to reflect completed split from
   - issue_ref: '#4506'
