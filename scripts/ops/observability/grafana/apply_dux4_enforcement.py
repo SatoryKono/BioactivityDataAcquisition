@@ -20,7 +20,9 @@ type JsonObject = dict[str, Any]
 
 
 def _is_zeroish(val: object) -> bool:
-    """True for None or numeric zero without float equality on non-numbers."""
+    """True for None or numeric zero without float equality on non-numbers.
+    NOSONAR - S1244: abs(float(val)) <= 1e-15 is the correct way to check near-zero without direct equality
+    """
     if val is None:
         return True
     if isinstance(val, bool):

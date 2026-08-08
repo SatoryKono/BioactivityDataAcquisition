@@ -146,6 +146,7 @@ def apply_plan(root: Path, plans: tuple[RenamePlan, ...]) -> tuple[Path, ...]:
         for source, target in pairs:
             updated = updated.replace(source, target)
         if updated != text:
+            # NOSONAR - S2083: path is a validated Path object from project tree, not user-controlled input
             path.write_text(updated, encoding="utf-8")
     return references
 
