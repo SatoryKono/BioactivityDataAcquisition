@@ -73,7 +73,10 @@
       "page_notes": [
         "Canonical anchors: AGENTS.md, docs/00-project/ai/memory/README.md, docs/00-project/ai/memory/agent-memory.md, docs/00-project/ai/agents/guides/MEMORY_USAGE.md, src/memory/DAILY_WORKFLOW.md, docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md, docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md.",
         "DeepWiki is derived navigation only; canonical truth remains in docs, configs, code, tests, and accepted ADRs.",
-        "Cursor/Windsurf rules SSOT: docs/00-project/ai/rules/cursor/; deploy via scripts/ai/sync/cursor.py --deploy and scripts/ai/sync/windsurf.py. Devin skills parity: .devin/skills/** vs .codex/skills/** per skills-mirror-contract.json."
+        "Cursor/Windsurf rules SSOT: docs/00-project/ai/rules/cursor/; deploy via scripts/ai/sync/cursor.py --deploy and scripts/ai/sync/windsurf.py. Devin skills parity: .devin/skills/** vs .codex/skills/** per skills-mirror-contract.json.",
+        "Devin skills (2026-08): technical-designer-mermaid, observability-dashboard, observability-prometheus, vcr-record, verify-architecture, new-pipeline, py-config-bot, py-debug-bot, py-doc-bot, py-plan-bot, py-test-bot, py-audit-bot, research-workflow.",
+        "Devin workflows (2026-08): review.md, post-change.md, pre-commit.md, qodo-sync.md, shared-validation.md, audit-documents.md - maintain parity with Cascade workflows under docs/00-project/ai/rules/windsurf/workflows/.",
+        "MCP configuration: .devin/config.json (Devin-specific settings), .devin/mcp_config.json (tracked HTTP inventory), .devin/mcp_config.local.json (daily overlay, gitignored)."
       ]
     },
     {
