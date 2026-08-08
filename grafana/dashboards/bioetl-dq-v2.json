@@ -113,7 +113,7 @@
         "x": 0,
         "y": 3
       },
-      "description": "Current panels show the latest DQ verdict and reasons for the selected pipeline. Selected-run panels use HTTP-backed identity and record accounting; run ID never filters Prometheus. Selected-range panels show scores, freshness, rejects, and delivery impact. These scopes answer different questions and must not be compared as equivalent status signals.",
+      "description": "Current panels show the latest DQ verdict and reasons for the selected pipeline. Selected-run panels use HTTP-backed identity and record accounting; run ID never filters Prometheus. Selected-range panels show scores, freshness, rejects, and delivery impact. These scopes answer different questions and must not be compared as equivalent status signals. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
       "options": {
         "mode": "html",
         "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Is data conformant, and what impact needs action?</div><div><b>Scope:</b> <b>CURRENT</b> = Status/reasons · <b>SELECTED RUN</b> = accounting</div><div><b>TIME RANGE</b> = score/freshness/impact; scopes are not peers</div></div></div>"
@@ -133,7 +133,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current DQ verdict for the selected pipeline. Mapping: `0=OK`, `1=WARN`, `>=2=CRIT`, `null=UNKNOWN`. UNKNOWN means current status evidence is missing, stale, unavailable, or not started—not healthy. Run type and stage mainly affect range evidence; run ID does not filter this verdict.",
+      "description": "Current DQ verdict for the selected pipeline. Mapping: `0=OK`, `1=WARN`, `>=2=CRIT`, `null=UNKNOWN`. UNKNOWN means current status evidence is missing, stale, unavailable, or not started—not healthy. Run type and stage mainly affect range evidence; run ID does not filter this verdict. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -245,7 +245,7 @@
         "content": "**Data trust — next actions (<=4)**\n1. Read **Status** + **Now · DQ Threshold/Reasons** (not range zeros).\n2. If blocked/quarantine/rejects > 0, use accounting with denominators (expand Run/Range lanes).\n3. Selected run -> **Run Explorer** hub; resume -> Trust **Review First Recovery Action**.\n4. Range cards are SLA/freshness context only — not peer severity.\n",
         "mode": "markdown"
       },
-      "description": "Read Status and Now lane panels (current threshold state and reasons). If blocked, quarantined, or rejected records exist, use Run or Range lanes for accounting with denominators. For selected-run evidence, use Run Explorer. For resume or replay, use Trust. Range cards are SLA and freshness context only, not peer severity badges",
+      "description": "Start with Current DQ Status, Threshold State, and Current Reasons. For CRIT, inspect validation, anomaly, quarantine, and reject blockers before replay. For WARN, inspect threshold and freshness evidence. Use selected-run accounting and selected-range evidence as supporting lanes, not competing verdicts.",
       "links": [
         {
           "title": "Review current status",
@@ -268,7 +268,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current DQ threshold state for the selected pipeline. Mapping: `0=OK`, `1=WARN`, `2=CRIT`, `null=UNKNOWN`. Hard-fail reasons map to CRIT, warning-only reasons map to WARN. Disabled or noop DQ monitoring is treated as WARN, not unconditional green. This is pipeline-wide; use selected-range panels below for scoped evidence",
+      "description": "Current DQ threshold state for the selected pipeline. Mapping: `0=OK`, `1=WARN`, `2=CRIT`, `null=UNKNOWN`. Hard-fail reasons map to CRIT, warning-only reasons map to WARN. Disabled or noop DQ monitoring is treated as WARN, not unconditional green. This is pipeline-wide; use selected-range panels below for scoped evidence. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -386,7 +386,7 @@
             "y": 92
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "Do not put full UUIDs into Prometheus labels. Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero",
+          "description": "Selected run: Compact identity table showing Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, Replay [Capability.Mode], Checkpoint [Anchors], and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity. No data/datasource errors mean the BioETL Ops HTTP backend may be unavailable; verify /health/live before interpreting as expected empty. Fail-closed: timeout, empty, or unresolved identity must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -542,7 +542,7 @@
             "y": 92
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "Do not put full UUIDs into Prometheus labels. Current Bronze/Silver/Gold stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero",
+          "description": "Selected run: Bronze/Silver/Gold stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors mean the BioETL Ops HTTP backend may be unavailable; verify /health/live before interpreting as expected empty. Fail-closed: timeout, empty, or unresolved identity must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -848,7 +848,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Current bounded reason and action rows for WARN/CRIT. If a non-OK current status has no active reason series, a fail-safe reason_evidence_unavailable row directs the operator to verify recording rules.",
+          "description": "Current: Bounded reason and action rows for WARN/CRIT. If a non-OK current status has no active reason series, a fail-safe reason_evidence_unavailable row directs the operator to verify recording rules. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1011,7 +1011,7 @@
           ],
           "title": "Monitor Volume-Weighted DQ Score",
           "type": "stat",
-          "description": "Do not read dual 100% as “all healthy” when Status is UNKNOWN/INCOMPLETE. Latest volume-weighted DQ score retained for up to 7 days between runs on the canonical 0.0-1.0 ratio scale, where 1.0 means all records are valid. UNKNOWN means no matching score and record-count samples exist in that window; absence is never coerced to 0. Review raw sample history in the adjacent trend panel. Scope: selected-range and pipeline scope only"
+          "description": "Selected range: Latest volume-weighted DQ score retained for up to 7 days between runs on the canonical 0.0-1.0 ratio scale, where 1.0 means all records are valid. UNKNOWN means no matching score and record-count samples exist in that window; absence is never coerced to 0. Review raw sample history in the adjacent trend panel. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges."
         },
         {
           "datasource": {
@@ -1097,14 +1097,14 @@
           ],
           "title": "Monitor Worst-Entity DQ Score",
           "type": "stat",
-          "description": "Do not read dual 100% as “all healthy” when Status is UNKNOWN/INCOMPLETE. Latest pipeline-scoped worst-entity DQ score retained for up to 7 days between runs on the canonical 0.0-1.0 ratio scale, where 1.0 means all records are valid. UNKNOWN means no matching validation score sample exists in that window, not a successful run and not a zero score"
+          "description": "Selected range: Latest pipeline-scoped worst-entity DQ score retained for up to 7 days between runs on the canonical 0.0-1.0 ratio scale, where 1.0 means all records are valid. UNKNOWN means no matching validation score sample exists in that window, not a successful run and not a zero score. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges."
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "SLA 24/72 only applies when samples exist. TIME RANGE freshness age in hours. Explicit SLA: WARN at 24h and CRIT at 72h. An ~8h value is green only because it is below the visible 24h SLA; null is UNKNOWN. TELEMETRY MISSING means freshness evidence is unavailable, not healthy.",
+          "description": "Selected range: Freshness age in hours. SLA 24/72 only applies when samples exist. Explicit SLA: WARN at 24h and CRIT at 72h. An ~8h value is green only because it is below the visible 24h SLA; null is UNKNOWN. TELEMETRY MISSING means freshness evidence is unavailable, not healthy. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1186,7 +1186,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE delivery impact. Selected-range blocked-record evidence only. Counts Silver filter rejects plus DQ quarantine records for the pipeline/run_type window without applying entity YAML thresholds in Grafana. Read alongside the adjacent Track: Source Records in Range (Bronze) panel for the denominator/magnitude context, and rely on Monitor DQ Current Status / Monitor DQ Threshold State (bioetl_dq_current_* recording rules) for the soft/hard severity verdict instead of the absolute count. 0 means no blocked records were observed in the selected window. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero.",
+          "description": "Selected range: Blocked-record evidence. Counts Silver filter rejects plus DQ quarantine records for the pipeline/run_type window without applying entity YAML thresholds. Read alongside the adjacent Track: Source Records in Range (Bronze) panel for denominator context, and rely on Monitor DQ Current Status / Monitor DQ Threshold State for the soft/hard severity verdict instead of the absolute count. 0 means no blocked records were observed in the selected window. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1273,7 +1273,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE delivery impact. Selected-range quarantine count. Non-zero means records were withheld from normal promotion and require quarantine triage even when Silver filter rejects remain zero; 0 means no quarantined records were reported in the selected window. TIME RANGE evidence only — not a peer verdict with Now. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero.",
+          "description": "Selected range: Quarantine count. Non-zero means records were withheld from normal promotion and require quarantine triage even when Silver filter rejects remain zero; 0 means no quarantined records were reported in the selected window. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1431,7 +1431,7 @@
           ],
           "title": "Monitor Silver Filter Rejects",
           "type": "stat",
-          "description": "TIME RANGE delivery impact. Selected-range Silver structural reject count from the filtered_out path only. FILTERED_OUT_SILVER is a legacy alias for this Silver structural path and is not a Gold contract/semantic reject code. A zero here does not refute current CRIT because quarantine, Gold reject outcomes, and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation/Gold panels before assuming the incident is filter-driven. The Explorer handoff preserves pipeline/run_type and time range so the operator can validate scoped totals before narrowing by reason_code or field. TIME RANGE evidence only — not a peer verdict with Now"
+          "description": "Selected range: Silver structural reject count from the filtered_out path only. FILTERED_OUT_SILVER is a legacy alias for this Silver structural path and is not a Gold contract/semantic reject code. A zero here does not refute current CRIT because quarantine, Gold reject outcomes, and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation/Gold panels before assuming the incident is filter-driven. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges."
         }
       ],
       "description": "Expand for selected-range impact and freshness after resolving the current reason lane."
@@ -1453,7 +1453,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Silver structural reject reconciliation signal. Non-zero means the stage-total filtered_out counter diverges from the bounded Silver reject breakdown metric over the selected range. Gold contract and semantic reject outcomes are excluded from this guardrail. Zero or empty means none observed, not started, or not available—not bare success. Red only for validated failure",
+          "description": "Selected range: Silver structural reject reconciliation signal. Non-zero means the stage-total filtered_out counter diverges from the bounded Silver reject breakdown metric over the selected range. Gold contract and semantic reject outcomes are excluded from this guardrail. Zero or empty means none observed, not started, or not available—not bare success. Red only for validated failure. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1637,7 +1637,7 @@
           ],
           "title": "Inspect Top Silver Reject Reasons",
           "type": "table",
-          "description": "Silver structural reject reasons ranked by count in the selected range. Gold contract and semantic rejects are excluded. No data means no bounded reason samples were observed; it must not create a synthetic reason. For record-level evidence run `bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only` with the relevant run/reason filters."
+          "description": "Selected range: Silver structural reject reasons ranked by count in the selected range. Gold contract and semantic rejects are excluded. No data means no bounded reason samples were observed; it must not create a synthetic reason. For record-level evidence run `bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only` with the relevant run/reason filters. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges."
         },
         {
           "datasource": {
@@ -1744,14 +1744,14 @@
           ],
           "title": "Inspect Top Silver Reject Fields",
           "type": "table",
-          "description": "Silver structural rejects grouped by schema field in the selected range. Gold contract and semantic rejects are excluded. No data means no bounded field samples were observed. For record-level evidence use `bioetl quarantine inspect` with the relevant pipeline, run, and field filters."
+          "description": "Selected range: Silver structural rejects grouped by schema field in the selected range. Gold contract and semantic rejects are excluded. No data means no bounded field samples were observed. For record-level evidence use `bioetl quarantine inspect` with the relevant pipeline, run, and field filters. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges."
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range pipeline breakdown of Silver structural rejects from the filtered_out stage-total counter. This is a scope/distribution panel, not a reason_code summary, and it intentionally excludes Gold contract/semantic rejects. No data means no filtered_out samples were observed in the active window; the panel must not invent a synthetic pipeline row",
+          "description": "Selected range: Pipeline breakdown of Silver structural rejects from the filtered_out stage-total counter. This is a scope/distribution panel, not a reason_code summary, and it intentionally excludes Gold contract/semantic rejects. No data means no filtered_out samples were observed in the active window; the panel must not invent a synthetic pipeline row. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
           "fieldConfig": {
             "defaults": {
               "color": {

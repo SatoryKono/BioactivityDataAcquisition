@@ -30,8 +30,6 @@ docs_code_zones:
       role: approved_repo_only_agent_policy_automation
     - path: docs/00-project/ai/agents/scripts
       role: approved_repo_only_agent_script_mirror
-    - path: docs/plugins/link_checker
-      role: approved_docs_plugin_source_tree
 
 root_tooling_roots:
   approved_roots:

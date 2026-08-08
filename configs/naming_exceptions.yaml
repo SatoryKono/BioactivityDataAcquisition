@@ -55,7 +55,6 @@ documentation_exceptions:
   - docs/05-operations/tooling/scripts-ops/SETUP_CHECKLIST.md
   - docs/05-operations/tooling/scripts-ops/SMOKE_TEST_README.md
   - docs/05-operations/tooling/scripts-ops/WSL_SETUP_SUMMARY.md
-  - docs/plugins/link_checker/INTEGRATION_GUIDE.md
 
 # Root-level files that may use non-standard naming
 root_file_exceptions:

@@ -37,7 +37,6 @@ repos:
         exclude: >
           (?x)(^|.*/)(
             mkdocs\.yml|
-            docs/plugins/link_checker/mkdocs_example\.yml|
             docs/05-operations/deployment/k8s-deployment\.yaml|
             docs/05-operations/deployment/k8s-monitoring\.yaml|
             docs/05-operations/deployment/k8s-networking\.yaml|
