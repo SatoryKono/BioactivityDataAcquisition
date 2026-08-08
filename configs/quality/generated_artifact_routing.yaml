@@ -61,6 +61,9 @@ allowed_output_roots:
   local_generated_docs_helpers:
     - docs/site/
     - docs/00-project/ai/skills/_references/
+    - docs/00-project/ai/memory/
+    - docs/00-project/ai/prompts/
+    - docs/00-project/ai/skills/local/
   generated_source:
     - src/bioetl/domain/schemas/generated/
     - src/bioetl/domain/mapping/generated/
@@ -728,6 +731,16 @@ routes:
     outputs:
       - reports/logs/bioetl.log
     notes: Default local runtime log file avoids root logs/ and stays under reports/logs.
+
+  - id: ai-local-generated-docs-helpers
+    generator: AI runtime memory, prompts, and local skill generators
+    output_kind: local_generated_docs_helpers
+    commit_policy: ignored_local_export
+    outputs:
+      - docs/00-project/ai/memory/
+      - docs/00-project/ai/prompts/
+      - docs/00-project/ai/skills/local/
+    notes: AI runtime memory sheets, prompt templates, and local skill docs are machine-local helpers and not committed.
 
   - id: docker-trivy-sarif-security-report
     generator: .github/workflows/docker.yml

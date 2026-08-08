@@ -15,7 +15,3 @@ from __future__ import annotations
 import pytest
 
 pytestmark = pytest.mark.skip(reason="Legacy memory sync test - module structure changed")
-    test_verify_expected_group_counts_uses_sync_run_for_targeted_relation_checks,
-)
-
-pytestmark = [pytest.mark.memory, pytest.mark.timeout(180)]
