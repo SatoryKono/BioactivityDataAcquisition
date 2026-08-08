@@ -55,7 +55,7 @@
   "redact_private_values": true,
   "languages": {
     "Python": {
-      "format_on_save": "off",
+      "format_on_save": "on",
       "formatter": {
         "language_server": {
           "name": "ruff"
@@ -70,7 +70,11 @@
         "!pylsp"
       ],
       "hard_tabs": false,
-      "tab_size": 4
+      "tab_size": 4,
+      "code_lenses": [
+        "source.test",
+        "source.go_to_definition"
+      ]
     },
     "YAML": {
       "format_on_save": "on",
@@ -132,7 +136,26 @@
     "runnables": true,
     "line_numbers": true,
     "breakpoints": true,
-    "folds": true
+    "folds": true,
+    "code_actions": true
+  },
+  "editor": {
+    "scroll_beyond_last_line": "one_page",
+    "scrollbar": {
+      "show": "auto"
+    },
+    "inline_completion": {
+      "enabled": true
+    },
+    "cursor_blink": false,
+    "relative_line_numbers": false,
+    "show_inline_completions": "always",
+    "soft_wrap": "preferred_line_length",
+    "show_whitespaces": "trailing",
+    "guides": {
+      "indentation": true,
+      "bracket_pairs": true
+    }
   },
   "terminal": {
     "env": {
@@ -154,6 +177,23 @@
     "font_family": "JetBrains Mono",
     "font_size": 14,
     "line_height": "comfortable"
+  },
+  "project_panel": {
+    "default_width": 240,
+    "dock": "left",
+    "scrollbar": {
+      "show": "auto"
+    },
+    "file_icons": true,
+    "folder_icons": true,
+    "indent_size": 4,
+    "indent_guides": true
+  },
+  "search": {
+    "case_sensitive": false,
+    "regex": false,
+    "whole_word": false,
+    "use_regex": false
   },
   "vim_mode": false,
   "context_servers": {},
@@ -378,6 +418,79 @@
   "telemetry": {
     "diagnostics": false,
     "metrics": false
+  },
+  "tasks": {
+    "version": "1",
+    "tasks": [
+      {
+        "label": "Lint (ruff + mypy)",
+        "command": "python",
+        "args": [
+          "-m",
+          "scripts.engineering.dev.zed_lint_imports"
+        ],
+        "cwd": "$ZED_PROJECT"
+      },
+      {
+        "label": "Type Check (mypy)",
+        "command": "python",
+        "args": [
+          "-m",
+          "scripts.engineering.dev.zed_mypy"
+        ],
+        "cwd": "$ZED_PROJECT"
+      },
+      {
+        "label": "Test: Smoke",
+        "command": "python",
+        "args": [
+          "-m",
+          "scripts.engineering.dev.zed_pytest_lane",
+          "smoke"
+        ],
+        "cwd": "$ZED_PROJECT"
+      },
+      {
+        "label": "Test: Unit Fast",
+        "command": "python",
+        "args": [
+          "-m",
+          "scripts.engineering.dev.zed_pytest_lane",
+          "unit-fast"
+        ],
+        "cwd": "$ZED_PROJECT"
+      },
+      {
+        "label": "Test: Architecture",
+        "command": "python",
+        "args": [
+          "-m",
+          "scripts.engineering.dev.zed_pytest_lane",
+          "architecture"
+        ],
+        "cwd": "$ZED_PROJECT"
+      },
+      {
+        "label": "Test: Current File",
+        "command": "python",
+        "args": [
+          "-m",
+          "scripts.engineering.dev.zed_pytest_lane",
+          "file",
+          "$ZED_FILE"
+        ],
+        "cwd": "$ZED_PROJECT"
+      },
+      {
+        "label": "Run Local Pipeline",
+        "command": "python",
+        "args": [
+          "-m",
+          "scripts.engineering.dev.zed_run"
+        ],
+        "cwd": "$ZED_PROJECT"
+      }
+    ]
   },
   "show_sign_in": true,
   "ui_font_family": "JetBrains Mono",
