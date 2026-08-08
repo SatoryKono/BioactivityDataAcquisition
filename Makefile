@@ -1,6 +1,6 @@
 # BioETL local-first Makefile
 
-.PHONY: help install test lint test-fast test-cov-fast-stable test-coverage test-architecture test-unit test-integration test-ci-local test-confidence-local test-confidence-unit test-confidence-contract test-profile test-deps run-local sync-windsurf-rules devin devin-setup devin-check devin-mcp-start devin-fix-bug devin-add-feature devin-update-docs devin-audit-config devin-workflows devin-mcp-start-minimal devin-mcp-start-standard devin-mcp-start-full deepwiki-backup deepwiki-update deepwiki-validate
+.PHONY: help install test lint test-fast test-cov-fast-stable test-coverage test-architecture test-unit test-integration test-ci-local test-confidence-local test-confidence-unit test-confidence-contract test-profile test-deps run-local sync-windsurf-rules devin devin-setup devin-check devin-mcp-start devin-fix-bug devin-add-feature devin-update-docs devin-audit-config devin-workflows devin-select-profile devin-mcp-start-minimal devin-mcp-start-standard devin-mcp-start-full deepwiki-backup deepwiki-update deepwiki-validate
 .PHONY: docker-check docker-build docker-start docker-stop docker-logs docker-health docker-clean docker-compose-check
 .PHONY: clean clean-all clean-local-artifacts clean-preflight precommit-install qa-arch-fast qa-debt security-check quarantine-inspect quarantine-replay quarantine-purge release-lock
 
@@ -43,6 +43,7 @@ help:
 	@echo "  make devin-update-docs     Quick documentation update"
 	@echo "  make devin-audit-config    Quick config audit"
 	@echo "  make devin-workflows       List available Devin workflows"
+	@echo "  make devin-select-profile  Interactive profile selection guide"
 	@echo "  make devin-mcp-start-minimal Start minimal MCP plane (memory, filesystem, fetch)"
 	@echo "  make devin-mcp-start-standard Start standard MCP plane (essential + github, docker, search)"
 	@echo "  make devin-mcp-start-full   Start full MCP plane (all 18 servers)"
@@ -191,6 +192,35 @@ devin-workflows:
 	@echo "  shared-validation    - Shared validation workflow"
 	@echo ""
 	@echo "Usage: cat .devin/workflows/<workflow-name>.md | $(DEVIN) $(DEVIN_ARGS)"
+
+# Interactive profile selection guide
+devin-select-profile:
+	@echo "Select profile based on task type:"
+	@echo "  1) Bug fix              → py-debug-bot"
+	@echo "  2) Feature addition     → py-plan-bot → orchestrator"
+	@echo "  3) Config change        → py-config-bot"
+	@echo "  4) Documentation        → py-doc-bot"
+	@echo "  5) Testing              → py-test-bot"
+	@echo "  6) Audit                → py-audit-bot"
+	@echo "  7) Architecture debt    → py-audit-bot (debt profile)"
+	@read -p "Select profile (1-7): " profile; \
+	case $$profile in \
+		1) echo "Using py-debug-bot for bug fix"; \
+		   echo "Command: run_subagent(title='debug', task='Follow .devin/agents/py-debug-bot/AGENT.md', profile='py-debug-bot', is_background=False)";; \
+		2) echo "Using py-plan-bot for feature planning"; \
+		   echo "Command: run_subagent(title='plan', task='Follow .devin/agents/py-plan-bot/AGENT.md', profile='py-plan-bot', is_background=False)";; \
+		3) echo "Using py-config-bot for config change"; \
+		   echo "Command: run_subagent(title='config', task='Follow .devin/agents/py-config-bot/AGENT.md', profile='py-config-bot', is_background=False)";; \
+		4) echo "Using py-doc-bot for documentation"; \
+		   echo "Command: run_subagent(title='docs', task='Follow .devin/agents/py-doc-bot/AGENT.md', profile='py-doc-bot', is_background=False)";; \
+		5) echo "Using py-test-bot for testing"; \
+		   echo "Command: run_subagent(title='test', task='Follow .devin/agents/py-test-bot/AGENT.md', profile='py-test-bot', is_background=False)";; \
+		6) echo "Using py-audit-bot for audit"; \
+		   echo "Command: run_subagent(title='audit', task='Follow .devin/agents/py-audit-bot/AGENT.md', profile='py-audit-bot', is_background=False)";; \
+		7) echo "Using py-audit-bot (debt) for architecture debt"; \
+		   echo "Command: run_subagent(title='debt', task='Follow .devin/agents/py-audit-bot/AGENT.md for debt workflow', profile='py-audit-bot', is_background=False)";; \
+		*) echo "Invalid selection. Please run make devin-select-profile again.";; \
+	esac
 
 # Tiered MCP startup profiles
 devin-mcp-start-minimal:
