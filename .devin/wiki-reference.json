@@ -16,7 +16,8 @@
       "page_notes": [
         {
           "content": "Canonical anchors: docs/04-reference/cli/, src/bioetl/interfaces/."
-        }
+        },
+        "Current command groups (2026-08): run (pipeline execution), health (health checks), quarantine (quarantine management), checkpoint (checkpoint management), run-manifest (manifest inspection), export (Gold layer export), maintenance (maintenance operations), diagnostics (unified diagnostics with diagnostics guide subcommand)."
       ]
     },
     {
@@ -46,7 +47,8 @@
       "page_notes": [
         {
           "content": "Canonical anchors: docs/04-reference/operations/, scripts/ops/."
-        }
+        },
+        "Script reorganization (2026-08): scripts/ai/sync/ (AI-facing setup and MCP operations), scripts/engineering/ (engineering-related scripts), scripts/memory/ (Neo4j project-memory tooling). Legacy tools from src/tools/ migrated or removed per docs/00-project/TOOLS.md."
       ]
     },
     {

@@ -1,6 +1,6 @@
 # BioETL local-first Makefile
 
-.PHONY: help install test lint test-fast test-cov-fast-stable test-coverage test-architecture test-unit test-integration test-ci-local test-confidence-local test-confidence-unit test-confidence-contract test-profile test-deps run-local sync-windsurf-rules devin devin-setup devin-check devin-mcp-start
+.PHONY: help install test lint test-fast test-cov-fast-stable test-coverage test-architecture test-unit test-integration test-ci-local test-confidence-local test-confidence-unit test-confidence-contract test-profile test-deps run-local sync-windsurf-rules devin devin-setup devin-check devin-mcp-start deepwiki-backup deepwiki-update deepwiki-validate
 .PHONY: docker-check docker-build docker-start docker-stop docker-logs docker-health docker-clean docker-compose-check
 .PHONY: clean clean-all clean-local-artifacts clean-preflight precommit-install qa-arch-fast qa-debt security-check quarantine-inspect quarantine-replay quarantine-purge release-lock
 
@@ -38,6 +38,11 @@ help:
 	@echo "  make devin                 Launch Devin CLI with BioETL runtime config"
 	@echo "  make devin-check           Validate Devin auth, rules, skills, and MCP config"
 	@echo "  make devin-mcp-start       Start the optional daily shared MCP plane"
+	@echo ""
+	@echo "DeepWiki management:"
+	@echo "  make deepwiki-backup       Backup wiki files before regeneration"
+	@echo "  make deepwiki-update       Update DeepWiki files via MCP"
+	@echo "  make deepwiki-validate     Validate wiki files against canonical sources"
 	@echo ""
 	@echo "Local governance:"
 	@echo "  make precommit-install      Install local pre-commit hooks"
@@ -150,6 +155,21 @@ devin-mcp-start:
 
 devin: devin-setup
 	$(DEVIN) $(DEVIN_ARGS)
+
+# DeepWiki management
+deepwiki-backup:
+	@echo "Backing up wiki files..."
+	@git add .devin/wiki-*.json
+	@git commit -m "backup: wiki files before DeepWiki regeneration" || echo "No changes to backup"
+
+deepwiki-update:
+	@echo "Updating DeepWiki files..."
+	@echo "See .devin/workflows/deepwiki-regeneration.md for manual workflow"
+	@echo "Or use: python scripts/ai/update_deepwiki.py --check"
+
+deepwiki-validate:
+	@echo "Validating DeepWiki against canonical sources..."
+	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/ai/update_deepwiki.py --validate
 
 # Check Docker
 docker-check:

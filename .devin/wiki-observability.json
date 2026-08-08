@@ -6,7 +6,9 @@
       "page_notes": [
         {
           "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, src/bioetl/infrastructure/observability/, grafana/dashboards/."
-        }
+        },
+        "Current dashboards (2026-08): bioetl-control-plane-v1, bioetl-overview-v2, bioetl-runtime, bioetl-provider-health-v2, bioetl-dq-v2, bioetl-incident-v1, bioetl-run-explorer-v1. Retired: bioetl-workflow-overview, bioetl-alerts-slo, bioetl-silver-reject-explorer.",
+        "Infrastructure changes (2026-08): Loki, Promtail, Tempo, Quarantine Explorer UI removed; BioETL Ops HTTP datasource for identity panels; opt-in monitoring via make docker-start-monitoring."
       ]
     },
     {
@@ -46,7 +48,8 @@
       "page_notes": [
         {
           "content": "Canonical anchors: grafana/dashboards/, scripts/ops/observability/grafana/."
-        }
+        },
+        "Recent refactoring (2026-08): Run Explorer simplification (HTTP narrative, up to 4 next actions), Data Quality panel updates (DQ Now vs Range lanes, TELEMETRY MISSING language), Metrics Evidence panel (replaces SCRAPING jargon), Navigation bus updates (Panel ID 1000)."
       ]
     },
     {
@@ -55,8 +58,19 @@
       "purpose": "Documents Prometheus alert rules, recording rules, and alert routing.",
       "page_notes": [
         {
-          "content": "Canonical anchors: configs/observability/prometheus/, docs/02-architecture/decisions/."
+          "content": "Canonical anchors: configs/observability/prometheus/, docs/02-architecture/decisions/"
         }
+      ]
+    },
+    {
+      "title": "Observability Skills",
+      "parent": "Observability",
+      "purpose": "Documents Devin skills for dashboard and Prometheus management: observability-dashboard, observability-prometheus, and related Grafana/Prometheus skills.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: .devin/skills/observability-dashboard/SKILL.md, .devin/skills/observability-prometheus/SKILL.md, docs/00-project/ai/skills/SKILLS-CATALOG.md."
+        },
+        "Available skills (2026-08): grafana-dashboard-render (rendering, preflight, auditing), grafana-dashboard-extension (editing, validating), prometheus-metric-discovery (real metrics discovery), prometheus-query-debugger (PromQL debugging), prometheus-alert-rule-editor (alert rule tuning), prometheus-rule-testing (promtool validation)."
       ]
     }
   ]

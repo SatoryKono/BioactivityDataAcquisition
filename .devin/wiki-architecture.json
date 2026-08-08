@@ -6,7 +6,8 @@
       "page_notes": [
         {
           "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
-        }
+        },
+        "Recent ADR updates (2026-08): ADR-040 diagram governance, ADR-034 schema↔domain pairs, ADR-037 canonical schema generation, ADR-050 silver structural/gold semantic filter boundary."
       ]
     },
     {
@@ -46,7 +47,8 @@
       "page_notes": [
         {
           "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
-        }
+        },
+        "Recent additions (2026-08): silver DQ request port in src/bioetl/domain/ports/quality/silver_dq_request.py for data quality validation requests, schema↔domain configuration pairs per ADR-034, and canonical schema generation per ADR-037."
       ]
     },
     {
@@ -56,7 +58,8 @@
       "page_notes": [
         {
           "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
-        }
+        },
+        "Recent additions (2026-08): fetch forwarding implementation in src/bioetl/application/core/_fetch_forwarding.py for improved data fetching efficiency and error handling."
       ]
     },
     {
@@ -76,7 +79,8 @@
       "page_notes": [
         {
           "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
-        }
+        },
+        "Recent additions (2026-08): versioning service in src/bioetl/composition/services/versioning.py for component version management, updated bootstrap ordering, and DI compliance improvements per ADR-025 pipeline config unification."
       ]
     },
     {
