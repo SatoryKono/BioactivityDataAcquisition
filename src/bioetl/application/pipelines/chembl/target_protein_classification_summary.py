@@ -61,7 +61,9 @@ def summarize_target_protein_classification_dependency(
         return pl.DataFrame(schema=_SUMMARY_SCHEMA)
 
     rows_by_target: dict[str, list[dict[str, object]]] = {}
-    for row in df.to_dicts():
+    # Bolt Optimization: Use iter_rows(named=True) instead of to_dicts() for lazy evaluation.
+    # This prevents materializing the entire list of dictionaries in memory at once, reducing peak memory and speeding up iteration.
+    for row in df.iter_rows(named=True):
         target_id = _text_or_none(row.get("target_id"))
         if target_id is None:
             continue
