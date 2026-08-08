@@ -1,6 +1,6 @@
 # BioETL local-first Makefile
 
-.PHONY: help install test lint test-fast test-cov-fast-stable test-coverage test-architecture test-unit test-integration test-ci-local test-confidence-local test-confidence-unit test-confidence-contract test-profile test-deps run-local sync-windsurf-rules devin devin-setup devin-check devin-mcp-start deepwiki-backup deepwiki-update deepwiki-validate
+.PHONY: help install test lint test-fast test-cov-fast-stable test-coverage test-architecture test-unit test-integration test-ci-local test-confidence-local test-confidence-unit test-confidence-contract test-profile test-deps run-local sync-windsurf-rules devin devin-setup devin-check devin-mcp-start devin-fix-bug devin-add-feature devin-update-docs devin-audit-config devin-workflows devin-mcp-start-minimal devin-mcp-start-standard devin-mcp-start-full deepwiki-backup deepwiki-update deepwiki-validate
 .PHONY: docker-check docker-build docker-start docker-stop docker-logs docker-health docker-clean docker-compose-check
 .PHONY: clean clean-all clean-local-artifacts clean-preflight precommit-install qa-arch-fast qa-debt security-check quarantine-inspect quarantine-replay quarantine-purge release-lock
 
@@ -38,6 +38,14 @@ help:
 	@echo "  make devin                 Launch Devin CLI with BioETL runtime config"
 	@echo "  make devin-check           Validate Devin auth, rules, skills, and MCP config"
 	@echo "  make devin-mcp-start       Start the optional daily shared MCP plane"
+	@echo "  make devin-fix-bug         Quick bug fix workflow (5 steps vs 8)"
+	@echo "  make devin-add-feature     Quick feature addition workflow"
+	@echo "  make devin-update-docs     Quick documentation update"
+	@echo "  make devin-audit-config    Quick config audit"
+	@echo "  make devin-workflows       List available Devin workflows"
+	@echo "  make devin-mcp-start-minimal Start minimal MCP plane (memory, filesystem, fetch)"
+	@echo "  make devin-mcp-start-standard Start standard MCP plane (essential + github, docker, search)"
+	@echo "  make devin-mcp-start-full   Start full MCP plane (all 18 servers)"
 	@echo ""
 	@echo "DeepWiki management:"
 	@echo "  make deepwiki-backup       Backup wiki files before regeneration"
@@ -152,6 +160,53 @@ devin-check: devin-setup
 devin-mcp-start:
 	XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --daily
 	PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh daily
+
+# Quick-fix shortcuts for common Devin tasks
+devin-fix-bug:
+	@echo "Quick bug fix workflow (5 steps vs 8)"
+	@$(DEVIN) $(DEVIN_ARGS) --prompt "Run py-test-bot baseline on current scope (1-2 files), then orchestrator fix, then py-test-bot final, then py-doc-bot docstring only, then py-audit-bot targeted audit"
+
+devin-add-feature:
+	@echo "Quick feature addition workflow"
+	@$(DEVIN) $(DEVIN_ARGS) --prompt "Run py-plan-bot for new feature, then orchestrator implementation, then py-test-bot baseline+final, then py-doc-bot, then py-audit-bot final"
+
+devin-update-docs:
+	@echo "Quick documentation update"
+	@$(DEVIN) $(DEVIN_ARGS) --prompt "Run py-doc-bot to update documentation for current changes, then py-audit-bot targeted docs audit"
+
+devin-audit-config:
+	@echo "Quick config audit"
+	@$(DEVIN) $(DEVIN_ARGS) --prompt "Run py-audit-bot targeted audit on configs/, then py-config-bot gap analysis if needed"
+
+# Workflow discovery
+devin-workflows:
+	@echo "Available Devin workflows:"
+	@echo "  audit-documents      - Document audit workflow"
+	@echo "  deepwiki-regeneration - DeepWiki update workflow"
+	@echo "  master               - Master workflow"
+	@echo "  post-change          - Post-change validation"
+	@echo "  pre-commit           - Pre-commit checks"
+	@echo "  qodo-sync            - Qodo sync workflow"
+	@echo "  review               - Code review workflow"
+	@echo "  shared-validation    - Shared validation workflow"
+	@echo ""
+	@echo "Usage: cat .devin/workflows/<workflow-name>.md | $(DEVIN) $(DEVIN_ARGS)"
+
+# Tiered MCP startup profiles
+devin-mcp-start-minimal:
+	@echo "Starting minimal MCP plane (memory, filesystem, fetch) - ~30 seconds"
+	@XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --minimal
+	@PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh minimal
+
+devin-mcp-start-standard:
+	@echo "Starting standard MCP plane (essential + github, docker, brave-search) - ~1 minute"
+	@XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --standard
+	@PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh standard
+
+devin-mcp-start-full:
+	@echo "Starting full MCP plane (all 18 servers) - ~2 minutes"
+	@XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --daily
+	@PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh daily
 
 devin: devin-setup
 	$(DEVIN) $(DEVIN_ARGS)
