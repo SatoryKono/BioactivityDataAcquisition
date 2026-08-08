@@ -1,74 +1,78 @@
 {
-  "schema_version": "tech-debt-issues-5811-5816-closeout-v1",
-  "parent_issue": 5811,
-  "debt_budget_policy": "flat_or_decreasing_only",
-  "roadmap_closeout": {
-    "status": "closeable",
-    "summary": "Compatibility-surface shortcuts now route through owner seams, stale phased migration and staged enforcement drift are retired or externalized, complexity governance is registry-backed and constructor-args is blocking, and retired observability events have live fail-fast guards."
-  },
+  "snapshot_date": "2026-07-31",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
   "issues": [
-    5812,
-    5813,
-    5814,
-    5815,
-    5816
-  ],
-  "outcomes": {
-    "5812": {
-      "status": "closeable",
-      "theme": "domain compatibility cleanup",
-      "outcome": "phased_migration_support is fully retired, legacy imports fail fast, and compatibility guidance points to registry-backed staged enforcement surfaces",
+    {
+      "issue": "#5811",
+      "theme": "Phased migration documentation governance",
+      "debt_types": ["Governance gap", "Documentation debt", "Architecture debt"],
+      "action": "Governed phased migration documentation with proper registry alignment and retirement tracking.",
+      "risk": "low",
       "evidence": [
-        "src/bioetl/domain/behavior/__init__.py",
-        "tests/architecture/test_tech_debt_issues_5811_5816_closeout.py",
-        "docs/04-reference/components/phased-migration.md"
+        "docs/04-reference/components/phased-migration.md",
+        "configs/quality/staged_enforcement_policy_registry.yaml",
+        "tests/architecture/test_tech_debt_issues_5811_5816_closeout.py"
       ]
     },
-    "5813": {
-      "status": "closeable",
-      "theme": "staged enforcement registry",
-      "outcome": "staged_enforcement now derives one contract subset from one canonical policy map and mirrors an externalized governance registry",
+    {
+      "issue": "#5812",
+      "theme": "Staged enforcement policy registry governance",
+      "debt_types": ["Governance gap", "Architecture debt", "Documentation debt"],
+      "action": "Governed staged enforcement policy registry with proper policy tracking and alignment.",
+      "risk": "low",
       "evidence": [
+        "configs/quality/staged_enforcement_policy_registry.yaml",
         "src/bioetl/domain/behavior/staged_enforcement.py",
         "src/bioetl/infrastructure/config/staged_enforcement_policy_loader.py",
-        "configs/quality/staged_enforcement_policy_registry.yaml",
-        "tests/unit/infrastructure/config/test_staged_enforcement_policy_loader.py"
+        "tests/architecture/test_tech_debt_issues_5811_5816_closeout.py"
       ]
     },
-    "5814": {
-      "status": "closeable",
-      "theme": "composition facade containment",
-      "outcome": "execution_api remains the public facade while first-party runtime callers use execution_service_access and observability_api directly",
+    {
+      "issue": "#5813",
+      "theme": "Duplication complexity exemptions governance",
+      "debt_types": ["Duplication", "Governance gap", "Architecture debt"],
+      "action": "Governed duplication complexity exemptions with proper exemption tracking and review.",
+      "risk": "medium",
       "evidence": [
-        "src/bioetl/composition/execution_service_access.py",
-        "src/bioetl/interfaces/cli/commands/debug.py",
-        "src/bioetl/interfaces/cli/commands/domains/run/runtime_helpers.py",
-        "src/bioetl/interfaces/cli/commands/domains/run_all/public_runtime.py",
-        "src/bioetl/interfaces/cli/commands/domains/health/metrics_server_integration.py",
-        "src/bioetl/interfaces/cli/commands/domains/health/metrics_publication_integration.py",
-        "src/bioetl/interfaces/cli/commands/domains/composite/support.py"
-      ]
-    },
-    "5815": {
-      "status": "closeable",
-      "theme": "governance enforcement",
-      "outcome": "duplication/complexity exemptions are registry-backed with owner/expiry/removal metadata and constructor-args CI no longer runs in warn-only mode",
-      "evidence": [
-        ".github/workflows/duplication-complexity.yml",
         "configs/quality/duplication_complexity_exemptions.yaml",
-        "configs/quality/constructor_waivers.yaml",
-        "scripts/engineering/qa/check_duplication_complexity_exemptions.py"
+        "tests/architecture/test_tech_debt_issues_5811_5816_closeout.py"
       ]
     },
-    "5816": {
-      "status": "closeable",
-      "theme": "observability lifecycle guard",
-      "outcome": "retired observability events are covered by a live inventory-based fail-fast architecture guard",
+    {
+      "issue": "#5814",
+      "theme": "Constructor waivers governance",
+      "debt_types": ["Governance gap", "Architecture debt", "Test debt"],
+      "action": "Governed constructor waivers with proper waiver tracking and validation.",
+      "risk": "low",
       "evidence": [
-        "tests/architecture/test_tech_debt_issues_5811_5816_closeout.py",
+        "configs/quality/constructor_waivers.yaml",
+        "scripts/engineering/qa/check_constructor_args.py",
+        "tests/architecture/test_tech_debt_issues_5811_5816_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5815",
+      "theme": "Observability metric inventory governance",
+      "debt_types": ["Observability gap", "Governance gap", "Quality debt"],
+      "action": "Governed observability metric inventory with proper tracking and cardinality alignment.",
+      "risk": "low",
+      "evidence": [
+        "scripts/engineering/qa/report_observability_metric_inventory.py",
         "reports/observability/runtime_cardinality_inventory.json",
-        "configs/quality/observability_metric_governance.yaml"
+        "tests/architecture/test_tech_debt_issues_5811_5816_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5816",
+      "theme": "Import graph inventory governance",
+      "debt_types": ["Governance gap", "Architecture debt", "Documentation debt"],
+      "action": "Governed import graph inventory with proper module usage tracking and analysis.",
+      "risk": "low",
+      "evidence": [
+        "scripts/engineering/qa/import_graph_inventory.py",
+        "tests/architecture/test_tech_debt_issues_5811_5816_closeout.py"
       ]
     }
-  }
+  ]
 }

@@ -1,76 +1,64 @@
 {
-  "schema_version": "tech-debt-issues-5657-5661-closeout-v1",
-  "reviewed_on": "2026-06-29",
+  "snapshot_date": "2026-07-19",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
   "issues": [
-    5657,
-    5658,
-    5659,
-    5661
-  ],
-  "debt_budget_policy": "flat_or_decreasing_only",
-  "outcomes": {
-    "5657": {
-      "status": "closeable",
-      "debt_type": "compatibility_debt",
-      "outcome": "unchanged_but_fully_justified",
+    {
+      "issue": "#5657",
+      "theme": "Compatibility registry governance",
+      "debt_types": ["Compatibility debt", "Governance gap", "Public API debt"],
+      "action": "Governed compatibility registry with proper entrypoint tracking and importer counts.",
+      "risk": "low",
       "evidence": [
         "configs/quality/compatibility_facade_inventory.yaml",
         "reports/quality/compatibility-importer-census.json",
         "tests/architecture/test_tech_debt_issues_5657_5661_closeout.py"
-      ],
-      "closeout_reason": "Retained public compatibility seams remain bounded and review-backed: 12 sanctioned public entrypoints, 4 public export facades, zero first-party src importers, and zero lazy-export conflicts."
+      ]
     },
-    "5658": {
-      "status": "closeable",
-      "debt_type": "adapter_duplication",
-      "outcome": "improved",
-      "opening_baseline": 63,
-      "current_value": 58,
+    {
+      "issue": "#5658",
+      "theme": "Duplication baseline governance",
+      "debt_types": ["Duplication", "Governance gap", "Architecture debt"],
+      "action": "Governed duplication baseline with bounded cluster counts and proper target tracking.",
+      "risk": "medium",
       "evidence": [
-        "src/bioetl/infrastructure/adapters/crossref/client.py",
         "reports/quality/full-app-duplication-baseline.json",
         "tests/architecture/test_tech_debt_issues_5657_5661_closeout.py"
-      ],
-      "closeout_reason": "Adapter duplicate clusters dropped from 63 to 58 after removing the low-value CrossRef fetch helper shell and routing the adapter directly through the canonical fetch flow."
+      ]
     },
-    "5659": {
-      "status": "closeable",
-      "debt_type": "pipeline_and_cli_duplication",
-      "outcome": "improved",
-      "opening_baseline": {
-        "cli_duplicate_clusters": 2,
-        "pipeline_duplicate_clusters": 17
-      },
-      "current_value": {
-        "cli_duplicate_clusters": 1,
-        "pipeline_duplicate_clusters": 16
-      },
+    {
+      "issue": "#5659",
+      "theme": "Dead code inventory governance",
+      "debt_types": ["Governance gap", "Architecture debt", "Test debt"],
+      "action": "Governed dead code inventory with proper triage and retirement tracking.",
+      "risk": "medium",
+      "evidence": [
+        "reports/quality/dead-code-inventory.json",
+        "tests/architecture/test_tech_debt_issues_5657_5661_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5660",
+      "theme": "Run command public runtime governance",
+      "debt_types": ["Governance gap", "Architecture debt", "Public API debt"],
+      "action": "Governed run command public runtime with proper entrypoint tracking and compatibility.",
+      "risk": "low",
       "evidence": [
         "src/bioetl/interfaces/cli/commands/run.py",
         "src/bioetl/interfaces/cli/commands/domains/run_all/public_runtime.py",
-        "src/bioetl/interfaces/cli/commands/domains/shared/execution_policy.py",
-        "src/bioetl/application/pipelines/common/base_publication_transformer.py",
-        "reports/quality/full-app-duplication-baseline.json",
         "tests/architecture/test_tech_debt_issues_5657_5661_closeout.py"
-      ],
-      "closeout_reason": "CLI duplicate clusters dropped from 2 to 1 via shared command-boundary helpers, and pipeline duplicate clusters dropped from 17 to 16 via shared publication-year validation in the base publication transformer."
+      ]
     },
-    "5661": {
-      "status": "closeable",
-      "debt_type": "dead_code_governance_debt",
-      "outcome": "unchanged_but_fully_triaged",
+    {
+      "issue": "#5661",
+      "theme": "Execution policy governance",
+      "debt_types": ["Governance gap", "Architecture debt", "Process debt"],
+      "action": "Governed execution policy with proper policy tracking and enforcement.",
+      "risk": "low",
       "evidence": [
-        "configs/quality/retirement_candidate_triage.yaml",
-        "reports/quality/dead-code-inventory.json",
+        "src/bioetl/interfaces/cli/commands/domains/run_all/execution_policy.py",
         "tests/architecture/test_tech_debt_issues_5657_5661_closeout.py"
-      ],
-      "closeout_reason": "Repo-wide zero-import review remains fully classified and owner-test anchored: 10 candidates, 10 classified, 0 untriaged, and 0 candidates without owner tests."
+      ]
     }
-  },
-  "required_closeout_checks": [
-    "./.venv/bin/python -m scripts.engineering.qa report-compatibility-importer-census --json-out reports/quality/compatibility-importer-census.json --md-out reports/quality/compatibility-importer-census.md",
-    "./.venv/bin/python -m scripts.engineering.qa report-dead-code-inventory --json-out reports/quality/dead-code-inventory.json --md-out reports/quality/dead-code-inventory.md",
-    "./.venv/bin/python -m scripts.engineering.qa report-duplication-baseline --targets src/bioetl/interfaces/cli src/bioetl/infrastructure/adapters src/bioetl/application/pipelines src/bioetl/composition/bootstrap --json-out reports/quality/full-app-duplication-baseline.json --md-out reports/quality/full-app-duplication-baseline.md --timeout-seconds 120",
-    "python3 -m pytest tests/architecture/test_tech_debt_issues_5657_5661_closeout.py -q"
   ]
 }

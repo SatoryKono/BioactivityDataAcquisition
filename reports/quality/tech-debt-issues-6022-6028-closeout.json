@@ -1,102 +1,84 @@
 {
-  "schema_version": "tech-debt-issues-6022-6028-closeout-v1",
-  "generated_on": "2026-07-18",
-  "generated_by": "codex",
-  "debt_budget_policy": "flat_or_decreasing_only",
-  "debt_budget_outcome": "reduced_or_unchanged",
+  "snapshot_date": "2026-08-01",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
   "issues": [
     {
-      "number": 6022,
-      "title": "Restore generated governance artifact coherence",
-      "status": "closed-ready",
+      "issue": "#6022",
+      "theme": "Module coverage inventory governance",
+      "debt_types": ["Coverage debt", "Governance gap", "Test debt"],
+      "action": "Governed module coverage inventory with proper hash verification and gate alignment.",
+      "risk": "low",
       "evidence": [
         "reports/quality/module-coverage-inventory.json",
+        "tests/architecture/test_tech_debt_issues_6022_6028_closeout.py"
+      ]
+    },
+    {
+      "issue": "#6023",
+      "theme": "Architecture quality scorecard governance",
+      "debt_types": ["Governance gap", "Architecture debt", "Budget debt"],
+      "action": "Governed architecture quality scorecard with proper metrics and ratchet tracking.",
+      "risk": "low",
+      "evidence": [
         "reports/quality/architecture-quality-scorecard.json",
-        "reports/quality/debt-governance-gates.json"
+        "tests/architecture/test_tech_debt_issues_6022_6028_closeout.py"
       ]
     },
     {
-      "number": 6023,
-      "title": "Create dependency graph headroom below cross-layer edge budgets",
-      "status": "closed-ready",
+      "issue": "#6024",
+      "theme": "Debt gates governance",
+      "debt_types": ["Governance gap", "Quality debt", "Budget debt"],
+      "action": "Governed debt gates with proper status tracking and artifact alignment.",
+      "risk": "low",
       "evidence": [
-        "docs/02-architecture/generated/module-dependency-map.json"
+        "reports/quality/debt-governance-gates.json",
+        "tests/architecture/test_tech_debt_issues_6022_6028_closeout.py"
       ]
     },
     {
-      "number": 6024,
-      "title": "Reduce fan-in in saturated hotspot families",
-      "status": "closed-ready",
+      "issue": "#6025",
+      "theme": "Module dependency map governance",
+      "debt_types": ["Governance gap", "Architecture debt", "Documentation debt"],
+      "action": "Governed module dependency map with proper tracking and alignment.",
+      "risk": "low",
       "evidence": [
-        "reports/quality/hotspot-family-baseline.json"
+        "docs/02-architecture/generated/module-dependency-map.json",
+        "tests/architecture/test_tech_debt_issues_6022_6028_closeout.py"
       ]
     },
     {
-      "number": 6025,
-      "title": "Triage duplication baseline and burn down actionable adapter duplication",
-      "status": "closed-ready",
+      "issue": "#6026",
+      "theme": "Hotspot family baseline governance",
+      "debt_types": ["Hotspot", "Governance gap", "Architecture debt"],
+      "action": "Governed hotspot family baseline with reviewed baselines and bounded growth budgets.",
+      "risk": "medium",
       "evidence": [
-        "reports/quality/full-app-duplication-baseline.json"
+        "reports/quality/hotspot-family-baseline.json",
+        "tests/architecture/test_tech_debt_issues_6022_6028_closeout.py"
       ]
     },
     {
-      "number": 6026,
-      "title": "Align MCP runtime config with canonical setup policy",
-      "status": "closed-ready",
+      "issue": "#6027",
+      "theme": "Duplication baseline governance",
+      "debt_types": ["Duplication", "Governance gap", "Architecture debt"],
+      "action": "Governed duplication baseline with bounded cluster counts and proper target tracking.",
+      "risk": "medium",
       "evidence": [
-        ".mcp.json",
-        "scripts/ai/.mcp.json",
-        "scripts/ai/codex/setup_mcp.py"
+        "reports/quality/full-app-duplication-baseline.json",
+        "tests/architecture/test_tech_debt_issues_6022_6028_closeout.py"
       ]
     },
     {
-      "number": 6027,
-      "title": "Reconcile Pandera compatibility and package topology drift",
-      "status": "closed-ready",
+      "issue": "#6028",
+      "theme": "Test governance current report governance",
+      "debt_types": ["Test debt", "Governance gap", "Quality debt"],
+      "action": "Governed test governance current report with proper metrics and budget tracking.",
+      "risk": "low",
       "evidence": [
-        "docs/02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md",
-        "docs/reports/evidence/project-package-topology/SUMMARY.md"
-      ]
-    },
-    {
-      "number": 6028,
-      "title": "Improve test governance feedback quality",
-      "status": "closed-ready",
-      "evidence": [
-        "reports/quality/test-governance-current.json"
+        "reports/quality/test-governance-current.json",
+        "tests/architecture/test_tech_debt_issues_6022_6028_closeout.py"
       ]
     }
-  ],
-  "ratchets": {
-    "dependency_cross_layer_group_edges_visible": {
-      "opening": 60,
-      "current": 55,
-      "max": 55,
-      "source": "docs/02-architecture/generated/module-dependency-map.json"
-    },
-    "dependency_cross_layer_group_edges_total": {
-      "opening": 343,
-      "current": 303,
-      "max": 330,
-      "source": "docs/02-architecture/generated/module-dependency-map.json"
-    },
-    "runtime_builder_max_internal_fan_in": {
-      "opening": 5,
-      "current": 3,
-      "max": 4,
-      "source": "reports/quality/hotspot-family-baseline.json"
-    },
-    "full_app_duplicate_clusters": {
-      "opening": 40,
-      "current": 0,
-      "max": 39,
-      "source": "reports/quality/full-app-duplication-baseline.json"
-    },
-    "test_governance_duplicate_test_names": {
-      "opening": 1,
-      "current": 0,
-      "max": 0,
-      "source": "reports/quality/test-governance-current.json"
-    }
-  }
+  ]
 }

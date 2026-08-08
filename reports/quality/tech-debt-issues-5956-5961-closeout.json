@@ -1,120 +1,78 @@
 {
-  "schema_version": "tech-debt-issues-5956-5961-closeout-v1",
-  "generated_on": "2026-07-05",
-  "generated_by": "codex",
-  "debt_budget_policy": "flat_or_decreasing_only",
-  "debt_budget_outcome": "reduced_or_unchanged",
+  "snapshot_date": "2026-07-25",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
   "issues": [
     {
-      "number": 5956,
-      "status": "closed-ready",
+      "issue": "#5956",
+      "theme": "Duplication baseline governance",
+      "debt_types": ["Duplication", "Governance gap", "Architecture debt"],
+      "action": "Governed duplication baseline with bounded cluster counts and proper target tracking.",
+      "risk": "medium",
       "evidence": [
         "reports/quality/full-app-duplication-baseline.json",
-        "configs/quality/debt_scorecard.yaml"
+        "configs/quality/debt_scorecard.yaml",
+        "tests/architecture/test_tech_debt_issues_5956_5961_closeout.py"
       ]
     },
     {
-      "number": 5957,
-      "status": "closed-ready",
+      "issue": "#5957",
+      "theme": "Compatibility census governance",
+      "debt_types": ["Compatibility debt", "Governance gap", "Public API debt"],
+      "action": "Governed compatibility census with proper entrypoint tracking and importer counts.",
+      "risk": "low",
       "evidence": [
         "reports/quality/compatibility-importer-census.json",
-        "configs/quality/internal_compatibility_shim_inventory.yaml"
+        "configs/quality/internal_compatibility_shim_inventory.yaml",
+        "tests/architecture/test_tech_debt_issues_5956_5961_closeout.py"
       ]
     },
     {
-      "number": 5958,
-      "status": "closed-ready",
+      "issue": "#5958",
+      "theme": "Internal compatibility shims governance",
+      "debt_types": ["Compatibility debt", "Governance gap", "Architecture debt"],
+      "action": "Governed internal compatibility shims with proper tracking and sunset policies.",
+      "risk": "medium",
       "evidence": [
         "reports/quality/compatibility-importer-census.json",
-        "configs/quality/internal_compatibility_shim_inventory.yaml"
+        "configs/quality/internal_compatibility_shim_inventory.yaml",
+        "tests/architecture/test_tech_debt_issues_5956_5961_closeout.py"
       ]
     },
     {
-      "number": 5959,
-      "status": "closed-ready",
+      "issue": "#5959",
+      "theme": "Scripts inventory manifest governance",
+      "debt_types": ["Governance gap", "Documentation debt", "Process debt"],
+      "action": "Governed scripts inventory manifest with proper lifecycle tracking and registry alignment.",
+      "risk": "low",
       "evidence": [
         "configs/quality/scripts_inventory_manifest.json",
-        "configs/quality/scripts_lifecycle_registry.json"
+        "configs/quality/scripts_lifecycle_registry.json",
+        "tests/architecture/test_tech_debt_issues_5956_5961_closeout.py"
       ]
     },
     {
-      "number": 5960,
-      "status": "closed-ready",
+      "issue": "#5960",
+      "theme": "Root hygiene review governance",
+      "debt_types": ["Governance gap", "Process debt", "Documentation debt"],
+      "action": "Governed root hygiene review with proper evidence tracking and allowlist alignment.",
+      "risk": "low",
       "evidence": [
-        "reports/quality/root-hygiene-review-evidence.json"
+        "reports/quality/root-hygiene-review-evidence.json",
+        "tests/architecture/test_tech_debt_issues_5956_5961_closeout.py"
       ]
     },
     {
-      "number": 5961,
-      "status": "closed-ready",
+      "issue": "#5961",
+      "theme": "Debt gates governance",
+      "debt_types": ["Governance gap", "Quality debt", "Budget debt"],
+      "action": "Governed debt gates with proper status tracking and artifact alignment.",
+      "risk": "low",
       "evidence": [
         "reports/quality/full-app-duplication-baseline.json",
-        "reports/quality/debt-governance-gates.json"
+        "reports/quality/debt-governance-gates.json",
+        "tests/architecture/test_tech_debt_issues_5956_5961_closeout.py"
       ]
     }
-  ],
-  "outcomes": {
-    "5956": {
-      "status": "closeable"
-    },
-    "5957": {
-      "status": "closeable"
-    },
-    "5958": {
-      "status": "closeable"
-    },
-    "5959": {
-      "status": "closeable"
-    },
-    "5960": {
-      "status": "closeable"
-    },
-    "5961": {
-      "status": "closeable"
-    }
-  },
-  "ratchets": {
-    "infrastructure_adapter_duplicate_clusters": {
-      "current": 0,
-      "max": 0,
-      "opening": 39,
-      "source": "reports/quality/full-app-duplication-baseline.json"
-    },
-    "application_pipeline_duplicate_clusters": {
-      "current": 0,
-      "max": 2,
-      "opening": 3,
-      "source": "reports/quality/full-app-duplication-baseline.json"
-    },
-    "full_app_duplicate_clusters": {
-      "current": 0,
-      "max": 2,
-      "opening": 41,
-      "source": "reports/quality/full-app-duplication-baseline.json"
-    },
-    "retained_entrypoints": {
-      "current": 12,
-      "max": 12,
-      "opening": 12,
-      "source": "reports/quality/compatibility-importer-census.json"
-    },
-    "retained_public_export_facades": {
-      "current": 4,
-      "max": 4,
-      "opening": 4,
-      "source": "reports/quality/compatibility-importer-census.json"
-    },
-    "zero_reference_supporting_scripts": {
-      "current": 4,
-      "max": 32,
-      "opening": 46,
-      "source": "configs/quality/scripts_inventory_manifest.json"
-    },
-    "root_review_required_surfaces": {
-      "current": 90,
-      "max": 90,
-      "opening": 99,
-      "source": "reports/quality/root-hygiene-review-evidence.json"
-    }
-  }
+  ]
 }
