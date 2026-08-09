@@ -1,23 +1,185 @@
+# Composite entity contract for composite_molecule.
+# column_groups mirrors configs/composites/molecule.yaml::composite.merge.column_groups.
 version: 1.0.0
 provider: composite
 entity: molecule
 pipeline:
-    pipeline_name: composite_molecule
-    provider: composite
-    entity_type: molecule
-    description: Composite molecule entity merging data from multiple providers
-    business_primary_keys:
-        - entity_id
-    sink:
-        silver:
-            mode: merge
-            idempotency_contract: merge_upsert
-        gold:
-            enabled: true
+  pipeline_name: composite_molecule
+  provider: composite
+  entity_type: molecule
+  description: Composite molecule entity merging data from multiple providers
+  business_primary_keys:
+  - entity_id
+  sink:
+    silver:
+      mode: merge
+      idempotency_contract: merge_upsert
+    gold:
+      enabled: true
+schema:
+  content_hash:
+    include: []
+    exclude: []
+  column_groups:
+  - name: system
+    fields:
+    - entity_id
+    - content_hash
+    - _source
+    - _index
+    pattern: ^_composite_|^_source_providers|^_enrichment_|^_lineage_
+    provider_order:
+    - chembl
+    - pubchem
+  - name: identifiers
+    fields:
+    - molecule_id
+    - inchi_key
+    - standardized_inchi_key
+    - structure_parent_key
+    - inchi
+    - standard_inchi
+    provider_order:
+    - chembl
+    - pubchem
+  - name: structure
+    fields:
+    - canonical_smiles
+    - isomeric_smiles
+    - helm_notation
+    - structure_type
+    provider_order:
+    - chembl
+    - pubchem
+  - name: properties
+    fields:
+    - molecular_weight
+    - molecular_formula
+    - logp
+    - logp_method
+    - polar_surface_area
+    - hba_count
+    - hbd_count
+    - rotatable_bond_count
+    - heavy_atom_count
+    - aromatic_ring_count
+    - qed_weighted
+    - property_ro5_violations
+    - property_ro3_pass
+    provider_order:
+    - chembl
+    - pubchem
+  - name: names
+    fields:
+    - pref_name
+    - iupac_name
+    - molecule_synonyms
+    provider_order:
+    - chembl
+    - pubchem
+  - name: clinical
+    fields:
+    - max_phase
+    - first_approval
+    - therapeutic_flag
+    - black_box_warning
+    - withdrawn_flag
+    - oral
+    - parenteral
+    - topical
+    - first_in_class
+    - prodrug
+    - natural_product
+    - availability_type
+    provider_order:
+    - chembl
+  - name: hierarchy
+    fields:
+    - hierarchy_parent_chembl_id
+    - hierarchy_active_chembl_id
+    - hierarchy_child_chembl_id
+    - molecule_hierarchy
+    provider_order:
+    - chembl
+  - name: classification
+    fields:
+    - molecule_type
+    - atc_classifications
+    - chirality
+    - inorganic_flag
+    - polymer_flag
+    - dosed_ingredient
+    provider_order:
+    - chembl
+  - name: xrefs
+    fields:
+    - cross_references
+    provider_order:
+    - chembl
+    - pubchem
+  - name: usan
+    fields:
+    - usan_year
+    - usan_stem
+    - usan_substem
+    - usan_stem_definition
+    provider_order:
+    - chembl
+  silver:
+    include_groups:
+    - system
+    - identifiers
+    - structure
+    - properties
+    - names
+    - clinical
+    - hierarchy
+    - classification
+    - xrefs
+    - usan
+    exclude_fields: []
+  gold:
+    include_groups:
+    - system
+    - identifiers
+    - structure
+    - properties
+    - names
+    - clinical
+    - hierarchy
+    - classification
+    - xrefs
+    - usan
+    exclude_fields:
+    - _dq_*
+    - _index
+    - _lookup_method
+    - _original_id
 quality:
-    version: 1.0.0
-    provider: composite
-    entity: molecule
-    entity_field_validations: []
-    cross_field_validations: []
+  version: 1.0.0
+  provider: composite
+  entity: molecule
+  entity_field_validations: []
+  entity_cross_field_validations: []
+filters:
+  version: 1.0.0
+  provider: composite
+  entity: molecule
+  silver_filters:
+    required_fields:
+    - entity_id
+    - molecule_id
+  gold_filters:
+    required_fields:
+    - entity_id
+    - molecule_id
+contracts:
+  primary_key:
+  - entity_id
+  merge_keys:
+  - entity_id
+  hash_include: []
+  hash_exclude: []
+  contract_ref: composite.molecule
+  active_version: 1.0.0
 status: active

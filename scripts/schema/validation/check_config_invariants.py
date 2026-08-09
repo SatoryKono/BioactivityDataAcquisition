@@ -9,6 +9,9 @@ Checks:
   INV-CFG-004  Providers requiring auth declare API key / mailto env vars
   INV-CFG-005  No unknown keys in unified entity/composite/provider configs
   INV-CFG-006  pipeline_name == {provider}_{entity_type}
+  INV-CFG-008  Provider and entity root config versions stay synchronized
+  INV-CFG-009  Composite entity contracts carry complete schema/filter/contract sections
+  INV-CFG-010  Provider configs use named env indirection instead of ${...} interpolation
 
 Usage:
     python -m scripts.schema check-invariants [--verbose]
@@ -77,12 +80,24 @@ def _deep_string_search(obj: Any, fragment: str) -> bool:
     return False
 
 
-def _entity_configs() -> list[Path]:
+def _provider_entity_configs() -> list[Path]:
     return sorted(
         p
         for p in ENTITIES_DIR.rglob(YAML_GLOB)
         if not p.name.startswith("_") and p.parent.name != "composite"
     )
+
+
+def _composite_entity_configs() -> list[Path]:
+    return sorted(
+        p
+        for p in (ENTITIES_DIR / "composite").glob(YAML_GLOB)
+        if not p.name.startswith("_")
+    )
+
+
+def _entity_configs() -> list[Path]:
+    return [*_provider_entity_configs(), *_composite_entity_configs()]
 
 
 def _provider_configs() -> list[Path]:
@@ -204,7 +219,7 @@ def check_inv_002(verbose: bool) -> list[str]:
     declared_pairs = _provider_declared_pairs(provider_data_by_name, errors)
 
     actual_pairs: set[tuple[str, str]] = set()
-    for path in _entity_configs():
+    for path in _provider_entity_configs():
         actual_pairs.add(
             _append_entity_config_consistency_errors(
                 path,
@@ -226,6 +241,28 @@ def check_inv_002(verbose: bool) -> list[str]:
             f"INV-CFG-002 configs/providers/{provider}.yaml: declared entity "
             f"{entity!r} has no file configs/entities/{provider}/{entity}.yaml"
         )
+
+    for path in _composite_entity_configs():
+        data = _load_yaml(path)
+        missing_sections = REQUIRED_ENTITY_SECTIONS - set(data)
+        if missing_sections:
+            errors.append(
+                f"INV-CFG-002 {_rel(path)}: missing sections "
+                f"{sorted(missing_sections)}"
+            )
+        if data.get("provider") != "composite":
+            errors.append(
+                f"INV-CFG-002 {_rel(path)}: provider must be 'composite'"
+            )
+        if data.get("entity") != path.stem:
+            errors.append(
+                f"INV-CFG-002 {_rel(path)}: entity must match filename {path.stem!r}"
+            )
+        if not (COMPOSITES_DIR / path.name).exists():
+            errors.append(
+                f"INV-CFG-002 {_rel(path)}: missing counterpart "
+                f"configs/composites/{path.name}"
+            )
 
     if verbose and not errors:
         sys.stdout.write(
@@ -372,6 +409,117 @@ def check_inv_006(verbose: bool) -> list[str]:
     return errors
 
 
+def check_inv_008(verbose: bool) -> list[str]:
+    """INV-CFG-008: provider and entity root config versions match."""
+    errors: list[str] = []
+    provider_versions = {
+        path.stem: _load_yaml(path).get("version") for path in _provider_configs()
+    }
+    for path in _provider_entity_configs():
+        provider = path.parent.name
+        entity_version = _load_yaml(path).get("version")
+        provider_version = provider_versions.get(provider)
+        if entity_version != provider_version:
+            errors.append(
+                f"INV-CFG-008 {_rel(path)}: root version {entity_version!r} "
+                f"!= configs/providers/{provider}.yaml version {provider_version!r}"
+            )
+    if verbose and not errors:
+        sys.stdout.write(
+            "  INV-CFG-008: PASS (provider/entity root versions synchronized)\n"
+        )
+    return errors
+
+
+def _runtime_composite_column_groups(data: dict[str, Any]) -> object:
+    composite = data.get("composite")
+    if not isinstance(composite, dict):
+        return None
+    schema = composite.get("schema")
+    if isinstance(schema, dict) and schema.get("column_groups") is not None:
+        return schema.get("column_groups")
+    merge = composite.get("merge")
+    return merge.get("column_groups") if isinstance(merge, dict) else None
+
+
+def check_inv_009(verbose: bool) -> list[str]:
+    """INV-CFG-009: composite entity contracts are complete and schema-aligned."""
+    errors: list[str] = []
+    for path in _composite_entity_configs():
+        data = _load_yaml(path)
+        schema = data.get("schema")
+        entity_groups = schema.get("column_groups") if isinstance(schema, dict) else None
+        runtime_path = COMPOSITES_DIR / path.name
+        runtime_groups = (
+            _runtime_composite_column_groups(_load_yaml(runtime_path))
+            if runtime_path.exists()
+            else None
+        )
+        if not isinstance(entity_groups, list) or not entity_groups:
+            errors.append(
+                f"INV-CFG-009 {_rel(path)}: schema.column_groups must be non-empty"
+            )
+        elif entity_groups != runtime_groups:
+            errors.append(
+                f"INV-CFG-009 {_rel(path)}: schema.column_groups drift from "
+                f"configs/composites/{path.name}"
+            )
+
+        filters = data.get("filters")
+        if not isinstance(filters, dict):
+            errors.append(f"INV-CFG-009 {_rel(path)}: filters must be a mapping")
+        else:
+            for layer in ("silver_filters", "gold_filters"):
+                layer_filters = filters.get(layer)
+                required_fields = (
+                    layer_filters.get("required_fields")
+                    if isinstance(layer_filters, dict)
+                    else None
+                )
+                if not isinstance(required_fields, list) or not required_fields:
+                    errors.append(
+                        f"INV-CFG-009 {_rel(path)}: "
+                        f"filters.{layer}.required_fields must be non-empty"
+                    )
+
+        pipeline = data.get("pipeline")
+        contracts = data.get("contracts")
+        pipeline_keys = (
+            pipeline.get("business_primary_keys")
+            if isinstance(pipeline, dict)
+            else None
+        )
+        contract_keys = (
+            contracts.get("primary_key") if isinstance(contracts, dict) else None
+        )
+        if not isinstance(contract_keys, list) or contract_keys != pipeline_keys:
+            errors.append(
+                f"INV-CFG-009 {_rel(path)}: contracts.primary_key must match "
+                "pipeline.business_primary_keys"
+            )
+    if verbose and not errors:
+        sys.stdout.write(
+            "  INV-CFG-009: PASS (composite entity contracts complete and aligned)\n"
+        )
+    return errors
+
+
+def check_inv_010(verbose: bool) -> list[str]:
+    """INV-CFG-010: provider configs avoid inline environment interpolation."""
+    errors: list[str] = []
+    for path in _provider_configs():
+        if _deep_string_search(_load_yaml(path), "${"):
+            errors.append(
+                f"INV-CFG-010 {_rel(path)}: replace inline ${{...}} with a "
+                "documented placeholder or named *_env indirection key"
+            )
+    if verbose and not errors:
+        sys.stdout.write(
+            "  INV-CFG-010: PASS (provider env indirection is declarative)\n"
+        )
+    return errors
+
+
 CHECK_FUNCTIONS = (
     check_inv_001,
     check_inv_002,
@@ -379,6 +527,9 @@ CHECK_FUNCTIONS = (
     check_inv_004,
     check_inv_005,
     check_inv_006,
+    check_inv_008,
+    check_inv_009,
+    check_inv_010,
 )
 
 

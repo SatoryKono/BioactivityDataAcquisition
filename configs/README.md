@@ -29,11 +29,38 @@ retired forms, removal dates, and permanent rationales are governed by
 - composite `merge.column_groups_file`: retired legacy merge alias
 - composite `composite.version`: required composite schema field
 
+## Provider Runtime Values
+
+Tracked provider configs are deterministic documentation and policy surfaces.
+They must not contain `${ENV_VAR}` interpolation strings:
+
+- non-secret operator contact fields such as CrossRef/OpenAlex `mailto` use the
+  safe `your-email@example.com` placeholder; set the real runtime contact with
+  `BIOETL_DEFAULT_EMAIL` in the machine-local environment;
+- secret-bearing fields use named indirection keys such as
+  `api_key_env: BIOETL_SEMANTICSCHOLAR_API_KEY`; secret values remain in the
+  machine-local environment and never enter tracked YAML.
+
+## Versioning Strategy
+
+- top-level `version` identifies the provider/entity config document contract;
+  every `configs/entities/{provider}/*.yaml` value must equal the matching
+  `configs/providers/{provider}.yaml` value;
+- nested `quality.version`, `filters.version`, source-profile versions, and
+  contract versions identify their own independently evolving section
+  contracts and therefore do not have to equal the top-level version;
+- `configs/entities/composite/{entity}.yaml` is the entity-level composite
+  contract and must contain `pipeline`, `schema`, `quality`, `filters`, and
+  `contracts`; its `schema.column_groups` mirrors the canonical merge schema in
+  `configs/composites/{entity}.yaml` and is protected by config invariants.
+
 ## Navigation
 
 - `configs/_schema/`: canonical JSON schemas for pipeline, source, composite, and
   related config contracts
 - `configs/providers/`: provider YAML definitions
+- `configs/entities/`: provider-backed and composite entity contracts
+- `configs/composites/`: composite seed/enricher/merge runtime definitions
 - `configs/ide/pycharm/`: reviewed portable PyCharm templates copied into the
   ignored local `.idea/` directory
 - `configs/quality/`: architecture, compatibility, generated-artifact routing,

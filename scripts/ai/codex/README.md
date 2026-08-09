@@ -27,6 +27,36 @@ bash scripts/ai/codex/setup_skills.sh --check
 bootstrap. Их `--install-personal` режим остаётся явной compatibility-опцией и
 не перезаписывает существующие personal entries.
 
+### Concurrency compatibility
+
+Tracked project policy сохраняет `agents.max_threads = 3`. В актуальной
+официальной документации Codex это legacy alias для
+`agents.max_concurrent_threads_per_session`; оба ключа задают максимальное
+число одновременно открытых spawned-agent threads без primary thread. Переход
+на другое имя ключа или значение требует versioned CLI check и отдельного
+concurrency benchmark. Последняя локальная проверка выполнена на Codex CLI
+`0.147.0`.
+
+Legacy alias из tracked config и canonical key можно проверить без изменения
+user config, скопировав project policy в изолированный temporary `CODEX_HOME`:
+
+```bash
+issue8219_project_home=$(mktemp -d /tmp/bioetl-codex-project.XXXXXX)
+issue8219_canonical_home=$(mktemp -d /tmp/bioetl-codex-canonical.XXXXXX)
+cp .codex/config.toml "$issue8219_project_home/config.toml"
+
+CODEX_HOME="$issue8219_project_home" codex doctor --json 2>/dev/null \
+  | jq '{codexVersion, configLoad: .checks["config.load"].status, configParse: .checks["config.load"].details["config.toml parse"]}'
+CODEX_HOME="$issue8219_canonical_home" codex doctor \
+  -c agents.max_concurrent_threads_per_session=3 --json 2>/dev/null \
+  | jq '{codexVersion, configLoad: .checks["config.load"].status}'
+```
+
+Ожидаемый результат для обеих форм — `configLoad: "ok"`; для скопированного
+tracked config также `configParse: "ok"`. Общий `codex doctor` в таком
+изолированном home может завершиться ненулевым кодом из-за отсутствующих auth,
+network или TTY checks; это не является ошибкой разбора concurrency config.
+
 ## Authentication
 
 По решению владельца launcher authentication сохраняет текущий repository
