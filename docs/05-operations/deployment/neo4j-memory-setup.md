@@ -20,7 +20,7 @@ ______________________________________________________________________
 - [Neo4j Audit Instance Guide](neo4j-audit-instance-guide.md)
 - [Neo4j Audit Instance Quick Start](neo4j-audit-instance-quick-start.md)
 - [Neo4j Audit Instance Implementation](neo4j-audit-instance-implementation.md)
-- [Neo4j Complete Recovery Guide](../runbooks/neo4j-complete-recovery-guide.md)
+- [Neo4j Backend Recovery Quick Start](../runbooks/neo4j-backend-recovery-quick-start.md)
 - [Neo4j Memory Windows Verification](../verification/neo4j-memory-windows-verification.md)
 - [Neo4j Memory QA Examples](../verification/neo4j-memory-qa-examples.md)
 
