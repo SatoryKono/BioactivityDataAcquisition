@@ -263,7 +263,7 @@ asyncio_mode = "auto"
 
 # ============ COVERAGE ============
 [tool.coverage.run]
-source = ["src/bioetl"]
+source = ["src/bioetl", "scripts"]
 branch = true
 relative_files = true
 omit = [
