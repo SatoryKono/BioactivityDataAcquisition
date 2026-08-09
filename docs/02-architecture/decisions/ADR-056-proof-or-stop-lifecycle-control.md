@@ -1,6 +1,6 @@
 # ADR-056: Proof-or-Stop lifecycle control
 
-- **Status:** Accepted
+**Status:** Accepted
 - **Date:** 2026-08-09
 - **Decision owners:** BioETL maintainers
 
