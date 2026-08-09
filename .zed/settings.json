@@ -1,0 +1,501 @@
+{
+  "format_on_save": "off",
+  "tab_size": 4,
+  "preferred_line_length": 88,
+  "soft_wrap": "preferred_line_length",
+  "autosave": "on_focus_change",
+  "auto_install_extensions": {
+    "docker-compose": true
+  },
+  "file_scan_inclusions": [],
+  "file_scan_exclusions": [
+    "**/.git",
+    "**/.svn",
+    "**/.hg",
+    "**/.jj",
+    "**/CVS",
+    "**/.DS_Store",
+    "**/Thumbs.db",
+    "**/.classpath",
+    "**/.settings",
+    "**/node_modules",
+    "**/.venv",
+    "**/.venv-win",
+    "**/.venv-wsl",
+    "**/venv",
+    "**/env",
+    "**/__pycache__",
+    "**/.pytest_cache",
+    "**/.mypy_cache",
+    "**/.ruff_cache",
+    "**/.hypothesis",
+    "**/.cache",
+    "**/.worktrees",
+    "**/dist",
+    "**/build",
+    "**/coverage",
+    "**/htmlcov",
+    "**/reports/coverage",
+    "**/target",
+    "**/generated",
+    "**/data/debug_exports"
+  ],
+  "file_types": {
+    "Docker Compose": [
+      "docker-compose*.yml",
+      "docker-compose*.yaml",
+      "compose*.yml",
+      "compose*.yaml",
+      "scripts/ops/runtime/docker/compose/*.yml",
+      "scripts/ops/runtime/docker/compose/*.yaml",
+      "scripts/ops/observability/*compose*.yml",
+      "scripts/ops/observability/*compose*.yaml"
+    ]
+  },
+  "redact_private_values": true,
+  "languages": {
+    "Python": {
+      "format_on_save": "on",
+      "formatter": {
+        "language_server": {
+          "name": "ruff"
+        }
+      },
+      "code_actions_on_format": {
+        "source.organizeImports.ruff": true
+      },
+      "language_servers": [
+        "basedpyright",
+        "ruff",
+        "!pylsp"
+      ],
+      "hard_tabs": false,
+      "tab_size": 4,
+      "code_lenses": [
+        "source.test",
+        "source.go_to_definition"
+      ]
+    },
+    "YAML": {
+      "format_on_save": "on",
+      "formatter": "language_server",
+      "hard_tabs": false,
+      "tab_size": 2
+    },
+    "Docker Compose": {
+      "format_on_save": "on",
+      "formatter": "language_server",
+      "language_servers": [
+        "docker-compose",
+        "..."
+      ],
+      "hard_tabs": false,
+      "tab_size": 2
+    },
+    "Markdown": {
+      "format_on_save": "off",
+      "soft_wrap": "preferred_line_length",
+      "preferred_line_length": 88,
+      "hard_tabs": false,
+      "tab_size": 2
+    },
+    "JSON": {
+      "format_on_save": "on",
+      "formatter": "language_server",
+      "hard_tabs": false,
+      "tab_size": 2
+    },
+    "JSONC": {
+      "format_on_save": "on",
+      "formatter": "language_server",
+      "hard_tabs": false,
+      "tab_size": 2
+    }
+  },
+  "lsp": {
+    "ruff": {
+      "initialization_options": {
+        "settings": {
+          "configurationPreference": "filesystemFirst"
+        }
+      }
+    },
+    "basedpyright": {
+      "settings": {
+        "basedpyright.analysis": {
+          "typeCheckingMode": "strict",
+          "pythonVersion": "3.12",
+          "autoSearchPaths": true,
+          "useLibraryCodeForTypes": true,
+          "diagnosticMode": "openFilesOnly"
+        }
+      }
+    }
+  },
+  "gutter": {
+    "runnables": true,
+    "line_numbers": true,
+    "breakpoints": true,
+    "folds": true,
+    "code_actions": true
+  },
+  "editor": {
+    "scroll_beyond_last_line": "one_page",
+    "scrollbar": {
+      "show": "auto"
+    },
+    "inline_completion": {
+      "enabled": true
+    },
+    "cursor_blink": false,
+    "relative_line_numbers": false,
+    "show_inline_completions": "always",
+    "soft_wrap": "preferred_line_length",
+    "show_whitespaces": "trailing",
+    "guides": {
+      "indentation": true,
+      "bracket_pairs": true
+    }
+  },
+  "terminal": {
+    "env": {
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "VCR_RECORD_MODE": "none",
+      "VIRTUAL_ENV": ".venv-win"
+    },
+    "detect_venv": {
+      "on": {
+        "directories": [
+          ".venv-win",
+          ".venv",
+          ".venv-wsl",
+          "venv",
+          "env"
+        ]
+      }
+    },
+    "font_family": "JetBrains Mono",
+    "font_size": 14,
+    "line_height": "comfortable"
+  },
+  "project_panel": {
+    "default_width": 240,
+    "dock": "left",
+    "scrollbar": {
+      "show": "auto"
+    },
+    "file_icons": true,
+    "folder_icons": true,
+    "indent_size": 4,
+    "indent_guides": true
+  },
+  "search": {
+    "case_sensitive": false,
+    "regex": false,
+    "whole_word": false,
+    "use_regex": false
+  },
+  "vim_mode": false,
+  "context_servers": {},
+  "agent": {
+    "default_profile": "bioetl-ask",
+    "auto_compact": {
+      "enabled": true,
+      "threshold": "90%"
+    },
+    "profiles": {
+      "bioetl-ask": {
+        "name": "BioETL Ask",
+        "tools": {
+          "diagnostics": true,
+          "fetch": true,
+          "find_path": true,
+          "grep": true,
+          "list_directory": true,
+          "read_file": true,
+          "search_web": true,
+          "copy_path": false,
+          "create_directory": false,
+          "delete_path": false,
+          "edit_file": false,
+          "move_path": false,
+          "skill": false,
+          "spawn_agent": false,
+          "terminal": false,
+          "write_file": false
+        },
+        "enable_all_context_servers": false,
+        "context_servers": {}
+      },
+      "bioetl-write": {
+        "name": "BioETL Write",
+        "tools": {
+          "diagnostics": true,
+          "fetch": true,
+          "find_path": true,
+          "grep": true,
+          "list_directory": true,
+          "read_file": true,
+          "search_web": true,
+          "copy_path": true,
+          "create_directory": true,
+          "delete_path": false,
+          "edit_file": true,
+          "move_path": true,
+          "skill": true,
+          "spawn_agent": false,
+          "terminal": true,
+          "write_file": true
+        },
+        "enable_all_context_servers": false,
+        "context_servers": {}
+      }
+    },
+    "tool_permissions": {
+      "default": "confirm",
+      "tools": {
+        "diagnostics": {
+          "default": "allow"
+        },
+        "fetch": {
+          "default": "allow"
+        },
+        "find_path": {
+          "default": "allow"
+        },
+        "grep": {
+          "default": "allow"
+        },
+        "list_directory": {
+          "default": "allow"
+        },
+        "read_file": {
+          "default": "allow"
+        },
+        "search_web": {
+          "default": "allow"
+        },
+        "terminal": {
+          "default": "confirm",
+          "always_deny": [
+            {
+              "pattern": "\\brm\\s+-rf\\s+(/|~|\\.|\\.\\.|\\*)"
+            },
+            {
+              "pattern": "\\bsudo\\s+rm\\b"
+            },
+            {
+              "pattern": "(?i)\\bRemove-Item\\b.*(-(Recurse|Force|r|f)\\b)"
+            },
+            {
+              "pattern": "(?i)\\brmdir\\b.*/[sS]"
+            },
+            {
+              "pattern": "(?i)\\b(del|erase)\\b.*/[sS]"
+            },
+            {
+              "pattern": "\\bgit\\s+clean\\s+.*-[a-zA-Z]*f"
+            },
+            {
+              "pattern": "\\bgit\\s+reset\\s+--hard\\b"
+            },
+            {
+              "pattern": "\\bgit\\s+push\\s+.*--force\\b"
+            },
+            {
+              "pattern": "\\bgit\\s+push\\s+.*-f\\b"
+            }
+          ],
+          "always_confirm": [
+            {
+              "pattern": "\\.env"
+            },
+            {
+              "pattern": "\\bgit\\s+push\\b"
+            },
+            {
+              "pattern": "\\bsudo\\b"
+            },
+            {
+              "pattern": "(?i)\\bRemove-Item\\b"
+            },
+            {
+              "pattern": "(?i)\\b(del|erase|rmdir)\\b"
+            },
+            {
+              "pattern": "\\bgit\\s+clean\\b"
+            },
+            {
+              "pattern": "\\bgit\\s+reset\\b"
+            },
+            {
+              "pattern": "\\bgit\\s+checkout\\s+--\\b"
+            }
+          ]
+        },
+        "edit_file": {
+          "default": "confirm",
+          "always_deny": [
+            {
+              "pattern": "(^|[/\\\\])\\.env(\\.|$|[/\\\\])"
+            },
+            {
+              "pattern": "(^|[/\\\\])secrets?([/\\\\]|$)"
+            },
+            {
+              "pattern": "\\.(pem|key|cert|crt)$"
+            }
+          ]
+        },
+        "write_file": {
+          "default": "confirm",
+          "always_deny": [
+            {
+              "pattern": "(^|[/\\\\])\\.env(\\.|$|[/\\\\])"
+            },
+            {
+              "pattern": "(^|[/\\\\])secrets?([/\\\\]|$)"
+            },
+            {
+              "pattern": "\\.(pem|key|cert|crt)$"
+            }
+          ]
+        },
+        "delete_path": {
+          "default": "confirm",
+          "always_deny": [
+            {
+              "pattern": "(^|[/\\\\])\\.git([/\\\\]|$)"
+            },
+            {
+              "pattern": "(^|[/\\\\])\\.env(\\.|$|[/\\\\])"
+            },
+            {
+              "pattern": "(^|[/\\\\])secrets?([/\\\\]|$)"
+            },
+            {
+              "pattern": "\\.(pem|key|cert|crt)$"
+            }
+          ]
+        },
+        "move_path": {
+          "default": "confirm",
+          "always_deny": [
+            {
+              "pattern": "(^|[/\\\\])\\.git([/\\\\]|$)"
+            },
+            {
+              "pattern": "(^|[/\\\\])\\.env(\\.|$|[/\\\\])"
+            },
+            {
+              "pattern": "(^|[/\\\\])secrets?([/\\\\]|$)"
+            },
+            {
+              "pattern": "\\.(pem|key|cert|crt)$"
+            }
+          ]
+        },
+        "copy_path": {
+          "default": "confirm",
+          "always_deny": [
+            {
+              "pattern": "(^|[/\\\\])\\.env(\\.|$|[/\\\\])"
+            },
+            {
+              "pattern": "(^|[/\\\\])secrets?([/\\\\]|$)"
+            }
+          ]
+        },
+        "create_directory": {
+          "default": "confirm"
+        },
+        "skill": {
+          "default": "confirm"
+        }
+      }
+    }
+  },
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false
+  },
+  "tasks": {
+    "version": "1",
+    "tasks": [
+      {
+        "label": "Lint (ruff + mypy)",
+        "command": "python",
+        "args": [
+          "-m",
+          "scripts.engineering.dev.zed_lint_imports"
+        ],
+        "cwd": "$ZED_PROJECT"
+      },
+      {
+        "label": "Type Check (mypy)",
+        "command": "python",
+        "args": [
+          "-m",
+          "scripts.engineering.dev.zed_mypy"
+        ],
+        "cwd": "$ZED_PROJECT"
+      },
+      {
+        "label": "Test: Smoke",
+        "command": "python",
+        "args": [
+          "-m",
+          "scripts.engineering.dev.zed_pytest_lane",
+          "smoke"
+        ],
+        "cwd": "$ZED_PROJECT"
+      },
+      {
+        "label": "Test: Unit Fast",
+        "command": "python",
+        "args": [
+          "-m",
+          "scripts.engineering.dev.zed_pytest_lane",
+          "unit-fast"
+        ],
+        "cwd": "$ZED_PROJECT"
+      },
+      {
+        "label": "Test: Architecture",
+        "command": "python",
+        "args": [
+          "-m",
+          "scripts.engineering.dev.zed_pytest_lane",
+          "architecture"
+        ],
+        "cwd": "$ZED_PROJECT"
+      },
+      {
+        "label": "Test: Current File",
+        "command": "python",
+        "args": [
+          "-m",
+          "scripts.engineering.dev.zed_pytest_lane",
+          "file",
+          "$ZED_FILE"
+        ],
+        "cwd": "$ZED_PROJECT"
+      },
+      {
+        "label": "Run Local Pipeline",
+        "command": "python",
+        "args": [
+          "-m",
+          "scripts.engineering.dev.zed_run"
+        ],
+        "cwd": "$ZED_PROJECT"
+      }
+    ]
+  },
+  "show_sign_in": true,
+  "ui_font_family": "JetBrains Mono",
+  "ui_font_size": 14,
+  "buffer_font_family": "JetBrains Mono",
+  "buffer_font_size": 14,
+  "buffer_line_height": "comfortable"
+}

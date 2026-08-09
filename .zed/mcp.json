@@ -1,0 +1,181 @@
+{
+  "mcpServers": {
+    "memory": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_memory_wrapper.sh"
+      ],
+      "env": {
+        "NPM_CONFIG_CACHE": ".cache/npm-cache",
+        "MEMORY_FILE_PATH": "docs/00-project/ai/memory/mcp-memory.json"
+      },
+      "startup_timeout_sec": 120
+    },
+    "filesystem": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_filesystem_wrapper.sh"
+      ],
+      "env": {
+        "NPM_CONFIG_CACHE": ".cache/npm-cache"
+      }
+    },
+    "fetch": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_fetch_wrapper.sh"
+      ],
+      "env": {
+        "UV_CACHE_DIR": ".cache/uv-cache",
+        "UV_TOOL_DIR": ".cache/uv-tools",
+        "NPM_CONFIG_CACHE": ".cache/npm-cache"
+      },
+      "startup_timeout_sec": 300
+    },
+    "github": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/github-mcp-wrapper.sh"
+      ],
+      "env": {
+        "NPM_CONFIG_CACHE": ".cache/npm-cache"
+      },
+      "startup_timeout_sec": 180
+    },
+    "docker": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_docker_wrapper.sh"
+      ],
+      "startup_timeout_sec": 240
+    },
+    "context7": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_context7_wrapper.sh"
+      ],
+      "startup_timeout_sec": 240
+    },
+    "ast-grep": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_ast_grep_wrapper.sh"
+      ],
+      "startup_timeout_sec": 120
+    },
+    "mcp-code-interpreter": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_code_interpreter_wrapper.sh"
+      ],
+      "startup_timeout_sec": 240
+    },
+    "prometheus": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_prometheus_wrapper.sh"
+      ],
+      "startup_timeout_sec": 240
+    },
+    "grafana": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_grafana_wrapper.sh"
+      ],
+      "startup_timeout_sec": 240
+    },
+    "brave-search": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_brave_search_wrapper.sh"
+      ],
+      "startup_timeout_sec": 180
+    },
+    "neo4j-cypher": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh"
+      ],
+      "startup_timeout_sec": 120
+    },
+    "neo4j-memory": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh"
+      ],
+      "startup_timeout_sec": 120
+    },
+    "mermaid": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_mermaid_wrapper.sh"
+      ],
+      "startup_timeout_sec": 300
+    },
+    "deja": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_deja_wrapper.sh"
+      ],
+      "env": {
+        "NPM_CONFIG_CACHE": ".cache/npm-cache"
+      },
+      "startup_timeout_sec": 120
+    },
+    "adr-analysis": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_adr_analysis_wrapper.sh"
+      ],
+      "env": {
+        "PROJECT_PATH": ".",
+        "ADR_PATH": "docs/02-architecture/decisions"
+      },
+      "startup_timeout_sec": 120
+    },
+    "mutmut": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_mutmut_wrapper.sh"
+      ],
+      "env": {
+        "MUTMUT_PROJECT_PATH": "."
+      },
+      "startup_timeout_sec": 120
+    },
+    "code-analyzer": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_code_analyzer_wrapper.sh"
+      ],
+      "env": {
+        "PROJECT_PATH": "."
+      },
+      "startup_timeout_sec": 120
+    },
+    "github-actions": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_github_actions_wrapper.sh"
+      ],
+      "startup_timeout_sec": 180
+    },
+    "deepwiki": {
+      "type": "http",
+      "url": "https://mcp.deepwiki.com/mcp",
+      "env_http_headers": {
+        "x-deepwiki-api-key": "DEEPWIKI_API_KEY",
+        "x-deepwiki-organisation-id": "DEEPWIKI_ORGANISATION_ID"
+      },
+      "startup_timeout_sec": 240
+    },
+    "ref": {
+      "type": "http",
+      "url": "https://api.ref.tools/mcp",
+      "env_http_headers": {
+        "x-ref-api-key": "REF_TOOL_API_KEY"
+      },
+      "startup_timeout_sec": 120
+    }
+  }
+}
