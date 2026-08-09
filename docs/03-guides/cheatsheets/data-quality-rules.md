@@ -79,7 +79,7 @@ Normative (RULES §2.1 / rules-summary):
 3. Invalid Silver rows **MUST NOT** be silently dropped: stop write **or** route to `common.quarantine`.
 4. Gold validation is **strict / fail-closed**.
 
-See: [quarantine runbook](../../05-operations/runbooks/quarantine-management.md), [dq-failure-investigation](../../05-operations/runbooks/dq-failure-investigation.md).
+See: [quarantine runbook](../../05-operations/runbooks/quarantine-management.md), [pipeline-failure-dq](../../05-operations/runbooks/pipeline-failure-dq.md).
 
 ## Common patterns
 

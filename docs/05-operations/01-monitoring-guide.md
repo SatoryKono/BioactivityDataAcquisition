@@ -167,16 +167,16 @@ Dashboard остаётся read-only surface. Replay и quarantine actions вы�
   - `BioETLPipelineInfrastructureValidationFailed` -> `pipeline-failure-critical.md`
   - `BioETLPipelineRunFailed` -> `pipeline-failure-critical.md`
 - **DQ / freshness**
-  - `BioETLDQSoftThresholdExceeded` -> `dq-failure-investigation.md`
-  - `BioETLDQQuarantineRateHigh` / `BioETLDQQuarantineRateCritical` -> `dq-failure-investigation.md`
+  - `BioETLDQSoftThresholdExceeded` -> `pipeline-failure-dq.md`
+  - `BioETLDQQuarantineRateHigh` / `BioETLDQQuarantineRateCritical` -> `pipeline-failure-dq.md`
     (`5-20%` warning / `>20%` critical, только при `bronze>=20`)
-  - `BioETLDQValidationFailuresCritical` -> `dq-failure-investigation.md`
-  - `BioETLDQCriticalAnomaliesDetected` -> `dq-failure-investigation.md`
-  - `BioETLSilverValidationFailuresDetected` -> `dq-failure-investigation.md`
+  - `BioETLDQValidationFailuresCritical` -> `pipeline-failure-dq.md`
+  - `BioETLDQCriticalAnomaliesDetected` -> `pipeline-failure-dq.md`
+  - `BioETLSilverValidationFailuresDetected` -> `pipeline-failure-dq.md`
     (driven by `bioetl_silver_validation_failures_total`, which increments on
     canonical failed Silver Pandera validation outcomes with bounded
     `table/pipeline` labels)
-  - `BioETLDataFreshnessLagHigh` / `BioETLDataFreshnessLagCritical` -> `dq-failure-investigation.md`
+  - `BioETLDataFreshnessLagHigh` / `BioETLDataFreshnessLagCritical` -> `pipeline-failure-dq.md`
     (`24-72h` warning / `>72h` critical; lag считается как `time() - bioetl_data_freshness_seconds`)
 - **Provider health**
   - `BioETLProviderHealthCheckFailuresDetected` -> `incident-response.md`
