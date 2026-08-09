@@ -8,6 +8,9 @@ description: "Diagnose a concrete AI-agent trajectory with BioETL's safe optiona
 ## Source Of Truth
 
 - Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 - Safe adapter: `../../../scripts/ai/agent_tools/README.md`
 - Shared contract: [references/advisory-contract.md](references/advisory-contract.md)

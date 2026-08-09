@@ -5,6 +5,10 @@ from __future__ import annotations
 from collections.abc import Iterable
 
 from bioetl.application.services.control_plane.evidence.models import EvidenceCheck
+from bioetl.application.services.control_plane.evidence.lineage_graph_validation import (
+    conflicting_node_ids,
+    cycle_nodes,
+)
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.lineage import LineageGraphFragment, LineageNodeType
 
@@ -73,7 +77,7 @@ def build_lineage_checks(
         *(f"fragment:{fragment_id}" for fragment_id in missing_ledger_fragments),
     ]
     identity_gaps = _identity_gaps(manifest=manifest, fragments=fragments)
-    cycle_nodes = _cycle_nodes(fragments)
+    cycles = cycle_nodes(fragments)
     return (
         _gap_check(
             check="closure",
@@ -93,7 +97,7 @@ def build_lineage_checks(
         ),
         _gap_check(
             check="cycle_detection",
-            gaps=cycle_nodes,
+            gaps=cycles,
             ok_reason="lineage_graph_acyclic",
             error_reason="lineage_cycle_detected",
             ok_detail="No directed cycle was detected in the selected lineage graph.",
@@ -103,7 +107,7 @@ def build_lineage_checks(
             manifest,
             fragments,
             validation_complete=not (
-                closure_gaps or identity_gaps or cycle_nodes
+                closure_gaps or identity_gaps or cycles
             ),
         ),
     )
@@ -115,6 +119,9 @@ def _identity_gaps(
     expected_run = str(manifest.run_id)
     expected_manifest = manifest.manifest_id
     gaps: set[str] = set()
+    gaps.update(
+        f"node_definition:{node_id}" for node_id in conflicting_node_ids(fragments)
+    )
     for fragment in fragments:
         fragment_key = fragment.stored_fragment_id or fragment.fragment_id
         if fragment.run_id != expected_run:
@@ -144,38 +151,6 @@ def _identity_gaps(
             ):
                 gaps.add(f"manifest_node:{node.node_id}")
     return sorted(gaps)
-
-
-def _cycle_nodes(fragments: tuple[LineageGraphFragment, ...]) -> list[str]:
-    adjacency: dict[str, set[str]] = {}
-    for fragment in fragments:
-        for edge in fragment.edges:
-            adjacency.setdefault(edge.source.node_id, set()).add(edge.target.node_id)
-            _ = adjacency.setdefault(edge.target.node_id, set())
-
-    visiting: set[str] = set()
-    visited: set[str] = set()
-    cycle: set[str] = set()
-
-    def visit(node_id: str) -> bool:
-        if node_id in visiting:
-            cycle.add(node_id)
-            return True
-        if node_id in visited:
-            return False
-        visiting.add(node_id)
-        found = False
-        for target_id in sorted(adjacency.get(node_id, ())):
-            if visit(target_id):
-                _ = cycle.update({node_id, target_id})
-                found = True
-        visiting.remove(node_id)
-        visited.add(node_id)
-        return found
-
-    for candidate in sorted(adjacency):
-        _ = visit(candidate)
-    return sorted(cycle)
 
 
 def _gap_check(

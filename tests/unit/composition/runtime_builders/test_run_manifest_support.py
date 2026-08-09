@@ -454,7 +454,7 @@ def test_replay_support_helpers_cover_boundary_launch_context_and_assessment(
     )
 
     manifest_support.build_launch_context_snapshot.assert_called_once()
-    assert launch_context == {"seed": "value"}
+    assert launch_context == {"seed": "value", "run_ledger_enabled": True}
 
     captured: dict[str, object] = {}
     monkeypatch.setattr(

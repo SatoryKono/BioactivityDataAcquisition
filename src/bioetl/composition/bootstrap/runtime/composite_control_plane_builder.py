@@ -106,6 +106,7 @@ def _build_composite_control_plane_manifest(
     runtime: CompositeRuntimeConfig,
     infra_context: CompositeInfrastructureContext,
     config_artifacts: CompositeControlPlaneConfigArtifacts,
+    ledger_enabled: bool,
 ) -> RunManifest:
     """Create manifest for composite control plane."""
     manifest_store = FileRunManifestStore(
@@ -125,6 +126,7 @@ def _build_composite_control_plane_manifest(
             runtime=runtime,
             infra_context=infra_context,
             config_artifacts=config_artifacts,
+            ledger_enabled=ledger_enabled,
         )
     )
 
@@ -149,6 +151,7 @@ def build_composite_control_plane_bundle(
         runtime=runtime,
         infra_context=infra_context,
         config_artifacts=config_artifacts,
+        ledger_enabled=ledger_enabled,
     )
     run_ledger_service = _build_run_ledger_service(
         manifest_id=manifest.manifest_id,
@@ -191,6 +194,7 @@ def _build_composite_manifest_create_request(
     runtime: CompositeRuntimeConfig,
     infra_context: CompositeInfrastructureContext,
     config_artifacts: CompositeControlPlaneConfigArtifacts,
+    ledger_enabled: bool = True,
 ) -> RunManifestCreateSpec:
     """Build the manifest creation payload for one composite execution."""
     source_refs = build_composite_source_refs(
@@ -213,17 +217,7 @@ def _build_composite_manifest_create_request(
             config,
             runtime,
             required_persistence_profile=config_artifacts.effective_required_profile,
-            run_ledger_enabled=bool(
-                getattr(
-                    getattr(
-                        getattr(infra_context.settings, "pipeline", None),
-                        "control_plane",
-                        None,
-                    ),
-                    "run_ledger_enabled",
-                    True,
-                )
-            ),
+            run_ledger_enabled=ledger_enabled,
         ),
         runtime_config=build_composite_runtime_config_snapshot(runtime),
         resolved_config=build_composite_resolved_config_snapshot(config),
