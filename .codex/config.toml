@@ -7,4 +7,4 @@
 # safe; user model, auth, provider, and MCP configuration stay user-local.
 
 [agents]
-max_threads = 5
+max_threads = 3
