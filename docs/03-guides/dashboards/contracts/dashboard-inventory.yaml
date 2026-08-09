@@ -136,7 +136,7 @@ dashboards:
   - uid: bioetl-dq-v2
     title: 4. Data Quality
     owner: "@bioetl-observability"
-    owner_route: docs/05-operations/runbooks/dq-failure-investigation.md
+    owner_route: docs/05-operations/runbooks/pipeline-failure-dq.md
     family: primary
     navigation_id: 4
     target_workspace: Data Trust Explorer

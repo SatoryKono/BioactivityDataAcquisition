@@ -53,9 +53,9 @@ The machine-readable SLO/alert binding lives in
 | Traceability integrity | `bioetl_checkpoint_compatibility_events_total`, `bioetl_lineage_fragments_emitted_total`, `bioetl_lineage_refs_missing_total` | 15m to 30m alert windows | zero checkpoint compatibility blocks, lineage write failures, or missing lineage refs | checkpoint/lineage alerts -> traceability and checkpoint runbooks |
 | Provider health completion ratio | `bioetl_health_check_success_total`, `bioetl_health_check_degraded_total`, `bioetl_health_check_failures_total` | 24h rolling | `>= 95%` successful or degraded completions per `provider` | provider health alerts -> `runbooks/incident-response.md` |
 | Retry exhaustion containment | `bioetl_data_source_retry_exhausted_total` | 1h rolling | `< 3` exhaustions per `provider,operation` | retry exhaustion alerts -> `runbooks/incident-response.md` |
-| DQ quarantine ratio | `bioetl_dq_records_quarantined_total` vs `bioetl_records_processed_total{stage="bronze"}` | 24h rolling | `<= 5%` per `pipeline,run_type` when `bronze >= 20` | quarantine alerts -> `runbooks/dq-failure-investigation.md` |
-| DQ validation health | `bioetl_dq_validation_failures_total`, `bioetl_dq_anomaly_detected`, `bioetl_silver_validation_failures_total` | 24h rolling | no hard-fail validation failures; investigate critical anomalies immediately | validation/anomaly alerts -> `runbooks/dq-failure-investigation.md` |
-| Data freshness lag | `bioetl_data_freshness_seconds` | continuous / 24h review | `<= 24h` lag for active pipelines; `> 72h` is critical | freshness alerts -> `runbooks/dq-failure-investigation.md` |
+| DQ quarantine ratio | `bioetl_dq_records_quarantined_total` vs `bioetl_records_processed_total{stage="bronze"}` | 24h rolling | `<= 5%` per `pipeline,run_type` when `bronze >= 20` | quarantine alerts -> `runbooks/pipeline-failure-dq.md` |
+| DQ validation health | `bioetl_dq_validation_failures_total`, `bioetl_dq_anomaly_detected`, `bioetl_silver_validation_failures_total` | 24h rolling | no hard-fail validation failures; investigate critical anomalies immediately | validation/anomaly alerts -> `runbooks/pipeline-failure-dq.md` |
+| Data freshness lag | `bioetl_data_freshness_seconds` | continuous / 24h review | `<= 24h` lag for active pipelines; `> 72h` is critical | freshness alerts -> `runbooks/pipeline-failure-dq.md` |
 
 ## PromQL Reference
 

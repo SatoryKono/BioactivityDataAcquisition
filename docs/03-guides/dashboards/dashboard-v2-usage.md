@@ -643,7 +643,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
 
 - Runtime escalation triage path:
   `Monitor Pipeline Alert Conditions` -> `pipeline-failure-critical.md`,
-  `Inspect DQ Alert Conditions` / `Inspect Freshness Lagged Entities >24h` -> `dq-failure-investigation.md`,
+  `Inspect DQ Alert Conditions` / `Inspect Freshness Lagged Entities >24h` -> `pipeline-failure-dq.md`,
   `Inspect Control-plane Alert Conditions` -> `run-manifest-inspection.md`,
   `Inspect GLOBAL Provider Alert Conditions` -> `incident-response.md`,
   `Monitor No-Records Runs` -> `checkpoint-debugging.md`.

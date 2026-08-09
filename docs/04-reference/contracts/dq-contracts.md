@@ -376,7 +376,7 @@ graph TD
 **From this page**:
 
 - [DQ Configuration Guide](../../03-guides/dq-configuration.md)
-- [DQ Failure Investigation Runbook](../../05-operations/runbooks/dq-failure-investigation.md)
+- [Pipeline Failure DQ Runbook](../../05-operations/runbooks/pipeline-failure-dq.md)
 - [ADR-045: DQ Contract System](../../02-architecture/decisions/ADR-045-dq-contract-system.md)
 - [ADR-027: DQ Rules Externalization](../../02-architecture/decisions/ADR-027-dq-rules-externalization.md)
 
@@ -571,5 +571,4 @@ pytest tests/architecture/test_dq_contract_patterns.py tests/architecture/test_c
 
 ### Validation
 
-- [DQ Failure Investigation Runbook](../../05-operations/runbooks/dq-failure-investigation.md)
 - [Pipeline Failure (DQ) Runbook](../../05-operations/runbooks/pipeline-failure-dq.md)
