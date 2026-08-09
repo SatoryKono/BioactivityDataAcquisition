@@ -39,23 +39,28 @@ def _filter_codex_parent_env(env: dict[str, str]) -> dict[str, str]:
     }
 
 
-def test_codex_parent_allowlist_is_ref_only_in_launchers() -> None:
-    for path in (CODEX_EXEC, RUN_CODEX_IMPL):
-        text = path.read_text(encoding="utf-8")
-        assert "REF_TOOL_API_KEY" in text
-        # Wrapper-scoped secrets must not be exported into the Codex process.
-        for banned in (
-            "BRAVE_API_KEY",
-            "GITHUB_PERSONAL_ACCESS_TOKEN",
-            "GITHUB_TOKEN",
-            "HUB_PAT_TOKEN",
-            "DOCKERHUB_USERNAME",
-            "NEO4J_PASSWORD",
-            "GRAFANA_SERVICE_ACCOUNT_TOKEN",
-            "GRAFANA_USERNAME",
-            "GRAFANA_PASSWORD",
-        ):
-            assert banned not in text, f"{path}: unexpected parent export of {banned}"
+def test_codex_parent_allowlist_is_ref_only_in_canonical_launcher() -> None:
+    wrapper = CODEX_EXEC.read_text(encoding="utf-8")
+    assert "DEPRECATED" in wrapper
+    assert "scripts/ai/codex/run-codex.sh" in wrapper
+
+    implementation = RUN_CODEX_IMPL.read_text(encoding="utf-8")
+    assert "REF_TOOL_API_KEY" in implementation
+    # Wrapper-scoped secrets must not be exported into the Codex process.
+    for banned in (
+        "BRAVE_API_KEY",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "GITHUB_TOKEN",
+        "HUB_PAT_TOKEN",
+        "DOCKERHUB_USERNAME",
+        "NEO4J_PASSWORD",
+        "GRAFANA_SERVICE_ACCOUNT_TOKEN",
+        "GRAFANA_USERNAME",
+        "GRAFANA_PASSWORD",
+    ):
+        assert banned not in implementation, (
+            f"{RUN_CODEX_IMPL}: unexpected parent export of {banned}"
+        )
 
 
 def test_codex_parent_env_filter_keeps_only_nonempty_allowlisted() -> None:
