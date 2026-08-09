@@ -72,7 +72,6 @@ allowed_output_roots:
     - /tmp/
 
 forbidden_output_roots:
-  - src/tools/reports/
   - output/
   - test-output/
   - logs/
@@ -94,7 +93,7 @@ routes:
       - reports/documentation_merged.md
       - reports/configs_merged.md
       - reports/project_structure.md
-    notes: Generated merge snapshots belong in reports/, not src/tools/reports/.
+    notes: Generated merge snapshots belong in reports/.
 
   - id: docs-export-merged-markdown
     generator: scripts/docs/build/generate_docs_export.py
@@ -261,8 +260,7 @@ routes:
       - docs/04-reference/passports/pipeline-passport-guide.md
       - docs/04-reference/passports/completeness-report.json
       - docs/04-reference/passports/executable-unit-registry.json
-    notes:
-      ADR-054 deterministic read-only passport projections generated from
+    notes: ADR-054 deterministic read-only passport projections generated from
       executable registration, config, domain-contract, and workflow owners.
 
   - id: dq-contracts-generated-doc
