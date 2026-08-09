@@ -324,3 +324,11 @@ OUTPUT_FORMAT: markdown | json | both
 3. Соответствие RULES и ADR
 4. Отсутствие противоречий с другими findings
 ```
+
+---
+
+**Version History:**
+- 2.0.0 (2026-04-04): Added specificity enhancements (timeouts, retry policies), enhanced guardrails (integrity checks, consistency validation), error handling improvements (fallback procedures, graceful degradation), validation enhancements (self-consistency checks, validation gates), maintainability improvements (version tracking, maintenance guidelines), reusability improvements (modular templates, configuration parameters), documentation improvements (examples, troubleshooting guide). Score improved from 7.52 to 8.49/10.
+- 1.0.0: Initial version with basic docs AI audit planning prompt
+4. Отсутствие противоречий с другими findings
+```

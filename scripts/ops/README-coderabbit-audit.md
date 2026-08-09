@@ -94,6 +94,6 @@ coderabbit review --base=main --dir src/bioetl/domain --agent --light
 
 ## Related Documentation
 
-- **Skill**: `.devin/skills/coderabbit-audit/SKILL.md`
+- **Operator policy**: `docs/03-guides/coderabbit-audit-playbook.md`
 - **Playbook**: `docs/03-guides/coderabbit-audit-playbook.md`
 - **Config**: `.coderabbit.yaml`

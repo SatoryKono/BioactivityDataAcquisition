@@ -39,7 +39,7 @@ from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.domain.config import TableConfig
 from bioetl.domain.exceptions import DataQualityError, DataQualityThresholdError
-from bioetl.domain.ports import MetricsPort
+from bioetl.domain.ports import MetricsPort, SilverWriteRequest
 from bioetl.domain.types import ValidationResult
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.config._base import get_pipeline_config
@@ -166,10 +166,11 @@ class TestRecordProcessorProcessBatch:
         assert bronze_call_kwargs["run_id"] == mock_context.run_id
         assert bronze_call_kwargs["run_type"] == mock_context.run_type
 
-        silver_call_kwargs = mock_storage.write_silver.call_args[1]
-        assert silver_call_kwargs["run_id"] == mock_context.run_id
-        assert silver_call_kwargs["run_type"] == mock_context.run_type
-        silver_records = silver_call_kwargs["records"]
+        silver_request = mock_storage.write_silver.call_args.args[0]
+        assert isinstance(silver_request, SilverWriteRequest)
+        assert silver_request.run_id == mock_context.run_id
+        assert silver_request.run_type == mock_context.run_type
+        silver_records = silver_request.records
         for record in silver_records:
             assert "_run_id" not in record
             assert "_run_type" not in record
@@ -260,7 +261,9 @@ class TestRecordProcessorProcessBatch:
             deterministic_batch_uuid_from_callsite("test_record_processor"),
         )
 
-        silver_records = mock_services.storage.write_silver.call_args.kwargs["records"]
+        silver_request = mock_services.storage.write_silver.call_args.args[0]
+        assert isinstance(silver_request, SilverWriteRequest)
+        silver_records = silver_request.records
         normalized = silver_records[0]
         assert normalized["entity_id"] == "crossref:10.1000/abc"
         assert normalized["publication_doi"] == "10.1000/abc"
@@ -326,7 +329,9 @@ class TestRecordProcessorProcessBatch:
             deterministic_batch_uuid_from_callsite("test_record_processor"),
         )
 
-        silver_records = mock_services.storage.write_silver.call_args.kwargs["records"]
+        silver_request = mock_services.storage.write_silver.call_args.args[0]
+        assert isinstance(silver_request, SilverWriteRequest)
+        silver_records = silver_request.records
         assert silver_records[0]["publication_doi"] == "10.1000/abc"
         assert silver_records[1]["publication_doi"] == "10.1000/abc"
         assert silver_records[0]["content_hash"] == silver_records[1]["content_hash"]

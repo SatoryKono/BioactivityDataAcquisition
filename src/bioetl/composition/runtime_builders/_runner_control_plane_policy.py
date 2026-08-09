@@ -186,9 +186,7 @@ def resolve_runner_control_plane_policy(
         runtime_environment=getattr(settings, "env", None),
         debug_mode=getattr(settings, "debug", False),
     )
-    if (
-        exact_replay or critical_runtime
-    ) and normalize_required_persistence_profile(
+    if (exact_replay or critical_runtime) and normalize_required_persistence_profile(
         requested_profile
     ) == "degraded_observable":
         requested_profile = DEFAULT_REQUIRED_PERSISTENCE_PROFILE

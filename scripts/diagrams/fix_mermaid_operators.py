@@ -66,7 +66,7 @@ def check_file(path: Path) -> CheckResult:
             issues.append(ArrowIssue(line_no=line_no, operator="==>", line=line))
         elif diagram_type == "sequence":
             # Use word boundaries to avoid matching ==> inside ==>>
-            if re.search(r'(?<!>)==>(?!>)', line):
+            if re.search(r"(?<!>)==>(?!>)", line):
                 issues.append(ArrowIssue(line_no=line_no, operator="==>", line=line))
             if "==>>" in line:
                 issues.append(ArrowIssue(line_no=line_no, operator="==>>", line=line))
@@ -117,7 +117,7 @@ def fix_file(path: Path, dry_run: bool = False) -> int:
     elif diagram_type == "sequence":
         # Sequence diagrams use both ==> and ==>>
         # Count standalone ==> (not part of ==>>)
-        standalone_equals = len(re.findall(r'(?<!>)==>(?!>)', content))
+        standalone_equals = len(re.findall(r"(?<!>)==>(?!>)", content))
         double_equals = content.count("==>>")
         replacements = standalone_equals + double_equals
         if replacements == 0:
@@ -138,7 +138,9 @@ def main() -> int:
     """CLI entry point for fixing Mermaid operators."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Fix invalid thick arrow operators in Mermaid diagrams")
+    parser = argparse.ArgumentParser(
+        description="Fix invalid thick arrow operators in Mermaid diagrams"
+    )
     parser.add_argument("path", type=Path, help="Path to the diagram file to fix")
     parser.add_argument("--dry-run", action="store_true", help="Don't modify files")
     args = parser.parse_args()
@@ -154,4 +156,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     import sys
+
     sys.exit(main())
