@@ -3,11 +3,11 @@
   "catalog_kind": "vcr_metadata_catalog",
   "vcr_root": "tests/fixtures/vcr",
   "totals": {
-    "cassette_count": 197,
-    "metadata_sidecar_count": 197,
+    "cassette_count": 178,
+    "metadata_sidecar_count": 178,
     "provider_count": 8,
     "duplicate_scenario_stem_count": 0,
-    "direct_reachable_cassette_count": 128,
+    "direct_reachable_cassette_count": 109,
     "generated_reachable_cassette_count": 69,
     "metadata_review_required_cassette_count": 0,
     "unowned_cassette_count": 0
@@ -44,8 +44,8 @@
       "metadata_coverage_percent": 100.0
     },
     "pubchem": {
-      "cassette_count": 31,
-      "metadata_sidecar_count": 31,
+      "cassette_count": 12,
+      "metadata_sidecar_count": 12,
       "without_metadata_count": 0,
       "metadata_coverage_percent": 100.0
     },
@@ -1435,6 +1435,84 @@
     },
     {
       "provider": "pubchem",
+      "scenario_stem": "pubchem_cid_contracts",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/pubchem_cid_contracts.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/pubchem_cid_contracts_meta.yaml",
+      "metadata_status": "managed_inventory",
+      "reachability_status": "direct_reference",
+      "reachability_owner_paths": [
+        "tests/integration/adapters/test_pubchem.py"
+      ]
+    },
+    {
+      "provider": "pubchem",
+      "scenario_stem": "pubchem_cross_route_contracts",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/pubchem_cross_route_contracts.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/pubchem_cross_route_contracts_meta.yaml",
+      "metadata_status": "managed_inventory",
+      "reachability_status": "direct_reference",
+      "reachability_owner_paths": [
+        "tests/integration/adapters/test_pubchem.py"
+      ]
+    },
+    {
+      "provider": "pubchem",
+      "scenario_stem": "pubchem_health_contracts",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/pubchem_health_contracts.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/pubchem_health_contracts_meta.yaml",
+      "metadata_status": "managed_inventory",
+      "reachability_status": "direct_reference",
+      "reachability_owner_paths": [
+        "tests/integration/adapters/test_pubchem.py"
+      ]
+    },
+    {
+      "provider": "pubchem",
+      "scenario_stem": "pubchem_inchikey_contracts",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/pubchem_inchikey_contracts.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/pubchem_inchikey_contracts_meta.yaml",
+      "metadata_status": "managed_inventory",
+      "reachability_status": "direct_reference",
+      "reachability_owner_paths": [
+        "tests/integration/adapters/test_pubchem.py"
+      ]
+    },
+    {
+      "provider": "pubchem",
+      "scenario_stem": "pubchem_query_contracts",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/pubchem_query_contracts.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/pubchem_query_contracts_meta.yaml",
+      "metadata_status": "managed_inventory",
+      "reachability_status": "direct_reference",
+      "reachability_owner_paths": [
+        "tests/integration/adapters/test_pubchem.py"
+      ]
+    },
+    {
+      "provider": "pubchem",
+      "scenario_stem": "pubchem_smiles_contracts",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/pubchem_smiles_contracts.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/pubchem_smiles_contracts_meta.yaml",
+      "metadata_status": "managed_inventory",
+      "reachability_status": "direct_reference",
+      "reachability_owner_paths": [
+        "tests/integration/adapters/test_pubchem.py"
+      ]
+    },
+    {
+      "provider": "pubchem",
       "scenario_stem": "test_pubchem_compound_full_cycle",
       "cassette_rel_path": "tests/fixtures/vcr/pubchem/test_pubchem_compound_full_cycle.yaml",
       "cassette_extension": ".yaml",
@@ -1487,331 +1565,6 @@
       "reachability_owner_paths": [
         "tests/contract/_provider_contract_replay.py",
         "tests/e2e/test_pubchem_compound_e2e.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemErrorPaths.test_fetch_by_cid_returns_empty_list",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_cid_returns_empty_list.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_cid_returns_empty_list_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemErrorPaths.test_fetch_by_cid_single_page_response",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_cid_single_page_response.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_cid_single_page_response_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemErrorPaths.test_fetch_by_name_http_503_is_handled",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_name_http_503_is_handled.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_name_http_503_is_handled_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemErrorPaths.test_fetch_by_smiles_http_503_is_handled",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_smiles_http_503_is_handled.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_smiles_http_503_is_handled_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemFetchByQuery.test_fetch_compound_by_name_aspirin",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_aspirin.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_aspirin_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemFetchByQuery.test_fetch_compound_by_name_caffeine",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_caffeine.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_caffeine_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemFetchByQuery.test_fetch_compound_by_name_water",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_water.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_water_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemFetchByQuery.test_fetch_compound_nonexistent_name",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_nonexistent_name.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_nonexistent_name_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemFetchByQuery.test_fetch_compound_with_limit",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_with_limit.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_with_limit_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemFetchDelegation.test_fetch_delegates_to_fetch_filtered_for_cid",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchDelegation.test_fetch_delegates_to_fetch_filtered_for_cid.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchDelegation.test_fetch_delegates_to_fetch_filtered_for_cid_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemFetchDelegation.test_fetch_delegates_to_fetch_filtered_for_smiles",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchDelegation.test_fetch_delegates_to_fetch_filtered_for_smiles.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchDelegation.test_fetch_delegates_to_fetch_filtered_for_smiles_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_batch",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_batch.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_batch_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_invalid_skipped",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_invalid_skipped.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_invalid_skipped_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_single",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_single.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_single_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_with_limit",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_with_limit.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_with_limit_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemFetchFilteredByInchikey.test_fetch_filtered_by_inchikey_aspirin",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByInchikey.test_fetch_filtered_by_inchikey_aspirin.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByInchikey.test_fetch_filtered_by_inchikey_aspirin_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemFetchFilteredByInchikey.test_fetch_filtered_by_inchikey_multiple",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByInchikey.test_fetch_filtered_by_inchikey_multiple.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByInchikey.test_fetch_filtered_by_inchikey_multiple_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_empty_skipped",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_empty_skipped.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_empty_skipped_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_ethanol",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_ethanol.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_ethanol_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_multiple",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_multiple.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_multiple_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_with_limit",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_with_limit.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_with_limit_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemHealthCheck.test_health_check_returns_healthy",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemHealthCheck.test_health_check_returns_healthy.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemHealthCheck.test_health_check_returns_healthy_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemHealthCheck.test_health_check_uses_water_compound",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemHealthCheck.test_health_check_uses_water_compound.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemHealthCheck.test_health_check_uses_water_compound_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemStructuralFields.test_compound_has_physicochemical_properties",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemStructuralFields.test_compound_has_physicochemical_properties.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemStructuralFields.test_compound_has_physicochemical_properties_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
-      ]
-    },
-    {
-      "provider": "pubchem",
-      "scenario_stem": "TestPubChemStructuralFields.test_compound_has_structural_identifiers",
-      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemStructuralFields.test_compound_has_structural_identifiers.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemStructuralFields.test_compound_has_structural_identifiers_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubchem.py"
       ]
     },
     {

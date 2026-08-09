@@ -50,7 +50,9 @@ TESTS_WORKFLOW = ROOT / ".github" / "workflows" / "tests.yml"
 CONTRACT_WORKFLOW = (
     ROOT / ".github" / "workflows" / "contract-governance-fast-check.yml"
 )
-MEMORY_GRAPH_UNIT_TEST = ROOT / "tests" / "unit" / "memory" / "test_graph_entrypoints.py"
+MEMORY_GRAPH_UNIT_TEST = (
+    ROOT / "tests" / "unit" / "memory" / "test_graph_entrypoints.py"
+)
 EXPECTED_CHILD_ISSUES = {5671, 5672, 5673, 5674, 5675}
 PUBLIC_EXPORT_FACADE_PATHS = {
     "src/bioetl/composition/entrypoints.py",

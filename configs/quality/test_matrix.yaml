@@ -950,7 +950,7 @@ fixture_governance:
       crossref: 24
       multi_provider: 1
       openalex: 25
-      pubchem: 31
+      pubchem: 12
       pubmed: 24
       semanticscholar: 24
       uniprot: 17
