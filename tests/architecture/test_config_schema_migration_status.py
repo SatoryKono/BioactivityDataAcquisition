@@ -27,10 +27,18 @@ SCHEMA_DIR = PROJECT_ROOT / "configs" / "_schema"
 CONFIG_README = PROJECT_ROOT / "configs" / "README.md"
 PIPELINE_GUIDE = PROJECT_ROOT / "docs" / "03-guides" / "pipeline-configuration.md"
 PROVIDERS_DIR = PROJECT_ROOT / "configs" / "providers"
+ENTITIES_DIR = PROJECT_ROOT / "configs" / "entities"
+COMPOSITES_DIR = PROJECT_ROOT / "configs" / "composites"
 
 
 def _load_schema(name: str) -> dict[str, Any]:
     return json.loads((SCHEMA_DIR / name).read_text(encoding="utf-8"))
+
+
+def _load_yaml_mapping(path: Path) -> dict[str, Any]:
+    payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    assert isinstance(payload, dict), f"{path} must contain a YAML mapping"
+    return payload
 
 
 def test_pipeline_schema_does_not_advertise_retired_file_reference_keys() -> None:
@@ -218,6 +226,82 @@ def test_provider_configs_use_canonical_pagination_fields() -> None:
         "Provider YAML corpus must use canonical provider_config.pagination.* "
         "fields and must not keep legacy pagination aliases.\n" + "\n".join(violations)
     )
+
+
+def test_provider_configs_use_declarative_environment_indirection() -> None:
+    """Tracked provider YAML must avoid inline environment interpolation."""
+    for path in sorted(PROVIDERS_DIR.glob("*.yaml")):
+        assert "${" not in path.read_text(encoding="utf-8"), (
+            f"{path}: use a documented placeholder or named *_env key"
+        )
+
+    crossref = _load_yaml_mapping(PROVIDERS_DIR / "crossref.yaml")
+    openalex = _load_yaml_mapping(PROVIDERS_DIR / "openalex.yaml")
+    semanticscholar = _load_yaml_mapping(PROVIDERS_DIR / "semanticscholar.yaml")
+    assert crossref["source"]["provider_config"]["mailto"] == (
+        "your-email@example.com"
+    )
+    assert openalex["source"]["provider_config"]["mailto"] == (
+        "your-email@example.com"
+    )
+    assert semanticscholar["source"]["provider_config"]["api_key_env"] == (
+        "BIOETL_SEMANTICSCHOLAR_API_KEY"
+    )
+
+
+def test_provider_and_entity_root_versions_are_synchronized() -> None:
+    """Provider-backed entity roots must share their provider config version."""
+    provider_versions = {
+        path.stem: _load_yaml_mapping(path).get("version")
+        for path in sorted(PROVIDERS_DIR.glob("*.yaml"))
+    }
+    for path in sorted(ENTITIES_DIR.glob("*/*.yaml")):
+        if path.parent.name == "composite":
+            continue
+        assert _load_yaml_mapping(path).get("version") == provider_versions.get(
+            path.parent.name
+        ), f"{path}: root version must match its provider config"
+
+
+def test_composite_entity_contracts_have_complete_aligned_sections() -> None:
+    """Composite entity contracts must be complete and mirror merge schemas."""
+    required_sections = {"pipeline", "schema", "quality", "filters", "contracts"}
+    for path in sorted((ENTITIES_DIR / "composite").glob("*.yaml")):
+        payload = _load_yaml_mapping(path)
+        assert required_sections <= payload.keys(), f"{path}: incomplete entity contract"
+
+        runtime = _load_yaml_mapping(COMPOSITES_DIR / path.name)["composite"]
+        runtime_schema = runtime.get("schema")
+        runtime_merge = runtime.get("merge")
+        runtime_groups = (
+            runtime_schema.get("column_groups")
+            if isinstance(runtime_schema, dict)
+            and runtime_schema.get("column_groups") is not None
+            else runtime_merge.get("column_groups")
+        )
+        assert payload["schema"]["column_groups"] == runtime_groups, (
+            f"{path}: schema.column_groups must mirror configs/composites/{path.name}"
+        )
+
+        for layer in ("silver_filters", "gold_filters"):
+            required_fields = payload["filters"][layer]["required_fields"]
+            assert "entity_id" in required_fields, (
+                f"{path}: filters.{layer} must require entity_id"
+            )
+        assert payload["contracts"]["primary_key"] == payload["pipeline"][
+            "business_primary_keys"
+        ]
+
+
+def test_config_docs_explain_runtime_values_and_version_scopes() -> None:
+    """Active config docs must explain env, version, and composite contracts."""
+    readme = CONFIG_README.read_text(encoding="utf-8")
+    guide = PIPELINE_GUIDE.read_text(encoding="utf-8")
+    for text in (readme, guide):
+        assert "BIOETL_DEFAULT_EMAIL" in text
+        assert "api_key_env: BIOETL_SEMANTICSCHOLAR_API_KEY" in text
+        assert "quality.version" in text
+        assert "configs/entities/composite/{entity}.yaml" in text
 
 
 def test_dq_schema_describes_contract_strictness_key_distinction() -> None:
