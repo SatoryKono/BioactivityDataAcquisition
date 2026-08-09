@@ -4,13 +4,18 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 
-from bioetl.application.services.control_plane.evidence.models import EvidenceCheck
+from bioetl.application.services.control_plane.evidence.lineage_closure import (
+    closure_gaps,
+)
 from bioetl.application.services.control_plane.evidence.lineage_graph_validation import (
-    conflicting_node_ids,
     cycle_nodes,
 )
+from bioetl.application.services.control_plane.evidence.lineage_identity import (
+    identity_gaps,
+)
+from bioetl.application.services.control_plane.evidence.models import EvidenceCheck
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
-from bioetl.domain.lineage import LineageGraphFragment, LineageNodeType
+from bioetl.domain.lineage import LineageGraphFragment
 
 
 def build_lineage_checks(
@@ -21,67 +26,15 @@ def build_lineage_checks(
 ) -> tuple[EvidenceCheck, ...]:
     """Validate the persisted lineage graph for one manifested run."""
     if not fragments:
-        required_profile = _required_profile(manifest)
-        return (
-            EvidenceCheck(
-                "closure",
-                "ERROR" if required_profile in {"replay_ready", "forensic_grade"} else "UNKNOWN",
-                "lineage_fragments_missing",
-                "No persisted lineage fragments resolved for the selected run.",
-            ),
-            EvidenceCheck(
-                "identity_consistency",
-                "UNKNOWN",
-                "lineage_identity_not_observable",
-                "Lineage identity cannot be validated without persisted fragments.",
-            ),
-            EvidenceCheck(
-                "cycle_detection",
-                "UNKNOWN",
-                "lineage_cycle_not_observable",
-                "Cycle detection cannot run without persisted fragments.",
-            ),
-            _persistence_profile_check(
-                manifest,
-                fragments,
-                validation_complete=False,
-            ),
-        )
+        return _missing_fragment_checks(manifest)
 
-    node_ids = {node.node_id for fragment in fragments for node in fragment.nodes}
-    missing_edge_nodes = sorted(
-        {
-            node_id
-            for fragment in fragments
-            for edge in fragment.edges
-            for node_id in (edge.source.node_id, edge.target.node_id)
-            if node_id not in node_ids
-        }
-    )
-    stored_ids = {
-        identifier
-        for fragment in fragments
-        for identifier in (fragment.fragment_id, fragment.stored_fragment_id)
-        if identifier
-    }
-    missing_ledger_fragments = sorted(
-        {
-            entry.lineage_fragment_id
-            for entry in ledger_entries
-            if entry.lineage_fragment_id
-            and entry.lineage_fragment_id not in stored_ids
-        }
-    )
-    closure_gaps = [
-        *(f"node:{node_id}" for node_id in missing_edge_nodes),
-        *(f"fragment:{fragment_id}" for fragment_id in missing_ledger_fragments),
-    ]
-    identity_gaps = _identity_gaps(manifest=manifest, fragments=fragments)
+    closure = closure_gaps(fragments, ledger_entries)
+    identities = identity_gaps(manifest=manifest, fragments=fragments)
     cycles = cycle_nodes(fragments)
     return (
         _gap_check(
             check="closure",
-            gaps=closure_gaps,
+            gaps=closure,
             ok_reason="lineage_closure_complete",
             error_reason="lineage_closure_gap",
             ok_detail="Every edge endpoint and ledger lineage reference resolves.",
@@ -89,7 +42,7 @@ def build_lineage_checks(
         ),
         _gap_check(
             check="identity_consistency",
-            gaps=identity_gaps,
+            gaps=identities,
             ok_reason="lineage_identity_consistent",
             error_reason="lineage_identity_mismatch",
             ok_detail="Fragment, edge, run-node, and manifest-node identities match.",
@@ -106,51 +59,35 @@ def build_lineage_checks(
         _persistence_profile_check(
             manifest,
             fragments,
-            validation_complete=not (
-                closure_gaps or identity_gaps or cycles
-            ),
+            validation_complete=not (closure or identities or cycles),
         ),
     )
 
 
-def _identity_gaps(
-    *, manifest: RunManifest, fragments: tuple[LineageGraphFragment, ...]
-) -> list[str]:
-    expected_run = str(manifest.run_id)
-    expected_manifest = manifest.manifest_id
-    gaps: set[str] = set()
-    gaps.update(
-        f"node_definition:{node_id}" for node_id in conflicting_node_ids(fragments)
+def _missing_fragment_checks(manifest: RunManifest) -> tuple[EvidenceCheck, ...]:
+    required_profile = _required_profile(manifest)
+    strict_profile = required_profile in {"replay_ready", "forensic_grade"}
+    return (
+        EvidenceCheck(
+            "closure",
+            "ERROR" if strict_profile else "UNKNOWN",
+            "lineage_fragments_missing",
+            "No persisted lineage fragments resolved for the selected run.",
+        ),
+        EvidenceCheck(
+            "identity_consistency",
+            "UNKNOWN",
+            "lineage_identity_not_observable",
+            "Lineage identity cannot be validated without persisted fragments.",
+        ),
+        EvidenceCheck(
+            "cycle_detection",
+            "UNKNOWN",
+            "lineage_cycle_not_observable",
+            "Cycle detection cannot run without persisted fragments.",
+        ),
+        _persistence_profile_check(manifest, (), validation_complete=False),
     )
-    for fragment in fragments:
-        fragment_key = fragment.stored_fragment_id or fragment.fragment_id
-        if fragment.run_id != expected_run:
-            gaps.add(f"fragment_run:{fragment_key}")
-        if fragment.manifest_id != expected_manifest:
-            gaps.add(f"fragment_manifest:{fragment_key}")
-        for edge in fragment.edges:
-            if edge.run_id is not None and edge.run_id != expected_run:
-                gaps.add(f"edge_run:{edge.source.node_id}")
-            if edge.manifest_id is not None and edge.manifest_id != expected_manifest:
-                gaps.add(f"edge_manifest:{edge.source.node_id}")
-        for node in fragment.nodes:
-            if node.node_type is LineageNodeType.RUN and (
-                node.node_id != f"run:{expected_run}"
-                or str(
-                    node.attributes.get("run_id") or ""
-                )
-                != expected_run
-            ):
-                gaps.add(f"run_node:{node.node_id}")
-            if node.node_type is LineageNodeType.MANIFEST and (
-                node.node_id != f"manifest:{expected_manifest}"
-                or str(
-                    node.attributes.get("manifest_id") or ""
-                )
-                != expected_manifest
-            ):
-                gaps.add(f"manifest_node:{node.node_id}")
-    return sorted(gaps)
 
 
 def _gap_check(

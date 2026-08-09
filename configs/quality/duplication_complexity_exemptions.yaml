@@ -181,10 +181,3 @@ function_entries:
     expiry: "2026-12-31"
     removal_step: "Extract retention validation branches into dedicated check helpers."
     rationale: "Retention check builders still aggregate many validation rules in single routines."
-  - name: assess_replay_write_risks
-    scopes: [critical_check]
-    max_complexity: 20
-    owner: "@bioetl-control-plane"
-    expiry: "2026-12-31"
-    removal_step: "Extract replay write risk assessment into smaller validation helpers."
-    rationale: "Replay write risk assessment still contains complex conditional logic."

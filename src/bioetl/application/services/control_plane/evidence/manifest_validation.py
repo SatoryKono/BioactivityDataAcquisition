@@ -10,45 +10,6 @@ SUPPORTED_RUN_MANIFEST_SCHEMA_MAJOR = "1"
 
 def build_manifest_checks(manifest: RunManifest) -> tuple[EvidenceCheck, ...]:
     """Validate typed manifest shape, schema compatibility, and contract anchors."""
-    schema_major = manifest.schema_version.split(".", maxsplit=1)[0]
-    schema_compatible = schema_major == SUPPORTED_RUN_MANIFEST_SCHEMA_MAJOR
-    provenance = manifest.code_provenance
-    contract_missing = [
-        name
-        for name in ("contract_ref", "contract_version")
-        if not str(getattr(provenance, name) or "").strip()
-    ]
-    strict_profile = str(
-        manifest.launch_context.get("required_persistence_profile")
-        or "degraded_observable"
-    ).strip()
-    if strict_profile in {"replay_ready", "forensic_grade"}:
-        contract_missing.extend(
-            name
-            for name in (
-                "contract_schema_hash",
-                "dq_policy_ref",
-                "rule_bundle_version",
-                "effective_config_artifact_id",
-            )
-            if not str(getattr(provenance, name) or "").strip()
-        )
-    contract_check = (
-        EvidenceCheck(
-            "contract_compatibility",
-            "ERROR",
-            "manifest_contract_anchors_incomplete",
-            "Required contract anchors are absent: "
-            + ", ".join(sorted(set(contract_missing))),
-        )
-        if contract_missing
-        else EvidenceCheck(
-            "contract_compatibility",
-            "UNKNOWN",
-            "manifest_contract_compatibility_not_verified",
-            "Contract anchors are present, but no registry comparison was recorded.",
-        )
-    )
     return (
         EvidenceCheck(
             "parse",
@@ -62,21 +23,68 @@ def build_manifest_checks(manifest: RunManifest) -> tuple[EvidenceCheck, ...]:
             "manifest_schema_valid",
             "Typed manifest invariants and required identity fields are valid.",
         ),
-        EvidenceCheck(
+        _schema_version_check(manifest.schema_version),
+        _contract_check(_missing_contract_anchors(manifest)),
+    )
+
+
+def _schema_version_check(schema_version: str) -> EvidenceCheck:
+    compatible = (
+        schema_version.split(".", maxsplit=1)[0]
+        == SUPPORTED_RUN_MANIFEST_SCHEMA_MAJOR
+    )
+    if compatible:
+        return EvidenceCheck(
             "schema_version",
-            "OK" if schema_compatible else "ERROR",
+            "OK",
+            "manifest_schema_version_compatible",
+            "Manifest schema major version is supported.",
+        )
+    return EvidenceCheck(
+        "schema_version",
+        "ERROR",
+        "manifest_schema_version_incompatible",
+        "Manifest schema major version is not supported by this runtime.",
+    )
+
+
+def _missing_contract_anchors(manifest: RunManifest) -> list[str]:
+    fields = ["contract_ref", "contract_version"]
+    required_profile = str(
+        manifest.launch_context.get("required_persistence_profile")
+        or "degraded_observable"
+    ).strip()
+    if required_profile in {"replay_ready", "forensic_grade"}:
+        fields.extend(
             (
-                "manifest_schema_version_compatible"
-                if schema_compatible
-                else "manifest_schema_version_incompatible"
-            ),
-            (
-                "Manifest schema major version is supported."
-                if schema_compatible
-                else "Manifest schema major version is not supported by this runtime."
-            ),
-        ),
-        contract_check,
+                "contract_schema_hash",
+                "dq_policy_ref",
+                "rule_bundle_version",
+                "effective_config_artifact_id",
+            )
+        )
+    provenance = manifest.code_provenance
+    return [
+        name
+        for name in fields
+        if not str(getattr(provenance, name) or "").strip()
+    ]
+
+
+def _contract_check(missing: list[str]) -> EvidenceCheck:
+    if missing:
+        return EvidenceCheck(
+            "contract_compatibility",
+            "ERROR",
+            "manifest_contract_anchors_incomplete",
+            "Required contract anchors are absent: "
+            + ", ".join(sorted(set(missing))),
+        )
+    return EvidenceCheck(
+        "contract_compatibility",
+        "UNKNOWN",
+        "manifest_contract_compatibility_not_verified",
+        "Contract anchors are present, but no registry comparison was recorded.",
     )
 
 
