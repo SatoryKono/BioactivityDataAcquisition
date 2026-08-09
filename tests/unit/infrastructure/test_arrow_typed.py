@@ -52,8 +52,8 @@ def test_arrow_typed_metadata() -> None:
 
 def test_arrow_typed_types() -> None:
     assert isinstance(arrow_typed.null(), pa.DataType)
-    assert isinstance(arrow_typed.timestamp(), pa.DataType)
-    assert isinstance(arrow_typed.timestamp(tz="UTC"), pa.DataType)
+    assert isinstance(arrow_typed.timestamp("us"), pa.DataType)
+    assert isinstance(arrow_typed.timestamp("us", tz="UTC"), pa.DataType)
 
 
 def test_arrow_typed_as_data_type() -> None:
