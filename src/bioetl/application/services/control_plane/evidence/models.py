@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Literal
-
+from bioetl.application.services.control_plane_evidence import (
+    EvidenceCheck,
+    EvidenceStatus,
+)
 from bioetl.domain.control_plane import RunManifest
 
-EvidenceStatus = Literal["OK", "WARNING", "ERROR", "UNKNOWN"]
 CONTROL_PLANE_EVIDENCE_CONTRACT = "control_plane_validation_evidence_v1"
 
 _STATUS_PRIORITY: dict[EvidenceStatus, int] = {
@@ -16,25 +16,6 @@ _STATUS_PRIORITY: dict[EvidenceStatus, int] = {
     "WARNING": 2,
     "ERROR": 3,
 }
-
-
-@dataclass(frozen=True, slots=True)
-class EvidenceCheck:
-    """One bounded validation result suitable for an operator table."""
-
-    check: str
-    status: EvidenceStatus
-    reason: str
-    detail: str
-
-    def to_dict(self) -> dict[str, object]:
-        """Return a JSON-safe table row."""
-        return {
-            "check": self.check,
-            "status": self.status,
-            "reason": self.reason,
-            "detail": self.detail,
-        }
 
 
 def evidence_payload(
