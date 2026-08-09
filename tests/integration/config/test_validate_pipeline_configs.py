@@ -201,3 +201,31 @@ def test_validate_config_tree_reports_legacy_pipeline_dir_reintroduction(
         "Legacy pipeline config directory must remain absent" in error
         for error in errors
     )
+
+
+def test_validate_config_tree_includes_composite_entity_contracts(
+    tmp_path: Path,
+) -> None:
+    """Composite entity contracts must pass through required-section validation."""
+    module = _load_module()
+    configs_root = _build_minimal_crossref_tree(tmp_path)
+    relative_path = "configs/entities/composite/activity.yaml"
+    _copy_repo_file(tmp_path, relative_path)
+
+    composite_entity_path = tmp_path / relative_path
+    payload = _load_yaml(composite_entity_path)
+    payload.pop("filters")
+    _write_yaml(composite_entity_path, payload)
+
+    errors, warnings, total = module.validate_config_tree(
+        configs_root,
+        registry_validator=lambda _root: [],
+    )
+
+    assert total == 4
+    assert not warnings
+    assert any(
+        "configs/entities/composite/activity.yaml: Missing required top-level "
+        "section: filters" in error
+        for error in errors
+    )
