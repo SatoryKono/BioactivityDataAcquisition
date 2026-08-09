@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-09T12:43:48.550767+00:00",
+  "generated_at": "2026-08-09T12:58:29.013811+00:00",
   "summary": {
     "total_scripts": 573,
     "status_counts": {
@@ -13,7 +13,7 @@
       "build": 16,
       "ci": 78,
       "docs": 230,
-      "other": 50,
+      "other": 76,
       "scripts": 467,
       "skills": 10,
       "tests": 360
@@ -1505,7 +1505,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 53,
+      "reference_count": 55,
       "references": [
         {
           "path": ".github/ISSUES/AI-AGENT-CONFIG-AUDIT-2026-07-14-ISSUE-PACK.md",
@@ -1544,16 +1544,16 @@
           "text": "- \"scripts/ai/codex/setup_mcp.py\""
         },
         {
-          "path": "Makefile",
-          "line": 155,
-          "source_group": "build",
-          "text": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/ai/codex/setup_mcp.py --check"
+          "path": ".zed/tasks.json",
+          "line": 362,
+          "source_group": "other",
+          "text": "\"scripts/ai/codex/setup_mcp.py\","
         },
         {
-          "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 32,
-          "source_group": "docs",
-          "text": "| `.mcp.json` | yes | tracked exact-root workspace MCP entrypoint | generated from `scripts/ai/codex/setup_mcp.py`; MUST stay repo-relative and must not embed machine-local absolute paths |"
+          "path": ".zed/tasks.json",
+          "line": 377,
+          "source_group": "other",
+          "text": "\"scripts/ai/codex/setup_mcp.py\","
         }
       ]
     },
@@ -2761,8 +2761,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 38,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\""
+        },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
           "line": 94,
@@ -2831,8 +2837,14 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 128,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\""
+        },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 137,
@@ -2874,8 +2886,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 62,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.sh\""
+        },
         {
           "path": "scripts/ai/.mcp.json",
           "line": 62,
@@ -2932,8 +2950,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 90,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
+        },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
           "line": 95,
@@ -3002,8 +3026,14 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 149,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.sh\""
+        },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 157,
@@ -3046,8 +3076,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 69,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_code_interpreter_wrapper.sh\""
+        },
         {
           "path": "scripts/ai/.mcp.json",
           "line": 69,
@@ -3086,8 +3122,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 55,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\""
+        },
         {
           "path": "scripts/ai/.mcp.json",
           "line": 55,
@@ -3132,8 +3174,14 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 118,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_deja_wrapper.sh\""
+        },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 131,
@@ -3201,8 +3249,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 48,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_docker_wrapper.sh\""
+        },
         {
           "path": "scripts/ai/.mcp.json",
           "line": 48,
@@ -3279,8 +3333,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 26,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\""
+        },
         {
           "path": "scripts/ai/.mcp.json",
           "line": 26,
@@ -3325,8 +3385,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 17,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
+        },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
           "line": 232,
@@ -3383,8 +3449,14 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 159,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\""
+        },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 163,
@@ -3445,8 +3517,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 83,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.sh\""
+        },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
           "line": 96,
@@ -3517,8 +3595,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 6,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_memory_wrapper.sh\""
+        },
         {
           "path": "scripts/ai/.mcp.json",
           "line": 6,
@@ -3593,8 +3677,14 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 111,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
+        },
         {
           "path": "scripts/ai/.mcp.json",
           "line": 111,
@@ -3643,8 +3733,14 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 139,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_mutmut_wrapper.sh\""
+        },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 144,
@@ -3718,8 +3814,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 97,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
+        },
         {
           "path": "scripts/ai/.mcp.json",
           "line": 97,
@@ -3776,8 +3878,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 24,
+      "reference_count": 25,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 104,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh\""
+        },
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
           "line": 74,
@@ -3819,12 +3927,6 @@
           "line": 22,
           "source_group": "docs",
           "text": "# Expected: scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh"
-        },
-        {
-          "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
-          "line": 114,
-          "source_group": "docs",
-          "text": "│ scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh             │"
         }
       ]
     },
@@ -3871,8 +3973,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 76,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
+        },
         {
           "path": "scripts/ai/.mcp.json",
           "line": 76,
@@ -6907,7 +7015,7 @@
       "agent_usage": [
         "technical-designer-mermaid"
       ],
-      "reference_count": 19,
+      "reference_count": 18,
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
@@ -6926,12 +7034,6 @@
           "line": 327,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
-        },
-        {
-          "path": "docs/00-project/ai/prompts/trash/documentation_diagrams_audit.md",
-          "line": 243,
-          "source_group": "docs",
-          "text": "bash scripts/diagrams/validate_mermaid_syntax.sh"
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
@@ -6956,6 +7058,12 @@
           "line": 422,
           "source_group": "docs",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh --include-embedded --puppeteer /tmp/puppeteer-config.json"
+        },
+        {
+          "path": "docs/02-architecture/diagrams/governance/diagram-modernization-program.md",
+          "line": 133,
+          "source_group": "docs",
+          "text": "1. `scripts/diagrams/validate_mermaid_syntax.sh`"
         }
       ]
     },
@@ -7028,7 +7136,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 165,
+      "reference_count": 162,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -7254,7 +7362,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 39,
+      "reference_count": 38,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -8349,7 +8457,7 @@
       "references": [
         {
           "path": "docs/02-architecture/03-infrastructure-layer.md",
-          "line": 295,
+          "line": 302,
           "source_group": "docs",
           "text": "| `validation.py`                | Validation utilities     | Валидация параметров адаптеров               |"
         },
@@ -9006,7 +9114,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -9015,19 +9123,7 @@
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
         {
-          "path": "docs/00-project/ai/prompts/test-prompts-2-test-speed-optimization-loop.md",
-          "line": 52,
-          "source_group": "docs",
-          "text": "- `scripts/engineering/dev/run_pytest.sh`, `scripts/engineering/dev/run_pytest.ps1`, `scripts/engineering/ci/run_pytest_resilient.py`"
-        },
-        {
-          "path": "docs/00-project/ai/prompts/test-prompts-2-test-speed-optimization-loop.md",
-          "line": 158,
-          "source_group": "docs",
-          "text": "cat scripts/engineering/ci/run_pytest_resilient.py"
-        },
-        {
-          "path": "docs/00-project/ai/prompts/trash/test_speed_optimization_loop.md",
+          "path": "docs/00-project/ai/prompts/test_speed_optimization_loop.md",
           "line": 30,
           "source_group": "docs",
           "text": "- `scripts/engineering/dev/run_pytest.sh`, `scripts/engineering/dev/run_pytest.ps1`, `scripts/engineering/ci/run_pytest_resilient.py`"
@@ -9055,6 +9151,12 @@
           "line": 29,
           "source_group": "scripts",
           "text": "\"run-tests\": \"run_pytest_resilient.py\","
+        },
+        {
+          "path": "tests/architecture/test_generated_artifact_routing.py",
+          "line": 216,
+          "source_group": "tests",
+          "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"run_pytest_resilient.py\""
         }
       ]
     },
@@ -9975,7 +10077,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 44,
+      "reference_count": 40,
       "references": [
         {
           "path": ".github/ISSUES/DOC-AUDIT-003-Align-Windows-Pytest-Docs-With-Xdist-Policy.md",
@@ -10034,7 +10136,7 @@
       "agent_usage": [
         "py-test-bot"
       ],
-      "reference_count": 59,
+      "reference_count": 48,
       "references": [
         {
           "path": ".codex/skills/py-test-bot/SKILL.md",
@@ -10073,16 +10175,16 @@
           "text": "- WSL/Linux: `setup_env_wsl.sh`, `run_pytest.sh`, `run_mypy.sh`"
         },
         {
-          "path": "docs/00-project/ai/prompts/test-prompts-1-test-fix-retest-loop.md",
-          "line": 40,
+          "path": "docs/00-project/ai/prompts/test_fix_retest_loop.md",
+          "line": 18,
           "source_group": "docs",
           "text": "- Linux/WSL: `bash scripts/engineering/dev/run_pytest.sh <scope> --maxfail=1 -q`"
         },
         {
-          "path": "docs/00-project/ai/prompts/test-prompts-1-test-fix-retest-loop.md",
-          "line": 81,
+          "path": "docs/00-project/ai/prompts/test_speed_optimization_loop.md",
+          "line": 20,
           "source_group": "docs",
-          "text": "bash scripts/engineering/dev/run_pytest.sh tests/bioetl/pipelines/chembl/test_activity.py::test_activity_transform --maxfail=1 -q"
+          "text": "- Для mixed Windows + WSL checkout в WSL используй `bash scripts/engineering/dev/run_pytest.sh`, для CI/single-OS допускается `uv run python -m pytest`."
         }
       ]
     },
@@ -10343,7 +10445,7 @@
           "text": "- Windows PowerShell: `setup_env_windows.ps1`, `run_pytest.ps1`, `run_mypy.ps1`"
         },
         {
-          "path": "docs/00-project/ai/prompts/memory-sheets-1-agent-memory.md",
+          "path": "docs/00-project/ai/prompts/agent-memory.md",
           "line": 100,
           "source_group": "docs",
           "text": "environment with `.\\scripts\\engineering\\dev\\setup_env_windows.ps1`."
@@ -10547,8 +10649,20 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 14,
       "references": [
+        {
+          "path": ".zed/README.md",
+          "line": 101,
+          "source_group": "other",
+          "text": "- `zed_env_doctor.py` - Environment health checks"
+        },
+        {
+          "path": ".zed/tasks.json",
+          "line": 6,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_env_doctor.py\""
+        },
         {
           "path": "scripts/engineering/dev/zed_lint_imports.py",
           "line": 19,
@@ -10584,18 +10698,6 @@
           "line": 26,
           "source_group": "scripts",
           "text": "from scripts.engineering.dev.zed_env_doctor import ensure_ready"
-        },
-        {
-          "path": "scripts/engineering/dev/zed_xenon.py",
-          "line": 27,
-          "source_group": "scripts",
-          "text": "from scripts.engineering.dev.zed_env_doctor import ensure_ready"
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 310,
-          "source_group": "tests",
-          "text": "assert env_verify[\"args\"] == [\"scripts/engineering/dev/zed_env_doctor.py\"]"
         }
       ],
       "owner": "@bioetl-platform",
@@ -10608,8 +10710,20 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 6,
       "references": [
+        {
+          "path": ".zed/README.md",
+          "line": 98,
+          "source_group": "other",
+          "text": "- `zed_lint_imports.py` - Run import-linter with `.importlinter` config"
+        },
+        {
+          "path": ".zed/tasks.json",
+          "line": 291,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_lint_imports.py\""
+        },
         {
           "path": "scripts/engineering/dev/zed_run.py",
           "line": 59,
@@ -10645,8 +10759,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
+        {
+          "path": ".zed/README.md",
+          "line": 99,
+          "source_group": "other",
+          "text": "- `zed_mypy.py` - Run mypy matching CI scope (`src/bioetl` only)"
+        },
         {
           "path": "pyproject.toml",
           "line": 318,
@@ -10672,31 +10792,55 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 17,
       "references": [
         {
-          "path": "scripts/engineering/dev/zed_run.py",
-          "line": 57,
-          "source_group": "scripts",
-          "text": "if name == \"zed_pytest_lane.py\":"
+          "path": ".zed/README.md",
+          "line": 97,
+          "source_group": "other",
+          "text": "- `zed_pytest_lane.py` - Run pytest with marker expressions (Windows-safe)"
         },
         {
-          "path": "tests/unit/repo_backed/scripts/test_zed_helper_entrypoints.py",
-          "line": 23,
-          "source_group": "tests",
-          "text": "\"zed_pytest_lane.py\","
+          "path": ".zed/tasks.json",
+          "line": 69,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
         },
         {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 73,
-          "source_group": "tests",
-          "text": "return runpy.run_path(str(DEV_SCRIPTS / \"zed_pytest_lane.py\"))"
+          "path": ".zed/tasks.json",
+          "line": 91,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
         },
         {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 261,
-          "source_group": "tests",
-          "text": "lane_script = \"scripts/engineering/dev/zed_pytest_lane.py\""
+          "path": ".zed/tasks.json",
+          "line": 111,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
+        },
+        {
+          "path": ".zed/tasks.json",
+          "line": 129,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
+        },
+        {
+          "path": ".zed/tasks.json",
+          "line": 147,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
+        },
+        {
+          "path": ".zed/tasks.json",
+          "line": 165,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
+        },
+        {
+          "path": ".zed/tasks.json",
+          "line": 183,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
         }
       ]
     },
@@ -10705,8 +10849,44 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 9,
       "references": [
+        {
+          "path": ".zed/README.md",
+          "line": 100,
+          "source_group": "other",
+          "text": "- `zed_run.py` - Run local pipeline"
+        },
+        {
+          "path": ".zed/tasks.json",
+          "line": 18,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_run.py\","
+        },
+        {
+          "path": ".zed/tasks.json",
+          "line": 34,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_run.py\","
+        },
+        {
+          "path": ".zed/tasks.json",
+          "line": 52,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_run.py\","
+        },
+        {
+          "path": ".zed/tasks.json",
+          "line": 303,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_run.py\","
+        },
+        {
+          "path": ".zed/tasks.json",
+          "line": 321,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_run.py\","
+        },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_helper_entrypoints.py",
           "line": 24,
@@ -10716,12 +10896,6 @@
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
           "line": 337,
-          "source_group": "tests",
-          "text": "\"scripts/engineering/dev/zed_run.py\","
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 351,
           "source_group": "tests",
           "text": "\"scripts/engineering/dev/zed_run.py\","
         }
@@ -10748,8 +10922,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
+        {
+          "path": ".zed/tasks.json",
+          "line": 338,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_vulture.py\""
+        },
         {
           "path": "scripts/engineering/dev/zed_run.py",
           "line": 61,
@@ -10785,8 +10965,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
+        {
+          "path": ".zed/tasks.json",
+          "line": 350,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_xenon.py\""
+        },
         {
           "path": "scripts/engineering/dev/zed_run.py",
           "line": 63,
@@ -11111,7 +11297,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 297,
+      "reference_count": 306,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -11692,14 +11878,14 @@
       "reference_count": 5,
       "references": [
         {
-          "path": "docs/00-project/ai/prompts/architecture-prompts-3-metric-exemptions-tasks-json.md",
-          "line": 170,
+          "path": "docs/00-project/ai/prompts/architecture_metric_exemptions_tasks_json_prompt.md",
+          "line": 165,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off`"
         },
         {
-          "path": "docs/00-project/ai/prompts/trash/architecture_metric_exemptions_tasks_json_prompt.md",
-          "line": 143,
+          "path": "docs/00-project/ai/prompts/architecture_metric_exemptions_tasks_json_prompt.md",
+          "line": 511,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off`"
         },
@@ -18180,7 +18366,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 158,
+          "line": 157,
           "source_group": "docs",
           "text": "`scripts/ops/observability/grafana/render_nav_bus.py`). The current dashboard"
         },
@@ -18412,7 +18598,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 148,
+          "line": 147,
           "source_group": "docs",
           "text": "- On Linux, `setup_grafana_screenshot_runtime.sh` is the canonical bootstrap"
         },
@@ -20205,7 +20391,7 @@
         "new-pipeline",
         "py-config-bot"
       ],
-      "reference_count": 67,
+      "reference_count": 70,
       "references": [
         {
           "path": ".codex/skills/new-pipeline/SKILL.md",
@@ -20400,7 +20586,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 5,
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
@@ -20416,15 +20602,9 @@
         },
         {
           "path": "docs/03-data-model/json-field-typing-inventory.md",
-          "line": 8,
-          "source_group": "docs",
-          "text": "python src/tools/generate_json_field_typing_inventory.py"
-        },
-        {
-          "path": "docs/03-data-model/json-field-typing-inventory.md",
           "line": 11,
           "source_group": "docs",
-          "text": "Generator: `src/tools/generate_json_field_typing_inventory.py`."
+          "text": "Generator: `scripts/schema/analysis/generate_json_field_typing_inventory.py`."
         },
         {
           "path": "scripts/schema/__main__.py",
@@ -20436,7 +20616,7 @@
           "path": "tests/architecture/test_non_chembl_json_field_typing_policy.py",
           "line": 129,
           "source_group": "tests",
-          "text": "assert \"src/tools/generate_json_field_typing_inventory.py\" in actual"
+          "text": "assert \"scripts/schema/analysis/generate_json_field_typing_inventory.py\" in actual"
         }
       ]
     },
