@@ -11,7 +11,7 @@
   "codex_devin": {
     "optional_presence_globs": [
       "*/agents/openai.yaml",
-      "coderabbit-audit/*"
+      "coderabbit-audit"
     ],
     "allowed_content_variant_globs": [
       "*/SKILL.md",
