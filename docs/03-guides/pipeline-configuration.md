@@ -270,16 +270,16 @@ pipeline:
 
 Версии имеют явную область действия:
 
-- корневой `version` — версия provider/entity config document; для каждого
-  `configs/entities/{provider}/*.yaml` она обязана совпадать с корневой версией
-  `configs/providers/{provider}.yaml`;
+- корневой `version` — версия текущего config bundle. Provider config и каждый
+  entity config являются разными владельцами и версионируются независимо;
 - `quality.version`, `filters.version`, `source_profile.version`,
   `contracts.active_version` и hash-policy versions — независимые версии
   соответствующих контрактов. Они меняются только при изменении своей
   семантики и не обязаны совпадать с корневым `version`;
-- `python -m scripts.schema check-invariants` проверяет root-version parity и
-  не позволяет случайно трактовать `quality.version: 1.1.0` как drift от
-  entity/provider `version: 1.0.0`.
+- все версии используют `MAJOR.MINOR.PATCH`; `python -m scripts.schema
+  check-invariants` проверяет формат каждой области и не позволяет случайно
+  трактовать `quality.version: 1.1.0` как drift от entity/provider
+  `version: 1.0.0`.
 
 ### Пример с переопределениями
 

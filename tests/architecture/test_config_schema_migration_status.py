@@ -15,6 +15,7 @@ from __future__ import annotations
 import pytest
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -249,18 +250,28 @@ def test_provider_configs_use_declarative_environment_indirection() -> None:
     )
 
 
-def test_provider_and_entity_root_versions_are_synchronized() -> None:
-    """Provider-backed entity roots must share their provider config version."""
-    provider_versions = {
-        path.stem: _load_yaml_mapping(path).get("version")
-        for path in sorted(PROVIDERS_DIR.glob("*.yaml"))
-    }
-    for path in sorted(ENTITIES_DIR.glob("*/*.yaml")):
-        if path.parent.name == "composite":
-            continue
-        assert _load_yaml_mapping(path).get("version") == provider_versions.get(
-            path.parent.name
-        ), f"{path}: root version must match its provider config"
+def test_config_version_scopes_are_explicit_semver() -> None:
+    """Provider, entity, quality, and filter versions are independent SemVer scopes."""
+    semver = re.compile(r"^\d+\.\d+\.\d+$")
+    paths = [
+        *sorted(PROVIDERS_DIR.glob("*.yaml")),
+        *sorted(ENTITIES_DIR.glob("*/*.yaml")),
+    ]
+    for path in paths:
+        payload = _load_yaml_mapping(path)
+        assert semver.fullmatch(str(payload.get("version", ""))), path
+        for section_name in ("quality", "filters"):
+            section = payload.get(section_name)
+            if isinstance(section, dict):
+                assert semver.fullmatch(str(section.get("version", ""))), (
+                    f"{path}: {section_name}.version must use SemVer"
+                )
+
+    chembl_activity = _load_yaml_mapping(
+        ENTITIES_DIR / "chembl" / "activity.yaml"
+    )
+    assert chembl_activity["version"] == "1.0.0"
+    assert chembl_activity["quality"]["version"] == "1.1.0"
 
 
 def test_composite_entity_contracts_have_complete_aligned_sections() -> None:

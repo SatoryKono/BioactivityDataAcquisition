@@ -43,12 +43,14 @@ They must not contain `${ENV_VAR}` interpolation strings:
 
 ## Versioning Strategy
 
-- top-level `version` identifies the provider/entity config document contract;
-  every `configs/entities/{provider}/*.yaml` value must equal the matching
-  `configs/providers/{provider}.yaml` value;
+- top-level `version` identifies the current file's contract: provider config
+  bundle and each entity config bundle evolve independently;
 - nested `quality.version`, `filters.version`, source-profile versions, and
   contract versions identify their own independently evolving section
   contracts and therefore do not have to equal the top-level version;
+- every declared config version uses `MAJOR.MINOR.PATCH`; a version changes only
+  when its own scoped contract changes, so `chembl/activity` root `1.0.0` with
+  `quality.version: 1.1.0` is intentional rather than drift;
 - `configs/entities/composite/{entity}.yaml` is the entity-level composite
   contract and must contain `pipeline`, `schema`, `quality`, `filters`, and
   `contracts`; its `schema.column_groups` mirrors the canonical merge schema in
