@@ -128,6 +128,18 @@ async def dispatch_control_plane_request(
     query: dict[str, str],
 ) -> None:
     """Route control-plane selector helper endpoints."""
+    try:
+        if await dispatch_control_plane_evidence_request(
+            host,
+            writer=writer,
+            path=path,
+            query=query,
+        ):
+            return
+    except ValueError as exc:
+        await host._send_response(writer, 400, str(exc))
+        return
+
     if host._run_manifest_port is None:
         await host._send_response(
             writer,
@@ -137,13 +149,6 @@ async def dispatch_control_plane_request(
         return
 
     try:
-        if await dispatch_control_plane_evidence_request(
-            host,
-            writer=writer,
-            path=path,
-            query=query,
-        ):
-            return
         if path == "/ops/control-plane/ready":
             await handle_control_plane_ready(host, writer)
             return
