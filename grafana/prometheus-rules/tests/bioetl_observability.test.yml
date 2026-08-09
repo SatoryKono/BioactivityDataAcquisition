@@ -1174,4 +1174,4 @@ tests:
             exp_annotations:
               summary: "DQ current-status recording rule is missing"
               description: "DQ monitoring is enabled but bioetl_dq_current_status is absent for at least one pipeline; first-screen DQ verdict panels may read UNKNOWN without raising threshold alerts."
-              runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"
+              runbook: "docs/05-operations/runbooks/pipeline-failure-dq.md"
