@@ -105,9 +105,7 @@ class ControlPlaneEvidenceService:
             self.lineage_store.list_by_manifest_id(scope.manifest.manifest_id)
         )
         if not fragments:
-            fragments = tuple(
-                self.lineage_store.list_by_run_id(scope.manifest.run_id)
-            )
+            fragments = tuple(self.lineage_store.list_by_run_id(scope.manifest.run_id))
         run_ledger_entries = ledger_entries(self.ledger_port, scope.manifest)
         return service_payload(
             endpoint="lineage-validation",
@@ -121,11 +119,7 @@ class ControlPlaneEvidenceService:
                 "fragment_count": len(fragments),
                 "edge_count": sum(len(fragment.edges) for fragment in fragments),
                 "node_count": len(
-                    {
-                        node.node_id
-                        for fragment in fragments
-                        for node in fragment.nodes
-                    }
+                    {node.node_id for fragment in fragments for node in fragment.nodes}
                 ),
             },
         )
@@ -232,6 +226,7 @@ class ControlPlaneEvidenceService:
         )
         payload["rows"] = rows
         return payload
+
 
 __all__ = [
     "DEFAULT_CONTROL_PLANE_RETENTION_DAYS",

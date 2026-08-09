@@ -47,8 +47,7 @@ def _missing_ledger_fragments(
         {
             entry.lineage_fragment_id
             for entry in ledger_entries
-            if entry.lineage_fragment_id
-            and entry.lineage_fragment_id not in stored_ids
+            if entry.lineage_fragment_id and entry.lineage_fragment_id not in stored_ids
         }
     )
 

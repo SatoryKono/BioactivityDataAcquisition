@@ -142,9 +142,7 @@ def _checkpoint_anchor_checks(
         "manifest_id": _metadata_text(metadata, "manifest_id"),
         "pipeline_name": _metadata_text(metadata, "pipeline_name"),
         "run_type": _metadata_text(metadata, "run_type"),
-        "execution_fingerprint": _metadata_text(
-            metadata, "execution_fingerprint"
-        ),
+        "execution_fingerprint": _metadata_text(metadata, "execution_fingerprint"),
     }
     mismatches = sorted(
         name
