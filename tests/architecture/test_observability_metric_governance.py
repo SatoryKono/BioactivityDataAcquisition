@@ -172,9 +172,7 @@ def test_http_panel_contract_recognizes_explicit_backend_failure_copy() -> None:
             "title": "Example HTTP panel",
             "description": "Valid empty means no matching rows.",
             "fieldConfig": {
-                "defaults": {
-                    "noValue": "Backend failure renders as QUERY ERROR."
-                }
+                "defaults": {"noValue": "Backend failure renders as QUERY ERROR."}
             },
         },
         target={

@@ -20,7 +20,7 @@ from bioetl.application.runtime_clock import current_utc_time
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.types import JsonDict
 
-FLOW_INVARIANT_PROJECTION_ERRORS: OperationErrorTypes = (*OPERATION_ERRORS, ArithmeticError)
+_FLOW_ERRORS = cast("OperationErrorTypes", (*OPERATION_ERRORS, ArithmeticError))
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_executor import BatchExecutor
@@ -220,7 +220,7 @@ def record_run_shutdown(host: _PipelineRunnerFlowHostProtocol) -> None:
     )
     try:
         _record_flow_invariants(host)
-    except FLOW_INVARIANT_PROJECTION_ERRORS:
+    except _FLOW_ERRORS:
         host._logger.warning(
             "shutdown_flow_invariants_failed",
             run_id=str(host._context.run_id),

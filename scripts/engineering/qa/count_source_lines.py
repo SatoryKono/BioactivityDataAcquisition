@@ -3,6 +3,7 @@
 
 from pathlib import Path
 
+
 def count_lines(filepath: Path) -> int:
     """Count non-empty, non-comment lines in a Python file."""
     try:
@@ -11,6 +12,7 @@ def count_lines(filepath: Path) -> int:
         return len(lines)
     except Exception:
         return 0
+
 
 def main():
     src_root = Path("src/bioetl")
@@ -33,6 +35,7 @@ def main():
     for i, (filepath, count) in enumerate(file_counts[:70], 1):
         rel_path = filepath.relative_to(Path.cwd())
         print(f"{i:3d}. {count:4d} lines: {rel_path}")
+
 
 if __name__ == "__main__":
     main()

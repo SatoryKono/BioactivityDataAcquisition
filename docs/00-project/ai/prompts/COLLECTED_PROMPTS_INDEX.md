@@ -64,8 +64,8 @@ Contains time-bound repository state and should not be treated as active policy.
 ## Related Entry Points
 
 - `docs/00-project/ai/prompts/README.md` — repo-only prompts surface README
-- `docs/00-project/ai/prompts/ai_workspace_setup.md` — working AI workspace
-  prompt surface
+- `docs/00-project/ai/prompts/docs_ai_audit_planning_codex_prompt.md` — working
+  AI documentation-audit planning prompt
 - `docs/00-project/ai/prompts/architecture_review_and_refactoring_assessment.md`
   — working architecture review prompt
 - `docs/00-project/ai/prompts/test_speed_optimization_loop.md` — working test

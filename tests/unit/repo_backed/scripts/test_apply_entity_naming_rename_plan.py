@@ -42,7 +42,13 @@ pytestmark = pytest.mark.repo_backed
 
 def _load_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[4]
-    module_path = repo_root / "scripts" / "engineering" / "repo" / "apply_entity_naming_rename_plan.py"
+    module_path = (
+        repo_root
+        / "scripts"
+        / "engineering"
+        / "repo"
+        / "apply_entity_naming_rename_plan.py"
+    )
     spec = importlib.util.spec_from_file_location(
         "apply_entity_naming_rename_plan_module",
         module_path,

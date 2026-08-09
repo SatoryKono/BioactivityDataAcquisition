@@ -25,7 +25,7 @@
 # pyright: reportConstantRedefinition=false
 # pyright: reportInvalidTypeForm=false
 # PD6 residual test mock/fixture surface — product NewTypes/Ports stay strict (#7048).
-"""Security regression tests for src/tools/differentiate_linkstyle.py."""
+"""Security regression tests for scripts/diagrams/fix/differentiate_linkstyle.py."""
 
 from __future__ import annotations
 
@@ -41,7 +41,9 @@ pytestmark = pytest.mark.repo_backed
 
 def _load_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[4]
-    module_path = repo_root / "src" / "tools" / "differentiate_linkstyle.py"
+    module_path = (
+        repo_root / "scripts" / "diagrams" / "fix" / "differentiate_linkstyle.py"
+    )
     spec = importlib.util.spec_from_file_location(
         "differentiate_linkstyle_security_module",
         module_path,

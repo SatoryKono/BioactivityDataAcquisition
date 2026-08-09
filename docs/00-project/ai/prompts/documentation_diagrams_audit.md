@@ -28,7 +28,7 @@ Claude Code и других агентных сред.
 
 Основной scope: `docs/` без `docs/00-project/ai/`.
 AI-конфигурация и runtime-поведение аудитируются отдельно через
-`docs/00-project/ai/prompts/ai_workspace_setup.md`.
+`docs/00-project/ai/prompts/docs_ai_audit_planning_codex_prompt.md`.
 
 ## Рекомендуемый состав агентов
 

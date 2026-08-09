@@ -1104,7 +1104,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected range: Freshness age in hours. SLA 24/72 only applies when samples exist. Explicit SLA: WARN at 24h and CRIT at 72h. An ~8h value is green only because it is below the visible 24h SLA; null is UNKNOWN. TELEMETRY MISSING means freshness evidence is unavailable, not healthy. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
+          "description": "TIME RANGE delivery impact: Freshness age in hours. SLA 24/72 only applies when samples exist. Explicit SLA: WARN at 24h and CRIT at 72h. An ~8h value is green only because it is below the visible 24h SLA; null is UNKNOWN. TELEMETRY MISSING means freshness evidence is unavailable, not healthy. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1186,7 +1186,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected range: Blocked-record evidence. Counts Silver filter rejects plus DQ quarantine records for the pipeline/run_type window without applying entity YAML thresholds. Read alongside the adjacent Track: Source Records in Range (Bronze) panel for denominator context, and rely on Monitor DQ Current Status / Monitor DQ Threshold State for the soft/hard severity verdict instead of the absolute count. 0 means no blocked records were observed in the selected window. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
+          "description": "TIME RANGE delivery impact: Blocked-record evidence. Counts Silver filter rejects plus DQ quarantine records for the pipeline/run_type window without applying entity YAML thresholds. Read alongside the adjacent Track: Source Records in Range (Bronze) panel for denominator context, and rely on Monitor DQ Current Status / Monitor DQ Threshold State for the soft/hard severity verdict instead of the absolute count. 0 means no blocked records were observed in the selected window. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1273,7 +1273,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected range: Quarantine count. Non-zero means records were withheld from normal promotion and require quarantine triage even when Silver filter rejects remain zero; 0 means no quarantined records were reported in the selected window. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
+          "description": "TIME RANGE delivery impact: Quarantine count. Non-zero means records were withheld from normal promotion and require quarantine triage even when Silver filter rejects remain zero; 0 means no quarantined records were reported in the selected window. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1431,7 +1431,7 @@
           ],
           "title": "Monitor Silver Filter Rejects",
           "type": "stat",
-          "description": "Selected range: Silver structural reject count from the filtered_out path only. FILTERED_OUT_SILVER is a legacy alias for this Silver structural path and is not a Gold contract/semantic reject code. A zero here does not refute current CRIT because quarantine, Gold reject outcomes, and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation/Gold panels before assuming the incident is filter-driven. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges."
+          "description": "TIME RANGE delivery impact: Silver structural reject count from the filtered_out path only. FILTERED_OUT_SILVER is a legacy alias for this Silver structural path and is not a Gold contract/semantic reject code. A zero here does not refute current CRIT because quarantine, Gold reject outcomes, and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation/Gold panels before assuming the incident is filter-driven. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges."
         }
       ],
       "description": "Expand for selected-range impact and freshness after resolving the current reason lane."
