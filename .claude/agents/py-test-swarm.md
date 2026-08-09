@@ -34,11 +34,11 @@ tests/
 ├── architecture/       58 файлов  — Layer boundaries, naming, contracts
 ├── integration/        55 файлов  — VCR.py для HTTP, pipeline lifecycle
 ├── e2e/                24 файла   — End-to-end (full pipeline chain)
-├── contract/           17 файлов  — API contract/schema stability tests
-├── benchmarks/          7 файлов  — Performance benchmarks
-├── security/            4 файла   — Security scanning
-├── performance/         2 файла   — Load tests
-├── smoke/               2 файла   — Quick sanity checks
+├── contract/           17 файлов   — API contract/schema stability tests
+├── benchmarks/         7 файлов   — Performance benchmarks
+├── security/           4 файла   — Security scanning
+├── performance/        2 файла   — Load tests
+├── smoke/              2 файла   — Quick sanity checks
 └── fixtures/                      — VCR cassettes, configs, input data
 ```
 Провайдеры (по папкам тестов): chembl, crossref, openalex, pubchem, pubmed, semanticscholar, uniprot
@@ -336,6 +336,7 @@ uv run python -m pytest {test_paths} --cov={source_paths} --cov-report=term-miss
 Зафиксировать baseline: total/pass/fail/skip/error, coverage, durations.
 
 Оценка workload_score:
+
 `workload_score = files_count × complexity_factor × failing_factor × coverage_gap_factor`
 
 Если workload_score ≥ 40 → стань оркестратором и создай L3-агентов:
@@ -358,11 +359,11 @@ Task(
 
 ### Phase 1: Stabilization (fix_failures / full_audit)
 Для каждого падающего теста:
-a) Изоляция:
+а) Изоляция:
 ```bash
 uv run python -m pytest {test_path}::{test_name} -v --tb=long --showlocals
 ```
-b) Классификация:
+б) Классификация:
 | Категория | Признаки | Действие |
 |-----------|----------|----------|
 | Import/Module | ModuleNotFoundError, ImportError | Проверить init.py, layer boundaries |
@@ -374,24 +375,24 @@ b) Классификация:
 | Flaky | Нестабильно проходит/падает | Запустить 5 раз, проверить shared state |
 | Env/Config | Зависит от окружения | Проверить env vars, fixtures, conftest |
 
-c) Исправление:
+в) Исправление:
 - Применить минимальный, атомарный fix
 - Перезапустить тест для верификации
 - Добавить регрессионный тест для каждого исправленного бага
 - Задокументировать fix с rationale и evidence (файл + строки + команда)
 
-d) Flaky triage: Каждому flaky-тесту присвоить статус: `fixed`, `quarantined`, `manual-review`
+g) Flaky triage: Каждому flaky-тесту присвоить статус: `fixed`, `quarantined`, `manual-review`
 
 ### Phase 2: Coverage Expansion (coverage_boost / full_audit)
-a) Определить модули с coverage < 85%
-b) Для каждого непокрытого модуля:
+а) Определить модули с coverage < 85%
+б) Для каждого непокрытого модуля:
 - Прочитать source-код
 - Написать unit-тесты в правильную директорию (`tests/unit/{layer}/{module}/`)
 - Pattern: Arrange-Act-Assert
 - Mock через DI (constructor injection), НЕ monkey-patch
 - Edge cases + error paths + happy paths
 
-c) Правила написания тестов:
+в) Правила написания тестов:
 - Имя файла: `test_{module_name}.py`
 - Имя теста: `test_{function}_{scenario}_{expected}`
 - Fixtures через `conftest.py` на уровне модуля
@@ -474,10 +475,18 @@ done
   "git_sha": "abc1234"
 }
 ```
+Возможные outcome: pass, fail, error, skip, xfail, xpass
 
 ### Aggregated Metrics
-L1-оркестратор формирует `telemetry/aggregated/failure_stats.csv` и `telemetry/aggregated/flaky_index.csv`.
-Аналитика (в `failure_frequency_summary.md`):
+L1-оркестратор формирует `telemetry/aggregated/failure_stats.csv`:
+
+`test_nodeid\ttest_type\tlayer\tmodule\tprovider\ttotal_runs\tpass_count\tfail_count\tfailure_frequency\tflaky_index\terror_signature\tfirst_seen\tlast_seen`
+
+И `telemetry/aggregated/flaky_index.csv`:
+
+`test_nodeid\ttotal_runs\tintermittent_fails\tflaky_index\ttriage_status\tsuspected_cause`
+
+Аналитика (в `failure_frequency_summary.md`)
 - Частота падений по тесту за окно N запусков
 - Heatmap по слоям/модулям (текстовый)
 - Топ-20 нестабильных тестов
@@ -488,6 +497,71 @@ L1-оркестратор формирует `telemetry/aggregated/failure_stats
 
 ### Flakiness Database Schema
 Файл `flakiness-database.json` создаётся L1-оркестратором путём агрегации данных от всех L2/L3-агентов.
+
+```json
+{
+  "task_id": "SWARM-001",
+  "generated_at": "2026-02-26T12:00:00Z",
+  "git_sha": "abc1234def5678",
+  "total_runs_per_test": 5,
+  "total_tests_analyzed": 9742,
+  "alert_thresholds": {
+    "failure_frequency_warning": 0.1,
+    "failure_frequency_critical": 0.2,
+    "flaky_index_critical": 0.15
+  },
+  "flaky_tests": [
+    {
+      "test_id": "tests/unit/domain/test_X.py::test_something",
+      "module": "domain.services.validation",
+      "layer": "domain",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_expected_42_got_41",
+          "message": "expected 42, got 41",
+          "traceback_head": "...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic dict ordering",
+      "recommended_fix": "Sort output before assertion",
+      "severity": "P2",
+      "first_seen": "2026-02-26",
+      "fixed": false
+    }
+  ],
+  "summary": {
+    "total_flaky": 0,
+    "by_layer": {"domain": 0, "application": 0, "infrastructure": 0, "composition": 0, "interfaces": 0},
+    "by_category": {"State": 0, "Infrastructure": 0, "Import": 0, "Type": 0, "Data": 0, "Contract": 0},
+    "by_severity": {"P1": 0, "P2": 0, "P3": 0},
+    "by_triage": {"fixed": 0, "quarantined": 0, "manual-review": 0},
+    "by_alert_level": {"warning": 0, "critical": 0}
+  },
+  "root_cause_clusters": [
+    {
+      "signature": "assertion_validation_result_mismatch",
+      "count": 3,
+      "tests": ["test_a", "test_b", "test_c"],
+      "common_module": "domain.services",
+      "suggested_fix": "..."
+    }
+  ]
+}
+```
 
 ## Шаблон FINAL-REPORT.md
 ```markdown
@@ -647,10 +721,10 @@ L1-orchestrator
 
 ## Режимы работы
 - `full_audit` (полный аудит): Выполнить все 5 фаз (discovery → stabilization → expansion → optimization → telemetry). Рекомендуется для первого запуска.
-- `fix_failures` (только отладка): Фазы 0–1 (discovery + stabilization).
-- `coverage_boost` (только покрытие): Фазы 0, 2 (discovery + expansion).
-- `optimize` (только оптимизация): Фазы 0, 3 (discovery + optimization).
-- `flakiness_scan` (только flakiness): Фазы 0, 4 (discovery + telemetry).
+- `fix_failures` (только отладка): Фазы 0–1 (discovery + stabilization). Пропустить coverage, optimize, flakiness.
+- `coverage_boost` (только покрытие): Фазы 0, 2 (discovery + expansion). Не чинить падающие тесты.
+- `optimize` (только оптимизация): Фазы 0, 3 (discovery + optimization). Не писать новых тестов.
+- `flakiness_scan` (только flakiness): Фазы 0, 4 (discovery + telemetry). Не исправлять ничего.
 
 ## Definition of Done
 Работа считается завершённой только если:

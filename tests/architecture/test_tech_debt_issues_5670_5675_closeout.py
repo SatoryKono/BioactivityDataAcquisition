@@ -50,25 +50,7 @@ TESTS_WORKFLOW = ROOT / ".github" / "workflows" / "tests.yml"
 CONTRACT_WORKFLOW = (
     ROOT / ".github" / "workflows" / "contract-governance-fast-check.yml"
 )
-SNAPSHOT_INVARIANTS = (
-    ROOT
-    / "tests"
-    / "testing_support"
-    / "neo4j_memory_sync_support"
-    / "snapshot_invariants.py"
-)
-SNAPSHOT_COMMON = (
-    ROOT / "tests" / "testing_support" / "neo4j_memory_sync_support" / "common.py"
-)
-SNAPSHOT_UNIT_TEST = (
-    ROOT
-    / "tests"
-    / "unit"
-    / "scripts"
-    / "ops"
-    / "neo4j_memory_sync"
-    / "test_snapshot_invariants.py"
-)
+MEMORY_GRAPH_UNIT_TEST = ROOT / "tests" / "unit" / "memory" / "test_graph_entrypoints.py"
 EXPECTED_CHILD_ISSUES = {5671, 5672, 5673, 5674, 5675}
 PUBLIC_EXPORT_FACADE_PATHS = {
     "src/bioetl/composition/entrypoints.py",
@@ -254,17 +236,13 @@ def test_issue_5675_compatibility_tests_and_snapshot_lane_are_bounded() -> None:
         assert (ROOT / entry["path"]).exists()
 
     assert date.fromisoformat(str(snapshot_policy["review_date"])) >= today
-    assert snapshot_policy["decision"] == "retained_memory_lane_with_platform_skip"
-    assert snapshot_policy["required_markers"] == ["memory"]
-    assert snapshot_policy["min_timeout_seconds"] >= 180
-    assert snapshot_policy["windows_skip_required"] is True
-    assert snapshot_policy["shared_snapshot_cache_required"] is True
+    assert snapshot_policy["decision"] == "canonical_fast_unit_lane"
+    assert snapshot_policy["required_markers"] == ["unit"]
+    assert snapshot_policy["min_timeout_seconds"] == 0
+    assert snapshot_policy["windows_skip_required"] is False
+    assert snapshot_policy["shared_snapshot_cache_required"] is False
 
-    unit_text = SNAPSHOT_UNIT_TEST.read_text(encoding="utf-8")
-    support_text = SNAPSHOT_INVARIANTS.read_text(encoding="utf-8")
-    common_text = SNAPSHOT_COMMON.read_text(encoding="utf-8")
-    assert "pytest.mark.memory" in unit_text
-    assert "pytest.mark.timeout(180)" in unit_text
-    assert 'sys.platform.startswith("win")' in support_text
-    assert "pytest.skip(" in support_text
-    assert "@lru_cache(maxsize=1)" in common_text
+    unit_text = MEMORY_GRAPH_UNIT_TEST.read_text(encoding="utf-8")
+    assert "pytestmark = pytest.mark.unit" in unit_text
+    assert "pytest.skip(" not in unit_text
+    assert "memory.graph.sync_pkg" in unit_text

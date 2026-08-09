@@ -254,13 +254,9 @@ budget_ratchet:
   - issue: '#5103'
     owner: test-governance
     status: memory_legacy_aliases_retained_with_rationale
-    note: Analyzed memory legacy module aliases (scripts.memory.sync, scripts.ops.neo4j_memory_sync, scripts.memory.query).
-      These are documented compatibility entrypoints that resolve to canonical memory.graph.* implementations
-      per src/memory/README.md. They are actively used in CI scripts (check_neo4j_memory_ontology.py,
-      check_neo4j_memory_live_audit.py) and test support modules (neo4j_memory_sync_support/). Migration
-      would require updating all usages across CI and test infrastructure. Retained test with updated
-      review date (2026-12-31) to allow for planned migration in future cleanup cycles. Budget remains
-      at 35.
+    note: Memory compatibility entrypoints remain covered by focused alias contracts, while the obsolete
+      always-skipped neo4j_memory_sync test/support tree was retired by issue #8406. Canonical behavior
+      is covered directly through memory.graph.sync_pkg unit tests.
   - issue: '#5104'
     owner: test-governance
     status: compatibility_test_file_max_ratcheted_to_33
@@ -824,24 +820,21 @@ compatibility_test_inventory:
   default_review_date: '2026-09-30'
   entries: []
 platform_sensitive_snapshot_tests:
-  issue_ref: '#5663'
-  decision: retained_memory_lane_with_platform_skip
+  issue_ref: '#8406'
+  decision: canonical_fast_unit_lane
   owner: memory-governance
-  review_date: '2026-09-30'
-  rationale: Neo4j memory snapshot invariant tests intentionally build a full repo snapshot; they remain
-    outside fast lanes through explicit memory markers, bounded timeout policy, shared snapshot caching,
-    and Windows skip guards.
+  review_date: '2026-12-31'
+  rationale: Canonical memory graph behavior is exercised directly without platform skips or a duplicated
+    repository snapshot cache.
   required_markers:
-  - memory
-  min_timeout_seconds: 180
-  windows_skip_required: true
-  shared_snapshot_cache_required: true
+  - unit
+  min_timeout_seconds: 0
+  windows_skip_required: false
+  shared_snapshot_cache_required: false
   entries:
-  - path: tests/unit/scripts/ops/neo4j_memory_sync/test_snapshot_invariants.py
-    support_module: tests/testing_support/neo4j_memory_sync_support/snapshot_invariants.py
-    cache_provider: tests/testing_support/neo4j_memory_sync_support/common.py::_snapshot_base
-    runtime_policy: memory_lane_only
-    platform_policy: skip_on_windows
+  - path: tests/unit/memory/test_graph_entrypoints.py
+    runtime_policy: fast_unit_lane
+    platform_policy: cross_platform
 remediation_closeout:
   parent_issue: '#4200'
   audit_snapshot:
