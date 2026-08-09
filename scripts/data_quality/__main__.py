@@ -30,7 +30,7 @@ COMMAND_SPECS = {name: module_command(module) for name, module in COMMANDS.items
 def main(argv: list[str] | None = None) -> int:
     return dispatch_cli(
         argv,
-        help_text=__doc__,
+        help_text=__doc__ or "Data quality commands",
         commands=COMMAND_SPECS,
     )
 
