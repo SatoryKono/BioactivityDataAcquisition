@@ -3,7 +3,6 @@
 
 This tool inventories script entrypoints in:
 - scripts/**
-- src/tools/**
 
 It classifies each script by discovered call-sites and can:
 - update a committed manifest (`--update`)
@@ -35,7 +34,7 @@ SCRIPT_EXTENSIONS: Final[tuple[str, ...]] = (
     ".mjs",
     ".sql",
 )
-SCRIPT_ROOTS: Final[tuple[str, ...]] = ("scripts", "src/tools")
+SCRIPT_ROOTS: Final[tuple[str, ...]] = ("scripts",)
 SEARCH_ROOTS: Final[tuple[str, ...]] = (
     "AGENTS.md",
     ".github/ISSUES",
@@ -50,7 +49,6 @@ SEARCH_ROOTS: Final[tuple[str, ...]] = (
     "makefile",
     "docs",
     "scripts",
-    "src/tools",
     "tests",
 )
 SKIP_DIR_NAMES: Final[set[str]] = {
@@ -101,19 +99,19 @@ SKIP_FILE_EXTENSIONS: Final[set[str]] = {
     ".zip",
 }
 _SCRIPTS_PREFIX = "scripts/"
-SCRIPT_PATH_TOKENS: Final[tuple[str, ...]] = (_SCRIPTS_PREFIX, "src/tools/")
+SCRIPT_PATH_TOKENS: Final[tuple[str, ...]] = (_SCRIPTS_PREFIX,)
 SCRIPT_PATH_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
-    r"(?:scripts|src/tools)/[A-Za-z0-9._/-]+\.(?:py|sh|ps1|cmd|bat|mjs|sql)"
+    r"scripts/[A-Za-z0-9._/-]+\.(?:py|sh|ps1|cmd|bat|mjs|sql)"
 )
 BASENAME_REF_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
     r"[A-Za-z0-9._-]+\.(?:py|sh|ps1|cmd|bat|mjs|sql)"
 )
 MODULE_REF_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
     r"(?:uv\s+run\s+)?(?:python(?:3(?:\.\d+)?)?|py)\s+-m\s+"
-    r"((?:scripts|src\.tools)(?:\.\w+)+)"
+    r"(scripts(?:\.\w+)+)"
 )
 MODULE_STRING_REF_PATTERN: Final[re.Pattern[str]] = re.compile(
-    r"[\"']((?:scripts|src\.tools)(?:\.\w+)+)[\"']"
+    r"[\"'](scripts(?:\.\w+)+)[\"']"
 )
 RELATIVE_IMPORT_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
     # Bounded dots + identifier (S8786: avoid open nested quantifiers).
@@ -122,7 +120,7 @@ RELATIVE_IMPORT_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
 )
 ABSOLUTE_SCRIPT_IMPORT_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
     # Absolute first-party imports of inventoried script packages.
-    r"^[ \t]*from[ \t]+(?:scripts|src\.tools)(?:\.[A-Za-z0-9_]+){0,32}[ \t]+import[ \t]+",
+    r"^[ \t]*from[ \t]+scripts(?:\.[A-Za-z0-9_]+){0,32}[ \t]+import[ \t]+",
     re.MULTILINE,
 )
 SCRIPT_PATH_ALIASES: Final[dict[str, tuple[str, ...]]] = {
@@ -191,9 +189,7 @@ LEGACY_NAMED_SCRIPTS: Final[frozenset[str]] = frozenset(
     }
 )
 LEGACY_SRC_TOOLS_WRAPPERS: Final[frozenset[str]] = frozenset(
-    {
-        "src/tools/scripts/generate_contracts.py",
-    }
+    set()
 )
 DEPRECATED_LEGACY_PATHS: Final[frozenset[str]] = frozenset(
     {
@@ -391,7 +387,7 @@ def _source_group(rel_path: str) -> str:
         return "docs"
     if rel_path == "AGENTS.md":
         return "agents"
-    if rel_path.startswith(_SCRIPTS_PREFIX) or rel_path.startswith("src/tools/"):
+    if rel_path.startswith(_SCRIPTS_PREFIX):
         return "scripts"
     return "other"
 

@@ -318,7 +318,6 @@ extra_checks = true
 # only (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py).
 # memory is an approved sidecar (configs/quality/repo_structure_catalog.yaml).
 exclude = [
-    "src/tools/",
     "src/memory/",
 ]
 
@@ -461,9 +460,6 @@ known-first-party = ["bioetl", "tests"]
 "src/bioetl/domain/behavior/__init__.py" = ["F401"]
 # Entrypoints uses semantic grouping with comments in __all__ (not alphabetical)
 "src/bioetl/composition/entrypoints.py" = ["RUF022"]
-# Tools scripts use print() for output, may have simpler patterns, and are not production code
-# F403: thin re-export shims wrap scripts.diagrams entrypoints.
-"src/tools/**/*.py" = ["PTH", "SIM", "T201", "F401", "F403", "F541", "UP015", "RUF005", "B007", "F841"]
 # Scripts are CLI utilities: print() is expected, pathlib not required.
 # E501/I001/E402: operator scripts prioritize readability and bootstrap imports.
 # B008: Typer/Click Option defaults are the standard CLI pattern.
