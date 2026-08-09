@@ -9,6 +9,9 @@ from pathlib import Path
 from bioetl.application.services.control_plane.evidence import (
     ControlPlaneEvidenceService,
 )
+from bioetl.application.services.control_plane.manifest.integrity_metrics import (
+    ControlPlaneIntegrityMetricsService,
+)
 from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.domain.ports import (
     CheckpointPort,
@@ -45,6 +48,8 @@ __all__ = [
     "HealthServerDependencies",
     "create_health_server_dependencies",
 ]
+
+
 @dataclass(frozen=True, slots=True)
 class HealthServerDependencies:
     """Dependencies required by the HTTP health server."""
@@ -57,6 +62,7 @@ class HealthServerDependencies:
     workflow_manifest_port: WorkflowManifestPort
     metrics_exposition: HealthMetricsExpositionPort
     control_plane_evidence_service: ControlPlaneEvidenceService | None = None
+    control_plane_integrity_refresher: ControlPlaneIntegrityMetricsService | None = None
     data_root: Path = Path()
 
 
@@ -153,6 +159,11 @@ def create_health_server_dependencies(
                 base_path=resolved_data_root / "output" / "control",
                 metrics=resolved_metrics,
             ),
+        ),
+        control_plane_integrity_refresher=ControlPlaneIntegrityMetricsService(
+            manifest_port=control_plane_ports.manifest_port,
+            ledger_port=control_plane_ports.ledger_port,
+            metrics=resolved_metrics,
         ),
         metrics_exposition=HealthMetricsExpositionAdapter(),
         data_root=resolved_data_root,

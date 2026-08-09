@@ -140,13 +140,20 @@ def test_manifest_validation_reports_version_and_contract_reasons() -> None:
         code_provenance=RunCodeProvenance(),
     )
 
-    payload = ControlPlaneEvidenceService().manifest_validation(
-        scope=_scope(manifest)
-    )
+    payload = ControlPlaneEvidenceService().manifest_validation(scope=_scope(manifest))
 
     assert payload["status"] == "ERROR"
     assert "manifest_schema_version_incompatible" in _reasons(payload)
     assert "manifest_contract_anchors_incomplete" in _reasons(payload)
+
+
+def test_manifest_validation_does_not_overclaim_registry_compatibility() -> None:
+    payload = ControlPlaneEvidenceService().manifest_validation(
+        scope=_scope(_manifest())
+    )
+
+    assert payload["status"] == "UNKNOWN"
+    assert "manifest_contract_compatibility_not_verified" in _reasons(payload)
 
 
 class _LineageStore:

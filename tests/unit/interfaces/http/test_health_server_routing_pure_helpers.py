@@ -428,6 +428,7 @@ async def test_routing_support_dispatches_control_plane_branches(
             "run_ledger_port": True,
             "workflow_manifest_port": True,
             "checkpoint_port": True,
+            "validation_evidence_service": False,
             "data_root": "/audit-root",
             "runtime_source_id": "a" * 64,
         },
