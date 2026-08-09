@@ -80,8 +80,9 @@ class TestGoldStrictValidationPaths:
 
         writer = TestWriter()
 
-        # Test non-empty records (should not raise)
-        writer._validate_records([{"id": 1}, {"id": 2}])
+        records = [{"id": 1}, {"id": 2}]
+        assert writer._validate_records(records) is None
+        assert records == [{"id": 1}, {"id": 2}]
 
     def test_validate_scd2_requirements_valid(self) -> None:
         """Test SCD2 validation accepts valid configuration."""
@@ -101,12 +102,11 @@ class TestGoldStrictValidationPaths:
             valid_to_col="valid_to",
         )
 
-        # Test valid SCD2 configuration (should not raise)
-        writer._validate_scd2_requirements(
+        assert writer._validate_scd2_requirements(
             mode=GoldWriteMode.SCD2,
             scd_config=scd_config,
             ingestion_ts=FIXED_INGESTION_TS,
-        )
+        ) is None
 
     def test_validate_scd2_requires_config(self) -> None:
         """Test SCD2 validation requires scd_config."""
@@ -216,19 +216,17 @@ class TestGoldStrictValidationPaths:
 
         writer = TestWriter()
 
-        # Test append mode (should not raise)
-        writer._validate_scd2_requirements(
+        assert writer._validate_scd2_requirements(
             mode=GoldWriteMode.APPEND,
             scd_config=None,
             ingestion_ts=None,
-        )
+        ) is None
 
-        # Test overwrite mode (should not raise)
-        writer._validate_scd2_requirements(
+        assert writer._validate_scd2_requirements(
             mode=GoldWriteMode.OVERWRITE,
             scd_config=None,
             ingestion_ts=None,
-        )
+        ) is None
 
     def test_validate_schema_strict_true(self) -> None:
         """Test schema validation accepts strict=True schemas."""
@@ -247,8 +245,8 @@ class TestGoldStrictValidationPaths:
             strict=True,
         )
 
-        # Test strict schema (should not raise)
-        writer._validate_schema_strict(schema)
+        assert writer._validate_schema_strict(schema) is None
+        assert schema.strict is True
 
     def test_validate_schema_strict_false(self) -> None:
         """Test schema validation rejects non-strict schemas."""

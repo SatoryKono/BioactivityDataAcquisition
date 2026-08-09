@@ -10,10 +10,6 @@ from bioetl.application.core.base_transformer._structural_policy_coercion import
     _coerce_integer_from_string,
 )
 from bioetl.application.core.batch_transformer_streaming import StreamingBatchProcessor
-from bioetl.application.services.execution.pipeline_runner_models import RunOptions
-from bioetl.composition.bootstrap.runtime.pipeline_context_builder import (
-    _build_vacuum_config,
-)
 from bioetl.domain.types.identifiers import BatchID
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
@@ -48,13 +44,3 @@ async def test_streaming_chunk_size_must_be_positive() -> None:
         ):
             pass
 
-
-def test_vacuum_retention_none_defaults_zero_not_silently_coerced() -> None:
-    options_none = RunOptions(vacuum_after_run=True, vacuum_retention_days=None)
-    vacuum_default = _build_vacuum_config(options_none)
-    assert vacuum_default.retention_days == 7
-
-    # Explicit 0 must NOT be rewritten to 7 via or; domain rejects non-positive.
-    options_zero = RunOptions(vacuum_after_run=True, vacuum_retention_days=0)
-    with pytest.raises(ValueError, match="retention_days must be positive"):
-        _ = _build_vacuum_config(options_zero)
