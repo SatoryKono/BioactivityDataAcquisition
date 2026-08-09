@@ -14,6 +14,10 @@ from bioetl.application.services.control_plane.evidence.lineage_identity import 
     identity_gaps,
 )
 from bioetl.application.services.control_plane.evidence.models import EvidenceCheck
+from bioetl.application.services.control_plane.evidence.persistence_profile import (
+    STRICT_PERSISTENCE_PROFILES,
+    resolve_persistence_profile,
+)
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.lineage import LineageGraphFragment
 
@@ -65,8 +69,10 @@ def build_lineage_checks(
 
 
 def _missing_fragment_checks(manifest: RunManifest) -> tuple[EvidenceCheck, ...]:
-    required_profile = _required_profile(manifest)
-    strict_profile = required_profile in {"replay_ready", "forensic_grade"}
+    required_profile, profile_valid = resolve_persistence_profile(manifest)
+    strict_profile = (
+        not profile_valid or required_profile in STRICT_PERSISTENCE_PROFILES
+    )
     return (
         EvidenceCheck(
             "closure",
@@ -110,20 +116,20 @@ def _gap_check(
     )
 
 
-def _required_profile(manifest: RunManifest) -> str:
-    return str(
-        manifest.launch_context.get("required_persistence_profile")
-        or "degraded_observable"
-    ).strip()
-
-
 def _persistence_profile_check(
     manifest: RunManifest,
     fragments: tuple[LineageGraphFragment, ...],
     *,
     validation_complete: bool,
 ) -> EvidenceCheck:
-    required_profile = _required_profile(manifest)
+    required_profile, profile_valid = resolve_persistence_profile(manifest)
+    if not profile_valid:
+        return EvidenceCheck(
+            "persistence_profile",
+            "ERROR",
+            "lineage_persistence_profile_unsupported",
+            "Lineage validation rejects an unsupported persistence profile.",
+        )
     if fragments and validation_complete:
         return EvidenceCheck(
             "persistence_profile",
@@ -131,7 +137,7 @@ def _persistence_profile_check(
             "lineage_persistence_profile_observed",
             f"Persisted lineage evidence is present for {required_profile}.",
         )
-    if required_profile in {"replay_ready", "forensic_grade"}:
+    if required_profile in STRICT_PERSISTENCE_PROFILES:
         return EvidenceCheck(
             "persistence_profile",
             "ERROR",

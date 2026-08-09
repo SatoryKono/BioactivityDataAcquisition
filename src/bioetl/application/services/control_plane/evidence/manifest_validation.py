@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 from bioetl.application.services.control_plane.evidence.models import EvidenceCheck
+from bioetl.application.services.control_plane.evidence.persistence_profile import (
+    STRICT_PERSISTENCE_PROFILES,
+    resolve_persistence_profile,
+)
 from bioetl.domain.control_plane import RunManifest
 
 SUPPORTED_RUN_MANIFEST_SCHEMA_MAJOR = "1"
@@ -24,6 +28,7 @@ def build_manifest_checks(manifest: RunManifest) -> tuple[EvidenceCheck, ...]:
             "Typed manifest invariants and required identity fields are valid.",
         ),
         _schema_version_check(manifest.schema_version),
+        _persistence_profile_check(manifest),
         _contract_check(_missing_contract_anchors(manifest)),
     )
 
@@ -49,11 +54,8 @@ def _schema_version_check(schema_version: str) -> EvidenceCheck:
 
 def _missing_contract_anchors(manifest: RunManifest) -> list[str]:
     fields = ["contract_ref", "contract_version"]
-    required_profile = str(
-        manifest.launch_context.get("required_persistence_profile")
-        or "degraded_observable"
-    ).strip()
-    if required_profile in {"replay_ready", "forensic_grade"}:
+    required_profile, profile_valid = resolve_persistence_profile(manifest)
+    if not profile_valid or required_profile in STRICT_PERSISTENCE_PROFILES:
         fields.extend(
             (
                 "contract_schema_hash",
@@ -64,6 +66,23 @@ def _missing_contract_anchors(manifest: RunManifest) -> list[str]:
         )
     provenance = manifest.code_provenance
     return [name for name in fields if not str(getattr(provenance, name) or "").strip()]
+
+
+def _persistence_profile_check(manifest: RunManifest) -> EvidenceCheck:
+    _, profile_valid = resolve_persistence_profile(manifest)
+    if profile_valid:
+        return EvidenceCheck(
+            "persistence_profile",
+            "OK",
+            "manifest_persistence_profile_supported",
+            "The required persistence profile belongs to the supported vocabulary.",
+        )
+    return EvidenceCheck(
+        "persistence_profile",
+        "ERROR",
+        "manifest_persistence_profile_unsupported",
+        "The required persistence profile is outside the supported vocabulary.",
+    )
 
 
 def _contract_check(missing: list[str]) -> EvidenceCheck:
