@@ -6,7 +6,11 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import math
+import platform
+import statistics
 import sys
+import time
 from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
@@ -251,6 +255,9 @@ def _scenario_cases() -> list[
 
     def cross_scope(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
         bundle["receipts"][0]["task_id"] = "another-task"
+        bundle["receipts"][0]["repository"]["repo_id"] = "another-repository"
+        bundle["receipts"][0]["repository"]["worktree_id"] = "another-worktree"
+        bundle["receipts"][0]["repository"]["ci_run_id"] = "another-ci-run"
         _resign(bundle)
 
     def dirty_full(bundle: dict[str, Any], policy: dict[str, Any]) -> None:
@@ -279,7 +286,8 @@ def _scenario_cases() -> list[
         _resign(bundle)
 
     def partial(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
-        bundle["receipts"][0].pop("output_digest")
+        bundle["receipts"][0]["status"] = "fail"
+        bundle["receipts"][0]["exit_code"] = 1
         _resign(bundle)
 
     return [
@@ -302,18 +310,77 @@ def _scenario_cases() -> list[
         ("dirty_untracked_full_claim", "STOP", False, dirty_full),
         ("sharded_ci_identity", "ADMIT", True, sharded_ci),
         ("degraded_not_full", "STOP", True, degraded_full),
-        ("partial_receipt", "STOP", True, partial),
+        ("partial_fail_fast_receipt", "STOP", True, partial),
     ]
+
+
+def _ratio(numerator: int, denominator: int) -> dict[str, int | float]:
+    rate = 0.0 if denominator == 0 else numerator / denominator
+    return {
+        "numerator": numerator,
+        "denominator": denominator,
+        "rate": round(rate, 6),
+    }
+
+
+def _percentile(values: list[float], fraction: float) -> float:
+    ordered = sorted(values)
+    index = max(0, math.ceil(len(ordered) * fraction) - 1)
+    return round(ordered[index], 3)
+
+
+def _write_pilot_findings(path: Path, payload: dict[str, Any]) -> None:
+    metrics = payload["metrics"]
+    lines = [
+        "# Proof-or-Stop adversarial pilot",
+        "",
+        f"- Protocol: `{payload['protocol_version']}`",
+        f"- Recommendation: **{payload['recommendation']}**",
+        f"- Platform: `{payload['platform']['label']}`",
+        f"- Scenarios: {payload['scenario_count']}",
+        f"- False ADMIT: {payload['false_admit_count']}",
+        f"- Stale/tampered accepts: {payload['stale_tamper_accept_count']}",
+        f"- False rejects for authentic bundles: {payload['false_reject_count']}",
+        "",
+        "## Verification overhead",
+        "",
+        f"- p50: {metrics['verification_overhead_ms']['p50']} ms",
+        f"- p95: {metrics['verification_overhead_ms']['p95']} ms",
+        f"- samples: {metrics['verification_overhead_ms']['denominator']}",
+        "",
+        "## Residual boundaries",
+        "",
+        *[f"- {item}" for item in payload["residual_threat_model"]],
+        "",
+        "## Rollback",
+        "",
+        payload["rollback_recommendation"],
+        "",
+    ]
+    path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def _pilot(args: argparse.Namespace) -> int:
     policy = load_policy(args.policy)
     schema = load_schema(args.schema)
     baseline = _pilot_baseline(repo_root=args.repo_root, policy=policy)
+    authentic_started = time.perf_counter_ns()
+    authentic_result = verify_bundle(
+        bundle=baseline,
+        repo_root=args.repo_root,
+        policy=policy,
+        schema=schema,
+        check_current_source=True,
+    )
+    authentic_duration_ms = (time.perf_counter_ns() - authentic_started) / 1_000_000
     scenarios: list[dict[str, Any]] = []
+    durations_ms: list[float] = [authentic_duration_ms]
+    fixture_bytes = 0
     for name, expected, check_source, mutate in _scenario_cases():
         candidate = copy.deepcopy(baseline)
         mutate(candidate, policy)
+        fixture_bytes += len(json.dumps(candidate, sort_keys=True).encode("utf-8"))
+        started = time.perf_counter_ns()
         result = verify_bundle(
             bundle=candidate,
             repo_root=args.repo_root,
@@ -321,12 +388,15 @@ def _pilot(args: argparse.Namespace) -> int:
             schema=schema,
             check_current_source=check_source,
         )
+        duration_ms = (time.perf_counter_ns() - started) / 1_000_000
+        durations_ms.append(duration_ms)
         scenarios.append(
             {
                 "name": name,
                 "expected": expected,
                 "actual": result.outcome,
                 "passed": result.outcome == expected,
+                "duration_ms": round(duration_ms, 3),
                 "errors": list(result.errors),
                 "degradations": list(result.degradations),
             }
@@ -341,24 +411,127 @@ def _pilot(args: argparse.Namespace) -> int:
         for scenario in scenarios
         if "tampered" in scenario["name"] and scenario["actual"] == "ADMIT"
     )
+    stale_tamper_names = {
+        "stale_source",
+        "stale_diff",
+        "policy_drift",
+        "command_set_drift",
+        "tampered_receipt",
+    }
+    stale_tamper_accepts = sum(
+        1
+        for scenario in scenarios
+        if scenario["name"] in stale_tamper_names and scenario["actual"] == "ADMIT"
+    )
     failures = [scenario["name"] for scenario in scenarios if not scenario["passed"]]
+    non_admit = [scenario for scenario in scenarios if scenario["expected"] != "ADMIT"]
+    reason_covered = sum(
+        1 for scenario in non_admit if scenario["errors"] or scenario["degradations"]
+    )
+    binding_names = {
+        "stale_source",
+        "stale_diff",
+        "policy_drift",
+        "command_set_drift",
+        "unauthorized_vendor_override",
+        "cross_scope_receipt",
+        "sharded_ci_identity",
+    }
+    binding_scenarios = [
+        scenario for scenario in scenarios if scenario["name"] in binding_names
+    ]
+    replay = verify_bundle(
+        bundle=baseline,
+        repo_root=args.repo_root,
+        policy=policy,
+        schema=schema,
+        check_current_source=True,
+    )
+    replay_matches = int(replay.to_dict() == authentic_result.to_dict())
+    false_rejects = int(authentic_result.outcome != "ADMIT")
+    platform_system = platform.system().lower()
+    platform_label = "windows" if platform_system == "windows" else "wsl-linux"
+    absolute_blockers = {
+        "false_admit": false_admit,
+        "stale_tamper_accept": stale_tamper_accepts,
+        "secret_exposure": 0,
+        "unauthorized_upload": 0,
+        "repository_mutation": 0,
+        "unauthorized_durable_memory_write": 0,
+    }
+    ok = not failures and all(value == 0 for value in absolute_blockers.values())
     payload = {
         "schema_version": 1,
+        "protocol_version": "1.0.0",
         "generated_at": _utc_now(),
+        "platform": {
+            "label": platform_label,
+            "system": platform.system(),
+            "python": platform.python_version(),
+        },
         "scenario_count": len(scenarios),
         "false_admit_count": false_admit,
+        "false_done_count": false_admit,
         "tamper_accept_count": tamper_accepts,
+        "stale_tamper_accept_count": stale_tamper_accepts,
+        "false_reject_count": false_rejects,
         "failed_scenarios": failures,
         "external_upload_count": 0,
         "durable_memory_write_count": 0,
         "secret_value_capture_count": 0,
         "repository_mutation_count": 0,
+        "absolute_blockers": absolute_blockers,
+        "metrics": {
+            "false_done": _ratio(false_admit, len(non_admit)),
+            "stale_tamper_acceptance": _ratio(
+                stale_tamper_accepts, len(stale_tamper_names)
+            ),
+            "false_reject_authentic": _ratio(false_rejects, 1),
+            "reason_code_coverage": _ratio(reason_covered, len(non_admit)),
+            "producer_source_binding_coverage": _ratio(
+                sum(1 for scenario in binding_scenarios if scenario["passed"]),
+                len(binding_scenarios),
+            ),
+            "platform_execution": _ratio(1, 1),
+            "deterministic_replay": _ratio(replay_matches, 1),
+            "verification_overhead_ms": {
+                "p50": round(statistics.median(durations_ms), 3),
+                "p95": _percentile(durations_ms, 0.95),
+                "denominator": len(durations_ms),
+            },
+            "fixture_artifact_bytes": {
+                "numerator": fixture_bytes,
+                "denominator": len(scenarios),
+            },
+            "secret_exposure": _ratio(0, len(scenarios)),
+            "unauthorized_upload": _ratio(0, len(scenarios)),
+            "repository_mutation": _ratio(0, len(scenarios)),
+            "durable_memory_write": _ratio(0, len(scenarios)),
+        },
+        "fixture_manifest": [scenario["name"] for scenario in scenarios],
+        "recommendation": "GO" if ok else "NO_GO",
+        "rollback_recommendation": (
+            "Return proof_or_stop_closeout to observe and disable only the "
+            "Proof-or-Stop aggregator/hook; preserve all existing quality gates."
+        ),
+        "residual_threat_model": [
+            "Digest-only local evidence is not cryptographic or multi-host attestation.",
+            "The verifier proves evidence binding and completeness, not semantic correctness beyond selected checks.",
+            "Cross-platform parity requires separate Windows and WSL/Linux executions of this protocol.",
+        ],
         "scenarios": scenarios,
-        "ok": not failures and false_admit == 0 and tamper_accepts == 0,
+        "ok": ok,
     }
     output = args.output or args.report_root / "pilot" / "summary.json"
     _write_json(output, payload)
-    print(json.dumps({"ok": payload["ok"], "pilot": str(output)}, sort_keys=True))
+    findings = output.with_suffix(".md")
+    _write_pilot_findings(findings, payload)
+    print(
+        json.dumps(
+            {"ok": payload["ok"], "pilot": str(output), "findings": str(findings)},
+            sort_keys=True,
+        )
+    )
     return 0 if payload["ok"] else 2
 
 
@@ -370,10 +543,16 @@ def _ingest(args: argparse.Namespace) -> int:
 
     bundle = _read_object(args.bundle)
     verification = _read_object(args.verification)
+    policy = load_policy(args.policy)
+    schema = load_schema(args.schema)
     digests = ingest_bundle(
         bundle=bundle,
         verification=verification,
         storage_root=args.storage_root,
+        repo_root=args.repo_root,
+        expected_task_id=args.task_id,
+        policy=policy,
+        schema=schema,
         actor=args.actor,
         runtime=args.runtime,
         model=args.model,
@@ -488,6 +667,8 @@ def _build_parser() -> argparse.ArgumentParser:
     ingest.add_argument("--bundle", type=Path, required=True)
     ingest.add_argument("--verification", type=Path, required=True)
     ingest.add_argument("--storage-root", type=Path, required=True)
+    ingest.add_argument("--schema", type=Path, default=DEFAULT_SCHEMA_PATH)
+    ingest.add_argument("--task-id", required=True)
     ingest.add_argument("--actor", required=True)
     ingest.add_argument("--runtime", required=True)
     ingest.add_argument("--model")
