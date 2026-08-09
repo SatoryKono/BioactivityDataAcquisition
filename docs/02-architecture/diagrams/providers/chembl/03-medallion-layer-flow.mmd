@@ -1,19 +1,11 @@
----
-title: ChEMBL Medallion Layer Flow
-version: 1.0.0
-status: active
-author: BioETL Team
-last_verified: 2026-07-24
-adr_references:
-  - ADR-002: Medallion Architecture
-  - ADR-018: Gold Strict Validation
-  - ADR-050: Silver Structural and Gold Semantic Filter Boundary
-  - ADR-040: Diagram Governance
-description: |
-  Medallion layer flow diagram for ChEMBL provider showing Bronze write (JSONL),
-  Silver transformation, Gold enrichment, and quarantine routing.
-  Covers ChEMBL-specific medallion layer implementation.
----
+%% Title: ChEMBL Medallion Layer Flow
+%% Description: Medallion layer flow diagram for ChEMBL provider showing Bronze write (JSONL), Silver transformation, Gold enrichment, and quarantine routing. Covers ChEMBL-specific medallion layer implementation.
+%% @version 1.0.0
+%% @date 2026-07-24
+%% @type flowchart
+%% @level system
+%% @nodes 46
+%% @adr ADR-002,ADR-018,ADR-050,ADR-040
 
 %% @version 1.0.0
 %% @date 2026-07-24
@@ -78,13 +70,8 @@ flowchart TD
     
     Complete --> Success[Emit Success Metrics]
     Success --> End([ChEMBL Medallion Layer End])
-
-    style Start fill:#e1f5ff
-    style End fill:#e1f5ff
-    style Complete fill:#c8e6c9
-    style Fail fill:#ffcccc
-    style BronzeSuccess fill:#fff4e6
-    style SilverDQCheck fill:#fff4e6
-    style SilverSuccess fill:#fff4e6
-    style GoldCheck fill:#fff4e6
-    style GoldSuccess fill:#fff4e6
+    classDef domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    classDef composition fill:#fff7ed,stroke:#ea580c,stroke-width:2px
+    classDef interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px

@@ -501,7 +501,6 @@ nav:
           - "Pipeline Failure (Critical)": 05-operations/runbooks/pipeline-failure-critical.md
           - "Pipeline Failure (Recovery)": 05-operations/runbooks/pipeline-failure-recovery.md
           - "Pipeline Failure (DQ)": 05-operations/runbooks/pipeline-failure-dq.md
-          - "DQ Failure Investigation": 05-operations/runbooks/dq-failure-investigation.md
           - "Data Recovery": 05-operations/runbooks/data-recovery.md
           - "Incident Response": 05-operations/runbooks/incident-response.md
           - "Backfill & Rebuild": 05-operations/runbooks/backfill-rebuild.md

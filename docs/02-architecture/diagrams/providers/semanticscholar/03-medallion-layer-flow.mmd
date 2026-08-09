@@ -1,26 +1,11 @@
-______________________________________________________________________
-
-Version: 1.0.0
-Status: active
-Class: published
-Owner: BioETL Team
-Last verified: '2026-07-28'
-
-______________________________________________________________________
-
----
-title: Semantic Scholar Medallion Layer Flow
-version: 1.0.0
-status: active
-author: BioETL Team
-last_verified: 2026-07-28
-adr_references:
-  - ADR-014: Deterministic Writes
-  - ADR-018: Gold Strict Validation
-  - ADR-040: Diagram Governance
-description: |
-  Medallion Bronze/Silver/Gold flow for Semantic Scholar.
----
+%% Title: Semantic Scholar Medallion Layer Flow
+%% Description: Medallion Bronze/Silver/Gold flow for Semantic Scholar.
+%% @version 1.0.0
+%% @date 2026-07-28
+%% @type flowchart
+%% @level system
+%% @nodes 46
+%% @adr ADR-014,ADR-018,ADR-040
 
 %% @version 1.0.0
 %% @date 2026-07-28
@@ -34,3 +19,8 @@ flowchart TD
     DQ -->|fail| Q[Quarantine]
     S --> G[Gold strict contract when enabled]
     G --> C[Consumers / exports]
+    classDef domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    classDef composition fill:#fff7ed,stroke:#ea580c,stroke-width:2px
+    classDef interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px

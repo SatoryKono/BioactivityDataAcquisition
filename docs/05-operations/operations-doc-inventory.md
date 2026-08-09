@@ -18,10 +18,10 @@ Last reviewed: 2026-05-26
 
 ## Duplicate (de-duplicated)
 
-- `docs/05-operations/runbooks/dq-failure-investigation.md`  
-  Canonical: `docs/05-operations/runbooks/pipeline-failure-dq.md`.
-- `docs/05-operations/runbooks/neo4j-complete-recovery-guide.md`  
-  Canonical: `docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md`.
+- ~~`docs/05-operations/runbooks/dq-failure-investigation.md`~~  
+  Canonical: `docs/05-operations/runbooks/pipeline-failure-dq.md`. (Removed 2026-08-09)
+- ~~`docs/05-operations/runbooks/neo4j-complete-recovery-guide.md`~~  
+  Canonical: `docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md`. (Removed 2026-08-09)
 
 Policy: duplicate-файлы сохраняются как short notice + ссылка на canonical.
 
