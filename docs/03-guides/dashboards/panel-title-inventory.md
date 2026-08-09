@@ -37,6 +37,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 135 | Track Replay Lag |
 | bioetl-control-plane-v1.json | 105 | Track Checkpoint Save Latency |
 | bioetl-control-plane-v1.json | 106 | Track Global Checkpoint Admin Latency |
+| bioetl-control-plane-v1.json | 9413 | Review Checkpoint Validation |
 | bioetl-control-plane-v1.json | 901 | Inspect Manifest & Ledger Evidence |
 | bioetl-control-plane-v1.json | 908 | Review Terminal Run Outcomes |
 | bioetl-control-plane-v1.json | 2 | Track Ledger Append Failures |
@@ -45,6 +46,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 7 | Compare Ledger Appends by Type & Status |
 | bioetl-control-plane-v1.json | 132 | Monitor Manifest Failures (30m) |
 | bioetl-control-plane-v1.json | 133 | Monitor Ledger Failures (30m) |
+| bioetl-control-plane-v1.json | 9414 | Review Manifest Validation |
 | bioetl-control-plane-v1.json | 903 | Inspect Global Store Reliability |
 | bioetl-control-plane-v1.json | 4 | Track Global Read Failures |
 | bioetl-control-plane-v1.json | 136 | Monitor Global Read Failures (30m) |
@@ -59,6 +61,8 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 109 | Track Global Audit Write Latency |
 | bioetl-control-plane-v1.json | 110 | Track Global Audit Query Latency |
 | bioetl-control-plane-v1.json | 112 | Compare Lineage Persistence Outcomes |
+| bioetl-control-plane-v1.json | 9415 | Review Lineage Validation |
+| bioetl-control-plane-v1.json | 9416 | Review Retention Compliance |
 | bioetl-control-plane-v1.json | 905 | Inspect Run Identity Evidence |
 | bioetl-control-plane-v1.json | 9404 | Review Identity Anchors |
 | bioetl-control-plane-v1.json | 9407 | Copy Identity Values |
@@ -72,6 +76,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 9412 | Inspect Run Details |
 | bioetl-control-plane-v1.json | 9402 | Review Run Summary |
 | bioetl-control-plane-v1.json | 9403 | Review Processed Records |
+| bioetl-control-plane-v1.json | 9417 | Review Bounded Failure Reasons |
 | bioetl-dq-v2.json | 1000 | Navigate Dashboards |
 | bioetl-dq-v2.json | 9400 | Understand Evidence Scope |
 | bioetl-dq-v2.json | 9401 | Monitor Current DQ Status |
