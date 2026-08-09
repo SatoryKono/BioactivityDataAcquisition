@@ -254,7 +254,8 @@ budget_ratchet:
   - issue: '#5103'
     owner: test-governance
     status: memory_legacy_aliases_retained_with_rationale
-    note: Memory compatibility entrypoints remain covered by focused alias contracts, while the obsolete
+    note: >-
+      Memory compatibility entrypoints remain covered by focused alias contracts, while the obsolete
       always-skipped neo4j_memory_sync test/support tree was retired by issue #8406. Canonical behavior
       is covered directly through memory.graph.sync_pkg unit tests.
   - issue: '#5104'

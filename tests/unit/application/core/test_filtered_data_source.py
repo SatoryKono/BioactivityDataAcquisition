@@ -1052,6 +1052,7 @@ class TestFilteredDataSourceMetrics:
                 assert call.args[2]["source_kind"] == "csv_multi_column"
                 assert "source_file" not in call.args[2]
 
+
 @pytest.mark.unit
 class TestFilteredDataSourceGetSourceMetadata:
     """Tests for get_source_metadata delegation."""

@@ -28,11 +28,5 @@
   },
   "read_config_from": {
     "agents_standard": true
-  },
-  "devin": {
-    "org_id": "bioetl"
-  },
-  "shell": {
-    "setup_complete": true
   }
 }

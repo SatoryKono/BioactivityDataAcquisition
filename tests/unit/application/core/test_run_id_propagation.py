@@ -225,12 +225,12 @@ class TestRunIdPropagation:
 
         # Verify Silver was called with explicit run identity kwargs
         mock_storage.write_silver.assert_called_once()
-        silver_call_kwargs = mock_storage.write_silver.call_args[1]
-        silver_records = silver_call_kwargs["records"]
+        silver_request = mock_storage.write_silver.call_args.args[0]
+        silver_records = silver_request.records
 
         assert len(silver_records) == 1
-        assert silver_call_kwargs["run_id"] == run_id
-        assert silver_call_kwargs["run_type"] == RunType.INCREMENTAL
+        assert silver_request.run_id == run_id
+        assert silver_request.run_type == RunType.INCREMENTAL
         assert "_run_id" not in silver_records[0]
         assert "_run_type" not in silver_records[0]
 
@@ -290,11 +290,11 @@ class TestRunIdPropagation:
         # Verify all Silver calls have the same run_id in records
         assert mock_storage.write_silver.call_count == 3
         for call in mock_storage.write_silver.call_args_list:
-            silver_call_kwargs = call[1]
-            silver_records = silver_call_kwargs["records"]
+            silver_request = call.args[0]
+            silver_records = silver_request.records
             for record in silver_records:
                 assert "_run_id" not in record
-            assert silver_call_kwargs["run_id"] == run_id
+            assert silver_request.run_id == run_id
 
     @pytest.mark.asyncio
     async def test_different_run_types_propagated_correctly(
@@ -358,7 +358,7 @@ class TestRunIdPropagation:
             assert bronze_kwargs["run_type"] == run_type
 
             # Verify Silver
-            silver_call_kwargs = mock_storage.write_silver.call_args[1]
-            silver_records = silver_call_kwargs["records"]
+            silver_request = mock_storage.write_silver.call_args.args[0]
+            silver_records = silver_request.records
             assert "_run_type" not in silver_records[0]
-            assert silver_call_kwargs["run_type"] == run_type
+            assert silver_request.run_type == run_type
