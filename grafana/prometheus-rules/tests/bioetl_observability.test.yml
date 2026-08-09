@@ -251,7 +251,7 @@ tests:
             exp_annotations:
               summary: Gold-stage strict validation failures detected
               description: bioetl_dq_validation_failures_total increased with stage=gold severity=hard_fail for pipeline=chembl in the last 15m.
-              runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+              runbook: docs/05-operations/runbooks/pipeline-failure-dq.md
 
   - name: replay-not-reconstructable
     interval: 1m
@@ -492,7 +492,7 @@ tests:
             exp_annotations:
               summary: DQ quarantine rate is elevated
               description: Quarantine rate stayed between 5% and 50% for pipeline=chembl run_type=incremental over the last 30m, with at least 20 bronze records observed.
-              runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+              runbook: docs/05-operations/runbooks/pipeline-failure-dq.md
 
   - name: dq-quarantine-rate-critical
     interval: 1m
@@ -512,7 +512,7 @@ tests:
             exp_annotations:
               summary: DQ Hard Threshold exceeded
               description: Quarantine rate exceeded 50% hard threshold for pipeline=chembl run_type=incremental over the last 15m, with at least 20 bronze records observed.
-              runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+              runbook: docs/05-operations/runbooks/pipeline-failure-dq.md
 
   - name: data-freshness-warning
     interval: 1m
@@ -530,7 +530,7 @@ tests:
             exp_annotations:
               summary: Data freshness lag is elevated
               description: time() - bioetl_data_freshness_seconds stayed between 24h and 72h for pipeline=chembl entity=activity.
-              runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+              runbook: docs/05-operations/runbooks/pipeline-failure-dq.md
 
   - name: data-freshness-critical
     interval: 1m
@@ -548,7 +548,7 @@ tests:
             exp_annotations:
               summary: Data freshness lag is critical
               description: time() - bioetl_data_freshness_seconds exceeded 72h for pipeline=chembl entity=activity.
-              runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+              runbook: docs/05-operations/runbooks/pipeline-failure-dq.md
 
   - name: control-plane-read-failure-rate
     interval: 1m

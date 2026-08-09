@@ -251,7 +251,6 @@
 05-operations/runbooks/merge-campaign.md
 05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md
 05-operations/runbooks/neo4j-backend-recovery-quick-start.md
-05-operations/runbooks/neo4j-complete-recovery-guide.md
 05-operations/runbooks/windows-c-to-d-migration.md
 05-operations/runbooks/workflow-control-plane.md
 05-operations/sli-slo-baseline.md

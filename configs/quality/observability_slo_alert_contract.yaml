@@ -293,15 +293,15 @@ slo_contracts:
       - name: BioETLDQSoftThresholdExceeded
         severity: warning
         for: 2m
-        runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+        runbook: docs/05-operations/runbooks/pipeline-failure-dq.md
       - name: BioETLDQQuarantineRateHigh
         severity: warning
         for: 10m
-        runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+        runbook: docs/05-operations/runbooks/pipeline-failure-dq.md
       - name: BioETLDQQuarantineRateCritical
         severity: critical
         for: 5m
-        runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+        runbook: docs/05-operations/runbooks/pipeline-failure-dq.md
   dq_validation_health:
     target: "zero hard-fail validation failures and immediate critical anomaly review"
     metrics:
@@ -313,23 +313,23 @@ slo_contracts:
       - name: BioETLDQValidationFailuresCritical
         severity: critical
         for: 2m
-        runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+        runbook: docs/05-operations/runbooks/pipeline-failure-dq.md
       - name: BioETLGoldValidationFailuresCritical
         severity: critical
         for: 2m
-        runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+        runbook: docs/05-operations/runbooks/pipeline-failure-dq.md
       - name: BioETLDQCriticalAnomaliesDetected
         severity: critical
         for: 5m
-        runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+        runbook: docs/05-operations/runbooks/pipeline-failure-dq.md
       - name: BioETLSilverValidationFailuresDetected
         severity: warning
         for: 5m
-        runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+        runbook: docs/05-operations/runbooks/pipeline-failure-dq.md
       - name: BioETLSilverFilterRejectAccountingMismatch
         severity: warning
         for: 5m
-        runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+        runbook: docs/05-operations/runbooks/pipeline-failure-dq.md
   data_freshness_lag:
     target: "<= 24h active pipeline lag; > 72h is critical"
     metrics:
@@ -338,11 +338,11 @@ slo_contracts:
       - name: BioETLDataFreshnessLagHigh
         severity: warning
         for: 15m
-        runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+        runbook: docs/05-operations/runbooks/pipeline-failure-dq.md
       - name: BioETLDataFreshnessLagCritical
         severity: critical
         for: 15m
-        runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+        runbook: docs/05-operations/runbooks/pipeline-failure-dq.md
   observability_signal_completeness:
     target: "Operator-facing runtime and DQ verdict telemetry must stay present whenever pipelines run or DQ monitoring is enabled"
     metrics:
@@ -354,4 +354,4 @@ slo_contracts:
       - name: BioETLDQCurrentStatusMissing
         severity: warning
         for: 15m
-        runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+        runbook: docs/05-operations/runbooks/pipeline-failure-dq.md

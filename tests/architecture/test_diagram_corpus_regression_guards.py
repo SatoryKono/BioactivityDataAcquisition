@@ -124,17 +124,15 @@ def test_apply_elk_default_dir_is_canonical_architecture_tree() -> None:
 
 
 def test_diagram_codemods_are_owned_by_scripts_diagrams() -> None:
-    canonical = {
-        "apply_elk_layout.py": "scripts.diagrams.fix.apply_elk_layout",
-        "differentiate_linkstyle.py": "scripts.diagrams.fix.differentiate_linkstyle",
-        "harmonize_link_styles.py": "scripts.diagrams.fix.harmonize_link_styles",
-    }
+    canonical = (
+        "apply_elk_layout.py",
+        "differentiate_linkstyle.py",
+        "harmonize_link_styles.py",
+    )
 
-    for name, module in canonical.items():
+    for name in canonical:
         assert (REPO_ROOT / "scripts" / "diagrams" / "fix" / name).exists()
-        wrapper = (REPO_ROOT / "src" / "tools" / name).read_text(encoding="utf-8")
-        assert "Compatibility wrapper" in wrapper
-        assert module in wrapper
+        assert not (REPO_ROOT / "src" / "tools" / name).exists()
 
     runtime_import_hits: list[str] = []
     for path in sorted((REPO_ROOT / "src" / "bioetl").rglob("*.py")):
