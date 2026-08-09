@@ -656,19 +656,13 @@ class TestDataQualityServiceAnomalyDetection:
     ):
         """Test anomaly detection with anomalies detected."""
         await asyncio.sleep(0)
-        from bioetl.infrastructure.observability.anomaly.types import (
-            AnomalyRecord,
-            AnomalySeverity,
-            AnomalyType,
-        )
-
-        anomaly = AnomalyRecord(
+        anomaly = DQAnomaly(
             metric_name="error_rate",
             current_value=0.15,
             baseline_mean=0.05,
             baseline_stddev=0.02,
-            anomaly_type=AnomalyType.SPIKE,
-            severity=AnomalySeverity.HIGH,
+            anomaly_type=DQAnomalyType.SPIKE,
+            severity=DQAnomalySeverity.HIGH,
             z_score=5.0,
             timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             message="Error rate spike detected",
@@ -705,19 +699,13 @@ class TestDataQualityServiceAnomalyDetection:
     ):
         """Test anomaly detection with critical anomaly."""
         await asyncio.sleep(0)
-        from bioetl.infrastructure.observability.anomaly.types import (
-            AnomalyRecord,
-            AnomalySeverity,
-            AnomalyType,
-        )
-
-        critical_anomaly = AnomalyRecord(
+        critical_anomaly = DQAnomaly(
             metric_name="error_rate",
             current_value=0.50,
             baseline_mean=0.05,
             baseline_stddev=0.02,
-            anomaly_type=AnomalyType.THRESHOLD_EXCEEDED,
-            severity=AnomalySeverity.CRITICAL,
+            anomaly_type=DQAnomalyType.THRESHOLD_EXCEEDED,
+            severity=DQAnomalySeverity.CRITICAL,
             z_score=22.5,
             timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             message="Error rate critical",
@@ -880,19 +868,13 @@ class TestDataQualityServiceBaselineUpdates:
     ):
         """Test that baseline is not updated when critical anomaly detected."""
         await asyncio.sleep(0)
-        from bioetl.infrastructure.observability.anomaly.types import (
-            AnomalyRecord,
-            AnomalySeverity,
-            AnomalyType,
-        )
-
-        critical_anomaly = AnomalyRecord(
+        critical_anomaly = DQAnomaly(
             metric_name="error_rate",
             current_value=0.50,
             baseline_mean=0.05,
             baseline_stddev=0.02,
-            anomaly_type=AnomalyType.THRESHOLD_EXCEEDED,
-            severity=AnomalySeverity.CRITICAL,
+            anomaly_type=DQAnomalyType.THRESHOLD_EXCEEDED,
+            severity=DQAnomalySeverity.CRITICAL,
             z_score=22.5,
             timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             message="Error rate critical",
