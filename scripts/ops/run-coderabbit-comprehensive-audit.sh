@@ -3,7 +3,7 @@
 # CodeRabbit Comprehensive Audit Launcher
 # Hybrid approach: immediate P0 issues, batched P1 findings
 # Based on: docs/03-guides/coderabbit-audit-playbook.md
-# Skill: .devin/skills/coderabbit-audit/SKILL.md
+# Policy: docs/03-guides/coderabbit-audit-playbook.md
 #
 
 set -euo pipefail

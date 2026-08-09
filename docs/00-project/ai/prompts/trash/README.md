@@ -28,8 +28,8 @@ BioETL.
 - [grok-closeout.md](../grok-closeout.md) — short Grok closeout prompt (issues/PR)
 - [grok-audit-cycle.md](../grok-audit-cycle.md) — short Grok audit cycle (default 1 cycle)
 
-- [ai_workspace_setup.md](../ai_workspace_setup.md) — internal setup and audit
-  prompt for AI workspace configuration
+- [docs_ai_audit_planning_codex_prompt.md](../docs_ai_audit_planning_codex_prompt.md)
+  — internal planning prompt for AI documentation audits
 - [documentation_diagrams_audit.md](../documentation_diagrams_audit.md) —
   working prompt for full documentation and diagram audits aligned to the live
   BioETL repo structure

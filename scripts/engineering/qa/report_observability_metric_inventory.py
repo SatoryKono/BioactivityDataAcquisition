@@ -1688,9 +1688,7 @@ def _panel_contract(
     )
     if not isinstance(defaults, dict):
         defaults = {}
-    documentation_lower = (
-        f"{description} {defaults.get('noValue', '')}"
-    ).lower()
+    documentation_lower = (f"{description} {defaults.get('noValue', '')}").lower()
     thresholds = defaults.get("thresholds", {})
     threshold_steps = (
         thresholds.get("steps", []) if isinstance(thresholds, dict) else []

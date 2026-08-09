@@ -1447,7 +1447,6 @@
         "docs/00-project/RULES.md",
         "docs/00-project/ai/agents/policy/agent-orchestration-rules.md",
         "docs/00-project/ai/memory/gh-issues-documentation-update.md",
-        "docs/00-project/ai/prompts/ai_workspace_setup.md",
         "docs/00-project/ai/prompts/documentation_diagrams_audit.md",
         "docs/00-project/ai/skills/_references/local/technical-designer-mermaid/references/patterns.md",
         "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
@@ -1991,8 +1990,7 @@
       "enforcement_owner_paths": [
         "scripts/docs/passports/projector.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/architecture/test_passport_documentation_projections.py",
-        "tests/unit/scripts/test_documentation_governance_check.py"
+        "tests/architecture/test_passport_documentation_projections.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
@@ -2005,8 +2003,7 @@
         "docs/04-reference/passports/workflows/chembl-core.md",
         "scripts/docs/passports/projector.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/architecture/test_passport_documentation_projections.py",
-        "tests/unit/scripts/test_documentation_governance_check.py"
+        "tests/architecture/test_passport_documentation_projections.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",
@@ -2019,12 +2016,15 @@
       "decision_date": "2026-08-09",
       "decision_path": "docs/02-architecture/decisions/ADR-056-proof-or-stop-lifecycle-control.md",
       "enforcement_owner_paths": [
-        "tests/architecture/test_proof_or_stop_contract.py"
+        "tests/architecture/test_proof_or_stop_contract.py",
+        "tests/unit/scripts/test_documentation_governance_check.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
+        "docs/00-project/RULES.md",
         "docs/04-reference/contracts/README.md",
-        "tests/architecture/test_proof_or_stop_contract.py"
+        "tests/architecture/test_proof_or_stop_contract.py",
+        "tests/unit/scripts/test_documentation_governance_check.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",
