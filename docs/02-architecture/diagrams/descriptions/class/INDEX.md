@@ -5,6 +5,18 @@ _Автогенерация: 2026-07-08T10:42:35+03:00_
 - Карточек описаний: **16**
 - Scope: class-diagram description cards for canonical class families.
 
+## Package-Level Diagrams (90-pkg-*.mmd)
+
+Package-level class diagrams (90-pkg-*.mmd) are **AST-generated supplemental package-family inventory slices** that provide automated inventory of package structure. These diagrams:
+
+- Are generated automatically from AST analysis of the codebase
+- Serve as supplemental inventory slices for package families
+- Do not have individual description files (by design)
+- Are marked with `@reference Generated supplemental package-family diagram` in their metadata
+- Should be regenerated when package structure changes
+
+The curated class diagrams (01-16) above provide narrative documentation of key class families, while package-level diagrams (90-pkg-*.mmd) provide automated structural inventory. Both serve complementary purposes in the documentation ecosystem.
+
 ## Related Indexes
 
 - [Diagram descriptions root index](../INDEX.md)
