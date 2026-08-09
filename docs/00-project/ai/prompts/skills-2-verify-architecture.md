@@ -39,7 +39,7 @@ Execute architecture validation checks and report blocking/non-blocking issues.
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 - Canonical runtime entrypoint: this `SKILL.md`
-- Shared wrapper contract: [wrapper-contract.md](../../../../../.codex/skills/py-audit-bot/references/wrapper-contract.md)
+- Shared wrapper contract: [wrapper-contract.md](../../../../.codex/skills/py-audit-bot/references/wrapper-contract.md)
 - Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 
 ## Trigger Scope

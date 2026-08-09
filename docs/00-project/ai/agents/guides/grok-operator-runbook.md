@@ -62,8 +62,8 @@ Local config is machine-only — **do not commit** API keys or full `config.toml
 
 Prefer short templates:
 
-- [grok-closeout.md](../../prompts/grok-closeout.md)
-- [grok-audit-cycle.md](../../prompts/grok-audit-cycle.md)
+- [grok-prompts-2-grok-closeout.md](../../prompts/grok-prompts-2-grok-closeout.md)
+- [grok-prompts-1-grok-audit-cycle.md](../../prompts/grok-prompts-1-grok-audit-cycle.md)
 
 Do not inline full RULES/ADR text into user prompts.
 
