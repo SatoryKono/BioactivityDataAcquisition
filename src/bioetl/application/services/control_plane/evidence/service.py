@@ -28,6 +28,7 @@ from bioetl.application.services.control_plane.evidence.retention import (
 )
 from bioetl.domain.control_plane import (
     ControlPlaneArtifactLifecyclePolicy,
+    RunLedgerEntry,
     RunManifest,
 )
 from bioetl.domain.ports import LineageStorePort, RunLedgerPort
@@ -266,7 +267,7 @@ class ControlPlaneEvidenceService:
     def _ledger_entries(
         self,
         manifest: RunManifest,
-    ) -> tuple[object, ...]:
+    ) -> tuple[RunLedgerEntry, ...]:
         if self.ledger_port is None:
             return ()
         return tuple(self.ledger_port.list_entries(manifest.manifest_id))

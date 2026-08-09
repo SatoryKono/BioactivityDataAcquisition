@@ -4,18 +4,18 @@
   "authoritative_surface": "grafana/dashboards/*.json",
   "route_contract_sha256": "88b420a39e5db86b1c5ca6df94822b4c4bedf41ac6f34e93956d4cd8fab174a4",
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "2986da90935cde3dc6e04876042abef32c2e90a0194b0f3b11caab4a792a49e6",
-    "bioetl-dq-v2": "ac99c6e00e3c26d3be0f8aba322000d8265062c0d8bed75068ffa2c6c32a3b35",
+    "bioetl-control-plane-v1": "95b4cb10299b3e09fb6335b705d0d15568c281d0d7cc0600b7b4f52888815a71",
+    "bioetl-dq-v2": "a0d74aac205b4b6a22596d52dfab3203ad3a16e5c7a6ce0389c1c68626e0544b",
     "bioetl-incident-v1": "04543e80cc248a03fba6919cb1d4e52474d73135ed15bf881aa508f3459c9de9",
-    "bioetl-overview-v2": "d72a0eb371a031e8d027dff77805c5edad3397333a6c288e3c0c762733db857e",
-    "bioetl-provider-health-v2": "47606d37121c7c4799dc68f133143018ca591702c98ef9ed135c493ce1cf106a",
-    "bioetl-run-explorer-v1": "4f2dd1d9f9e0baa1cd6edd15cd0af71d492bda6bdcf9888bd758197e8c11646a",
-    "bioetl-runtime": "bdb4161969fd2f0227f364bd5f27e2e827daa87f57145a685ce365d65af157b3"
+    "bioetl-overview-v2": "a5f0ebdc784a09c78751488369f635e33f00c302ae07e7df9b37fa7ec1a5fb98",
+    "bioetl-provider-health-v2": "584a34937d0516859d7e9c8c4b0f2c6102c3f363e2c4b89e82a3440c676cc490",
+    "bioetl-run-explorer-v1": "d3e9e1db23f64ab586b3a9ce7d529e0721d5372dd2a509dc3c7e627fa05fa483",
+    "bioetl-runtime": "3e17de9881b03831f5f0cf445a68c1fbccea89b3234a47a0af0c0afe9b96389d"
   },
   "summary": {
     "route_count": 6,
     "dashboard_uid_count": 7,
-    "panel_disposition_count": 192,
+    "panel_disposition_count": 197,
     "unmapped_dashboard_uids": [],
     "missing_dashboard_uids": [],
     "run_id_prometheus_violations": [],
@@ -465,6 +465,25 @@
     },
     {
       "dashboard_uid": "bioetl-control-plane-v1",
+      "panel_id": 9413,
+      "panel_title": "Review Checkpoint Validation",
+      "route": "data-trust-recovery",
+      "component": "JSON fallback",
+      "disposition": "advanced-evidence",
+      "source": {
+        "datasource_uid": null,
+        "datasource_type": null,
+        "target_count": 1,
+        "expressions": [
+          "/ops/control-plane/checkpoint-validation?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+        ]
+      },
+      "basis": "preserved-from-json",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-control-plane-v1"
+    },
+    {
+      "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 908,
       "panel_title": "Review Terminal Run Outcomes",
       "route": "data-trust-recovery",
@@ -590,6 +609,25 @@
         "target_count": 1,
         "expressions": [
           "(((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[30m]))), 1)) > bool 0) + (((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[30m]))), 1)) > bool 0.1)"
+        ]
+      },
+      "basis": "preserved-from-json",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-control-plane-v1"
+    },
+    {
+      "dashboard_uid": "bioetl-control-plane-v1",
+      "panel_id": 9414,
+      "panel_title": "Review Manifest Validation",
+      "route": "data-trust-recovery",
+      "component": "JSON fallback",
+      "disposition": "advanced-evidence",
+      "source": {
+        "datasource_uid": null,
+        "datasource_type": null,
+        "target_count": 1,
+        "expressions": [
+          "/ops/control-plane/manifest-validation?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
         ]
       },
       "basis": "preserved-from-json",
@@ -832,6 +870,44 @@
     },
     {
       "dashboard_uid": "bioetl-control-plane-v1",
+      "panel_id": 9415,
+      "panel_title": "Review Lineage Validation",
+      "route": "data-trust-recovery",
+      "component": "JSON fallback",
+      "disposition": "advanced-evidence",
+      "source": {
+        "datasource_uid": null,
+        "datasource_type": null,
+        "target_count": 1,
+        "expressions": [
+          "/ops/control-plane/lineage-validation?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+        ]
+      },
+      "basis": "preserved-from-json",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-control-plane-v1"
+    },
+    {
+      "dashboard_uid": "bioetl-control-plane-v1",
+      "panel_id": 9416,
+      "panel_title": "Review Retention Compliance",
+      "route": "data-trust-recovery",
+      "component": "JSON fallback",
+      "disposition": "advanced-evidence",
+      "source": {
+        "datasource_uid": null,
+        "datasource_type": null,
+        "target_count": 1,
+        "expressions": [
+          "/ops/control-plane/retention-compliance?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+        ]
+      },
+      "basis": "preserved-from-json",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-control-plane-v1"
+    },
+    {
+      "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 9404,
       "panel_title": "Review Identity Anchors",
       "route": "data-trust-recovery",
@@ -1027,6 +1103,25 @@
         "target_count": 1,
         "expressions": [
           "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+        ]
+      },
+      "basis": "preserved-from-json",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-control-plane-v1"
+    },
+    {
+      "dashboard_uid": "bioetl-control-plane-v1",
+      "panel_id": 9417,
+      "panel_title": "Review Bounded Failure Reasons",
+      "route": "data-trust-recovery",
+      "component": "JSON fallback",
+      "disposition": "advanced-evidence",
+      "source": {
+        "datasource_uid": null,
+        "datasource_type": null,
+        "target_count": 1,
+        "expressions": [
+          "/ops/control-plane/failure-reasons?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
         ]
       },
       "basis": "preserved-from-json",
