@@ -20,7 +20,6 @@ from bioetl.application.services.control_plane.evidence.manifest_validation impo
     build_manifest_checks,
 )
 from bioetl.application.services.control_plane.evidence.models import (
-    EvidenceCheck,
     unresolved_scope_check,
 )
 from bioetl.application.services.control_plane.evidence.retention import (
@@ -33,6 +32,7 @@ from bioetl.application.services.control_plane.evidence.service_support import (
     ledger_entries,
     service_payload,
 )
+from bioetl.application.services.control_plane_evidence import EvidenceCheck
 from bioetl.domain.control_plane import ControlPlaneArtifactLifecyclePolicy
 from bioetl.domain.ports import LineageStorePort, RunLedgerPort
 
