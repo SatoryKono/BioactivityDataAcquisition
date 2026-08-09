@@ -9,7 +9,7 @@ Checks:
   INV-CFG-004  Providers requiring auth declare API key / mailto env vars
   INV-CFG-005  No unknown keys in unified entity/composite/provider configs
   INV-CFG-006  pipeline_name == {provider}_{entity_type}
-  INV-CFG-008  Provider and entity root config versions stay synchronized
+  INV-CFG-008  Provider/entity/section config versions use explicit SemVer scopes
   INV-CFG-009  Composite entity contracts carry complete schema/filter/contract sections
   INV-CFG-010  Provider configs use named env indirection instead of ${...} interpolation
 
@@ -27,6 +27,7 @@ Pre-commit integration:
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from collections.abc import Sequence, Set
 from pathlib import Path
@@ -56,6 +57,7 @@ ENTITIES_DIR = CONFIGS_DIR / "entities"
 COMPOSITES_DIR = CONFIGS_DIR / "composites"
 PROVIDERS_DIR = CONFIGS_DIR / "providers"
 YAML_GLOB = "*.yaml"
+SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -410,23 +412,26 @@ def check_inv_006(verbose: bool) -> list[str]:
 
 
 def check_inv_008(verbose: bool) -> list[str]:
-    """INV-CFG-008: provider and entity root config versions match."""
+    """INV-CFG-008: config version scopes are explicit SemVer values."""
     errors: list[str] = []
-    provider_versions = {
-        path.stem: _load_yaml(path).get("version") for path in _provider_configs()
-    }
-    for path in _provider_entity_configs():
-        provider = path.parent.name
-        entity_version = _load_yaml(path).get("version")
-        provider_version = provider_versions.get(provider)
-        if entity_version != provider_version:
-            errors.append(
-                f"INV-CFG-008 {_rel(path)}: root version {entity_version!r} "
-                f"!= configs/providers/{provider}.yaml version {provider_version!r}"
-            )
+    for path in [*_provider_configs(), *_entity_configs()]:
+        data = _load_yaml(path)
+        version_scopes: list[tuple[str, object]] = [("version", data.get("version"))]
+        for section_name in ("quality", "filters"):
+            section = data.get(section_name)
+            if isinstance(section, dict):
+                version_scopes.append(
+                    (f"{section_name}.version", section.get("version"))
+                )
+        for scope, value in version_scopes:
+            if not isinstance(value, str) or not SEMVER_RE.fullmatch(value):
+                errors.append(
+                    f"INV-CFG-008 {_rel(path)}: {scope}={value!r} must use "
+                    "MAJOR.MINOR.PATCH"
+                )
     if verbose and not errors:
         sys.stdout.write(
-            "  INV-CFG-008: PASS (provider/entity root versions synchronized)\n"
+            "  INV-CFG-008: PASS (config version scopes use explicit SemVer)\n"
         )
     return errors
 
