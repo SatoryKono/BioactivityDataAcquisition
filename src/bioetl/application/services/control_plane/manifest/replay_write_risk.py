@@ -104,6 +104,43 @@ def _has_explicit_clear(manifest: RunManifest) -> bool:
     return _normalized_text(launch.get("clear_policy")) in _CLEAR_POLICIES
 
 
+def _has_duplicate_risk(
+    manifest: RunManifest,
+    modes: tuple[tuple[str, str], ...],
+) -> bool:
+    return _declares_append_semantic_sink(manifest) or any(
+        mode == "append" for _layer, mode in modes
+    )
+
+
+def _has_destructive_sink_mode(modes: tuple[tuple[str, str], ...]) -> bool:
+    return any(
+        (layer == "gold" and mode == "overwrite")
+        or (layer == "silver" and mode == "delete")
+        for layer, mode in modes
+    )
+
+
+def _is_composite_replace_replay(manifest: RunManifest) -> bool:
+    """Return whether composite replay uses replace-style publication."""
+    launch = manifest.launch_context
+    return (
+        _normalized_text(launch.get("execution_context")) == "composite"
+        and _normalized_text(launch.get("replay_mode")) in {"rebuild", "resume"}
+    )
+
+
+def _has_overwrite_risk(
+    manifest: RunManifest,
+    modes: tuple[tuple[str, str], ...],
+) -> bool:
+    return (
+        _has_destructive_sink_mode(modes)
+        or _has_explicit_clear(manifest)
+        or _is_composite_replace_replay(manifest)
+    )
+
+
 def assess_replay_write_risks(
     manifest: RunManifest,
 ) -> frozenset[ReplayWriteRiskType]:
@@ -112,28 +149,11 @@ def assess_replay_write_risks(
         return frozenset()
 
     modes = _iter_sink_modes(manifest)
-    risks: set[ReplayWriteRiskType] = set()
-    if _declares_append_semantic_sink(manifest) or any(
-        mode == "append" for _layer, mode in modes
-    ):
-        risks.add(ReplayWriteRiskType.DUPLICATE)
-    if any(
-        (layer == "gold" and mode == "overwrite")
-        or (layer == "silver" and mode == "delete")
-        for layer, mode in modes
-    ):
-        risks.add(ReplayWriteRiskType.OVERWRITE)
-    if _has_explicit_clear(manifest):
-        risks.add(ReplayWriteRiskType.OVERWRITE)
-    if (
-        _normalized_text(manifest.launch_context.get("execution_context"))
-        == "composite"
-        and _normalized_text(manifest.launch_context.get("replay_mode"))
-        in {"rebuild", "resume"}
-    ):
-        # Composite merged Silver/Gold publication is replace-style today.
-        risks.add(ReplayWriteRiskType.OVERWRITE)
-    return frozenset(risks)
+    risk_checks = (
+        (ReplayWriteRiskType.DUPLICATE, _has_duplicate_risk(manifest, modes)),
+        (ReplayWriteRiskType.OVERWRITE, _has_overwrite_risk(manifest, modes)),
+    )
+    return frozenset(risk for risk, detected in risk_checks if detected)
 
 
 def emit_replay_write_risk_metrics(

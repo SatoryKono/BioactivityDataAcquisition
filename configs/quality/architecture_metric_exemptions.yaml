@@ -21,47 +21,7 @@ policy:
     - removal_step
 registries:
   file_size_limits: {}
-  function_complexity:
-    src/bioetl/application/services/control_plane/evidence/lineage.py::build_lineage_checks:
-      value: 25
-      owner: "@bioetl-control-plane"
-      reason: "Lineage check builders still aggregate many validation rules in single routines."
-      classification: critical_check
-      linked_rf: "#5815"
-      expires_on: "2026-12-31"
-      removal_step: "Extract lineage validation branches into dedicated check helpers."
-    src/bioetl/application/services/control_plane/evidence/lineage.py::_identity_gaps:
-      value: 25
-      owner: "@bioetl-control-plane"
-      reason: "Identity gap detection still contains complex branching logic."
-      classification: critical_check
-      linked_rf: "#5815"
-      expires_on: "2026-12-31"
-      removal_step: "Extract identity gap detection into smaller validation helpers."
-    src/bioetl/application/services/control_plane/evidence/manifest_validation.py::build_manifest_checks:
-      value: 20
-      owner: "@bioetl-control-plane"
-      reason: "Manifest check builders still aggregate many validation rules in single routines."
-      classification: critical_check
-      linked_rf: "#5815"
-      expires_on: "2026-12-31"
-      removal_step: "Extract manifest validation branches into dedicated check helpers."
-    src/bioetl/application/services/control_plane/evidence/models.py::evidence_payload:
-      value: 20
-      owner: "@bioetl-control-plane"
-      reason: "Evidence payload construction still contains complex conditional logic."
-      classification: critical_check
-      linked_rf: "#5815"
-      expires_on: "2026-12-31"
-      removal_step: "Extract evidence payload construction into smaller helpers."
-    src/bioetl/application/services/control_plane/evidence/retention.py::build_retention_checks:
-      value: 30
-      owner: "@bioetl-control-plane"
-      reason: "Retention check builders still aggregate many validation rules in single routines."
-      classification: critical_check
-      linked_rf: "#5815"
-      expires_on: "2026-12-31"
-      removal_step: "Extract retention validation branches into dedicated check helpers."
+  function_complexity: {}
   function_length: {}
   class_size: {}
   class_method_count: {}

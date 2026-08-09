@@ -4,7 +4,7 @@
   "authoritative_surface": "grafana/dashboards/*.json",
   "route_contract_sha256": "88b420a39e5db86b1c5ca6df94822b4c4bedf41ac6f34e93956d4cd8fab174a4",
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "95b4cb10299b3e09fb6335b705d0d15568c281d0d7cc0600b7b4f52888815a71",
+    "bioetl-control-plane-v1": "79bc4243bc8b47c307853c3a6157f8f9b1b2d1ce8c8d2a76d6b9142253239908",
     "bioetl-dq-v2": "a0d74aac205b4b6a22596d52dfab3203ad3a16e5c7a6ce0389c1c68626e0544b",
     "bioetl-incident-v1": "04543e80cc248a03fba6919cb1d4e52474d73135ed15bf881aa508f3459c9de9",
     "bioetl-overview-v2": "a5f0ebdc784a09c78751488369f635e33f00c302ae07e7df9b37fa7ec1a5fb98",
@@ -224,7 +224,7 @@
         "datasource_type": "prometheus",
         "target_count": 1,
         "expressions": [
-          "round(((\n (sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])))\n+\n (sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])))\n+\n (sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])))\n+\n (sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range])))\n+\n (sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))\n+\n (sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range]))))))"
+          "round(((\n (sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])))\n+\n (sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])))\n+\n (sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])))\n+\n (sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range])))\n+\n (sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))\n+\n (sum(increase(bioetl_replay_duplicate_overwrite_risk_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))\n+\n (sum(max_over_time(bioetl_manifest_ledger_integrity_ratio{pipeline=~\"$pipeline\", run_type=~\"$run_type\", integrity_type=\"inconsistent\"}[$__range]) > bool 0))\n+\n (sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range]))))))"
         ]
       },
       "basis": "preserved-from-json",
