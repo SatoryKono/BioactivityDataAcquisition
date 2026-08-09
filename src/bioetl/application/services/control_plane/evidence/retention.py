@@ -6,12 +6,13 @@ from collections.abc import Iterable
 from typing import Protocol
 
 from bioetl.application.services.control_plane.evidence.models import EvidenceCheck
+from bioetl.application.services.control_plane.evidence.retention_checks import (
+    retention_evidence_checks,
+)
 from bioetl.domain.control_plane import (
-    ControlPlaneArtifactLifecycleDecision,
     ControlPlaneArtifactLifecyclePlan,
     ControlPlaneArtifactLifecyclePolicy,
     ControlPlaneArtifactRef,
-    ControlPlaneArtifactSurface,
     RunManifest,
 )
 
@@ -38,97 +39,7 @@ def build_retention_checks(
         for artifact in plan.artifacts
         if _artifact_matches_manifest(artifact, manifest)
     )
-    delete_candidates = tuple(
-        artifact
-        for artifact in relevant
-        if artifact.decision is ControlPlaneArtifactLifecycleDecision.DELETE
-    )
-    required_profile = str(
-        manifest.launch_context.get("required_persistence_profile")
-        or "degraded_observable"
-    ).strip()
-    floor_required = required_profile in {"replay_ready", "forensic_grade"}
-    evidence_floor_protected = any(
-        reason.startswith("evidence_floor:")
-        for artifact in relevant
-        for reason in artifact.protected_by
-    )
-    present_surfaces = {artifact.surface for artifact in relevant}
-    required_surfaces = {
-        ControlPlaneArtifactSurface.RUN_MANIFEST,
-        ControlPlaneArtifactSurface.RUN_LEDGER,
-    }
-    if floor_required:
-        required_surfaces.update(
-            {
-                ControlPlaneArtifactSurface.EFFECTIVE_CONFIG,
-                ControlPlaneArtifactSurface.LINEAGE,
-            }
-        )
-    missing_surfaces = sorted(
-        surface.value for surface in required_surfaces - present_surfaces
-    )
-    return (
-        (
-            EvidenceCheck(
-                "retention_policy",
-                "ERROR" if delete_candidates else "OK",
-                (
-                    "retention_delete_candidates_present"
-                    if delete_candidates
-                    else "retention_policy_satisfied"
-                ),
-                (
-                    f"{len(delete_candidates)} selected-run artifacts are delete candidates."
-                    if delete_candidates
-                    else "Selected-run artifacts are retained by the current dry-run policy."
-                ),
-            ),
-            EvidenceCheck(
-                "evidence_floor",
-                (
-                    "OK"
-                    if not floor_required or evidence_floor_protected
-                    else "ERROR"
-                ),
-                (
-                    "reproducibility_evidence_floor_satisfied"
-                    if not floor_required or evidence_floor_protected
-                    else "reproducibility_evidence_floor_unprotected"
-                ),
-                (
-                    f"The {required_profile} evidence floor is protected."
-                    if floor_required and evidence_floor_protected
-                    else (
-                        "No strict replay evidence floor is declared for this run."
-                        if not floor_required
-                        else f"The {required_profile} evidence floor lacks planner protection."
-                    )
-                ),
-            ),
-            EvidenceCheck(
-                "required_evidence",
-                "ERROR" if missing_surfaces else "OK",
-                (
-                    "required_evidence_surfaces_missing"
-                    if missing_surfaces
-                    else "required_evidence_surfaces_present"
-                ),
-                (
-                    "Missing lifecycle evidence surfaces: " + ", ".join(missing_surfaces)
-                    if missing_surfaces
-                    else "Required lifecycle evidence surfaces are represented in the plan."
-                ),
-            ),
-            EvidenceCheck(
-                "archive",
-                "UNKNOWN",
-                "archive_evidence_not_recorded",
-                "The local lifecycle plan does not attest external archive availability.",
-            ),
-        ),
-        relevant,
-    )
+    return retention_evidence_checks(manifest, relevant), relevant
 
 
 def _artifact_matches_manifest(

@@ -49,43 +49,72 @@ def evidence_payload(
     extra: dict[str, object] | None = None,
 ) -> dict[str, object]:
     """Build the shared bounded response envelope for validation endpoints."""
-    status: EvidenceStatus = "UNKNOWN"
-    if checks:
-        status = checks[0].status
-        for check in checks[1:]:
-            if _STATUS_PRIORITY[check.status] > _STATUS_PRIORITY[status]:
-                status = check.status
-    counts = {
-        value: sum(check.status == value for check in checks)
-        for value in ("OK", "WARNING", "ERROR", "UNKNOWN")
-    }
+    counts = _status_counts(checks)
+    pipeline, run_type, run_id, manifest_id = _scope_identity(
+        manifest=manifest,
+        requested_pipeline=requested_pipeline,
+        selected_run_types=selected_run_types,
+        selected_run_id=selected_run_id,
+    )
     payload: dict[str, object] = {
         "contract": CONTROL_PLANE_EVIDENCE_CONTRACT,
         "endpoint": endpoint,
-        "status": status,
-        "pipeline": (
-            manifest.pipeline_name if manifest is not None else requested_pipeline
-        ),
-        "run_type": (
-            manifest.run_type.value
-            if manifest is not None
-            else (selected_run_types[0] if len(selected_run_types) == 1 else None)
-        ),
-        "run_id": str(manifest.run_id) if manifest is not None else selected_run_id,
-        "manifest_id": manifest.manifest_id if manifest is not None else None,
+        "status": _overall_status(checks),
+        "pipeline": pipeline,
+        "run_type": run_type,
+        "run_id": run_id,
+        "manifest_id": manifest_id,
         "resolved_via": resolved_via,
-        "summary": {
-            "check_count": len(checks),
-            "ok_count": counts["OK"],
-            "warning_count": counts["WARNING"],
-            "error_count": counts["ERROR"],
-            "unknown_count": counts["UNKNOWN"],
-        },
+        "summary": _summary(checks, counts),
         "rows": [check.to_dict() for check in checks],
     }
     if extra:
         payload.update(extra)
     return payload
+
+
+def _overall_status(checks: tuple[EvidenceCheck, ...]) -> EvidenceStatus:
+    if not checks:
+        return "UNKNOWN"
+    return max(checks, key=lambda check: _STATUS_PRIORITY[check.status]).status
+
+
+def _status_counts(checks: tuple[EvidenceCheck, ...]) -> dict[str, int]:
+    return {
+        value: sum(check.status == value for check in checks)
+        for value in ("OK", "WARNING", "ERROR", "UNKNOWN")
+    }
+
+
+def _scope_identity(
+    *,
+    manifest: RunManifest | None,
+    requested_pipeline: str,
+    selected_run_types: tuple[str, ...],
+    selected_run_id: str | None,
+) -> tuple[str, str | None, str | None, str | None]:
+    if manifest is not None:
+        return (
+            manifest.pipeline_name,
+            manifest.run_type.value,
+            str(manifest.run_id),
+            manifest.manifest_id,
+        )
+    run_type = selected_run_types[0] if len(selected_run_types) == 1 else None
+    return requested_pipeline, run_type, selected_run_id, None
+
+
+def _summary(
+    checks: tuple[EvidenceCheck, ...],
+    counts: dict[str, int],
+) -> dict[str, int]:
+    return {
+        "check_count": len(checks),
+        "ok_count": counts["OK"],
+        "warning_count": counts["WARNING"],
+        "error_count": counts["ERROR"],
+        "unknown_count": counts["UNKNOWN"],
+    }
 
 
 def unresolved_scope_check(resolved_via: str) -> EvidenceCheck:
