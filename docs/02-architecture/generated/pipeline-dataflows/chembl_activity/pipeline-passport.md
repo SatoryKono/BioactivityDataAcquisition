@@ -2,7 +2,7 @@
 
 # `chembl_activity` Pipeline Dataflow Passport
 
-Generated: **2026-08-07**  
+Generated: **2026-08-09**
 Generator: **1.0.0**  
 IR schema: **1.0.0**  
 Effective config SHA256: `90b2b848882ce0d0681dd613c91724859a19ad23d2d82e43686e2054919a4204`  

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-09T12:30:41.529069+00:00",
+  "generated_at": "2026-08-09T12:43:48.550767+00:00",
   "summary": {
     "total_scripts": 573,
     "status_counts": {
@@ -7028,7 +7028,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 167,
+      "reference_count": 165,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -12294,7 +12294,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 80,
+      "reference_count": 77,
       "references": [
         {
           "path": "docs/00-project/RULES.md",

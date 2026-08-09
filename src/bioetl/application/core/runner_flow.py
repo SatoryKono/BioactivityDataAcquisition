@@ -6,7 +6,10 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Protocol, cast
 
-from bioetl.application.core.batch_operation_errors import OPERATION_ERRORS
+from bioetl.application.core.batch_operation_errors import (
+    OPERATION_ERRORS,
+    OperationErrorTypes,
+)
 from bioetl.application.core.runner_flow_metrics import (
     record_flow_invariants as _record_flow_invariants_impl,
 )
@@ -16,6 +19,8 @@ from bioetl.application.core.runner_flow_metrics import (
 from bioetl.application.runtime_clock import current_utc_time
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.types import JsonDict
+
+FLOW_INVARIANT_PROJECTION_ERRORS: OperationErrorTypes = (*OPERATION_ERRORS, ArithmeticError)
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_executor import BatchExecutor
@@ -215,8 +220,7 @@ def record_run_shutdown(host: _PipelineRunnerFlowHostProtocol) -> None:
     )
     try:
         _record_flow_invariants(host)
-    except (*OPERATION_ERRORS, ArithmeticError):
-        # Best-effort metrics projection after shutdown ledger is written.
+    except FLOW_INVARIANT_PROJECTION_ERRORS:
         host._logger.warning(
             "shutdown_flow_invariants_failed",
             run_id=str(host._context.run_id),

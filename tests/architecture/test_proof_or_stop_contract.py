@@ -5,8 +5,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
 import yaml
 from jsonschema import Draft202012Validator
+
+pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 
