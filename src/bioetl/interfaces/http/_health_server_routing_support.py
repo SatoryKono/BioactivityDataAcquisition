@@ -149,25 +149,17 @@ async def dispatch_control_plane_request(
         return
 
     try:
-        if path == "/ops/control-plane/ready":
-            await handle_control_plane_ready(host, writer)
-            return
-        if path == "/ops/control-plane/filter-options":
-            await handle_control_plane_filter_options(host, writer, query)
-            return
-        if path == "/ops/control-plane/selector-context":
-            await handle_control_plane_selector_context(host, writer, query)
-            return
-        if path == "/ops/control-plane/identity-table":
-            await handle_control_plane_identity_table(host, writer, query)
-            return
-        if path == "/ops/control-plane/identity-evidence":
-            await handle_control_plane_identity_evidence(host, writer, query)
-            return
-        if path == "/ops/control-plane/checkpoint-freshness":
-            await handle_control_plane_checkpoint_freshness(host, writer, query)
-            return
-        await host._send_response(writer, 404, _NOT_FOUND_MESSAGE)
+        handlers = {
+            "/ops/control-plane/ready": handle_control_plane_ready,
+            "/ops/control-plane/filter-options": lambda h, w: handle_control_plane_filter_options(h, w, query),
+            "/ops/control-plane/selector-context": lambda h, w: handle_control_plane_selector_context(h, w, query),
+            "/ops/control-plane/identity-table": lambda h, w: handle_control_plane_identity_table(h, w, query),
+            "/ops/control-plane/identity-evidence": lambda h, w: handle_control_plane_identity_evidence(h, w, query),
+            "/ops/control-plane/checkpoint-freshness": lambda h, w: handle_control_plane_checkpoint_freshness(h, w, query),
+        }
+        if handler := handlers.get(path):
+            return await handler(host, writer)
+        return await host._send_response(writer, 404, _NOT_FOUND_MESSAGE)
     except ValueError as exc:
         await host._send_response(writer, 400, str(exc))
 
