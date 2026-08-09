@@ -27,6 +27,26 @@ from tests.helpers.control_plane import InMemoryRunLedgerStore, InMemoryRunManif
 pytestmark = pytest.mark.unit
 
 
+def _manifest() -> RunManifest:
+    run_id = RunID(UUID("00000000-0000-0000-0000-000000008500"))
+    return RunManifest(
+        manifest_id="manifest-8500",
+        execution_fingerprint="fingerprint-8500",
+        schema_version="1.0",
+        created_at=datetime(2026, 8, 9, tzinfo=UTC),
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        launch_context={"required_persistence_profile": "degraded_observable"},
+        code_provenance=RunCodeProvenance(
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+        ),
+    )
+
+
 async def _get_json(server: HealthServer, path: str) -> tuple[int, dict[str, object]]:
     assert server._server is not None
     sockets = server._server.sockets
@@ -56,23 +76,7 @@ async def _get_json(server: HealthServer, path: str) -> tuple[int, dict[str, obj
 async def test_all_control_plane_validation_routes_publish_stable_contract(
     tmp_path,
 ) -> None:
-    run_id = RunID(UUID("00000000-0000-0000-0000-000000008500"))
-    manifest = RunManifest(
-        manifest_id="manifest-8500",
-        execution_fingerprint="fingerprint-8500",
-        schema_version="1.0",
-        created_at=datetime(2026, 8, 9, tzinfo=UTC),
-        run_id=run_id,
-        run_type=RunType.INCREMENTAL,
-        pipeline_name="chembl_activity",
-        provider="chembl",
-        entity="activity",
-        launch_context={"required_persistence_profile": "degraded_observable"},
-        code_provenance=RunCodeProvenance(
-            contract_ref="chembl.activity",
-            contract_version="1.0.0",
-        ),
-    )
+    manifest = _manifest()
     manifests = InMemoryRunManifestStore()
     manifests.save(manifest)
     ledger = InMemoryRunLedgerStore()
@@ -132,3 +136,59 @@ async def test_all_control_plane_validation_routes_publish_stable_contract(
     finally:
         await server.stop()
         await checkpoints.aclose()
+
+
+class _CorruptCheckpointPort:
+    async def load_for_manifest_id(self, manifest_id: str) -> object:
+        raise ValueError("raw corrupt checkpoint secret")
+
+
+@pytest.mark.asyncio
+async def test_checkpoint_parse_failure_has_stable_reason_without_raw_error() -> None:
+    manifest = _manifest()
+    manifests = InMemoryRunManifestStore()
+    manifests.save(manifest)
+    server = HealthServer(
+        host="127.0.0.1",
+        port=0,
+        checkpoint_port=_CorruptCheckpointPort(),  # type: ignore[arg-type]
+        run_manifest_port=manifests,
+        control_plane_evidence_service=ControlPlaneEvidenceService(),
+    )
+    await server.start()
+    try:
+        status, payload = await _get_json(
+            server,
+            "/ops/control-plane/checkpoint-validation?pipeline=chembl_activity"
+            f"&run_id={manifest.run_id}",
+        )
+
+        assert status == 200
+        assert payload["status"] == "ERROR"
+        assert any(
+            row.get("reason") == "checkpoint_parse_error"
+            for row in payload["rows"]
+        )
+        assert "raw corrupt checkpoint secret" not in str(payload)
+    finally:
+        await server.stop()
+
+
+@pytest.mark.asyncio
+async def test_missing_evidence_service_returns_unknown_table_contract() -> None:
+    server = HealthServer(host="127.0.0.1", port=0)
+    await server.start()
+    try:
+        status, payload = await _get_json(
+            server,
+            "/ops/control-plane/manifest-validation?pipeline=chembl_activity",
+        )
+
+        assert status == 503
+        assert payload["contract"] == CONTROL_PLANE_EVIDENCE_CONTRACT
+        assert payload["status"] == "UNKNOWN"
+        assert payload["rows"][0]["reason"] == (
+            "control_plane_evidence_service_unavailable"
+        )
+    finally:
+        await server.stop()

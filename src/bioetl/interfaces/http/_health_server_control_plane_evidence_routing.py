@@ -7,15 +7,11 @@ from collections.abc import Callable, Coroutine
 from typing import Protocol
 
 from bioetl.application.runtime_clock import current_utc_time
-from bioetl.application.services.control_plane.evidence import (
-    ControlPlaneEvidenceService,
-    EvidenceScope,
-)
+from bioetl.application.services.control_plane.evidence import ControlPlaneEvidenceService
 from bioetl.application.services.control_plane.evidence.service_support import (
     source_error_payload,
 )
-from bioetl.domain.exceptions import BioETLError
-from bioetl.domain.ports import CheckpointPort, RunManifestPort
+from bioetl.domain.ports import CheckpointPort
 from bioetl.interfaces.http._forensic_request_budget import (
     ForensicEndpointUnavailable,
     forensic_unavailable_payload,
@@ -24,21 +20,18 @@ from bioetl.interfaces.http._forensic_request_budget import (
 from bioetl.interfaces.http._health_server_checkpoint_lookup import (
     load_checkpoint_freshness_evidence,
 )
-from bioetl.interfaces.http._health_server_control_plane_scope import (
-    _IdentityScope,
-    read_selected_run_id,
-    resolve_control_plane_identity_scope,
+from bioetl.interfaces.http._health_server_control_plane_evidence_scope import (
+    SOURCE_READ_ERRORS,
+    EvidenceScopeHost,
+    evidence_service_unavailable_payload,
+    resolve_evidence_scope,
+    to_evidence_scope,
 )
 
-_SOURCE_READ_ERRORS = (BioETLError, OSError, TypeError, ValueError)
 
-
-class _EvidenceRoutingHost(Protocol):
+class _EvidenceRoutingHost(EvidenceScopeHost, Protocol):
     @property
     def _checkpoint_port(self) -> CheckpointPort | None: ...
-
-    @property
-    def _run_manifest_port(self) -> RunManifestPort | None: ...
 
     @property
     def _control_plane_evidence_service(
@@ -48,20 +41,8 @@ class _EvidenceRoutingHost(Protocol):
     @property
     def _forensic_endpoint_limiter(self) -> asyncio.Semaphore: ...
 
-    def _read_required_param(self, query: dict[str, str], name: str) -> str: ...
-
     @staticmethod
     def _is_all_scope_token(value: str | None) -> bool: ...
-
-    @staticmethod
-    def _read_optional_param(query: dict[str, str], name: str) -> str | None: ...
-
-    @classmethod
-    def _read_scope_csv_param(
-        cls,
-        query: dict[str, str],
-        name: str,
-    ) -> tuple[str, ...]: ...
 
     async def _send_response(
         self,
@@ -110,10 +91,14 @@ async def dispatch_control_plane_evidence_request(
     if operation_factory is None:
         return False
     if host._control_plane_evidence_service is None:
-        await host._send_response(
+        await host._send_payload_response(
             writer,
             503,
-            "Control-plane validation evidence unavailable",
+            evidence_service_unavailable_payload(
+                host,
+                query,
+                endpoint=path.rsplit("/", maxsplit=1)[-1],
+            ),
         )
         return True
     try:
@@ -137,7 +122,7 @@ async def _checkpoint_payload(
     query: dict[str, str],
 ) -> dict[str, object]:
     service = _require_service(host)
-    scope, error_payload = await _resolve_scope(
+    scope, error_payload = await resolve_evidence_scope(
         host,
         query,
         endpoint="checkpoint-validation",
@@ -163,16 +148,16 @@ async def _checkpoint_payload(
             scope=scope,
             target_pipeline=target_pipeline,
         )
-    except _SOURCE_READ_ERRORS:
+    except SOURCE_READ_ERRORS:
         return source_error_payload(
             endpoint="checkpoint-validation",
-            scope=_evidence_scope(scope),
+            scope=to_evidence_scope(scope),
             reason="checkpoint_parse_error",
             check="parse",
         )
     return await asyncio.to_thread(
         service.checkpoint_validation,
-        scope=_evidence_scope(scope),
+        scope=to_evidence_scope(scope),
         checkpoint=checkpoint,
         evidence_source=evidence_source,
         aggregate_scope_unknown=aggregate_scope_unknown,
@@ -192,7 +177,7 @@ async def _service_payload(
         "retention-compliance": ("retention_plan_read_error", "retention_policy"),
         "failure-reasons": ("run_ledger_parse_error", "classification"),
     }[endpoint]
-    scope, error_payload = await _resolve_scope(
+    scope, error_payload = await resolve_evidence_scope(
         host,
         query,
         endpoint=endpoint,
@@ -202,7 +187,7 @@ async def _service_payload(
     if error_payload is not None:
         return error_payload
     assert scope is not None
-    evidence_scope = _evidence_scope(scope)
+    evidence_scope = to_evidence_scope(scope)
     try:
         if endpoint == "retention-compliance":
             return await asyncio.to_thread(
@@ -224,55 +209,13 @@ async def _service_payload(
             service.failure_reasons,
             scope=evidence_scope,
         )
-    except _SOURCE_READ_ERRORS:
+    except SOURCE_READ_ERRORS:
         return source_error_payload(
             endpoint=endpoint,
             scope=evidence_scope,
             reason=source_reason,
             check=source_check,
         )
-
-
-async def _resolve_scope(
-    host: _EvidenceRoutingHost,
-    query: dict[str, str],
-    *,
-    endpoint: str,
-    check: str,
-    reason: str,
-) -> tuple[_IdentityScope | None, dict[str, object] | None]:
-    service = _require_service(host)
-    try:
-        scope = await asyncio.to_thread(
-            resolve_control_plane_identity_scope,
-            host,
-            query,
-        )
-    except _SOURCE_READ_ERRORS:
-        fallback = EvidenceScope(
-            requested_pipeline=host._read_required_param(query, "pipeline"),
-            selected_run_id=read_selected_run_id(host, query),
-            selected_run_types=host._read_scope_csv_param(query, "run_type"),
-            resolved_via="control_plane_source_read_failed",
-            manifest=None,
-        )
-        return None, source_error_payload(
-            endpoint=endpoint,
-            scope=fallback,
-            reason=reason,
-            check=check,
-        )
-    return scope, None
-
-
-def _evidence_scope(scope: _IdentityScope) -> EvidenceScope:
-    return EvidenceScope(
-        requested_pipeline=scope.requested_pipeline,
-        selected_run_id=scope.selected_run_id,
-        selected_run_types=scope.selected_run_types,
-        resolved_via=scope.resolved_via,
-        manifest=scope.resolved_manifest,
-    )
 
 
 def _require_service(host: _EvidenceRoutingHost) -> ControlPlaneEvidenceService:

@@ -108,6 +108,32 @@ def test_checkpoint_validation_keeps_legacy_checksum_unknown() -> None:
     assert "checkpoint_anchors_match_manifest" in _reasons(payload)
 
 
+def test_checkpoint_validation_reports_schema_and_anchor_mismatch_reasons() -> None:
+    manifest = _manifest()
+
+    payload = ControlPlaneEvidenceService().checkpoint_validation(
+        scope=_scope(manifest),
+        checkpoint=(
+            manifest.run_id,
+            {
+                "manifest_id": "different-manifest",
+                "pipeline_name": manifest.pipeline_name,
+                "run_type": manifest.run_type.value,
+                "execution_fingerprint": manifest.execution_fingerprint,
+                "records_processed": "corrupt-count",
+                "checkpoint_checksum_valid": False,
+            },
+        ),
+        evidence_source="immutable_manifest_history",
+        aggregate_scope_unknown=False,
+    )
+
+    assert payload["status"] == "ERROR"
+    assert "checkpoint_records_processed_invalid" in _reasons(payload)
+    assert "checkpoint_checksum_mismatch" in _reasons(payload)
+    assert "checkpoint_anchor_mismatch" in _reasons(payload)
+
+
 def test_manifest_validation_reports_version_and_contract_reasons() -> None:
     manifest = _manifest(
         schema_version="2.0",
@@ -169,6 +195,43 @@ def test_lineage_validation_detects_directed_cycle() -> None:
     assert "lineage_identity_consistent" in _reasons(payload)
 
 
+def test_lineage_validation_detects_conflicting_node_definitions() -> None:
+    manifest = _manifest()
+    fragment_a = LineageGraphFragment(
+        fragment_id="fragment-a",
+        run_id=str(manifest.run_id),
+        manifest_id=manifest.manifest_id,
+        nodes=(
+            LineageNodeRef(
+                LineageNodeType.DATASET,
+                "shared:node",
+                attributes={"version": "1"},
+            ),
+        ),
+    )
+    fragment_b = LineageGraphFragment(
+        fragment_id="fragment-b",
+        run_id=str(manifest.run_id),
+        manifest_id=manifest.manifest_id,
+        nodes=(
+            LineageNodeRef(
+                LineageNodeType.TRANSFORM,
+                "shared:node",
+                attributes={"version": "2"},
+            ),
+        ),
+    )
+    service = ControlPlaneEvidenceService(
+        lineage_store=_LineageStore((fragment_b, fragment_a))  # type: ignore[arg-type]
+    )
+
+    payload = service.lineage_validation(scope=_scope(manifest))
+
+    assert payload["status"] == "ERROR"
+    assert "lineage_identity_mismatch" in _reasons(payload)
+    assert "node_definition:shared:node" in str(payload)
+
+
 class _LifecyclePlanner:
     def __init__(self, plan: ControlPlaneArtifactLifecyclePlan) -> None:
         self.plan_result = plan
@@ -224,6 +287,37 @@ def test_retention_compliance_uses_dry_run_evidence_floor() -> None:
     assert all("path" not in row for row in payload["artifacts"])
 
 
+def test_retention_compliance_reports_delete_and_evidence_floor_violations() -> None:
+    manifest = _manifest()
+    plan = ControlPlaneArtifactLifecyclePlan(
+        generated_at=_NOW,
+        cutoff=_NOW,
+        dry_run=True,
+        artifacts=(
+            ControlPlaneArtifactRef(
+                surface=ControlPlaneArtifactSurface.RUN_MANIFEST,
+                path="/redacted/manifest.json",
+                artifact_id=manifest.manifest_id,
+                decision=ControlPlaneArtifactLifecycleDecision.DELETE,
+                reason="retention_expired",
+                replay_impact=(
+                    ControlPlaneArtifactReplayImpact.STRICT_REPLAY_EVIDENCE_PROTECTED
+                ),
+            ),
+        ),
+    )
+    service = ControlPlaneEvidenceService(
+        lifecycle_planner=_LifecyclePlanner(plan)  # type: ignore[arg-type]
+    )
+
+    payload = service.retention_compliance(scope=_scope(manifest), now=_NOW)
+
+    assert payload["status"] == "ERROR"
+    assert "retention_delete_candidates_present" in _reasons(payload)
+    assert "reproducibility_evidence_floor_unprotected" in _reasons(payload)
+    assert "required_evidence_surfaces_missing" in _reasons(payload)
+
+
 def test_failure_reasons_expose_only_fixed_categories() -> None:
     manifest = _manifest()
     ledger = InMemoryRunLedgerStore()
@@ -248,6 +342,15 @@ def test_failure_reasons_expose_only_fixed_categories() -> None:
 
     rows = payload["rows"]
     assert [row["category"] for row in rows] == list(FAILURE_REASON_CATEGORIES)
+    assert {row["category"]: row["count"] for row in rows} == {
+        "api": 1,
+        "dq": 0,
+        "schema": 1,
+        "storage": 0,
+        "network": 1,
+        "validation": 0,
+        "unknown": 1,
+    }
     assert payload["total_failure_count"] == 4
     assert "secret raw failure" not in str(payload)
     assert "NovelCrash" not in str(payload)
