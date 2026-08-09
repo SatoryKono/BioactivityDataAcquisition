@@ -1,0 +1,5 @@
+interface:
+  display_name: "Agent Debugging"
+  short_description: "Run safe deterministic agent diagnostics"
+  default_prompt: "Use $agent-debugging to inspect a bounded AI-agent trajectory through the safe BioETL adapter and confirm findings with repository-native checks."
+

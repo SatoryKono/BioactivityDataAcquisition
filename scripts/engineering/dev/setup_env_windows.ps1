@@ -1,3 +1,8 @@
+param(
+    [ValidateSet("none", "agentdebugx", "proofagent", "all")]
+    [string]$AgentTools = "none"
+)
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
@@ -50,6 +55,25 @@ if (Get-Command uv -ErrorAction SilentlyContinue) {
         Write-Host "[setup_env_windows][hint] Retry with the same command; UV_HTTP_TIMEOUT defaults to $env:UV_HTTP_TIMEOUT seconds."
         exit $LASTEXITCODE
     }
+
+    $OptionalExtras = @()
+    if ($AgentTools -in @("agentdebugx", "all")) { $OptionalExtras += "agentdebugx" }
+    if ($AgentTools -in @("proofagent", "all")) { $OptionalExtras += "proofagent" }
+    $InstalledExtras = @()
+    $OptionalFailures = 0
+    foreach ($Extra in $OptionalExtras) {
+        $SyncArgs = @("sync", "--active", "--frozen", "--no-build", "--extra", "dev", "--extra", "tracing")
+        foreach ($Installed in $InstalledExtras) { $SyncArgs += @("--extra", $Installed) }
+        $SyncArgs += @("--extra", $Extra)
+        & uv @SyncArgs
+        if ($LASTEXITCODE -eq 0) {
+            $InstalledExtras += $Extra
+            Write-Host "[setup_env_windows][ok] Optional tool installed: $Extra"
+        } else {
+            $OptionalFailures = 1
+            Write-Error "[setup_env_windows][error] Optional tool failed without blocking the remaining tools: $Extra" -ErrorAction Continue
+        }
+    }
 } else {
     if (-not (Test-Path $VenvPython)) {
         if (Get-Command py -ErrorAction SilentlyContinue) {
@@ -68,8 +92,24 @@ if (Get-Command uv -ErrorAction SilentlyContinue) {
     }
 
     Invoke-CheckedCommand -Command { & $VenvPython -m pip install -e ".[dev,tracing]" } -ErrorMessage "[setup_env_windows][error] editable install failed."
+    $OptionalExtras = @()
+    if ($AgentTools -in @("agentdebugx", "all")) { $OptionalExtras += "agentdebugx" }
+    if ($AgentTools -in @("proofagent", "all")) { $OptionalExtras += "proofagent" }
+    $OptionalFailures = 0
+    foreach ($Extra in $OptionalExtras) {
+        & $VenvPython -m pip install --only-binary=:all: -e ".[dev,tracing,$Extra]"
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "[setup_env_windows][ok] Optional tool installed: $Extra"
+        } else {
+            $OptionalFailures = 1
+            Write-Error "[setup_env_windows][error] Optional tool failed without blocking the remaining tools: $Extra" -ErrorAction Continue
+        }
+    }
 }
 
 Write-Host "[setup_env_windows][ok] Environment ready at .venv-win"
 Write-Host "[setup_env_windows][hint] Activate with: .\.venv-win\Scripts\Activate.ps1"
 Write-Host "[setup_env_windows][hint] Run tests with: .\scripts\engineering\dev\run_pytest.ps1 tests\unit --narrow --timeout=120 --lf"
+if ($OptionalFailures -ne 0) {
+    exit 1
+}

@@ -2020,6 +2020,7 @@
       "decision_date": "2026-08-09",
       "decision_path": "docs/02-architecture/decisions/ADR-056-proof-or-stop-lifecycle-control.md",
       "enforcement_owner_paths": [
+        "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_proof_or_stop_contract.py",
         "tests/unit/scripts/test_documentation_governance_check.py"
       ],
@@ -2027,6 +2028,7 @@
       "implementation_owner_paths": [
         "docs/00-project/RULES.md",
         "docs/04-reference/contracts/README.md",
+        "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_proof_or_stop_contract.py",
         "tests/unit/scripts/test_documentation_governance_check.py"
       ],
