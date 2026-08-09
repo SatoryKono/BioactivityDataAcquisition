@@ -15,7 +15,6 @@ from bioetl.application.services.control_plane.evidence.lineage_identity import 
 )
 from bioetl.application.services.control_plane.evidence.models import EvidenceCheck
 from bioetl.application.services.control_plane.evidence.persistence_profile import (
-    STRICT_PERSISTENCE_PROFILES,
     resolve_persistence_profile,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
@@ -70,13 +69,11 @@ def build_lineage_checks(
 
 def _missing_fragment_checks(manifest: RunManifest) -> tuple[EvidenceCheck, ...]:
     required_profile, profile_valid = resolve_persistence_profile(manifest)
-    strict_profile = (
-        not profile_valid or required_profile in STRICT_PERSISTENCE_PROFILES
-    )
+    lineage_required = not profile_valid or required_profile == "forensic_grade"
     return (
         EvidenceCheck(
             "closure",
-            "ERROR" if strict_profile else "UNKNOWN",
+            "ERROR" if lineage_required else "UNKNOWN",
             "lineage_fragments_missing",
             "No persisted lineage fragments resolved for the selected run.",
         ),
@@ -137,7 +134,7 @@ def _persistence_profile_check(
             "lineage_persistence_profile_observed",
             f"Persisted lineage evidence is present for {required_profile}.",
         )
-    if required_profile in STRICT_PERSISTENCE_PROFILES:
+    if required_profile == "forensic_grade":
         return EvidenceCheck(
             "persistence_profile",
             "ERROR",
@@ -148,7 +145,7 @@ def _persistence_profile_check(
         "persistence_profile",
         "WARNING",
         "lineage_persistence_profile_degraded",
-        "degraded_observable permits a run without persisted lineage closure.",
+        f"{required_profile} permits a run without persisted forensic lineage.",
     )
 
 

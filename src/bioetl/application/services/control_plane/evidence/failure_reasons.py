@@ -65,11 +65,29 @@ def build_failure_reason_rows(
         total += 1
     return (
         [
-            {"category": category, "count": counts[category]}
+            {
+                "category": category,
+                "count": counts[category],
+                "status": "OK",
+                "reason": "failure_reasons_bounded",
+            }
             for category in FAILURE_REASON_CATEGORIES
         ],
         total,
     )
+
+
+def build_unknown_failure_reason_rows(reason: str) -> list[dict[str, object]]:
+    """Return visible UNKNOWN rows while preserving the fixed categories."""
+    return [
+        {
+            "category": category,
+            "count": None,
+            "status": "UNKNOWN",
+            "reason": reason,
+        }
+        for category in FAILURE_REASON_CATEGORIES
+    ]
 
 
 def _is_failure(entry: RunLedgerEntry) -> bool:
@@ -97,4 +115,8 @@ def _classify(entry: RunLedgerEntry) -> str:
     return "unknown"
 
 
-__all__ = ["FAILURE_REASON_CATEGORIES", "build_failure_reason_rows"]
+__all__ = [
+    "FAILURE_REASON_CATEGORIES",
+    "build_failure_reason_rows",
+    "build_unknown_failure_reason_rows",
+]
