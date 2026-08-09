@@ -404,6 +404,11 @@
     "family": "pipeline_runtime",
     "type": "counter"
   },
+  "bioetl_replay_duplicate_overwrite_risk_total": {
+    "description": "Total accepted replay manifests exposing duplicate or overwrite write risk",
+    "family": "pipeline_runtime",
+    "type": "counter"
+  },
   "bioetl_replay_reconstructability_events_total": {
     "description": "Total replay reconstructability observations recorded during manifest assembly",
     "family": "pipeline_runtime",

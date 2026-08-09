@@ -1378,6 +1378,26 @@ def test_control_plane_current_status_rules_project_pipeline_signals_to_run_type
     )
 
 
+def test_control_plane_rules_require_replay_risk_and_integrity_telemetry() -> None:
+    payload = _load_control_plane_current_status_rules()
+    record_map = _build_record_map(payload)
+
+    universe_expr = record_map["bioetl_control_plane_run_type_universe"]["expr"]
+    replay_expr = record_map["bioetl_replay_safety_blockers_15m"]["expr"]
+    failures_expr = record_map["bioetl_manifest_ledger_failures_15m"]["expr"]
+    telemetry_expr = record_map["bioetl_control_plane_telemetry_missing_5m"]["expr"]
+
+    assert "bioetl_manifest_ledger_integrity_ratio" in universe_expr
+    assert "increase(bioetl_replay_duplicate_overwrite_risk_total[15m])" in (
+        replay_expr
+    )
+    assert 'integrity_type="inconsistent"' in replay_expr
+    assert 'integrity_type="inconsistent"' in failures_expr
+    assert "bioetl_replay_duplicate_overwrite_risk_total[5m]" in telemetry_expr
+    assert "bioetl_manifest_ledger_integrity_ratio[5m]" in telemetry_expr
+    assert re.search(r",\s*4\s*\)\s*$", telemetry_expr)
+
+
 def test_dq_current_status_splits_hard_failures_from_degraded_warnings() -> None:
     payload = _load_rules()
     record_map = _build_record_map(payload)

@@ -41,6 +41,7 @@ _SOCKET_BACKED_TEST_MODULES = frozenset(
         "test_health_server.py",
         "test_health_server_control_plane_checkpoint_freshness.py",
         "test_health_server_control_plane_identity.py",
+        "test_health_server_control_plane_validation_evidence.py",
         "test_processed_records_table.py",
     }
 )
