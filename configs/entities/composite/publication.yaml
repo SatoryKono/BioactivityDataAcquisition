@@ -10,7 +10,7 @@ pipeline:
   loading_strategy: full_scan_only
   description: Composite publication entity merging data from multiple providers
   business_primary_keys:
-  - entity_id
+    - entity_id
   sink:
     silver:
       mode: merge
@@ -22,244 +22,254 @@ schema:
     include: []
     exclude: []
   column_groups:
-  - name: system
-    fields:
-    - entity_id
-    - content_hash
-    - _source
-    - _index
-    - _lookup_method
-    - _original_id
-    pattern: ^_composite_|^_source_providers|^_enrichment_|^_lineage_
-    provider_order:
-    - chembl
-    - crossref
-    - openalex
-    - pubmed
-    - semanticscholar
-  - name: provider_ids
-    fields:
-    - alternative_id
-    - chembl_release
-    - corpus_id
-    - dblp_id
-    - mag_id
-    - nlm_unique_id
-    - openalex_id
-    - paper_id
-    - pmc_id
-    - pmid
-    - publication_id
-    - src_id
-    provider_order:
-    - semanticscholar
-    - openalex
-    - pubmed
-    - chembl
-    - crossref
-  - name: journal
-    fields:
-    - abstract
-    - abstract_structured
-    - doi
-    - issn
-    - issn_electronic
-    - issn_list
-    - issn_print
-    - issue
-    - journal
-    - journal_iso_abbrev
-    - journal_issn_type
-    - journal_name_short
-    - publisher
-    - title
-    - venue
-    - volume
-    provider_order:
-    - pubmed
-    - semanticscholar
-    - chembl
-    - crossref
-    - openalex
-  - name: pagination
-    fields:
-    - medline_pgn
-    - page_first
-    - page_last
-    - page_range
-    provider_order:
-    - pubmed
-    - chembl
-    - crossref
-    - openalex
-    - semanticscholar
-  - name: authors
-    fields:
-    - author_count
-    - author_details
-    - author_h_indices
-    - author_openalex_ids
-    - author_orcids
-    - author_s2_ids
-    - authors
-    - authors_with_affiliations
-    provider_order:
-    - pubmed
-    - semanticscholar
-    - openalex
-    - chembl
-    - crossref
-  - name: affiliations
-    fields:
-    - affiliation_list
-    - affiliation_structured
-    - institution_country_codes
-    - institution_ids
-    - ror_ids
-    - country
-    provider_order:
-    - pubmed
-    - openalex
-    - semanticscholar
-    - chembl
-    - crossref
-  - name: date
-    fields:
-    - creation_date
-    - date_completed
-    - date_revised
-    - pub_date
-    - pub_day
-    - pub_month
-    - publication_date
-    - publication_year
-    - year
-    provider_order:
-    - chembl
-    - crossref
-    - openalex
-    - pubmed
-    - semanticscholar
-  - name: subjects
-    fields:
-    - keyword_count
-    - mesh_heading_count
-    - primary_topic
-    - subject_fields
-    - subject_keywords
-    - subject_mesh
-    - subject_topics
-    - tldr
-    provider_order:
-    - pubmed
-    - openalex
-    - semanticscholar
-    - crossref
-    - chembl
-  - name: biomedical
-    fields:
-    - chemicals
-    - chemical_count
-    - gene_symbols
-    - databanks
-    - grants
-    - grant_count
-    provider_order:
-    - pubmed
-    - openalex
-    - chembl
-  - name: citations
-    fields:
-    - citation_contexts
-    - citation_subset
-    - citations_made
-    - citations_received
-    - fwci
-    - influential_citation_count
-    - references
-    provider_order:
-    - semanticscholar
-    - crossref
-    - openalex
-    - pubmed
-    - chembl
-  - name: doc_type
-    fields:
-    - content_domain_crossmark_restriction
-    - content_domain_domains
-    - is_oa
-    - is_retracted
-    - language
-    - license_url
-    - oa_status
-    - open_access_url
-    - publication_class
-    - publication_status
-    - publication_subclass
-    - publication_type
-    - publication_type_unified
-    - publication_types
-    provider_order:
-    - semanticscholar
-    - pubmed
-    - chembl
-    - crossref
-    - openalex
+    - name: system
+      fields:
+        - entity_id
+        - content_hash
+        - _source
+        - _index
+        - _lookup_method
+        - _original_id
+      pattern: ^_composite_|^_source_providers|^_enrichment_|^_lineage_
+      provider_order:
+        - chembl
+        - crossref
+        - openalex
+        - pubmed
+        - semanticscholar
+    - name: provider_ids
+      fields:
+        - alternative_id
+        - chembl_release
+        - corpus_id
+        - dblp_id
+        - mag_id
+        - nlm_unique_id
+        - openalex_id
+        - paper_id
+        - pmc_id
+        - pmid
+        - publication_id
+        - src_id
+      provider_order:
+        - semanticscholar
+        - openalex
+        - pubmed
+        - chembl
+        - crossref
+    - name: journal
+      fields:
+        - abstract
+        - abstract_structured
+        - doi
+        - issn
+        - issn_electronic
+        - issn_list
+        - issn_print
+        - issue
+        - journal
+        - journal_iso_abbrev
+        - journal_issn_type
+        - journal_name_short
+        - publisher
+        - title
+        - venue
+        - volume
+      provider_order:
+        - pubmed
+        - semanticscholar
+        - chembl
+        - crossref
+        - openalex
+    - name: pagination
+      fields:
+        - medline_pgn
+        - page_first
+        - page_last
+        - page_range
+      provider_order:
+        - pubmed
+        - chembl
+        - crossref
+        - openalex
+        - semanticscholar
+    - name: authors
+      fields:
+        - author_count
+        - author_details
+        - author_h_indices
+        - author_openalex_ids
+        - author_orcids
+        - author_s2_ids
+        - authors
+        - authors_with_affiliations
+      provider_order:
+        - pubmed
+        - semanticscholar
+        - openalex
+        - chembl
+        - crossref
+    - name: affiliations
+      fields:
+        - affiliation_list
+        - affiliation_structured
+        - institution_country_codes
+        - institution_ids
+        - ror_ids
+        - country
+      provider_order:
+        - pubmed
+        - openalex
+        - semanticscholar
+        - chembl
+        - crossref
+    - name: date
+      fields:
+        - creation_date
+        - date_completed
+        - date_revised
+        - pub_date
+        - pub_day
+        - pub_month
+        - publication_date
+        - publication_year
+        - year
+      provider_order:
+        - chembl
+        - crossref
+        - openalex
+        - pubmed
+        - semanticscholar
+    - name: subjects
+      fields:
+        - keyword_count
+        - mesh_heading_count
+        - primary_topic
+        - subject_fields
+        - subject_keywords
+        - subject_mesh
+        - subject_topics
+        - tldr
+      provider_order:
+        - pubmed
+        - openalex
+        - semanticscholar
+        - crossref
+        - chembl
+    - name: biomedical
+      fields:
+        - chemicals
+        - chemical_count
+        - gene_symbols
+        - databanks
+        - grants
+        - grant_count
+      provider_order:
+        - pubmed
+        - openalex
+        - chembl
+    - name: citations
+      fields:
+        - citation_contexts
+        - citation_subset
+        - citations_made
+        - citations_received
+        - fwci
+        - influential_citation_count
+        - references
+      provider_order:
+        - semanticscholar
+        - crossref
+        - openalex
+        - pubmed
+        - chembl
+    - name: doc_type
+      fields:
+        - content_domain_crossmark_restriction
+        - content_domain_domains
+        - is_oa
+        - is_retracted
+        - language
+        - license_url
+        - oa_status
+        - open_access_url
+        - publication_class
+        - publication_status
+        - publication_subclass
+        - publication_type
+        - publication_type_unified
+        - publication_types
+      provider_order:
+        - semanticscholar
+        - pubmed
+        - chembl
+        - crossref
+        - openalex
   silver:
     include_groups:
-    - system
-    - provider_ids
-    - journal
-    - pagination
-    - authors
-    - affiliations
-    - date
-    - subjects
-    - biomedical
-    - citations
-    - doc_type
+      - system
+      - provider_ids
+      - journal
+      - pagination
+      - authors
+      - affiliations
+      - date
+      - subjects
+      - biomedical
+      - citations
+      - doc_type
     exclude_fields: []
   gold:
     include_groups:
-    - system
-    - provider_ids
-    - journal
-    - pagination
-    - authors
-    - affiliations
-    - date
-    - subjects
-    - biomedical
-    - citations
-    - doc_type
+      - system
+      - provider_ids
+      - journal
+      - pagination
+      - authors
+      - affiliations
+      - date
+      - subjects
+      - biomedical
+      - citations
+      - doc_type
     exclude_fields:
-    - _dq_*
-    - _index
-    - _lookup_method
-    - _original_id
+      - _dq_*
+      - _index
+      - _lookup_method
+      - _original_id
 quality:
   version: 1.0.0
   provider: composite
   entity: publication
+  thresholds:
+    soft_fail: 0.05
+    hard_fail: 0.50
   entity_field_validations: []
   entity_cross_field_validations: []
 filters:
   version: 1.0.0
   provider: composite
   entity: publication
+  input_filter:
+    enabled: false
+    source_path: data/input/composite_publication.csv
+    column_name: entity_id
+    filter_field: entity_id
+    batch_size: 1000
+    checkpoint_interval: 1000
   silver_filters:
     required_fields:
-    - entity_id
-    - publication_id
+      - entity_id
+      - publication_id
   gold_filters:
     required_fields:
-    - entity_id
-    - publication_id
+      - entity_id
+      - publication_id
 contracts:
   primary_key:
-  - entity_id
+    - entity_id
   merge_keys:
-  - entity_id
+    - entity_id
   hash_include: []
   hash_exclude: []
   contract_ref: composite.publication
