@@ -45,6 +45,7 @@ from scripts.engineering.qa.report_config_surface_backlog import (
 from scripts.engineering.qa.report_module_coverage_inventory import (
     _refresh_existing_inventory_source_tree,
 )
+from memory.proof import emit_receipt_from_environment
 
 DEFAULT_JSON_OUTPUT = (
     PROJECT_ROOT / "reports" / "quality" / "debt-governance-gates.json"
@@ -1907,6 +1908,15 @@ def main(argv: list[str] | None = None) -> int:
             compare_artifacts=args.changed_from_ref is None,
             root=repo_root,
         )
+        emit_receipt_from_environment(
+            repo_root=repo_root,
+            producer="debt_governance_gates",
+            evidence_kind="debt",
+            command="python -m scripts.engineering.qa report-debt-governance-gates",
+            status="fail" if errors else "pass",
+            exit_code=1 if errors else 0,
+            output_path=json_out,
+        )
         if errors:
             for error in errors:
                 print(error, file=sys.stderr)
@@ -1915,6 +1925,15 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.update:
         _write_artifacts(payload, json_out=json_out, md_out=md_out, root=repo_root)
+        emit_receipt_from_environment(
+            repo_root=repo_root,
+            producer="debt_governance_gates",
+            evidence_kind="debt",
+            command="python -m scripts.engineering.qa report-debt-governance-gates",
+            status="pass",
+            exit_code=0,
+            output_path=json_out,
+        )
         return 0
 
     print(json.dumps(payload, indent=2, sort_keys=True))

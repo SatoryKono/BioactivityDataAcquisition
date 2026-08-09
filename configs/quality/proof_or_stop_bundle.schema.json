@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bioetl.local/contracts/proof-or-stop-bundle.schema.json",
+  "title": "BioETL Proof-or-Stop evidence bundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "run_id",
+    "task_id",
+    "repository",
+    "actor",
+    "runtime",
+    "claim",
+    "trust_tier",
+    "source",
+    "acceptance",
+    "receipts",
+    "bundle_digest"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "run_id": {"type": "string", "minLength": 1},
+    "task_id": {"type": "string", "minLength": 1},
+    "repository": {"$ref": "#/$defs/repository"},
+    "actor": {"type": "string", "minLength": 1},
+    "runtime": {"type": "string", "minLength": 1},
+    "claim": {"enum": ["tested", "reviewed", "done", "ready_to_merge"]},
+    "trust_tier": {
+      "enum": [
+        "local_single_host",
+        "ci",
+        "independent_evaluator",
+        "unsupported_or_compromised"
+      ]
+    },
+    "source": {"$ref": "#/$defs/source"},
+    "acceptance": {"$ref": "#/$defs/acceptance"},
+    "receipts": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/receipt"}
+    },
+    "bundle_digest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repo_id", "branch", "worktree_id"],
+      "properties": {
+        "repo_id": {"type": "string", "minLength": 1},
+        "branch": {"type": "string", "minLength": 1},
+        "worktree_id": {"type": "string", "minLength": 1},
+        "ci_run_id": {"type": ["string", "null"]}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "head_sha",
+        "material_hash",
+        "task_diff_hash",
+        "policy_hash",
+        "command_set_hash",
+        "dirty",
+        "untracked_paths"
+      ],
+      "properties": {
+        "head_sha": {"$ref": "#/$defs/gitSha"},
+        "material_hash": {"$ref": "#/$defs/digest"},
+        "task_diff_hash": {"$ref": "#/$defs/digest"},
+        "policy_hash": {"$ref": "#/$defs/digest"},
+        "command_set_hash": {"$ref": "#/$defs/digest"},
+        "dirty": {"type": "boolean"},
+        "untracked_paths": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        }
+      }
+    },
+    "acceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required_evidence", "require_full_trust"],
+      "properties": {
+        "required_evidence": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        },
+        "require_full_trust": {"type": "boolean"}
+      }
+    },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receipt_id",
+        "producer",
+        "evidence_kind",
+        "command",
+        "argv",
+        "cwd",
+        "started_at",
+        "duration_ms",
+        "exit_code",
+        "status",
+        "output_digest",
+        "source",
+        "repository",
+        "task_id",
+        "execution_attestation",
+        "receipt_digest"
+      ],
+      "properties": {
+        "receipt_id": {"type": "string", "minLength": 1},
+        "producer": {"type": "string", "minLength": 1},
+        "evidence_kind": {"type": "string", "minLength": 1},
+        "command": {"type": "string", "minLength": 1},
+        "argv": {"type": "array", "items": {"type": "string"}},
+        "cwd": {"type": "string", "minLength": 1},
+        "started_at": {"type": "string", "format": "date-time"},
+        "duration_ms": {"type": "integer", "minimum": 0},
+        "exit_code": {"type": ["integer", "null"]},
+        "status": {"enum": ["pass", "fail", "skip", "unavailable"]},
+        "skip_reason": {"type": ["string", "null"]},
+        "follow_up": {"type": ["string", "null"]},
+        "output_digest": {"$ref": "#/$defs/digest"},
+        "source": {"$ref": "#/$defs/source"},
+        "repository": {"$ref": "#/$defs/repository"},
+        "task_id": {"type": "string", "minLength": 1},
+        "execution_attestation": {
+          "enum": ["digest_only", "ci_identity", "independent_identity", "none"]
+        },
+        "receipt_digest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "gitSha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}([0-9a-f]{24})?$"
+    }
+  }
+}

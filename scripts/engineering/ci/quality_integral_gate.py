@@ -47,6 +47,7 @@ from bioetl.infrastructure.quality.debt_scorecard import (
 )
 from bioetl.infrastructure.quality.exemptions_registry import load_exemptions_registry
 from bioetl.infrastructure.quality.inventory import build_exemption_inventory
+from memory.proof import emit_receipt_from_environment
 
 
 @dataclass(frozen=True)
@@ -1142,6 +1143,15 @@ def main() -> int:
 
     output_path = Path(args.output)
     _write_output(output_path, output)
+    emit_receipt_from_environment(
+        repo_root=Path.cwd(),
+        producer="quality_integral_gate",
+        evidence_kind="quality",
+        command="python -m scripts.engineering.ci.quality_integral_gate",
+        status="pass" if gate_pass else "fail",
+        exit_code=0 if gate_pass else 1,
+        output_path=output_path,
+    )
 
     if args.summary_out:
         _append_summary(

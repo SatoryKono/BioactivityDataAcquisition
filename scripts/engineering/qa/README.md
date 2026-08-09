@@ -25,6 +25,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `generate-debt-tasks`            | `generate_architecture_debt_tasks.py`                 | Generate `tasks_architecture_metric_exemptions_*.json` from the registry                          |
 | `reduce-architecture-debt`       | `reduce_architecture_debt.py`                         | Build `architecture_debt_execution_plan_*.json` from the latest tasks file                        |
 | `check-terminology`              | `lint_terminology.py`                                 | Terminology linting against glossary                                                              |
+| `proof-or-stop`                  | `src/memory/proof_cli.py`                             | Plan, capture, assemble, verify, pilot, and explicitly ingest source-bound closeout evidence       |
 | `report-dep-map`                 | `generate_architecture_dependency_map.py`             | Generate/check architecture dependency map                                                        |
 | `report-vcr-metadata`            | `report_vcr_metadata_catalog.py`                      | Generate/check canonical VCR metadata catalog                                                     |
 | `check-vcr-replay-preflight`     | `vcr/check_replay_preflight.py`                       | Fail fast on unresolved replay VCR pointers and cheap catalog drift                                |

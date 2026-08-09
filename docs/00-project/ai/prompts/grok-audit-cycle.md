@@ -44,6 +44,8 @@ Do not run empty cycles "for form".
 
 ## Cycle closeout
 - Table: finding | issue | state | commit/PR | verification
+- Run the offline Proof-or-Stop verifier; only ADMIT qualifies a lifecycle transition
+- Use .venv-win on Windows and .venv in WSL/Linux; vendor evidence cannot override core
 - If NO_ACTIONABLE_FINDINGS: stop (do not invent work for remaining cycles)
 
 ## Git safety

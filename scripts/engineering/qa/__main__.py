@@ -69,6 +69,7 @@ Commands:
     run-tests            Run a named test-health lane and emit JUnit/JSON artifacts
     summarize-junit      Aggregate existing JUnit XML into test-health JSON
     test-health          Summarize recent test-health run JSON artifacts
+    proof-or-stop        Plan, assemble, verify, pilot, or ingest source-bound evidence
     check-dashboard-visual-semantics Validate Grafana status-panel visual semantic invariants
     check-prometheus-rules Validate Prometheus rules with deterministic promtool preflight
     report-dashboard-inventory Generate/check dashboard inventory parity plus
@@ -167,6 +168,7 @@ COMMAND_MODULES: dict[str, str] = {
     ),
     "analyze-duplicate-functions": "scripts.engineering.qa.analyze_duplicate_functions",
     "calibrate-hotspots": "scripts.engineering.qa.calibrate_hotspot_budgets",
+    "proof-or-stop": "memory.proof_cli",
     "check-dashboard-visual-semantics": "scripts.engineering.qa.check_dashboard_visual_semantics",
     "check-dashboard-performance-budgets": (
         "scripts.engineering.qa.check_dashboard_performance_budgets"
