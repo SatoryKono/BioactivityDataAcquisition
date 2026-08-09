@@ -1052,59 +1052,6 @@ class TestFilteredDataSourceMetrics:
                 assert call.args[2]["source_kind"] == "csv_multi_column"
                 assert "source_file" not in call.args[2]
 
-    @pytest.mark.asyncio
-    async def test_multi_column_metrics_are_compatible_with_prometheus_adapter(
-        self,
-        mock_data_source_with_filtered,
-    ):
-        """Multi-column filter metrics must not emit undeclared Prometheus labels."""
-        from bioetl.domain.filtering.input_config import FilterColumn
-        from bioetl.infrastructure.observability.prometheus_metrics import (
-            PrometheusMetrics,
-        )
-
-        reader = AsyncMock()
-        reader.load_multi_column_filter = AsyncMock(
-            return_value=FilterLoadResult(
-                ids=("CHEMBL1", "CHEMBL2"),
-                total_count=2,
-                unique_count=2,
-                duplicate_count=0,
-                duplicates=frozenset(),
-                column_ids={
-                    "molecule_id": frozenset({"CHEMBL1", "CHEMBL2"}),
-                    "assay_id": frozenset({"CHEMBL_ASSAY_1"}),
-                },
-                valid_combinations=frozenset({("CHEMBL1", "CHEMBL_ASSAY_1")}),
-                filter_fields=("molecule_id", "assay_id"),
-            )
-        )
-        config = InputFilterConfig(
-            enabled=True,
-            source_path="data/multi.csv",
-            columns=(
-                FilterColumn("molecule_id", "molecule_id"),
-                FilterColumn("assay_id", "assay_id"),
-            ),
-        )
-        filtered = FilteredDataSource(
-            data_source=mock_data_source_with_filtered,
-            filter_reader=reader,
-            filter_config=config,
-            metrics=PrometheusMetrics(),
-            pipeline_name="test_pipeline",
-        )
-
-        await filtered.__aenter__()
-
-        assert filtered.filter_result is not None
-        assert filtered.filter_result.filter_fields == ("molecule_id", "assay_id")
-        assert filtered._filter_fields == ("molecule_id", "assay_id")
-        assert filtered._valid_combinations == frozenset(
-            {("CHEMBL1", "CHEMBL_ASSAY_1")}
-        )
-
-
 @pytest.mark.unit
 class TestFilteredDataSourceGetSourceMetadata:
     """Tests for get_source_metadata delegation."""

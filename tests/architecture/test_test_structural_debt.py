@@ -24,13 +24,11 @@ MAX_TEST_FUNCTION_LOC = 200
 
 TEST_FILE_LOC_EXEMPTIONS = {
     "tests/testing_support/bronze_writer.py": 2025,
-    "tests/testing_support/neo4j_memory_sync.py": 3300,
     "tests/integration/test_grafana_dashboard_links.py": 2350,
     "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py": 2200,
 }
 
 TEST_FUNCTION_LOC_EXEMPTIONS = {
-    "tests/testing_support/neo4j_memory_sync.py::test_snapshot_contains_core_repo_surfaces": 295,
     (
         "tests/unit/interfaces/http/test_control_plane_identity_helper_branches.py::"
         "test_identity_extractor_helpers_cover_checkpoint_manifest_and_ledger_edges"

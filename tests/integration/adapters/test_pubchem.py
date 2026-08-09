@@ -880,3 +880,20 @@ class TestPubChemErrorPaths:
         # Verify that the single-page response contains structural data
         assert records[0].get("molecular_formula") == "C2H6O"
         assert records[0].get("molecular_weight") is not None
+_PUBCHEM_CASSETTE_BY_CLASS = {
+    "TestPubChemFetchByQuery": "pubchem_query_contracts",
+    "TestPubChemFetchFilteredBySmiles": "pubchem_smiles_contracts",
+    "TestPubChemFetchFilteredByCid": "pubchem_cid_contracts",
+    "TestPubChemFetchFilteredByInchikey": "pubchem_inchikey_contracts",
+    "TestPubChemHealthCheck": "pubchem_health_contracts",
+    "TestPubChemFetchDelegation": "pubchem_cross_route_contracts",
+    "TestPubChemStructuralFields": "pubchem_cross_route_contracts",
+    "TestPubChemErrorPaths": "pubchem_cross_route_contracts",
+}
+
+
+@pytest.fixture
+def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
+    """Share one replay cassette across each coherent PubChem contract group."""
+    class_name = request.node.cls.__name__ if request.node.cls is not None else ""
+    return _PUBCHEM_CASSETTE_BY_CLASS.get(class_name, request.node.name)

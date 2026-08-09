@@ -1,8 +1,0 @@
-schema_version: 1
-provider: pubchem
-cassette_rel_path: tests/fixtures/vcr/pubchem/TestPubChemFetchDelegation.test_fetch_delegates_to_fetch_filtered_for_cid.yaml
-metadata_status: managed_inventory
-source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 4a3e17ad33c2a0230fb9da5e81202e8f008bca2e60916cc72aa2443ce1e21004
-recorded_at: '2026-07-03'
-staleness_ready: true

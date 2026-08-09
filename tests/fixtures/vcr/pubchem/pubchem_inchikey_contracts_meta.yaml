@@ -1,0 +1,8 @@
+schema_version: 1
+provider: pubchem
+cassette_rel_path: tests/fixtures/vcr/pubchem/pubchem_inchikey_contracts.yaml
+metadata_status: managed_inventory
+source: issue-8407-cassette-consolidation
+cassette_sha256: c622b9793dc617130b2245d5ee619ee29cdf13e50931add338a24ce75d46e421
+recorded_at: '2026-07-03'
+staleness_ready: true

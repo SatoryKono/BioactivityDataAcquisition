@@ -1,0 +1,8 @@
+schema_version: 1
+provider: pubchem
+cassette_rel_path: tests/fixtures/vcr/pubchem/pubchem_cid_contracts.yaml
+metadata_status: managed_inventory
+source: issue-8407-cassette-consolidation
+cassette_sha256: cd5afbe37ea2fcb548f2243faaccd48db3d908dc2632f40caf3074c1b8e90ba3
+recorded_at: '2026-07-03'
+staleness_ready: true
