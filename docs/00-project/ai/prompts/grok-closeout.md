@@ -36,7 +36,11 @@ For each issue in SCOPE:
 2. Fix product root cause OR mark VERIFIED_ALREADY_RESOLVED with evidence
 3. Run focused tests/checks for the surface
 4. PR if product/docs delta; else evidence-only
-5. Issue comment with acceptance + commands; close if done
+5. Use .venv-win/Scripts/python.exe on Windows or .venv/bin/python in WSL/Linux
+6. Run proof-or-stop assemble + verify; prose is a claim, not DONE state
+7. Only ADMIT at the required trust tier qualifies closeout; DEGRADED/STOP stay open
+8. Optional vendor evidence cannot override the offline core verifier
+9. Issue comment with acceptance + commands; close if admitted and done
 Blocked: leave issue OPEN with exact blocker and acceptance gaps
 
 ## Done table

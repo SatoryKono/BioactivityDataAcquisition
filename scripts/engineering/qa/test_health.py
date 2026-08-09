@@ -22,6 +22,8 @@ from xml.etree import ElementTree
 
 import yaml
 
+from memory.proof import emit_receipt_from_environment
+
 ROOT = Path(__file__).resolve().parents[3]
 MATRIX_PATH = ROOT / "configs" / "quality" / "test_matrix.yaml"
 CLASSIFIERS_PATH = ROOT / "configs" / "quality" / "test_health_classifiers.yaml"
@@ -522,6 +524,16 @@ def _run_tests(argv: list[str]) -> int:
             "warnings": ["No JUnit XML files were found for this run."],
         }
     _write_summary(plan.summary_path, payload)
+    emit_receipt_from_environment(
+        repo_root=ROOT,
+        producer="test_health",
+        evidence_kind="tests",
+        command="python -m scripts.engineering.qa run-tests",
+        status="pass" if completed.returncode == 0 else "fail",
+        exit_code=completed.returncode,
+        output_path=plan.summary_path,
+        duration_ms=max(0, round(duration * 1000)),
+    )
     print(f"[test-health] summary: {_relative_to_root(plan.summary_path)}")
     return completed.returncode
 

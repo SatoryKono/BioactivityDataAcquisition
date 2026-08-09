@@ -49,11 +49,15 @@ This workflow is coordinated by `master.md` which provides:
    - `make test-architecture` (when architecture boundaries touched)
    - relevant unit/integration tests for changed modules
 
-8. Report: checks run, checks skipped, mirror-sync status (Cursor / Windsurf / Devin workflows)
+8. Assemble and verify the source-bound Proof-or-Stop bundle with
+   `python -m scripts.engineering.qa proof-or-stop assemble|verify`. Treat
+   `DEGRADED` and `STOP` as non-qualified lifecycle claims.
 
-9. Confirm no silent breaking changes to CLI/API/schema contracts
+9. Report: checks run, checks skipped, mirror-sync status (Cursor / Windsurf / Devin workflows)
 
-10. **Report to master.md** with execution status and results
+10. Confirm no silent breaking changes to CLI/API/schema contracts
+
+11. **Report to master.md** with execution status and Proof-or-Stop outcome
 
 ## Conditional Execution
 
