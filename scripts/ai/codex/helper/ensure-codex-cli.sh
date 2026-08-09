@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Ensure a writable Codex CLI installation for project launchers.
+# INTERNAL: Ensure a writable Codex CLI installation for project launchers.
+# Called by: Multiple parent scripts
+# DO NOT invoke directly
 
 set -euo pipefail
 
