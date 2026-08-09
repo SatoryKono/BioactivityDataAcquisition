@@ -90,6 +90,8 @@ help:
 	@echo "  make docker-clean           Stop containers; preserve volumes/images"
 	@echo "  make docker-compose-check   Validate docker-compose.yml"
 	@echo "  make docker-shell-bioetl    Open shell in bioetl container"
+	@echo ""
+	@echo "Note: Temporary diagnostic scripts are in scripts/temp/ with bounded lifecycles"
 
 install:
 	uv sync --extra dev --extra tests --extra tests_full --extra export
