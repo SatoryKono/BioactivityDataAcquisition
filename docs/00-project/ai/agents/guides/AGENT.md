@@ -369,7 +369,7 @@ ______________________________________________________________________
 ### 7.2. Создание Нового Пайплайна
 
 1. **Конфиг:** Создай `configs/entities/{provider}/{entity}.yaml`. Определи `load-strategy` (`incremental` или `full`).
-1. **Трансформер:** Наследуй от `BaseTransformer` (`src/bioetl/application/core/base_transformer.py`).
+1. **Трансформер:** Наследуй от `BaseTransformer` (`src/bioetl/application/core/base_transformer/base.py`).
 1. **Пайплайн:** Создай класс в `src/bioetl/application/pipelines/`.
 1. **Фабрика:** Создай фабрику в `src/bioetl/composition/factories/`.
 1. **Регистрация:** Зарегистрируй в `PipelineRegistry` (через декоратор `@register`).
@@ -378,10 +378,17 @@ ______________________________________________________________________
 ### 7.3. Использование BaseTransformer
 
 ```python
-from bioetl.application.core.base-transformer import BaseTransformer
+from bioetl.application.core.base_transformer.base import BaseTransformer
+from bioetl.domain.context import PipelineContext
+from bioetl.domain.types import BronzeRecord, SilverRecord
 
 class MyTransformer(BaseTransformer):
-    def -transform-record(self, record: dict) -> dict:
+    async def _transform_impl(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> SilverRecord | None:
         # Реализуй логику трансформации
         return {...}
 ```
