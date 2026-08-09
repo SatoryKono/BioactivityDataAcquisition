@@ -32,6 +32,7 @@ from __future__ import annotations
 from collections.abc import AsyncIterator
 from unittest.mock import MagicMock
 
+import httpx
 import pytest
 import respx
 from httpx import Response
@@ -255,9 +256,9 @@ async def test_health_check_on_connection_error(uniprot_adapter):
     Connection errors fall back to circuit breaker state which may
     be DEGRADED if there were prior failures.
     """
-    # Mock all requests to the UniProt search endpoint to raise connection error
+    # Use httpx.ConnectError for more realistic connection error simulation
     respx.route(host="rest.uniprot.org", path="/uniprotkb/search").mock(
-        side_effect=Exception("Connection error")
+        side_effect=httpx.ConnectError("Connection error")
     )
     async with uniprot_adapter:
         status = await uniprot_adapter.health_check()
