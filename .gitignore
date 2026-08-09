@@ -421,7 +421,6 @@ nul
 .mkdocs-site-tmp/
 output/
 site/
-src/tools/reports/
 docs/site/
 docs/exports/*.merged.md
 tests.zip
