@@ -135,13 +135,9 @@ markdown_extensions:
       custom_fences:
         - name: mermaid
           class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
   - admonition
   - toc:
       permalink: true
-      slugify: !!python/object/apply:pymdownx.slugs.slugify
-        kwds:
-          case: lower
 
 # Mermaid init (theme sync + adaptive layout).
 extra_javascript:
