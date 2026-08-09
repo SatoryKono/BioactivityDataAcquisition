@@ -17,6 +17,25 @@ from scripts.engineering.repo import check_scripts_inventory as inventory
 pytestmark = pytest.mark.unit
 
 
+def test_temporary_diagnostic_decision_overrides_strong_reference_groups() -> None:
+    refs = [
+        inventory.RefEvidence(
+            path="scripts/temp/README.md",
+            line=1,
+            text="report_example.py",
+            source_group="scripts",
+        )
+    ]
+
+    status = inventory._status_for(
+        "scripts/temp/report_example.py",
+        refs,
+        {"scripts/temp/report_example.py": "temporary_diagnostic"},
+    )
+
+    assert status == "temporary_diagnostic"
+
+
 def test_validate_target_registry_entries_rejects_supporting_status_without_taxonomy() -> (
     None
 ):

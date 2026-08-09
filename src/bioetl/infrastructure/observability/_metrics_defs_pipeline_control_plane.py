@@ -15,6 +15,8 @@ __all__ = [
     "CONTROL_PLANE_READS_TOTAL",
     "CONTROL_PLANE_READ_DURATION_SECONDS",
     "CONTROL_PLANE_TERMINAL_EVENTS_TOTAL",
+    "MANIFEST_LEDGER_INTEGRITY_RATIO",
+    "REPLAY_DUPLICATE_OVERWRITE_RISK_TOTAL",
 ]
 
 CONTROL_PLANE_MANIFEST_WRITES_TOTAL = Counter(
@@ -47,6 +49,18 @@ CONTROL_PLANE_TERMINAL_EVENTS_TOTAL = Counter(
     "bioetl_control_plane_terminal_events_total",
     "Total terminal run outcomes mirrored from persisted run-ledger entries",
     ["pipeline", "terminal_status"],
+)
+
+REPLAY_DUPLICATE_OVERWRITE_RISK_TOTAL = Counter(
+    "bioetl_replay_duplicate_overwrite_risk_total",
+    "Total accepted replay manifests exposing duplicate or overwrite write risk",
+    ["pipeline", "run_type", "risk_type"],
+)
+
+MANIFEST_LEDGER_INTEGRITY_RATIO = Gauge(
+    "bioetl_manifest_ledger_integrity_ratio",
+    "Ratio of ledger-expected manifests by referential-integrity outcome",
+    ["pipeline", "run_type", "integrity_type"],
 )
 
 CONTROL_PLANE_READS_TOTAL = Counter(

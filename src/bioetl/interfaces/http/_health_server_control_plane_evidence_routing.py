@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable, Coroutine
 from typing import Protocol
 
 from bioetl.application.runtime_clock import current_utc_time
@@ -12,6 +12,7 @@ from bioetl.application.services.control_plane.evidence import (
     EvidenceScope,
 )
 from bioetl.domain.exceptions import BioETLError
+from bioetl.domain.ports import CheckpointPort, RunManifestPort
 from bioetl.interfaces.http._forensic_request_budget import (
     ForensicEndpointUnavailable,
     forensic_unavailable_payload,
@@ -31,6 +32,12 @@ _SOURCE_READ_ERRORS = (BioETLError, OSError, TypeError, ValueError)
 
 class _EvidenceRoutingHost(Protocol):
     @property
+    def _checkpoint_port(self) -> CheckpointPort | None: ...
+
+    @property
+    def _run_manifest_port(self) -> RunManifestPort | None: ...
+
+    @property
     def _control_plane_evidence_service(
         self,
     ) -> ControlPlaneEvidenceService | None: ...
@@ -39,6 +46,9 @@ class _EvidenceRoutingHost(Protocol):
     def _forensic_endpoint_limiter(self) -> asyncio.Semaphore: ...
 
     def _read_required_param(self, query: dict[str, str], name: str) -> str: ...
+
+    @staticmethod
+    def _is_all_scope_token(value: str | None) -> bool: ...
 
     @staticmethod
     def _read_optional_param(query: dict[str, str], name: str) -> str | None: ...
@@ -75,7 +85,7 @@ async def dispatch_control_plane_evidence_request(
     """Handle one validation route and return whether the path was recognized."""
     operations: dict[
         str,
-        Callable[[], Awaitable[dict[str, object]]],
+        Callable[[], Coroutine[object, object, dict[str, object]]],  # Any: async function signatures
     ] = {
         "/ops/control-plane/checkpoint-validation": lambda: _checkpoint_payload(
             host, query
@@ -146,7 +156,7 @@ async def _checkpoint_payload(
             _,
             aggregate_scope_unknown,
         ) = await load_checkpoint_freshness_evidence(
-            host,  # type: ignore[arg-type]
+            host,
             scope=scope,
             target_pipeline=target_pipeline,
         )
@@ -197,8 +207,20 @@ async def _service_payload(
                 scope=evidence_scope,
                 now=current_utc_time(),
             )
-        method = getattr(service, endpoint.replace("-", "_"))
-        return await asyncio.to_thread(method, scope=evidence_scope)
+        if endpoint == "manifest-validation":
+            return await asyncio.to_thread(
+                service.manifest_validation,
+                scope=evidence_scope,
+            )
+        if endpoint == "lineage-validation":
+            return await asyncio.to_thread(
+                service.lineage_validation,
+                scope=evidence_scope,
+            )
+        return await asyncio.to_thread(
+            service.failure_reasons,
+            scope=evidence_scope,
+        )
     except _SOURCE_READ_ERRORS:
         return service.source_error(
             endpoint=endpoint,
@@ -220,13 +242,13 @@ async def _resolve_scope(
     try:
         scope = await asyncio.to_thread(
             resolve_control_plane_identity_scope,
-            host,  # type: ignore[arg-type]
+            host,
             query,
         )
     except _SOURCE_READ_ERRORS:
         fallback = EvidenceScope(
             requested_pipeline=host._read_required_param(query, "pipeline"),
-            selected_run_id=read_selected_run_id(host, query),  # type: ignore[arg-type]
+            selected_run_id=read_selected_run_id(host, query),
             selected_run_types=host._read_scope_csv_param(query, "run_type"),
             resolved_via="control_plane_source_read_failed",
             manifest=None,

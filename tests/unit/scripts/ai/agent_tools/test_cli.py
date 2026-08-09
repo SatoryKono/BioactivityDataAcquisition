@@ -328,7 +328,6 @@ def test_source_identity_is_explicitly_advisory(
         ("rev-parse", "HEAD"): "head-sha",
         ("rev-parse", "HEAD^{tree}"): "tree-sha",
         ("branch", "--show-current"): "main",
-        ("status", "--porcelain=v1", "--untracked-files=no"): " M README.md\n",
     }
 
     def run(command: list[str], **_: Any) -> subprocess.CompletedProcess[str]:
@@ -341,7 +340,8 @@ def test_source_identity_is_explicitly_advisory(
     assert context["source"]["head_sha"] == "head-sha"
     assert context["source"]["changed_path_inventory"] == "not-collected"
     assert context["source"]["untracked_inventory"] == "not-collected"
-    assert context["source"]["dirty"] is True
+    assert context["source"]["tracked_worktree_state"] == "not-collected"
+    assert context["source"]["dirty"] is None
 
 
 def test_platform_entrypoint_names_are_explicit() -> None:

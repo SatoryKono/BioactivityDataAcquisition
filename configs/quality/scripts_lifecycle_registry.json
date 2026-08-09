@@ -494,6 +494,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as the internal shell uvx resolution and proxy-cleanup helper shared by MCP wrappers; keep it supporting unless command resolution becomes a standalone governed MCP command."
     },
+    "scripts/ai/mcp/wrappers.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the catalog-driven implementation behind the canonical scripts.ai.mcp router; keep it supporting because operators enter through the package command surface."
+    },
     "scripts/ai/sync/governance.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
@@ -643,6 +649,12 @@
       "decision": "shared_helper_module",
       "review_by": "2026-07-15",
       "next_step": "Retain as the shared CLI dispatch helper for canonical scripts.engineering and adjacent routers; promote it to active inventory once helper modules receive explicit catalog classification."
+    },
+    "scripts/engineering/common/platform.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the shared platform-detection implementation used by governed setup and MCP commands; keep it supporting rather than exposing another standalone entrypoint."
     },
     "scripts/engineering/common/repo_paths.py": {
       "owner": "@bioetl-platform",

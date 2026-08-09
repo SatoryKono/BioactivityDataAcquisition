@@ -141,7 +141,7 @@ def _cycle_nodes(fragments: tuple[LineageGraphFragment, ...]) -> list[str]:
     for fragment in fragments:
         for edge in fragment.edges:
             adjacency.setdefault(edge.source.node_id, set()).add(edge.target.node_id)
-            adjacency.setdefault(edge.target.node_id, set())
+            _ = adjacency.setdefault(edge.target.node_id, set())
 
     visiting: set[str] = set()
     visited: set[str] = set()
@@ -157,14 +157,14 @@ def _cycle_nodes(fragments: tuple[LineageGraphFragment, ...]) -> list[str]:
         found = False
         for target_id in sorted(adjacency.get(node_id, ())):
             if visit(target_id):
-                cycle.update({node_id, target_id})
+                _ = cycle.update({node_id, target_id})
                 found = True
         visiting.remove(node_id)
         visited.add(node_id)
         return found
 
     for candidate in sorted(adjacency):
-        visit(candidate)
+        _ = visit(candidate)
     return sorted(cycle)
 
 
