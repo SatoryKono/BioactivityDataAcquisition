@@ -6,7 +6,8 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from bioetl.domain.control_plane import MANIFEST_CREATED_EVENT, RunLedgerEntry
+from bioetl.domain.control_plane import RunLedgerEntry
+from bioetl.domain.control_plane.run_ledger import MANIFEST_CREATED_EVENT
 from bioetl.domain.exceptions import BioETLError
 
 if TYPE_CHECKING:

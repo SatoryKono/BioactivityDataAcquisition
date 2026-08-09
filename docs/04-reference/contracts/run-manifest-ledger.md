@@ -169,6 +169,35 @@ shipped; `scripts/ops/observability/docker-compose.monitoring.audit.yml` is an
 empty placeholder. See
 `docs/05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md`.
 
+### Run-scoped validation evidence HTTP contract
+
+`bioetl health server` publishes five read-only validation endpoints for the
+same `pipeline`, optional `run_type`, and optional exact `run_id` selector
+scope used by the control-plane dashboard:
+
+| Endpoint | Evidence checks |
+| --- | --- |
+| `/ops/control-plane/checkpoint-validation` | persisted parse, supported metadata schema, checksum evidence, manifest anchor agreement |
+| `/ops/control-plane/manifest-validation` | persisted parse, typed schema, schema-major compatibility, contract anchors |
+| `/ops/control-plane/lineage-validation` | graph closure, run/manifest identity consistency, directed-cycle detection, persistence profile |
+| `/ops/control-plane/retention-compliance` | 90-day dry-run retention policy, reproducibility evidence floor, required evidence surfaces, archive evidence |
+| `/ops/control-plane/failure-reasons` | fixed failure categories `api`, `dq`, `schema`, `storage`, `network`, `validation`, `unknown` |
+
+The shared response contract is
+`control_plane_validation_evidence_v1`. Validation rows use only `OK`,
+`WARNING`, `ERROR`, or `UNKNOWN` and a stable machine reason. Missing legacy
+checkpoint checksum evidence is `UNKNOWN` with
+`checkpoint_checksum_not_recorded`; successful parsing must not be presented as
+checksum verification. Retention is always evaluated through planner dry-run
+and never deletes data from an HTTP request. Failure-reason responses contain
+category counts only: raw exception types and messages are deliberately omitted
+and are never promoted into Prometheus labels.
+
+All five routes use the same bounded forensic execution budget as the other
+expensive operator endpoints. Capacity exhaustion and deadline expiry return
+the stable forensic-unavailable response rather than allowing unbounded file
+scan work to accumulate.
+
 ## Lifecycle Management
 
 File-backed control-plane lifecycle management is planner-driven:

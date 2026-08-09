@@ -5,8 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 
-from bioetl.application.services.control_plane.evidence.checkpoint_manifest import (
+from bioetl.application.services.control_plane.evidence.checkpoint_validation import (
     build_checkpoint_checks,
+)
+from bioetl.application.services.control_plane.evidence.manifest_validation import (
     build_manifest_checks,
 )
 from bioetl.application.services.control_plane.evidence.failure_reasons import (

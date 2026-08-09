@@ -107,6 +107,21 @@ Evidence-floor retention is also exposed as
 `evidence_floor:`. Treat those entries as replay/forensic contract violations,
 not as ordinary retention-expired cleanup candidates.
 
+The read-only health backend exposes the same planner decision for a selected
+run at `/ops/control-plane/retention-compliance`. It always uses the default
+90-day policy with `dry_run=True` and returns bounded surface/decision/reason
+counts without filesystem paths. Its checks mean:
+
+- `retention_policy`: selected-run evidence has no delete candidates;
+- `evidence_floor`: a declared `replay_ready` or `forensic_grade` floor is
+  protected by the planner;
+- `required_evidence`: the lifecycle plan contains the surfaces required by the
+  selected persistence profile;
+- `archive`: `UNKNOWN` unless a future durable archive attestation is persisted.
+
+The HTTP response is evidence for triage, not authorization to apply cleanup.
+Continue to use the reviewed CLI dry-run/apply sequence below for mutations.
+
 ## Recovery
 
 If a dry-run plan looks unsafe, do not apply it. Increase `--retention-days` or
