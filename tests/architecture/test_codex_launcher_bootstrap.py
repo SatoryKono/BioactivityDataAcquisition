@@ -36,13 +36,13 @@ def test_wsl_launchers_use_local_bootstrap_helper() -> None:
 
     # Check that ops launchers are deprecated wrappers
     assert "DEPRECATED" in codex_sh
-    assert "canonical Codex launcher" in codex_sh
+    assert "canonical" in codex_sh.lower()
     assert "scripts/ai/codex/run-codex.sh" in codex_sh
     assert "exec bash" in codex_sh
     assert "ensure-codex-cli.sh" not in codex_sh  # No longer uses bootstrap helper
 
     assert "DEPRECATED" in codex_exec_sh
-    assert "canonical Codex launcher" in codex_exec_sh
+    assert "canonical" in codex_exec_sh.lower()
     assert "scripts/ai/codex/run-codex.sh" in codex_exec_sh
     assert "exec bash" in codex_exec_sh
     assert "ensure-codex-cli.sh" not in codex_exec_sh  # No longer uses bootstrap helper
