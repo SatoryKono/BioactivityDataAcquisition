@@ -158,3 +158,113 @@ devin-select-profile:
 - [ ] План внедрения разбит на фазы с конкретными сроками
 - [ ] Ответ на русском (технические термины в оригинале)
 - [ ] Не предлагаются изменения, которые увеличивают тех. долг
+
+## Scope Variations (для улучшения переиспользуемости)
+
+### Контекстные переменные окружения
+Учитывай следующие переменные окружения для адаптации под разные сценарии:
+
+```bash
+# CI Environment
+export DEVIN_MODE=ci
+export DEVIN_PARALLEL=false
+export DEVIN_TIMEOUT=1800
+
+# Local Development
+export DEVIN_MODE=local
+export DEVIN_PARALLEL=true
+export DEVIN_TIMEOUT=3600
+
+# Production Deployment
+export DEVIN_MODE=production
+export DEVIN_PARALLEL=false
+export DEVIN_TIMEOUT=7200
+```
+
+### Шаблоны для разных типов задач
+
+#### Bug Fix Template
+```text
+Тип задачи: Bug Fix
+Scope: [конкретный модуль/функция]
+Приоритет: [P0/P1/P2/P3]
+Ожидаемое время: [X минут]
+```
+
+#### Feature Addition Template
+```text
+Тип задачи: Feature Addition
+Scope: [описание новой функциональности]
+Приоритет: [P0/P1/P2/P3]
+Ожидаемое время: [X минут]
+```
+
+#### Refactoring Template
+```text
+Тип задачи: Refactoring
+Scope: [описание области рефакторинга]
+Приоритет: [P0/P1/P2/P3]
+Ожидаемое время: [X минут]
+```
+
+#### Documentation Template
+```text
+Тип задачи: Documentation
+Scope: [описание документируемой области]
+Приоритет: [P0/P1/P2/P3]
+Ожидаемое время: [X минут]
+```
+
+## Error Recovery (для улучшения обработки ошибок)
+
+### Стратегии для Common Failures
+
+#### MCP Server Unavailable
+```bash
+# Fallback procedure
+export DEVIN_MCP_FALLBACK=true
+export DEVIN_SKIP_MCP=true
+# Продолжить работу без MCP инструментов
+```
+
+#### Profile Selection Failure
+```bash
+# Fallback procedure
+export DEVIN_DEFAULT_PROFILE=py-debug-bot
+# Использовать default profile при невозможности выбора
+```
+
+#### Memory Workflow Failure
+```bash
+# Fallback procedure
+export DEVIN_SKIP_MEMORY=true
+# Продолжить работу без memory workflow
+```
+
+### Логирование ошибок с уровнями severity
+
+```text
+ERROR: Критическая ошибка, блокирующая выполнение
+WARNING: Предупреждение, не блокирующее выполнение
+INFO: Информационное сообщение
+DEBUG: Отладочная информация
+```
+
+## Validation Checklist (для улучшения валидации)
+
+### Pre-Implementation Validation
+- [ ] Предложенные улучшения совместимы с текущей версией Devin CLI
+- [ ] Предложенные улучшения не нарушают существующие guardrails
+- [ ] Предложенные улучшения учитывают существующую структуру .devin/
+- [ ] Предложенные улучшения не требуют изменения тех. долга
+
+### Implementation Validation
+- [ ] Каждое улучшение протестировано в изолированном контексте
+- [ ] Каждое улучшение не ломает существующие workflows
+- [ ] Каждое улучшение имеет fallback procedure
+
+### Post-Implementation Validation
+- [ ] Запуск `make devin-check` успешен
+- [ ] Все workflows из `.devin/workflows/` работают корректно
+- [ ] MCP серверы (если используются) работают стабильно
+- [ ] Memory workflow (если используется) работает корректно

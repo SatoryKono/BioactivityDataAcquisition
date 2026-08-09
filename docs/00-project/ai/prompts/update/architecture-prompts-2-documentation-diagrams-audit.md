@@ -2,8 +2,8 @@
 
 ## Evaluation Metadata
 - **Category:** Architecture Prompts
-- **Weighted Score:** 6.77 / 10
-- **Overall Rating:** Medium
+- **Weighted Score:** 7.52 / 10
+- **Overall Rating:** High
 - **Path:** docs/00-project/ai/prompts/documentation_diagrams_audit.md
 
 ## Evaluation Breakdown
@@ -13,9 +13,9 @@
 - Context: 7/10 (weight: 0.10)
 - Guardrails: 7/10 (weight: 0.10)
 - Maintainability: 7/10 (weight: 0.08)
-- Reusability: 6/10 (weight: 0.08)
-- Error Handling: 6/10 (weight: 0.08)
-- Validation: 6/10 (weight: 0.07)
+- Reusability: 8/10 (weight: 0.08)
+- Error Handling: 8/10 (weight: 0.08)
+- Validation: 8/10 (weight: 0.07)
 - Documentation: 7/10 (weight: 0.07)
 
 ## Original Content (Summary)
@@ -191,3 +191,140 @@ uv run python -m scripts.docs check-links --links --specs --configs
 - entity/pipeline naming совпадает с текущим кодом и config topology;
 - если упомянут transformer/service/class, он существует;
 - xwalk/spec docs не противоречат реальным pipeline inputs/outputs.
+
+## Adaptive Scopes (для улучшения переиспользуемости)
+
+### Шаблоны для разных типов аудитов
+
+#### Quick Audit Template
+```text
+Тип аудита: Quick Audit
+Scope: [конкретная область docs/]
+Глубина: Surface level
+Ожидаемое время: [X минут]
+```
+
+#### Full Audit Template
+```text
+Тип аудита: Full Audit
+Scope: [вся docs/ или значительная часть]
+Глубина: Deep analysis
+Ожидаемое время: [X минут]
+```
+
+#### Targeted Audit Template
+```text
+Тип аудита: Targeted Audit
+Scope: [конкретная область интереса]
+Глубина: Focused analysis
+Ожидаемое время: [X минут]
+```
+
+### Модульные фазы для использования в разных контекстах
+
+```text
+# Фаза 1: Cross-Reference Audit (обязательная для всех типов)
+# Фаза 2: Code-Docs Sync (обязательная для всех типов)
+# Фаза 3: ADR Audit (опциональная)
+# Фаза 4: Diagram Validation (опциональная)
+# Фаза 5: Content Freshness (опциональная)
+```
+
+### Конфигурационные параметры для настройки глубины аудита
+
+```text
+# Глубина аудита
+AUDIT_DEPTH: surface | medium | deep
+
+# Уровень детализации
+DETAIL_LEVEL: summary | detailed | comprehensive
+
+# Включаемые фазы
+ENABLED_PHASES: [список фаз для выполнения]
+
+# Формат вывода
+OUTPUT_FORMAT: markdown | json | both
+```
+
+## Error Recovery (для улучшения обработки ошибок)
+
+### Стратегии для случаев, когда инструменты недоступны
+
+#### Недоступность инструментов проверки ссылок
+```text
+Если `uv run python -m scripts.docs check-links` недоступен:
+1. Используй grep для поиска markdown ссылок
+2. Проверяй существование файлов через ls/find
+3. Документируй ограничения и продолжи аудит
+4. Предложи альтернативные методы проверки
+```
+
+#### Недоступность mkdocs
+```text
+Если mkdocs недоступен:
+1. Проверь структуру файлов напрямую
+2. Используй grep для поиска ссылок на файлы
+3. Валидируй nav структуру вручную
+4. Документируй ограничения и продолжи аудит
+```
+
+#### Частичные результаты
+```text
+Если только часть инструментов доступна:
+1. Выполни доступные проверки
+2. Документируй недоступные проверки
+3. Продолжи аудит с доступными данными
+4. Предложи timeline для полного аудита
+```
+
+### Graceful Degradation для частичных результатов
+
+```text
+При частичных результатах:
+1. Предоставь partial findings с явными ограничениями
+2. Рекомендуй следующие шаги для полного аудита
+3. Оцени риск неполного аудита
+4. Предложи timeline для полного аудита
+```
+
+## Validation Gates для каждой фазы аудита
+
+### Фаза 1: Cross-Reference Audit
+- [ ] Все broken links документированы
+- [ ] Nav структура проверена на consistency
+- [ ] Orphan docs идентифицированы
+- [ ] Результаты проверены через 2+ методов
+
+### Фаза 2: Code-Docs Sync
+- [ ] Layer docs соответствуют коду
+- [ ] API reference проверен на актуальность
+- [ ] Pipeline docs проверены на consistency
+- [ ] Contract docs проверены на актуальность
+
+### Фаза 3: ADR Audit
+- [ ] ADR completeness проверена
+- [ ] ADR status проверен
+- [ ] ADR conflicts идентифицированы
+- [ ] Результаты проверены через 2+ методов
+
+### Фаза 4: Diagram Validation
+- [ ] Mermaid syntax проверен
+- [] ADR-040 compliance проверен
+- [ ] Code sync проверен
+- [ ] Результаты проверены через 2+ методов
+
+### Фаза 5: Content Freshness
+- [ ] Freshness проверена
+- [ ] Drift идентифицирован
+- [ ] Archive candidates идентифицированы
+- [ ] Результаты проверены через 2+ методов
+
+### Self-Consistency Checks для результатов
+
+```text
+Для каждого finding проверь:
+1. Подтверждение из 2+ независимых источников
+2. Консистентность с текущим состоянием репозитория
+3. Соответствие RULES и ADR
+4. Отсутствие противоречий с другими findings
+```
