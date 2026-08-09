@@ -40,6 +40,7 @@ from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.domain.config import TableConfig
 from bioetl.domain.exceptions import DataQualityError, DataQualityThresholdError
 from bioetl.domain.ports import MetricsPort, SilverWriteRequest
+from bioetl.infrastructure.storage.bronze.pipeline_helpers import BronzeWriteRequest
 from bioetl.domain.types import ValidationResult
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.config._base import get_pipeline_config
@@ -161,10 +162,11 @@ class TestRecordProcessorProcessBatch:
 
         await record_processor.process_batch(records, batch_id)
 
-        # Verify Bronze write received run_id and run_type from context
-        bronze_call_kwargs = mock_storage.write_bronze.call_args[1]
-        assert bronze_call_kwargs["run_id"] == mock_context.run_id
-        assert bronze_call_kwargs["run_type"] == mock_context.run_type
+        # Verify Bronze write received run_id and run_type via typed request
+        bronze_request = mock_storage.write_bronze.call_args.args[0]
+        assert isinstance(bronze_request, BronzeWriteRequest)
+        assert bronze_request.run_id == mock_context.run_id
+        assert bronze_request.run_type == mock_context.run_type
 
         silver_request = mock_storage.write_silver.call_args.args[0]
         assert isinstance(silver_request, SilverWriteRequest)

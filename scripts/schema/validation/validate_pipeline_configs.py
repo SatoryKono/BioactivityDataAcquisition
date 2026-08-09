@@ -264,9 +264,16 @@ def _load_yaml_payload(config_path: Path) -> dict[str, Any] | None:
     return payload if isinstance(payload, dict) else None
 
 
-def _append_prefixed(messages: list[str], prefix: Path, items: list[str]) -> None:
+def _append_prefixed(messages: list[str], prefix: Path, items: list[str], *, configs_root: Path | None = None) -> None:
     """Append validation messages with a config path prefix."""
-    messages.extend(f"{prefix}: {item}" for item in items)
+    if configs_root is not None:
+        try:
+            relative_path = prefix.relative_to(configs_root.parent)
+            messages.extend(f"{relative_path.as_posix()}: {item}" for item in items)
+            return
+        except ValueError:
+            pass
+    messages.extend(f"{prefix.as_posix()}: {item}" for item in items)
 
 
 def _pipeline_name_from_provider_entity(provider: str, entity: str) -> str:
@@ -536,6 +543,7 @@ def _process_entity_config(
     pipeline_schema: dict[str, Any],
     base_pipeline_defaults: dict[str, Any],
     skip_runtime_normalized_check: bool,
+    configs_root: Path,
     errors: list[str],
     warnings: list[str],
 ) -> None:
@@ -550,9 +558,9 @@ def _process_entity_config(
     if payload is None:
         errors.append(f"{config_path}: entity config must be a YAML mapping")
         return
-    _append_prefixed(errors, config_path, _validate_entity_config_sections(payload))
+    _append_prefixed(errors, config_path, _validate_entity_config_sections(payload), configs_root=configs_root)
     _append_prefixed(
-        errors, config_path, _validate_provider_entity_consistency(payload)
+        errors, config_path, _validate_provider_entity_consistency(payload), configs_root=configs_root
     )
     pipeline_payload = payload.get("pipeline")
     if not isinstance(pipeline_payload, dict):
@@ -563,7 +571,7 @@ def _process_entity_config(
     )
     if not valid_pipeline:
         errors.append(f"{config_path}: {pipeline_schema_error}")
-    _append_prefixed(errors, config_path, _validate_pipeline_payload(pipeline_payload))
+    _append_prefixed(errors, config_path, _validate_pipeline_payload(pipeline_payload), configs_root=configs_root)
     normalized_payload = _build_normalized_pipeline_payload(
         payload,
         pipeline_payload,
@@ -574,9 +582,10 @@ def _process_entity_config(
             errors,
             config_path,
             _validate_runtime_normalized_invariants(normalized_payload),
+            configs_root=configs_root,
         )
     _append_prefixed(
-        warnings, config_path, _validate_sink_paths_and_sort(normalized_payload)
+        warnings, config_path, _validate_sink_paths_and_sort(normalized_payload), configs_root=configs_root
     )
 
 
@@ -585,6 +594,7 @@ def _process_provider_config(
     *,
     verbose: bool,
     known_entities: dict[str, set[str]],
+    configs_root: Path,
     errors: list[str],
 ) -> None:
     """Validate one provider runtime config and append findings."""
@@ -606,6 +616,7 @@ def _process_provider_config(
             payload,
             known_entities=known_entities,
         ),
+        configs_root=configs_root,
     )
 
 
@@ -615,6 +626,7 @@ def _process_composite_config(
     verbose: bool,
     composite_schema: dict[str, Any],
     known_pipeline_names: set[str],
+    configs_root: Path,
     errors: list[str],
 ) -> None:
     """Validate one composite config and append findings."""
@@ -640,6 +652,7 @@ def _process_composite_config(
             config_dir=config_path.parent,
             known_pipeline_names=known_pipeline_names,
         ),
+        configs_root=configs_root,
     )
 
 
@@ -648,6 +661,7 @@ def _process_workflow_config(
     *,
     verbose: bool,
     known_pipeline_names: set[str],
+    configs_root: Path,
     errors: list[str],
 ) -> None:
     """Validate one workflow runtime config and append findings."""
@@ -669,6 +683,7 @@ def _process_workflow_config(
             config_dir=config_path.parent,
             known_pipeline_names=known_pipeline_names,
         ),
+        configs_root=configs_root,
     )
 
 
@@ -828,6 +843,7 @@ def validate_config_tree(
             pipeline_schema=pipeline_schema,
             base_pipeline_defaults=base_pipeline_defaults,
             skip_runtime_normalized_check=skip_runtime_normalized_check,
+            configs_root=configs_root,
             errors=errors,
             warnings=warnings,
         )
@@ -844,6 +860,7 @@ def validate_config_tree(
                     payload,
                     known_provider_names=known_provider_names,
                 ),
+                configs_root=configs_root,
             )
 
     for config_path in provider_files:
@@ -851,6 +868,7 @@ def validate_config_tree(
             config_path,
             verbose=verbose,
             known_entities=known_entities,
+            configs_root=configs_root,
             errors=errors,
         )
 
@@ -860,6 +878,7 @@ def validate_config_tree(
             verbose=verbose,
             composite_schema=composite_schema,
             known_pipeline_names=known_pipeline_names,
+            configs_root=configs_root,
             errors=errors,
         )
 
@@ -868,6 +887,7 @@ def validate_config_tree(
             config_path,
             verbose=verbose,
             known_pipeline_names=known_pipeline_names,
+            configs_root=configs_root,
             errors=errors,
         )
 
