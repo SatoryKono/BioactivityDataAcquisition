@@ -22,9 +22,7 @@ def identity_gaps(
     """Return stable identity mismatches across selected fragments."""
     expected_run = str(manifest.run_id)
     expected_manifest = manifest.manifest_id
-    gaps = {
-        f"node_definition:{node_id}" for node_id in conflicting_node_ids(fragments)
-    }
+    gaps = {f"node_definition:{node_id}" for node_id in conflicting_node_ids(fragments)}
     for fragment in fragments:
         gaps.update(_fragment_anchor_gaps(fragment, expected_run, expected_manifest))
         for edge in fragment.edges:
@@ -69,7 +67,11 @@ def _special_node_gap(
     expected_manifest: str,
 ) -> str | None:
     if node.node_type is LineageNodeType.RUN:
-        return None if _run_node_matches(node, expected_run) else f"run_node:{node.node_id}"
+        return (
+            None
+            if _run_node_matches(node, expected_run)
+            else f"run_node:{node.node_id}"
+        )
     if node.node_type is LineageNodeType.MANIFEST:
         return (
             None
@@ -80,15 +82,17 @@ def _special_node_gap(
 
 
 def _run_node_matches(node: LineageNodeRef, expected_run: str) -> bool:
-    return node.node_id == f"run:{expected_run}" and str(
-        node.attributes.get("run_id") or ""
-    ) == expected_run
+    return (
+        node.node_id == f"run:{expected_run}"
+        and str(node.attributes.get("run_id") or "") == expected_run
+    )
 
 
 def _manifest_node_matches(node: LineageNodeRef, expected_manifest: str) -> bool:
-    return node.node_id == f"manifest:{expected_manifest}" and str(
-        node.attributes.get("manifest_id") or ""
-    ) == expected_manifest
+    return (
+        node.node_id == f"manifest:{expected_manifest}"
+        and str(node.attributes.get("manifest_id") or "") == expected_manifest
+    )
 
 
 __all__ = ["identity_gaps"]

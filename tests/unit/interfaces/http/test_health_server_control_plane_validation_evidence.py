@@ -94,9 +94,7 @@ async def test_all_control_plane_validation_routes_publish_stable_contract(
     service = ControlPlaneEvidenceService(
         ledger_port=ledger,
         lineage_store=FileLineageStore(tmp_path / "control" / "lineage"),
-        lifecycle_planner=FileControlPlaneArtifactLifecycleStore(
-            tmp_path / "control"
-        ),
+        lifecycle_planner=FileControlPlaneArtifactLifecycleStore(tmp_path / "control"),
     )
     server = HealthServer(
         host="127.0.0.1",
@@ -166,8 +164,7 @@ async def test_checkpoint_parse_failure_has_stable_reason_without_raw_error() ->
         assert status == 200
         assert payload["status"] == "ERROR"
         assert any(
-            row.get("reason") == "checkpoint_parse_error"
-            for row in payload["rows"]
+            row.get("reason") == "checkpoint_parse_error" for row in payload["rows"]
         )
         assert "raw corrupt checkpoint secret" not in str(payload)
     finally:

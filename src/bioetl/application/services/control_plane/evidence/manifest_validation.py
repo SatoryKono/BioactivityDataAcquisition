@@ -30,8 +30,7 @@ def build_manifest_checks(manifest: RunManifest) -> tuple[EvidenceCheck, ...]:
 
 def _schema_version_check(schema_version: str) -> EvidenceCheck:
     compatible = (
-        schema_version.split(".", maxsplit=1)[0]
-        == SUPPORTED_RUN_MANIFEST_SCHEMA_MAJOR
+        schema_version.split(".", maxsplit=1)[0] == SUPPORTED_RUN_MANIFEST_SCHEMA_MAJOR
     )
     if compatible:
         return EvidenceCheck(
@@ -64,11 +63,7 @@ def _missing_contract_anchors(manifest: RunManifest) -> list[str]:
             )
         )
     provenance = manifest.code_provenance
-    return [
-        name
-        for name in fields
-        if not str(getattr(provenance, name) or "").strip()
-    ]
+    return [name for name in fields if not str(getattr(provenance, name) or "").strip()]
 
 
 def _contract_check(missing: list[str]) -> EvidenceCheck:
@@ -77,8 +72,7 @@ def _contract_check(missing: list[str]) -> EvidenceCheck:
             "contract_compatibility",
             "ERROR",
             "manifest_contract_anchors_incomplete",
-            "Required contract anchors are absent: "
-            + ", ".join(sorted(set(missing))),
+            "Required contract anchors are absent: " + ", ".join(sorted(set(missing))),
         )
     return EvidenceCheck(
         "contract_compatibility",
