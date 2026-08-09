@@ -49,11 +49,12 @@ def evidence_payload(
     extra: dict[str, object] | None = None,
 ) -> dict[str, object]:
     """Build the shared bounded response envelope for validation endpoints."""
-    status = max(
-        (check.status for check in checks),
-        key=_STATUS_PRIORITY.__getitem__,
-        default="UNKNOWN",
-    )
+    status: EvidenceStatus = "UNKNOWN"
+    if checks:
+        status = checks[0].status
+        for check in checks[1:]:
+            if _STATUS_PRIORITY[check.status] > _STATUS_PRIORITY[status]:
+                status = check.status
     counts = {
         value: sum(check.status == value for check in checks)
         for value in ("OK", "WARNING", "ERROR", "UNKNOWN")

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from math import isfinite
+from typing import cast
 
 from bioetl.application.services.control_plane.evidence.models import EvidenceCheck
 from bioetl.domain.control_plane import RunManifest
@@ -71,9 +72,12 @@ def _checkpoint_schema_check(metadata: Mapping[str, object]) -> EvidenceCheck:
         )
     saved_at = metadata.get("checkpoint_saved_at_epoch_seconds")
     if saved_at is not None:
-        try:
-            saved_at_number = float(saved_at)  # type: ignore[arg-type]
-        except (TypeError, ValueError):
+        if isinstance(saved_at, str | bytes | bytearray | int | float):
+            try:
+                saved_at_number = float(saved_at)
+            except (TypeError, ValueError):
+                saved_at_number = float("nan")
+        else:
             saved_at_number = float("nan")
         if not isfinite(saved_at_number):
             return EvidenceCheck(
@@ -182,8 +186,9 @@ def _checkpoint_anchor_checks(
 
 def _metadata_text(metadata: Mapping[str, object], key: str) -> str | None:
     value = metadata.get(key)
-    if value is None and isinstance(metadata.get("run_context"), Mapping):
-        value = metadata["run_context"].get(key)  # type: ignore[index,union-attr]
+    run_context = metadata.get("run_context")
+    if value is None and isinstance(run_context, Mapping):
+        value = cast("Mapping[str, object]", run_context).get(key)
     normalized = str(value or "").strip()
     return normalized or None
 
