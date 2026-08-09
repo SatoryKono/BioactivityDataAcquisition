@@ -296,7 +296,7 @@
         ".yml",
         ".json"
       ],
-      "files_scanned": 233,
+      "files_scanned": 235,
       "ignored_by_jscpd_patterns": [
         "**/configs/**",
         "**/*.yaml",
@@ -347,5 +347,5 @@
     "composite_runtime family is at zero inconsistent keys as of Stream B plateau.",
     "Residual entity drift is limited to intentional entity-specific filters, metadata policy blocks, schema field-alias surfaces, and pipeline overrides."
   ],
-  "snapshot_date": "2026-08-08"
+  "snapshot_date": "2026-08-09"
 }

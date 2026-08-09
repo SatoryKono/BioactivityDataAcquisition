@@ -255,8 +255,8 @@ async def test_health_check_on_connection_error(uniprot_adapter):
     Connection errors fall back to circuit breaker state which may
     be DEGRADED if there were prior failures.
     """
-    # Mock the health check URL with query parameters
-    respx.get("https://rest.uniprot.org/uniprotkb/search", params={"query": "accession:P62988", "size": 1, "format": "json"}).mock(
+    # Mock all requests to the UniProt search endpoint to raise connection error
+    respx.route(host="rest.uniprot.org", path="/uniprotkb/search").mock(
         side_effect=Exception("Connection error")
     )
     async with uniprot_adapter:

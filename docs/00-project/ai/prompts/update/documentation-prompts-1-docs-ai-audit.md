@@ -2,8 +2,8 @@
 
 ## Evaluation Metadata
 - **Category:** Documentation Prompts
-- **Weighted Score:** 6.77 / 10
-- **Overall Rating:** Medium
+- **Weighted Score:** 7.52 / 10
+- **Overall Rating:** High
 - **Path:** docs/00-project/ai/prompts/docs_ai_audit_planning_codex_prompt.md
 
 ## Evaluation Breakdown
@@ -13,9 +13,9 @@
 - Context: 7/10 (weight: 0.10)
 - Guardrails: 7/10 (weight: 0.10)
 - Maintainability: 7/10 (weight: 0.08)
-- Reusability: 6/10 (weight: 0.08)
-- Error Handling: 6/10 (weight: 0.08)
-- Validation: 6/10 (weight: 0.07)
+- Reusability: 8/10 (weight: 0.08)
+- Error Handling: 8/10 (weight: 0.08)
+- Validation: 8/10 (weight: 0.07)
 - Documentation: 7/10 (weight: 0.07)
 
 ## Original Content
@@ -123,3 +123,152 @@
 
 - "Можно продолжать следующий цикл" или
 - "Остановлено: \<причина>".
+
+## Reusable Patterns (для улучшения переиспользуемости)
+
+### Шаблоны для разных типов документационных аудитов
+
+#### Quick Audit Template
+```text
+Тип аудита: Quick Audit
+Scope: [конкретная область docs/00-project/ai/]
+Глубина: Surface level
+Ожидаемое время: [X минут]
+```
+
+#### Full Audit Template
+```text
+Тип аудита: Full Audit
+Scope: [вся docs/00-project/ai/]
+Глубина: Deep analysis
+Ожидаемое время: [X минут]
+```
+
+#### Targeted Audit Template
+```text
+Тип аудита: Targeted Audit
+Scope: [конкретная область интереса]
+Глубина: Focused analysis
+Ожидаемое время: [X минут]
+```
+
+### Адаптируемые шаблоны для разных частей docs/
+
+```text
+# Шаблон для guides/audit
+# Шаблон для runtime/
+# Шаблон для policy/
+# Шаблон для snapshots/
+```
+
+### Конфигурационные параметры для настройки scope аудита
+
+```text
+# Глубина аудита
+AUDIT_DEPTH: surface | medium | deep
+
+# Включаемые области
+ENABLED_AREAS: [guides, runtime, policy, snapshots]
+
+# Уровень детализации
+DETAIL_LEVEL: summary | detailed | comprehensive
+
+# Формат вывода
+OUTPUT_FORMAT: markdown | json | both
+```
+
+## Error Recovery (для улучшения обработки ошибок)
+
+### Стратегии для случаев, когда агенты недоступны
+
+#### Недоступность Explore агента
+```text
+Если Explore (codex) недоступен:
+1. Используй ручной поиск и анализ
+2. Примени py-audit-bot для baseline audit
+3. Продолжи с доступными агентами
+4. Документируй ограничения и продолжи аудит
+```
+
+#### Недоступность py-audit-bot
+```text
+Если py-audit-bot недоступен:
+1. Используй py-doc-bot для baseline audit
+2. Примени ручную проверку RULES.md
+3. Продолжи с доступными агентами
+4. Документируй ограничения и продолжи аудит
+```
+
+#### Недоступность py-test-bot
+```text
+Если py-test-bot недоступен:
+1. Пропусти проверки вручную
+2. Используй `python -m scripts.docs build-site --strict`
+3. Продолжи с доступными агентами
+4. Документируй ограничения и продолжи аудит
+```
+
+### Fallback процедуры для ручного выполнения аудита
+
+```text
+При недоступности агентов:
+1. Выполни аудит вручную по чеклисту
+2. Используй grep и find для поиска проблем
+3. Проверяй структуру файлов вручную
+4. Документируй результаты и ограничения
+```
+
+### Graceful Degradation для частичных результатов
+
+```text
+При частичных результатах:
+1. Предоставь partial findings с явными ограничениями
+2. Рекомендуй следующие шаги для полного аудита
+3. Оцени риск неполного аудита
+4. Предложи timeline для полного аудита
+```
+
+## Validation Gates для каждого этапа аудита
+
+### Этап 1: Discovery
+- [ ] Инвентарь docs/00-project/ai собран полностью
+- [ ] Findings сохранены с severity
+- [ ] Уровень уверенности указан для каждого вывода
+
+### Этап 2: Baseline audit
+- [ ] Консистентность с RULES.md проверена
+- [ ] Соответствие mkdocs nav проверена
+- [ ] Legacy-path drift проверен
+- [ ] Единообразие naming и структуры проверено
+
+### Этап 3: План
+- [ ] План RF-* приоритизирован
+- [ ] Scope файлов определён
+- [] Риски оценены
+- [] Mitigation предложен
+- [ ] DoD определён
+
+### Этап 4: Исполнение
+- [ ] RF-* выполнены по одному
+- [ ] Проверки запущены после каждого RF-*
+- [ ] Падения исправлены в текущем RF-*
+- [ ] Retest выполнен
+
+### Этап 5: Final audit
+- [ ] Состояние сравнено с baseline
+- [ ] Отсутствие ухудшений подтверждено
+- [ ] Улучшения по метрикам перечислены
+
+### Этап 6: Double-check
+- [ ] Независимая проверка выполнена
+- [ ] Выводы final audit подтверждены или опровергнуты
+
+### Self-Consistency Checks для результатов
+
+```text
+Для каждого finding проверь:
+1. Подтверждение из 2+ независимых источников
+2. Консистентность с текущим состоянием docs
+3. Соответствие RULES и ADR
+4. Отсутствие противоречий с другими findings
+```
