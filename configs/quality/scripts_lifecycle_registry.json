@@ -512,6 +512,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain only as a bounded manual mirror-sync utility for Windsurf/Cascade rule surfaces while docs and Makefile still expose the direct script path; promote it into a governed AI-rules workflow or retire it once tracked mirrors no longer need explicit sync execution."
     },
+    "scripts/data_quality/__main__.py": {
+      "owner": "@bioetl-dq",
+      "decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the unified data-quality module dispatcher; keep operator commands routed through python -m scripts.data_quality and do not promote this package boundary into a second command implementation."
+    },
     "scripts/data_quality/export_chembl_observed_vocab.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
@@ -650,6 +656,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the internal Conventional Commit validator invoked by the local pre-commit commit-msg hook; keep it dependency-light and avoid promoting it into a broader public CLI unless additional governed callers emerge."
     },
+    "scripts/engineering/dev/setup_bioetl_wsl_fixed.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the bounded Windows/WSL compatibility setup wrapper while contributors still need the PowerShell entrypoint; keep environment setup delegated to the canonical WSL setup surface and retire this wrapper when no documented callers remain."
+    },
     "scripts/engineering/dev/zed_env_doctor.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
@@ -709,6 +721,12 @@
       "decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
       "next_step": "Retain as a bounded manual preflight utility for reproducible test-audit claims while testing guidance still references the direct script path; promote it into the canonical scripts.engineering.qa surface or retire it after the broader test-governance workflow is consolidated."
+    },
+    "scripts/engineering/qa/count_source_lines.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Consolidate this manual source-line counter with the canonical module-coverage inventory reporting path, then remove the duplicate utility after its output contract is covered."
     },
     "scripts/engineering/qa/config_surface_governance.py": {
       "owner": "@bioetl-platform",
@@ -799,6 +817,12 @@
       "decision": "shared_helper_module",
       "review_by": "2026-07-15",
       "next_step": "Retain as the shared first-party import-graph helper consumed by QA inventory reports; fold it into a broader canonical graph helper surface only if the inventory/reporting pipeline is consolidated."
+    },
+    "scripts/engineering/qa/get_large_modules.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Consolidate this manual large-module report with the canonical module-coverage inventory reporting path, then remove the duplicate utility after its output contract is covered."
     },
     "scripts/engineering/qa/refresh_test_governance_baseline.py": {
       "owner": "@bioetl-platform",
@@ -1015,6 +1039,12 @@
       "decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a completed one-off migration helper with explicit sunset review; do not re-run or promote unless VCR extensionless cassette migration is reopened under reviewed governance."
+    },
+    "scripts/ops/neo4j_memory_sync.py": {
+      "owner": "@bioetl-memory",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the compatibility alias for memory.graph.sync; migrate remaining callers to the canonical memory module and remove this wrapper after repository and operator references reach zero."
     },
     "scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh": {
       "owner": "@bioetl-platform",
