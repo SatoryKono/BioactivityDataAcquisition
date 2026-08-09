@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "expected_entrypoint_count": 29,
+  "expected_entrypoint_count": 30,
   "canonical_root": ".codex/skills",
   "runtime_root": ".devin/skills",
   "docs_root": "docs/00-project/ai/skills/local",
@@ -10,6 +10,7 @@
     "docs/00-project/ai/skills/local/SKILLS-CATALOG.md"
   ],
   "required_entrypoints": [
+    "agent-debugging",
     "agent-orchestration",
     "capability-discovery",
     "deep-research",
@@ -41,6 +42,8 @@
     "verify-architecture"
   ],
   "required_identical_files": [
+    "agent-debugging/agents/openai.yaml",
+    "agent-debugging/references/advisory-contract.md",
     "documentation-audit/agents/openai.yaml",
     "documentation-audit/references/audit-checklist.md",
     "documentation-audit/references/report-template.md",
@@ -85,6 +88,7 @@
   ],
   "runtime_variant_files": [
     "SKILLS-CATALOG.md",
+    "agent-debugging/SKILL.md",
     "agent-orchestration/SKILL.md",
     "capability-discovery/SKILL.md",
     "deep-research/SKILL.md",

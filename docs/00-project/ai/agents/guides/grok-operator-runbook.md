@@ -102,6 +102,23 @@ Verify the binary exists before relying on LSP tools. If missing, bootstrap
 3. PR for product/docs deltas only.
 4. Comment + close; leave blocked issues open.
 
+## 8. Optional agent diagnostics
+
+When a bounded agent trajectory or tool-routing failure exists, Grok may use
+the repository adapter rather than calling AgentDebugX or ProofAgent directly:
+
+```bash
+python -m scripts.ai.agent_tools doctor
+python -m scripts.ai.agent_tools debug --task-id <id> \
+  --trajectory reports/ai/agent-tools/inputs/<trajectory>.json
+python -m scripts.ai.agent_tools evaluate --task-id <id> \
+  --events reports/ai/agent-tools/inputs/<events>.jsonl
+```
+
+The adapter enforces deterministic/no-upload execution and writes only to its
+report subtree. Vendor results are advisory: confirm them with BioETL-native
+tests and never use them alone to advance lifecycle state or close an issue.
+
 ## Related
 
 - `AGENTS.md`

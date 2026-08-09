@@ -1,6 +1,36 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+AGENT_TOOLS="none"
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --agent-tools)
+            if [[ $# -lt 2 ]]; then
+                echo "[setup_env_wsl][error] --agent-tools requires: none, agentdebugx, proofagent, or all." >&2
+                exit 2
+            fi
+            AGENT_TOOLS="$2"
+            shift 2
+            ;;
+        -h|--help)
+            echo "Usage: $0 [--agent-tools none|agentdebugx|proofagent|all]"
+            exit 0
+            ;;
+        *)
+            echo "[setup_env_wsl][error] Unknown argument: $1" >&2
+            exit 2
+            ;;
+    esac
+done
+
+case "$AGENT_TOOLS" in
+    none|agentdebugx|proofagent|all) ;;
+    *)
+        echo "[setup_env_wsl][error] Invalid --agent-tools value: $AGENT_TOOLS" >&2
+        exit 2
+        ;;
+esac
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 cd "$REPO_ROOT"
@@ -32,6 +62,26 @@ if command -v uv >/dev/null 2>&1; then
         echo "[setup_env_wsl][hint] Retry with the same command; UV_HTTP_TIMEOUT defaults to $UV_HTTP_TIMEOUT seconds." >&2
         exit 1
     }
+
+    OPTIONAL_EXTRAS=()
+    [[ "$AGENT_TOOLS" == "agentdebugx" || "$AGENT_TOOLS" == "all" ]] && OPTIONAL_EXTRAS+=("agentdebugx")
+    [[ "$AGENT_TOOLS" == "proofagent" || "$AGENT_TOOLS" == "all" ]] && OPTIONAL_EXTRAS+=("proofagent")
+    INSTALLED_EXTRAS=()
+    OPTIONAL_FAILURES=0
+    for EXTRA in "${OPTIONAL_EXTRAS[@]}"; do
+        SYNC_ARGS=(--active --frozen --no-build --extra dev --extra tracing)
+        for INSTALLED in "${INSTALLED_EXTRAS[@]}"; do
+            SYNC_ARGS+=(--extra "$INSTALLED")
+        done
+        SYNC_ARGS+=(--extra "$EXTRA")
+        if UV_NO_BUILD=1 uv sync "${SYNC_ARGS[@]}"; then
+            INSTALLED_EXTRAS+=("$EXTRA")
+            echo "[setup_env_wsl][ok] Optional tool installed: $EXTRA"
+        else
+            OPTIONAL_FAILURES=1
+            echo "[setup_env_wsl][error] Optional tool failed without blocking the remaining tools: $EXTRA" >&2
+        fi
+    done
 else
     if command -v python3 >/dev/null 2>&1; then
         python3 -m venv "$VENV_DIR"
@@ -45,8 +95,23 @@ else
     # Binary-only bootstrap + project extras (shell:S8541).
     "$VENV_PYTHON" -m pip install --only-binary=:all: --upgrade "pip==25.0.1" "setuptools==75.8.0" "wheel==0.45.1"
     "$VENV_PYTHON" -m pip install --only-binary=:all: -e '.[dev,tracing]'
+    OPTIONAL_EXTRAS=()
+    [[ "$AGENT_TOOLS" == "agentdebugx" || "$AGENT_TOOLS" == "all" ]] && OPTIONAL_EXTRAS+=("agentdebugx")
+    [[ "$AGENT_TOOLS" == "proofagent" || "$AGENT_TOOLS" == "all" ]] && OPTIONAL_EXTRAS+=("proofagent")
+    OPTIONAL_FAILURES=0
+    for EXTRA in "${OPTIONAL_EXTRAS[@]}"; do
+        if "$VENV_PYTHON" -m pip install --only-binary=:all: -e ".[dev,tracing,$EXTRA]"; then
+            echo "[setup_env_wsl][ok] Optional tool installed: $EXTRA"
+        else
+            OPTIONAL_FAILURES=1
+            echo "[setup_env_wsl][error] Optional tool failed without blocking the remaining tools: $EXTRA" >&2
+        fi
+    done
 fi
 
 echo "[setup_env_wsl][ok] Environment ready at $VENV_DIR"
 echo "[setup_env_wsl][hint] Activate with: source \"$VENV_DIR/bin/activate\""
 echo "[setup_env_wsl][hint] Run tests with: bash scripts/engineering/dev/run_pytest.sh tests/unit --narrow --timeout=120 --lf"
+if [[ "${OPTIONAL_FAILURES:-0}" -ne 0 ]]; then
+    exit 1
+fi

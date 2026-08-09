@@ -36,6 +36,13 @@ Bootstrap commands:
 bash scripts/engineering/dev/setup_env_wsl.sh
 ```
 
+Optional agent diagnostics are intentionally excluded from the default setup.
+Select one tool or both with `-AgentTools agentdebugx|proofagent|all` on Windows,
+or `--agent-tools agentdebugx|proofagent|all` on WSL. The installers use exact
+lock-backed pins, attempt requested tools independently, and keep core setup
+usable when a vendor package fails. See
+`scripts/ai/agent_tools/README.md` for commands, uninstall, and rollback.
+
 ### PyCharm portable templates
 
 After clean clone (or when local `.idea` drifted), sync shared IDE templates:

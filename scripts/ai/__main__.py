@@ -6,6 +6,7 @@ Usage:
     python -m scripts.ai --help
 
 Surfaces:
+    agent_tools  Optional AgentDebugX and ProofAgent adapters
     codex    Codex setup/check tooling
     mcp      MCP operational tooling
     vibe     Vibe launch tooling
@@ -20,7 +21,7 @@ from pathlib import Path
 from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
 _DIR = Path(__file__).parent
-SURFACES = ("codex", "mcp", "vibe")
+SURFACES = ("agent_tools", "codex", "mcp", "vibe")
 
 
 def _codex_command(rest: list[str]) -> list[str]:
