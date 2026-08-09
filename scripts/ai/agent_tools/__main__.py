@@ -23,7 +23,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Final
 
-from memory.proof import ProofError, canonical_digest, discover_context, load_policy
+from memory.proof import canonical_digest, command_set_hash, load_policy
 from scripts.engineering.common.repo_paths import (
     ensure_path_within_root,
     ensure_safe_cli_argv,
@@ -215,11 +215,84 @@ def _tool_status(spec: ToolSpec) -> dict[str, Any]:
 
 
 def _source_context() -> dict[str, Any]:
+    """Build a bounded advisory identity with Proof-or-Stop-compatible fields.
+
+    The canonical gate hashes every material file and the complete binary task
+    diff. That is appropriate for an authoritative receipt but can be expensive
+    on LFS-heavy worktrees. This producer is advisory, so it binds to the HEAD
+    tree plus changed/untracked path inventory and labels the weaker mode
+    explicitly. The artifact cannot be mistaken for a Proof-or-Stop receipt.
+    """
     policy_path = ROOT / "configs/quality/proof_or_stop_policy.yaml"
     policy = load_policy(policy_path)
-    repository, source = discover_context(
-        ROOT, policy=policy, claim="ready_to_merge"
+
+    def git_text(*args: str) -> str:
+        completed = subprocess.run(
+            [
+                "git",
+                "-c",
+                "filter.lfs.process=",
+                "-c",
+                "filter.lfs.required=false",
+                "-c",
+                "filter.lfs.clean=cat",
+                "-c",
+                "filter.lfs.smudge=cat",
+                "-C",
+                str(ROOT),
+                *args,
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=60,
+        )
+        if completed.returncode != 0:
+            raise OSError(f"git {' '.join(args)} failed: {completed.stderr.strip()}")
+        return completed.stdout.strip()
+
+    head_sha = git_text("rev-parse", "HEAD")
+    tree_sha = git_text("rev-parse", "HEAD^{tree}")
+    branch = git_text("branch", "--show-current") or "detached"
+    changed_paths = sorted(
+        path
+        for path in git_text(
+            "diff", "--name-only", "--no-ext-diff", "--no-textconv", "HEAD", "--"
+        ).splitlines()
+        if path
     )
+    untracked_paths = sorted(
+        path
+        for path in git_text("ls-files", "--others", "--exclude-standard").splitlines()
+        if path
+    )
+    policy_hash = canonical_digest(policy)
+    repository = {
+        "repo_id": ROOT.name.lower(),
+        "branch": branch,
+        "worktree_id": hashlib.sha256(str(ROOT.resolve()).encode()).hexdigest()[:16],
+        "ci_run_id": os.environ.get("GITHUB_RUN_ID"),
+    }
+    source = {
+        "head_sha": head_sha,
+        "material_hash": hashlib.sha256(tree_sha.encode()).hexdigest(),
+        "task_diff_hash": canonical_digest(
+            {
+                "changed_paths": changed_paths,
+                "untracked_paths": untracked_paths,
+                "policy_hash": policy_hash,
+            }
+        ),
+        "policy_hash": policy_hash,
+        "command_set_hash": command_set_hash(policy, "ready_to_merge"),
+        "dirty": bool(changed_paths or untracked_paths),
+        "untracked_paths": untracked_paths,
+        "changed_paths": changed_paths,
+        "binding_mode": "bounded-advisory-v1",
+        "head_tree_sha": tree_sha,
+    }
     return {
         "repository": repository,
         "source": source,
@@ -343,7 +416,7 @@ def _run(
     output_dir = _output_dir(spec, task_id)
     try:
         identity = _source_context()
-    except (OSError, ProofError, subprocess.SubprocessError, ValueError) as exc:
+    except (OSError, subprocess.SubprocessError, ValueError) as exc:
         payload = _summary(
             spec=spec,
             task_id=task_id,
