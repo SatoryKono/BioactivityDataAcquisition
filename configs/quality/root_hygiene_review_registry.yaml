@@ -275,7 +275,7 @@ review_lanes:
       - path: .zed
         current_live_state: present_curated_root_surface
         canonical_path: .zed
-        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
+        action_if_reintroduced: keep_only_as_curated_shared_project_editor_configuration_without_credentials_or_local_runtime_state
       - path: script-codex
         current_live_state: present_local_only_root_surface
         canonical_path: scripts/ai/codex

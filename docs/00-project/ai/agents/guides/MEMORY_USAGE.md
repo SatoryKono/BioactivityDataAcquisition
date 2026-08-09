@@ -168,4 +168,4 @@ hygiene documented in:
 
 - [grok-operator-runbook.md](grok-operator-runbook.md)
 - [grok-tui-config-checklist.md](grok-tui-config-checklist.md)
-- [../../prompts/grok-prompts-2-grok-closeout.md](../../prompts/grok-prompts-2-grok-closeout.md)
+- [../../prompts/grok-closeout.md](../../prompts/grok-closeout.md)
