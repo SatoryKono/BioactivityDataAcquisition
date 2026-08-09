@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2603 |
-| Tracked doc-like files | 2603 |
-| Ignored local docs/reports files | 5 |
+| Doc-like files | 2610 |
+| Tracked doc-like files | 2610 |
+| Ignored local docs/reports files | 0 |
 | Duplicate groups | 11 |
 | Generated without route or exception | 0 |
 | Generated routes | 70 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 2603 |
+| tracked | 2610 |
 
 ## Lifecycle Counts
 
@@ -57,22 +57,22 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 725 |
+| Active | 726 |
 | Archived | 169 |
-| Canonical | 68 |
+| Canonical | 69 |
 | Duplicate | 8 |
-| Generated | 929 |
+| Generated | 916 |
 | Working | 722 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 725 |
+| active | 726 |
 | archive | 169 |
-| canonical | 68 |
+| canonical | 69 |
 | duplicate | 8 |
-| generated | 929 |
+| generated | 916 |
 | working | 722 |
 
 ## Recommended Actions
@@ -81,8 +81,8 @@
 | --- | --- |
 | archive-after-github-state-check | 320 |
 | archive-after-migration | 257 |
-| generate-automatically | 929 |
-| keep | 1103 |
+| generate-automatically | 916 |
+| keep | 1105 |
 | merge | 8 |
 | reconcile-with-github-state | 4 |
 
@@ -222,39 +222,39 @@
 | `docs/00-project/ai/memory/neo4j-project-memory-seed.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/COLLECTED_PROMPTS_INDEX.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/README.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/agent-memory.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/ai_workspace_setup.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/architecture_debt_reduction_orchestration.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/architecture_metric_exemptions_tasks_json_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/architecture_review_and_refactoring_assessment.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/docs_ai_audit_planning_codex_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/documentation_diagrams_audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/grok-audit-cycle.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/grok-closeout.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/refactor_orchestration_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/scripts_inventory_consolidation_cleanup_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/test_fix_retest_loop.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/test_speed_optimization_loop.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/update/architecture-prompts-1-architecture-review.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/update/architecture-prompts-2-documentation-diagrams-audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/update/documentation-prompts-1-docs-ai-audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/update/memory-sheets-1-agent-memory.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/update/memory-sheets-2-memory-py-audit-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/update/role-specific-agents-1-py-audit-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/update/role-specific-agents-2-py-debug-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/update/runtime-agentry-1-CODEX-RUNTIME.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/update/runtime-agentry-2-JUNIE-RUNTIME.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/update/setup-prompts-1-devin-setup-prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/update/setup-prompts-2-optimization-prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/update/skills-1-research-workflow.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/update/skills-2-verify-architecture.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/update/specialized-prompts-1-scripts-inventory.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/update/test-prompts-1-test-fix-retest-loop.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/update/test-prompts-2-test-speed-optimization-loop.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/update/workflows-1-master.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/update/workflows-2-post-change.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/memory-py-audit-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/role-specific-agents-1-py-audit-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/role-specific-agents-2-py-debug-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/runtime-agentry-1-CODEX-RUNTIME.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/runtime-agentry-2-JUNIE-RUNTIME.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/setup-prompts-1-devin-setup-prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/setup-prompts-2-optimization-prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/skills-1-research-workflow.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/skills-2-verify-architecture.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/specialized-prompts-1-scripts-inventory.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/specialized-prompts-2-coderabbit-audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/workflows-1-master.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/workflows-2-post-change.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/skills/_references/README.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
 | `docs/00-project/ai/skills/_references/local/deep-research/references/critique-framework.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
 | `docs/00-project/ai/skills/_references/local/deep-research/references/report-templates.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
+| `docs/00-project/ai/skills/_references/local/deep-research/references/search-patterns.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
+| `docs/00-project/ai/skills/_references/local/deep-research/references/source-evaluation.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
+| `docs/00-project/ai/skills/_references/local/documentation-audit/references/audit-checklist.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
+| `docs/00-project/ai/skills/_references/local/documentation-audit/references/report-template.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
+| `docs/00-project/ai/skills/_references/local/technical-designer-mermaid/references/patterns.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
+| `docs/00-project/ai/skills/global/.system/skill-creator/SKILL.md` | ai-skill-license-mirrors |  |  | scripts/ai/codex/check_skills_mirror.sh |
+| `docs/00-project/ai/skills/global/.system/skill-creator/agents/openai.yaml` | ai-skill-license-mirrors |  |  | scripts/ai/codex/check_skills_mirror.sh |
+| `docs/00-project/ai/skills/global/.system/skill-creator/license.txt` | ai-skill-license-mirrors |  |  | scripts/ai/codex/check_skills_mirror.sh |
+| `docs/00-project/ai/skills/global/.system/skill-creator/references/openai_yaml.md` | ai-skill-license-mirrors |  |  | scripts/ai/codex/check_skills_mirror.sh |
+| `docs/00-project/ai/skills/global/.system/skill-installer/LICENSE.txt` | ai-skill-license-mirrors |  |  | scripts/ai/codex/check_skills_mirror.sh |
+| `docs/00-project/ai/skills/global/.system/skill-installer/SKILL.md` | ai-skill-license-mirrors |  |  | scripts/ai/codex/check_skills_mirror.sh |
+| `docs/00-project/ai/skills/global/.system/skill-installer/agents/openai.yaml` | ai-skill-license-mirrors |  |  | scripts/ai/codex/check_skills_mirror.sh |
+| `docs/00-project/ai/skills/global/gh-address-comments/LICENSE.txt` |  | generated_skill_license_mirror |  |  |
 
 ## GitHub Issue Evidence Examples
 
@@ -374,7 +374,7 @@
 | debt-governance-gates-quality-baseline | `scripts/engineering/qa/report_debt_governance_gates.py` | tracked_quality_baseline |
 | docker-stability-runbooks-generated-docs | `manual closeout plus architecture QA verification` | tracked_curated_generated_doc |
 | docker-trivy-sarif-security-report | `.github/workflows/docker.yml` | ignored_ci_output |
-| docs-export-merged-markdown | `src/tools/generate_docs_export.py` | ignored_local_export |
+| docs-export-merged-markdown | `scripts/docs/build/generate_docs_export.py` | ignored_local_export |
 | docs-reports-generated-curated-misc | `multiple governed docs and quality generators` | tracked_or_local_curated_generated_doc |
 | documentation-cleanup-inventory | `scripts/docs/checks/documentation_cleanup_inventory.py` | tracked_curated_generated_doc |
 | domain-io-taint-inventory-quality-baseline | `scripts/engineering/qa/report_domain_io_taint_inventory.py` | tracked_quality_baseline |
@@ -383,7 +383,7 @@
 | engineering-closeout-curated-docs | `manual closeout plus architecture QA verification` | tracked_curated_generated_doc |
 | executable-unit-passport-projections | `scripts/docs/passports/cli.py` | tracked_curated_generated_doc |
 | field-level-diagnostics-quality-report | `scripts/schema/analysis/generate_field_level_diagnostics.py` | working_output |
-| file-merger-working-reports | `src/tools/file_merger.py` | working_output |
+| file-merger-working-reports | `scripts/engineering/common/file_merger.py` | working_output |
 | flaky-test-burndown-review-quality-baseline | `scripts/engineering/qa/report_flaky_test_burndown_review.py` | tracked_quality_baseline |
 | full-app-duplication-baseline-quality-report | `scripts/engineering/qa/report_duplication_baseline.py` | tracked_quality_baseline |
 | grafana-dashboard-release-gate-report | `scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py` | working_output |

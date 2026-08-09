@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-03'
+  Last verified: '2026-08-09'
 
 ______________________________________________________________________
 
@@ -181,7 +181,10 @@ PubMedAdapter                         (pubchempy)
 
 Реализует narrow storage ports (`BronzeStoragePort`, `SilverStoragePort`, `GoldStoragePort`, `MergedStoragePort`) для работы с различными уровнями данных.
 
-Реализация разделена на три writer-а, каждый декомпозирован на mixins:
+Реализация разделена на три writer-а. Конкретные классы остаются в корневых
+модулях `bronze_writer.py`, `silver_writer.py` и `gold_writer.py`, а их
+специализированные mixins, operations, runtime services и helpers сгруппированы
+в подпакетах `bronze/`, `silver/` и `gold/`:
 
 - **`BronzeWriter`** (`bronze_writer.py`): Запись сырых данных в формате JSONL + zstd. Atomic writes через temp file + rename, генерация checksums.
 - **`SilverWriter`** (`silver_writer.py`): Запись в Delta Lake таблицы с наследованием от `BaseDeltaWriter`, ACID-транзакциями, логикой merge/upsert для идемпотентности, поддержкой Time Travel и 7-дневным VACUUM retention.
@@ -189,49 +192,53 @@ PubMedAdapter                         (pubchempy)
 
 #### 2.2.1. BronzeWriter Mixin Decomposition
 
-| Файл                                  | Назначение                              |
-| ------------------------------------- | --------------------------------------- |
-| `bronze_writer.py`                    | Главный `BronzeWriter`                  |
-| `bronze_writer_io_mixin.py`           | I/O операции (JSONL write, compression) |
-| `bronze_writer_metadata_mixin.py`     | Генерация Bronze metadata sidecar       |
-| `bronze_writer_metrics_mixin.py`      | Метрики Bronze write операций           |
-| `bronze_writer_side_effects_mixin.py` | Side effects (checksum, notifications)  |
-| `bronze_writer_validation_mixin.py`   | Валидация входных данных                |
-| `bronze_write_result_helpers.py`      | Helper functions для write result       |
+| Файл                              | Класс/роль                     | Назначение                              |
+| --------------------------------- | ------------------------------ | --------------------------------------- |
+| `bronze_writer.py`                | `BronzeWriter`                 | Корневой concrete storage adapter       |
+| `bronze/io_mixin.py`              | `BronzeWriterIOMixin`          | I/O операции (JSONL write, compression) |
+| `bronze/read_cleanup_mixin.py`    | `BronzeWriterReadCleanupMixin` | Read и cleanup операции                 |
+| `bronze/metadata_mixin.py`        | `BronzeWriterMetadataMixin`    | Генерация Bronze metadata sidecar       |
+| `bronze/metrics_mixin.py`         | `BronzeWriterMetricsMixin`     | Метрики Bronze write операций           |
+| `bronze/side_effects_mixin.py`    | `BronzeWriterSideEffectsMixin` | Side effects (checksum, audit)           |
+| `bronze/validation_mixin.py`      | `BronzeWriterValidationMixin`  | Валидация входных данных                |
+| `bronze/write_execution.py`       | Execution functions            | Atomic data и sidecar write flow        |
+| `bronze/pipeline_helpers.py`      | Request/context helpers        | Подготовка и завершение write pipeline  |
+| `bronze_write_result_helpers.py`  | Helper functions               | Формирование write result               |
 
 #### 2.2.2. SilverWriter Mixin Decomposition
 
-| Файл                                        | Назначение                                 |
-| ------------------------------------------- | ------------------------------------------ |
-| `silver_writer.py`                          | Главный `SilverWriter`                     |
-| `silver_writer_arrow_mixin.py`              | PyArrow conversion и schema alignment      |
-| `silver_writer_delta_mixin.py`              | Delta Lake write/merge operations          |
-| `silver_writer_merged_mixin.py`             | Post-merge reconciliation                  |
-| `silver_writer_metadata_mixin.py`           | Silver metadata sidecar generation         |
-| `silver_writer_postwrite_mixin.py`          | Post-write operations (VACUUM, stats)      |
-| `silver_writer_validation_mixin.py`         | Schema validation и data quality           |
-| `silver_writer_maintenance_mixin.py`        | Maintenance operations (OPTIMIZE, Z-ORDER) |
-| `silver_writer_delta_helpers.py`            | Delta Lake helper functions                |
-| `silver_writer_merge_resilience_helpers.py` | Merge retry и resilience logic             |
-| `silver_writer_pipeline_helpers.py`         | Pipeline-specific helpers                  |
-| `silver/runtime_helpers.py`                 | Runtime configuration helpers              |
+| Файл                                  | Класс/роль                      | Назначение                                 |
+| ------------------------------------- | ------------------------------- | ------------------------------------------ |
+| `silver_writer.py`                    | `SilverWriter`                  | Корневой concrete Delta storage adapter    |
+| `silver/writer_runtime_facade.py`     | `SilverWriterRuntimeFacade`     | Делегирование в runtime operation services |
+| `silver/delta_mixin.py`               | `SilverWriterDeltaMixin`        | Delta Lake write/merge operations          |
+| `silver/merged_mixin.py`              | `SilverWriterMergedMixin`       | Merged-table write flow                    |
+| `silver/metadata_mixin.py`            | `SilverWriterMetadataMixin`     | Silver metadata sidecar generation         |
+| `silver/postwrite_mixin.py`           | `SilverWriterPostwriteMixin`    | Post-write operations                      |
+| `silver/validation_mixin.py`          | `SilverWriterValidationMixin`   | Schema validation и data quality           |
+| `silver/maintenance_mixin.py`         | `SilverWriterMaintenanceMixin`  | Maintenance operations                     |
+| `silver/operations/`                  | Operation services              | Arrow, Delta, metadata, validation и postwrite operations |
+| `silver/delta_helpers.py`             | Helper functions                | Delta Lake write helpers                   |
+| `silver/merge_resilience_helpers.py`  | Helper functions                | Merge retry и resilience logic             |
+| `silver/pipeline_helpers.py`          | Request/context helpers         | Pipeline-specific write flow               |
+| `silver/runtime_helpers.py`           | Runtime service builders        | Runtime configuration и collaborator wiring |
 
 #### 2.2.3. GoldWriter Mixin Decomposition
 
-| Файл                          | Назначение                             |
-| ----------------------------- | -------------------------------------- |
-| `gold_writer.py`              | Главный `GoldWriter`                   |
-| `gold/io_mixin.py`            | I/O operations (Delta write)           |
-| `gold/io_delta_mixins.py`     | Delta-specific I/O (merge, overwrite)  |
-| `gold/metadata_mixin.py`      | Gold metadata sidecar generation       |
-| `gold/validation_mixin.py`    | Pandera schema validation              |
-| `gold/read_cleanup_mixin.py`  | Read и cleanup operations              |
-| `gold/io_helpers.py`          | I/O helper functions                   |
-| `gold/metadata_audit.py`      | Metadata audit trail                   |
-| `gold/pipeline_helpers.py`    | Pipeline-specific helpers              |
-| `gold/runtime_helpers.py`     | Runtime configuration helpers          |
-| `gold/metadata_operations.py` | Metadata sidecar write operations      |
-| `gold/metadata_payloads.py`   | Metadata payload normalization helpers |
+| Файл                          | Класс/роль                     | Назначение                             |
+| ----------------------------- | ------------------------------ | -------------------------------------- |
+| `gold_writer.py`              | `GoldWriter`                   | Корневой concrete Delta storage adapter |
+| `gold/io_mixin.py`            | `GoldWriterIOMixin`            | I/O operations (Delta write)           |
+| `gold/io_delta_mixins.py`     | Delta-specific mixins          | Merge, overwrite и SCD2 I/O            |
+| `gold/metadata_mixin.py`      | `GoldWriterMetadataMixin`      | Gold metadata sidecar generation       |
+| `gold/validation_mixin.py`    | `GoldWriterValidationMixin`    | Pandera schema validation              |
+| `gold/read_cleanup_mixin.py`  | `GoldWriterReadCleanupMixin`   | Read и cleanup operations              |
+| `gold/io_helpers.py`          | Helper functions               | I/O helper functions                   |
+| `gold/metadata_audit.py`      | Audit helpers                  | Metadata audit trail                   |
+| `gold/pipeline_helpers.py`    | Request/context helpers        | Pipeline-specific write flow           |
+| `gold/runtime_helpers.py`     | Runtime service builders       | Runtime collaborator wiring            |
+| `gold/metadata_operations.py` | Metadata operation functions   | Metadata sidecar write operations      |
+| `gold/metadata_payloads.py`   | Payload builders               | Metadata payload normalization         |
 
 #### 2.2.4. Storage Support
 
