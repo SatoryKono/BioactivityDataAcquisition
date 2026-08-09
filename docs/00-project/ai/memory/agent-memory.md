@@ -68,6 +68,18 @@ Use repository search and current generators/checkers. Do not rely on memory for
 file counts, provider counts, ADR ranges, coverage thresholds, command aliases,
 or current dependency versions.
 
+## Platform-specific Python environments
+
+- On native Windows and in PowerShell, agents MUST use the repository-local
+  `.venv-win` environment. Activate it with
+  `.\.venv-win\Scripts\Activate.ps1` or invoke
+  `.\.venv-win\Scripts\python.exe` directly.
+- Do not reuse a Linux/WSL `.venv` from Windows. Create or refresh the Windows
+  environment with `.\scripts\engineering\dev\setup_env_windows.ps1`.
+- WSL/Linux agents must continue to follow the platform-specific environment
+  guidance in `docs/03-guides/getting-started.md`; `.venv-win` is reserved for
+  native Windows processes.
+
 ## Durable invariants to verify at source
 
 - Respect layer boundaries and constructor injection.

@@ -54,9 +54,9 @@ All AI agents and skills MUST use tokens and parameters from the repository root
   `DOCKER_USERNAME`, `HUB_PAT_TOKEN`)
 
 **Env file guardrail:** Agents and contributors MUST NOT create, edit, rename, move,
-overwrite, or delete any `.env` file without explicit per-task user approval. If a
-task requires changes to `.env`, the agent MUST stop and request explicit user
-permission first.
+overwrite, or delete any `.env` file without explicit per-task user approval. Reading
+`.env` files is permitted. If a task requires changes to `.env`, the agent MUST stop
+and request explicit user permission first.
 
 For the current consolidated environment configuration, see the consolidation
 history in `docs/env/` (note: `docs/env/consolidated.env` was moved to `.env`).
@@ -149,4 +149,5 @@ Minimum expectation:
 
 - Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
 - Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Reading `.env` files is permitted.
 - Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

@@ -2,10 +2,10 @@
   "version": 2,
   "permissions": {
     "ask": [
-      "Read(**/.env*)",
       "Write(**/.env*)"
     ],
     "allow": [
+      "Read(**/.env*)",
       "Read(**/.devin/**)",
       "Read(**/docs/**)",
       "Read(**/configs/**)",

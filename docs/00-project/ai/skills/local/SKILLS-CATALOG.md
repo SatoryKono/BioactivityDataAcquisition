@@ -30,7 +30,7 @@ emits a machine-readable drift/sync report for owner review.
 | --- | --- |
 | `py-audit-bot` | baseline, final, targeted, review, debt, reproducibility |
 | `py-config-bot` | configuration, schema, contract |
-| `py-debug-bot` | reproduce, isolate, fix |
+| `py-debug-bot` | reproduce, isolate, remediation guidance |
 | `py-doc-bot` | focused docs, broad docs audit, mirror sync |
 | `py-plan-bot` | implementation, refactor, release planning |
 | `py-test-bot` | focused tests, broad campaign, flake triage |
