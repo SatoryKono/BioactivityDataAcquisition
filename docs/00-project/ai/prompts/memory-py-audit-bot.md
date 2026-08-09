@@ -63,19 +63,19 @@ catalog here; read their current canonical owners.
 #### Concrete Audit Commands
 ```bash
 # Step 1: Establish current baseline and scope
-python -m scripts.ai.audit.baseline --scope=src/bioetl/ --output=/tmp/audit-baseline.json
+python -m scripts.engineering.qa run_architecture_audit_read_only --scope=src/bioetl/ --output=/tmp/audit-baseline.json
 
 # Step 2: Verify blockers twice when feasible
-python -m scripts.ai.audit.verify-blockers --baseline=/tmp/audit-baseline.json --repeat=2
+python -m scripts.engineering.qa check_test_audit_preflight --baseline=/tmp/audit-baseline.json --repeat=2
 
 # Step 3: Separate issue types
-python -m scripts.ai.audit.classify-issues --input=/tmp/audit-findings.json --output=/tmp/audit-classified.json
+python -m scripts.engineering.qa report_test_governance_audit --input=/tmp/audit-findings.json --output=/tmp/audit-classified.json
 
 # Step 4: Validate debt semantics
-python -m scripts.ai.audit.validate-debt --input=/tmp/audit-classified.json --debt-config=configs/quality/debt_scorecard.yaml
+python -m scripts.engineering.qa check_quality_exemptions --input=/tmp/audit-classified.json --debt-config=configs/quality/debt_scorecard.yaml
 
 # Step 5: Generate audit report
-python -m scripts.ai.audit.report --input=/tmp/audit-classified.json --output=/tmp/audit-report.md
+python -m scripts.engineering.qa report_debt_governance_gates --input=/tmp/audit-classified.json --output=/tmp/audit-report.md
 ```
 
 #### Timeout Policies
@@ -336,14 +336,14 @@ documentation_examples:
 #### Usage Examples
 ```bash
 # Example: Audit architecture/import rules
-python -m scripts.ai.audit.run --scope=architecture --output=/tmp/architecture-audit.md
+python -m scripts.engineering.qa run_architecture_audit_read_only --output=/tmp/architecture-audit.md
 
 # Example: Audit config/schema rules
-python -m scripts.ai.audit.run --scope=config --output=/tmp/config-audit.md
+python -m scripts.engineering.qa check_semantic_registry_drift --output=/tmp/config-audit.md
 
 # Example: Audit debt semantics
-python -m scripts.ai.audit.run --scope=debt --output=/tmp/debt-audit.md
+python -m scripts.engineering.qa check_quality_exemptions --output=/tmp/debt-audit.md
 
 # Example: Full audit with all scopes
-python -m scripts.ai.audit.run --scope=all --output=/tmp/full-audit.md
+python -m scripts.engineering.qa report_debt_governance_gates --output=/tmp/full-audit.md
 ```

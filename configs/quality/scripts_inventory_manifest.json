@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-09T13:23:54.121852+00:00",
+  "generated_at": "2026-08-09T13:31:54.324052+00:00",
   "summary": {
     "total_scripts": 573,
     "status_counts": {
@@ -7136,7 +7136,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 162,
+      "reference_count": 160,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -7362,7 +7362,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 38,
+      "reference_count": 37,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -11297,7 +11297,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 304,
+      "reference_count": 312,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",

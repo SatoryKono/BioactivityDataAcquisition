@@ -82,7 +82,7 @@ active runtime source first and mirrors are synchronized afterward.
 - Configuration: `configs/`
 - Architecture evidence: `docs/reports/evidence/`
 - Quality/debt governance: `configs/quality/`, `reports/quality/`
-- Runtime tooling: `scripts/ai/`, `scripts/ops/`
+- Runtime tooling: `scripts/ai/`, `scripts/ops/`, `scripts/engineering/`
 - Documentation map: `docs/00-project/00-map.md`
 - Glossary: `docs/00-project/glossary.md`
 
