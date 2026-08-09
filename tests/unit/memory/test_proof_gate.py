@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import subprocess
-from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -15,6 +14,7 @@ from memory.proof import (
     build_receipt,
     load_policy,
 )
+from tests.helpers.clock import FIXED_TEST_TIME
 
 pytestmark = pytest.mark.unit
 
@@ -44,7 +44,7 @@ def _bundle(tmp_path: Path) -> dict[str, object]:
         command="python -m scripts.engineering.qa run-tests --suite fast",
         argv=[],
         cwd=str(repo),
-        started_at=datetime.now(UTC).isoformat(),
+        started_at=FIXED_TEST_TIME.isoformat(),
         duration_ms=1,
         exit_code=0,
         status="pass",
