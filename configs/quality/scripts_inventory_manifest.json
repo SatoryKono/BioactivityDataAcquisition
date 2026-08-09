@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-09T14:16:16.396839+00:00",
+  "generated_at": "2026-08-09T14:43:03.676643+00:00",
   "summary": {
     "total_scripts": 574,
     "status_counts": {
@@ -12,11 +12,11 @@
       "agents": 4,
       "build": 16,
       "ci": 78,
-      "docs": 234,
+      "docs": 239,
       "other": 76,
       "scripts": 470,
       "skills": 10,
-      "tests": 360
+      "tests": 363
     }
   },
   "scripts": [
@@ -255,7 +255,7 @@
       "agent_usage": [
         "CODEX-RUNTIME"
       ],
-      "reference_count": 13,
+      "reference_count": 14,
       "references": [
         {
           "path": ".codex/agents/CODEX-RUNTIME.md",
@@ -294,14 +294,14 @@
           "text": "`python3 scripts/ai/codex/doctor.py static --no-write`."
         },
         {
-          "path": "scripts/ai/codex/README.md",
-          "line": 21,
-          "source_group": "scripts",
-          "text": "python3 scripts/ai/codex/doctor.py static --no-write"
+          "path": "docs/00-project/governance/script-testing-standards.md",
+          "line": 250,
+          "source_group": "docs",
+          "text": "- `scripts/ai/codex/doctor.py` - AI runtime diagnostics"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 160,
+          "line": 21,
           "source_group": "scripts",
           "text": "python3 scripts/ai/codex/doctor.py static --no-write"
         }
@@ -1584,7 +1584,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 56,
+      "reference_count": 57,
       "references": [
         {
           "path": ".github/ISSUES/AI-AGENT-CONFIG-AUDIT-2026-07-14-ISSUE-PACK.md",
@@ -1690,7 +1690,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -1703,6 +1703,12 @@
           "line": 86,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/sync_native_skills.py\""
+        },
+        {
+          "path": "docs/00-project/governance/script-testing-standards.md",
+          "line": 252,
+          "source_group": "docs",
+          "text": "- `scripts/ai/codex/sync_native_skills.py` - Skills synchronization"
         },
         {
           "path": "tests/architecture/test_ops_ai_setup_scripts.py",
@@ -2620,8 +2626,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
+        {
+          "path": "docs/00-project/governance/script-testing-standards.md",
+          "line": 257,
+          "source_group": "docs",
+          "text": "- `scripts/ai/mcp/_check_env_keys.py` - Environment validation"
+        },
         {
           "path": "tests/unit/scripts/ai/mcp/test_check_env_keys.py",
           "line": 11,
@@ -2645,8 +2657,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
+        {
+          "path": "docs/00-project/governance/script-testing-standards.md",
+          "line": 258,
+          "source_group": "docs",
+          "text": "- `scripts/ai/mcp/_patch_grok_mcp_tokens.py` - Token management"
+        },
         {
           "path": "tests/unit/scripts/ai/mcp/test_patch_grok_mcp_tokens.py",
           "line": 11,
@@ -8599,7 +8617,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/03-guides/docs-parity-gate.md",
@@ -8636,6 +8654,18 @@
           "line": 24,
           "source_group": "scripts",
           "text": "- docs_parity_check.py"
+        },
+        {
+          "path": "tests/unit/scripts/docs/test_docs_parity_check.py",
+          "line": 1,
+          "source_group": "tests",
+          "text": "\"\"\"Tests for docs_parity_check.py.\"\"\""
+        },
+        {
+          "path": "tests/unit/scripts/docs/test_docs_parity_check.py",
+          "line": 10,
+          "source_group": "tests",
+          "text": "from scripts.docs_parity_check import DocumentationParityChecker, ParityResult"
         }
       ]
     },
@@ -10374,7 +10404,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 24,
+      "reference_count": 25,
       "references": [
         {
           "path": ".github/ISSUES/DOC-AUDIT-003-Align-Windows-Pytest-Docs-With-Xdist-Policy.md",
@@ -10393,6 +10423,12 @@
           "line": 37,
           "source_group": "docs",
           "text": "- ✅ `run_tests.py`"
+        },
+        {
+          "path": "docs/00-project/governance/script-testing-standards.md",
+          "line": 253,
+          "source_group": "docs",
+          "text": "- `scripts/engineering/dev/run_tests.py` - Test execution"
         },
         {
           "path": "docs/03-guides/testing.md",
@@ -10417,12 +10453,6 @@
           "line": 43,
           "source_group": "scripts",
           "text": "\"run-tests\": \"run_tests.py\","
-        },
-        {
-          "path": "scripts/engineering/dev/__main__.py",
-          "line": 106,
-          "source_group": "scripts",
-          "text": "commands={\"test-changed\": python_command(\"run_tests.py\", \"changed\")},"
         }
       ]
     },
@@ -15889,7 +15919,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 22,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -15908,6 +15938,12 @@
           "line": 74,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.repo check-inventory --check"
+        },
+        {
+          "path": "docs/00-project/governance/script-testing-standards.md",
+          "line": 254,
+          "source_group": "docs",
+          "text": "- `scripts/engineering/repo/check_scripts_inventory.py` - Script inventory"
         },
         {
           "path": "docs/03-guides/script-management/README.md",
@@ -15932,12 +15968,6 @@
           "line": 18,
           "source_group": "scripts",
           "text": "| `check-inventory`       | `check_scripts_inventory.py`     | Check scripts inventory drift against manifest                        |"
-        },
-        {
-          "path": "scripts/engineering/repo/__main__.py",
-          "line": 9,
-          "source_group": "scripts",
-          "text": "check-inventory    Check scripts inventory drift"
         }
       ]
     },
@@ -16313,7 +16343,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 13,
       "references": [
         {
           "path": "docs/02-architecture/adr-registry.md",
@@ -16961,13 +16991,25 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ops/data/__main__.py",
           "line": 24,
           "source_group": "scripts",
           "text": "\"check-delta\": \"check_delta_integrity.py\","
+        },
+        {
+          "path": "tests/unit/scripts/ops/data/test_check_delta_integrity.py",
+          "line": 1,
+          "source_group": "tests",
+          "text": "\"\"\"Tests for check_delta_integrity.py.\"\"\""
+        },
+        {
+          "path": "tests/unit/scripts/ops/data/test_check_delta_integrity.py",
+          "line": 10,
+          "source_group": "tests",
+          "text": "from scripts.ops.data.check_delta_integrity import main"
         }
       ]
     },
@@ -16976,13 +17018,25 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ops/data/__main__.py",
           "line": 28,
           "source_group": "scripts",
           "text": "\"report-null-fields\": \"extract_null_fields.py\","
+        },
+        {
+          "path": "tests/unit/scripts/ops/data/test_extract_null_fields.py",
+          "line": 1,
+          "source_group": "tests",
+          "text": "\"\"\"Tests for extract_null_fields.py.\"\"\""
+        },
+        {
+          "path": "tests/unit/scripts/ops/data/test_extract_null_fields.py",
+          "line": 11,
+          "source_group": "tests",
+          "text": "from scripts.ops.data.extract_null_fields import extract_null_fields, NULL_FIELDS"
         }
       ]
     },
@@ -17100,8 +17154,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "docs/00-project/governance/script-testing-standards.md",
+          "line": 259,
+          "source_group": "docs",
+          "text": "- `scripts/ops/data/validate_data_dir.py` - Data validation"
+        },
         {
           "path": "scripts/ops/data/__main__.py",
           "line": 25,
@@ -17842,8 +17902,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "docs/00-project/governance/script-testing-standards.md",
+          "line": 260,
+          "source_group": "docs",
+          "text": "- `scripts/ops/migrations/validate_sunset_dates.py` - Migration validation"
+        },
         {
           "path": "scripts/ops/migrations/LIFECYCLE.md",
           "line": 56,
