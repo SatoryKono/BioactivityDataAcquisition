@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-17'
+  Last verified: '2026-08-09'
 
 ______________________________________________________________________
 
 # Dashboards Docs Index
 
-Дата сверки: **2026-07-24**
+Дата сверки: **2026-08-09**
 Источник истины: `grafana/dashboards/*.json` (7 shipped dashboards after
 monitoring surface reduction 2026-07-23)
 
@@ -34,8 +34,7 @@ shadow review. The seven JSON UIDs remain authoritative and reachable. See
   `docs/03-guides/dashboards/dux3-first-screen-inventory.json`.
 - **DUX4 visual enforcement (2026-07-29, epic #7088):**
   `dux4-title-scope-harness.md`, `dux4-field-override-inventory.json`,
-  `dux4-panel-redesign-matrix.json`, `dux4-variable-rules.md`,
-  `dux4-visual-enforcement-closeout.md`.
+  `dux4-panel-redesign-matrix.json`.
 - Residual gap table: `reports/observability/dashboard-ux-residual-gap-2026-07-28.md`.
 - `operator-ux-v2.md` — first-screen zones, prose budget, empty-state taxonomy, link standard, KPI targets.
 - `verdict-ontology.md` — state×confidence×basis×next_action for all workspaces.

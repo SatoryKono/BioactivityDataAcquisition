@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DOCS_ROOT = PROJECT_ROOT / "docs"
 DEFAULT_MANIFEST = (
     PROJECT_ROOT / "docs" / "exports" / "full-docs-inputs-no-plans-reports-skills.txt"

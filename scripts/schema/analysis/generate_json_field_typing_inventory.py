@@ -77,7 +77,7 @@ from bioetl.infrastructure.schemas.silver import (
     UNIPROT_PROTEIN_SCHEMA,
 )
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_OUTPUT = PROJECT_ROOT / "docs/03-data-model/json-field-typing-inventory.md"
 _PUBLICATION_INPUT_CSV = "data/input/publication.csv"
 
@@ -377,10 +377,10 @@ def build_inventory() -> str:
         "Regenerate this inventory with:",
         "",
         "```bash",
-        "python src/tools/generate_json_field_typing_inventory.py",
+        "python -m scripts.schema generate-json-field-typing-inventory",
         "```",
         "",
-        "Generator: `src/tools/generate_json_field_typing_inventory.py`.",
+        "Generator: `scripts/schema/analysis/generate_json_field_typing_inventory.py`.",
         "",
         "Related:",
         "- `docs/02-architecture/decisions/ADR-035-json-field-typing-policy.md`",

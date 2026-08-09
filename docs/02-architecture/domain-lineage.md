@@ -350,7 +350,7 @@ transform_ref = TransformRef(
     version="1.0.0",
     step_index=0,
     pipeline_name="pubchem_pipeline",
-    code_ref="src/bioetl/application/pipelines/pubchem/transform_normalize.py",
+    code_ref="src/bioetl/application/pipelines/pubchem/transformer.py",
 )
 
 # Конвертация в node reference

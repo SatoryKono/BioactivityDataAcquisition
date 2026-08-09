@@ -126,7 +126,7 @@ def test_json_field_typing_inventory_documents_governed_non_chembl_fields() -> N
     assert "# JSON Field Typing Inventory" in actual
     assert "ADR-035" in actual
     assert "canonical JSON string" in actual
-    assert "src/tools/generate_json_field_typing_inventory.py" in actual
+    assert "scripts/schema/analysis/generate_json_field_typing_inventory.py" in actual
 
     for field_name in (
         "authors",
