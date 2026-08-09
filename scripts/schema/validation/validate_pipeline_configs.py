@@ -53,9 +53,7 @@ def load_schema(schema_path: Path) -> dict[str, Any]:
 
 def _find_entity_files(entities_dir: Path) -> list[Path]:
     return [
-        p
-        for p in sorted(entities_dir.rglob(YAML_GLOB))
-        if not p.name.startswith("_")
+        p for p in sorted(entities_dir.rglob(YAML_GLOB)) if not p.name.startswith("_")
     ]
 
 

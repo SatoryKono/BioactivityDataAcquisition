@@ -249,13 +249,10 @@ def check_inv_002(verbose: bool) -> list[str]:
         missing_sections = REQUIRED_ENTITY_SECTIONS - set(data)
         if missing_sections:
             errors.append(
-                f"INV-CFG-002 {_rel(path)}: missing sections "
-                f"{sorted(missing_sections)}"
+                f"INV-CFG-002 {_rel(path)}: missing sections {sorted(missing_sections)}"
             )
         if data.get("provider") != "composite":
-            errors.append(
-                f"INV-CFG-002 {_rel(path)}: provider must be 'composite'"
-            )
+            errors.append(f"INV-CFG-002 {_rel(path)}: provider must be 'composite'")
         if data.get("entity") != path.stem:
             errors.append(
                 f"INV-CFG-002 {_rel(path)}: entity must match filename {path.stem!r}"
@@ -453,7 +450,9 @@ def check_inv_009(verbose: bool) -> list[str]:
     for path in _composite_entity_configs():
         data = _load_yaml(path)
         schema = data.get("schema")
-        entity_groups = schema.get("column_groups") if isinstance(schema, dict) else None
+        entity_groups = (
+            schema.get("column_groups") if isinstance(schema, dict) else None
+        )
         runtime_path = COMPOSITES_DIR / path.name
         runtime_groups = (
             _runtime_composite_column_groups(_load_yaml(runtime_path))

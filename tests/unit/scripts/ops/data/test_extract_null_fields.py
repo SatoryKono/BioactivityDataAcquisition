@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import Mock, patch
 
 import pandas as pd
 import pytest
@@ -21,10 +20,7 @@ class TestExtractNullFields:
         # Create sample CSV file
         csv_file = tmp_path / "test_publication.csv"
         csv_file.write_text(
-            "pmid,abstract,author_orcids\n"
-            "1,,\n"
-            "2,,\n"
-            "3,,\n",
+            "pmid,abstract,author_orcids\n1,,\n2,,\n3,,\n",
             encoding="utf-8",
         )
 
@@ -82,7 +78,7 @@ class TestExtractNullFields:
         assert "openalex" in NULL_FIELDS
 
         # Check that each source has a list of fields
-        for source, fields in NULL_FIELDS.items():
+        for _source, fields in NULL_FIELDS.items():
             assert isinstance(fields, list)
             assert len(fields) > 0
             assert all(isinstance(field, str) for field in fields)
@@ -93,12 +89,21 @@ class TestExtractNullFields:
         expected_fields = ["pmid", "abstract", "author_orcids", "affiliation_list"]
 
         for field in expected_fields:
-            assert field in crossref_fields, f"Expected field {field} not in crossref fields"
+            assert field in crossref_fields, (
+                f"Expected field {field} not in crossref fields"
+            )
 
     def test_extract_null_fields_chembl_fields(self) -> None:
         """Test that chembl null fields are defined."""
         chembl_fields = NULL_FIELDS.get("chembl", [])
-        expected_fields = ["author_orcids", "language", "affiliation_list", "publication_date"]
+        expected_fields = [
+            "author_orcids",
+            "language",
+            "affiliation_list",
+            "publication_date",
+        ]
 
         for field in expected_fields:
-            assert field in chembl_fields, f"Expected field {field} not in chembl fields"
+            assert field in chembl_fields, (
+                f"Expected field {field} not in chembl fields"
+            )

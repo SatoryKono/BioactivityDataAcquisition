@@ -281,9 +281,7 @@ def _source_context(
             }
         )
     dirty = bool(
-        index_state.returncode == 1
-        or worktree_state.returncode == 1
-        or untracked_paths
+        index_state.returncode == 1 or worktree_state.returncode == 1 or untracked_paths
     )
     repository = {
         "repo_id": ROOT.name.lower(),
@@ -507,7 +505,9 @@ def _run(
     duration_ms = round((time.monotonic() - started) * 1000)
     _write_protected(output_dir / "stdout.txt", _redact(completed.stdout))
     _write_protected(output_dir / "stderr.txt", _redact(completed.stderr))
-    if completed.returncode not in ({0} if spec.report_subdir == "agentdebugx" else {0, 1}):
+    if completed.returncode not in (
+        {0} if spec.report_subdir == "agentdebugx" else {0, 1}
+    ):
         payload = _summary(
             spec=spec,
             task_id=task_id,
