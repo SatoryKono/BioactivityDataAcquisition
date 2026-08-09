@@ -303,6 +303,33 @@ def test_adapter_does_not_import_vendor_packages() -> None:
     assert "import proofagent_harness" not in source
 
 
+def test_source_identity_is_explicitly_advisory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo_root = tmp_path
+    monkeypatch.setattr(cli, "ROOT", repo_root)
+    policy = {"claims": {"ready_to_merge": {"required_evidence": []}}, "evidence_kinds": {}}
+    monkeypatch.setattr(cli, "load_policy", lambda _: policy)
+    responses = {
+        ("rev-parse", "HEAD"): "head-sha",
+        ("rev-parse", "HEAD^{tree}"): "tree-sha",
+        ("branch", "--show-current"): "main",
+        ("diff", "--name-only", "--no-ext-diff", "--no-textconv", "HEAD", "--"): "src/a.py\n",
+        ("ls-files", "--others", "--exclude-standard"): "reports/new.json\n",
+    }
+
+    def run(command: list[str], **_: Any) -> subprocess.CompletedProcess[str]:
+        git_args = tuple(command[command.index(str(repo_root)) + 1 :])
+        return subprocess.CompletedProcess(command, 0, responses[git_args], "")
+
+    monkeypatch.setattr(cli.subprocess, "run", run)
+    context = cli._source_context()
+    assert context["source"]["binding_mode"] == "bounded-advisory-v1"
+    assert context["source"]["head_sha"] == "head-sha"
+    assert context["source"]["changed_paths"] == ["src/a.py"]
+    assert context["source"]["dirty"] is True
+
+
 def test_platform_entrypoint_names_are_explicit() -> None:
     assert cli.TOOLS["agentdebugx"].executable == "agentdebug"
     assert cli.TOOLS["proofagent"].executable == "proof"
