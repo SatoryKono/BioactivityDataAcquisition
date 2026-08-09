@@ -53,6 +53,10 @@ config surfaces:
 - **Control-plane contract**:
   [`run-manifest-ledger.md`](run-manifest-ledger.md) — published contract for
   `RunManifest` / `RunLedger`
+- **Agent lifecycle evidence contract**:
+  [`proof-or-stop-evidence.md`](proof-or-stop-evidence.md) — source-bound
+  closeout claims, receipts, trust tiers, and staged enforcement governed by
+  [`ADR-056`](../../02-architecture/decisions/ADR-056-proof-or-stop-lifecycle-control.md)
 
 Control-plane контракты `RunManifest` / `RunLedger` документируются отдельно в
 [`run-manifest-ledger.md`](run-manifest-ledger.md). Для них текущим source of

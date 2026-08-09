@@ -74,6 +74,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-053](ADR-053-optional-grafana-scenes-app-shell.md) | Optional Grafana Scenes App Shell as Presentation Adapter | Accepted | Observability | 2026-07-28 |
 | [ADR-054](ADR-054-passport-documentation-projections.md) | Evidence-Backed Passport Documentation Projections | Accepted | Documentation | 2026-07-29 |
 | [ADR-055](ADR-055-workflow-reconciliation-data-step-ownership.md) | Workflow Reconciliation Data-Step Ownership | Accepted | Architecture | 2026-07-29 |
+| [ADR-056](ADR-056-proof-or-stop-lifecycle-control.md) | Proof-or-Stop Lifecycle Control | Accepted | Governance | 2026-08-09 |
 
 ## ADRs by Category
 

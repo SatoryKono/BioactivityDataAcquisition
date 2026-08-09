@@ -39,6 +39,10 @@ def load_staged_enforcement_policies(
     for row in policies:
         if not isinstance(row, dict):
             raise ValueError(f"Expected mapping policy row in {path}")
+        # Control-plane policies share the governance registry but do not
+        # participate in per-pipeline domain enforcement.
+        if row.get("domain_engine", True) is False:
+            continue
         check_name = str(row["check_name"])
         current_stage = _STAGE_BY_NAME[str(row["current_stage"])]
         loaded[check_name] = EnforcementPolicy(

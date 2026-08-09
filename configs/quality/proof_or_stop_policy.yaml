@@ -1,0 +1,110 @@
+schema_version: 1
+policy_id: bioetl-proof-or-stop-v1
+description: >-
+  Source-bound closeout evidence policy. This policy composes existing QA
+  producers; it does not redefine their domain thresholds or debt budgets.
+
+claims:
+  tested:
+    required_evidence:
+      - tests
+    require_full_trust: false
+  reviewed:
+    required_evidence:
+      - review
+    require_full_trust: false
+  done:
+    required_evidence:
+      - tests
+      - governance
+      - docs_runtime
+      - debt
+    require_full_trust: false
+  ready_to_merge:
+    required_evidence:
+      - tests
+      - governance
+      - docs_runtime
+      - debt
+      - quality
+    require_full_trust: true
+
+evidence_kinds:
+  tests:
+    authorized_producers:
+      - test_health
+    command_families:
+      - python -m scripts.engineering.qa run-tests
+      - python -m pytest
+  review:
+    authorized_producers:
+      - independent_evaluator
+    command_families:
+      - independent evaluator
+  governance:
+    authorized_producers:
+      - pretest_guardrails
+    command_families:
+      - bash scripts/engineering/dev/pretest_guardrails.sh
+  docs_runtime:
+    authorized_producers:
+      - docs_runtime_checks
+      - pretest_guardrails
+    command_families:
+      - python -m scripts.docs verify
+      - bash scripts/ai/junie/check_junie_mirror.sh --check
+  debt:
+    authorized_producers:
+      - debt_governance_gates
+    command_families:
+      - python -m scripts.engineering.qa report-debt-governance-gates
+  quality:
+    authorized_producers:
+      - quality_integral_gate
+    command_families:
+      - python -m scripts.engineering.ci.quality_integral_gate
+
+receipt_statuses:
+  admitted:
+    - pass
+  degraded:
+    - skip
+    - unavailable
+  stopped:
+    - fail
+
+skip_policy:
+  require_reason: true
+  require_follow_up: true
+  never_counts_as_pass: true
+
+trust_tiers:
+  local_single_host:
+    execution_attestation: digest_only
+    maximum_outcome: DEGRADED
+  ci:
+    execution_attestation: ci_identity
+    maximum_outcome: ADMIT
+  independent_evaluator:
+    execution_attestation: independent_identity
+    maximum_outcome: ADMIT
+  unsupported_or_compromised:
+    execution_attestation: none
+    maximum_outcome: STOP
+
+source_binding:
+  required:
+    - head_sha
+    - material_hash
+    - task_diff_hash
+    - policy_hash
+    - command_set_hash
+  excluded_prefixes:
+    - reports/quality/proof-or-stop/
+
+evidence_store:
+  automatic_ci_ingestion: false
+  require_memory_mode: read-write
+  require_actor_identity: true
+  create_decision_records: false
+
