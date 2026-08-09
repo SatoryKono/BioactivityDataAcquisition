@@ -365,7 +365,7 @@ jobs:
 ## Related Documents
 
 - [Script Naming Conventions](script-naming-conventions.md) - Naming standards for scripts
-- [Script Inventory Audit](../../reports/scripts_inventory_audit_report.md) - Overall script inventory
+- [Scripts Inventory Manifest](../../../configs/quality/scripts_inventory_manifest.json) - Governed script inventory
 - [PEP 257 - Docstring Conventions](https://peps.org/pep-0257/)
 - [Google Style Python Docstrings](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings)
 
