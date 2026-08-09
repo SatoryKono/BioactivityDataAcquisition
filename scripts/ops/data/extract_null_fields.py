@@ -1,3 +1,35 @@
+#!/usr/bin/env python3
+"""Null Field Extraction Tool.
+
+Extracts specified null/empty fields from publication CSV files for analysis.
+This tool helps identify consistently empty fields across different data sources.
+
+Usage:
+    python scripts/ops/data/extract_null_fields.py <base_path> <output_path>
+
+Arguments:
+    base_path: Base path to silver data directory (default: hardcoded path)
+    output_path: Output directory for extracted null fields (default: hardcoded path)
+
+Examples:
+    # Extract null fields with default paths
+    python scripts/ops/data/extract_null_fields.py
+
+    # Extract to custom locations
+    python scripts/ops/data/extract_null_fields.py /path/to/data /path/to/output
+
+Returns:
+    int: Exit code (0 for success, non-zero for errors)
+
+Raises:
+    ValueError: When input paths are invalid
+    RuntimeError: When CSV files cannot be processed
+
+Note:
+    This script currently uses hardcoded paths and should be updated
+    to accept command-line arguments for production use.
+"""
+
 from pathlib import Path
 
 import pandas as pd

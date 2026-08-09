@@ -1,9 +1,38 @@
 #!/usr/bin/env python3
-"""
-ADR Registry Generator
+"""ADR Registry Generator.
 
 Generates a comprehensive registry of Architecture Decision Records (ADRs)
 with metadata for the project navigator. Implements issue #3090.
+
+Usage:
+    python scripts/generate_adr_registry.py [options]
+    python scripts/generate_adr_registry.py --output docs/02-architecture/adr-registry/registry.json
+    python scripts/generate_adr_registry.py --validate
+
+Options:
+    --output   Output path for the registry JSON (default: docs/02-architecture/adr-registry/registry.json)
+    --validate Validate ADR metadata without generating registry
+    --verbose  Show detailed processing information
+
+Examples:
+    # Generate ADR registry
+    python scripts/generate_adr_registry.py
+
+    # Generate registry to custom location
+    python scripts/generate_adr_registry.py --output custom/registry.json
+
+    # Validate ADR metadata
+    python scripts/generate_adr_registry.py --validate
+
+Args:
+    argv: Command line arguments (optional, defaults to sys.argv)
+
+Returns:
+    int: Exit code (0 for success, non-zero for validation errors)
+
+Raises:
+    ValueError: When ADR metadata is invalid
+    RuntimeError: When required directories are missing
 """
 
 import json

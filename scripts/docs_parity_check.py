@@ -1,9 +1,38 @@
 #!/usr/bin/env python3
-"""
-Documentation Parity Check Script
+"""Documentation Parity Check Script.
 
 Validates that documentation stays in sync with code and configuration.
 Implements the parity gate requirements from the governance framework.
+
+Usage:
+    python scripts/docs_parity_check.py [options]
+    python scripts/docs_parity_check.py --check
+    python scripts/docs_parity_check.py --update
+
+Options:
+    --check    Check documentation parity (default)
+    --update   Update documentation parity manifest
+    --verbose  Show detailed parity information
+
+Examples:
+    # Check documentation parity
+    python scripts/docs_parity_check.py --check
+
+    # Update parity manifest
+    python scripts/docs_parity_check.py --update
+
+    # Show detailed information
+    python scripts/docs_parity_check.py --check --verbose
+
+Args:
+    argv: Command line arguments (optional, defaults to sys.argv)
+
+Returns:
+    int: Exit code (0 for success, non-zero for parity issues)
+
+Raises:
+    RuntimeError: When required configuration files are missing
+    ValueError: When invalid arguments are provided
 """
 
 import csv
