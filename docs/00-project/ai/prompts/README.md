@@ -23,24 +23,25 @@ This directory stores prompt artifacts used for AI-oriented workflow support in 
 
 ### Working Prompts (Active)
 
-- [grok-prompts-2-grok-closeout.md](grok-prompts-2-grok-closeout.md) — short Grok closeout prompt (issues/PR)
-- [grok-prompts-1-grok-audit-cycle.md](grok-prompts-1-grok-audit-cycle.md) — short Grok audit cycle (default 1 cycle)
-- [ai_workspace_setup.md](trash/ai_workspace_setup.md) — archived setup and audit prompt for AI workspace configuration
-- [architecture-prompts-2-documentation-diagrams-audit.md](architecture-prompts-2-documentation-diagrams-audit.md) — working prompt for documentation and diagram audits
-- [architecture-prompts-1-architecture-review.md](architecture-prompts-1-architecture-review.md) — working prompt for read-only architecture review and refactoring assessment
-- [test-prompts-2-test-speed-optimization-loop.md](test-prompts-2-test-speed-optimization-loop.md) — working prompt for test-speed optimization loops
-- [test-prompts-1-test-fix-retest-loop.md](test-prompts-1-test-fix-retest-loop.md) — working prompt for test run → fix → rerun iterative validation loop
+- [grok-closeout.md](grok-closeout.md) — short Grok closeout prompt (issues/PR)
+- [grok-audit-cycle.md](grok-audit-cycle.md) — short Grok audit cycle (default 1 cycle)
+- [ai_workspace_setup.md](ai_workspace_setup.md) — internal setup and audit prompt for AI workspace configuration
+- [docs_ai_audit_planning_codex_prompt.md](docs_ai_audit_planning_codex_prompt.md) — working prompt for docs AI audit planning
+- [documentation_diagrams_audit.md](documentation_diagrams_audit.md) — working prompt for documentation and diagram audits
+- [architecture_review_and_refactoring_assessment.md](architecture_review_and_refactoring_assessment.md) — working prompt for read-only architecture review and refactoring assessment
+- [test_speed_optimization_loop.md](test_speed_optimization_loop.md) — working prompt for test-speed optimization loops
+- [test_fix_retest_loop.md](test_fix_retest_loop.md) — working prompt for test run → fix → rerun iterative validation loop
 
 ### Historical Prompts (Reference Only)
 
-- [architecture_debt_reduction_orchestration.md](trash/architecture_debt_reduction_orchestration.md) — historical orchestration prompt for architecture debt reduction (use runtime scripts instead)
-- [refactor-orchestration-1-refactor_orchestration_prompt.md](refactor-orchestration-1-refactor_orchestration_prompt.md) — historical refactor orchestration prompt
-- [architecture-prompts-3-metric-exemptions-tasks-json.md](architecture-prompts-3-metric-exemptions-tasks-json.md) — historical prompt for generating metric-exemption task JSON (use runtime scripts instead)
-- [specialized-prompts-1-scripts-inventory.md](specialized-prompts-1-scripts-inventory.md) — historical prompt for scripts inventory and cleanup
+- [architecture_debt_reduction_orchestration.md](architecture_debt_reduction_orchestration.md) — historical orchestration prompt for architecture debt reduction (use runtime scripts instead)
+- [refactor_orchestration_prompt.md](refactor_orchestration_prompt.md) — historical refactor orchestration prompt
+- [architecture_metric_exemptions_tasks_json_prompt.md](architecture_metric_exemptions_tasks_json_prompt.md) — historical prompt for generating metric-exemption task JSON (use runtime scripts instead)
+- [scripts_inventory_consolidation_cleanup_prompt.md](scripts_inventory_consolidation_cleanup_prompt.md) — historical prompt for scripts inventory and cleanup
 
 ### Index and Discovery
 
-- [COLLECTED_PROMPTS_INDEX.md](trash/COLLECTED_PROMPTS_INDEX.md) — discoverability index for repo-only collected prompt snapshots
+- [COLLECTED_PROMPTS_INDEX.md](COLLECTED_PROMPTS_INDEX.md) — discoverability index for repo-only collected prompt snapshots
 
 ## Usage Guidelines
 
