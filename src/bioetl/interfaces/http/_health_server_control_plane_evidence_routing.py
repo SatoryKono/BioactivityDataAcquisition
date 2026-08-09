@@ -7,7 +7,9 @@ from collections.abc import Callable, Coroutine
 from typing import Protocol
 
 from bioetl.application.runtime_clock import current_utc_time
-from bioetl.application.services.control_plane.evidence import ControlPlaneEvidenceService
+from bioetl.application.services.control_plane.evidence import (
+    ControlPlaneEvidenceService,
+)
 from bioetl.application.services.control_plane.evidence.service_support import (
     source_error_payload,
 )
@@ -69,7 +71,9 @@ async def dispatch_control_plane_evidence_request(
     """Handle one validation route and return whether the path was recognized."""
     operations: dict[
         str,
-        Callable[[], Coroutine[object, object, dict[str, object]]],  # Any: async function signatures
+        Callable[
+            [], Coroutine[object, object, dict[str, object]]
+        ],  # Any: async function signatures
     ] = {
         "/ops/control-plane/checkpoint-validation": lambda: _checkpoint_payload(
             host, query
