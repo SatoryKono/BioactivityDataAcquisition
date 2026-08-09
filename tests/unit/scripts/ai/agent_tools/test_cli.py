@@ -314,23 +314,19 @@ def test_source_identity_is_explicitly_advisory(
         ("rev-parse", "HEAD"): "head-sha",
         ("rev-parse", "HEAD^{tree}"): "tree-sha",
         ("branch", "--show-current"): "main",
+        ("diff", "--name-only", "--no-ext-diff", "--no-textconv", "HEAD", "--"): "src/a.py\n",
         ("ls-files", "--others", "--exclude-standard"): "reports/new.json\n",
     }
 
     def run(command: list[str], **_: Any) -> subprocess.CompletedProcess[str]:
         git_args = tuple(command[command.index(str(repo_root)) + 1 :])
-        if git_args in {
-            ("diff-index", "--quiet", "HEAD", "--"),
-            ("diff-files", "--quiet", "--"),
-        }:
-            return subprocess.CompletedProcess(command, 1, "", "")
         return subprocess.CompletedProcess(command, 0, responses[git_args], "")
 
     monkeypatch.setattr(cli.subprocess, "run", run)
     context = cli._source_context()
     assert context["source"]["binding_mode"] == "bounded-advisory-v1"
     assert context["source"]["head_sha"] == "head-sha"
-    assert context["source"]["changed_path_inventory"] == "not-collected"
+    assert context["source"]["changed_paths"] == ["src/a.py"]
     assert context["source"]["dirty"] is True
 
 

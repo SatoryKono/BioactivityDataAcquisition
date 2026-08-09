@@ -16,6 +16,10 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
 _WORKER_CRASH_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"\[gw\d+\]\s+node down:\s+not properly terminated", re.IGNORECASE),
     re.compile(r"worker.+(crash|terminated unexpectedly)", re.IGNORECASE),

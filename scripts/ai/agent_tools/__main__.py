@@ -214,9 +214,7 @@ def _tool_status(spec: ToolSpec) -> dict[str, Any]:
     }
 
 
-def _source_context(
-    materials: tuple[Path, ...] = (), *, scope: str | None = None
-) -> dict[str, Any]:
+def _source_context() -> dict[str, Any]:
     """Build a bounded advisory identity with Proof-or-Stop-compatible fields.
 
     The canonical gate hashes every material file and the complete binary task
@@ -228,8 +226,8 @@ def _source_context(
     policy_path = ROOT / "configs/quality/proof_or_stop_policy.yaml"
     policy = load_policy(policy_path)
 
-    def git_run(*args: str) -> subprocess.CompletedProcess[str]:
-        return subprocess.run(
+    def git_text(*args: str) -> str:
+        completed = subprocess.run(
             [
                 "git",
                 "-c",
@@ -251,9 +249,6 @@ def _source_context(
             errors="replace",
             timeout=60,
         )
-
-    def git_text(*args: str) -> str:
-        completed = git_run(*args)
         if completed.returncode != 0:
             raise OSError(f"git {' '.join(args)} failed: {completed.stderr.strip()}")
         return completed.stdout.strip()
@@ -261,30 +256,19 @@ def _source_context(
     head_sha = git_text("rev-parse", "HEAD")
     tree_sha = git_text("rev-parse", "HEAD^{tree}")
     branch = git_text("branch", "--show-current") or "detached"
-    index_state = git_run("diff-index", "--quiet", "HEAD", "--")
-    worktree_state = git_run("diff-files", "--quiet", "--")
-    if index_state.returncode not in {0, 1} or worktree_state.returncode not in {0, 1}:
-        raise OSError("git could not determine bounded worktree state")
+    changed_paths = sorted(
+        path
+        for path in git_text(
+            "diff", "--name-only", "--no-ext-diff", "--no-textconv", "HEAD", "--"
+        ).splitlines()
+        if path
+    )
     untracked_paths = sorted(
         path
         for path in git_text("ls-files", "--others", "--exclude-standard").splitlines()
         if path
     )
     policy_hash = canonical_digest(policy)
-    bound_materials = []
-    for path in materials:
-        safe_path = ensure_path_within_root(path, ROOT)
-        bound_materials.append(
-            {
-                "path": safe_path.relative_to(ROOT).as_posix(),
-                "sha256": hashlib.sha256(safe_path.read_bytes()).hexdigest(),
-            }
-        )
-    dirty = bool(
-        index_state.returncode == 1
-        or worktree_state.returncode == 1
-        or untracked_paths
-    )
     repository = {
         "repo_id": ROOT.name.lower(),
         "branch": branch,
@@ -296,22 +280,17 @@ def _source_context(
         "material_hash": hashlib.sha256(tree_sha.encode()).hexdigest(),
         "task_diff_hash": canonical_digest(
             {
-                "index_changed": index_state.returncode == 1,
-                "worktree_changed": worktree_state.returncode == 1,
+                "changed_paths": changed_paths,
                 "untracked_paths": untracked_paths,
-                "bound_materials": bound_materials,
-                "scope": scope,
                 "policy_hash": policy_hash,
             }
         ),
         "policy_hash": policy_hash,
         "command_set_hash": command_set_hash(policy, "ready_to_merge"),
-        "dirty": dirty,
+        "dirty": bool(changed_paths or untracked_paths),
         "untracked_paths": untracked_paths,
-        "bound_materials": bound_materials,
-        "scope": scope,
+        "changed_paths": changed_paths,
         "binding_mode": "bounded-advisory-v1",
-        "changed_path_inventory": "not-collected",
         "head_tree_sha": tree_sha,
     }
     return {
@@ -432,13 +411,11 @@ def _run(
     task_id: str,
     command_builder: Any,
     timeout: int,
-    identity_materials: tuple[Path, ...] = (),
-    identity_scope: str | None = None,
 ) -> int:
     started = time.monotonic()
     output_dir = _output_dir(spec, task_id)
     try:
-        identity = _source_context(identity_materials, scope=identity_scope)
+        identity = _source_context()
     except (OSError, subprocess.SubprocessError, ValueError) as exc:
         payload = _summary(
             spec=spec,
@@ -643,7 +620,6 @@ def main(argv: list[str] | None = None) -> int:
                 spec=TOOLS["agentdebugx"],
                 task_id=args.task_id,
                 timeout=timeout,
-                identity_materials=(trajectory,),
                 command_builder=lambda executable, output: [
                     str(executable),
                     "analyze",
@@ -704,8 +680,6 @@ def main(argv: list[str] | None = None) -> int:
             spec=TOOLS["proofagent"],
             task_id=args.task_id,
             timeout=timeout,
-            identity_materials=(() if args.from_git else (events,)),
-            identity_scope=(args.scope if args.from_git else None),
             command_builder=proof_command,
         )
     except (OSError, ValueError) as exc:
