@@ -2,7 +2,7 @@ schema_version: 1
 provider: pubchem
 cassette_rel_path: tests/fixtures/vcr/pubchem/pubchem_query_contracts.yaml
 metadata_status: managed_inventory
-source: issue-8407-cassette-consolidation
+source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: e2fb80dbe0d07f08eefba661891909827dc3d15ad02ce04a8bc77fa8002be188
 recorded_at: '2026-07-03'
 staleness_ready: true
