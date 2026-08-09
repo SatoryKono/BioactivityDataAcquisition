@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-09T14:00:49.968316+00:00",
+  "generated_at": "2026-08-09T14:06:49.096987+00:00",
   "summary": {
-    "total_scripts": 573,
+    "total_scripts": 574,
     "status_counts": {
-      "active": 339,
+      "active": 340,
       "supporting": 230,
       "temporary_diagnostic": 4
     },
@@ -12,9 +12,9 @@
       "agents": 4,
       "build": 16,
       "ci": 78,
-      "docs": 230,
+      "docs": 234,
       "other": 76,
-      "scripts": 469,
+      "scripts": 470,
       "skills": 10,
       "tests": 360
     }
@@ -82,13 +82,19 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/README.md",
           "line": 36,
           "source_group": "docs",
           "text": "| `scripts/ai/codex/check_skills_layout.sh` | Validates `_references` exists as a required subdirectory              |"
+        },
+        {
+          "path": "docs/00-project/governance/script-naming-conventions.md",
+          "line": 135,
+          "source_group": "docs",
+          "text": "- Underscores instead of hyphens: `check_skills_layout.sh`"
         },
         {
           "path": "scripts/ops/support/skills/check_ai_skills_layout.sh",
@@ -196,8 +202,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
+        {
+          "path": "docs/00-project/governance/script-naming-conventions.md",
+          "line": 136,
+          "source_group": "docs",
+          "text": "- Mixed naming: `diagnose_wsl.sh`"
+        },
         {
           "path": "scripts/ai/codex/diagnose_wsl.ps1",
           "line": 14,
@@ -1572,7 +1584,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 55,
+      "reference_count": 56,
       "references": [
         {
           "path": ".github/ISSUES/AI-AGENT-CONFIG-AUDIT-2026-07-14-ISSUE-PACK.md",
@@ -2493,7 +2505,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -2506,6 +2518,12 @@
           "line": 93,
           "source_group": "ci",
           "text": "- \"scripts/ai/junie/check_junie_mirror.py\""
+        },
+        {
+          "path": "docs/00-project/governance/script-naming-conventions.md",
+          "line": 118,
+          "source_group": "docs",
+          "text": "- Python: `check_junie_mirror.py`"
         },
         {
           "path": "scripts/ai/junie/check_junie_mirror.sh",
@@ -3093,7 +3111,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 5,
       "references": [
         {
           "path": ".zed/mcp.json",
@@ -3106,6 +3124,18 @@
           "line": 157,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1` (Windows)"
+        },
+        {
+          "path": "docs/00-project/governance/script-naming-conventions.md",
+          "line": 111,
+          "source_group": "docs",
+          "text": "- ❌ `mcp_code_analyzer_wrapper.sh`"
+        },
+        {
+          "path": "docs/00-project/governance/script-naming-conventions.md",
+          "line": 137,
+          "source_group": "docs",
+          "text": "- Wrapper scripts: `mcp_code_analyzer_wrapper.sh`"
         },
         {
           "path": "scripts/ai/.mcp.json",
@@ -10305,8 +10335,14 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
+        {
+          "path": "docs/00-project/governance/script-naming-conventions.md",
+          "line": 72,
+          "source_group": "docs",
+          "text": "- ❌ `run_tests.ps1`"
+        },
         {
           "path": "scripts/engineering/dev/README.md",
           "line": 236,
@@ -10338,7 +10374,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 24,
       "references": [
         {
           "path": ".github/ISSUES/DOC-AUDIT-003-Align-Windows-Pytest-Docs-With-Xdist-Policy.md",
@@ -10351,6 +10387,12 @@
           "line": 66,
           "source_group": "other",
           "text": "scripts/engineering/dev/run_tests.py scripts/engineering/dev/run_pytest.ps1 tests/conftest.py"
+        },
+        {
+          "path": "docs/00-project/governance/script-naming-conventions.md",
+          "line": 37,
+          "source_group": "docs",
+          "text": "- ✅ `run_tests.py`"
         },
         {
           "path": "docs/03-guides/testing.md",
@@ -10381,12 +10423,6 @@
           "line": 106,
           "source_group": "scripts",
           "text": "commands={\"test-changed\": python_command(\"run_tests.py\", \"changed\")},"
-        },
-        {
-          "path": "scripts/engineering/dev/run_tests.ps1",
-          "line": 5,
-          "source_group": "scripts",
-          "text": "# Canonical implementation: scripts/engineering/dev/run_tests.py"
         }
       ]
     },
@@ -10395,8 +10431,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
+        {
+          "path": "docs/00-project/governance/script-naming-conventions.md",
+          "line": 56,
+          "source_group": "docs",
+          "text": "- ❌ `run_tests.sh`"
+        },
         {
           "path": "docs/03-guides/testing.md",
           "line": 188,
@@ -17714,7 +17756,7 @@
         },
         {
           "path": "scripts/ops/migrations/README.md",
-          "line": 8,
+          "line": 17,
           "source_group": "scripts",
           "text": "- `scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py`"
         },
@@ -17766,9 +17808,9 @@
       "references": [
         {
           "path": "scripts/ops/migrations/README.md",
-          "line": 13,
+          "line": 22,
           "source_group": "scripts",
-          "text": "- `scripts/ops/migrations/oneoff/migrate_exemption_keys_to_paths.py`"
+          "text": "- `scripts/ops/migrations/oneoff/migrate_exemption_keys_to_paths.py` (SUNSET: 2027-02-09)"
         }
       ],
       "owner": "@bioetl-platform",
@@ -17785,15 +17827,30 @@
       "references": [
         {
           "path": "scripts/ops/migrations/README.md",
-          "line": 14,
+          "line": 23,
           "source_group": "scripts",
-          "text": "- `scripts/ops/migrations/oneoff/migrate_vcr_extensionless.py`"
+          "text": "- `scripts/ops/migrations/oneoff/migrate_vcr_extensionless.py` (SUNSET: 2027-02-09)"
         }
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a completed one-off migration helper with explicit sunset review; do not re-run or promote unless VCR extensionless cassette migration is reopened under reviewed governance."
+    },
+    {
+      "path": "scripts/ops/migrations/validate_sunset_dates.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/migrations/LIFECYCLE.md",
+          "line": 56,
+          "source_group": "scripts",
+          "text": "python scripts/ops/migrations/validate_sunset_dates.py"
+        }
+      ]
     },
     {
       "path": "scripts/ops/migrations/windows_disk_to_d_migration.ps1",
@@ -17840,7 +17897,7 @@
         },
         {
           "path": "scripts/ops/migrations/README.md",
-          "line": 9,
+          "line": 18,
           "source_group": "scripts",
           "text": "- `scripts/ops/migrations/windows_disk_to_d_migration.ps1` (checklist runner for external Windows disk migration plans)"
         }
@@ -19529,13 +19586,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "Makefile",
           "line": 148,
           "source_group": "build",
           "text": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/ops/runtime/mcp/apply-shared-to-devin.py"
+        },
+        {
+          "path": "docs/00-project/governance/script-naming-conventions.md",
+          "line": 127,
+          "source_group": "docs",
+          "text": "- `scripts/ops/runtime/mcp/apply-shared-to-devin.py`"
         },
         {
           "path": "scripts/ops/runtime/mcp/OPERATOR.md",
