@@ -56,4 +56,4 @@ BioETL.
 ## Archived drafts
 
 Historical typo-named dashboard correction prompts live under
-[`docs/99-archive/guides/stale-ai-prompts/`](../../../99-archive/guides/stale-ai-prompts/).
+[`docs/99-archive/guides/stale-ai-prompts/`](../../../../99-archive/guides/stale-ai-prompts/).
