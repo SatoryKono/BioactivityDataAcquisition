@@ -1040,6 +1040,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a completed one-off migration helper with explicit sunset review; do not re-run or promote unless VCR extensionless cassette migration is reopened under reviewed governance."
     },
+    "scripts/ops/migrations/validate_sunset_dates.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded manual validator for the one-off migration sunset policy; keep it supporting unless it is wired into a reviewed canonical CI or ops command surface."
+    },
     "scripts/ops/neo4j_memory_sync.py": {
       "owner": "@bioetl-memory",
       "decision": "compatibility_wrapper",
