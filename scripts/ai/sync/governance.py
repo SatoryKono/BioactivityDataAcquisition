@@ -350,7 +350,16 @@ def _catalog_entries(path: Path, entrypoint: str) -> set[str]:
 
 
 def _matches_any(path: str, patterns: tuple[str, ...]) -> bool:
-    return any(fnmatch.fnmatchcase(path, pattern) for pattern in patterns)
+    # Check direct pattern match
+    if any(fnmatch.fnmatchcase(path, pattern) for pattern in patterns):
+        return True
+    # Check if path is under an optional directory (e.g., "coderabbit-audit" matches "coderabbit-audit/*")
+    for pattern in patterns:
+        if not pattern.endswith("/*"):
+            # If pattern doesn't have /*, treat it as a directory prefix
+            if path.startswith(pattern + "/"):
+                return True
+    return False
 
 
 def _string_tuple(value: object, *, label: str) -> tuple[str, ...]:
