@@ -10,6 +10,9 @@ import asyncio
 import time
 from dataclasses import dataclass
 
+from bioetl.application.services.control_plane.evidence import (
+    ControlPlaneEvidenceService,
+)
 from bioetl.application.services.quality.quarantine_service import QuarantineService
 from bioetl.domain.ports import (
     CheckpointPort,
@@ -60,6 +63,7 @@ class HealthServerControlPlaneDeps:
     run_manifest_port: RunManifestPort | None = None
     run_ledger_port: RunLedgerPort | None = None
     workflow_manifest_port: WorkflowManifestPort | None = None
+    control_plane_evidence_service: ControlPlaneEvidenceService | None = None
     metrics_exposition: HealthMetricsExpositionPort | None = None
     runtime_source_id: str | None = None
 
@@ -81,6 +85,7 @@ class HealthServer(
             "run_manifest_port",
             "run_ledger_port",
             "workflow_manifest_port",
+            "control_plane_evidence_service",
             "metrics_exposition",
             "runtime_source_id",
         }
@@ -148,6 +153,7 @@ class HealthServer(
         self._run_manifest_port = deps.run_manifest_port
         self._run_ledger_port = deps.run_ledger_port
         self._workflow_manifest_port = deps.workflow_manifest_port
+        self._control_plane_evidence_service = deps.control_plane_evidence_service
         self._runtime_source_id = deps.runtime_source_id
         self._metrics_exposition: HealthMetricsExpositionPort = (
             deps.metrics_exposition or _StaticHealthMetricsExposition()
@@ -254,6 +260,7 @@ async def run_health_server(
     run_manifest_port: RunManifestPort | None = None,
     run_ledger_port: RunLedgerPort | None = None,
     workflow_manifest_port: WorkflowManifestPort | None = None,
+    control_plane_evidence_service: ControlPlaneEvidenceService | None = None,
     prometheus_base_url: str | None = None,
     logger: LoggerPort | None = None,
     clock: ClockPort | None = None,
@@ -274,6 +281,7 @@ async def run_health_server(
         run_manifest_port: Optional read-only control-plane manifest catalog.
         run_ledger_port: Optional read-only control-plane run ledger.
         workflow_manifest_port: Optional read-only workflow manifest catalog.
+        control_plane_evidence_service: Optional bounded validation collaborator.
         prometheus_base_url: Optional Prometheus HTTP API base URL.
         logger: Optional LoggerPort for structured server event logging.
         clock: Optional ClockPort for response timestamps.
@@ -288,6 +296,7 @@ async def run_health_server(
             run_manifest_port=run_manifest_port,
             run_ledger_port=run_ledger_port,
             workflow_manifest_port=workflow_manifest_port,
+            control_plane_evidence_service=control_plane_evidence_service,
         ),
         prometheus_base_url=prometheus_base_url,
         logger=logger,

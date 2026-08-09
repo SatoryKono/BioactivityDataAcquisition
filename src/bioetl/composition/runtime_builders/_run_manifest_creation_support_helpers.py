@@ -67,6 +67,7 @@ class RunManifestCreateRequestInputs:
     contract_identity: RunManifestContractIdentity
     dq_contract_compatibility_hash: str
     effective_config_artifact_id: str
+    ledger_enabled: bool = True
 
 
 def current_silver_filter_compatibility_mode() -> str:

@@ -230,6 +230,7 @@
         "tests/architecture/test_docs_root_surface_governance_alignment.py",
         "tests/architecture/test_forbidden_imports.py",
         "tests/unit/application/test_pipeline_config.py",
+        "tests/unit/scripts/diagrams/test_convert_provider_diagrams.py",
         "tests/unit/scripts/test_generate_adr_registry.py"
       ],
       "gap_reasons": [],
@@ -342,6 +343,7 @@
         "tests/architecture/test_docs_root_surface_governance_alignment.py",
         "tests/architecture/test_forbidden_imports.py",
         "tests/unit/application/test_pipeline_config.py",
+        "tests/unit/scripts/diagrams/test_convert_provider_diagrams.py",
         "tests/unit/scripts/test_generate_adr_registry.py"
       ],
       "manual_exception": null,
@@ -1433,6 +1435,8 @@
       "enforcement_owner_paths": [
         "configs/quality/generated_artifact_routing.yaml",
         "configs/quality/scripts_inventory_manifest.json",
+        "scripts/diagrams/__main__.py",
+        "scripts/diagrams/fix/convert_provider_diagrams.py",
         "scripts/diagrams/fix/harmonize_link_styles.py",
         "scripts/diagrams/fix/prune_orphan_nodes.py",
         "scripts/diagrams/lint/lint_diagrams.py",
@@ -1441,7 +1445,8 @@
         "tests/architecture/test_config_topology_docs_drift.py",
         "tests/architecture/test_diagram_corpus_regression_guards.py",
         "tests/architecture/test_diagram_lint_policy_rules.py",
-        "tests/architecture/test_documentation_cleanup_inventory.py"
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+        "tests/unit/scripts/diagrams/test_convert_provider_diagrams.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
@@ -1459,6 +1464,8 @@
         "docs/03-guides/cheatsheets/adr-matrix.md",
         "docs/03-guides/index.md",
         "docs/05-operations/ci-workflow-map.md",
+        "scripts/diagrams/__main__.py",
+        "scripts/diagrams/fix/convert_provider_diagrams.py",
         "scripts/diagrams/fix/harmonize_link_styles.py",
         "scripts/diagrams/fix/prune_orphan_nodes.py",
         "scripts/diagrams/lint/lint_diagrams.py",
@@ -1467,7 +1474,8 @@
         "tests/architecture/test_config_topology_docs_drift.py",
         "tests/architecture/test_diagram_corpus_regression_guards.py",
         "tests/architecture/test_diagram_lint_policy_rules.py",
-        "tests/architecture/test_documentation_cleanup_inventory.py"
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+        "tests/unit/scripts/diagrams/test_convert_provider_diagrams.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",

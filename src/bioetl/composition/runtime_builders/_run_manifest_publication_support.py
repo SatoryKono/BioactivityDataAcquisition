@@ -39,6 +39,7 @@ def create_manifest_record(
     """Create and optionally ledger-record one manifest."""
     manifest = RunManifestService(
         manifest_port=manifest_store,
+        metrics=manifest_store.metrics,
         clock=SystemClock(),
         _manifest_id_factory=lambda: create_runtime_occurrence_id("run_manifest"),
     ).create_manifest(manifest_create_request)

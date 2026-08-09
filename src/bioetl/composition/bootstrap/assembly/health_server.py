@@ -6,6 +6,9 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
+from bioetl.application.services.control_plane.evidence import (
+    ControlPlaneEvidenceService,
+)
 from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.domain.ports import (
     CheckpointPort,
@@ -13,12 +16,17 @@ from bioetl.domain.ports import (
     HealthMetricsExpositionPort,
     HealthMonitorPort,
     HealthStatePort,
+    LineageStorePort,
     MetricsPort,
     RunLedgerPort,
     RunManifestPort,
     WorkflowManifestPort,
 )
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.control_plane.file_artifact_lifecycle_store import (
+    FileControlPlaneArtifactLifecycleStore,
+)
+from bioetl.infrastructure.control_plane.file_lineage_store import FileLineageStore
 from bioetl.infrastructure.control_plane.file_run_ledger_store import (
     FileRunLedgerStore,
 )
@@ -37,8 +45,6 @@ __all__ = [
     "HealthServerDependencies",
     "create_health_server_dependencies",
 ]
-
-
 @dataclass(frozen=True, slots=True)
 class HealthServerDependencies:
     """Dependencies required by the HTTP health server."""
@@ -50,6 +56,7 @@ class HealthServerDependencies:
     run_ledger_port: RunLedgerPort
     workflow_manifest_port: WorkflowManifestPort
     metrics_exposition: HealthMetricsExpositionPort
+    control_plane_evidence_service: ControlPlaneEvidenceService | None = None
     data_root: Path = Path()
 
 
@@ -84,6 +91,7 @@ class _RunManifestPorts:
     manifest_port: RunManifestPort
     ledger_port: RunLedgerPort
     workflow_manifest_port: WorkflowManifestPort
+    lineage_port: LineageStorePort
 
 
 def _create_control_plane_ports(
@@ -106,6 +114,10 @@ def _create_control_plane_ports(
         ),
         workflow_manifest_port=FileWorkflowManifestStore(
             base_path=output_root / "workflow_manifest",
+            metrics=metrics,
+        ),
+        lineage_port=FileLineageStore(
+            base_path=output_root / "lineage",
             metrics=metrics,
         ),
     )
@@ -134,6 +146,14 @@ def create_health_server_dependencies(
         run_manifest_port=control_plane_ports.manifest_port,
         run_ledger_port=control_plane_ports.ledger_port,
         workflow_manifest_port=control_plane_ports.workflow_manifest_port,
+        control_plane_evidence_service=ControlPlaneEvidenceService(
+            ledger_port=control_plane_ports.ledger_port,
+            lineage_store=control_plane_ports.lineage_port,
+            lifecycle_planner=FileControlPlaneArtifactLifecycleStore(
+                base_path=resolved_data_root / "output" / "control",
+                metrics=resolved_metrics,
+            ),
+        ),
         metrics_exposition=HealthMetricsExpositionAdapter(),
         data_root=resolved_data_root,
     )

@@ -114,6 +114,7 @@ def _build_composite_control_plane_manifest(
     )
     return RunManifestService(
         manifest_port=manifest_store,
+        metrics=infra_context.metrics,
         clock=SystemClock(),
         _manifest_id_factory=lambda: create_runtime_occurrence_id(
             "composite_run_manifest"
@@ -212,6 +213,17 @@ def _build_composite_manifest_create_request(
             config,
             runtime,
             required_persistence_profile=config_artifacts.effective_required_profile,
+            run_ledger_enabled=bool(
+                getattr(
+                    getattr(
+                        getattr(infra_context.settings, "pipeline", None),
+                        "control_plane",
+                        None,
+                    ),
+                    "run_ledger_enabled",
+                    True,
+                )
+            ),
         ),
         runtime_config=build_composite_runtime_config_snapshot(runtime),
         resolved_config=build_composite_resolved_config_snapshot(config),

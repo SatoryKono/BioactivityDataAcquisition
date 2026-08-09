@@ -54,7 +54,9 @@ def test_debt_mode_routes_config_writes_via_py_config_bot() -> None:
 
 def test_historical_prompts_reference_new_runtime_surface() -> None:
     for prompt_path in HISTORICAL_PROMPT_FILES:
-        assert prompt_path.is_file(), f"tracked historical prompt is missing: {prompt_path}"
+        assert prompt_path.is_file(), (
+            f"tracked historical prompt is missing: {prompt_path}"
+        )
         text = prompt_path.read_text(encoding="utf-8")
         assert "py-audit-bot" in text
         assert "python -m scripts.engineering.qa generate-debt-tasks" in text

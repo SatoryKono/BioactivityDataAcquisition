@@ -117,16 +117,22 @@ def _identity_gaps(
             if edge.manifest_id is not None and edge.manifest_id != expected_manifest:
                 gaps.add(f"edge_manifest:{edge.source.node_id}")
         for node in fragment.nodes:
-            if node.node_type is LineageNodeType.RUN:
-                if node.node_id != f"run:{expected_run}" or str(
+            if node.node_type is LineageNodeType.RUN and (
+                node.node_id != f"run:{expected_run}"
+                or str(
                     node.attributes.get("run_id") or ""
-                ) != expected_run:
-                    gaps.add(f"run_node:{node.node_id}")
-            if node.node_type is LineageNodeType.MANIFEST:
-                if node.node_id != f"manifest:{expected_manifest}" or str(
+                )
+                != expected_run
+            ):
+                gaps.add(f"run_node:{node.node_id}")
+            if node.node_type is LineageNodeType.MANIFEST and (
+                node.node_id != f"manifest:{expected_manifest}"
+                or str(
                     node.attributes.get("manifest_id") or ""
-                ) != expected_manifest:
-                    gaps.add(f"manifest_node:{node.node_id}")
+                )
+                != expected_manifest
+            ):
+                gaps.add(f"manifest_node:{node.node_id}")
     return sorted(gaps)
 
 

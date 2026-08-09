@@ -124,6 +124,7 @@ def create_run_manifest(
         execution_context_value=execution_context_value,
         provenance=provenance,
         contract_identity=manifest_context.contract_identity,
+        ledger_enabled=ledger_enabled,
     )
     return _publish_manifest_and_refs(
         ctx=ctx,
@@ -185,6 +186,7 @@ def _build_manifest_create_request(
     execution_context_value: str,
     provenance: RunManifestProvenanceBundle,
     contract_identity: _manifest_support.RunManifestContractIdentity,
+    ledger_enabled: bool = True,
 ) -> RunManifestCreateSpec:
     reproducibility_context, contract_identity = resolve_manifest_publication_identity(
         ctx=ctx,
@@ -210,6 +212,7 @@ def _build_manifest_create_request(
             contract_identity=contract_identity,
             dq_contract_compatibility_hash=provenance.dq_contract_compatibility_hash,
             effective_config_artifact_id=provenance.effective_config_artifact_id,
+            ledger_enabled=ledger_enabled,
         )
     )
     return request
