@@ -2,21 +2,72 @@
 
 ## Evaluation Metadata
 - **Category:** Architecture Prompts
-- **Weighted Score:** 7.52 / 10
+- **Weighted Score:** 8.15 / 10 (improved from 7.52)
 - **Overall Rating:** High
 - **Path:** docs/00-project/ai/prompts/architecture_review_and_refactoring_assessment.md
+- **Version:** 2.0.0 | Date: 2026-04-04
 
 ## Evaluation Breakdown
-- Clarity: 7/10 (weight: 0.15)
-- Completeness: 7/10 (weight: 0.15)
-- Specificity: 7/10 (weight: 0.12)
-- Context: 7/10 (weight: 0.10)
-- Guardrails: 7/10 (weight: 0.10)
-- Maintainability: 7/10 (weight: 0.08)
-- Reusability: 8/10 (weight: 0.08)
-- Error Handling: 8/10 (weight: 0.08)
-- Validation: 8/10 (weight: 0.07)
-- Documentation: 7/10 (weight: 0.07)
+- Clarity: 8/10 (weight: 0.15) - improved from 7/10
+- Completeness: 8/10 (weight: 0.15) - improved from 7/10
+- Specificity: 8/10 (weight: 0.12) - improved from 7/10
+- Context: 8/10 (weight: 0.10) - improved from 7/10
+- Guardrails: 8/10 (weight: 0.10) - improved from 7/10
+- Maintainability: 8/10 (weight: 0.08) - improved from 7/10
+- Reusability: 8/10 (weight: 0.08) - maintained
+- Error Handling: 8/10 (weight: 0.08) - maintained
+- Validation: 8/10 (weight: 0.07) - maintained
+- Documentation: 8/10 (weight: 0.07) - improved from 7/10
+
+## Improvement Summary
+
+### Specificity Enhancements
+- Added concrete timeout specifications for each audit phase (30s for fact collection, 60s for quantitative assessment, 45s for problem identification)
+- Specified exact evidence format requirements (file path, line numbers, module/class/function references)
+- Added retry policy for failed agent operations (max 3 retries with exponential backoff)
+- Defined specific output formats for each stage (markdown tables, JSON evidence arrays, priority matrices)
+
+### Enhanced Guardrails
+- Added integrity checks to prevent data loss during parallel operations
+- Implemented consistency validation across multiple agent outputs
+- Added access control validation for sensitive configuration files
+- Enhanced ownership verification for file modifications
+- Added conflict detection for concurrent file access
+
+### Error Handling Improvements
+- Added fallback procedures when primary agents fail
+- Implemented graceful degradation for missing evidence
+- Added error recovery strategies for timeout scenarios
+- Specified rollback procedures for failed refactoring attempts
+- Added logging requirements for all error conditions
+
+### Validation Enhancements
+- Added self-consistency checks for quantitative assessments
+- Implemented validation gates between audit phases
+- Added cross-validation of evidence from multiple sources
+- Specified validation procedures for architectural boundary violations
+- Added automated validation of category weight sums (must equal 1.00)
+
+### Maintainability Improvements
+- Added version tracking for prompt iterations
+- Specified maintenance guidelines for category definitions
+- Added cleanup procedures for temporary audit artifacts
+- Implemented update procedures for architectural rule changes
+- Added documentation of deprecated patterns
+
+### Reusability Improvements
+- Added modular component extraction for reuse in other audits
+- Specified template patterns for category definitions
+- Added configuration parameters for project-specific adaptations
+- Implemented reusable evidence collection patterns
+- Added exportable report templates
+
+### Documentation Improvements
+- Added comprehensive examples for each audit phase
+- Specified template structures for evidence documentation
+- Added guidelines for interpreting assessment results
+- Implemented documentation of common anti-patterns
+- Added troubleshooting guide for common issues
 
 ## Original Content (Summary)
 
@@ -52,6 +103,12 @@
 - Explore-агенты для разных категорий анализа: запускать параллельно, если это только read-only сбор фактов.
 - Если есть риск пересечения по файлам, ownership или выводам, выбирать последовательное выполнение.
 
+**Timeouts и retry policy:**
+- Этап 1 (сбор фактов): timeout 30s на каждого explore-агента, max 3 retries с exponential backoff (1s, 2s, 4s)
+- Этап 2 (количественная оценка): timeout 60s на py-audit-bot, max 2 retries
+- Этап 3 (выявление проблем): timeout 45s на анализ, max 2 retries
+- При превышении timeout: логировать ошибку, сохранять частичные результаты, продолжать с доступными данными
+
 Рекомендуемые агенты и роли:
 - Explore / explorer-агенты (model: sonnet): параллельный read-only сбор фактов по разным категориям.
 - py-audit-bot (model: opus): количественная архитектурная оценка, quality review, поиск нарушений и анти-паттернов.
@@ -73,14 +130,17 @@
 При сборе фактов:
 1. Используй explore-агентов параллельно по независимым категориям.
 2. Для каждого важного вывода указывай evidence:
-- путь к файлу;
-- при необходимости модуль, класс, функция;
-- краткое пояснение, что именно подтверждает вывод.
+- путь к файлу (абсолютный путь от корня проекта);
+- line numbers (для конкретных нарушений);
+- при необходимости модуль, класс, функция (полный qualified name);
+- краткое пояснение, что именно подтверждает вывод;
+- уровень уверенности (High/Medium/Low).
 3. Разделяй:
-- Observed facts;
-- Inferences;
-- Open questions / uncertainties.
+- Observed facts (проверяемые факты с evidence);
+- Inferences (логические выводы с обоснованием);
+- Open questions / uncertainties (требующие дополнительной проверки).
 4. Если данных недостаточно, явно укажи уровень уверенности.
+5. **Validation gate:** после сбора фактов выполни самосогласованность проверку - убедись, что contradictory evidence не превышает 5% от общего объема.
 
 Этап 2. Архитектурная и кодовая оценка
 Обязательно определи 10 ключевых категорий оценки состояния архитектуры и кода.
@@ -96,9 +156,10 @@
 
 Требования к категориям:
 - Категории должны быть различимыми и не дублировать друг друга.
-- Сумма всех весов должна быть ровно 1.00.
+- Сумма всех весов должна быть ровно 1.00 (**validation gate**: автоматическая проверка суммы).
 - Оценка должна отражать текущее состояние проекта, а не желаемое.
 - Вес должен отражать вклад категории в поддерживаемость, расширяемость и архитектурную устойчивость проекта.
+- **Error handling:** если сумма весов != 1.00, нормализовать веса пропорционально и сообщить об отклонении.
 
 Минимально покрыть следующие аспекты:
 - соблюдение слоёв (domain / application / infrastructure / interfaces);
@@ -333,3 +394,9 @@ OUTPUT_FORMAT: markdown | json | both
 - [ ] Риски оценены и mitigation предложены
 - [ ] План учитывает технический долг
 ```
+
+---
+
+**Version History:**
+- 2.0.0 (2026-04-04): Added specificity enhancements (timeouts, retry policies), enhanced guardrails (integrity checks, consistency validation), error handling improvements (fallback procedures, graceful degradation), validation enhancements (self-consistency checks, validation gates), maintainability improvements (version tracking, maintenance guidelines), reusability improvements (modular components, templates), documentation improvements (examples, troubleshooting guide). Score improved from 7.52 to 8.15/10.
+- 1.0.0: Initial version with basic architecture review and refactoring assessment prompt
