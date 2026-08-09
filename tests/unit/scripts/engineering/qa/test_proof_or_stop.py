@@ -21,6 +21,8 @@ from memory.proof import (
 )
 from memory.proof_cli import main
 
+pytestmark = pytest.mark.unit
+
 
 def _git(repo: Path, *args: str) -> None:
     subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True)

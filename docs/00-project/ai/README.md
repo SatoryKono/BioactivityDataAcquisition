@@ -64,7 +64,7 @@ See [AI Runtime Mirror Ownership](agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
   published mirrors, guides, policy notes
 - [AI Memory Surface](memory/README.md) — project memory entry point and
   role-specific memory sheets
-- [AI Prompts Surface](prompts/README.md) — working prompts, historical prompt
+- [AI Prompts Surface](prompts/documentation-prompts-2-README.md) — working prompts, historical prompt
   collections, prompt indexes
 - [Skills Mirror](skills/README.md) — published mirrors, practical indexes and
   skill references
@@ -83,6 +83,5 @@ See [AI Runtime Mirror Ownership](agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
 
 - [agents/guides/grok-operator-runbook.md](agents/guides/grok-operator-runbook.md)
 - [agents/guides/grok-tui-config-checklist.md](agents/guides/grok-tui-config-checklist.md)
-- [prompts/grok-closeout.md](prompts/grok-closeout.md)
-- [prompts/grok-audit-cycle.md](prompts/grok-audit-cycle.md)
-
+- [prompts/grok-prompts-2-grok-closeout.md](prompts/grok-prompts-2-grok-closeout.md)
+- [prompts/grok-prompts-1-grok-audit-cycle.md](prompts/grok-prompts-1-grok-audit-cycle.md)
