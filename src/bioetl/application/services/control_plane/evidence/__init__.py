@@ -23,9 +23,9 @@ __all__ = [
     "CONTROL_PLANE_EVIDENCE_CONTRACT",
     "DEFAULT_CONTROL_PLANE_RETENTION_DAYS",
     "FAILURE_REASON_CATEGORIES",
+    "build_unknown_failure_reason_rows",
     "ControlPlaneEvidenceService",
     "EvidenceCheck",
     "EvidenceScope",
     "EvidenceStatus",
-    "build_unknown_failure_reason_rows",
 ]
