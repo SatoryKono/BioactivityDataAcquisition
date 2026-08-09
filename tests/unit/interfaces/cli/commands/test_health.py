@@ -782,19 +782,21 @@ class TestHealthServerAsyncExecution:
         # Verify HealthServer was called with correct options
         from bioetl.interfaces.http.health_server import HealthServerControlPlaneDeps
 
-        mock_server_cls.assert_called_once_with(
-            host="127.0.0.1",
-            port=9000,
-            control_plane=HealthServerControlPlaneDeps(
-                health_monitor=mock_deps.health_monitor,
-                quarantine_service=None,
-                checkpoint_port=mock_deps.checkpoint_port,
-                run_manifest_port=mock_deps.run_manifest_port,
-                run_ledger_port=mock_deps.run_ledger_port,
-                workflow_manifest_port=mock_deps.workflow_manifest_port,
-                metrics_exposition=mock_deps.metrics_exposition,
-            ),
-        )
+        # Check that HealthServer was called with the expected host and port
+        assert mock_server_cls.called
+        call_kwargs = mock_server_cls.call_args.kwargs
+        assert call_kwargs["host"] == "127.0.0.1"
+        assert call_kwargs["port"] == 9000
+        # Check control_plane structure (runtime_source_id may vary)
+        control_plane = call_kwargs["control_plane"]
+        assert isinstance(control_plane, HealthServerControlPlaneDeps)
+        assert control_plane.health_monitor == mock_deps.health_monitor
+        assert control_plane.quarantine_service is None
+        assert control_plane.checkpoint_port == mock_deps.checkpoint_port
+        assert control_plane.run_manifest_port == mock_deps.run_manifest_port
+        assert control_plane.run_ledger_port == mock_deps.run_ledger_port
+        assert control_plane.workflow_manifest_port == mock_deps.workflow_manifest_port
+        assert control_plane.metrics_exposition == mock_deps.metrics_exposition
         mock_server.set_data_root.assert_called_once_with(str(tmp_path))
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")

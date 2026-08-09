@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Helper: keep Codex MCP config synchronized before launching Codex.
+# INTERNAL: Helper: keep Codex MCP config synchronized before launching Codex.
+# Called by: run-codex-impl.sh
+# DO NOT invoke directly
 
 set -euo pipefail
 

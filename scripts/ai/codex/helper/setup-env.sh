@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Helper: Setup missing components WITHOUT apt-get
-# Skips apt if it's hanging, installs from binaries instead
+# INTERNAL: Helper: Setup missing components WITHOUT apt-get
+# Called by: run-codex.sh
+# DO NOT invoke directly
 
 set -u
 

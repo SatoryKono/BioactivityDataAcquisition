@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Helper: Launch Codex
-# Called by: run-codex.sh/run-codex.ps1
+# INTERNAL: Helper: Launch Codex
+# Called by: run-codex.sh, run-codex.ps1
+# DO NOT invoke directly
 
 set -euo pipefail
 

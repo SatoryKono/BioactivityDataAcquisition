@@ -25,7 +25,7 @@ def _project_root() -> Path:
 
 
 def test_wsl_launchers_use_local_bootstrap_helper() -> None:
-    """Bash launchers should resolve Codex through the repo-local helper."""
+    """Bash launchers should redirect to canonical launcher with deprecation warning."""
     root = _project_root()
     codex_sh = (
         root / "scripts" / "ops" / "launchers" / "codex" / "codex.sh"
@@ -34,20 +34,18 @@ def test_wsl_launchers_use_local_bootstrap_helper() -> None:
         root / "scripts" / "ops" / "launchers" / "codex" / "codex-exec.sh"
     ).read_text(encoding="utf-8")
 
-    assert "ensure-codex-cli.sh" in codex_sh
-    assert "ensure-mcp.sh" in codex_sh
-    assert 'if [[ "${CODEX_SKIP_MCP_SETUP:-0}" != "1" ]]; then' in codex_sh
-    assert '--ensure --codex-bin "${CODEX_BIN}"' in codex_sh
-    assert 'exec "${CODEX_BIN}" -C "${REPO_ROOT}"' in codex_sh
-    assert "npm install -g @openai/codex" not in codex_sh
+    # Check that ops launchers are deprecated wrappers
+    assert "DEPRECATED" in codex_sh
+    assert "canonical Codex launcher" in codex_sh
+    assert "scripts/ai/codex/run-codex.sh" in codex_sh
+    assert "exec bash" in codex_sh
+    assert "ensure-codex-cli.sh" not in codex_sh  # No longer uses bootstrap helper
 
-    assert "ensure-codex-cli.sh" in codex_exec_sh
-    assert "ensure-mcp.sh" in codex_exec_sh
-    assert 'if [[ "${CODEX_SKIP_MCP_SETUP:-0}" != "1" ]]; then' in codex_exec_sh
-    assert '--ensure --codex-bin "${CODEX_BIN}"' in codex_exec_sh
-    assert 'exec "${CODEX_BIN}" exec --full-auto -C "${REPO_ROOT}" "$@"' in (
-        codex_exec_sh
-    )
+    assert "DEPRECATED" in codex_exec_sh
+    assert "canonical Codex launcher" in codex_exec_sh
+    assert "scripts/ai/codex/run-codex.sh" in codex_exec_sh
+    assert "exec bash" in codex_exec_sh
+    assert "ensure-codex-cli.sh" not in codex_exec_sh  # No longer uses bootstrap helper
     assert "npm install -g @openai/codex" not in codex_exec_sh
 
 
@@ -62,14 +60,14 @@ def test_windows_launchers_delegate_to_wsl_scripts_without_posix_redirects() -> 
     ).read_text(encoding="utf-8")
 
     assert "/dev/null" not in codex_bat
-    assert 'bash -i "%REPO_WSL%/scripts/ops/launchers/codex/codex.sh"' in codex_bat
+    assert 'bash -i "%REPO_WSL%/scripts/ai/codex/run-codex.sh"' in codex_bat
     assert "wslpath -a" in codex_bat
 
     assert "/dev/null" not in codex_exec_bat
     assert (
-        'bash "%REPO_WSL%/scripts/ops/launchers/codex/codex-exec.sh"' in codex_exec_bat
+        'bash "%REPO_WSL%/scripts/ai/codex/run-codex.sh"' in codex_exec_bat
     )
-    assert 'bash -i "%REPO_WSL%/scripts/ops/launchers/codex/codex-exec.sh"' not in (
+    assert 'bash -i "%REPO_WSL%/scripts/ai/codex/run-codex.sh"' not in (
         codex_exec_bat
     )
     assert "wslpath -a" in codex_exec_bat

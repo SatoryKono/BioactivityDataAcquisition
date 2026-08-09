@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Shared Codex auth probes for WSL launchers.
+# INTERNAL: Shared Codex auth probes for WSL launchers.
 # Source this file; do not execute it directly.
+# Called by: run-codex-impl.sh, other WSL launchers
 
 # shellcheck shell=bash
 
