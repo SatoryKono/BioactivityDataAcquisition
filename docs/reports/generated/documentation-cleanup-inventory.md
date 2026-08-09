@@ -10,7 +10,7 @@
 | Doc-like files | 2608 |
 | Tracked doc-like files | 2603 |
 | Ignored local docs/reports files | 5 |
-| Duplicate groups | 2 |
+| Duplicate groups | 11 |
 | Generated without route or exception | 0 |
 | Generated routes | 70 |
 
@@ -58,20 +58,22 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 739 |
-| Archived | 155 |
-| Canonical | 73 |
-| Generated | 914 |
+| Active | 725 |
+| Archived | 169 |
+| Canonical | 68 |
+| Duplicate | 8 |
+| Generated | 911 |
 | Working | 727 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 739 |
-| archive | 155 |
-| canonical | 73 |
-| generated | 914 |
+| active | 725 |
+| archive | 169 |
+| canonical | 68 |
+| duplicate | 8 |
+| generated | 911 |
 | working | 727 |
 
 ## Recommended Actions
@@ -80,14 +82,23 @@
 | --- | --- |
 | archive-after-github-state-check | 320 |
 | archive-after-migration | 262 |
-| generate-automatically | 914 |
-| keep | 1108 |
+| generate-automatically | 911 |
+| keep | 1103 |
+| merge | 8 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
 
 | Path | Status | Inbound | Action |
 | --- | --- | --- | --- |
+| `docs/03-guides/dashboards/dux3-audit-selection-notes.md` | Duplicate | 0 | merge |
+| `docs/03-guides/dashboards/dux3-residual-contracts.md` | Duplicate | 3 | merge |
+| `docs/03-guides/dashboards/dux3-screenshot-regression-protocol.md` | Duplicate | 0 | merge |
+| `docs/03-guides/dashboards/dux3-semantic-fixtures.md` | Duplicate | 0 | merge |
+| `docs/03-guides/dashboards/dux4-title-scope-harness.md` | Duplicate | 1 | merge |
+| `docs/03-guides/dashboards/dux5-copy-dictionary.md` | Duplicate | 3 | merge |
+| `docs/03-guides/dashboards/dux5-screenshot-regression-protocol.md` | Duplicate | 2 | merge |
+| `docs/03-guides/dashboards/dux6-residual-readability.md` | Duplicate | 1 | merge |
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-05.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
@@ -160,14 +171,6 @@
 | `reports/quality/coderabbit/20260806-full/_S13-tests-unit-domain-root.txt` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260806-full/_S14-tests-unit-application-root.txt` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260806-full/_S14b-tests-unit-infrastructure-root.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S15c-tests-residual-1.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S15c-tests-residual-2.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S15c-tests-residual-3.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S15c-tests-residual-4.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S16b-configs-other.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S17-docs-00-project-root.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S20-scripts-root.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_diag277_by_file.txt` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -180,9 +183,7 @@
 | `docs/00-project/ai/agents/agents/py-debug-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/agents/py-doc-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/agents/py-plan-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/py-review-orchestrator.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/agents/py-test-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/py-test-swarm.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/agents/sp-api-designer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/agents/sp-architect-reviewer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/agents/sp-code-reviewer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
@@ -253,6 +254,8 @@
 | `docs/00-project/ai/skills/global/gh-fix-ci/LICENSE.txt` |  | generated_skill_license_mirror |  |  |
 | `docs/00-project/ai/skills/global/openai-docs/LICENSE.txt` |  | generated_skill_license_mirror |  |  |
 | `docs/00-project/ai/skills/local/SKILLS-CATALOG.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/skills/local/new-pipeline/SKILL.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/skills/local/new-pipeline/agents/openai.yaml` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 
 ## GitHub Issue Evidence Examples
 

@@ -12,12 +12,6 @@ path_entries:
     expiry: "2026-12-31"
     removal_step: "Keep test-only code on the dedicated test-complexity lane."
     rationale: "Production xenon budget tracks src-only maintainability, not test scaffolding."
-  - path: src/tools/
-    scopes: [xenon, critical_check]
-    owner: "@bioetl-architecture"
-    expiry: "2026-12-31"
-    removal_step: "Move high-branch reporting helpers behind smaller collaborators."
-    rationale: "Repo-local tooling remains outside the production runtime boundary."
   - path: src/memory/
     scopes: [xenon, critical_check]
     owner: "@bioetl-memory"
