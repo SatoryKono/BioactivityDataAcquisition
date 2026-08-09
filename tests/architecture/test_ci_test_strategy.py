@@ -12,6 +12,8 @@
 
 from __future__ import annotations
 
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -68,6 +70,21 @@ def test_coverage_job_combines_shard_coverage_and_runs_serial_pass() -> None:
     assert "coverage report --show-missing --fail-under=85" in workflow, (
         "coverage-verify job must enforce the 85% threshold on combined coverage"
     )
+
+
+def test_resilient_pytest_runner_supports_direct_script_invocation() -> None:
+    """The workflow's direct script invocation must preserve repo imports."""
+    result = subprocess.run(
+        [
+            sys.executable,
+            "scripts/engineering/ci/run_pytest_resilient.py",
+            "--help",
+        ],
+        capture_output=True,
+        check=False,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
 
 
 def test_parallel_ci_jobs_exclude_serial_marker() -> None:

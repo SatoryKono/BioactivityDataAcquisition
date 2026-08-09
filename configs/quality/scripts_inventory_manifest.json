@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-09T14:43:03.676643+00:00",
+  "generated_at": "2026-08-09T15:00:04.779426+00:00",
   "summary": {
     "total_scripts": 574,
     "status_counts": {
@@ -9229,7 +9229,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -9266,6 +9266,12 @@
           "line": 29,
           "source_group": "scripts",
           "text": "\"run-tests\": \"run_pytest_resilient.py\","
+        },
+        {
+          "path": "tests/architecture/test_ci_test_strategy.py",
+          "line": 80,
+          "source_group": "tests",
+          "text": "\"scripts/engineering/ci/run_pytest_resilient.py\","
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
