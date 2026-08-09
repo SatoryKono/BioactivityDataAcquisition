@@ -34,11 +34,13 @@ from pathlib import Path
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.record_processor import RecordProcessor
-from bioetl.composition.factories.services.factory import ServicesBuilder
 from bioetl.domain.config import TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.ports.noop import NoOpTracing
+from tests.testing_support.application_batch_components import (
+    build_test_batch_processing_components,
+)
 
 
 def _write_temp_pipeline_config(
@@ -121,7 +123,7 @@ def _create_record_processor(
     lock_validator=None,
 ) -> RecordProcessor:
     effective_tracer = tracer if tracer is not None else NoOpTracing()
-    components = ServicesBuilder.create_batch_processing_components(
+    components = build_test_batch_processing_components(
         services=services,
         context=context,
         config=config,

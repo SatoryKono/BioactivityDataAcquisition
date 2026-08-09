@@ -68,7 +68,6 @@ from bioetl.application.core.lifecycle.checkpoint_manager import (
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
-from bioetl.composition.factories.services.factory import ServicesBuilder
 from bioetl.domain.config import MemoryConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
@@ -82,6 +81,9 @@ from bioetl.domain.types import (
     GoldSchemaType,
     RunType,
     ValidationResult,
+)
+from tests.testing_support.application_batch_components import (
+    build_test_batch_processing_components,
 )
 
 
@@ -200,7 +202,7 @@ def _create_batch_executor(
         shutdown_signal = ShutdownSignal()
 
     error_classifier = ErrorClassifier()
-    components = ServicesBuilder.create_batch_processing_components(
+    components = build_test_batch_processing_components(
         services=services,
         context=context,
         config=config,
