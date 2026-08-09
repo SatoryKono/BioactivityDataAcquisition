@@ -45,7 +45,7 @@ def cycle_nodes(fragments: tuple[LineageGraphFragment, ...]) -> list[str]:
         found = False
         for target_id in sorted(adjacency.get(node_id, ())):
             if visit(target_id):
-                _ = cycle.update({node_id, target_id})
+                cycle.update({node_id, target_id})
                 found = True
         visiting.remove(node_id)
         visited.add(node_id)
