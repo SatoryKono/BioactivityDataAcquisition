@@ -205,3 +205,7 @@ def test_pilot_covers_adversarial_matrix(proof_repo: Path, tmp_path: Path) -> No
     assert '"scenario_count": 15' in payload
     assert '"false_admit_count": 0' in payload
     assert '"tamper_accept_count": 0' in payload
+    assert '"recommendation": "GO"' in payload
+    assert '"reason_code_coverage"' in payload
+    assert '"deterministic_replay"' in payload
+    assert output.with_suffix(".md").is_file()

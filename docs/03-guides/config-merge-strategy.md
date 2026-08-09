@@ -329,10 +329,10 @@ loading_strategy: null
 
 ## Related Documents
 
-- [ADR-031: Configuration Loading Strategy](../../02-architecture/decisions/ADR-031-configuration-loading-strategy.md)
-- [Configuration File Policy](../../00-project/governance/03-file-policy.md)
-- [Entity Configuration Schema](../../04-reference/configs/entity-config-schema.json)
-- [Base Configuration Schema](../../04-reference/configs/base-config-schema.json)
+- [ADR-031: Loading Strategy Formalization](../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)
+- [Configuration File Policy](../00-project/governance/03-file-policy.md)
+- [Pipeline Configuration Schema](../../configs/_schema/pipeline.json)
+- [Source Configuration Schema](../../configs/_schema/source.json)
 
 ## Revision History
 

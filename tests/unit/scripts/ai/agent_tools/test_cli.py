@@ -24,9 +24,13 @@ def repo_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     monkeypatch.setattr(
         cli,
         "_source_context",
-        lambda *_args, **_kwargs: {
+        lambda *_args, **kwargs: {
             "repository": {"repo_id": "bioetl"},
-            "source": {"head_sha": "fixture-sha", "policy_hash": "fixture-policy"},
+            "source": {
+                "head_sha": "fixture-sha",
+                "policy_hash": "fixture-policy",
+                "scope": kwargs.get("scope"),
+            },
         },
     )
     return tmp_path

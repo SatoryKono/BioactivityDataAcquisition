@@ -1466,6 +1466,11 @@ jobs:
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
           exit 0
 
+      - name: Run adversarial Proof-or-Stop pilot
+        run: >-
+          uv run --frozen --no-build python -m scripts.engineering.qa
+          proof-or-stop pilot --repo-root "$GITHUB_WORKSPACE"
+
       - name: Normalize required producer receipts
         shell: bash
         env:
