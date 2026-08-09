@@ -992,8 +992,7 @@
         "tests/unit/domain/test_protein_class_target_type.py",
         "tests/unit/infrastructure/config/test_protein_class_target_type_loader.py",
         "tests/unit/infrastructure/quality/test_quarterly_targets_validation.py",
-        "tests/unit/repo_backed/application/pipelines/chembl/test_chembl_target_helpers.py",
-        "tests/unit/scripts/ops/neo4j_memory_sync/test_targeted_apply_and_filters.py"
+        "tests/unit/repo_backed/application/pipelines/chembl/test_chembl_target_helpers.py"
       ],
       "contract_yaml_contract_ref": "chembl.target",
       "contract_yaml_contract_version": "3.0.0",
@@ -1699,8 +1698,7 @@
         "tests/unit/domain/test_protein_class_target_type.py",
         "tests/unit/infrastructure/config/test_protein_class_target_type_loader.py",
         "tests/unit/infrastructure/quality/test_quarterly_targets_validation.py",
-        "tests/unit/repo_backed/application/pipelines/chembl/test_chembl_target_helpers.py",
-        "tests/unit/scripts/ops/neo4j_memory_sync/test_targeted_apply_and_filters.py"
+        "tests/unit/repo_backed/application/pipelines/chembl/test_chembl_target_helpers.py"
       ],
       "contract_yaml_contract_ref": "composite.target",
       "contract_yaml_contract_version": "1.0.0",
@@ -2569,5 +2567,5 @@
     "gold_enabled": "Effective runtime state of pipeline.sink.gold.enabled after hierarchical config resolution; omitted enabled defaults to true. Never infer this from contract/Pandera availability or from unrelated flags such as filters.input_filter.enabled.",
     "missing_gold_enabled_count": "Runtime-enabled Gold rows whose contract parity_status is not covered."
   },
-  "snapshot_date": "2026-08-07"
+  "snapshot_date": "2026-08-09"
 }
