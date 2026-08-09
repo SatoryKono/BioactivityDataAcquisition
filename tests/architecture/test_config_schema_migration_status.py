@@ -239,12 +239,8 @@ def test_provider_configs_use_declarative_environment_indirection() -> None:
     crossref = _load_yaml_mapping(PROVIDERS_DIR / "crossref.yaml")
     openalex = _load_yaml_mapping(PROVIDERS_DIR / "openalex.yaml")
     semanticscholar = _load_yaml_mapping(PROVIDERS_DIR / "semanticscholar.yaml")
-    assert crossref["source"]["provider_config"]["mailto"] == (
-        "your-email@example.com"
-    )
-    assert openalex["source"]["provider_config"]["mailto"] == (
-        "your-email@example.com"
-    )
+    assert crossref["source"]["provider_config"]["mailto"] == ("your-email@example.com")
+    assert openalex["source"]["provider_config"]["mailto"] == ("your-email@example.com")
     assert semanticscholar["source"]["provider_config"]["api_key_env"] == (
         "BIOETL_SEMANTICSCHOLAR_API_KEY"
     )
@@ -267,9 +263,7 @@ def test_config_version_scopes_are_explicit_semver() -> None:
                     f"{path}: {section_name}.version must use SemVer"
                 )
 
-    chembl_activity = _load_yaml_mapping(
-        ENTITIES_DIR / "chembl" / "activity.yaml"
-    )
+    chembl_activity = _load_yaml_mapping(ENTITIES_DIR / "chembl" / "activity.yaml")
     assert chembl_activity["version"] == "1.0.0"
     assert chembl_activity["quality"]["version"] == "1.1.0"
 
@@ -279,7 +273,9 @@ def test_composite_entity_contracts_have_complete_aligned_sections() -> None:
     required_sections = {"pipeline", "schema", "quality", "filters", "contracts"}
     for path in sorted((ENTITIES_DIR / "composite").glob("*.yaml")):
         payload = _load_yaml_mapping(path)
-        assert required_sections <= payload.keys(), f"{path}: incomplete entity contract"
+        assert required_sections <= payload.keys(), (
+            f"{path}: incomplete entity contract"
+        )
 
         runtime = _load_yaml_mapping(COMPOSITES_DIR / path.name)["composite"]
         runtime_schema = runtime.get("schema")
@@ -299,9 +295,10 @@ def test_composite_entity_contracts_have_complete_aligned_sections() -> None:
             assert "entity_id" in required_fields, (
                 f"{path}: filters.{layer} must require entity_id"
             )
-        assert payload["contracts"]["primary_key"] == payload["pipeline"][
-            "business_primary_keys"
-        ]
+        assert (
+            payload["contracts"]["primary_key"]
+            == payload["pipeline"]["business_primary_keys"]
+        )
 
 
 def test_config_docs_explain_runtime_values_and_version_scopes() -> None:

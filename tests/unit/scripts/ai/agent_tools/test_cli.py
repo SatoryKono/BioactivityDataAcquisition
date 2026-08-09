@@ -122,7 +122,9 @@ def test_debug_uses_deterministic_subprocess_and_redacts_output(
     assert summary["advisory"] is True
     assert summary["lifecycle_authority"] is False
     assert "--mode" in captured["command"]
-    assert captured["command"][captured["command"].index("--mode") + 1] == "deterministic"
+    assert (
+        captured["command"][captured["command"].index("--mode") + 1] == "deterministic"
+    )
     assert "GITHUB_TOKEN" not in captured["env"]
     assert captured["env"]["LITELLM_LOCAL_MODEL_COST_MAP"] == "true"
     output_dir = repo_root / "reports/ai/agent-tools/agentdebugx/fixture-debug"
@@ -308,7 +310,10 @@ def test_source_identity_is_explicitly_advisory(
 ) -> None:
     repo_root = tmp_path
     monkeypatch.setattr(cli, "ROOT", repo_root)
-    policy = {"claims": {"ready_to_merge": {"required_evidence": []}}, "evidence_kinds": {}}
+    policy = {
+        "claims": {"ready_to_merge": {"required_evidence": []}},
+        "evidence_kinds": {},
+    }
     monkeypatch.setattr(cli, "load_policy", lambda _: policy)
     responses = {
         ("rev-parse", "HEAD"): "head-sha",
