@@ -420,28 +420,6 @@ async def test_routing_support_dispatches_control_plane_branches(
         path="/ops/control-plane/ready",
         query={},
     )
-
-
-@pytest.mark.asyncio
-async def test_missing_evidence_service_keeps_unknown_table_contract() -> None:
-    host = _RoutingHost()
-    writer = _Writer()
-
-    await routing_support.dispatch_control_plane_request(
-        host,
-        writer=writer,
-        path="/ops/control-plane/manifest-validation",
-        query={"pipeline": "chembl_activity"},
-    )
-
-    response_type, status_code, payload = host.sent[-1]
-    assert response_type == "payload"
-    assert status_code == 503
-    assert payload["contract"] == "control_plane_validation_evidence_v1"
-    assert payload["status"] == "UNKNOWN"
-    assert payload["rows"][0]["reason"] == (
-        "control_plane_evidence_service_unavailable"
-    )
     assert host.sent[-1] == (
         "payload",
         200,
@@ -505,6 +483,28 @@ async def test_missing_evidence_service_keeps_unknown_table_contract() -> None:
         "text",
         400,
         "Missing required query parameter: pipeline",
+    )
+
+
+@pytest.mark.asyncio
+async def test_missing_evidence_service_keeps_unknown_table_contract() -> None:
+    host = _RoutingHost()
+    writer = _Writer()
+
+    await routing_support.dispatch_control_plane_request(
+        host,
+        writer=writer,
+        path="/ops/control-plane/manifest-validation",
+        query={"pipeline": "chembl_activity"},
+    )
+
+    response_type, status_code, payload = host.sent[-1]
+    assert response_type == "payload"
+    assert status_code == 503
+    assert payload["contract"] == "control_plane_validation_evidence_v1"
+    assert payload["status"] == "UNKNOWN"
+    assert payload["rows"][0]["reason"] == (
+        "control_plane_evidence_service_unavailable"
     )
 
 
