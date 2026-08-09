@@ -629,6 +629,37 @@ def test_control_plane_exposes_terminal_events_and_telemetry_gap() -> None:
     )
 
 
+def test_control_plane_bounded_failure_rows_preserve_unknown_evidence() -> None:
+    """Bounded failure rows must expose status/reason instead of healthy-looking zeros."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panel = next(
+        panel for panel in get_dashboard_panels(dashboard) if panel.get("id") == 9417
+    )
+
+    assert panel.get("type") == "table"
+    assert panel.get("options", {}).get("showHeader") is True
+    target = panel.get("targets", [])[0]
+    assert target.get("root_selector") == "rows"
+    assert target.get("url", "").startswith("/ops/control-plane/failure-reasons?")
+
+    description = str(panel.get("description", "")).lower()
+    assert (
+        "every category row carries bounded status and reason evidence" in description
+    )
+    assert "unknown backend verdict must remain visible" in description
+    assert "must not look like a healthy zero" in description
+
+    visible_columns = {
+        override.get("matcher", {}).get("options")
+        for override in panel.get("fieldConfig", {}).get("overrides", [])
+    }
+    assert {"count", "status", "reason"}.issubset(visible_columns)
+    no_value = str(
+        panel.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
+    ).lower()
+    assert "backend unavailable must not be treated as zero failures" in no_value
+
+
 def test_control_plane_first_screen_normalizes_workflow_pipeline_aliases() -> None:
     """Trust first-screen cards use thin pipeline selectors (#6574; no mega-expr glue)."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))

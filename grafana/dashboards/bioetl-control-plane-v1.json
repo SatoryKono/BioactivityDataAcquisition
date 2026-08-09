@@ -4727,7 +4727,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "Summarizes selected-run failures into the fixed categories api, dq, schema, storage, network, validation, and unknown. Raw exception messages and identifiers are excluded. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+          "description": "Summarizes selected-run failures into the fixed categories api, dq, schema, storage, network, validation, and unknown. Every category row carries bounded status and reason evidence; an UNKNOWN backend verdict must remain visible in the rows and must not look like a healthy zero. Raw exception messages and identifiers are excluded. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4750,6 +4750,30 @@
                   {
                     "id": "custom.align",
                     "value": "right"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 110
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 360
                   }
                 ]
               }
