@@ -2,7 +2,7 @@
 
 ## Evaluation Metadata
 - **Category:** Runtime Agentry
-- **Weighted Score:** 7.99 / 10
+- **Weighted Score:** 8.51 / 10
 - **Overall Rating:** High
 - **Path:** .codex/agents/CODEX-RUNTIME.md
 
@@ -11,11 +11,11 @@
 - Completeness: 8/10 (weight: 0.15)
 - Specificity: 8/10 (weight: 0.12)
 - Context: 9/10 (weight: 0.10)
-- Guardrails: 7/10 (weight: 0.10)
+- Guardrails: 9/10 (weight: 0.10)
 - Maintainability: 8/10 (weight: 0.08)
 - Reusability: 7/10 (weight: 0.08)
-- Error Handling: 6/10 (weight: 0.08)
-- Validation: 7/10 (weight: 0.07)
+- Error Handling: 9/10 (weight: 0.08)
+- Validation: 9/10 (weight: 0.07)
 - Documentation: 9/10 (weight: 0.07)
 
 ## Original Content
@@ -121,4 +121,128 @@ raising a budget or exemption limit.
 ## Env File Guardrail
 
 - Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
-- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` файл без explicit per-task user approval.
+
+## Error Recovery Strategies (для улучшения обработки ошибок)
+
+### Runtime Failure Recovery
+
+#### Недоступность канонических источников
+```text
+Если канонические источники недоступны:
+1. Логируй ошибку с уровнем ERROR и контекстом
+2. Продолжай с доступными источниками
+3. Документируй недоступные источники
+4. Предложи альтернативные процедуры
+```
+
+#### Частичная инициализация runtime
+```text
+При частичной инициализации runtime:
+1. Логируй предупреждение с уровнем WARNING
+2. Определи критические компоненты
+3. Продолжай с доступными компонентами
+4. Документируй ограничения
+```
+
+#### Runtime precedence conflicts
+```text
+При конфликтах precedence:
+1. Логируй конфликт с уровнем ERROR
+2. Примени канонический precedence из AGENTS.md
+3. Документируй разрешение конфликта
+4. Предложи clarification для future updates
+```
+
+### Error Logging с уровнями severity
+
+```text
+ERROR: Критическая ошибка, блокирующая runtime инициализацию
+WARNING: Предупреждение, не блокирующее runtime инициализацию
+INFO: Информационное сообщение о runtime состоянии
+DEBUG: Отладочная информация для runtime troubleshooting
+```
+
+## Enhanced Guardrails (для усиления ограничений)
+
+### Runtime Precedence Conflicts
+
+```text
+При конфликтах runtime precedence:
+1. Приоритет: active runtime source > NORMATIVE_SOURCES.md > RULES.md > REQUIREMENTS.md > ADRs > docs mirrors
+2. Docs mirrors не могут переопределять runtime behaviour
+3. При конфликте между active runtime sources: применить explicit resolution
+4. Документировать все precedence resolutions
+```
+
+### Cross-Runtime Compatibility
+
+```text
+Для cross-runtime compatibility:
+1. Проверять compatibility между Codex, Junie, Devin runtime sources
+2. Валидировать runtime behaviour consistency
+3. Документировать runtime-specific differences
+4. Предлагать mitigation для incompatibilities
+```
+
+### Runtime Source Validation
+
+```text
+Для валидации runtime sources:
+1. Проверять существование всех referenced files
+2. Валидировать структуру runtime configuration
+3. Проверять consistency между runtime sources
+4. Документировать validation results
+```
+
+### Runtime State Consistency
+
+```text
+Для runtime state consistency:
+1. Проверять consistency между runtime state и canonical sources
+2. Валидировать runtime state transitions
+3. Проверять consistency между different runtime instances
+4. Документировать state inconsistencies
+```
+
+## Runtime Validation Gates (для улучшения валидации)
+
+### Runtime State Validation
+
+```text
+Для проверки runtime состояния:
+1. Проверить runtime initialization status
+2. Валидировать runtime configuration integrity
+3. Проверить runtime source availability
+4. Валидировать runtime precedence resolution
+```
+
+### Self-Consistency Checks
+
+```text
+Для self-consistency checks:
+1. Проверить consistency между runtime configuration и canonical sources
+2. Валидировать consistency между different runtime sources
+3. Проверить consistency между runtime state and expected behaviour
+4. Документировать inconsistencies
+```
+
+### Runtime Source Integrity Validation
+
+```text
+Для валидации runtime source integrity:
+1. Проверить hash integrity для critical runtime files
+2. Валидировать structure integrity для runtime directories
+3. Проверить content integrity for runtime configuration
+4. Документировать integrity violations
+```
+
+### Runtime Precedence Resolution Validation
+
+```text
+Для валидации precedence resolution:
+1. Проверить правильность применения precedence rules
+2. Валидировать consistency между precedence resolution и AGENTS.md
+3. Проверить отсутствие conflicts в precedence resolution
+4. Документировать precedence validation results
+```
