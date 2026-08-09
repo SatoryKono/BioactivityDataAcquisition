@@ -41,7 +41,7 @@ groups:
                 or 0 * bioetl_control_plane_run_type_universe)
               +
               (
-                (max by (pipeline, run_type) (bioetl_manifest_ledger_integrity_ratio{integrity_type="inconsistent"}) > bool 0)
+                (max by (pipeline, run_type) (bioetl_manifest_ledger_integrity_ratio{integrity_type="inconsistent"}) > bool 0) * 2
                 or 0 * bioetl_control_plane_run_type_universe
               )
             )
@@ -64,7 +64,7 @@ groups:
               )
               +
               (
-                (max by (pipeline, run_type) (bioetl_manifest_ledger_integrity_ratio{integrity_type="inconsistent"}) > bool 0)
+                (max by (pipeline, run_type) (bioetl_manifest_ledger_integrity_ratio{integrity_type="inconsistent"}) > bool 0) * 2
                 or 0 * bioetl_control_plane_run_type_universe
               )
             )
@@ -102,7 +102,11 @@ groups:
               (
                 bioetl_control_plane_run_type_universe
                 unless on (pipeline, run_type)
-                sum by (pipeline, run_type) (count_over_time(bioetl_replay_duplicate_overwrite_risk_total[5m]))
+                (
+                  count by (pipeline, run_type) (
+                    count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m])
+                  ) == 2
+                )
               )
               or 0 * bioetl_control_plane_run_type_universe
             )
@@ -111,7 +115,11 @@ groups:
               (
                 bioetl_control_plane_run_type_universe
                 unless on (pipeline, run_type)
-                sum by (pipeline, run_type) (count_over_time(bioetl_manifest_ledger_integrity_ratio[5m]))
+                (
+                  count by (pipeline, run_type) (
+                    count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m])
+                  ) == 2
+                )
               )
               or 0 * bioetl_control_plane_run_type_universe
             ),

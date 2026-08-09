@@ -26,7 +26,6 @@ from bioetl.infrastructure.observability._metrics_defs_pipeline_control_plane im
     CONTROL_PLANE_READS_TOTAL,
     CONTROL_PLANE_TERMINAL_EVENTS_TOTAL,
     MANIFEST_LEDGER_INTEGRITY_RATIO,
-    REPLAY_DUPLICATE_OVERWRITE_RISK_TOTAL,
 )
 from bioetl.infrastructure.observability._metrics_defs_pipeline_lifecycle import (
     OBSERVABILITY_EVENTS_TOTAL,
@@ -59,6 +58,7 @@ from bioetl.infrastructure.observability._metrics_defs_pipeline_quality import (
 )
 from bioetl.infrastructure.observability._metrics_defs_pipeline_replay import (
     REPLAY_DRIFT_EVENTS_TOTAL,
+    REPLAY_DUPLICATE_OVERWRITE_RISK_TOTAL,
     REPLAY_LAG_SECONDS,
     REPLAY_RECONSTRUCTABILITY_EVENTS_TOTAL,
 )

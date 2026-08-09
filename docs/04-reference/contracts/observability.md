@@ -238,7 +238,9 @@ publishing through the exposed port.
 | `bioetl_control_plane_manifest_writes_total`   | Counter   | `pipeline,run_type,status`                  | Попытки записи immutable run manifest                                                                                                                                         |
 | `bioetl_control_plane_ledger_appends_total`    | Counter   | `pipeline,event_type,status`                | Попытки append в run ledger                                                                                                                                                   |
 | `bioetl_control_plane_terminal_events_total`   | Counter   | `pipeline,terminal_status`                  | Bounded terminal run outcomes mirrored from persisted run-ledger entries (`success`, `failed`, `shutdown`)                                                                  |
+| `bioetl_manifest_ledger_integrity_ratio`       | Gauge     | `pipeline,run_type,integrity_type`          | Complementary `consistent` / `inconsistent` ratios over manifests that expect a ledger; `run_ledger_enabled=false` manifests are excluded and zero denominator is never reported as healthy |
 | `bioetl_replay_reconstructability_events_total`| Counter   | `pipeline,replay_capability,strict_requirement,status` | Bounded replay reconstructability decisions emitted during manifest assembly                                                                                                   |
+| `bioetl_replay_duplicate_overwrite_risk_total` | Counter   | `pipeline,run_type,risk_type`               | Accepted replay manifests with bounded `duplicate` / `overwrite` write risk; both series are initialized with `inc(0)` after durable manifest acceptance |
 | `bioetl_checkpoint_compatibility_events_total` | Counter   | `pipeline,disposition`                      | Итоги resume/checkpoint compatibility policy                                                                                                                                  |
 | `bioetl_checkpoint_load_events_total`          | Counter   | `pipeline,status`                           | Bounded checkpoint load decisions (`loaded`, `missing`, `blocked`, `incompatible`, `observe_blocked_identity`, `observe_loaded_degraded`, `incompatible_hard_fail`, `failed`) |
 | `bioetl_checkpoint_operator_operations_total`  | Counter   | `operation,status`                          | Bounded checkpoint admin actions for `list`, `get`, and `delete` workflows                                                                                                    |
@@ -338,6 +340,12 @@ failures, ledger append failures, checkpoint compatibility и read failures, а
 alert `BioETLControlPlaneReadFailureRate` (см. `docs/05-operations/runbooks/observability-checklist.md`)
 визуализирует процент failed reads для каждого store/operation. Это панель
 является первичной точкой диагностики control-plane regressions.
+
+Recording rules трактуют любое ненулевое значение
+`bioetl_manifest_ledger_integrity_ratio{integrity_type="inconsistent"}` как
+fail-closed CRIT (`2`) одновременно в manifest/ledger failure и replay-safety
+проекциях. Telemetry-completeness требует обе bounded series каждой новой
+семьи; наличие только одной category series остаётся `UNKNOWN`, а не zero.
 
 ### 3.1 Enum mappings
 
@@ -494,6 +502,7 @@ Intentional non-goals for now:
 | `bioetl_pipeline_runs_total{status="failed"}`                                  | `increase(...) > 0` за `15m`                                                                                                                                                                        | P1       | `docs/05-operations/runbooks/pipeline-failure-critical.md`     |
 | `bioetl_control_plane_manifest_writes_total{status="failed"}`                  | `increase(...) > 0` за `15m`                                                                                                                                                                        | P1       | `docs/05-operations/runbooks/run-manifest-inspection.md`       |
 | `bioetl_control_plane_ledger_appends_total{status="failed"}`                   | `increase(...) > 0` за `15m`                                                                                                                                                                        | P1       | `docs/05-operations/runbooks/run-manifest-inspection.md`       |
+| `bioetl_manifest_ledger_integrity_ratio{integrity_type="inconsistent"}`        | `> 0` на последнем bounded reconciliation refresh                                                                                                                                                    | P0       | `docs/05-operations/runbooks/run-manifest-inspection.md`       |
 | `bioetl_pipeline_health_check_passed`                                          | `== 0` за `5m`                                                                                                                                                                                      | P1       | `docs/05-operations/runbooks/pipeline-failure-critical.md`     |
 | `bioetl_provider_health_status`                                                | `== 0` за `5m`                                                                                                                                                                                      | P2       | `docs/05-operations/runbooks/incident-response.md`             |
 | `bioetl_circuit_breaker_state`                                                 | `== 2` за `5m`                                                                                                                                                                                      | P2       | `docs/05-operations/runbooks/incident-response.md`             |

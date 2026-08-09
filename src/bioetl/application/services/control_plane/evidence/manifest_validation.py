@@ -44,9 +44,9 @@ def build_manifest_checks(manifest: RunManifest) -> tuple[EvidenceCheck, ...]:
         if contract_missing
         else EvidenceCheck(
             "contract_compatibility",
-            "OK",
-            "manifest_contract_anchors_complete",
-            "Required contract identity and compatibility anchors are present.",
+            "UNKNOWN",
+            "manifest_contract_compatibility_not_verified",
+            "Contract anchors are present, but no registry comparison was recorded.",
         )
     )
     return (

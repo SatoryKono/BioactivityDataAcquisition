@@ -751,8 +751,9 @@ Variable handoff policy for dashboard links remains strict and bounded:
   collapsed HTTP-backed forensic row. It exposes P0/P1/P2 identity anchors,
   identity gaps, replay parentage, composite identity, checkpoint anchor compare,
   and copy-friendly full values through `/ops/control-plane/identity-evidence`;
-  checkpoint age vs RPO, replay duplicate detection, and richer semantic drift
-  classification remain limitation notes instead of fake PromQL.
+  duplicate/overwrite exposure is now covered by bounded replay-risk telemetry;
+  checkpoint age vs RPO and richer occurrence-vs-semantic drift classification
+  remain exact-evidence limitations instead of fake PromQL.
 - `control-plane.Monitor Checkpoint Age` is the canonical
   exact-run checkpoint freshness read path through
   `/ops/control-plane/checkpoint-freshness`. For

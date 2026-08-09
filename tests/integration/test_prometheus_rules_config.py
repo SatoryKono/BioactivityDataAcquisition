@@ -1393,8 +1393,9 @@ def test_control_plane_rules_require_replay_risk_and_integrity_telemetry() -> No
     )
     assert 'integrity_type="inconsistent"' in replay_expr
     assert 'integrity_type="inconsistent"' in failures_expr
-    assert "bioetl_replay_duplicate_overwrite_risk_total[5m]" in telemetry_expr
-    assert "bioetl_manifest_ledger_integrity_ratio[5m]" in telemetry_expr
+    assert 'risk_type=~"duplicate|overwrite"' in telemetry_expr
+    assert 'integrity_type=~"consistent|inconsistent"' in telemetry_expr
+    assert telemetry_expr.count("== 2") == 2
     assert re.search(r",\s*4\s*\)\s*$", telemetry_expr)
 
 

@@ -1030,17 +1030,17 @@ tests:
         eval_time: 10m
         exp_samples:
           - labels: '{__name__="bioetl_manifest_ledger_failures_15m",pipeline="chembl",run_type="incremental"}'
-            value: 1
+            value: 2
       - expr: bioetl_replay_safety_blockers_15m{pipeline="chembl",run_type="incremental"}
         eval_time: 10m
         exp_samples:
           - labels: '{__name__="bioetl_replay_safety_blockers_15m",pipeline="chembl",run_type="incremental"}'
-            value: 1
+            value: 2
       - expr: bioetl_control_plane_current_status_trusted{pipeline="chembl",run_type="incremental"}
         eval_time: 10m
         exp_samples:
           - labels: '{__name__="bioetl_control_plane_current_status_trusted",pipeline="chembl",run_type="incremental"}'
-            value: 1
+            value: 2
 
   - name: control-plane-counter-reset-preserves-failure-evidence
     interval: 1m
@@ -1057,6 +1057,33 @@ tests:
         exp_samples:
           - labels: '{__name__="bioetl_manifest_ledger_failures_15m",pipeline="chembl",run_type="incremental"}'
             value: 9
+
+  - name: control-plane-telemetry-fails-closed-when-one-risk-series-is-missing
+    interval: 1m
+    input_series:
+      - series: 'bioetl_control_plane_manifest_writes_total{pipeline="chembl",run_type="incremental",status="success"}'
+        values: "0+1x10"
+      - series: 'bioetl_control_plane_ledger_appends_total{pipeline="chembl",status="success"}'
+        values: "0+1x10"
+      - series: 'bioetl_replay_duplicate_overwrite_risk_total{pipeline="chembl",run_type="incremental",risk_type="duplicate"}'
+        values: "0+0x10"
+      - series: 'bioetl_manifest_ledger_integrity_ratio{pipeline="chembl",run_type="incremental",integrity_type="consistent"}'
+        values: "1+0x10"
+      - series: 'bioetl_manifest_ledger_integrity_ratio{pipeline="chembl",run_type="incremental",integrity_type="inconsistent"}'
+        values: "0+0x10"
+      - series: 'bioetl_checkpoint_saved_at_seconds{pipeline="chembl"}'
+        values: "0+60x10"
+    promql_expr_test:
+      - expr: bioetl_control_plane_telemetry_missing_5m{pipeline="chembl",run_type="incremental"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_control_plane_telemetry_missing_5m",pipeline="chembl",run_type="incremental"}'
+            value: 1
+      - expr: bioetl_control_plane_current_status_trusted{pipeline="chembl",run_type="incremental"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_control_plane_current_status_trusted",pipeline="chembl",run_type="incremental"}'
+            value: 3
 
   - name: control-plane-trusted-status-incomplete-with-missing-checkpoint
     interval: 1m

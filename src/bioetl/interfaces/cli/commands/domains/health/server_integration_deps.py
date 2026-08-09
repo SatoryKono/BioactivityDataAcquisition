@@ -114,6 +114,11 @@ def build_health_server(
                 "control_plane_evidence_service",
                 None,
             ),
+            control_plane_integrity_refresher=getattr(
+                deps,
+                "control_plane_integrity_refresher",
+                None,
+            ),
             metrics_exposition=metrics_exposition,
             runtime_source_id=_runtime_source_id_from_environment(),
         ),
