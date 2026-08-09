@@ -59,6 +59,49 @@ from tests.integration._grafana_dashboard_links_support import (
 
 pytestmark = pytest.mark.integration
 
+_OPS_HTTP_BROWSER_PROXY = (
+    "/api/datasources/proxy/uid/bioetl-ops-http/health/live"
+)
+_FORBIDDEN_OPS_HTTP_BROWSER_HOST_RE = re.compile(
+    r"^https?://(?:localhost|127(?:\.\d{1,3}){3}|host\.docker\.internal|"
+    r"[a-z0-9_-]+)(?::\d+)?/health(?:/|$)",
+    re.IGNORECASE,
+)
+
+
+def test_ops_http_health_links_use_same_origin_grafana_proxy() -> None:
+    """Browser health CTAs must remain portable across host environments."""
+    health_links: list[tuple[str, str, str]] = []
+    forbidden: list[str] = []
+
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        for link in _collect_dashboard_links(dashboard):
+            title = str(link.get("title", ""))
+            url = str(link.get("url", ""))
+            if "BioETL Ops HTTP health" not in title and "/health/" not in url:
+                continue
+            health_links.append((dashboard_path.name, title, url))
+            if _FORBIDDEN_OPS_HTTP_BROWSER_HOST_RE.match(url):
+                forbidden.append(f"{dashboard_path.name}:{title!r} -> {url}")
+
+    assert len(health_links) == 12, (
+        "Shipped dashboards must expose exactly twelve Ops HTTP health CTAs; "
+        f"found {len(health_links)}"
+    )
+    assert not forbidden, (
+        "Browser-side Ops HTTP health links must not target loopback, "
+        "host.docker.internal, or container service DNS:\n" + "\n".join(forbidden)
+    )
+    assert all(url == _OPS_HTTP_BROWSER_PROXY for _, _, url in health_links), (
+        "Every Ops HTTP health CTA must use the same-origin Grafana datasource proxy:\n"
+        + "\n".join(
+            f"{dashboard}:{title!r} -> {url}"
+            for dashboard, title, url in health_links
+            if url != _OPS_HTTP_BROWSER_PROXY
+        )
+    )
+
 
 def test_dashboards_do_not_ship_empty_options_data_links_arrays() -> None:
     """Empty dataLinks arrays are export noise and should not survive in shipped dashboards."""

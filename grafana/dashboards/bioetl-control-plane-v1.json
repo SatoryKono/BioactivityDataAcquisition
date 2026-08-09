@@ -688,7 +688,7 @@
           },
           "id": 894,
           "options": {
-            "content": "Known blind spots\n- Replay duplicate/overwrite risk signal is not instrumented yet.\n- Manifest-to-ledger referential integrity ratio is not instrumented yet.",
+            "content": "Coverage contract\n- Replay duplicate/overwrite risk is covered by bounded `risk_type` telemetry.\n- Manifest-to-ledger referential integrity is covered by complementary `consistent` / `inconsistent` ratio series.\n- A zero blocker verdict is trustworthy only while the telemetry-coverage card is complete.",
             "mode": "markdown"
           },
           "title": "Review Coverage Limits",
@@ -1780,6 +1780,69 @@
           "type": "timeseries",
           "maxDataPoints": 400,
           "interval": "1m"
+        },
+        {
+          "datasource": "BioETL Ops HTTP",
+          "description": "Validates checkpoint parse, schema, checksum, and required identity anchors for the selected run. UNKNOWN is not a healthy zero. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": true
+              },
+              "unit": "none",
+              "noValue": "No checkpoint-validation rows. Select an exact run and verify backend health; UNKNOWN or backend unavailable must not be treated as PASS."
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 110
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 69
+          },
+          "id": 9413,
+          "options": {
+            "footer": {
+              "show": false
+            },
+            "showHeader": true,
+            "cellHeight": "sm"
+          },
+          "targets": [
+            {
+              "expr": "",
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "rows",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/control-plane/checkpoint-validation?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "title": "Review Checkpoint Validation",
+          "type": "table"
         }
       ],
       "description": "Expand only when replay or checkpoint readiness needs forensic evidence."
@@ -4040,7 +4103,7 @@
                 },
                 {
                   "title": "Check BioETL Ops HTTP health",
-                  "url": "http://localhost:8000/health/live",
+                  "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
                   "targetBlank": true
                 },
                 {
@@ -4191,7 +4254,7 @@
               "links": [
                 {
                   "title": "Check BioETL Ops HTTP health",
-                  "url": "http://localhost:8000/health/live",
+                  "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
                   "targetBlank": true
                 },
                 {

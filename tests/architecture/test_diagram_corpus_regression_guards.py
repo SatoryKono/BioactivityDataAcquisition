@@ -127,7 +127,6 @@ def test_diagram_codemods_are_owned_by_scripts_diagrams() -> None:
     canonical = (
         "apply_elk_layout.py",
         "differentiate_linkstyle.py",
-        "harmonize_link_styles.py",
     )
 
     for name in canonical:
