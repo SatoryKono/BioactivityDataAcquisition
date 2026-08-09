@@ -11,8 +11,8 @@
 
 | ADR | status | implementation owners | enforcement owners | gaps |
 | --- | --- | ---: | ---: | --- |
-| `ADR-001` | `enforced` | 15 | 7 | - |
-| `ADR-002` | `enforced` | 14 | 4 | - |
+| `ADR-001` | `enforced` | 16 | 8 | - |
+| `ADR-002` | `enforced` | 15 | 5 | - |
 | `ADR-004` | `enforced` | 3 | 1 | - |
 | `ADR-005` | `enforced` | 18 | 4 | - |
 | `ADR-006` | `enforced` | 7 | 2 | - |

@@ -1,8 +1,51 @@
 #!/bin/bash
-# BioETL Kubernetes Quick-Start Script
-# Usage: ./deploy-bioetl.sh [action] [environment]
-# Actions: deploy, update, delete, status, logs
-# Environments: dev, staging, prod
+# BioETL Kubernetes Deployment Script.
+#
+# Provides quick-start deployment capabilities for BioETL on Kubernetes.
+# Supports multiple environments and deployment actions with proper validation.
+#
+# Usage:
+#   bash scripts/ops/runtime/deploy/deploy-bioetl.sh [action] [environment]
+#
+# Actions:
+#   deploy    Deploy application (create namespace + apply manifests)
+#   update    Update container image
+#   delete    Delete deployment and namespace
+#   status    Show deployment status
+#   logs      Stream logs from pods
+#   port-forward   Forward port to service
+#
+# Environments:
+#   dev       Development environment
+#   staging   Staging environment
+#   prod      Production environment
+#
+# Examples:
+#   # Deploy to development
+#   bash scripts/ops/runtime/deploy/deploy-bioetl.sh deploy dev
+#
+#   # Update staging deployment
+#   bash scripts/ops/runtime/deploy/deploy-bioetl.sh update staging
+#
+#   # Check production status
+#   bash scripts/ops/runtime/deploy/deploy-bioetl.sh status prod
+#
+#   # Stream logs from bioetl pods
+#   bash scripts/ops/runtime/deploy/deploy-bioetl.sh logs dev bioetl
+#
+# Environment Variables:
+#   BIOETL_IMAGE_REGISTRY    Container registry (default: your-registry)
+#   BIOETL_IMAGE_TAG         Image tag (default: 6.1.0)
+#
+# Dependencies:
+#   - kubectl (Kubernetes CLI)
+#   - k8s-deployment.yaml (Kubernetes deployment manifest)
+#   - k8s-monitoring.yaml (Kubernetes monitoring manifest)
+#   - k8s-networking.yaml (Kubernetes networking manifest)
+#
+# See Also:
+#   - Kubernetes deployment documentation
+#   - Infrastructure deployment guides
 
 set -e
 
