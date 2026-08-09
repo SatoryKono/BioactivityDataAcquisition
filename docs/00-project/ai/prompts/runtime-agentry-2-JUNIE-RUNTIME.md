@@ -2,7 +2,7 @@
 
 ## Evaluation Metadata
 - **Category:** Runtime Agentry
-- **Weighted Score:** 7.99 / 10
+- **Weighted Score:** 8.51 / 10
 - **Overall Rating:** High
 - **Path:** .junie/agents/JUNIE-RUNTIME.md
 
@@ -11,11 +11,11 @@
 - Completeness: 8/10 (weight: 0.15)
 - Specificity: 8/10 (weight: 0.12)
 - Context: 9/10 (weight: 0.10)
-- Guardrails: 7/10 (weight: 0.10)
+- Guardrails: 9/10 (weight: 0.10)
 - Maintainability: 8/10 (weight: 0.08)
 - Reusability: 7/10 (weight: 0.08)
-- Error Handling: 6/10 (weight: 0.08)
-- Validation: 7/10 (weight: 0.07)
+- Error Handling: 9/10 (weight: 0.08)
+- Validation: 9/10 (weight: 0.07)
 - Documentation: 9/10 (weight: 0.07)
 
 ## Original Content
@@ -145,4 +145,128 @@ raising a budget or exemption limit.
 ## Env File Guardrail
 
 - Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
-- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` файл без explicit per-task user approval.
+
+## Error Recovery Strategies (для улучшения обработки ошибок)
+
+### Junie-Specific Failure Recovery
+
+#### Недоступность JetBrains IDE integration
+```text
+Если JetBrains IDE integration недоступна:
+1. Логируй ошибку с уровнем ERROR и контекстом
+2. Продолжай с доступными IDE features
+3. Документируй недоступные IDE features
+4. Предложи альтернативные процедуры
+```
+
+#### Частичная инициализация Junie runtime
+```text
+При частичной инициализации Junie runtime:
+1. Логируй предупреждение с уровнем WARNING
+2. Определи критические Junie components
+3. Продолжай с доступными Junie components
+4. Документируй ограничения
+```
+
+#### Codex–Junie parity conflicts
+```text
+При конфликтах Codex–Junie parity:
+1. Логируй конфликт с уровнем ERROR
+2. Примени parity contract из junie-mirror-contract.json
+3. Документируй разрешение конфликта
+4. Предложи clarification для parity updates
+```
+
+### Error Logging с уровнями severity
+
+```text
+ERROR: Критическая ошибка, блокирующая Junie runtime инициализацию
+WARNING: Предупреждение, не блокирующее Junie runtime инициализацию
+INFO: Информационное сообщение о Junie runtime состоянии
+DEBUG: Отладочная информация для Junie runtime troubleshooting
+```
+
+## Enhanced Guardrails (для усиления ограничений)
+
+### Codex–Junie Parity Contract
+
+```text
+Для Codex–Junie parity contract:
+1. Проверять parity между Codex и Junie runtime sources
+2. Валидировать parity через check_junie_mirror.sh
+3. Документировать parity violations
+4. Предлагать mitigation для parity issues
+```
+
+### Junie-Specific Features
+
+```text
+Для Junie-specific features:
+1. Проверять compatibility с Codex runtime
+2. Валидировать Junie-specific behaviour consistency
+3. Документировать Junie-specific differences
+4. Предлагать mitigation for incompatibilities
+```
+
+### Junie State Consistency
+
+```text
+Для Junie state consistency:
+1. Проверять consistency между Junie state и canonical sources
+2. Валидировать Junie state transitions
+3. Проверять consistency между Junie and Codex runtime states
+4. Документировать state inconsistencies
+```
+
+### Junie–Codex Synchronization
+
+```text
+Для Junie–Codex synchronization:
+1. Проверять synchronization status через parity contract
+2. Валидировать synchronization completeness
+3. Проверить synchronization consistency
+4. Документировать synchronization issues
+```
+
+## Junie Validation Gates (для улучшения валидации)
+
+### Junie Runtime State Validation
+
+```text
+Для проверки Junie runtime состояния:
+1. Проверить Junie runtime initialization status
+2. Валидировать Junie runtime configuration integrity
+3. Проверить Junie runtime source availability
+4. Валидировать Junie runtime precedence resolution
+```
+
+### Self-Consistency Checks
+
+```text
+Для self-consistency checks:
+1. Проверить consistency между Junie runtime configuration и canonical sources
+2. Валидировать consistency between Junie and Codex runtime sources
+3. Проверить consistency between Junie runtime state and expected behaviour
+4. Документировать inconsistencies
+```
+
+### Junie–Codex Mirror Parity Validation
+
+```text
+Для валидации Junie–Codex mirror parity:
+1. Проверить parity через check_junie_mirror.sh
+2. Валидировать parity contract compliance
+3. Проверить parity consistency across all runtime sources
+4. Документировать parity violations
+```
+
+### Junie State Integrity Validation
+
+```text
+Для валидации Junie state integrity:
+1. Проверить hash integrity для critical Junie runtime files
+2. Валидировать structure integrity для Junie runtime directories
+3. Проверить content integrity for Junie runtime configuration
+4. Документировать integrity violations
+```
