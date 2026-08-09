@@ -61331,146 +61331,6 @@
       "duplicate_group": null,
       "duplicate_resolution": null,
       "extension": ".md",
-      "freshness": "review-required",
-      "generated_route": null,
-      "generated_route_exception": null,
-      "generator": null,
-      "github_issue_number": null,
-      "github_issue_url": null,
-      "inbound_links": 0,
-      "lifecycle": "docs_reports_curated_or_historical_report",
-      "outbound_links": 0,
-      "owner": "BioETL Team",
-      "path": "docs/reports/gh-issues/ai-consolidation-issue.md",
-      "recommended_action": "archive-after-migration",
-      "root_doc_kind": null,
-      "section": "reports",
-      "status": "Working",
-      "surface_family": "working",
-      "tracking_state": "ignored_local"
-    },
-    {
-      "canonical_successor": null,
-      "catalog_lifecycle": null,
-      "commit_policy": null,
-      "declared_class": null,
-      "declared_status": null,
-      "diagram_kind": null,
-      "duplicate_group": null,
-      "duplicate_resolution": null,
-      "extension": ".md",
-      "freshness": "review-required",
-      "generated_route": null,
-      "generated_route_exception": null,
-      "generator": null,
-      "github_issue_number": null,
-      "github_issue_url": null,
-      "inbound_links": 0,
-      "lifecycle": "docs_reports_curated_or_historical_report",
-      "outbound_links": 0,
-      "owner": "BioETL Team",
-      "path": "docs/reports/gh-issues/diagrams-refactoring-issue.md",
-      "recommended_action": "archive-after-migration",
-      "root_doc_kind": null,
-      "section": "reports",
-      "status": "Working",
-      "surface_family": "working",
-      "tracking_state": "ignored_local"
-    },
-    {
-      "canonical_successor": null,
-      "catalog_lifecycle": null,
-      "commit_policy": null,
-      "declared_class": null,
-      "declared_status": null,
-      "diagram_kind": null,
-      "duplicate_group": null,
-      "duplicate_resolution": null,
-      "extension": ".md",
-      "freshness": "review-required",
-      "generated_route": null,
-      "generated_route_exception": null,
-      "generator": null,
-      "github_issue_number": null,
-      "github_issue_url": null,
-      "inbound_links": 0,
-      "lifecycle": "docs_reports_curated_or_historical_report",
-      "outbound_links": 0,
-      "owner": "BioETL Team",
-      "path": "docs/reports/gh-issues/docs-consolidation-issue.md",
-      "recommended_action": "archive-after-migration",
-      "root_doc_kind": null,
-      "section": "reports",
-      "status": "Working",
-      "surface_family": "working",
-      "tracking_state": "ignored_local"
-    },
-    {
-      "canonical_successor": null,
-      "catalog_lifecycle": null,
-      "commit_policy": null,
-      "declared_class": null,
-      "declared_status": null,
-      "diagram_kind": null,
-      "duplicate_group": null,
-      "duplicate_resolution": null,
-      "extension": ".md",
-      "freshness": "review-required",
-      "generated_route": null,
-      "generated_route_exception": null,
-      "generator": null,
-      "github_issue_number": null,
-      "github_issue_url": null,
-      "inbound_links": 0,
-      "lifecycle": "docs_reports_curated_or_historical_report",
-      "outbound_links": 0,
-      "owner": "BioETL Team",
-      "path": "docs/reports/gh-issues/memory-consolidation-issue.md",
-      "recommended_action": "archive-after-migration",
-      "root_doc_kind": null,
-      "section": "reports",
-      "status": "Working",
-      "surface_family": "working",
-      "tracking_state": "ignored_local"
-    },
-    {
-      "canonical_successor": null,
-      "catalog_lifecycle": null,
-      "commit_policy": null,
-      "declared_class": null,
-      "declared_status": null,
-      "diagram_kind": null,
-      "duplicate_group": null,
-      "duplicate_resolution": null,
-      "extension": ".md",
-      "freshness": "review-required",
-      "generated_route": null,
-      "generated_route_exception": null,
-      "generator": null,
-      "github_issue_number": null,
-      "github_issue_url": null,
-      "inbound_links": 0,
-      "lifecycle": "docs_reports_curated_or_historical_report",
-      "outbound_links": 0,
-      "owner": "BioETL Team",
-      "path": "docs/reports/gh-issues/schema-refactoring-issue.md",
-      "recommended_action": "archive-after-migration",
-      "root_doc_kind": null,
-      "section": "reports",
-      "status": "Working",
-      "surface_family": "working",
-      "tracking_state": "ignored_local"
-    },
-    {
-      "canonical_successor": null,
-      "catalog_lifecycle": null,
-      "commit_policy": null,
-      "declared_class": null,
-      "declared_status": null,
-      "diagram_kind": null,
-      "duplicate_group": null,
-      "duplicate_resolution": null,
-      "extension": ".md",
       "freshness": "current",
       "generated_route": null,
       "generated_route_exception": null,
@@ -73803,7 +73663,7 @@
       "active_quality_baseline": 54,
       "closeout_evidence": 87,
       "docs_reports_curated_entrypoint": 2,
-      "docs_reports_curated_or_historical_report": 7,
+      "docs_reports_curated_or_historical_report": 2,
       "docs_reports_generated_or_route_owned": 7,
       "docs_reports_retention_sensitive_evidence": 21,
       "generated_skill_license_mirror": 5,
@@ -73819,7 +73679,15 @@
     },
     "by_recommended_action": {
       "archive-after-github-state-check": 320,
+<<<<<<< HEAD
       "archive-after-migration": 262,
+||||||| 3e34286517
+      "archive-after-migration": 262,
+      "generate-automatically": 914,
+      "keep": 1108,
+=======
+      "archive-after-migration": 257,
+>>>>>>> agent/close-8417-final
       "generate-automatically": 911,
       "keep": 1103,
       "merge": 8,
@@ -73851,7 +73719,14 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
+<<<<<<< HEAD
       "reports": 446,
+||||||| 3e34286517
+      "plugins-migration-analysis.md": 1,
+      "reports": 446,
+=======
+      "reports": 441,
+>>>>>>> agent/close-8417-final
       "reports-migration-analysis.md": 1,
       "security": 2
     },
@@ -73861,7 +73736,17 @@
       "Canonical": 68,
       "Duplicate": 8,
       "Generated": 911,
+<<<<<<< HEAD
       "Working": 727
+||||||| 3e34286517
+      "Active": 739,
+      "Archived": 155,
+      "Canonical": 73,
+      "Generated": 914,
+      "Working": 727
+=======
+      "Working": 722
+>>>>>>> agent/close-8417-final
     },
     "by_surface_family": {
       "active": 725,
@@ -73869,13 +73754,29 @@
       "canonical": 68,
       "duplicate": 8,
       "generated": 911,
+<<<<<<< HEAD
       "working": 727
+||||||| 3e34286517
+      "active": 739,
+      "archive": 155,
+      "canonical": 73,
+      "generated": 914,
+      "working": 727
+=======
+      "working": 722
+>>>>>>> agent/close-8417-final
     },
     "by_tracking_state": {
-      "ignored_local": 5,
       "tracked": 2603
     },
+<<<<<<< HEAD
     "docs_reports_local_count": 37,
+||||||| 3e34286517
+    "docs_reports_local_count": 37,
+    "duplicate_group_count": 2,
+=======
+    "docs_reports_local_count": 32,
+>>>>>>> agent/close-8417-final
     "duplicate_group_count": 11,
     "generated_route_count": 70,
     "generated_without_route_count": 217,
@@ -73889,8 +73790,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 2608,
-    "total_doc_like_ignored_local": 5,
+    "total_doc_like": 2603,
+    "total_doc_like_ignored_local": 0,
     "total_doc_like_tracked": 2603
   }
 }
