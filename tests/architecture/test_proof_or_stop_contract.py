@@ -44,3 +44,12 @@ def test_staged_registry_starts_proof_gate_in_observe() -> None:
 
     assert proof_policy["current_stage"] == "observe"
     assert proof_policy["rollback_stage"] == "observe"
+
+
+def test_ci_runs_the_adversarial_pilot_before_staged_enforcement() -> None:
+    workflow = (ROOT / ".github/workflows/tests.yml").read_text(encoding="utf-8")
+
+    assert "proof-or-stop pilot" in workflow
+    assert workflow.index("proof-or-stop pilot") < workflow.index(
+        "Apply staged Proof-or-Stop enforcement"
+    )

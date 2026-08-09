@@ -75,6 +75,29 @@ ingestion is a separate, explicitly authorized operation requiring
 outcomes as immutable evidence events only; it cannot create decisions or
 override a stop.
 
+The explicit adapter re-verifies the live repository, task, worktree, policy,
+schema, receipt digests, and the binding between `bundle.json` and
+`verification.json` before the first durable write:
+
+```bash
+BIOETL_AI_MEMORY_MODE=read-write \
+BIOETL_AI_RUNTIME=codex \
+BIOETL_AI_AGENT=<authorized-agent> \
+python -m scripts.engineering.qa proof-or-stop ingest \
+  --repo-root . \
+  --task-id <task-id> \
+  --bundle reports/quality/proof-or-stop/<run-id>/bundle.json \
+  --verification reports/quality/proof-or-stop/<run-id>/verification.json \
+  --storage-root <authorized-memory-root> \
+  --actor <authorized-agent> \
+  --runtime codex
+```
+
+Valid `pass`, `fail`, `skip`, and `unavailable` receipt outcomes are preserved
+as evidence. Corrupt, tampered, stale, unauthorized, or cross-scope material is
+rejected before ingestion. Bundle producer provenance and source/output digests
+are stored alongside the separate ingestion actor provenance.
+
 ## Staged enforcement and rollback
 
 The `proof_or_stop_closeout` entry in

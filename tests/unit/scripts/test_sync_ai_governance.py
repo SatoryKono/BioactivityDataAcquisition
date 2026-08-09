@@ -330,6 +330,30 @@ def test_skills_mirror_reports_unexpected_devin_entrypoint(tmp_path: Path) -> No
     assert "Devin unexpected skill entrypoint: unexpected/SKILL.md" in issues
 
 
+def test_skills_mirror_accepts_optional_devin_entrypoint_file_glob(
+    tmp_path: Path,
+) -> None:
+    _seed_skills_mirror_fixture(tmp_path)
+    contract_path = tmp_path / sync_ai_governance.SKILLS_MIRROR_CONTRACT_PATH
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    contract["codex_devin"]["optional_presence_globs"] = [
+        "*/agents/openai.yaml",
+        "*/references/**",
+        "coderabbit-audit/*",
+    ]
+    contract["codex_devin"]["allowed_content_variant_globs"].append(
+        "coderabbit-audit/*"
+    )
+    contract_path.write_text(json.dumps(contract) + "\n", encoding="utf-8")
+    optional = tmp_path / ".devin/skills/coderabbit-audit/SKILL.md"
+    optional.parent.mkdir(parents=True)
+    optional.write_text("# Optional Devin skill\n", encoding="utf-8")
+
+    issues = sync_ai_governance.sync_skill_mirrors(tmp_path, check_only=True)
+
+    assert not any("coderabbit-audit" in issue for issue in issues)
+
+
 def test_skills_mirror_reports_stale_catalog_membership(tmp_path: Path) -> None:
     _seed_skills_mirror_fixture(tmp_path)
     (tmp_path / ".devin/skills/SKILLS-CATALOG.md").write_text(

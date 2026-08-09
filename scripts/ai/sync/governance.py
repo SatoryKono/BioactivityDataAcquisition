@@ -350,16 +350,16 @@ def _catalog_entries(path: Path, entrypoint: str) -> set[str]:
 
 
 def _matches_any(path: str, patterns: tuple[str, ...]) -> bool:
-    # Check direct pattern match
-    if any(fnmatch.fnmatchcase(path, pattern) for pattern in patterns):
-        return True
-    # Check if path is under an optional directory (e.g., "coderabbit-audit" matches "coderabbit-audit/*")
-    for pattern in patterns:
-        if not pattern.endswith("/*"):
-            # If pattern doesn't have /*, treat it as a directory prefix
-            if path.startswith(pattern + "/"):
-                return True
-    return False
+    return any(fnmatch.fnmatchcase(path, pattern) for pattern in patterns)
+
+
+def _matches_skill_entrypoint(
+    skill: str, *, entrypoint: str, patterns: tuple[str, ...]
+) -> bool:
+    """Match directory or entrypoint-relative optional-presence contracts."""
+    return _matches_any(skill, patterns) or _matches_any(
+        f"{skill}/{entrypoint}", patterns
+    )
 
 
 def _string_tuple(value: object, *, label: str) -> tuple[str, ...]:
@@ -592,7 +592,9 @@ def _validate_codex_devin_parity(
     unexpected_devin = {
         skill
         for skill in (devin_skills - canonical_skills)
-        if not _matches_any(skill, optional_presence)
+        if not _matches_skill_entrypoint(
+            skill, entrypoint=entrypoint, patterns=optional_presence
+        )
     }
     issues.extend(
         f"Devin missing skill entrypoint: {skill}/{entrypoint}"
@@ -613,7 +615,11 @@ def _validate_codex_devin_parity(
     )
     # Filter out optional presence skills from Devin catalog validation
     devin_expected = {
-        skill for skill in devin_skills if not _matches_any(skill, optional_presence)
+        skill
+        for skill in devin_skills
+        if not _matches_skill_entrypoint(
+            skill, entrypoint=entrypoint, patterns=optional_presence
+        )
     }
     issues.extend(
         _validate_catalog(
@@ -626,7 +632,11 @@ def _validate_codex_devin_parity(
     )
     # Structural files should exclude optional presence skills
     structural_skills = canonical_skills | {
-        skill for skill in devin_skills if not _matches_any(skill, optional_presence)
+        skill
+        for skill in devin_skills
+        if not _matches_skill_entrypoint(
+            skill, entrypoint=entrypoint, patterns=optional_presence
+        )
     }
     structural_files = {catalog_name} | {
         f"{skill}/{entrypoint}" for skill in structural_skills
