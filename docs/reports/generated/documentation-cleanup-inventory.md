@@ -7,10 +7,10 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2608 |
+| Doc-like files | 2603 |
 | Tracked doc-like files | 2603 |
-| Ignored local docs/reports files | 5 |
-| Duplicate groups | 2 |
+| Ignored local docs/reports files | 0 |
+| Duplicate groups | 11 |
 | Generated without route or exception | 0 |
 | Generated routes | 70 |
 
@@ -18,7 +18,6 @@
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 5 |
 | tracked | 2603 |
 
 ## Lifecycle Counts
@@ -30,7 +29,7 @@
 | active_quality_baseline | 54 |
 | closeout_evidence | 87 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 7 |
+| docs_reports_curated_or_historical_report | 2 |
 | docs_reports_generated_or_route_owned | 7 |
 | docs_reports_retention_sensitive_evidence | 21 |
 | generated_skill_license_mirror | 5 |
@@ -58,44 +57,50 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 739 |
-| Archived | 155 |
-| Canonical | 73 |
-| Generated | 914 |
-| Working | 727 |
+| Active | 725 |
+| Archived | 169 |
+| Canonical | 68 |
+| Duplicate | 8 |
+| Generated | 911 |
+| Working | 722 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 739 |
-| archive | 155 |
-| canonical | 73 |
-| generated | 914 |
-| working | 727 |
+| active | 725 |
+| archive | 169 |
+| canonical | 68 |
+| duplicate | 8 |
+| generated | 911 |
+| working | 722 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 320 |
-| archive-after-migration | 262 |
-| generate-automatically | 914 |
-| keep | 1108 |
+| archive-after-migration | 257 |
+| generate-automatically | 911 |
+| keep | 1103 |
+| merge | 8 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
 
 | Path | Status | Inbound | Action |
 | --- | --- | --- | --- |
+| `docs/03-guides/dashboards/dux3-audit-selection-notes.md` | Duplicate | 0 | merge |
+| `docs/03-guides/dashboards/dux3-residual-contracts.md` | Duplicate | 3 | merge |
+| `docs/03-guides/dashboards/dux3-screenshot-regression-protocol.md` | Duplicate | 0 | merge |
+| `docs/03-guides/dashboards/dux3-semantic-fixtures.md` | Duplicate | 0 | merge |
+| `docs/03-guides/dashboards/dux4-title-scope-harness.md` | Duplicate | 1 | merge |
+| `docs/03-guides/dashboards/dux5-copy-dictionary.md` | Duplicate | 3 | merge |
+| `docs/03-guides/dashboards/dux5-screenshot-regression-protocol.md` | Duplicate | 2 | merge |
+| `docs/03-guides/dashboards/dux6-residual-readability.md` | Duplicate | 1 | merge |
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-05.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/ai-consolidation-issue.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/diagrams-refactoring-issue.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/docs-consolidation-issue.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/memory-consolidation-issue.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/schema-refactoring-issue.md` | Working | 0 | archive-after-migration |
 | `reports/ai/issue-7340-specialized-subsystem-analysis-20260731.md` | Working | 0 | archive-after-migration |
 | `reports/ai/issue-7348-comprehensive-skills-analysis-20260731.md` | Working | 0 | archive-after-migration |
 | `reports/ai/memory-audit-20260804/FINAL-REPORT.md` | Working | 0 | archive-after-migration |
@@ -165,9 +170,6 @@
 | `reports/quality/coderabbit/20260806-full/_S15c-tests-residual-3.txt` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260806-full/_S15c-tests-residual-4.txt` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260806-full/_S16b-configs-other.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S17-docs-00-project-root.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S20-scripts-root.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_diag277_by_file.txt` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -180,9 +182,7 @@
 | `docs/00-project/ai/agents/agents/py-debug-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/agents/py-doc-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/agents/py-plan-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/py-review-orchestrator.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/agents/py-test-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/py-test-swarm.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/agents/sp-api-designer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/agents/sp-architect-reviewer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/agents/sp-code-reviewer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
@@ -253,6 +253,8 @@
 | `docs/00-project/ai/skills/global/gh-fix-ci/LICENSE.txt` |  | generated_skill_license_mirror |  |  |
 | `docs/00-project/ai/skills/global/openai-docs/LICENSE.txt` |  | generated_skill_license_mirror |  |  |
 | `docs/00-project/ai/skills/local/SKILLS-CATALOG.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/skills/local/new-pipeline/SKILL.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/skills/local/new-pipeline/agents/openai.yaml` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 
 ## GitHub Issue Evidence Examples
 
@@ -334,11 +336,6 @@
 | `docs/reports/generated/pipeline_normalization_field_matrix/non_chembl_normalization_field_matrix.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.csv` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
-| `docs/reports/gh-issues/ai-consolidation-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/gh-issues/diagrams-refactoring-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/gh-issues/docs-consolidation-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/gh-issues/memory-consolidation-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/gh-issues/schema-refactoring-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/index.md` | tracked | docs_reports_curated_entrypoint | keep |
 
 ## Generated Route Registry
