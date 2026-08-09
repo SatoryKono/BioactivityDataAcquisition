@@ -86,7 +86,7 @@ forbidden_output_roots:
 
 routes:
   - id: file-merger-working-reports
-    generator: src/tools/file_merger.py
+    generator: scripts/engineering/common/file_merger.py
     output_kind: working_report
     commit_policy: working_output
     outputs:
@@ -97,7 +97,7 @@ routes:
     notes: Generated merge snapshots belong in reports/, not src/tools/reports/.
 
   - id: docs-export-merged-markdown
-    generator: src/tools/generate_docs_export.py
+    generator: scripts/docs/build/generate_docs_export.py
     output_kind: ignored_docs_export
     commit_policy: ignored_local_export
     outputs:

@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-08-09'
 
 ______________________________________________________________________
 
@@ -142,7 +142,7 @@ ______________________________________________________________________
 
 **Source config:** `configs/providers/crossref.yaml`
 **Adapter code:** `src/bioetl/infrastructure/adapters/crossref/client.py`
-**API Docs:** https://api.crossref.org/swagger-ui/index.html
+**API Docs:** https://api.crossref.org/swagger-ui/
 
 ### Base Configuration
 
@@ -243,7 +243,7 @@ ______________________________________________________________________
 
 **Source config:** `configs/providers/openalex.yaml`
 **Adapter code:** `src/bioetl/infrastructure/adapters/openalex/client.py`
-**API Docs:** https://docs.openalex.org
+**API Docs:** https://developers.openalex.org
 
 ### Base Configuration
 

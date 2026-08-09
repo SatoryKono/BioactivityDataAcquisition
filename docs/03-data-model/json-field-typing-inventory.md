@@ -5,10 +5,10 @@ Scope: inferred Bronze CSV samples + Silver Pandera + Silver PyArrow + Gold cont
 Governed structured payloads (publications, UniProt semantic-sensitive fields, and related sidecars) MUST remain `canonical JSON string` across Silver Pandera, Silver PyArrow, domain schemas, and Gold contracts. Regenerate this inventory with:
 
 ```bash
-python src/tools/generate_json_field_typing_inventory.py
+python -m scripts.schema generate-json-field-typing-inventory
 ```
 
-Generator: `src/tools/generate_json_field_typing_inventory.py`.
+Generator: `scripts/schema/analysis/generate_json_field_typing_inventory.py`.
 
 Related:
 - `docs/02-architecture/decisions/ADR-035-json-field-typing-policy.md`
@@ -134,6 +134,7 @@ Related:
 | `confidence_description` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `content_domain_domains` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `content_hash` | `unknown` (nullable) | `str` (not-null) | `string` (nullable) | `str` (not-null) |
+| `corpus_id` | `unknown` (nullable) | `Int64` (nullable) | `int64` (nullable) | `str` (nullable) |
 | `country` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `creation_date` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `cross_references` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |

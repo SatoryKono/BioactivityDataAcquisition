@@ -19,15 +19,16 @@ def get_project_root() -> Path:
     """Get the project root directory.
 
     Returns the project root directory by going up from the script location.
-    Script is located in src/tools/, so project root is 2 levels up.
+    Script is located in scripts/engineering/common/, so project root is three
+    directory levels above its containing directory.
 
     Returns:
         Path to project root directory.
     """
     # Get the directory where this script is located
     script_dir = Path(__file__).resolve().parent
-    # Go up 2 levels: src/tools/ -> src/ -> project_root/
-    project_root = script_dir.parent.parent
+    # common/ -> engineering/ -> scripts/ -> project root
+    project_root = script_dir.parents[2]
     return project_root
 
 
@@ -43,26 +44,26 @@ def parse_arguments() -> argparse.Namespace:
         epilog="""
 Examples:
   # Standard mode
-  python src/tools/file_merger.py -i ./src -o combined.txt
-  python src/tools/file_merger.py -i ./docs -e md -o docs_combined.md --sort by_extension
+  python -m scripts.engineering.common.file_merger -i ./src -o combined.txt
+  python -m scripts.engineering.common.file_merger -i ./docs -e md -o docs_combined.md --sort by_extension
 
   # Project code merge mode (creates 5 files by architectural layers)
-  python src/tools/file_merger.py --merge_project_code
+  python -m scripts.engineering.common.file_merger --merge_project_code
 
   # Documentation merge mode (merges all docs/*.md into one file)
-  python src/tools/file_merger.py --merge_documentation
-  python src/tools/file_merger.py --merge_documentation -o my_docs.md
+  python -m scripts.engineering.common.file_merger --merge_documentation
+  python -m scripts.engineering.common.file_merger --merge_documentation -o my_docs.md
 
   # Configs merge mode (merges all configs/*.yaml into one file)
-  python src/tools/file_merger.py --merge_configs
-  python src/tools/file_merger.py --merge_configs -o my_configs.md
+  python -m scripts.engineering.common.file_merger --merge_configs
+  python -m scripts.engineering.common.file_merger --merge_configs -o my_configs.md
 
   # Project structure mode (creates tree structure of all project files)
-  python src/tools/file_merger.py --project_structure
-  python src/tools/file_merger.py --project_structure -o structure.md
+  python -m scripts.engineering.common.file_merger --project_structure
+  python -m scripts.engineering.common.file_merger --project_structure -o structure.md
 
   # All merge modes at once (creates all output files in reports/)
-  python src/tools/file_merger.py --merge_all
+  python -m scripts.engineering.common.file_merger --merge_all
         """,
     )
 
