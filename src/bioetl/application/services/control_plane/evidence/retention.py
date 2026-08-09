@@ -39,7 +39,7 @@ def build_retention_checks(
         for artifact in plan.artifacts
         if _artifact_matches_manifest(artifact, manifest)
     )
-    return retention_evidence_checks(manifest, relevant), relevant
+    return retention_evidence_checks(manifest, relevant, cutoff=plan.cutoff), relevant
 
 
 def _artifact_matches_manifest(
