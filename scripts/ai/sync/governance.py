@@ -590,7 +590,8 @@ def _validate_codex_devin_parity(
     )
     # Filter out optional presence skills from unexpected check
     unexpected_devin = {
-        skill for skill in (devin_skills - canonical_skills)
+        skill
+        for skill in (devin_skills - canonical_skills)
         if not _matches_any(skill, optional_presence)
     }
     issues.extend(
@@ -612,8 +613,7 @@ def _validate_codex_devin_parity(
     )
     # Filter out optional presence skills from Devin catalog validation
     devin_expected = {
-        skill for skill in devin_skills
-        if not _matches_any(skill, optional_presence)
+        skill for skill in devin_skills if not _matches_any(skill, optional_presence)
     }
     issues.extend(
         _validate_catalog(
@@ -626,8 +626,7 @@ def _validate_codex_devin_parity(
     )
     # Structural files should exclude optional presence skills
     structural_skills = canonical_skills | {
-        skill for skill in devin_skills
-        if not _matches_any(skill, optional_presence)
+        skill for skill in devin_skills if not _matches_any(skill, optional_presence)
     }
     structural_files = {catalog_name} | {
         f"{skill}/{entrypoint}" for skill in structural_skills
