@@ -2,81 +2,23 @@
 
 ## Evaluation Metadata
 - **Category:** Architecture Prompts
-- **Weighted Score:** 8.49 / 10 (improved from 7.52)
+- **Weighted Score:** 7.52 / 10
 - **Overall Rating:** High
 - **Path:** docs/00-project/ai/prompts/documentation_diagrams_audit.md
-- **Version:** 3.0.0 | Date: 2026-04-04
+- **Version:** 3.0.0
+- **Date:** 2026-08-09
 
 ## Evaluation Breakdown
-- Clarity: 9/10 (weight: 0.15) - improved from 7/10
-- Completeness: 9/10 (weight: 0.15) - improved from 7/10
-- Specificity: 8/10 (weight: 0.12) - improved from 7/10
-- Context: 8/10 (weight: 0.10) - improved from 7/10
-- Guardrails: 8/10 (weight: 0.10) - improved from 7/10
-- Maintainability: 8/10 (weight: 0.08) - improved from 7/10
-- Reusability: 9/10 (weight: 0.08) - improved from 8/10
-- Error Handling: 9/10 (weight: 0.08) - improved from 8/10
-- Validation: 8/10 (weight: 0.07) - maintained
-- Documentation: 9/10 (weight: 0.07) - improved from 7/10
-
-## Improvement Summary
-
-### Specificity Enhancements
-- Added concrete timeout specifications for each audit phase (45s for Cross-Reference, 60s for Code-Docs Sync, 30s for ADR Audit, 45s for Diagram Validation, 30s for Content Freshness)
-- Specified exact retry policies for each agent (max 3 retries with exponential backoff: 1s, 2s, 4s)
-- Added specific command-line validation procedures for link checking and diagram validation
-- Defined exact output formats for audit reports (markdown tables, JSON evidence)
-- Added concrete severity classification criteria (Critical/High/Medium/Low) for findings
-
-### Enhanced Guardrails
-- Added integrity checks to prevent documentation drift during audit execution
-- Implemented consistency validation between code and documentation
-- Added access control validation for docs/99-archive/ modifications (read-only enforcement)
-- Enhanced ownership verification for documentation file changes
-- Added conflict detection for concurrent documentation modifications
-
-### Error Handling Improvements
-- Added fallback procedures when primary agents are unavailable
-- Implemented graceful degradation for partial audit results
-- Added error recovery strategies for link checking failures
-- Specified rollback procedures for failed documentation updates
-- Added logging requirements for all error conditions with specific log levels
-
-### Validation Enhancements
-- Added self-consistency checks for audit findings
-- Implemented validation gates between audit phases
-- Added cross-validation of documentation from multiple sources
-- Specified validation procedures for Mermaid diagram syntax
-- Added automated validation of mkdocs nav consistency
-
-### Maintainability Improvements
-- Added version tracking for prompt iterations
-- Specified maintenance guidelines for audit templates
-- Added cleanup procedures for temporary audit artifacts
-- Implemented update procedures for audit rule changes
-- Added documentation of deprecated audit patterns
-
-### Reusability Improvements
-- Added adaptive scope templates for different audit types (Quick/Full/Targeted)
-- Specified template patterns for different docs/ areas (architecture/guides/reference)
-- Added configuration parameters for audit scope customization
-- Implemented reusable metric collection patterns
-- Added exportable audit report templates
-
-### Documentation Improvements
-- Added comprehensive examples for each audit template
-- Specified template structures for audit reports
-- Added guidelines for interpreting audit results
-- Implemented documentation of common documentation anti-patterns
-- Added troubleshooting guide for common audit issues
-
-## Original Content (Summary)
-
-*Статус: internal-working prompt*
-
-# Documentation & Diagrams Audit
-
-*Версия: 2.0.0 | Дата: 2026-04-04*
+- Clarity: 7/10 (weight: 0.15)
+- Completeness: 7/10 (weight: 0.15)
+- Specificity: 7/10 (weight: 0.12)
+- Context: 7/10 (weight: 0.10)
+- Guardrails: 7/10 (weight: 0.10)
+- Maintainability: 7/10 (weight: 0.08)
+- Reusability: 8/10 (weight: 0.08)
+- Error Handling: 8/10 (weight: 0.08)
+- Validation: 8/10 (weight: 0.07)
+- Documentation: 7/10 (weight: 0.07)
 
 ## Назначение
 
@@ -123,10 +65,27 @@ docs/
 ├── 02-architecture/
 │   ├── decisions/
 │   ├── diagrams/
-│   │   ├── architecture/
-│   │   ├── class-diagrams/
-│   │   ├── foundation/
-│   │   └── views/
+│   │   ├── architecture/           # архитектурные диаграммы (01-40)
+│   │   ├── class-diagrams/         # класс-диаграммы (01-90)
+│   │   ├── foundation/            # фундаментальные диаграммы (01-50)
+│   │   ├── providers/             # провайдер-специфичные диаграммы
+│   │   │   ├── chembl/
+│   │   │   ├── crossref/
+│   │   │   ├── openalex/
+│   │   │   ├── pubchem/
+│   │   │   ├── pubmed/
+│   │   │   ├── semanticscholar/
+│   │   │   └── uniprot/
+│   │   ├── sequence/              # sequence diagrams (01-05)
+│   │   ├── state-machines/        # state machine diagrams (01-05)
+│   │   ├── bundles/               # бандлы диаграмм
+│   │   ├── descriptions/          # описания диаграмм
+│   │   ├── governance/            # governance диаграммы
+│   │   ├── guide/                 # guide диаграммы
+│   │   ├── manifests/             # manifests диаграммы
+│   │   ├── theme/                 # theme диаграммы
+│   │   ├── tooling/               # tooling диаграммы
+│   │   └── views/                 # views диаграммы
 │   └── policies/
 ├── 03-guides/
 ├── 04-reference/
@@ -162,7 +121,7 @@ README.md                          # root-level doc entrypoint
 Выполни:
 
 ```bash
-uv run python -m scripts.docs check-links --links --specs --configs
+python -m scripts.docs.checks.check_links
 ```
 
 Дополнительно проверь, что все Markdown targets из `mkdocs.yml` существуют.
@@ -244,6 +203,86 @@ uv run python -m scripts.docs check-links --links --specs --configs
 - если упомянут transformer/service/class, он существует;
 - xwalk/spec docs не противоречат реальным pipeline inputs/outputs.
 
+## Фаза 3: Diagram Audit
+
+### 3.1. Диаграммы архитектуры
+
+Аудируй диаграммы в `docs/02-architecture/diagrams/architecture/`:
+
+- Проверь, что все файлы `.mmd` имеют валидный Mermaid синтаксис
+- Проверь соответствие ADR-040 compliance
+- Проверь синхронизацию с текущим кодом
+- Проверь актуальность описаний в `docs/02-architecture/diagrams/descriptions/architecture/`
+
+### 3.2. Класс-диаграммы
+
+Аудируй класс-диаграммы в `docs/02-architecture/diagrams/class-diagrams/`:
+
+- Проверь, что все файлы `.mmd` имеют валидный Mermaid синтаксис
+- Проверь соответствие ADR-040 compliance
+- Проверь синхронизацию с текущим кодом
+- Проверь актуальность описаний в `docs/02-architecture/diagrams/descriptions/class/`
+
+Особое внимание на package-level диаграммы (90-pkg-*.mmd):
+- Проверьте соответствие фактической структуре пакетов
+- Проверьте актуальность импортов и зависимостей
+- Проверьте наличие всех классов и модулей
+
+### 3.3. Фундаментальные диаграммы
+
+Аудируй фундаментальные диаграммы в `docs/02-architecture/diagrams/foundation/`:
+
+- Проверь, что все файлы `.mmd` имеют валидный Mermaid синтаксис
+- Проверь соответствие ADR-040 compliance
+- Проверь синхронизацию с текущим кодом
+- Проверь актуальность описаний в `docs/02-architecture/diagrams/descriptions/foundation/`
+
+### 3.4. Провайдер-специфичные диаграммы
+
+Аудируй провайдер-специфичные диаграммы в `docs/02-architecture/diagrams/providers/`:
+
+Для каждого провайдера (chembl, crossref, openalex, pubchem, pubmed, semanticscholar, uniprot):
+- Проверь, что все файлы `.mmd` имеют валидный Mermaid синтаксис
+- Проверь соответствие ADR-040 compliance
+- Проверь синхронизацию с текущим кодом адаптеров
+- Проверь актуальность API flows и data transformation flows
+
+### 3.5. Sequence диаграммы
+
+Аудируй sequence диаграммы в `docs/02-architecture/diagrams/sequence/`:
+
+- Проверь, что все файлы `.mmd` имеют валидный Mermaid синтаксис
+- Проверь соответствие ADR-040 compliance
+- Проверь синхронизацию с текущим кодом
+- Проверь актуальность sequence flows
+
+### 3.6. State machine диаграммы
+
+Аудируй state machine диаграммы в `docs/02-architecture/diagrams/state-machines/`:
+
+- Проверь, что все файлы `.mmd` имеют валидный Mermaid синтаксис
+- Проверь соответствие ADR-040 compliance
+- Проверь синхронизацию с текущим кодом
+- Проверь актуальность state transitions
+
+### 3.7. Другие категории диаграмм
+
+Аудируй другие категории диаграмм:
+
+- `bundles/` - бандлы диаграмм
+- `governance/` - governance диаграммы
+- `guide/` - guide диаграммы
+- `manifests/` - manifests диаграммы
+- `theme/` - theme диаграммы
+- `tooling/` - tooling диаграммы
+- `views/` - views диаграммы
+
+Для каждой категории:
+- Проверь, что все файлы `.mmd` имеют валидный Mermaid синтаксис
+- Проверь соответствие ADR-040 compliance
+- Проверь синхронизацию с текущим кодом
+- Проверь актуальность описаний
+
 ## Adaptive Scopes (для улучшения переиспользуемости)
 
 ### Шаблоны для разных типов аудитов
@@ -272,6 +311,14 @@ Scope: [конкретная область интереса]
 Ожидаемое время: [X минут]
 ```
 
+#### Diagram-Only Audit Template
+```text
+Тип аудита: Diagram-Only Audit
+Scope: docs/02-architecture/diagrams/
+Глубина: Mermaid syntax + ADR-040 compliance + code sync
+Ожидаемое время: [X минут]
+```
+
 ### Модульные фазы для использования в разных контекстах
 
 ```text
@@ -296,6 +343,9 @@ ENABLED_PHASES: [список фаз для выполнения]
 
 # Формат вывода
 OUTPUT_FORMAT: markdown | json | both
+
+# Категории диаграмм для аудита
+DIAGRAM_CATEGORIES: [architecture, class-diagrams, foundation, providers, sequence, state-machines, bundles, governance, guide, manifests, theme, tooling, views]
 ```
 
 ## Error Recovery (для улучшения обработки ошибок)
@@ -304,7 +354,7 @@ OUTPUT_FORMAT: markdown | json | both
 
 #### Недоступность инструментов проверки ссылок
 ```text
-Если `uv run python -m scripts.docs check-links` недоступен:
+Если `python -m scripts.docs.checks.check_links` недоступен:
 1. Используй grep для поиска markdown ссылок
 2. Проверяй существование файлов через ls/find
 3. Документируй ограничения и продолжи аудит
@@ -318,6 +368,15 @@ OUTPUT_FORMAT: markdown | json | both
 2. Используй grep для поиска ссылок на файлы
 3. Валидируй nav структуру вручную
 4. Документируй ограничения и продолжи аудит
+```
+
+#### Недоступность Mermaid validator
+```text
+Если Mermaid validator недоступен:
+1. Проверь синтаксис визуально
+2. Используй онлайн Mermaid live editor для проверки
+3. Документируй ограничения и продолжи аудит
+4. Предложи альтернативные методы проверки
 ```
 
 #### Частичные результаты
@@ -360,9 +419,10 @@ OUTPUT_FORMAT: markdown | json | both
 - [ ] Результаты проверены через 2+ методов
 
 ### Фаза 4: Diagram Validation
-- [ ] Mermaid syntax проверен
-- [] ADR-040 compliance проверен
-- [ ] Code sync проверен
+- [ ] Mermaid syntax проверен для всех категорий
+- [ ] ADR-040 compliance проверен
+- [ ] Code sync проверен для всех категорий
+- [ ] Описания диаграмм проверены на актуальность
 - [ ] Результаты проверены через 2+ методов
 
 ### Фаза 5: Content Freshness
@@ -381,12 +441,41 @@ OUTPUT_FORMAT: markdown | json | both
 4. Отсутствие противоречий с другими findings
 ```
 
----
+## Diagram-Specific Validation Gates
 
-**Version History:**
-- 3.0.0 (2026-04-04): Added specificity enhancements (timeouts, retry policies), enhanced guardrails (integrity checks, consistency validation), error handling improvements (fallback procedures, graceful degradation), validation enhancements (self-consistency checks, validation gates), maintainability improvements (version tracking, maintenance guidelines), reusability improvements (adaptive scopes, configuration parameters), documentation improvements (examples, troubleshooting guide). Score improved from 7.52 to 8.49/10.
-- 2.0.0 (2026-04-04): Aligned with current repository structure, added adaptive scopes
-- 1.0.0: Initial version with basic documentation and diagrams audit prompt
-3. Соответствие RULES и ADR
-4. Отсутствие противоречий с другими findings
-```
+### Architecture Diagrams
+- [ ] Все архитектурные диаграммы проверены на Mermaid syntax
+- [ ] ADR-040 compliance проверен
+- [ ] Синхронизация с кодом проверена
+- [ ] Описания актуальны
+
+### Class Diagrams
+- [ ] Все класс-диаграммы проверены на Mermaid syntax
+- [ ] ADR-040 compliance проверен
+- [ ] Синхронизация с кодом проверена
+- [ ] Package-level диаграммы соответствуют фактической структуре
+- [ ] Описания актуальны
+
+### Foundation Diagrams
+- [ ] Все фундаментальные диаграммы проверены на Mermaid syntax
+- [ ] ADR-040 compliance проверен
+- [ ] Синхронизация с кодом проверена
+- [ ] Описания актуальны
+
+### Provider Diagrams
+- [ ] Все провайдер-специфичные диаграммы проверены на Mermaid syntax
+- [ ] ADR-040 compliance проверен
+- [ ] Синхронизация с кодом адаптеров проверена
+- [ ] API flows актуальны
+
+### Sequence Diagrams
+- [ ] Все sequence диаграммы проверены на Mermaid syntax
+- [ ] ADR-040 compliance проверен
+- [ ] Синхронизация с кодом проверена
+- [ ] Sequence flows актуальны
+
+### State Machine Diagrams
+- [ ] Все state machine диаграммы проверены на Mermaid syntax
+- [ ] ADR-040 compliance проверен
+- [ ] Синхронизация с кодом проверена
+- [ ] State transitions актуальны
