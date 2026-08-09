@@ -109,6 +109,11 @@ def build_health_server(
             run_manifest_port=deps.run_manifest_port,
             run_ledger_port=deps.run_ledger_port,
             workflow_manifest_port=deps.workflow_manifest_port,
+            control_plane_evidence_service=getattr(
+                deps,
+                "control_plane_evidence_service",
+                None,
+            ),
             metrics_exposition=metrics_exposition,
             runtime_source_id=_runtime_source_id_from_environment(),
         ),

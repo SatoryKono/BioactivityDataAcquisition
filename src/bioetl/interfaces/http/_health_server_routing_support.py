@@ -6,6 +6,9 @@ import asyncio
 from typing import Protocol
 
 from bioetl.application.runtime_clock import current_utc_time
+from bioetl.application.services.control_plane.evidence import (
+    ControlPlaneEvidenceService,
+)
 from bioetl.domain.control_plane import WorkflowManifest
 from bioetl.domain.ports import (
     CheckpointPort,
@@ -21,6 +24,9 @@ from bioetl.interfaces.http._health_server_checkpoint_freshness_payloads import 
 )
 from bioetl.interfaces.http._health_server_checkpoint_lookup import (
     load_checkpoint_freshness_evidence,
+)
+from bioetl.interfaces.http._health_server_control_plane_evidence_routing import (
+    dispatch_control_plane_evidence_request,
 )
 from bioetl.interfaces.http._health_server_control_plane_scope import (
     _IdentityScope,
@@ -63,6 +69,14 @@ class _HealthResponseSupport(Protocol):
 
 
 class _HealthRoutingHost(_HealthResponseSupport, Protocol):
+    @property
+    def _control_plane_evidence_service(
+        self,
+    ) -> ControlPlaneEvidenceService | None: ...
+
+    @property
+    def _forensic_endpoint_limiter(self) -> asyncio.Semaphore: ...
+
     @property
     def _checkpoint_port(self) -> CheckpointPort | None: ...
 
@@ -123,6 +137,13 @@ async def dispatch_control_plane_request(
         return
 
     try:
+        if await dispatch_control_plane_evidence_request(
+            host,
+            writer=writer,
+            path=path,
+            query=query,
+        ):
+            return
         if path == "/ops/control-plane/ready":
             await handle_control_plane_ready(host, writer)
             return
@@ -157,6 +178,9 @@ async def handle_control_plane_ready(
         "workflow_manifest_port": getattr(host, "_workflow_manifest_port", None)
         is not None,
         "checkpoint_port": host._checkpoint_port is not None,
+        "validation_evidence_service": (
+            host._control_plane_evidence_service is not None
+        ),
         "data_root": getattr(host, "_data_root", None),
         "runtime_source_id": getattr(host, "_runtime_source_id", None),
     }

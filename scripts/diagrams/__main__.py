@@ -78,9 +78,7 @@ COMMAND_SPECS = {
     "check-padding": python_command("check/report_diagram_padding.py"),
     # Fix
     "apply-elk": python_command("fix/apply_elk_layout.py"),
-    "convert-provider-diagrams": python_command(
-        "fix/convert_provider_diagrams.py"
-    ),
+    "convert-provider-diagrams": python_command("fix/convert_provider_diagrams.py"),
     "differentiate-linkstyle": python_command("fix/differentiate_linkstyle.py"),
     "fix-operators": python_command("fix/fix_mermaid_operators.py"),
     "fix-svg-text": python_command("fix/add_svg_text_fallback.py"),

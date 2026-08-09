@@ -8,6 +8,9 @@ from typing import TYPE_CHECKING
 from urllib.parse import parse_qs, urlsplit
 
 from bioetl.application.runtime_clock import current_utc_time
+from bioetl.application.services.control_plane.evidence import (
+    ControlPlaneEvidenceService,
+)
 from bioetl.application.services.quality.quarantine_service import QuarantineService
 from bioetl.domain.ports import (
     CheckpointPort,
@@ -39,6 +42,7 @@ class HealthServerRoutingMixin:
     _run_manifest_port: RunManifestPort | None = None
     _run_ledger_port: RunLedgerPort | None = None
     _workflow_manifest_port: WorkflowManifestPort | None = None
+    _control_plane_evidence_service: ControlPlaneEvidenceService | None = None
     _metrics_exposition: HealthMetricsExpositionPort
     _clock: ClockPort | None = None
     _data_root: str | None = None

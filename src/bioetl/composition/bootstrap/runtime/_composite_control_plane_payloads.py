@@ -39,6 +39,7 @@ def build_composite_launch_context_snapshot(
     runtime: CompositeRuntimeConfig,
     *,
     required_persistence_profile: str,
+    run_ledger_enabled: bool = True,
 ) -> dict[str, object]:
     """Capture launch-time options that materially affect composite execution."""
     return {
@@ -65,6 +66,7 @@ def build_composite_launch_context_snapshot(
             "composite_execution_outside_strict_exact_replay_boundary"
         ),
         "required_persistence_profile": required_persistence_profile,
+        "run_ledger_enabled": run_ledger_enabled,
     }
 
 
