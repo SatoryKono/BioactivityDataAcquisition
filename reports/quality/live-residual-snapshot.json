@@ -12,11 +12,11 @@
   },
   "hotspot_families": {
     "application_core": {
-      "files_ge_250_loc": 1,
+      "files_ge_250_loc": 0,
       "max_internal_fan_in": 8,
       "helper_function_ratio": 0.363,
       "files": 190,
-      "total_loc": 23087,
+      "total_loc": 23077,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 10
     },

@@ -1,4 +1,4 @@
-"""Architecture contract checks for the Proof-or-Stop control plane."""
+"""Architecture contract checks enforcing ADR-056 Proof-or-Stop control plane."""
 
 from __future__ import annotations
 

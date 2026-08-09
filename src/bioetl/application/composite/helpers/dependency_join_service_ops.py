@@ -59,6 +59,7 @@ def prepare_dependency_join_context(
     right_join_keys: list[str],
     seed_pipeline: str | None,
 ) -> PreparedDependencyJoinContext:
+    """Build the normalized context consumed by dependency join planning."""
     return build_prepared_dependency_join_context(
         deduplicator=deduplicator,
         join_key_resolver=join_key_resolver,
@@ -83,6 +84,7 @@ def resolve_composite_join_context_for_service(
     metadata: CompositeJoinContext,
     dependency: str,
 ) -> ResolvedCompositeJoinContext | None:
+    """Resolve composite join keys for the service orchestration layer."""
     return resolve_composite_join_context(
         join_key_resolver=join_key_resolver,
         logger=logger,
@@ -99,6 +101,7 @@ def execute_prepared_dependency_join(
     dependency: str,
     execution_plan: DependencyJoinExecutionSpec,
 ) -> pl.DataFrame:
+    """Execute one prepared dependency join plan."""
     return execute_planned_dependency_join(
         conflict_resolver=conflict_resolver,
         logger=logger,
@@ -115,6 +118,7 @@ def execute_composite_dependency_join(
     resolved_context: ResolvedCompositeJoinContext,
     dep: DependencyConfig,
 ) -> pl.DataFrame:
+    """Build and execute a composite-key dependency join plan."""
     return execute_prepared_dependency_join(
         conflict_resolver=conflict_resolver,
         logger=logger,
@@ -135,6 +139,7 @@ def execute_single_key_dependency_join(
     resolved_context: ResolvedSingleKeyJoinContext,
     dep: DependencyConfig,
 ) -> pl.DataFrame:
+    """Build and execute a single-key dependency join plan."""
     return execute_prepared_dependency_join(
         conflict_resolver=conflict_resolver,
         logger=logger,

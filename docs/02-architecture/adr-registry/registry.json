@@ -1,6 +1,6 @@
 {
-  "generated": "2026-07-29T20:58:03.507660",
-  "total_adrs": 55,
+  "generated": "2026-08-09T12:11:59.759689",
+  "total_adrs": 56,
   "adrs": [
     {
       "adr_number": "001",
@@ -980,7 +980,7 @@
       "category": "Architecture",
       "owner": "BioETL Team",
       "decision_date": "2026-07-27",
-      "last_reviewed": "2026-07-27",
+      "last_reviewed": "2026-08-09",
       "context": "`QuarantineEntry` is a Domain aggregate root that freezes identity and\nimmutability invariants for quarantine records. Its constructor currently\ntakes 9 arguments and is listed in `configs/quality/...",
       "decision": "Treat the 9-argument constructor as an **intentional_exception**, not a\ngeneric tech-debt waiver to burn to zero via anemic extraction:\n1. Fields form one explicit identity/snapshot surface (entry_...",
       "consequences": "- Waiver remains until optional decomposition lands.\n- Classification `intentional_exception` + this ADR link is the permanent\n  governance record for residual constructor budget on this type.\n- Re...",
@@ -998,7 +998,7 @@
       "category": "Architecture",
       "owner": "BioETL Team",
       "decision_date": "2026-07-28",
-      "last_reviewed": "2026-07-28",
+      "last_reviewed": "2026-08-09",
       "context": "Among public lazy facades, `bioetl.infrastructure.config` (package root at\n`src/bioetl/infrastructure/config/__init__.py`) was still classified as\n`compatibility_debt` while first-party `src/` impo...",
       "decision": "**Promote `bioetl.infrastructure.config` to permanent external public API.**\n1. Classification in `public_lazy_facade_inventory.yaml` is\n   `external_public_api` (not `compatibility_debt`).\n2. Firs...",
       "consequences": "- Issue #6790 closes by reclassification + inventory sync, not by deleting the root.\n- Compatibility census continues to fail-fast if first-party src importers reappear.\n- Future removal would requ...",
@@ -1063,11 +1063,29 @@
       "superseded_by": [],
       "related": [],
       "tags": []
+    },
+    {
+      "adr_number": "056",
+      "title": "Proof-or-Stop Lifecycle Control",
+      "file_path": "ADR-056-proof-or-stop-lifecycle-control.md",
+      "status": "accepted",
+      "source_status": "Accepted",
+      "category": "Governance",
+      "owner": "BioETL Team",
+      "decision_date": "2026-08-09",
+      "last_reviewed": null,
+      "context": "BioETL already has comprehensive pre-commit, pre-push, CI, documentation,\narchitecture, and debt gates. It also has an immutable EvidenceStore. The\nmissing boundary is mechanical: an agent can desc...",
+      "decision": "Adopt the repository-local Proof-or-Stop contract in\n`docs/04-reference/contracts/proof-or-stop-evidence.md`.\nAgent output remains a claim. `tested`, `reviewed`, `done`, and\n`ready_to_merge` lifecy...",
+      "consequences": "- False `DONE`/`ADMIT` caused by stale or incomplete receipts becomes\n  mechanically detectable.\n- CI remains vendor-neutral and local-first; optional evaluators cannot\n  override the core gate.\n- ...",
+      "supersedes": [],
+      "superseded_by": [],
+      "related": [],
+      "tags": []
     }
   ],
   "stats": {
     "by_status": {
-      "accepted": 53,
+      "accepted": 54,
       "superseded": 2
     },
     "by_category": {
@@ -1088,7 +1106,8 @@
       "HTTP/Networking": 1,
       "Data Contracts": 1,
       "Documentation": 3,
-      "Testing": 1
+      "Testing": 1,
+      "Governance": 1
     }
   }
 }
