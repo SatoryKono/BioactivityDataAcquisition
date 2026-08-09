@@ -42,11 +42,11 @@ SECRET_NAME_PATTERN: Final[re.Pattern[str]] = re.compile(
     r"(?:AUTH|CREDENTIAL|KEY|PASSWORD|SECRET|TOKEN)", re.IGNORECASE
 )
 SECRET_TEXT_PATTERNS: Final[tuple[re.Pattern[str], ...]] = (
+    re.compile(r"(?i)bearer\s+[A-Za-z0-9._~+/=-]+"),
     re.compile(
         r"(?i)(api[_-]?key|authorization|credential|password|secret|token)"
         r"\s*[:=]\s*([^\s,;]+)"
     ),
-    re.compile(r"(?i)bearer\s+[A-Za-z0-9._~+/=-]+"),
     re.compile(r"\b(?:gh[opsu]_|sk-[A-Za-z0-9_-]{8,})[A-Za-z0-9_-]+\b"),
 )
 EXIT_OK: Final[int] = 0
@@ -178,7 +178,10 @@ def _resolve_input(value: str) -> Path:
 
 def _executable_path(spec: ToolSpec) -> Path | None:
     suffix = ".exe" if os.name == "nt" else ""
-    adjacent = Path(sys.executable).resolve().parent / f"{spec.executable}{suffix}"
+    # Do not resolve the Python launcher first: POSIX venv interpreters are
+    # commonly symlinks to the system Python, while console scripts live beside
+    # the symlink inside ``venv/bin``.
+    adjacent = Path(sys.executable).parent / f"{spec.executable}{suffix}"
     if adjacent.is_file():
         return adjacent
     discovered = shutil.which(spec.executable)
@@ -613,4 +616,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

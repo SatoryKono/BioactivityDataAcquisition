@@ -1151,6 +1151,7 @@
         "docs/00-project/glossary.md",
         "docs/03-guides/cheatsheets/adr-matrix.md",
         "docs/03-guides/cheatsheets/pipeline-config.md",
+        "docs/03-guides/config-merge-strategy.md",
         "src/bioetl/application/core/lifecycle/checkpoint_manager.py",
         "src/bioetl/domain/config/pipeline.py",
         "src/bioetl/infrastructure/schemas/pipeline_config.py",
