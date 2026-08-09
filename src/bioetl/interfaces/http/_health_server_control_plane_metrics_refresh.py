@@ -25,7 +25,7 @@ async def refresh_control_plane_metrics(
 ) -> bool:
     """Run one refresh off-loop and contain typed source failures."""
     try:
-        await asyncio.to_thread(refresher.refresh)
+        _ = await asyncio.to_thread(refresher.refresh)
     except _REFRESH_ERRORS:
         return False
     return True
@@ -39,14 +39,14 @@ async def run_periodic_control_plane_metrics_refresh(
     """Refresh after every interval until the owning task is cancelled."""
     while True:
         await asyncio.sleep(interval_seconds)
-        await refresh_control_plane_metrics(refresher)
+        _ = await refresh_control_plane_metrics(refresher)
 
 
 async def stop_control_plane_metrics_refresh(task: asyncio.Task[None] | None) -> None:
     """Cancel and join the optional periodic refresh task."""
     if task is None:
         return
-    task.cancel()
+    _ = task.cancel()
     with suppress(asyncio.CancelledError):
         await task
 
