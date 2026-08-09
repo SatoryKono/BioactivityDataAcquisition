@@ -96,7 +96,7 @@ def test_all_shipped_dashboards_have_bounded_owner_routes() -> None:
         "docs/05-operations/runbooks/run-manifest-inspection.md",
         "docs/05-operations/runbooks/pipeline-failure-critical.md",
         "docs/05-operations/runbooks/incident-response.md",
-        "docs/05-operations/runbooks/dq-failure-investigation.md",
+        "docs/05-operations/runbooks/pipeline-failure-dq.md",
         "docs/05-operations/runbooks/quarantine-management.md",
     }
     for dashboard in dashboards:
