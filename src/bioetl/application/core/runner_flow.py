@@ -1,29 +1,12 @@
 # pyright: reportImportCycles=false
-# Import cycle residual tracked in allowlist (product burn-down).
 """Lifecycle helpers for :mod:`bioetl.application.core.runner`."""
 
 from __future__ import annotations
 
-__all__ = [
-    "emit_pipeline_completion",
-    "emit_pipeline_start",
-    "extract_checkpoint_offset",
-    "record_run_failed",
-    "record_run_finished",
-    "record_run_shutdown",
-    "record_run_started",
-    "record_stage_completed",
-    "record_stage_started",
-    "resolve_execution_offset",
-]
-
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Protocol, cast
 
-from bioetl.application.core.batch_operation_errors import (
-    OPERATION_ERRORS,
-    OperationErrorTypes,
-)
+from bioetl.application.core.batch_operation_errors import OPERATION_ERRORS
 from bioetl.application.core.runner_flow_metrics import (
     record_flow_invariants as _record_flow_invariants_impl,
 )
@@ -33,11 +16,6 @@ from bioetl.application.core.runner_flow_metrics import (
 from bioetl.application.runtime_clock import current_utc_time
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.types import JsonDict
-
-FLOW_INVARIANT_PROJECTION_ERRORS: OperationErrorTypes = (
-    *OPERATION_ERRORS,
-    ArithmeticError,
-)
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_executor import BatchExecutor
@@ -54,6 +32,19 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
+
+__all__ = [
+    "emit_pipeline_completion",
+    "emit_pipeline_start",
+    "extract_checkpoint_offset",
+    "record_run_failed",
+    "record_run_finished",
+    "record_run_shutdown",
+    "record_run_started",
+    "record_stage_completed",
+    "record_stage_started",
+    "resolve_execution_offset",
+]
 
 
 class _PipelineRunnerFlowHostProtocol(Protocol):
@@ -213,7 +204,6 @@ def _record_output_ready(host: _PipelineRunnerFlowHostProtocol) -> None:
 
 def record_run_shutdown(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Append graceful shutdown ledger entry."""
-    # Ledger write is primary; invariant projection must not block terminal recording.
     _record_run_metrics_event(
         host,
         lambda ledger_service, metrics_snapshot, details: (
@@ -225,7 +215,7 @@ def record_run_shutdown(host: _PipelineRunnerFlowHostProtocol) -> None:
     )
     try:
         _record_flow_invariants(host)
-    except FLOW_INVARIANT_PROJECTION_ERRORS:
+    except (*OPERATION_ERRORS, ArithmeticError):
         # Best-effort metrics projection after shutdown ledger is written.
         host._logger.warning(
             "shutdown_flow_invariants_failed",

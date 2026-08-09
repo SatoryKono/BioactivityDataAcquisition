@@ -1,13 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-09T11:57:45.275069+00:00",
+  "generated_at": "2026-08-09T12:13:28.439674+00:00",
   "summary": {
     "total_scripts": 573,
     "status_counts": {
-      "active": 342,
-      "supporting": 226,
-      "temporary_diagnostic": 4,
-      "unknown": 1
+      "active": 339,
+      "supporting": 230,
+      "temporary_diagnostic": 4
     },
     "reference_group_coverage": {
       "agents": 4,
@@ -2458,7 +2457,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 26,
+      "reference_count": 27,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -4923,7 +4922,7 @@
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
           "line": 207,
           "source_group": "scripts",
-          "text": "\"scripts/check_dq_dsl_parity.py\","
+          "text": "\"scripts/data_quality/check_dq_dsl_parity.py\","
         }
       ]
     },
@@ -7029,7 +7028,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 163,
+      "reference_count": 167,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -7098,7 +7097,7 @@
           "path": "tests/architecture/test_generated_artifact_routing.py",
           "line": 148,
           "source_group": "tests",
-          "text": "\"src/tools/generate_docs_export.py\","
+          "text": "\"scripts/docs/build/generate_docs_export.py\","
         }
       ]
     },
@@ -9341,7 +9340,7 @@
           "path": "tests/architecture/test_generated_artifact_routing.py",
           "line": 147,
           "source_group": "tests",
-          "text": "\"src/tools/file_merger.py\","
+          "text": "\"scripts/engineering/common/file_merger.py\","
         },
         {
           "path": "tests/unit/scripts/repo/test_cleanup_repository.py",
@@ -9976,7 +9975,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 40,
+      "reference_count": 42,
       "references": [
         {
           "path": ".github/ISSUES/DOC-AUDIT-003-Align-Windows-Pytest-Docs-With-Xdist-Policy.md",
@@ -11112,7 +11111,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 285,
+      "reference_count": 290,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -13262,7 +13261,7 @@
     {
       "path": "scripts/engineering/qa/report_architecture_suite_burndown.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -13272,7 +13271,11 @@
           "source_group": "scripts",
           "text": "\"report-architecture-suite-burndown\": \"scripts.engineering.qa.report_architecture_suite_burndown\","
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the implementation behind python -m scripts.engineering.qa report-architecture-suite-burndown; keep contributor execution routed through the unified QA dispatcher."
     },
     {
       "path": "scripts/engineering/qa/report_artifact_duplication_audit.py",
@@ -14406,7 +14409,7 @@
     {
       "path": "scripts/engineering/qa/report_vcr_corpus_budget.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -14416,7 +14419,11 @@
           "source_group": "scripts",
           "text": "\"report-vcr-corpus-budget\": \"scripts.engineering.qa.report_vcr_corpus_budget\","
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the implementation behind python -m scripts.engineering.qa report-vcr-corpus-budget; keep contributor execution routed through the unified QA dispatcher."
     },
     {
       "path": "scripts/engineering/qa/report_vcr_metadata_catalog.py",
@@ -14478,7 +14485,7 @@
     {
       "path": "scripts/engineering/qa/report_weak_assert_inventory.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -14488,7 +14495,11 @@
           "source_group": "scripts",
           "text": "\"report-weak-assert-inventory\": \"scripts.engineering.qa.report_weak_assert_inventory\","
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the implementation behind python -m scripts.engineering.qa report-weak-assert-inventory; keep contributor execution routed through the unified QA dispatcher."
     },
     {
       "path": "scripts/engineering/qa/run_architecture_audit_read_only.py",
@@ -16704,7 +16715,7 @@
     {
       "path": "scripts/ops/data/neo4j_audit.py",
       "type": "py",
-      "status": "unknown",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 9,
       "references": [
@@ -16756,7 +16767,11 @@
           "source_group": "docs",
           "text": "- **scripts/ops/data/neo4j_audit.py** — Helper functions for context-aware connections"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the context-aware Neo4j audit connection helper while deployment and live-audit runbooks reference scripts/ops/data/neo4j_audit.py; fold it into a broader canonical ops helper surface only if the audit workflow is consolidated."
     },
     {
       "path": "scripts/ops/data/vacuum_delta.py",

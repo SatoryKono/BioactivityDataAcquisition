@@ -144,8 +144,8 @@ def test_generated_artifact_routing_covers_core_generators() -> None:
     generators = {route["generator"] for route in payload["routes"]}
 
     expected_generators = {
-        "src/tools/file_merger.py",
-        "src/tools/generate_docs_export.py",
+        "scripts/engineering/common/file_merger.py",
+        "scripts/docs/build/generate_docs_export.py",
         "scripts/schema/generation/generate_schema_artifacts.py",
         "scripts/engineering/ci/validate_contract_identity.py",
         "scripts/engineering/ci/validate_contract_registry.py",
