@@ -58,7 +58,6 @@
 00-project/ai/prompts/ai_workspace_setup.md
 00-project/ai/prompts/all_dashbord_correction.md
 00-project/ai/prompts/all_dashbord_correction_agent.md
-00-project/ai/prompts/architecture_debt_reduction_orchestration.md
 00-project/ai/prompts/architecture_metric_exemptions_tasks_json_prompt.md
 00-project/ai/prompts/architecture_review_and_refactoring_assessment.md
 00-project/ai/prompts/dashbold_audit_4_workflow.md

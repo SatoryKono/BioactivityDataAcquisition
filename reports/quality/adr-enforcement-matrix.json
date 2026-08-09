@@ -2000,7 +2000,6 @@
       "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/RULES.md",
-        "docs/01-requirements/REQUIREMENTS.md",
         "docs/04-reference/passports/index.md",
         "docs/04-reference/passports/manual/workflows/chembl_baseline.yaml",
         "docs/04-reference/passports/manual/workflows/chembl_core.yaml",
@@ -2028,6 +2027,7 @@
       "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/RULES.md",
+        "docs/01-requirements/REQUIREMENTS.md",
         "docs/04-reference/contracts/README.md",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_proof_or_stop_contract.py",

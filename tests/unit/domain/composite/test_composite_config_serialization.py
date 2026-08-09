@@ -161,7 +161,13 @@ def test_composite_config_codec_roundtrips_all_business_sections() -> None:
             silver_table="silver/chembl/publication",
             limit=100,
         ),
-        dependencies=(),
+        dependencies=(
+            DependencyConfig(
+                pipeline="chembl_document",
+                join_keys=("doi",),
+                silver_table="silver/chembl/document",
+            ),
+        ),
         enrichers=(
             EnricherConfig(
                 pipeline="openalex_publication",
@@ -314,3 +320,37 @@ def test_composite_section_decoders_filter_invalid_nested_shapes() -> None:
     assert cross_validation.enricher_pairings[0].fields[0].method is (
         ComparisonMethod.EXACT
     )
+
+
+def test_composite_decoder_uses_defaults_when_optional_sections_are_absent() -> None:
+    payload = _build_composite_config().to_dict()
+    for section in ("dq", "execution", "lineage", "cross_validation"):
+        payload.pop(section)
+
+    restored = CompositeConfig.from_dict(payload)
+
+    assert restored.dq == CompositeDQConfig()
+    assert restored.execution == ExecutionConfig()
+    assert restored.lineage == LineageConfig()
+    assert restored.cross_validation == CrossValidationConfig()
+
+
+def test_cross_validation_decoder_handles_non_sequence_nested_values() -> None:
+    assert (
+        build_cross_validation_config(
+            {"enricher_pairings": "not-a-sequence"}
+        ).enricher_pairings
+        == ()
+    )
+
+    with pytest.raises(ValueError, match="must have at least one field"):
+        build_cross_validation_config(
+            {
+                "enricher_pairings": [
+                    {
+                        "enricher_pipeline": "openalex_publication",
+                        "fields": "not-a-sequence",
+                    }
+                ]
+            }
+        )

@@ -24,7 +24,7 @@ def repo_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     monkeypatch.setattr(
         cli,
         "_source_context",
-        lambda: {
+        lambda *_args, **_kwargs: {
             "repository": {"repo_id": "bioetl"},
             "source": {"head_sha": "fixture-sha", "policy_hash": "fixture-policy"},
         },
@@ -121,6 +121,15 @@ def test_debug_uses_deterministic_subprocess_and_redacts_output(
     assert summary["verdict"] == "WARN"
     assert summary["advisory"] is True
     assert summary["lifecycle_authority"] is False
+    assert summary["optional_evaluator_evidence"] == {
+        "schema_version": 1,
+        "evidence_kind": "review",
+        "producer": "optional_agentdebugx",
+        "vendor_verdict": "WARN",
+        "receipt_eligible": False,
+        "lifecycle_authority": False,
+        "source_binding": summary["source"],
+    }
     assert "--mode" in captured["command"]
     assert (
         captured["command"][captured["command"].index("--mode") + 1] == "deterministic"
@@ -319,16 +328,11 @@ def test_source_identity_is_explicitly_advisory(
         ("rev-parse", "HEAD"): "head-sha",
         ("rev-parse", "HEAD^{tree}"): "tree-sha",
         ("branch", "--show-current"): "main",
-        ("ls-files", "--others", "--exclude-standard"): "reports/new.json\n",
+        ("status", "--porcelain=v1", "--untracked-files=no"): " M README.md\n",
     }
 
     def run(command: list[str], **_: Any) -> subprocess.CompletedProcess[str]:
         git_args = tuple(command[command.index(str(repo_root)) + 1 :])
-        if git_args in {
-            ("diff-index", "--quiet", "HEAD", "--"),
-            ("diff-files", "--quiet", "--"),
-        }:
-            return subprocess.CompletedProcess(command, 1, "", "")
         return subprocess.CompletedProcess(command, 0, responses[git_args], "")
 
     monkeypatch.setattr(cli.subprocess, "run", run)
@@ -336,6 +340,7 @@ def test_source_identity_is_explicitly_advisory(
     assert context["source"]["binding_mode"] == "bounded-advisory-v1"
     assert context["source"]["head_sha"] == "head-sha"
     assert context["source"]["changed_path_inventory"] == "not-collected"
+    assert context["source"]["untracked_inventory"] == "not-collected"
     assert context["source"]["dirty"] is True
 
 

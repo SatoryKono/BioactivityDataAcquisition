@@ -17,7 +17,7 @@ from bioetl.application.core._batch_writer_gold_support import (
 from bioetl.application.core.batch_processing_runtime import (
     OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
 )
-from bioetl.domain.ports.storage import SilverWriteRequest
+from bioetl.domain.ports import SilverWriteRequest
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_writer import BatchWriteStorageProtocol

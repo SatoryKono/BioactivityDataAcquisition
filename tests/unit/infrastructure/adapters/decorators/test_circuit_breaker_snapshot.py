@@ -50,6 +50,10 @@ class _TypedSnapshotBreaker(_LegacyBreaker):
         return self._snapshot
 
 
+class _PublicTimestampBreaker(_LegacyBreaker):
+    last_failure_time = 7.5
+
+
 def test_snapshot_from_port_prefers_typed_public_snapshot() -> None:
     expected = CircuitBreakerSnapshot(
         state=CircuitBreakerState.HALF_OPEN,
@@ -85,3 +89,9 @@ def test_snapshot_from_port_falls_back_to_legacy_attributes() -> None:
         recovery_timeout=30.0,
         last_failure_time=42.0,
     )
+
+
+def test_snapshot_from_port_prefers_public_timestamp_attribute() -> None:
+    actual = snapshot_from_port(cast(CircuitBreakerPort, _PublicTimestampBreaker()))
+
+    assert actual.last_failure_time == pytest.approx(7.5)

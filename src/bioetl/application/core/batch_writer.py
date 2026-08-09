@@ -28,8 +28,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.models.metadata import SourceMetadata
-    from bioetl.domain.ports import GoldValidatorPort, TracingPort
-    from bioetl.domain.ports.storage import SilverWriteRequest
+    from bioetl.domain.ports import GoldValidatorPort, SilverWriteRequest, TracingPort
     from bioetl.domain.types import (
         BatchID,
         GoldRecord,
