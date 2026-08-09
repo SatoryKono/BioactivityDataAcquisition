@@ -24,8 +24,6 @@ def flatten_nested_dict(
     renames: dict[str, str] | None = None,
 ) -> JsonDict:  # Any: dict values vary by field type
     """Flatten one nested mapping into prefixed output fields."""
-    # Optimized for speed: Single-pass iteration merging prefixing and renaming.
-    # Uses explicit type annotation for mypy strict mode.
     result: JsonDict = {}  # Any: dict values vary by field type
     if not data or not isinstance(data, dict):
         for key in field_mapping:
@@ -34,9 +32,7 @@ def flatten_nested_dict(
             result[final_key] = None
         return result
     for source_key, converter in field_mapping.items():
-        # Construct the full key once
         full_key = f"{prefix}{source_key}"
-        # Determine the final key (handle rename immediately)
         final_key = renames.get(full_key, full_key) if renames else full_key
         value = data.get(source_key)
         if converter is not None and value is not None:
