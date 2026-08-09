@@ -2128,7 +2128,7 @@
             "dataLinks": [
               {
                 "title": "Open DQ Failure Runbook",
-                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/dq-failure-investigation.md"
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/pipeline-failure-dq.md"
               },
               {
                 "title": "Open 4. Data Quality",
@@ -2472,7 +2472,7 @@
             "dataLinks": [
               {
                 "title": "Open DQ Freshness Runbook",
-                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/dq-failure-investigation.md"
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/pipeline-failure-dq.md"
               },
               {
                 "title": "Open 4. Data Quality",
