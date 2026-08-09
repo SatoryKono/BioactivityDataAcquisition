@@ -37,7 +37,11 @@ def build_lineage_checks(
                 "lineage_cycle_not_observable",
                 "Cycle detection cannot run without persisted fragments.",
             ),
-            _persistence_profile_check(manifest, fragments),
+            _persistence_profile_check(
+                manifest,
+                fragments,
+                validation_complete=False,
+            ),
         )
 
     node_ids = {node.node_id for fragment in fragments for node in fragment.nodes}
@@ -95,7 +99,13 @@ def build_lineage_checks(
             ok_detail="No directed cycle was detected in the selected lineage graph.",
             error_prefix="Directed cycle includes nodes: ",
         ),
-        _persistence_profile_check(manifest, fragments),
+        _persistence_profile_check(
+            manifest,
+            fragments,
+            validation_complete=not (
+                closure_gaps or identity_gaps or cycle_nodes
+            ),
+        ),
     )
 
 
@@ -198,9 +208,11 @@ def _required_profile(manifest: RunManifest) -> str:
 def _persistence_profile_check(
     manifest: RunManifest,
     fragments: tuple[LineageGraphFragment, ...],
+    *,
+    validation_complete: bool,
 ) -> EvidenceCheck:
     required_profile = _required_profile(manifest)
-    if fragments:
+    if fragments and validation_complete:
         return EvidenceCheck(
             "persistence_profile",
             "OK",
@@ -212,7 +224,7 @@ def _persistence_profile_check(
             "persistence_profile",
             "ERROR",
             "lineage_persistence_profile_unsatisfied",
-            f"{required_profile} requires persisted lineage evidence.",
+            f"{required_profile} requires complete persisted lineage evidence.",
         )
     return EvidenceCheck(
         "persistence_profile",
