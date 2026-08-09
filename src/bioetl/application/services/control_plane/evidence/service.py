@@ -11,6 +11,7 @@ from bioetl.application.services.control_plane.evidence.checkpoint_validation im
 from bioetl.application.services.control_plane.evidence.failure_reasons import (
     FAILURE_REASON_CATEGORIES,
     build_failure_reason_rows,
+    build_unknown_failure_reason_rows,
 )
 from bioetl.application.services.control_plane.evidence.lineage import (
     build_lineage_checks,
@@ -56,6 +57,13 @@ class ControlPlaneEvidenceService:
         aggregate_scope_unknown: bool,
     ) -> dict[str, object]:
         """Return explicit checkpoint parse/schema/checksum/anchor results."""
+        if scope.manifest is None:
+            return service_payload(
+                endpoint="checkpoint-validation",
+                scope=scope,
+                checks=(unresolved_scope_check(scope.resolved_via),),
+                extra={"evidence_source": evidence_source},
+            )
         return service_payload(
             endpoint="checkpoint-validation",
             scope=scope,
@@ -175,19 +183,17 @@ class ControlPlaneEvidenceService:
     def failure_reasons(self, *, scope: EvidenceScope) -> dict[str, object]:
         """Return only fixed-category failure counts; omit raw errors/messages."""
         if scope.manifest is None:
+            scope_check = unresolved_scope_check(scope.resolved_via)
             payload = service_payload(
                 endpoint="failure-reasons",
                 scope=scope,
-                checks=(unresolved_scope_check(scope.resolved_via),),
+                checks=(scope_check,),
                 extra={
                     "categories": list(FAILURE_REASON_CATEGORIES),
-                    "total_failure_count": 0,
+                    "total_failure_count": None,
                 },
             )
-            payload["rows"] = [
-                {"category": category, "count": 0}
-                for category in FAILURE_REASON_CATEGORIES
-            ]
+            payload["rows"] = build_unknown_failure_reason_rows(scope_check.reason)
             return payload
         if self.ledger_port is None:
             checks = (
@@ -198,11 +204,8 @@ class ControlPlaneEvidenceService:
                     "The run ledger is not configured for failure aggregation.",
                 ),
             )
-            rows = [
-                {"category": category, "count": 0}
-                for category in FAILURE_REASON_CATEGORIES
-            ]
-            total = 0
+            rows = build_unknown_failure_reason_rows("run_ledger_unavailable")
+            total = None
         else:
             rows, total = build_failure_reason_rows(
                 ledger_entries(self.ledger_port, scope.manifest)

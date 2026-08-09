@@ -25,9 +25,6 @@ def retention_evidence_checks(
 ) -> tuple[EvidenceCheck, ...]:
     """Build explicit retention, evidence-floor, and archive results."""
     required_profile, profile_valid = resolve_persistence_profile(manifest)
-    strict_profile = (
-        not profile_valid or required_profile in STRICT_PERSISTENCE_PROFILES
-    )
     delete_count = sum(
         artifact.decision is ControlPlaneArtifactLifecycleDecision.DELETE
         for artifact in artifacts

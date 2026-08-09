@@ -36,6 +36,8 @@ async def load_checkpoint_freshness_evidence(
     checkpoint_port = host._checkpoint_port
     if checkpoint_port is None:
         return None, "checkpoint_port_unavailable", None, False
+    if scope.selected_run_id is not None and scope.resolved_manifest is None:
+        return None, "selected_run_id_not_found", None, False
 
     checkpoint_tuple: _CheckpointTuple | None = None
     evidence_source = "mutable_latest_pointer"
