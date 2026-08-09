@@ -206,7 +206,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.domains.composite.support",
         "push_metrics_to_gateway",
-        "bioetl.interfaces.cli.commands.domains.health.metrics_publication_integration.publish_metrics_safely",
+        "bioetl.composition.observability_api.push_metrics_to_gateway",
         _push_metrics_kwargs,
         True,
         True,
