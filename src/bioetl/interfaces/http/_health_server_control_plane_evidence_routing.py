@@ -11,6 +11,9 @@ from bioetl.application.services.control_plane.evidence import (
     ControlPlaneEvidenceService,
     EvidenceScope,
 )
+from bioetl.application.services.control_plane.evidence.service_support import (
+    source_error_payload,
+)
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.ports import CheckpointPort, RunManifestPort
 from bioetl.interfaces.http._forensic_request_budget import (
@@ -161,7 +164,7 @@ async def _checkpoint_payload(
             target_pipeline=target_pipeline,
         )
     except _SOURCE_READ_ERRORS:
-        return service.source_error(
+        return source_error_payload(
             endpoint="checkpoint-validation",
             scope=_evidence_scope(scope),
             reason="checkpoint_parse_error",
@@ -222,7 +225,7 @@ async def _service_payload(
             scope=evidence_scope,
         )
     except _SOURCE_READ_ERRORS:
-        return service.source_error(
+        return source_error_payload(
             endpoint=endpoint,
             scope=evidence_scope,
             reason=source_reason,
@@ -253,7 +256,7 @@ async def _resolve_scope(
             resolved_via="control_plane_source_read_failed",
             manifest=None,
         )
-        return None, service.source_error(
+        return None, source_error_payload(
             endpoint=endpoint,
             scope=fallback,
             reason=reason,

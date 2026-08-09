@@ -8,9 +8,6 @@ from datetime import datetime
 from bioetl.application.services.control_plane.evidence.checkpoint_validation import (
     build_checkpoint_checks,
 )
-from bioetl.application.services.control_plane.evidence.manifest_validation import (
-    build_manifest_checks,
-)
 from bioetl.application.services.control_plane.evidence.failure_reasons import (
     FAILURE_REASON_CATEGORIES,
     build_failure_reason_rows,
@@ -18,9 +15,11 @@ from bioetl.application.services.control_plane.evidence.failure_reasons import (
 from bioetl.application.services.control_plane.evidence.lineage import (
     build_lineage_checks,
 )
+from bioetl.application.services.control_plane.evidence.manifest_validation import (
+    build_manifest_checks,
+)
 from bioetl.application.services.control_plane.evidence.models import (
     EvidenceCheck,
-    evidence_payload,
     unresolved_scope_check,
 )
 from bioetl.application.services.control_plane.evidence.retention import (
@@ -28,25 +27,15 @@ from bioetl.application.services.control_plane.evidence.retention import (
     build_retention_checks,
     summarize_retention_artifacts,
 )
-from bioetl.domain.control_plane import (
-    ControlPlaneArtifactLifecyclePolicy,
-    RunLedgerEntry,
-    RunManifest,
+from bioetl.application.services.control_plane.evidence.service_support import (
+    EvidenceScope,
+    ledger_entries,
+    service_payload,
 )
+from bioetl.domain.control_plane import ControlPlaneArtifactLifecyclePolicy
 from bioetl.domain.ports import LineageStorePort, RunLedgerPort
 
 DEFAULT_CONTROL_PLANE_RETENTION_DAYS = 90
-
-
-@dataclass(frozen=True, slots=True)
-class EvidenceScope:
-    """Resolved selector context passed from the HTTP interface."""
-
-    requested_pipeline: str
-    selected_run_id: str | None
-    selected_run_types: tuple[str, ...]
-    resolved_via: str
-    manifest: RunManifest | None
 
 
 @dataclass(slots=True)
@@ -67,7 +56,7 @@ class ControlPlaneEvidenceService:
         aggregate_scope_unknown: bool,
     ) -> dict[str, object]:
         """Return explicit checkpoint parse/schema/checksum/anchor results."""
-        return self._payload(
+        return service_payload(
             endpoint="checkpoint-validation",
             scope=scope,
             checks=build_checkpoint_checks(
@@ -85,7 +74,7 @@ class ControlPlaneEvidenceService:
             if scope.manifest is None
             else build_manifest_checks(scope.manifest)
         )
-        return self._payload(
+        return service_payload(
             endpoint="manifest-validation",
             scope=scope,
             checks=checks,
@@ -94,13 +83,13 @@ class ControlPlaneEvidenceService:
     def lineage_validation(self, *, scope: EvidenceScope) -> dict[str, object]:
         """Return lineage closure, identity, cycle, and persistence validation."""
         if scope.manifest is None:
-            return self._payload(
+            return service_payload(
                 endpoint="lineage-validation",
                 scope=scope,
                 checks=(unresolved_scope_check(scope.resolved_via),),
             )
         if self.lineage_store is None:
-            return self._payload(
+            return service_payload(
                 endpoint="lineage-validation",
                 scope=scope,
                 checks=(
@@ -119,14 +108,14 @@ class ControlPlaneEvidenceService:
             fragments = tuple(
                 self.lineage_store.list_by_run_id(scope.manifest.run_id)
             )
-        ledger_entries = self._ledger_entries(scope.manifest)
-        return self._payload(
+        run_ledger_entries = ledger_entries(self.ledger_port, scope.manifest)
+        return service_payload(
             endpoint="lineage-validation",
             scope=scope,
             checks=build_lineage_checks(
                 manifest=scope.manifest,
                 fragments=fragments,
-                ledger_entries=ledger_entries,
+                ledger_entries=run_ledger_entries,
             ),
             extra={
                 "fragment_count": len(fragments),
@@ -149,13 +138,13 @@ class ControlPlaneEvidenceService:
     ) -> dict[str, object]:
         """Evaluate default retention and evidence-floor policy in dry-run mode."""
         if scope.manifest is None:
-            return self._payload(
+            return service_payload(
                 endpoint="retention-compliance",
                 scope=scope,
                 checks=(unresolved_scope_check(scope.resolved_via),),
             )
         if self.lifecycle_planner is None:
-            return self._payload(
+            return service_payload(
                 endpoint="retention-compliance",
                 scope=scope,
                 checks=(
@@ -178,7 +167,7 @@ class ControlPlaneEvidenceService:
             manifest=scope.manifest,
             plan=plan,
         )
-        return self._payload(
+        return service_payload(
             endpoint="retention-compliance",
             scope=scope,
             checks=checks,
@@ -192,7 +181,7 @@ class ControlPlaneEvidenceService:
     def failure_reasons(self, *, scope: EvidenceScope) -> dict[str, object]:
         """Return only fixed-category failure counts; omit raw errors/messages."""
         if scope.manifest is None:
-            payload = self._payload(
+            payload = service_payload(
                 endpoint="failure-reasons",
                 scope=scope,
                 checks=(unresolved_scope_check(scope.resolved_via),),
@@ -222,7 +211,7 @@ class ControlPlaneEvidenceService:
             total = 0
         else:
             rows, total = build_failure_reason_rows(
-                self._ledger_entries(scope.manifest)
+                ledger_entries(self.ledger_port, scope.manifest)
             )
             checks = (
                 EvidenceCheck(
@@ -232,7 +221,7 @@ class ControlPlaneEvidenceService:
                     "Failed ledger events were projected to the fixed category set.",
                 ),
             )
-        payload = self._payload(
+        payload = service_payload(
             endpoint="failure-reasons",
             scope=scope,
             checks=checks,
@@ -243,56 +232,6 @@ class ControlPlaneEvidenceService:
         )
         payload["rows"] = rows
         return payload
-
-    def source_error(
-        self,
-        *,
-        endpoint: str,
-        scope: EvidenceScope,
-        reason: str,
-        check: str,
-    ) -> dict[str, object]:
-        """Return a stable source-read failure without leaking raw exception text."""
-        return self._payload(
-            endpoint=endpoint,
-            scope=scope,
-            checks=(
-                EvidenceCheck(
-                    check,
-                    "ERROR",
-                    reason,
-                    "Persisted control-plane evidence could not be read or parsed.",
-                ),
-            ),
-        )
-
-    def _ledger_entries(
-        self,
-        manifest: RunManifest,
-    ) -> tuple[RunLedgerEntry, ...]:
-        if self.ledger_port is None:
-            return ()
-        return tuple(self.ledger_port.list_entries(manifest.manifest_id))
-
-    @staticmethod
-    def _payload(
-        *,
-        endpoint: str,
-        scope: EvidenceScope,
-        checks: tuple[EvidenceCheck, ...],
-        extra: dict[str, object] | None = None,
-    ) -> dict[str, object]:
-        return evidence_payload(
-            endpoint=endpoint,
-            checks=checks,
-            requested_pipeline=scope.requested_pipeline,
-            selected_run_id=scope.selected_run_id,
-            selected_run_types=scope.selected_run_types,
-            resolved_via=scope.resolved_via,
-            manifest=scope.manifest,
-            extra=extra,
-        )
-
 
 __all__ = [
     "DEFAULT_CONTROL_PLANE_RETENTION_DAYS",

@@ -13,6 +13,8 @@ from bioetl.application.services.control_plane.evidence.models import (
 from bioetl.application.services.control_plane.evidence.service import (
     DEFAULT_CONTROL_PLANE_RETENTION_DAYS,
     ControlPlaneEvidenceService,
+)
+from bioetl.application.services.control_plane.evidence.service_support import (
     EvidenceScope,
 )
 
