@@ -2,10 +2,10 @@
   "version": 2,
   "permissions": {
     "ask": [
-      "Read(**/.env*)",
       "Write(**/.env*)"
     ],
     "allow": [
+      "Read(**/.env*)",
       "Read(**/.devin/**)",
       "Read(**/docs/**)",
       "Read(**/configs/**)",
@@ -28,5 +28,11 @@
   },
   "read_config_from": {
     "agents_standard": true
+  },
+  "devin": {
+    "org_id": "bioetl"
+  },
+  "shell": {
+    "setup_complete": true
   }
 }

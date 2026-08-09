@@ -60,14 +60,14 @@
     "deepwiki": {
       "url": "https://mcp.deepwiki.com/mcp",
       "headers": {
-        "x-deepwiki-api-key": "${env:DEEPWIKI_API_KEY}",
-        "x-deepwiki-organisation-id": "${env:DEEPWIKI_ORGANISATION_ID}"
+        "x-deepwiki-api-key": "$DEEPWIKI_API_KEY",
+        "x-deepwiki-organisation-id": "$DEEPWIKI_ORGANISATION_ID"
       }
     },
     "ref": {
       "url": "https://api.ref.tools/mcp",
       "headers": {
-        "x-ref-api-key": "${env:REF_TOOL_API_KEY}"
+        "x-ref-api-key": "$REF_TOOL_API_KEY"
       }
     }
   }
