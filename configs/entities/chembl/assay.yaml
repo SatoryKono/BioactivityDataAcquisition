@@ -8,14 +8,14 @@ pipeline:
   description: Extract bioassay definitions from ChEMBL API
   field_policy: {}
   business_primary_keys:
-  - assay_id
+    - assay_id
   batch_size: 1000
   checkpoint_interval: 1000
 
   sink:
     silver:
       partition_by:
-      - assay_type
+        - assay_type
     gold:
       enabled: true
       mode: scd2
@@ -30,218 +30,218 @@ schema:
     include: []
     exclude: []
   column_groups:
-  - name: system
-    fields:
-    - entity_id
-    - content_hash
-    - _run_id
-    - _run_type
-    - _source_batch_id
-    - _ingestion_ts
-    - _index
-  - name: business
-    fields:
-    - assay_id
-    - assay_description
-    - assay_type
-    - assay_type_description
-    - assay_test_type
-    - assay_category
-    - assay_group
-    - assay_organism
-    - assay_taxonomy_id
-    - assay_strain
-    - assay_tissue
-    - assay_cell_type
-    - assay_subcellular_fraction_raw
-    - assay_subcellular_fraction
-    - target_id
-    - relationship_type
-    - relationship_description
-    - confidence_score
-    - confidence_description
-    - src_id
-    - src_assay_id
-    - publication_id
-    - assay_pref_name
-    - cell_id
-    - tissue_id
-    - bao_format
-    - bao_format_iri
-    - bao_format_mapping_status
-    - bao_label
-    - bao_ontology_version
-    - aidx
-    - variant_accession
-    - variant_isoform
-    - variant_mutation
-    - variant_organism
-    - variant_sequence
-    - variant_taxonomy_id
-    - variant_sequence_json
-    - assay_classifications
-    - assay_parameters
-  - name: dq
-    pattern: ^_dq_
+    - name: system
+      fields:
+        - entity_id
+        - content_hash
+        - _run_id
+        - _run_type
+        - _source_batch_id
+        - _ingestion_ts
+        - _index
+    - name: business
+      fields:
+        - assay_id
+        - assay_description
+        - assay_type
+        - assay_type_description
+        - assay_test_type
+        - assay_category
+        - assay_group
+        - assay_organism
+        - assay_taxonomy_id
+        - assay_strain
+        - assay_tissue
+        - assay_cell_type
+        - assay_subcellular_fraction_raw
+        - assay_subcellular_fraction
+        - target_id
+        - relationship_type
+        - relationship_description
+        - confidence_score
+        - confidence_description
+        - src_id
+        - src_assay_id
+        - publication_id
+        - assay_pref_name
+        - cell_id
+        - tissue_id
+        - bao_format
+        - bao_format_iri
+        - bao_format_mapping_status
+        - bao_label
+        - bao_ontology_version
+        - aidx
+        - variant_accession
+        - variant_isoform
+        - variant_mutation
+        - variant_organism
+        - variant_sequence
+        - variant_taxonomy_id
+        - variant_sequence_json
+        - assay_classifications
+        - assay_parameters
+    - name: dq
+      pattern: ^_dq_
   silver:
     include_groups:
-    - system
-    - business
-    - dq
+      - system
+      - business
+      - dq
     exclude_fields: []
   gold:
     include_groups:
-    - system
-    - business
+      - system
+      - business
     exclude_fields:
-    - _dq_*
-    - _source_batch_id
-    - _index
+      - _dq_*
+      - _source_batch_id
+      - _index
 quality:
   version: 1.1.0
   provider: chembl
   entity: assay
   entity_field_validations:
-  - field: assay_id
-    type: required
-    nullable: false
-    error_message: Assay ID is required
-  - field: assay_type
-    type: enum
-    allowed:
-    - B
-    - F
-    - A
-    - T
-    - P
-    - U
-    nullable: false
-    error_message: assay_type must be one of B, F, A, T, P, U
-  - field: assay_test_type
-    type: enum
-    allowed:
-    - In vivo
-    - In vitro
-    - Ex vivo
-    nullable: true
-    error_message: Invalid assay_test_type value
-  - field: assay_category
-    type: enum
-    allowed:
-    - screening
-    - confirmatory
-    - panel
-    - summary
-    - other
-    - Affinity biochemical assay
-    - Affinity on-target cellular assay
-    - Affinity phenotypic cellular assay
-    - Alphascreen assay
-    - Cell health data
-    - GPCR beta-arrestin recruitment assay
-    - HTRF assay
-    - ITC assay
-    - Incucyte cell viability
-    - NanoBRET assay
-    - PDSP assay
-    - Selectivity assay
-    - Thermal shift assay
-    nullable: true
-    error_message: Invalid assay_category value
-  - field: assay_group
-    type: enum
-    allowed:
-    - FUNCTIONAL
-    - BINDING
-    nullable: true
-    error_message: Invalid assay_group value
-  - field: confidence_score
-    type: range
-    min: 0
-    max: 9
-    nullable: true
-  - field: relationship_type
-    type: enum
-    allowed:
-    - D
-    - H
-    - M
-    - N
-    - S
-    - U
-    nullable: true
-  - field: confidence_description
-    type: enum
-    allowed:
-    - Default value - Target unknown or has yet to be assigned
-    - Direct protein complex subunits assigned
-    - Direct single protein target assigned
-    - Homologous single protein target assigned
-    - Multiple direct protein targets may be assigned
-    - Multiple homologous protein targets may be assigned
-    - Target assigned is molecular non-protein target
-    - Target assigned is non-molecular
-    nullable: true
-    error_message: Invalid confidence_description value
-  - field: assay_subcellular_fraction_raw
-    type: pattern
-    pattern: ^.{1,200}$
-    nullable: true
-    error_message: assay_subcellular_fraction_raw must not exceed 200 chars
-  - field: assay_subcellular_fraction
-    type: pattern
-    pattern: ^.{1,200}$
-    nullable: true
-    error_message: assay_subcellular_fraction must not exceed 200 chars
-  - field: bao_format_iri
-    type: pattern
-    pattern: '^https?://[^\s]+$'
-    nullable: true
-    error_message: bao_format_iri must be an HTTP(S) IRI when present
-  - field: bao_format_mapping_status
-    type: enum
-    allowed:
-    - mapped
-    - unmapped
-    - missing
-    nullable: true
-    error_message: Invalid BAO format mapping status
-  entity_cross_field_validations:
-  - name: assay_identifiable
-    fields:
-    - assay_id
-    - assay_description
-    condition: all_present
-    error_message: Assay must have ID and description
-  - name: bao_format_requires_mapping_status
-    fields:
-    - bao_format
-    - bao_format_mapping_status
-    condition: conditional_required
-    trigger_field: bao_format
-    required_field: bao_format_mapping_status
-    error_message: BAO format mappings must publish a companion mapping status
-  entity_conditional_validations:
-  - name: mapped_bao_format_requires_bundle
-    condition_field: bao_format_mapping_status
-    condition_value: mapped
-    condition_operator: eq
-    then_validations:
+    - field: assay_id
+      type: required
+      nullable: false
+      error_message: Assay ID is required
+    - field: assay_type
+      type: enum
+      allowed:
+        - B
+        - F
+        - A
+        - T
+        - P
+        - U
+      nullable: false
+      error_message: assay_type must be one of B, F, A, T, P, U
+    - field: assay_test_type
+      type: enum
+      allowed:
+        - In vivo
+        - In vitro
+        - Ex vivo
+      nullable: true
+      error_message: Invalid assay_test_type value
+    - field: assay_category
+      type: enum
+      allowed:
+        - screening
+        - confirmatory
+        - panel
+        - summary
+        - other
+        - Affinity biochemical assay
+        - Affinity on-target cellular assay
+        - Affinity phenotypic cellular assay
+        - Alphascreen assay
+        - Cell health data
+        - GPCR beta-arrestin recruitment assay
+        - HTRF assay
+        - ITC assay
+        - Incucyte cell viability
+        - NanoBRET assay
+        - PDSP assay
+        - Selectivity assay
+        - Thermal shift assay
+      nullable: true
+      error_message: Invalid assay_category value
+    - field: assay_group
+      type: enum
+      allowed:
+        - FUNCTIONAL
+        - BINDING
+      nullable: true
+      error_message: Invalid assay_group value
+    - field: confidence_score
+      type: range
+      min: 0
+      max: 9
+      nullable: true
+    - field: relationship_type
+      type: enum
+      allowed:
+        - D
+        - H
+        - M
+        - N
+        - S
+        - U
+      nullable: true
+    - field: confidence_description
+      type: enum
+      allowed:
+        - Default value - Target unknown or has yet to be assigned
+        - Direct protein complex subunits assigned
+        - Direct single protein target assigned
+        - Homologous single protein target assigned
+        - Multiple direct protein targets may be assigned
+        - Multiple homologous protein targets may be assigned
+        - Target assigned is molecular non-protein target
+        - Target assigned is non-molecular
+      nullable: true
+      error_message: Invalid confidence_description value
+    - field: assay_subcellular_fraction_raw
+      type: pattern
+      pattern: ^.{1,200}$
+      nullable: true
+      error_message: assay_subcellular_fraction_raw must not exceed 200 chars
+    - field: assay_subcellular_fraction
+      type: pattern
+      pattern: ^.{1,200}$
+      nullable: true
+      error_message: assay_subcellular_fraction must not exceed 200 chars
     - field: bao_format_iri
-      type: required
-      nullable: false
-      error_message: Mapped BAO format identifiers must publish a canonical IRI
-    - field: bao_ontology_version
-      type: required
-      nullable: false
-      error_message: Mapped BAO format identifiers must publish an ontology version
+      type: pattern
+      pattern: '^https?://[^\s]+$'
+      nullable: true
+      error_message: bao_format_iri must be an HTTP(S) IRI when present
+    - field: bao_format_mapping_status
+      type: enum
+      allowed:
+        - mapped
+        - unmapped
+        - missing
+      nullable: true
+      error_message: Invalid BAO format mapping status
+  entity_cross_field_validations:
+    - name: assay_identifiable
+      fields:
+        - assay_id
+        - assay_description
+      condition: all_present
+      error_message: Assay must have ID and description
+    - name: bao_format_requires_mapping_status
+      fields:
+        - bao_format
+        - bao_format_mapping_status
+      condition: conditional_required
+      trigger_field: bao_format
+      required_field: bao_format_mapping_status
+      error_message: BAO format mappings must publish a companion mapping status
+  entity_conditional_validations:
+    - name: mapped_bao_format_requires_bundle
+      condition_field: bao_format_mapping_status
+      condition_value: mapped
+      condition_operator: eq
+      then_validations:
+        - field: bao_format_iri
+          type: required
+          nullable: false
+          error_message: Mapped BAO format identifiers must publish a canonical IRI
+        - field: bao_ontology_version
+          type: required
+          nullable: false
+          error_message: Mapped BAO format identifiers must publish an ontology version
   key_nullability:
-  - field: assay_id
-    key_type: merge
-    nullable: false
-  - field: assay_type
-    key_type: partition
-    nullable: false
+    - field: assay_id
+      key_type: merge
+      nullable: false
+    - field: assay_type
+      key_type: partition
+      nullable: false
 filters:
   version: 1.0.0
   provider: chembl
@@ -268,15 +268,15 @@ filters:
   silver_filters:
     exclude_if_present: []
     required_fields:
-    - assay_id
-    - assay_type
-    - assay_description
-    - target_id
-    - publication_id
-    - bao_format
-    - assay_type_description
-    - relationship_type
-    - confidence_score
+      - assay_id
+      - assay_type
+      - assay_description
+      - target_id
+      - publication_id
+      - bao_format
+      - assay_type_description
+      - relationship_type
+      - confidence_score
   gold_filters:
     list_contains: {}
     list_lengths: {}
@@ -286,35 +286,35 @@ filters:
         max: 9
     columns:
       assay_type:
-      - B
-      - F
+        - B
+        - F
       relationship_type:
-      - D
+        - D
       confidence_score:
-      - 8
-      - 9
+        - 8
+        - 9
       assay_test_type:
         operator: not_in
         values:
-        - In vivo
-        - Ex vivo
+          - In vivo
+          - Ex vivo
       assay_strain:
         operator: is_empty
       bao_format:
         operator: not_in
         values:
-        - BAO_0000218
+          - BAO_0000218
       src_id:
-      - '1'
+        - "1"
     exclude_if_present: []
     required_fields:
-    - assay_type
-    - assay_description
+      - assay_type
+      - assay_description
 contracts:
   primary_key:
-  - assay_id
+    - assay_id
   merge_keys:
-  - assay_id
+    - assay_id
   hash_include: []
   hash_exclude: []
   hash_datetime_policy: v2_datetime_utc
@@ -323,67 +323,67 @@ contracts:
   rollout:
     mode: single
     read_order:
-    - 1.0.0
+      - 1.0.0
     write_versions:
-    - 1.0.0
+      - 1.0.0
     affects_hash: false
 hash_policy:
   provider: chembl
   entity: assay
   contract:
     version: 1.0.0
-    migration_note: 'Explicit config-level hash contract for the normalized ChEMBL assay Silver surface.'
+    migration_note: "Explicit config-level hash contract for the normalized ChEMBL assay Silver surface."
   hash_policy:
     algorithm: sha256
     canonicalization: provider + canonical_json_dumps(normalized_record)
     include_fields:
-    - assay_id
-    - assay_description
-    - assay_type
-    - assay_type_description
-    - assay_test_type
-    - assay_category
-    - assay_group
-    - assay_organism
-    - assay_taxonomy_id
-    - assay_strain
-    - assay_tissue
-    - assay_cell_type
-    - assay_subcellular_fraction_raw
-    - assay_subcellular_fraction
-    - target_id
-    - relationship_type
-    - relationship_description
-    - confidence_score
-    - confidence_description
-    - src_id
-    - src_assay_id
-    - publication_id
-    - assay_pref_name
-    - cell_id
-    - tissue_id
-    - bao_format
-    - bao_label
-    - aidx
-    - variant_accession
-    - variant_isoform
-    - variant_mutation
-    - variant_organism
-    - variant_sequence
-    - variant_taxonomy_id
-    - variant_sequence_json
-    - assay_classifications
-    - assay_parameters
+      - assay_id
+      - assay_description
+      - assay_type
+      - assay_type_description
+      - assay_test_type
+      - assay_category
+      - assay_group
+      - assay_organism
+      - assay_taxonomy_id
+      - assay_strain
+      - assay_tissue
+      - assay_cell_type
+      - assay_subcellular_fraction_raw
+      - assay_subcellular_fraction
+      - target_id
+      - relationship_type
+      - relationship_description
+      - confidence_score
+      - confidence_description
+      - src_id
+      - src_assay_id
+      - publication_id
+      - assay_pref_name
+      - cell_id
+      - tissue_id
+      - bao_format
+      - bao_label
+      - aidx
+      - variant_accession
+      - variant_isoform
+      - variant_mutation
+      - variant_organism
+      - variant_sequence
+      - variant_taxonomy_id
+      - variant_sequence_json
+      - assay_classifications
+      - assay_parameters
     exclude_fields:
-    - _ingestion_ts
-    - _run_id
-    - _run_type
-    - _dq_warn
-    - _dq_error
-    - _source_batch_id
-    - _index
+      - _ingestion_ts
+      - _run_id
+      - _run_type
+      - _dq_warn
+      - _dq_error
+      - _source_batch_id
+      - _index
     exclude_patterns:
-    - ^_dq_
+      - ^_dq_
     normalization:
       trim_strings: true
       round_floats:

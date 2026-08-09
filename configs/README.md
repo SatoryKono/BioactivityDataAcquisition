@@ -51,10 +51,22 @@ They must not contain `${ENV_VAR}` interpolation strings:
 - every declared config version uses `MAJOR.MINOR.PATCH`; a version changes only
   when its own scoped contract changes, so `chembl/activity` root `1.0.0` with
   `quality.version: 1.1.0` is intentional rather than drift;
+- **Version synchronization policy**: Provider config top-level versions should
+  generally align with their corresponding entity config top-level versions for
+  consistency, but nested section versions (quality, filters, etc.) are independent
+  and reflect the evolution of their specific contracts;
 - `configs/entities/composite/{entity}.yaml` is the entity-level composite
   contract and must contain `pipeline`, `schema`, `quality`, `filters`, and
   `contracts`; its `schema.column_groups` mirrors the canonical merge schema in
   `configs/composites/{entity}.yaml` and is protected by config invariants.
+- **Composite entity structure requirements**: Composite entity configs follow
+  the same structural requirements as provider entity configs, including:
+  - Full `schema` section with `column_groups`, `silver`, and `gold` definitions
+  - Complete `quality` section with `thresholds`, `entity_field_validations`,
+    and `entity_cross_field_validations` (even if empty arrays)
+  - Detailed `filters` section with `input_filter`, `silver_filters`, and
+    `gold_filters` definitions
+  - `contracts` section defining merge behavior and versioning
 
 ## Navigation
 

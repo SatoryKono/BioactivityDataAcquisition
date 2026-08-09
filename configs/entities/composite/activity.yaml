@@ -9,7 +9,7 @@ pipeline:
   entity_type: activity
   description: Composite activity entity merging data from multiple providers
   business_primary_keys:
-  - entity_id
+    - entity_id
   sink:
     silver:
       mode: merge
@@ -21,186 +21,196 @@ schema:
     include: []
     exclude: []
   column_groups:
-  - name: system
-    fields:
-    - entity_id
-    - content_hash
-    - _source
-    - _index
-    - _lookup_method
-    - _original_id
-    pattern: ^_composite_|^_source_providers|^_enrichment_|^_lineage_
-    provider_order:
-    - chembl
-  - name: identifiers
-    fields:
-    - activity_id
-    - molecule_id
-    - assay_id
-    - target_id
-    - publication_id
-    provider_order:
-    - chembl
-  - name: activity_values
-    fields:
-    - standard_type
-    - standard_relation
-    - standard_value
-    - standard_units
-    - standard_flag
-    - pchembl_value
-    provider_order:
-    - chembl
-  - name: original_values
-    fields:
-    - activity_type
-    - activity_relation
-    - activity_value
-    - units
-    - text_value
-    - standard_text_value
-    - upper_value
-    - standard_upper_value
-    provider_order:
-    - chembl
-  - name: ligand_efficiency
-    fields:
-    - ligand_efficiency_bei
-    - ligand_efficiency_le
-    - ligand_efficiency_lle
-    - ligand_efficiency_sei
-    provider_order:
-    - chembl
-  - name: compound_record
-    fields:
-    - record_id
-    - compound_key
-    - compound_name
-    - src_compound_id
-    provider_order:
-    - chembl
-  - name: molecule_context
-    fields:
-    - canonical_smiles
-    - molecule_pref_name
-    - parent_molecule_id
-    provider_order:
-    - chembl
-  - name: target_context
-    fields:
-    - target_pref_name
-    - target_organism
-    - taxonomy_id
-    provider_order:
-    - chembl
-  - name: assay_context
-    fields:
-    - assay_type
-    - assay_description
-    - assay_variant_accession
-    - assay_variant_mutation
-    - bao_format
-    - bao_label
-    - bao_endpoint
-    provider_order:
-    - chembl
-  - name: document_context
-    fields:
-    - document_journal
-    - document_year
-    provider_order:
-    - chembl
-  - name: ontology
-    fields:
-    - uo_units
-    - qudt_units
-    provider_order:
-    - chembl
-  - name: quality
-    fields:
-    - data_validity_comment
-    - data_validity_description
-    - activity_comment
-    - potential_duplicate
-    - manual_curation_flag
-    provider_order:
-    - chembl
-  - name: action
-    fields:
-    - action_type_action_type
-    - action_type_description
-    - action_type_parent_type
-    - activity_properties
-    provider_order:
-    - chembl
-  - name: source
-    fields:
-    - src_id
-    - original_activity_id
-    - toid
-    provider_order:
-    - chembl
+    - name: system
+      fields:
+        - entity_id
+        - content_hash
+        - _source
+        - _index
+        - _lookup_method
+        - _original_id
+      pattern: ^_composite_|^_source_providers|^_enrichment_|^_lineage_
+      provider_order:
+        - chembl
+    - name: identifiers
+      fields:
+        - activity_id
+        - molecule_id
+        - assay_id
+        - target_id
+        - publication_id
+      provider_order:
+        - chembl
+    - name: activity_values
+      fields:
+        - standard_type
+        - standard_relation
+        - standard_value
+        - standard_units
+        - standard_flag
+        - pchembl_value
+      provider_order:
+        - chembl
+    - name: original_values
+      fields:
+        - activity_type
+        - activity_relation
+        - activity_value
+        - units
+        - text_value
+        - standard_text_value
+        - upper_value
+        - standard_upper_value
+      provider_order:
+        - chembl
+    - name: ligand_efficiency
+      fields:
+        - ligand_efficiency_bei
+        - ligand_efficiency_le
+        - ligand_efficiency_lle
+        - ligand_efficiency_sei
+      provider_order:
+        - chembl
+    - name: compound_record
+      fields:
+        - record_id
+        - compound_key
+        - compound_name
+        - src_compound_id
+      provider_order:
+        - chembl
+    - name: molecule_context
+      fields:
+        - canonical_smiles
+        - molecule_pref_name
+        - parent_molecule_id
+      provider_order:
+        - chembl
+    - name: target_context
+      fields:
+        - target_pref_name
+        - target_organism
+        - taxonomy_id
+      provider_order:
+        - chembl
+    - name: assay_context
+      fields:
+        - assay_type
+        - assay_description
+        - assay_variant_accession
+        - assay_variant_mutation
+        - bao_format
+        - bao_label
+        - bao_endpoint
+      provider_order:
+        - chembl
+    - name: document_context
+      fields:
+        - document_journal
+        - document_year
+      provider_order:
+        - chembl
+    - name: ontology
+      fields:
+        - uo_units
+        - qudt_units
+      provider_order:
+        - chembl
+    - name: quality
+      fields:
+        - data_validity_comment
+        - data_validity_description
+        - activity_comment
+        - potential_duplicate
+        - manual_curation_flag
+      provider_order:
+        - chembl
+    - name: action
+      fields:
+        - action_type_action_type
+        - action_type_description
+        - action_type_parent_type
+        - activity_properties
+      provider_order:
+        - chembl
+    - name: source
+      fields:
+        - src_id
+        - original_activity_id
+        - toid
+      provider_order:
+        - chembl
   silver:
     include_groups:
-    - system
-    - identifiers
-    - activity_values
-    - original_values
-    - ligand_efficiency
-    - compound_record
-    - molecule_context
-    - target_context
-    - assay_context
-    - document_context
-    - ontology
-    - quality
-    - action
-    - source
+      - system
+      - identifiers
+      - activity_values
+      - original_values
+      - ligand_efficiency
+      - compound_record
+      - molecule_context
+      - target_context
+      - assay_context
+      - document_context
+      - ontology
+      - quality
+      - action
+      - source
     exclude_fields: []
   gold:
     include_groups:
-    - system
-    - identifiers
-    - activity_values
-    - original_values
-    - ligand_efficiency
-    - compound_record
-    - molecule_context
-    - target_context
-    - assay_context
-    - document_context
-    - ontology
-    - quality
-    - action
-    - source
+      - system
+      - identifiers
+      - activity_values
+      - original_values
+      - ligand_efficiency
+      - compound_record
+      - molecule_context
+      - target_context
+      - assay_context
+      - document_context
+      - ontology
+      - quality
+      - action
+      - source
     exclude_fields:
-    - _dq_*
-    - _index
-    - _lookup_method
-    - _original_id
+      - _dq_*
+      - _index
+      - _lookup_method
+      - _original_id
 quality:
   version: 1.0.0
   provider: composite
   entity: activity
+  thresholds:
+    soft_fail: 0.05
+    hard_fail: 0.50
   entity_field_validations: []
   entity_cross_field_validations: []
 filters:
   version: 1.0.0
   provider: composite
   entity: activity
+  input_filter:
+    enabled: false
+    source_path: data/input/composite_activity.csv
+    column_name: entity_id
+    filter_field: entity_id
+    batch_size: 1000
+    checkpoint_interval: 1000
   silver_filters:
     required_fields:
-    - entity_id
-    - activity_id
+      - entity_id
+      - activity_id
   gold_filters:
     required_fields:
-    - entity_id
-    - activity_id
+      - entity_id
+      - activity_id
 contracts:
   primary_key:
-  - entity_id
+    - entity_id
   merge_keys:
-  - entity_id
+    - entity_id
   hash_include: []
   hash_exclude: []
   contract_ref: composite.activity
