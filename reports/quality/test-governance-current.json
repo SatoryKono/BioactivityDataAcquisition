@@ -27,7 +27,7 @@
       "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
       "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
     ],
-    "scanned_test_count": 356,
+    "scanned_test_count": 357,
     "unreviewed_count": 0
   },
   "assertion_branch_reachability_percent": 100.0,
@@ -111,21 +111,21 @@
     },
     {
       "category": "architecture_helper_guard",
-      "line": "551",
+      "line": "560",
       "path": "tests/architecture/test_port_contracts_hypothesis.py",
       "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
       "test_name": "test_noop_metrics_accepts_any_valid_input"
     },
     {
       "category": "architecture_helper_guard",
-      "line": "572",
+      "line": "581",
       "path": "tests/architecture/test_port_contracts_hypothesis.py",
       "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
       "test_name": "test_noop_metrics_accepts_various_labels"
     },
     {
       "category": "architecture_helper_guard",
-      "line": "606",
+      "line": "615",
       "path": "tests/architecture/test_port_contracts_hypothesis.py",
       "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
       "test_name": "test_noop_logger_accepts_any_message"
@@ -230,14 +230,14 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "418",
+      "line": "420",
       "path": "tests/unit/composition/test_observability_contract.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_noop_metrics_all_methods_are_noop"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "428",
+      "line": "430",
       "path": "tests/unit/composition/test_observability_contract.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_noop_metrics_close_is_idempotent"
@@ -384,14 +384,14 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "355",
+      "line": "357",
       "path": "tests/unit/infrastructure/checkpoint/test_local_checkpoint.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_delete_nonexistent_is_noop"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "433",
+      "line": "435",
       "path": "tests/unit/infrastructure/checkpoint/test_local_checkpoint.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_checkpoint_aclose__aclose_is_noop__94522a27"
@@ -759,9 +759,9 @@
     "tests/architecture/test_code_metrics.py:223",
     "tests/architecture/test_codex_skill_agent_links.py:157",
     "tests/architecture/test_di_constructors.py:332",
-    "tests/architecture/test_port_contracts_hypothesis.py:551",
-    "tests/architecture/test_port_contracts_hypothesis.py:572",
-    "tests/architecture/test_port_contracts_hypothesis.py:606",
+    "tests/architecture/test_port_contracts_hypothesis.py:560",
+    "tests/architecture/test_port_contracts_hypothesis.py:581",
+    "tests/architecture/test_port_contracts_hypothesis.py:615",
     "tests/architecture/test_port_contracts_resilience_concurrency.py:193",
     "tests/architecture/test_quality_debt_scorecard.py:1127",
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
@@ -1293,7 +1293,7 @@
         "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
         "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
       ],
-      "scanned_test_count": 356,
+      "scanned_test_count": 357,
       "unreviewed_count": 0
     },
     "assertion_branch_reachability_percent": 100.0,
@@ -1377,21 +1377,21 @@
       },
       {
         "category": "architecture_helper_guard",
-        "line": "551",
+        "line": "560",
         "path": "tests/architecture/test_port_contracts_hypothesis.py",
         "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
         "test_name": "test_noop_metrics_accepts_any_valid_input"
       },
       {
         "category": "architecture_helper_guard",
-        "line": "572",
+        "line": "581",
         "path": "tests/architecture/test_port_contracts_hypothesis.py",
         "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
         "test_name": "test_noop_metrics_accepts_various_labels"
       },
       {
         "category": "architecture_helper_guard",
-        "line": "606",
+        "line": "615",
         "path": "tests/architecture/test_port_contracts_hypothesis.py",
         "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
         "test_name": "test_noop_logger_accepts_any_message"
@@ -1496,14 +1496,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "418",
+        "line": "420",
         "path": "tests/unit/composition/test_observability_contract.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_noop_metrics_all_methods_are_noop"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "428",
+        "line": "430",
         "path": "tests/unit/composition/test_observability_contract.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_noop_metrics_close_is_idempotent"
@@ -1650,14 +1650,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "355",
+        "line": "357",
         "path": "tests/unit/infrastructure/checkpoint/test_local_checkpoint.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_delete_nonexistent_is_noop"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "433",
+        "line": "435",
         "path": "tests/unit/infrastructure/checkpoint/test_local_checkpoint.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_checkpoint_aclose__aclose_is_noop__94522a27"
@@ -2025,9 +2025,9 @@
       "tests/architecture/test_code_metrics.py:223",
       "tests/architecture/test_codex_skill_agent_links.py:157",
       "tests/architecture/test_di_constructors.py:332",
-      "tests/architecture/test_port_contracts_hypothesis.py:551",
-      "tests/architecture/test_port_contracts_hypothesis.py:572",
-      "tests/architecture/test_port_contracts_hypothesis.py:606",
+      "tests/architecture/test_port_contracts_hypothesis.py:560",
+      "tests/architecture/test_port_contracts_hypothesis.py:581",
+      "tests/architecture/test_port_contracts_hypothesis.py:615",
       "tests/architecture/test_port_contracts_resilience_concurrency.py:193",
       "tests/architecture/test_quality_debt_scorecard.py:1127",
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
@@ -2232,8 +2232,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2235,
-      "test_python_file_count": 2461,
+      "test_glob_file_count": 2243,
+      "test_python_file_count": 2469,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2272,13 +2272,13 @@
       "top_level_directory_count_including_pycache": 15
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2235,
-    "total_test_functions": 23656,
+    "total_test_files": 2243,
+    "total_test_functions": 23710,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "3f023890ab3b37735edd265378363d0e821a1d88e550b235bfd7ca73dbcd455e",
+  "source_tree_sha256": "968c471b30cf467fed3598312d56880a0e278a679e7c2dda6465c80298787849",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 101,
@@ -2298,8 +2298,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2235,
-    "test_python_file_count": 2461,
+    "test_glob_file_count": 2243,
+    "test_python_file_count": 2469,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2338,8 +2338,8 @@
     "top_level_directory_count_including_pycache": 15
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2235,
-  "total_test_functions": 23656,
+  "total_test_files": 2243,
+  "total_test_functions": 23710,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

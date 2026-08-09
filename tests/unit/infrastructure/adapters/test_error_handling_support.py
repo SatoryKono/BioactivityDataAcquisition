@@ -17,6 +17,8 @@ from bioetl.infrastructure.adapters._error_handling_support import (
     safe_optional_str,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestBuildAdapterErrorContext:
     def test_builds_correct_context(self) -> None:

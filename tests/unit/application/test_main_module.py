@@ -7,6 +7,9 @@ import runpy
 
 from bioetl.__main__ import _clear_known_stale_windows_bytecode
 
+pytestmark = pytest.mark.unit
+
+
 def test_clear_known_stale_windows_bytecode_non_win32():
     with mock.patch("sys.platform", "linux"):
         with mock.patch("importlib.invalidate_caches") as mock_invalidate:
