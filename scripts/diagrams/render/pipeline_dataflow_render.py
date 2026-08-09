@@ -526,7 +526,7 @@ def render_passport(ir: PipelineDataflowIR) -> str:
         "",
         f"# `{ir.pipeline_name}` Pipeline Dataflow Passport",
         "",
-        f"Generated: **{ir.generated_date}**  ",
+        f"Generated: **{ir.generated_date}**",
         f"Generator: **{ir.generator_version}**  ",
         f"IR schema: **{ir.schema_version}**  ",
         f"Effective config SHA256: `{ir.effective_config_sha256}`  ",

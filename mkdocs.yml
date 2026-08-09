@@ -541,7 +541,7 @@ nav:
           - "Agent Naming Policy and Rename Plan (2026-03-08)": 00-project/ai/agents/policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md
           - "Consolidation Validation": 00-project/ai/agents/policy/CONSOLIDATION_VALIDATION.md
           - "Agent Consolidation Matrix (2026-03-08)": 00-project/ai/agents/policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md
-          - "Prompts Surface": 00-project/ai/prompts/documentation-prompts-2-README.md
+          - "Prompts Surface": 00-project/ai/prompts/README.md
           - "Shared Agent Memory": 00-project/ai/memory/agent-memory.md
           - "Runtime Agent Memory Alias": 00-project/ai/agents/runtime/agent-memory.md
           - "Test Agent Profile": 00-project/ai/agents/agents/py-test-bot.md

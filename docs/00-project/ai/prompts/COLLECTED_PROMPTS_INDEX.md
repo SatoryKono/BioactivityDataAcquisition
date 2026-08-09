@@ -21,7 +21,7 @@ This page is a curated discoverability index for unique prompt artifacts kept in
 These files are **not** the canonical source of project governance or runtime
 workflow policy. Prefer:
 
-- [RULES.md](../../../RULES.md)
+- [RULES.md](../../RULES.md)
 - current agent guides under `docs/00-project/ai/agents/`
 - runtime orchestration docs and active skill surfaces
 
@@ -70,5 +70,5 @@ Contains time-bound repository state and should not be treated as active policy.
   — working architecture review prompt
 - `docs/00-project/ai/prompts/test_speed_optimization_loop.md` — working test
   speed optimization prompt
-- [Skills Practical Index](../../skills/SKILLS-PRACTICAL-INDEX.md)
-- [Agent Orchestration Rules](../../agents/policy/agent-orchestration-rules.md)
+- [Skills Practical Index](../skills/SKILLS-PRACTICAL-INDEX.md)
+- [Agent Orchestration Rules](../agents/policy/agent-orchestration-rules.md)
