@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Migrate extensionless VCR cassettes to canonical .yaml names."""
+"""Migrate extensionless VCR cassettes to canonical .yaml names.
+
+SUNSET_DATE: 2027-02-09
+DEPRECATED: This oneoff migration script should be removed after the sunset date.
+RATIONALE: Oneoff migration for VCR cassette naming. Not needed after initial migration.
+"""
 
 from __future__ import annotations
 
