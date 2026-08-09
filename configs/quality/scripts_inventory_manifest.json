@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-09T17:13:56.356087+00:00",
+  "generated_at": "2026-08-09T17:37:28.698991+00:00",
   "summary": {
     "total_scripts": 576,
     "status_counts": {
@@ -16,7 +16,7 @@
       "other": 76,
       "scripts": 476,
       "skills": 11,
-      "tests": 365
+      "tests": 366
     }
   },
   "scripts": [
@@ -5486,7 +5486,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 69,
+      "reference_count": 70,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -10149,7 +10149,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1524,
+          "line": 1529,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
@@ -10789,7 +10789,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 43,
+      "reference_count": 44,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -10846,7 +10846,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 36,
+      "reference_count": 37,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -11674,7 +11674,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 312,
+      "reference_count": 314,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -15089,7 +15089,7 @@
       "references": [
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 255,
+          "line": 284,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_closure_campaign.py --require-global-claim`"
         },
@@ -15128,19 +15128,19 @@
       "references": [
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 252,
+          "line": 281,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py` persists"
         },
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 258,
+          "line": 287,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py --require-universal-claim`"
         },
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 261,
+          "line": 290,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py --require-durable-evidence-coverage`"
         },
