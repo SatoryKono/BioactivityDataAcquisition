@@ -45,7 +45,9 @@ BRONZE_FIXTURE_GAPS = ROOT / "configs" / "base" / "bronze_fixture_gaps.yaml"
 TEST_GOVERNANCE_CONFIG = ROOT / "configs" / "quality" / "test_governance_audit.yaml"
 TEST_GOVERNANCE_REPORT = ROOT / "reports" / "quality" / "test-governance-current.json"
 WORKFLOW = ROOT / ".github" / "workflows" / "tests.yml"
-MEMORY_GRAPH_UNIT_TEST = ROOT / "tests" / "unit" / "memory" / "test_graph_entrypoints.py"
+MEMORY_GRAPH_UNIT_TEST = (
+    ROOT / "tests" / "unit" / "memory" / "test_graph_entrypoints.py"
+)
 EXPECTED_ISSUES = {5646, 5656, 5660, 5662, 5663}
 
 
