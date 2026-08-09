@@ -187,3 +187,4 @@ ______________________________________________________________________
 - [ADR-024: Entity Naming Unification](../../02-architecture/decisions/ADR-024-entity-naming-unification.md)
 - [03-file-policy.md](03-file-policy.md) — Политика файлов и директорий
 - [glossary.md](../glossary.md) — Ubiquitous Language
+- [script-naming-conventions.md](script-naming-conventions.md) — Политика именования скриптов
