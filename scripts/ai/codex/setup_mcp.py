@@ -21,6 +21,10 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 _REPO_ROOT_STR = str(REPO_ROOT)
 if _REPO_ROOT_STR not in sys.path:
     sys.path.insert(0, _REPO_ROOT_STR)
+
+from scripts.ai.mcp.wrappers import load_wrapper_specs
+from scripts.engineering.common.platform import detect_platform
+
 MANAGED_BLOCK_BEGIN = "# === BEGIN MANAGED MCP SERVERS ==="
 MANAGED_BLOCK_END = "# === END MANAGED MCP SERVERS ==="
 MCP_JSON_FILENAME = "mcp.json"
@@ -273,7 +277,7 @@ def _wrapper_command(
       * ``\"posix\"`` — always bash + ``.sh`` (tracked portable SSOT)
       * ``\"nt\"`` — always PowerShell + ``.ps1``
     """
-    platform = wrapper_platform or ("nt" if os.name == "nt" else "posix")
+    platform = wrapper_platform or detect_platform().wrapper_platform
     if platform not in {"nt", "posix"}:
         raise ValueError(
             f"Unknown wrapper_platform {wrapper_platform!r}; expected 'nt', 'posix', or None"
@@ -419,126 +423,24 @@ def _canonical_servers(
         workspace_root,
         portable_workspace_paths=portable_workspace_paths,
     )
+    # Wrapper ownership comes from shared-servers.json.  The retained shell and
+    # PowerShell implementations are compatibility backends during migration;
+    # setup no longer carries a parallel hand-maintained mapping.
     servers: dict[str, dict[str, Any]] = {
-        "memory": _wrapper_command(
-            "mcp_memory_wrapper",
+        server_name: _wrapper_command(
+            spec.wrapper_stem,
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
             wrapper_platform=wrapper_platform,
-        ),
-        # Resolve repo root inside the wrapper so portable configs never pass
-        # client-rewritten "." / foreign-OS absolute paths into Node path.resolve.
-        "filesystem": _wrapper_command(
-            "mcp_filesystem_wrapper",
-            workspace_root,
-            portable_workspace_paths=portable_workspace_paths,
-            wrapper_platform=wrapper_platform,
-        ),
-        "fetch": _wrapper_command(
-            "mcp_fetch_wrapper",
-            workspace_root,
-            portable_workspace_paths=portable_workspace_paths,
-            wrapper_platform=wrapper_platform,
-        ),
-        "github": _wrapper_command(
-            "github-mcp-wrapper",
-            workspace_root,
-            portable_workspace_paths=portable_workspace_paths,
-            wrapper_platform=wrapper_platform,
-        ),
-        "docker": _wrapper_command(
-            "mcp_docker_wrapper",
-            workspace_root,
-            portable_workspace_paths=portable_workspace_paths,
-            wrapper_platform=wrapper_platform,
-        ),
-        "context7": _wrapper_command(
-            "mcp_context7_wrapper",
-            workspace_root,
-            portable_workspace_paths=portable_workspace_paths,
-            wrapper_platform=wrapper_platform,
-        ),
-        "ast-grep": _wrapper_command(
-            "mcp_ast_grep_wrapper",
-            workspace_root,
-            portable_workspace_paths=portable_workspace_paths,
-            wrapper_platform=wrapper_platform,
-        ),
-        "mcp-code-interpreter": _wrapper_command(
-            "mcp_code_interpreter_wrapper",
-            workspace_root,
-            portable_workspace_paths=portable_workspace_paths,
-            wrapper_platform=wrapper_platform,
-        ),
-        "prometheus": _wrapper_command(
-            "mcp_prometheus_wrapper",
-            workspace_root,
-            portable_workspace_paths=portable_workspace_paths,
-            wrapper_platform=wrapper_platform,
-        ),
-        "grafana": _wrapper_command(
-            "mcp_grafana_wrapper",
-            workspace_root,
-            portable_workspace_paths=portable_workspace_paths,
-            wrapper_platform=wrapper_platform,
-        ),
-        "brave-search": _wrapper_command(
-            "mcp_brave_search_wrapper",
-            workspace_root,
-            portable_workspace_paths=portable_workspace_paths,
-            wrapper_platform=wrapper_platform,
-        ),
-        "neo4j-cypher": _wrapper_command(
-            "mcp_neo4j_cypher_wrapper",
-            workspace_root,
-            portable_workspace_paths=portable_workspace_paths,
-            wrapper_platform=wrapper_platform,
-        ),
-        "neo4j-memory": _wrapper_command(
-            "mcp_neo4j_memory_wrapper",
-            workspace_root,
-            portable_workspace_paths=portable_workspace_paths,
-            wrapper_platform=wrapper_platform,
-        ),
-        "mermaid": _wrapper_command(
-            "mcp_mermaid_wrapper",
-            workspace_root,
-            portable_workspace_paths=portable_workspace_paths,
-            wrapper_platform=wrapper_platform,
-        ),
-        "deja": _wrapper_command(
-            "mcp_deja_wrapper",
-            workspace_root,
-            portable_workspace_paths=portable_workspace_paths,
-            wrapper_platform=wrapper_platform,
-        ),
-        "adr-analysis": _wrapper_command(
-            "mcp_adr_analysis_wrapper",
-            workspace_root,
-            portable_workspace_paths=portable_workspace_paths,
-            wrapper_platform=wrapper_platform,
-        ),
-        "mutmut": _wrapper_command(
-            "mcp_mutmut_wrapper",
-            workspace_root,
-            portable_workspace_paths=portable_workspace_paths,
-            wrapper_platform=wrapper_platform,
-        ),
-        "code-analyzer": _wrapper_command(
-            "mcp_code_analyzer_wrapper",
-            workspace_root,
-            portable_workspace_paths=portable_workspace_paths,
-            wrapper_platform=wrapper_platform,
-        ),
-        "github-actions": _wrapper_command(
-            "mcp_github_actions_wrapper",
-            workspace_root,
-            portable_workspace_paths=portable_workspace_paths,
-            wrapper_platform=wrapper_platform,
-        ),
-        "deepwiki": _http_server("https://mcp.deepwiki.com/mcp"),
-        "ref": _http_server("https://api.ref.tools/mcp"),
+        )
+        for server_name, spec in load_wrapper_specs().items()
     }
+    servers.update(
+        {
+            "deepwiki": _http_server("https://mcp.deepwiki.com/mcp"),
+            "ref": _http_server("https://api.ref.tools/mcp"),
+        }
+    )
     servers["deepwiki"]["env_http_headers"] = {
         "x-deepwiki-api-key": DEEPWIKI_API_KEY_ENV_VAR,
         "x-deepwiki-organisation-id": DEEPWIKI_ORGANISATION_ID_ENV_VAR,
