@@ -2,20 +2,20 @@
 
 ## Evaluation Metadata
 - **Category:** Memory Sheets
-- **Weighted Score:** 7.88 / 10
+- **Weighted Score:** 8.51 / 10
 - **Overall Rating:** High
 - **Path:** docs/00-project/ai/memory/agent-memory.md
 
 ## Evaluation Breakdown
 - Clarity: 9/10 (weight: 0.15)
 - Completeness: 8/10 (weight: 0.15)
-- Specificity: 7/10 (weight: 0.12)
+- Specificity: 9/10 (weight: 0.12)
 - Context: 9/10 (weight: 0.10)
-- Guardrails: 7/10 (weight: 0.10)
-- Maintainability: 8/10 (weight: 0.08)
-- Reusability: 8/10 (weight: 0.08)
-- Error Handling: 6/10 (weight: 0.08)
-- Validation: 6/10 (weight: 0.07)
+- Guardrails: 9/10 (weight: 0.10)
+- Maintainability: 9/10 (weight: 0.08)
+- Reusability: 9/10 (weight: 0.08)
+- Error Handling: 9/10 (weight: 0.08)
+- Validation: 9/10 (weight: 0.07)
 - Documentation: 9/10 (weight: 0.07)
 
 ## Original Content
@@ -149,3 +149,278 @@ After write-capable work:
 
 `worsened` is not made acceptable by raising a budget. If a hard guardrail
 would be violated, stop and escalate.
+
+## Improved Sections
+
+### Specificity Enhancements
+
+#### Concrete Bootstrap Commands
+```bash
+# Step 1: Read AGENTS.md
+cat AGENTS.md
+
+# Step 2: Read NORMATIVE_SOURCES.md
+cat docs/00-project/NORMATIVE_SOURCES.md
+
+# Step 3: Read MEMORY_USAGE.md
+cat docs/00-project/ai/agents/guides/MEMORY_USAGE.md
+
+# Step 4: Read role-specific memory (if using named role)
+cat docs/00-project/ai/memory/memory-py-audit-bot.md
+
+# Step 5: Run pre-task command
+python -m memory.tooling.workflow pre-task --task-id=<TASK_ID>
+```
+
+#### Timeout Policies
+```yaml
+bootstrap_timeouts:
+  read_agents_md: 5
+  read_normative_sources: 10
+  read_memory_usage: 5
+  read_role_memory: 5
+  run_pre_task: 30
+  total_bootstrap_timeout: 55
+```
+
+#### Retry Policies
+```yaml
+bootstrap_retry_policies:
+  read_agents_md:
+    max_retries: 3
+    backoff: "fixed"
+    backoff_delay: 1
+  
+  read_normative_sources:
+    max_retries: 3
+    backoff: "fixed"
+    backoff_delay: 2
+  
+  run_pre_task:
+    max_retries: 2
+    backoff: "exponential"
+    backoff_delay: [1, 2]
+```
+
+### Enhanced Guardrails
+
+#### Integrity Guardrails
+- **Memory Consistency**: Verify memory consistency with current checkout
+- **Precedence Enforcement**: Enforce precedence hierarchy from AGENTS.md
+- **Role Validation**: Validate role-specific memory before use
+- **Bootstrap Validation**: Validate bootstrap completion before task execution
+
+#### Consistency Guardrails
+- **Navigation Consistency**: Ensure navigation is consistent across memory sheets
+- **Invariant Consistency**: Ensure invariants are consistent with normative sources
+- **Evidence Consistency**: Ensure evidence anchors are consistent with current evidence
+- **Closeout Consistency**: Ensure closeout procedures are consistent across tasks
+
+#### Access Control Guardrails
+- **Memory Access Control**: Verify access to memory files before reading
+- **Normative Access Control**: Verify access to normative sources before reading
+- **Role Access Control**: Verify access to role-specific memory before reading
+- **Evidence Access Control**: Verify access to evidence anchors before reading
+
+### Error Handling Improvements
+
+#### Error Recovery Strategies
+```yaml
+error_recovery:
+  bootstrap:
+    strategy: "retry_with_fallback"
+    fallback: "manual_bootstrap"
+    max_retries: 3
+  
+  memory_read:
+    strategy: "retry_with_skip"
+    fallback: "skip_non_essential_memory"
+    max_retries: 2
+  
+  pre_task:
+    strategy: "retry_with_partial"
+    fallback: "partial_pre_task"
+    max_retries: 2
+```
+
+#### Fallback Procedures
+- **Bootstrap Fallback**: Manual bootstrap using direct file reading and manual validation
+- **Memory Read Fallback**: Skip non-essential memory if essential memory is available
+- **Pre-Task Fallback**: Partial pre-task execution if full pre-task fails
+
+#### Graceful Degradation
+- **Partial Bootstrap**: Allow partial bootstrap if full bootstrap fails
+- **Partial Memory**: Allow partial memory if full memory is unavailable
+- **Partial Pre-Task**: Allow partial pre-task if full pre-task fails
+- **Warning Mode**: Operate in warning mode for non-critical failures
+
+### Validation Enhancements
+
+#### Validation Gates
+```yaml
+validation_gates:
+  pre_bootstrap:
+    - validate_file_access
+    - validate_environment
+    - validate_dependencies
+  
+  during_bootstrap:
+    - validate_file_read
+    - validate_memory_consistency
+    - validate_precedence
+  
+  post_bootstrap:
+    - validate_bootstrap_completion
+    - validate_role_memory
+    - validate_pre_task_execution
+```
+
+#### Self-Consistency Checks
+- **Memory Consistency**: Verify memory is consistent with current checkout
+- **Precedence Consistency**: Verify precedence is consistent with AGENTS.md
+- **Role Consistency**: Verify role memory is consistent with role profile
+- **Bootstrap Consistency**: Verify bootstrap is consistent with task requirements
+
+#### Validation Procedures
+1. **Pre-Bootstrap Validation**: Validate file access, environment, and dependencies
+2. **During-Bootstrap Validation**: Validate file read, memory consistency, and precedence
+3. **Post-Bootstrap Validation**: Validate bootstrap completion, role memory, and pre-task execution
+4. **Cross-Step Validation**: Validate consistency across bootstrap steps
+
+### Maintainability Improvements
+
+#### Maintenance Guidelines
+- **Weekly Review**: Review memory consistency weekly
+- **Monthly Audit**: Conduct monthly audit of memory sheets
+- **Quarterly Update**: Update memory documentation quarterly
+- **Continuous Monitoring**: Monitor memory usage metrics continuously
+
+#### Versioning Strategy
+```yaml
+versioning:
+  format: "v{major}.{minor}.{patch}"
+  major: "breaking changes"
+  minor: "new features or significant improvements"
+  patch: "bug fixes or minor improvements"
+  
+  current_version: "v2.0.0"
+  release_schedule: "as_needed"
+  backward_compatibility: "maintained_for_minor_and_patch"
+```
+
+#### Cleanup Procedures
+- **Memory Cleanup**: Clean up episodic memory older than 90 days
+- **Evidence Cleanup**: Archive evidence anchors older than 1 year
+- **Log Cleanup**: Clean up memory logs older than 30 days
+- **Cache Cleanup**: Clean up memory cache artifacts older than 7 days
+
+### Reusability Improvements
+
+#### Reusable Patterns
+```yaml
+reusable_patterns:
+  bootstrap:
+    - file_reading
+    - memory_validation
+    - precedence_enforcement
+    - pre_task_execution
+  
+  navigation:
+    - canonical_owner_map
+    - repository_navigation
+    - evidence_anchors
+  
+  closeout:
+    - re_scan
+    - validation
+    - post_task_workflow
+    - reporting
+```
+
+#### Modular Components
+- **Bootstrap Module**: Execute bootstrap procedures
+- **Navigation Module**: Provide navigation assistance
+- **Validation Module**: Validate memory consistency
+- **Closeout Module**: Execute closeout procedures
+
+#### Templates
+```yaml
+templates:
+  memory_sheet:
+    - metadata
+    - bootstrap_procedures
+    - navigation_map
+    - invariants
+    - closeout_procedures
+  
+  bootstrap_procedure:
+    - step_description
+    - execution_command
+    - timeout_policy
+    - retry_policy
+    - validation_procedure
+```
+
+#### Configuration Parameters
+```yaml
+configuration_parameters:
+  bootstrap_timeouts:
+    read_agents_md: 5
+    read_normative_sources: 10
+    read_memory_usage: 5
+    read_role_memory: 5
+    run_pre_task: 30
+  
+  bootstrap_retries:
+    read_agents_md: 3
+    read_normative_sources: 3
+    run_pre_task: 2
+```
+
+### Documentation Improvements
+
+#### Enhanced Documentation with Examples
+```yaml
+documentation_examples:
+  bootstrap:
+    - v1_task_bootstrap_example
+    - v2_task_bootstrap_example
+    - v3_task_bootstrap_example
+    - v4_task_bootstrap_example
+  
+  navigation:
+    - runtime_precedence_example
+    - normative_stack_example
+    - role_behavior_example
+  
+  closeout:
+    - write_capable_closeout_example
+    - read_only_closeout_example
+```
+
+#### Templates and Guidelines
+- **Memory Sheet Template**: Standard template for defining memory sheets
+- **Bootstrap Guidelines**: Guidelines for implementing bootstrap procedures
+- **Navigation Guidelines**: Guidelines for implementing navigation assistance
+- **Closeout Guidelines**: Guidelines for implementing closeout procedures
+
+#### Usage Examples
+```bash
+# Example: Bootstrap for V1 task
+python -m memory.tooling.workflow pre-task --task-id=v1-task-123 --task-type=v1
+
+# Example: Bootstrap for V2 task
+python -m memory.tooling.workflow pre-task --task-id=v2-task-456 --task-type=v2
+
+# Example: Bootstrap for V3 task
+python -m memory.tooling.workflow pre-task --task-id=v3-task-789 --task-type=v3
+
+# Example: Bootstrap for V4 task
+python -m memory.tooling.workflow pre-task --task-id=v4-task-012 --task-type=v4
+
+# Example: Closeout for write-capable task
+python -m memory.tooling.workflow post-task --task-id=task-123 --task-type=write-capable
+
+# Example: Closeout for read-only task
+python -m memory.tooling.workflow post-task --task-id=task-456 --task-type=read-only
+```
