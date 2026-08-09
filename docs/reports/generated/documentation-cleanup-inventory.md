@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2608 |
-| Tracked doc-like files | 2603 |
-| Ignored local docs/reports files | 5 |
+| Doc-like files | 2621 |
+| Tracked doc-like files | 2621 |
+| Ignored local docs/reports files | 0 |
 | Duplicate groups | 11 |
 | Generated without route or exception | 0 |
 | Generated routes | 70 |
@@ -18,8 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 5 |
-| tracked | 2603 |
+| tracked | 2621 |
 
 ## Lifecycle Counts
 
@@ -30,7 +29,7 @@
 | active_quality_baseline | 54 |
 | closeout_evidence | 87 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 7 |
+| docs_reports_curated_or_historical_report | 2 |
 | docs_reports_generated_or_route_owned | 7 |
 | docs_reports_retention_sensitive_evidence | 21 |
 | generated_skill_license_mirror | 5 |
@@ -62,8 +61,8 @@
 | Archived | 169 |
 | Canonical | 68 |
 | Duplicate | 8 |
-| Generated | 911 |
-| Working | 727 |
+| Generated | 929 |
+| Working | 722 |
 
 ## Surface Families
 
@@ -73,16 +72,16 @@
 | archive | 169 |
 | canonical | 68 |
 | duplicate | 8 |
-| generated | 911 |
-| working | 727 |
+| generated | 929 |
+| working | 722 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 320 |
-| archive-after-migration | 262 |
-| generate-automatically | 911 |
+| archive-after-migration | 257 |
+| generate-automatically | 929 |
 | keep | 1103 |
 | merge | 8 |
 | reconcile-with-github-state | 4 |
@@ -102,11 +101,6 @@
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-05.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/ai-consolidation-issue.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/diagrams-refactoring-issue.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/docs-consolidation-issue.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/memory-consolidation-issue.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/schema-refactoring-issue.md` | Working | 0 | archive-after-migration |
 | `reports/ai/issue-7340-specialized-subsystem-analysis-20260731.md` | Working | 0 | archive-after-migration |
 | `reports/ai/issue-7348-comprehensive-skills-analysis-20260731.md` | Working | 0 | archive-after-migration |
 | `reports/ai/memory-audit-20260804/FINAL-REPORT.md` | Working | 0 | archive-after-migration |
@@ -171,6 +165,11 @@
 | `reports/quality/coderabbit/20260806-full/_S13-tests-unit-domain-root.txt` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260806-full/_S14-tests-unit-application-root.txt` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260806-full/_S14b-tests-unit-infrastructure-root.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S15c-tests-residual-1.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S15c-tests-residual-2.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S15c-tests-residual-3.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S15c-tests-residual-4.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S16b-configs-other.txt` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -235,27 +234,27 @@
 | `docs/00-project/ai/prompts/scripts_inventory_consolidation_cleanup_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/test_fix_retest_loop.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/test_speed_optimization_loop.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/update/architecture-prompts-1-architecture-review.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/update/architecture-prompts-2-documentation-diagrams-audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/update/documentation-prompts-1-docs-ai-audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/update/memory-sheets-1-agent-memory.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/update/memory-sheets-2-memory-py-audit-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/update/role-specific-agents-1-py-audit-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/update/role-specific-agents-2-py-debug-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/update/runtime-agentry-1-CODEX-RUNTIME.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/update/runtime-agentry-2-JUNIE-RUNTIME.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/update/setup-prompts-1-devin-setup-prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/update/setup-prompts-2-optimization-prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/update/skills-1-research-workflow.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/update/skills-2-verify-architecture.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/update/specialized-prompts-1-scripts-inventory.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/update/test-prompts-1-test-fix-retest-loop.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/update/test-prompts-2-test-speed-optimization-loop.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/update/workflows-1-master.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/update/workflows-2-post-change.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/skills/_references/README.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
 | `docs/00-project/ai/skills/_references/local/deep-research/references/critique-framework.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
 | `docs/00-project/ai/skills/_references/local/deep-research/references/report-templates.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/_references/local/deep-research/references/search-patterns.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/_references/local/deep-research/references/source-evaluation.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/_references/local/documentation-audit/references/audit-checklist.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/_references/local/documentation-audit/references/report-template.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/_references/local/technical-designer-mermaid/references/patterns.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/global/.system/skill-creator/SKILL.md` | ai-skill-license-mirrors |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/global/.system/skill-creator/agents/openai.yaml` | ai-skill-license-mirrors |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/global/.system/skill-creator/license.txt` | ai-skill-license-mirrors |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/global/.system/skill-creator/references/openai_yaml.md` | ai-skill-license-mirrors |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/global/.system/skill-installer/LICENSE.txt` | ai-skill-license-mirrors |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/global/.system/skill-installer/SKILL.md` | ai-skill-license-mirrors |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/global/.system/skill-installer/agents/openai.yaml` | ai-skill-license-mirrors |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/global/gh-address-comments/LICENSE.txt` |  | generated_skill_license_mirror |  |  |
-| `docs/00-project/ai/skills/global/gh-fix-ci/LICENSE.txt` |  | generated_skill_license_mirror |  |  |
-| `docs/00-project/ai/skills/global/openai-docs/LICENSE.txt` |  | generated_skill_license_mirror |  |  |
-| `docs/00-project/ai/skills/local/SKILLS-CATALOG.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/skills/local/new-pipeline/SKILL.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/skills/local/new-pipeline/agents/openai.yaml` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 
 ## GitHub Issue Evidence Examples
 
@@ -337,11 +336,6 @@
 | `docs/reports/generated/pipeline_normalization_field_matrix/non_chembl_normalization_field_matrix.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.csv` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
-| `docs/reports/gh-issues/ai-consolidation-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/gh-issues/diagrams-refactoring-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/gh-issues/docs-consolidation-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/gh-issues/memory-consolidation-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/gh-issues/schema-refactoring-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/index.md` | tracked | docs_reports_curated_entrypoint | keep |
 
 ## Generated Route Registry

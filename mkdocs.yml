@@ -266,7 +266,6 @@ nav:
           - "ADR-055 Workflow Reconciliation Ownership": 02-architecture/decisions/ADR-055-workflow-reconciliation-data-step-ownership.md
           - "Infrastructure Config Package Root Sunset": 02-architecture/compatibility/infrastructure-config-package-root-sunset.md
           - "Public API Freeze": 00-project/ai/agents/guides/PUBLIC_API_FREEZE.md
-          - "Quality Gates Stabilization Notes": 02-architecture/decisions/notes/2026-03-04-quality-gates-stabilization.md
   - Guides:
       - "Overview": 03-guides/index.md
       - "Getting Started": 03-guides/getting-started.md
@@ -573,10 +572,6 @@ nav:
           - "Architecture Governance Audit Evidence": 02-architecture/governance-audit-evidence.md
           - "Decision Evidence Notes":
               - "Composite Rebuild-Only Replay Boundary": 02-architecture/decisions/notes/2026-07-27-composite-rebuild-only-replay-boundary.md
-              - "Contract Coverage Matrix v3": 02-architecture/decisions/notes/2026-07-27-contract-coverage-matrix-v3.md
-              - "Infrastructure Config Public API": 02-architecture/decisions/notes/2026-07-27-infrastructure-config-public-api-decision.md
-              - "QuarantineEntry Constructor Intent": 02-architecture/decisions/notes/2026-07-27-quarantine-entry-constructor-intentional.md
-              - "StorageFactory Process Classification": 02-architecture/decisions/notes/2026-07-27-storagefactory-process-class.md
           - "Diagram Views Plan": 02-architecture/diagrams/governance/diagram-views-plan.md
           - "Diagram Prompt Expansion": 02-architecture/diagrams/governance/PROMPT-diagram-expansion.md
           - "Module Consolidation Requirements": 02-architecture/module-consolidation-migration-requirements.md
