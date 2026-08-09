@@ -1,8 +1,15 @@
 @echo off
-REM Compatibility facade for the canonical Codex auto-execution launcher
+REM DEPRECATED: This is a compatibility facade for the canonical Codex auto-execution launcher.
+REM Please use: bash scripts/ai/codex/run-codex.sh exec [prompt]
+REM This wrapper will be removed in a future release.
 
 setlocal EnableExtensions
 setlocal EnableDelayedExpansion
+
+echo [DEPRECATION WARNING] This launcher is deprecated.
+echo Please use: bash scripts/ai/codex/run-codex.sh exec [prompt]
+echo Redirecting to canonical launcher...
+echo.
 
 set "WSL_DISTRO=%BIOETL_WSL_DISTRO%"
 set "SCRIPT_DIR=%~dp0"
@@ -56,9 +63,10 @@ if not defined REPO_WSL (
     exit /b 1
 )
 
+REM Run canonical bash script with exec mode (non-interactive)
 if defined WSL_DISTRO (
-    "%WSL_EXE%" -d "%WSL_DISTRO%" -- bash "%REPO_WSL%/scripts/ops/launchers/codex/codex-exec.sh" %*
+    "%WSL_EXE%" -d "%WSL_DISTRO%" -- bash "%REPO_WSL%/scripts/ai/codex/run-codex.sh" exec %*
 ) else (
-    "%WSL_EXE%" -- bash "%REPO_WSL%/scripts/ops/launchers/codex/codex-exec.sh" %*
+    "%WSL_EXE%" -- bash "%REPO_WSL%/scripts/ai/codex/run-codex.sh" exec %*
 )
 exit /b %errorlevel%

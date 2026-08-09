@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Helper: Check and setup Codex environment (WSL)
+# INTERNAL: Helper: Check and setup Codex environment (WSL)
 # Called by: run-codex.sh
+# DO NOT invoke directly
 
 set -euo pipefail
 

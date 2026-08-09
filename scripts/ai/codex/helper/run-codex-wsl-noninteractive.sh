@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# INTERNAL: WSL non-interactive launch
+# Called by: WSL launchers
+# DO NOT invoke directly
 # Codex WSL Launcher Helper
 # Non-interactive wrapper to prevent hanging on update prompts
 
