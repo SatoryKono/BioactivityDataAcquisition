@@ -5,8 +5,9 @@
 ## Обзор
 
 Dashboard `0. Control Plane` monitors replay safety, manifest/ledger integrity,
-checkpoint freshness, audit activity, and lineage evidence. Shipped dashboard
-JSON is the source of truth.
+checkpoint freshness, explicit checkpoint/manifest/lineage validation, retention
+compliance, bounded failure reasons, audit activity, and lineage evidence.
+Shipped dashboard JSON is the source of truth.
 
 Diagnostic failure, incompatibility, replay, and lineage panels preserve empty
 Prometheus results as `No data`/`UNKNOWN`; they do not synthesize zero. A visible
@@ -60,6 +61,7 @@ absence.
 | 135 | Track Replay Lag | timeseries | Prometheus | Replay lag trend by replay capability and status. | shared shell | Time trend; no static threshold in doc. |
 | 105 | Track Checkpoint Save Latency | timeseries | Prometheus | Histogram quantiles for checkpoint save latency. | shared shell | Quantile series `p50/p95/p99` are the key mapping. |
 | 106 | Track Global Checkpoint Admin Latency | timeseries | Prometheus | Histogram quantiles for global checkpoint operator latency. | shared shell | Quantile series `p50/p95/p99` are the key mapping. |
+| 9413 | Review Checkpoint Validation | table | BioETL Ops HTTP | Run-scoped parse, schema, checksum, and required-anchor checks with stable reason codes. | shared shell | `PASS/WARN/FAIL/UNKNOWN`; `UNKNOWN` never implies a healthy zero. |
 
 ### Inspect Manifest & Ledger Evidence
 
@@ -73,6 +75,7 @@ absence.
 | 7 | Compare Ledger Appends by Type & Status | timeseries | Prometheus | Ledger appends by `event_type` and `status`. | shared shell | Series legend maps event/status breakdown. |
 | 132 | Monitor Manifest Failures (30m) | stat | Prometheus | 30-minute manifest write failure ratio severity. | shared shell | Threshold/value mapping encodes ratio severity. |
 | 133 | Monitor Ledger Failures (30m) | stat | Prometheus | 30-minute ledger append failure ratio severity. | shared shell | Threshold/value mapping encodes ratio severity. |
+| 9414 | Review Manifest Validation | table | BioETL Ops HTTP | Run-scoped parse, schema, schema-version, and contract-compatibility checks with stable reason codes. | shared shell | `PASS/WARN/FAIL/UNKNOWN`; unsupported schema versions are explicit. |
 
 ### Inspect Global Store Reliability
 
@@ -97,6 +100,8 @@ absence.
 | 109 | Track Global Audit Write Latency | timeseries | Prometheus | Histogram quantiles for audit write latency. | shared shell | Quantile series `p50/p95/p99` are the key mapping. |
 | 110 | Track Global Audit Query Latency | timeseries | Prometheus | Histogram quantiles for audit query latency. | shared shell | Quantile series `p50/p95/p99` are the key mapping. |
 | 112 | Compare Lineage Persistence Outcomes | timeseries | Prometheus | Lineage fragment emission outcomes by `layer` and `status`. | shared shell | Series legend maps lineage outcome families. |
+| 9415 | Review Lineage Validation | table | BioETL Ops HTTP | Run-scoped closure, identity-consistency, cycle-detection, and persistence-profile checks. | shared shell | Stable reason codes localize broken references, conflicts, and cycles. |
+| 9416 | Review Retention Compliance | table | BioETL Ops HTTP | Run-scoped evidence-floor, retention-policy, required-evidence, and archive-support checks. | shared shell | Unsupported archive behavior is explicit rather than inferred as compliant. |
 
 ### Inspect Run Identity Evidence
 
@@ -116,6 +121,7 @@ absence.
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
 | 9412 | Inspect Run Details | row | Static | Collapsed selected-run identity and processed-record evidence. | shared shell | Groups HTTP-backed evidence; no direct threshold. |
+| 9417 | Review Bounded Failure Reasons | table | BioETL Ops HTTP | Selected-run failure counts mapped only to `api`, `dq`, `schema`, `storage`, `network`, `validation`, and `unknown`. | shared shell | Raw messages and high-cardinality identifiers are excluded. |
 
 ## PromQL Formula Anchors
 
