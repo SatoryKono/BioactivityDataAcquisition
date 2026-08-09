@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 import pytest
@@ -19,8 +19,10 @@ from bioetl.domain.control_plane import (
     ControlPlaneArtifactReplayImpact,
     ControlPlaneArtifactSurface,
     RunCodeProvenance,
+    RunInputSnapshotRef,
     RunLedgerEntry,
     RunManifest,
+    RunSourceRef,
 )
 from bioetl.domain.lineage import (
     LineageEdge,
@@ -82,6 +84,34 @@ def _reasons(payload: dict[str, object]) -> set[str]:
     }
 
 
+def _unresolved_scope(reason: str = "selected_run_id_not_found") -> EvidenceScope:
+    return EvidenceScope(
+        requested_pipeline="chembl_activity",
+        selected_run_id=str(_RUN_ID),
+        selected_run_types=("incremental",),
+        resolved_via=reason,
+        manifest=None,
+    )
+
+
+def _snapshot_manifest(**overrides: object) -> RunManifest:
+    snapshot = RunInputSnapshotRef(
+        snapshot_id="sha256:snapshot-8493",
+        content_hash="snapshot-8493",
+    )
+    return _manifest(
+        source_refs=(
+            RunSourceRef(
+                provider="chembl",
+                entity="activity",
+                pipeline_name="chembl_activity",
+                input_snapshots=(snapshot,),
+            ),
+        ),
+        **overrides,
+    )
+
+
 def test_checkpoint_validation_keeps_legacy_checksum_unknown() -> None:
     service = ControlPlaneEvidenceService()
     manifest = _manifest()
@@ -134,6 +164,19 @@ def test_checkpoint_validation_reports_schema_and_anchor_mismatch_reasons() -> N
     assert "checkpoint_anchor_mismatch" in _reasons(payload)
 
 
+def test_checkpoint_validation_preserves_selected_run_not_found_reason() -> None:
+    payload = ControlPlaneEvidenceService().checkpoint_validation(
+        scope=_unresolved_scope(),
+        checkpoint=None,
+        evidence_source="selected_run_id_not_found",
+        aggregate_scope_unknown=False,
+    )
+
+    assert payload["status"] == "UNKNOWN"
+    assert payload["evidence_source"] == "selected_run_id_not_found"
+    assert _reasons(payload) == {"selected_run_id_not_found"}
+
+
 def test_manifest_validation_reports_version_and_contract_reasons() -> None:
     manifest = _manifest(
         schema_version="2.0",
@@ -154,6 +197,17 @@ def test_manifest_validation_does_not_overclaim_registry_compatibility() -> None
 
     assert payload["status"] == "UNKNOWN"
     assert "manifest_contract_compatibility_not_verified" in _reasons(payload)
+
+
+def test_manifest_validation_rejects_unknown_persistence_profile() -> None:
+    manifest = _manifest(
+        launch_context={"required_persistence_profile": "replay_redy"}
+    )
+
+    payload = ControlPlaneEvidenceService().manifest_validation(scope=_scope(manifest))
+
+    assert payload["status"] == "ERROR"
+    assert "manifest_persistence_profile_unsupported" in _reasons(payload)
 
 
 class _LineageStore:
@@ -239,6 +293,32 @@ def test_lineage_validation_detects_conflicting_node_definitions() -> None:
     assert "node_definition:shared:node" in str(payload)
 
 
+@pytest.mark.parametrize(
+    ("profile", "expected_status", "profile_reason"),
+    (
+        ("degraded_observable", "UNKNOWN", "lineage_persistence_profile_degraded"),
+        ("replay_ready", "UNKNOWN", "lineage_persistence_profile_degraded"),
+        ("forensic_grade", "ERROR", "lineage_persistence_profile_unsatisfied"),
+        ("replay_redy", "ERROR", "lineage_persistence_profile_unsupported"),
+    ),
+)
+def test_lineage_missing_fragments_obeys_profile_contract(
+    profile: str,
+    expected_status: str,
+    profile_reason: str,
+) -> None:
+    manifest = _manifest(launch_context={"required_persistence_profile": profile})
+    service = ControlPlaneEvidenceService(
+        lineage_store=_LineageStore(())  # type: ignore[arg-type]
+    )
+
+    payload = service.lineage_validation(scope=_scope(manifest))
+
+    assert payload["status"] == expected_status
+    assert profile_reason in _reasons(payload)
+    assert "lineage_fragments_missing" in _reasons(payload)
+
+
 class _LifecyclePlanner:
     def __init__(self, plan: ControlPlaneArtifactLifecyclePlan) -> None:
         self.plan_result = plan
@@ -248,7 +328,7 @@ class _LifecyclePlanner:
 
 
 def test_retention_compliance_uses_dry_run_evidence_floor() -> None:
-    manifest = _manifest()
+    manifest = _snapshot_manifest()
     artifacts = tuple(
         ControlPlaneArtifactRef(
             surface=surface,
@@ -259,7 +339,11 @@ def test_retention_compliance_uses_dry_run_evidence_floor() -> None:
                 else (
                     "effective-config-8490"
                     if surface is ControlPlaneArtifactSurface.EFFECTIVE_CONFIG
-                    else f"artifact-{surface.value}"
+                    else (
+                        "sha256:snapshot-8493"
+                        if surface is ControlPlaneArtifactSurface.CACHED_BRONZE
+                        else f"artifact-{surface.value}"
+                    )
                 )
             ),
             decision=ControlPlaneArtifactLifecycleDecision.RETAIN,
@@ -274,6 +358,7 @@ def test_retention_compliance_uses_dry_run_evidence_floor() -> None:
             ControlPlaneArtifactSurface.RUN_LEDGER,
             ControlPlaneArtifactSurface.EFFECTIVE_CONFIG,
             ControlPlaneArtifactSurface.LINEAGE,
+            ControlPlaneArtifactSurface.CACHED_BRONZE,
         )
     )
     plan = ControlPlaneArtifactLifecyclePlan(
@@ -288,8 +373,9 @@ def test_retention_compliance_uses_dry_run_evidence_floor() -> None:
 
     payload = service.retention_compliance(scope=_scope(manifest), now=_NOW)
 
-    assert "reproducibility_evidence_floor_satisfied" in _reasons(payload)
+    assert "reproducibility_evidence_within_retention" in _reasons(payload)
     assert "required_evidence_surfaces_present" in _reasons(payload)
+    assert "snapshot_lifecycle_evidence_present" in _reasons(payload)
     assert "archive_evidence_not_recorded" in _reasons(payload)
     assert all("path" not in row for row in payload["artifacts"])
 
@@ -298,7 +384,7 @@ def test_retention_compliance_reports_delete_and_evidence_floor_violations() -> 
     manifest = _manifest()
     plan = ControlPlaneArtifactLifecyclePlan(
         generated_at=_NOW,
-        cutoff=_NOW,
+        cutoff=_NOW + timedelta(seconds=1),
         dry_run=True,
         artifacts=(
             ControlPlaneArtifactRef(
@@ -323,6 +409,26 @@ def test_retention_compliance_reports_delete_and_evidence_floor_violations() -> 
     assert "retention_delete_candidates_present" in _reasons(payload)
     assert "reproducibility_evidence_floor_unprotected" in _reasons(payload)
     assert "required_evidence_surfaces_missing" in _reasons(payload)
+
+
+def test_retention_rejects_unknown_persistence_profile() -> None:
+    manifest = _manifest(
+        launch_context={"required_persistence_profile": "forensic_grdae"}
+    )
+    plan = ControlPlaneArtifactLifecyclePlan(
+        generated_at=_NOW,
+        cutoff=_NOW - timedelta(days=90),
+        dry_run=True,
+        artifacts=(),
+    )
+    service = ControlPlaneEvidenceService(
+        lifecycle_planner=_LifecyclePlanner(plan)  # type: ignore[arg-type]
+    )
+
+    payload = service.retention_compliance(scope=_scope(manifest), now=_NOW)
+
+    assert payload["status"] == "ERROR"
+    assert "retention_persistence_profile_unsupported" in _reasons(payload)
 
 
 def test_failure_reasons_expose_only_fixed_categories() -> None:
@@ -361,3 +467,27 @@ def test_failure_reasons_expose_only_fixed_categories() -> None:
     assert payload["total_failure_count"] == 4
     assert "secret raw failure" not in str(payload)
     assert "NovelCrash" not in str(payload)
+
+
+@pytest.mark.parametrize(
+    ("scope", "ledger", "expected_reason"),
+    (
+        (_unresolved_scope(), None, "selected_run_id_not_found"),
+        (_scope(_manifest()), None, "run_ledger_unavailable"),
+    ),
+)
+def test_failure_reasons_make_unknown_state_visible_without_zero_counts(
+    scope: EvidenceScope,
+    ledger: object | None,
+    expected_reason: str,
+) -> None:
+    payload = ControlPlaneEvidenceService(ledger_port=ledger).failure_reasons(
+        scope=scope
+    )  # type: ignore[arg-type]
+
+    rows = payload["rows"]
+    assert [row["category"] for row in rows] == list(FAILURE_REASON_CATEGORIES)
+    assert {row["status"] for row in rows} == {"UNKNOWN"}
+    assert {row["reason"] for row in rows} == {expected_reason}
+    assert all(row["count"] is None for row in rows)
+    assert payload["total_failure_count"] is None
