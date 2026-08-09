@@ -10,11 +10,13 @@
   "catalog": "SKILLS-CATALOG.md",
   "codex_devin": {
     "optional_presence_globs": [
-      "*/agents/openai.yaml"
+      "*/agents/openai.yaml",
+      "coderabbit-audit"
     ],
     "allowed_content_variant_globs": [
       "*/SKILL.md",
-      "*/agents/openai.yaml"
+      "*/agents/openai.yaml",
+      "coderabbit-audit/*"
     ],
     "required_identical_when_shared_globs": [
       "*/references/**"

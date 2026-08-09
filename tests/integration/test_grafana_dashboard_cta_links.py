@@ -148,7 +148,7 @@ def test_runtime_alert_condition_panels_expose_direct_runbook_links() -> None:
         ),
         "Inspect DQ Alert Conditions": (
             "Open DQ Failure Runbook",
-            "docs/05-operations/runbooks/dq-failure-investigation.md",
+            "docs/05-operations/runbooks/pipeline-failure-dq.md",
         ),
         "Inspect Control Plane Alert Conditions": (
             "Open Run Manifest Runbook",
@@ -164,7 +164,7 @@ def test_runtime_alert_condition_panels_expose_direct_runbook_links() -> None:
         ),
         "Inspect Entities Stale Over 24h": (
             "Open DQ Freshness Runbook",
-            "docs/05-operations/runbooks/dq-failure-investigation.md",
+            "docs/05-operations/runbooks/pipeline-failure-dq.md",
         ),
         "Monitor No-Records Runs": (
             "Open Checkpoint Debugging Runbook",

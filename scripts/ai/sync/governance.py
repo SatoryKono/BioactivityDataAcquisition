@@ -350,7 +350,16 @@ def _catalog_entries(path: Path, entrypoint: str) -> set[str]:
 
 
 def _matches_any(path: str, patterns: tuple[str, ...]) -> bool:
-    return any(fnmatch.fnmatchcase(path, pattern) for pattern in patterns)
+    # Check direct pattern match
+    if any(fnmatch.fnmatchcase(path, pattern) for pattern in patterns):
+        return True
+    # Check if path is under an optional directory (e.g., "coderabbit-audit" matches "coderabbit-audit/*")
+    for pattern in patterns:
+        if not pattern.endswith("/*"):
+            # If pattern doesn't have /*, treat it as a directory prefix
+            if path.startswith(pattern + "/"):
+                return True
+    return False
 
 
 def _string_tuple(value: object, *, label: str) -> tuple[str, ...]:
@@ -576,13 +585,21 @@ def _validate_codex_devin_parity(
 
     canonical_skills = _skill_entrypoints(canonical_root, entrypoint)
     devin_skills = _skill_entrypoints(devin_root, entrypoint)
+    optional_presence, allowed_variants, required_identical = _codex_devin_parity_rules(
+        contract
+    )
+    # Filter out optional presence skills from unexpected check
+    unexpected_devin = {
+        skill for skill in (devin_skills - canonical_skills)
+        if not _matches_any(skill, optional_presence)
+    }
     issues.extend(
         f"Devin missing skill entrypoint: {skill}/{entrypoint}"
         for skill in sorted(canonical_skills - devin_skills)
     )
     issues.extend(
         f"Devin unexpected skill entrypoint: {skill}/{entrypoint}"
-        for skill in sorted(devin_skills - canonical_skills)
+        for skill in sorted(unexpected_devin)
     )
     issues.extend(
         _validate_catalog(
@@ -593,21 +610,27 @@ def _validate_codex_devin_parity(
             entrypoint=entrypoint,
         )
     )
+    # Filter out optional presence skills from Devin catalog validation
+    devin_expected = {
+        skill for skill in devin_skills
+        if not _matches_any(skill, optional_presence)
+    }
     issues.extend(
         _validate_catalog(
             label="Devin",
             skills_root=devin_root,
-            expected_skills=devin_skills,
+            expected_skills=devin_expected,
             catalog_name=catalog_name,
             entrypoint=entrypoint,
         )
     )
-
-    optional_presence, allowed_variants, required_identical = _codex_devin_parity_rules(
-        contract
-    )
+    # Structural files should exclude optional presence skills
+    structural_skills = canonical_skills | {
+        skill for skill in devin_skills
+        if not _matches_any(skill, optional_presence)
+    }
     structural_files = {catalog_name} | {
-        f"{skill}/{entrypoint}" for skill in canonical_skills | devin_skills
+        f"{skill}/{entrypoint}" for skill in structural_skills
     }
     issues.extend(
         _validate_nonstructural_skill_files(
