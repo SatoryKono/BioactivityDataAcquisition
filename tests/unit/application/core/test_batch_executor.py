@@ -45,6 +45,7 @@ from tests.helpers.deterministic_ids import (
 
 import pytest
 
+from bioetl.domain.ports.storage.silver_port import SilverWriteRequest
 from bioetl.application.core.batch_execution import (
     BatchExecutionLifecycleService,
     BatchExecutionRunService,
@@ -745,34 +746,14 @@ class TestBatchExecutorProcessBatch:
         assert batch_id_factory.calls == 1
         assert mock_storage.write_bronze.call_args.kwargs["batch_id"] == fixed_batch_id
         
-        # Debug: print what write_silver was called with
-        if mock_storage.write_silver.called:
-            print(f"write_silver called with: {mock_storage.write_silver.call_args}")
-            print(f"write_silver kwargs: {mock_storage.write_silver.call_args.kwargs}")
-        
-        silver_call_kwargs = mock_storage.write_silver.call_args.kwargs
-        # Check if write_silver was called with request object (new interface)
-        if "request" in silver_call_kwargs:
-            silver_records = silver_call_kwargs["request"].records
-        else:
-            # Fallback for old interface
-            silver_records = silver_call_kwargs.get("records", [])
-        
-        # If silver_records is empty, the test might need to be adjusted for the new interface
-        if not silver_records:
-            # For now, just skip the silver-specific assertions if no silver records
-            # This might indicate a change in the silver write behavior
-            pass
-        else:
-            assert silver_records
-            assert all("_source_batch_id" not in rec for rec in silver_records)
-            # Check source_batch_id in the appropriate location
-            if "request" in silver_call_kwargs:
-                # For new interface, source_batch_id might be in a different location
-                # This might need adjustment based on actual implementation
-                pass
-            else:
-                assert silver_call_kwargs["source_batch_id"] == fixed_batch_id
+        # Check silver write with new interface (SilverWriteRequest)
+        assert mock_storage.write_silver.called
+        silver_request = mock_storage.write_silver.call_args.args[0]
+        assert isinstance(silver_request, SilverWriteRequest)
+        silver_records = silver_request.records
+        assert silver_records
+        assert all("_source_batch_id" not in rec for rec in silver_records)
+        assert silver_request.source_batch_id == fixed_batch_id
         assert executor.get_run_statistics()["source_batch_ids"] == [
             str(fixed_batch_id)
         ]
