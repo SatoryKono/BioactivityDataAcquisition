@@ -6,7 +6,7 @@ Verifies that DQ contracts documentation matches actual entity config DSL struct
 This script ensures documentation accuracy and prevents drift between docs and code.
 
 Usage:
-    python scripts/check_dq_dsl_parity.py
+    python scripts/data_quality/check_dq_dsl_parity.py
 
 Exit Codes:
     0: All checks passed

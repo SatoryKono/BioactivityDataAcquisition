@@ -59,6 +59,7 @@ def apply_single_key_dependency_join(
     dep: DependencyConfig,
     seed_pipeline: str | None,
 ) -> pl.DataFrame:
+    """Apply one dependency join resolved through a single join-key pair."""
     metadata = build_single_key_join_metadata(
         dep=dep,
         seed_pipeline=seed_pipeline,
@@ -107,6 +108,7 @@ def apply_composite_key_dependency_join(
     dep: DependencyConfig,
     seed_pipeline: str | None,
 ) -> pl.DataFrame:
+    """Apply one dependency join resolved through composite join keys."""
     metadata = build_composite_join_metadata(
         dep=dep,
         seed_pipeline=seed_pipeline,
@@ -158,6 +160,7 @@ def apply_resolved_dependency_join(
     dep: DependencyConfig,
     seed_pipeline: str | None,
 ) -> pl.DataFrame:
+    """Dispatch a loaded dependency to its configured join-key strategy."""
     if dep.is_multi_field_filter:
         return apply_composite_key_dependency_join(
             deduplicator=deduplicator,
@@ -205,6 +208,7 @@ def apply_loaded_dependency_join(
     dep: DependencyConfig,
     seed_pipeline: str | None,
 ) -> pl.DataFrame:
+    """Join a dependency frame when it is present in the loaded frame map."""
     dep_df = dependency_dfs.get(dep.pipeline)
     if dep_df is None:
         return merged_df

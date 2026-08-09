@@ -43,26 +43,26 @@ def parse_arguments() -> argparse.Namespace:
         epilog="""
 Examples:
   # Standard mode
-  python src/tools/file_merger.py -i ./src -o combined.txt
-  python src/tools/file_merger.py -i ./docs -e md -o docs_combined.md --sort by_extension
+  python scripts/engineering/common/file_merger.py -i ./src -o combined.txt
+  python scripts/engineering/common/file_merger.py -i ./docs -e md -o docs_combined.md --sort by_extension
 
   # Project code merge mode (creates 5 files by architectural layers)
-  python src/tools/file_merger.py --merge_project_code
+  python scripts/engineering/common/file_merger.py --merge_project_code
 
   # Documentation merge mode (merges all docs/*.md into one file)
-  python src/tools/file_merger.py --merge_documentation
-  python src/tools/file_merger.py --merge_documentation -o my_docs.md
+  python scripts/engineering/common/file_merger.py --merge_documentation
+  python scripts/engineering/common/file_merger.py --merge_documentation -o my_docs.md
 
   # Configs merge mode (merges all configs/*.yaml into one file)
-  python src/tools/file_merger.py --merge_configs
-  python src/tools/file_merger.py --merge_configs -o my_configs.md
+  python scripts/engineering/common/file_merger.py --merge_configs
+  python scripts/engineering/common/file_merger.py --merge_configs -o my_configs.md
 
   # Project structure mode (creates tree structure of all project files)
-  python src/tools/file_merger.py --project_structure
-  python src/tools/file_merger.py --project_structure -o structure.md
+  python scripts/engineering/common/file_merger.py --project_structure
+  python scripts/engineering/common/file_merger.py --project_structure -o structure.md
 
   # All merge modes at once (creates all output files in reports/)
-  python src/tools/file_merger.py --merge_all
+  python scripts/engineering/common/file_merger.py --merge_all
         """,
     )
 

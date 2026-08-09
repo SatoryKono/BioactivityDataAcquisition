@@ -745,7 +745,7 @@ class TestBatchExecutorProcessBatch:
 
         assert batch_id_factory.calls == 1
         assert mock_storage.write_bronze.call_args.kwargs["batch_id"] == fixed_batch_id
-        
+
         # Check silver write with new interface (SilverWriteRequest)
         assert mock_storage.write_silver.called
         silver_request = mock_storage.write_silver.call_args.args[0]

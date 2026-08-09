@@ -1160,6 +1160,24 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as a Docker runtime manager helper for container lifecycle management; keep it supporting unless it becomes a governed CI workflow or first-class ops entrypoint."
     },
+    "scripts/engineering/qa/report_architecture_suite_burndown.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the implementation behind python -m scripts.engineering.qa report-architecture-suite-burndown; keep contributor execution routed through the unified QA dispatcher."
+    },
+    "scripts/engineering/qa/report_vcr_corpus_budget.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the implementation behind python -m scripts.engineering.qa report-vcr-corpus-budget; keep contributor execution routed through the unified QA dispatcher."
+    },
+    "scripts/engineering/qa/report_weak_assert_inventory.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the implementation behind python -m scripts.engineering.qa report-weak-assert-inventory; keep contributor execution routed through the unified QA dispatcher."
+    },
     "scripts/ops/coderabbit/build_matrix.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
@@ -1171,6 +1189,12 @@
       "decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain only as the documented sequential runner for the bounded 2026-08 CodeRabbit campaign; remove it after campaign closeout and keep its API-dependent execution outside ordinary local workflows."
+    },
+    "scripts/ops/data/neo4j_audit.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the context-aware Neo4j audit connection helper while deployment and live-audit runbooks reference scripts/ops/data/neo4j_audit.py; fold it into a broader canonical ops helper surface only if the audit workflow is consolidated."
     },
     "scripts/ops/runtime/mcp/apply-shared-to-grok.ps1": {
       "owner": "@bioetl-platform",
@@ -1249,36 +1273,6 @@
       "decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain only as the bounded one-shot S1 C3-C6 remediation patcher for auditability; remove it after the corrected application-core behavior and regression coverage are durable in the canonical source tree."
-    },
-    "scripts/quality/coderabbit/build_matrix.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded CodeRabbit review-campaign matrix generator; remove it when the campaign closes or consolidate it into a canonical quality command if the workflow becomes recurring."
-    },
-    "scripts/quality/coderabbit/build_streams.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded CodeRabbit residual-stream generator for the current review campaign; remove it after the campaign evidence becomes the durable record."
-    },
-    "scripts/quality/coderabbit/inventory_cm.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded live CodeRabbit critical/major inventory utility; remove it when the review campaign closes rather than promoting it to a public quality entrypoint."
-    },
-    "scripts/quality/coderabbit/rebalance_streams.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded CodeRabbit residual-stream rebalancing utility; remove it after the current campaign or consolidate it if stream planning becomes a governed recurring workflow."
-    },
-    "scripts/quality/coderabbit/run_leaves.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as the bounded sequential runner for the current CodeRabbit leaf-review campaign; remove it after campaign completion and keep its API-dependent execution outside ordinary local test workflows."
     },
     "scripts/schema/generation/generate_protein_class_l1_target_type_artifacts.py": {
       "owner": "@bioetl-platform",
@@ -1411,30 +1405,6 @@
       "decision": "shared_helper_module",
       "review_by": "2026-09-30",
       "next_step": "Retain only as the bounded resume helper for the current CodeRabbit architecture-review campaign; remove it after the remaining-layer review is complete rather than treating it as a public active script."
-    },
-    "src/tools/apply_elk_layout.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded manual Mermaid layout-governance helper while architecture-diagram guidance still references the direct script path; promote it only if ELK layout normalization graduates to a canonical scripts.docs or scripts.engineering diagram workflow."
-    },
-    "src/tools/differentiate_linkstyle.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded manual Mermaid semantics helper while diagram-governance guidance and security regression tests still reference the direct script path; promote it only if link-style normalization graduates to a canonical scripts.docs or scripts.engineering diagram workflow."
-    },
-    "src/tools/harmonize_link_styles.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded manual Mermaid semantics helper while diagram-governance guidance still references the direct script path; promote it only if link-style harmonization graduates to a canonical scripts.docs or scripts.engineering diagram workflow."
-    },
-    "src/tools/neo4j_audit.py": {
-      "owner": "@bioetl-platform",
-      "decision": "shared_helper_module",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as the context-aware Neo4j audit connection helper while deployment and live-audit runbooks still reference src/tools/neo4j_audit.py; fold it into a broader canonical ops helper surface only if the audit workflow is consolidated."
     }
   }
 }

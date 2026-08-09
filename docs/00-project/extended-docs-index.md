@@ -24,7 +24,7 @@ promoting every specialist page into the primary MkDocs navigation.
 - [Variable reference](../03-guides/dashboards/variable-reference.md)
 - [CodeRabbit local reviews](../03-guides/development/coderabbit-local-reviews.md)
 - [Mistral Vibe WSL2 setup](../03-guides/development/mistral-vibe-wsl2-setup.md)
-- [Gold contract v1.1 migration](../03-guides/gold-contract-v1-1-migration.md)
+- [Gold contract v1.1 migration (archived)](../99-archive/guides/gold-contract-v1-1-migration.md)
 - [Script management](../03-guides/script-management/README.md)
 
 ## Reference
@@ -64,8 +64,6 @@ promoting every specialist page into the primary MkDocs navigation.
 - [Filter inventory pointer](../filters/README.md)
 - [Filter inventory baseline](../filters/inventory-baseline.md)
 - [Canonical semantic field unification runbook](../05-operations/runbooks/canonical-semantic-field-unification.md)
-- [Link checker integration](../plugins/link_checker/INTEGRATION_GUIDE.md)
-- [Link checker reference](../plugins/link_checker/README.md)
 - [Export policy](../security/export-policy.md)
 - [RBAC matrix](../security/rbac-matrix.md)
 
