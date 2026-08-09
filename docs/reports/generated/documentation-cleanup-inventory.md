@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2619 |
-| Tracked doc-like files | 2619 |
+| Doc-like files | 2634 |
+| Tracked doc-like files | 2634 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 11 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 2619 |
+| tracked | 2634 |
 
 ## Lifecycle Counts
 
@@ -61,7 +61,7 @@
 | Archived | 169 |
 | Canonical | 69 |
 | Duplicate | 8 |
-| Generated | 923 |
+| Generated | 938 |
 | Working | 722 |
 
 ## Surface Families
@@ -72,7 +72,7 @@
 | archive | 169 |
 | canonical | 69 |
 | duplicate | 8 |
-| generated | 923 |
+| generated | 938 |
 | working | 722 |
 
 ## Recommended Actions
@@ -81,7 +81,7 @@
 | --- | --- |
 | archive-after-github-state-check | 320 |
 | archive-after-migration | 257 |
-| generate-automatically | 923 |
+| generate-automatically | 938 |
 | keep | 1107 |
 | merge | 8 |
 | reconcile-with-github-state | 4 |
@@ -220,6 +220,7 @@
 | `docs/00-project/ai/memory/memory-py-test-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/memory/neo4j-project-memory-seed.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/memory/neo4j-project-memory-seed.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/COLLECTED_PROMPTS_INDEX.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/README.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/agent-memory.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/architecture_metric_exemptions_tasks_json_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
@@ -243,6 +244,7 @@
 | `docs/00-project/ai/prompts/specialized-prompts-2-coderabbit-audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/test_fix_retest_loop.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/test_speed_optimization_loop.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/trash/README.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/workflows-1-master.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/workflows-2-post-change.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/skills/_references/README.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
@@ -253,8 +255,6 @@
 | `docs/00-project/ai/skills/_references/local/documentation-audit/references/audit-checklist.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
 | `docs/00-project/ai/skills/_references/local/documentation-audit/references/report-template.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
 | `docs/00-project/ai/skills/_references/local/technical-designer-mermaid/references/patterns.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/global/.system/skill-creator/SKILL.md` | ai-skill-license-mirrors |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/global/.system/skill-creator/agents/openai.yaml` | ai-skill-license-mirrors |  |  | scripts/ai/codex/check_skills_mirror.sh |
 
 ## GitHub Issue Evidence Examples
 

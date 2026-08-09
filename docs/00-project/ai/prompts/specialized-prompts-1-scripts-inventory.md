@@ -108,7 +108,7 @@
 #### Quick Inventory Template
 ```text
 Тип инвентаризации: Quick Inventory
-Scope: [конкретная область scripts/ или src/tools/]
+Scope: [конкретная область scripts/]
 Глубина: Surface level
 Ожидаемое время: [X минут]
 ```
@@ -208,7 +208,7 @@ OUTPUT_FORMAT: markdown | json | both
 ## Validation Gates для проверки инвентаризации
 
 ### Этап 1: Поиск скриптов
-- [ ] Все скрипты найдены в scripts/** и src/tools/**
+- [ ] Все скрипты найдены в scripts/**
 - [ ] Типы скриптов определены корректно
 - [ ] Пути скриптов проверены на существование
 
