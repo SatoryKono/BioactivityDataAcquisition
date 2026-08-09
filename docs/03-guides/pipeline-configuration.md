@@ -26,7 +26,7 @@ BioETL использует **YAML-файлы** для конфигурации 
 
 ### Ключевые особенности
 
-- **Unified Entity Configuration Format (ADR-039):** Все 21 стандартных конфигураций пайплайнов консолидированы в единый файл `configs/entities/{provider}/{entity}.yaml` на сущность
+- **Unified Entity Configuration Format (ADR-039):** 22 provider-backed и 5 composite entity contracts используют единый файл `configs/entities/{provider}/{entity}.yaml` на сущность
 - **Convention over Configuration (ADR-029):** Пути и ссылки вычисляются автоматически
 - **Иерархическое наследование:** Общие defaults загружаются из `configs/base/pipeline.yaml`
 - **Иерархические DQ/Filter правила (ADR-027/028):** 3-уровневая иерархия с merge
@@ -36,7 +36,7 @@ BioETL использует **YAML-файлы** для конфигурации 
 
 ### Unified Entity Configuration Format (ADR-039)
 
-Начиная с версии 6.1.0, BioETL использует унифицированный формат конфигурации сущностей. Все стандартные конфигурации пайплайнов консолидированы из 5-6 отдельных файлов в один файл `configs/entities/{provider}/{entity}.yaml` на сущность.
+Начиная с версии 6.1.0, BioETL использует унифицированный формат конфигурации сущностей. Provider-backed pipelines и entity-level composite contracts консолидированы из 5-6 отдельных файлов в один файл `configs/entities/{provider}/{entity}.yaml` на сущность.
 
 **Структура унифицированного конфига:**
 
@@ -82,10 +82,11 @@ hash_policy:
 
 **Список унифицированных конфигураций:**
 
-- **chembl (14 entities):** activity, assay, assay_parameters, cell_line, compound_record, molecule, protein_class, publication, publication_similarity, publication_term, subcellular_fraction, target, target_component, tissue
+- **chembl (15 entities):** activity, assay, assay_parameters, cell_line, compound_record, molecule, protein_class, publication, publication_similarity, publication_term, subcellular_fraction, target, target_component, target_protein_classification, tissue
 - **crossref, openalex, pubmed, semanticscholar (4x publication.yaml)**
 - **pubchem/compound.yaml**
 - **uniprot/protein.yaml, uniprot/idmapping.yaml**
+- **composite (5 entity contracts):** activity, assay, molecule, publication, target
 
 ______________________________________________________________________
 
@@ -121,13 +122,15 @@ configs/
 │   │   ├── subcellular_fraction.yaml
 │   │   ├── target.yaml
 │   │   ├── target_component.yaml
+│   │   ├── target_protein_classification.yaml
 │   │   └── tissue.yaml
 │   ├── crossref/publication.yaml
 │   ├── openalex/publication.yaml
 │   ├── pubchem/compound.yaml
 │   ├── pubmed/publication.yaml
 │   ├── semanticscholar/publication.yaml
-│   └── uniprot/{idmapping,protein}.yaml
+│   ├── uniprot/{idmapping,protein}.yaml
+│   └── composite/{activity,assay,molecule,publication,target}.yaml
 ├── composites/                   # Composite pipeline configs (ADR-026)
 │   ├── activity.yaml
 │   ├── assay.yaml
@@ -156,7 +159,8 @@ quality/governance assets и composite helpers, поэтому active guide фи
 
 | Категория                     | Описание                                                                           |
 | ----------------------------- | ---------------------------------------------------------------------------------- |
-| Entity configs (unified)      | Standard ETL pipelines (`configs/entities`)                                        |
+| Provider entity configs       | Provider-backed ETL pipelines (`configs/entities/{provider}`)                      |
+| Composite entity configs      | Composite schema/DQ/filter/contracts (`configs/entities/composite`)                 |
 | Composite pipeline configs    | Multi-provider pipelines (`configs/composites/*.yaml`)                             |
 | Composite field-group configs | Shared field groups (`configs/composites/field_groups`)                            |
 | Provider configs              | Source + provider quality/filters (`configs/providers`)                            |
@@ -178,6 +182,7 @@ YAML file as a single undifferentiated owner surface.
 | `configs/entities/{provider}/{entity}.yaml` | `quality.*` | DQ contract owners | inline DQ policy grows beyond entity-local checks or must be shared across providers | DQ config validation, contract tests, and docs drift checks for DQ references |
 | `configs/entities/{provider}/{entity}.yaml` | `filters.*`, `input_filter`, `silver_filters`, `gold_filters` | filter-rule owners from ADR-028 | filter behavior needs reusable rule bundles or provider-level inheritance | config validation plus targeted filter-rule tests |
 | `configs/entities/{provider}/{entity}.yaml` | migration, canonicalization, system-field policy | architecture/config governance owners | policy applies to more than one entity family or changes manifest/hash identity | config validation plus architecture/governance tests that cover hash and migration semantics |
+| `configs/entities/composite/{entity}.yaml` | `pipeline`, `schema`, `quality`, `filters`, `contracts` | composite entity-contract owners | entity contract diverges from composite merge schema or needs a new output contract version | `python -m scripts.schema check-invariants`; `python -m scripts.schema validate-configs` |
 | `configs/composites/{entity}.yaml` | `composite.seed`, `dependencies`, `enrichers`, join/filter conditions | composite runtime owners | runtime orchestration logic leaks into config comments or requires code branches per provider | composite config loader tests and composite runtime tests |
 | `configs/composites/{entity}.yaml` | `merge`, `field_priorities`, `exclude_fields`, `schema.column_groups` | composite schema/merge owners | provider priority or field-order rules duplicate generated references or become shared across composites | composite config validation plus field-order/reference drift checks |
 | `configs/composites/{entity}.yaml` | `dq_overrides`, `lineage`, provider lookup/source tracking | DQ/lineage owners | lineage semantics need cross-composite policy or DQ overrides become common rules | `uv run python -m scripts.schema validate-configs` plus lineage/DQ contract tests |
@@ -261,6 +266,21 @@ pipeline:
 | `filters`   | Extraction/silver/gold filters               | Да          |
 | `contracts` | PK/merge/hash policy                         | Да          |
 
+### Стратегия версионирования
+
+Версии имеют явную область действия:
+
+- корневой `version` — версия provider/entity config document; для каждого
+  `configs/entities/{provider}/*.yaml` она обязана совпадать с корневой версией
+  `configs/providers/{provider}.yaml`;
+- `quality.version`, `filters.version`, `source_profile.version`,
+  `contracts.active_version` и hash-policy versions — независимые версии
+  соответствующих контрактов. Они меняются только при изменении своей
+  семантики и не обязаны совпадать с корневым `version`;
+- `python -m scripts.schema check-invariants` проверяет root-version parity и
+  не позволяет случайно трактовать `quality.version: 1.1.0` как drift от
+  entity/provider `version: 1.0.0`.
+
 ### Пример с переопределениями
 
 ```yaml
@@ -288,6 +308,15 @@ ______________________________________________________________________
 ## Composite Pipelines (ADR-026)
 
 Composite pipelines объединяют данные из нескольких провайдеров в единый датасет.
+
+Каждый composite имеет две согласованные конфигурационные поверхности:
+
+1. `configs/entities/composite/{entity}.yaml` — обязательный entity contract с
+   секциями `pipeline`, `schema`, `quality`, `filters` и `contracts`;
+1. `configs/composites/{entity}.yaml` — seed/dependency/enricher/merge runtime
+   orchestration. Его `composite.merge.column_groups` является канонической
+   схемой merge output и должен совпадать с
+   `configs/entities/composite/{entity}.yaml::schema.column_groups`.
 
 ### Структура Composite конфига
 
@@ -662,6 +691,15 @@ Retired source provider pagination aliases:
 Retired source root alias:
 
 - `source.batch_size`
+
+### Runtime contact и secret indirection
+
+Tracked provider YAML не содержит `${ENV_VAR}` interpolation strings. Для
+CrossRef/OpenAlex поле `mailto` хранит безопасный документирующий placeholder
+`your-email@example.com`; реальный технический контакт задаётся локально через
+`BIOETL_DEFAULT_EMAIL`. API keys остаются вне tracked YAML и указываются через
+декларативные поля `*_env`, например
+`api_key_env: BIOETL_SEMANTICSCHOLAR_API_KEY`.
 
 ### Rate Limits по провайдерам (7 source configs)
 

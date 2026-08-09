@@ -5,7 +5,7 @@ source:
         provider: semanticscholar
         base_url: https://api.semanticscholar.org/graph/v1
         auth_type: api_key
-        api_key: ${BIOETL_SEMANTICSCHOLAR_API_KEY}
+        api_key_env: BIOETL_SEMANTICSCHOLAR_API_KEY
         client:
             timeout_sec: 60.0
             max_retries: 5

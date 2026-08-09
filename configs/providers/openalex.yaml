@@ -6,7 +6,9 @@ source:
         base_url: https://api.openalex.org
         auth_type: api_key
         api_key_env: BIOETL_OPENALEX_API_KEY
-        mailto: ${BIOETL_OPENALEX_EMAIL}
+        # Documentation-only request attribution. Runtime operators set the
+        # real technical contact through BIOETL_DEFAULT_EMAIL.
+        mailto: "your-email@example.com"
         client:
             timeout_sec: 30.0
             max_retries: 3

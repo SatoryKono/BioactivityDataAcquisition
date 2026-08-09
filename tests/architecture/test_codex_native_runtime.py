@@ -51,6 +51,28 @@ def test_project_config_negative_fixture_reports_nonportable_key(
     assert any(finding.code == "config.portability" for finding in findings)
 
 
+def test_project_config_keeps_benchmarked_concurrency_alias(tmp_path: Path) -> None:
+    config = tmp_path / ".codex/config.toml"
+    config.parent.mkdir(parents=True)
+    config.write_text(
+        "[agents]\nmax_concurrent_threads_per_session = 3\n",
+        encoding="utf-8",
+    )
+
+    findings = native_runtime_contract.validate_project_config(tmp_path)
+    messages = [
+        finding.message for finding in findings if finding.code == "config.agents"
+    ]
+
+    assert messages == [
+        "agents.max_threads must equal 3",
+        "use agents.max_threads = 3 for the tracked portable baseline; "
+        "Codex documents it as the legacy alias for "
+        "agents.max_concurrent_threads_per_session",
+    ]
+    assert all("reject" not in message.lower() for message in messages)
+
+
 def test_native_agent_inventory_and_fields_are_valid() -> None:
     assert not native_runtime_contract.validate_agents(ROOT)
     toml_names = {path.stem for path in (ROOT / ".codex/agents").glob("py-*.toml")}

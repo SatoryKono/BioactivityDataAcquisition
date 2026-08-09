@@ -5,7 +5,9 @@ source:
         provider: crossref
         base_url: https://api.crossref.org
         auth_type: email
-        mailto: ${BIOETL_CROSSREF_EMAIL}
+        # Documentation-only polite-pool contact. Runtime operators set the
+        # real technical contact through BIOETL_DEFAULT_EMAIL.
+        mailto: "your-email@example.com"
         client:
             timeout_sec: 30.0
             max_retries: 3

@@ -55,7 +55,7 @@ def _find_entity_files(entities_dir: Path) -> list[Path]:
     return [
         p
         for p in sorted(entities_dir.rglob(YAML_GLOB))
-        if not p.name.startswith("_") and not _is_legacy_composite_entity_stub(p)
+        if not p.name.startswith("_")
     ]
 
 
@@ -75,23 +75,6 @@ def _find_workflow_files(workflows_dir: Path) -> list[Path]:
     return [
         p for p in sorted(workflows_dir.glob(YAML_GLOB)) if not p.name.startswith("_")
     ]
-
-
-def _is_legacy_composite_entity_stub(config_path: Path) -> bool:
-    """Return True for historical composite-shaped entity payloads, if any remain.
-
-    Composite runtime is sourced from ``configs/composites/*.yaml``. This helper
-    now acts as a defensive guard in case an old composite-shaped entity file is
-    reintroduced under ``configs/entities``.
-    """
-    try:
-        payload = _load_yaml_payload(config_path)
-    except yaml.YAMLError:
-        return False
-    if payload is None:
-        return False
-    provider = str(payload.get("provider") or config_path.parent.name).strip().lower()
-    return provider == "composite"
 
 
 def _validate_yaml_schema(payload: Any, schema: dict[str, Any]) -> tuple[bool, str]:
