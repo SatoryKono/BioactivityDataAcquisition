@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Migrate file_size_limits exemption keys from basename to module path.
 
+SUNSET_DATE: 2027-02-09
+DEPRECATED: This oneoff migration script should be removed after the sunset date.
+RATIONALE: Oneoff migration for exemption keys migration. Not needed after initial migration.
+
 The migration keeps values/metadata intact and rewrites keys to canonical
 repository-relative module paths: ``src/bioetl/.../*.py``.
 
