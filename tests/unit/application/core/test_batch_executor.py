@@ -101,7 +101,6 @@ from bioetl.application.core.lifecycle.shutdown import (
     PipelineShutdownError,
     ShutdownSignal,
 )
-from bioetl.composition.factories.services.factory import ServicesBuilder
 from bioetl.domain.config import TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
@@ -113,6 +112,9 @@ from bioetl.domain.types import (
     GoldSchemaType,
     RunType,
     ValidationResult,
+)
+from tests.testing_support.application_batch_components import (
+    build_test_batch_processing_components,
 )
 
 
@@ -254,7 +256,7 @@ def _create_batch_executor(
 ) -> BatchExecutor:
     """Build BatchExecutor with composition-level dependency wiring."""
     error_classifier = ErrorClassifier()
-    components = ServicesBuilder.create_batch_processing_components(
+    components = build_test_batch_processing_components(
         services=services,
         context=context,
         config=config,

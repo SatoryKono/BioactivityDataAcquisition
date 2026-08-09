@@ -41,12 +41,14 @@ import pytest
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.record_processor import RecordProcessor
-from bioetl.composition.factories.services.factory import ServicesBuilder
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier, ErrorType
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.domain.types import RunType, ValidationResult
+from tests.testing_support.application_batch_components import (
+    build_test_batch_processing_components,
+)
 
 
 @pytest.fixture
@@ -108,7 +110,7 @@ def _create_record_processor(
 ) -> RecordProcessor:
     """Build RecordProcessor with composition-level dependency wiring."""
     tracer = NoOpTracing()
-    components = ServicesBuilder.create_batch_processing_components(
+    components = build_test_batch_processing_components(
         services=services,
         context=context,
         config=config,

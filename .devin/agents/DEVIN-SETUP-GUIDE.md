@@ -29,6 +29,86 @@ make devin DEVIN_ARGS='--permission-mode smart'
 only refreshes the gitignored daily MCP override and starts `devin` from the
 repository root, where the CLI discovers `AGENTS.md` and `.devin/**`.
 
+## Quick-Fix Shortcuts
+
+For common tasks, use the following shortcuts to reduce workflow overhead:
+
+```bash
+# Quick bug fix (5 steps vs 8, ~60% faster)
+make devin-fix-bug
+
+# Quick feature addition
+make devin-add-feature
+
+# Quick documentation update (2 steps vs 8, ~75% faster)
+make devin-update-docs
+
+# Quick config audit
+make devin-audit-config
+
+# List available workflows
+make devin-workflows
+```
+
+## Tiered MCP Startup
+
+For different task types, use tiered MCP startup profiles:
+
+```bash
+# Minimal MCP plane (memory, filesystem, fetch) - ~30 seconds
+make devin-mcp-start-minimal
+
+# Standard MCP plane (essential + github, docker, search) - ~1 minute
+make devin-mcp-start-standard
+
+# Full MCP plane (all 18 servers) - ~2 minutes
+make devin-mcp-start-full
+```
+
+**Note:** `make devin-mcp-start` now defaults to the standard profile for balanced performance.
+
+## Quick Reference
+
+For a comprehensive quick reference guide, see `.devin/QUICK_REFERENCE.md`, which includes:
+- Common task shortcuts
+- Profile selection guide
+- Workflow templates
+- Error recovery procedures
+- Performance tips
+
+## Simplified Workflow Templates
+
+For common scenarios, use simplified workflow templates in `.devin/workflows/`:
+
+- **quick-fix.md** - Single-file bug fixes (5 steps vs 8, ~60% faster)
+- **doc-only.md** - Documentation-only changes (2 steps vs 8, ~75% faster)
+- **config-only.md** - Configuration-only changes (4 steps vs 8, ~50% faster)
+
+These templates provide guidance for when to use simplified workflows vs the full ORCHESTRATION.md workflow.
+
+## Error Recovery
+
+For common error scenarios and recovery procedures, see `.devin/troubleshooting.md`, which covers:
+- py-test-bot failures
+- py-audit-bot MUST findings
+- Permission denied errors
+- MCP server issues
+- Memory workflow failures
+- And more...
+
+## Interactive Tutorial
+
+For new users, see `.devin/TUTORIAL.md` for a step-by-step introduction to Devin CLI with BioETL.
+
+## Profile Selection Guide
+
+For interactive profile selection, use:
+```bash
+make devin-select-profile
+```
+
+This provides an interactive menu to help choose the appropriate profile for your task type.
+
 ## Key Differences from Codex
 
 | Aspect | Codex | Devin |
