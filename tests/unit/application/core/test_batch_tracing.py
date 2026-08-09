@@ -204,8 +204,6 @@ def test_set_execution_stats_none_span(service: BatchTracingManagerService) -> N
     assert result is None
 
 
-
-
 def test_noop_tracing(mock_context: MagicMock, mock_config: MagicMock) -> None:
     """Explicit NoOpTracing keeps the service safe without hidden defaults."""
     svc = BatchTracingManagerService(

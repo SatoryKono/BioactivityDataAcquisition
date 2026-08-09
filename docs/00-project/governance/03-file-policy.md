@@ -201,8 +201,7 @@ Machine-readable каталог для structure hygiene хранится в
   successor pages;
 - разрешённый живой состав `docs/plans/**` и правило `max_active_backlog = 1`;
 - допустимые sidecar roots под `src/`: `src/bioetl`, `src/memory`;
-- approved docs-resident code zones under `docs/00-project/ai/agents/**` and
-  `docs/plugins/link_checker/**`;
+- approved docs-resident code zones under `docs/00-project/ai/agents/**`;
 - tolerated local-only hidden root trees such as `.agent-work/`,
   `.agentbridge/`, `.cache/`, `.coverage-sharded/`, `.scannerwork/`,
   `.venv-docs/`, `.venv-win/`, and `.venv-win-corrupt/`;
@@ -273,7 +272,6 @@ Machine-readable каталог для structure hygiene хранится в
 - Текущие ratified zones:
   - `docs/00-project/ai/agents/policy/`
   - `docs/00-project/ai/agents/scripts/`
-  - `docs/plugins/link_checker/`
 - Эти зоны считаются repo-only documentation/governance tooling surfaces и не
   дают blanket permission на размещение нового Python-кода в других частях
   `docs/**`.

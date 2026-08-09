@@ -43,4 +43,3 @@ async def test_streaming_chunk_size_must_be_positive() -> None:
             chunk_size=0,
         ):
             pass
-

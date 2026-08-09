@@ -102,11 +102,14 @@ class TestGoldStrictValidationPaths:
             valid_to_col="valid_to",
         )
 
-        assert writer._validate_scd2_requirements(
-            mode=GoldWriteMode.SCD2,
-            scd_config=scd_config,
-            ingestion_ts=FIXED_INGESTION_TS,
-        ) is None
+        assert (
+            writer._validate_scd2_requirements(
+                mode=GoldWriteMode.SCD2,
+                scd_config=scd_config,
+                ingestion_ts=FIXED_INGESTION_TS,
+            )
+            is None
+        )
 
     def test_validate_scd2_requires_config(self) -> None:
         """Test SCD2 validation requires scd_config."""
@@ -216,17 +219,23 @@ class TestGoldStrictValidationPaths:
 
         writer = TestWriter()
 
-        assert writer._validate_scd2_requirements(
-            mode=GoldWriteMode.APPEND,
-            scd_config=None,
-            ingestion_ts=None,
-        ) is None
+        assert (
+            writer._validate_scd2_requirements(
+                mode=GoldWriteMode.APPEND,
+                scd_config=None,
+                ingestion_ts=None,
+            )
+            is None
+        )
 
-        assert writer._validate_scd2_requirements(
-            mode=GoldWriteMode.OVERWRITE,
-            scd_config=None,
-            ingestion_ts=None,
-        ) is None
+        assert (
+            writer._validate_scd2_requirements(
+                mode=GoldWriteMode.OVERWRITE,
+                scd_config=None,
+                ingestion_ts=None,
+            )
+            is None
+        )
 
     def test_validate_schema_strict_true(self) -> None:
         """Test schema validation accepts strict=True schemas."""

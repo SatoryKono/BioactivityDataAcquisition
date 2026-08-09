@@ -880,6 +880,8 @@ class TestPubChemErrorPaths:
         # Verify that the single-page response contains structural data
         assert records[0].get("molecular_formula") == "C2H6O"
         assert records[0].get("molecular_weight") is not None
+
+
 _PUBCHEM_CASSETTE_BY_CLASS = {
     "TestPubChemFetchByQuery": "pubchem_query_contracts",
     "TestPubChemFetchFilteredBySmiles": "pubchem_smiles_contracts",

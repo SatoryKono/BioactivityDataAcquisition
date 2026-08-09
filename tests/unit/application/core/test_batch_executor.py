@@ -52,7 +52,6 @@ from bioetl.application.core.batch_execution import (
 )
 from bioetl.application.core.lifecycle.batch_fsm import (
     BatchExecutionFSM,
-    BatchExecutionState,
 )
 from bioetl.application.core.batch_processing_contracts import BatchProcessingOutcome
 from bioetl.application.core.batch_executor import (
