@@ -1794,7 +1794,7 @@
                 "inspect": true
               },
               "unit": "none",
-              "noValue": "No checkpoint-validation rows. Select an exact run and verify backend health; UNKNOWN or backend unavailable must not be treated as PASS."
+              "noValue": "No checkpoint-validation rows. Select an exact run and verify backend health; UNKNOWN or backend unavailable must not be treated as OK."
             },
             "overrides": [
               {
@@ -2406,7 +2406,7 @@
                 "inspect": true
               },
               "unit": "none",
-              "noValue": "No manifest-validation rows. Select an exact run and verify backend health; UNKNOWN or backend unavailable must not be treated as PASS."
+              "noValue": "No manifest-validation rows. Select an exact run and verify backend health; UNKNOWN or backend unavailable must not be treated as OK."
             },
             "overrides": [
               {
@@ -3418,7 +3418,7 @@
                 "inspect": true
               },
               "unit": "none",
-              "noValue": "No lineage-validation rows. Select an exact run and verify backend health; UNKNOWN or backend unavailable must not be treated as PASS."
+              "noValue": "No lineage-validation rows. Select an exact run and verify backend health; UNKNOWN or backend unavailable must not be treated as OK."
             },
             "overrides": [
               {
@@ -3481,7 +3481,7 @@
                 "inspect": true
               },
               "unit": "none",
-              "noValue": "No retention-compliance rows. Select an exact run and verify backend health; UNKNOWN or backend unavailable must not be treated as PASS."
+              "noValue": "No retention-compliance rows. Select an exact run and verify backend health; UNKNOWN or backend unavailable must not be treated as OK."
             },
             "overrides": [
               {

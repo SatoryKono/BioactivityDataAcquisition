@@ -97,6 +97,7 @@ def test_build_composite_launch_context_snapshot_returns_runtime_sensitive_field
         == "composite_execution_outside_strict_exact_replay_boundary"
     )
     assert result["required_persistence_profile"] == "degraded_observable"
+    assert result["run_ledger_enabled"] is True
     assert result["required_only"] is True
     assert result["seed_limit"] == 50
     assert result["enrich_only"] == ["openalex_publications"]

@@ -61,7 +61,7 @@ absence.
 | 135 | Track Replay Lag | timeseries | Prometheus | Replay lag trend by replay capability and status. | shared shell | Time trend; no static threshold in doc. |
 | 105 | Track Checkpoint Save Latency | timeseries | Prometheus | Histogram quantiles for checkpoint save latency. | shared shell | Quantile series `p50/p95/p99` are the key mapping. |
 | 106 | Track Global Checkpoint Admin Latency | timeseries | Prometheus | Histogram quantiles for global checkpoint operator latency. | shared shell | Quantile series `p50/p95/p99` are the key mapping. |
-| 9413 | Review Checkpoint Validation | table | BioETL Ops HTTP | Run-scoped parse, schema, checksum, and required-anchor checks with stable reason codes. | shared shell | `PASS/WARN/FAIL/UNKNOWN`; `UNKNOWN` never implies a healthy zero. |
+| 9413 | Review Checkpoint Validation | table | BioETL Ops HTTP | Run-scoped parse, schema, checksum, and required-anchor checks with stable reason codes. | shared shell | `OK/WARNING/ERROR/UNKNOWN`; `UNKNOWN` never implies a healthy zero. |
 
 ### Inspect Manifest & Ledger Evidence
 
@@ -75,7 +75,7 @@ absence.
 | 7 | Compare Ledger Appends by Type & Status | timeseries | Prometheus | Ledger appends by `event_type` and `status`. | shared shell | Series legend maps event/status breakdown. |
 | 132 | Monitor Manifest Failures (30m) | stat | Prometheus | 30-minute manifest write failure ratio severity. | shared shell | Threshold/value mapping encodes ratio severity. |
 | 133 | Monitor Ledger Failures (30m) | stat | Prometheus | 30-minute ledger append failure ratio severity. | shared shell | Threshold/value mapping encodes ratio severity. |
-| 9414 | Review Manifest Validation | table | BioETL Ops HTTP | Run-scoped parse, schema, schema-version, and contract-compatibility checks with stable reason codes. | shared shell | `PASS/WARN/FAIL/UNKNOWN`; unsupported schema versions are explicit. |
+| 9414 | Review Manifest Validation | table | BioETL Ops HTTP | Run-scoped parse, schema, schema-version, and contract-compatibility checks with stable reason codes. | shared shell | `OK/WARNING/ERROR/UNKNOWN`; unsupported schema versions are explicit. |
 
 ### Inspect Global Store Reliability
 
