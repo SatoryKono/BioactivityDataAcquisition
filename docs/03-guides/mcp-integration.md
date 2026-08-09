@@ -10,6 +10,12 @@ ______________________________________________________________________
 
 # MCP Integration Guide
 
+Platform detection and dynamic wrapper generation are documented in
+[`development/platform-tooling.md`](development/platform-tooling.md). The
+shared server-to-wrapper mapping is owned by
+`scripts/ops/runtime/mcp/shared-servers.json` and validated with
+`python -m scripts.ai.mcp wrappers check`.
+
 **Issue:** #6551
 **SSOT policy:** [MCP_LOCAL_RUNTIME_CONFIG.md](../00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md),
 AGENTS.md, machine-local `.mcp.json` surfaces
