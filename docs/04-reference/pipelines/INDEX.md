@@ -55,7 +55,7 @@ Shared evidence sources:
   [dq-contracts.md](../contracts/dq-contracts.md),
   [quarantine-management.md](../../05-operations/runbooks/quarantine-management.md),
   and
-  [dq-failure-investigation.md](../../05-operations/runbooks/dq-failure-investigation.md).
+  [pipeline-failure-dq.md](../../05-operations/runbooks/pipeline-failure-dq.md).
 - Replay, checkpoint, and run lifecycle:
   [run-manifest-ledger.md](../contracts/run-manifest-ledger.md),
   [checkpoint-debugging.md](../../05-operations/runbooks/checkpoint-debugging.md),

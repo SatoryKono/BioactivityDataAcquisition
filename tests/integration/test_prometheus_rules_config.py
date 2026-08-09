@@ -1760,43 +1760,43 @@ def test_dq_and_provider_alerts_reference_expected_metrics() -> None:
     expected = {
         "BioETLDQSoftThresholdExceeded": (
             "bioetl_dq_soft_threshold_exceeded",
-            "docs/05-operations/runbooks/dq-failure-investigation.md",
+            "docs/05-operations/runbooks/pipeline-failure-dq.md",
         ),
         "BioETLDQQuarantineRateHigh": (
             "bioetl_dq_records_quarantined_total",
-            "docs/05-operations/runbooks/dq-failure-investigation.md",
+            "docs/05-operations/runbooks/pipeline-failure-dq.md",
         ),
         "BioETLDQQuarantineRateCritical": (
             "bioetl_dq_records_quarantined_total",
-            "docs/05-operations/runbooks/dq-failure-investigation.md",
+            "docs/05-operations/runbooks/pipeline-failure-dq.md",
         ),
         "BioETLDQValidationFailuresCritical": (
             "bioetl_dq_validation_failures_total",
-            "docs/05-operations/runbooks/dq-failure-investigation.md",
+            "docs/05-operations/runbooks/pipeline-failure-dq.md",
         ),
         "BioETLGoldValidationFailuresCritical": (
             "bioetl_dq_validation_failures_total",
-            "docs/05-operations/runbooks/dq-failure-investigation.md",
+            "docs/05-operations/runbooks/pipeline-failure-dq.md",
         ),
         "BioETLDQCriticalAnomaliesDetected": (
             "bioetl_dq_anomaly_detected",
-            "docs/05-operations/runbooks/dq-failure-investigation.md",
+            "docs/05-operations/runbooks/pipeline-failure-dq.md",
         ),
         "BioETLSilverValidationFailuresDetected": (
             "bioetl_silver_validation_failures_total",
-            "docs/05-operations/runbooks/dq-failure-investigation.md",
+            "docs/05-operations/runbooks/pipeline-failure-dq.md",
         ),
         "BioETLSilverFilterRejectAccountingMismatch": (
             "bioetl_silver_filter_reject_total_mismatch_15m",
-            "docs/05-operations/runbooks/dq-failure-investigation.md",
+            "docs/05-operations/runbooks/pipeline-failure-dq.md",
         ),
         "BioETLDataFreshnessLagHigh": (
             "bioetl_data_freshness_seconds",
-            "docs/05-operations/runbooks/dq-failure-investigation.md",
+            "docs/05-operations/runbooks/pipeline-failure-dq.md",
         ),
         "BioETLDataFreshnessLagCritical": (
             "bioetl_data_freshness_seconds",
-            "docs/05-operations/runbooks/dq-failure-investigation.md",
+            "docs/05-operations/runbooks/pipeline-failure-dq.md",
         ),
         "BioETLProviderFailureRateHigh": (
             "bioetl_provider_health_check_failures_15m",
