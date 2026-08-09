@@ -52,6 +52,11 @@ HTTP identity backend contract:
 - HTTP-backed panels (`ID`, `Processed Records`, checkpoint freshness) are
   served by **`bioetl health server`** (default Docker main: `:8000`) via
   datasource **BioETL Ops HTTP**.
+- `BIOETL_OPS_HTTP_URL` configures the URL reached by the Grafana server. It is
+  not a browser URL. The visible `Check BioETL Ops HTTP health` links use the
+  same-origin Grafana proxy
+  `/api/datasources/proxy/uid/bioetl-ops-http/health/live`; do not replace them
+  with `localhost`, `127.0.0.1`, `host.docker.internal`, or container DNS.
 - The shared above-the-fold `ID` and `Processed Records` cards on primary
   dashboards carry explicit no-value copy. Generic Grafana `No data` on those
   cards is never acceptance evidence: check `/health/live`, selector scope,

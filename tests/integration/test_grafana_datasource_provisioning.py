@@ -50,6 +50,14 @@ def test_ops_http_datasource_is_repo_provisioned() -> None:
     assert "BIOETL_OPS_HTTP_URL" in content
     assert "http://bioetl:8000" in content
 
+    payload = yaml.safe_load(content)
+    datasource = payload["datasources"][0]
+    expected_backend_url = "${BIOETL_OPS_HTTP_URL:-http://bioetl:8000}"
+    assert datasource["uid"] == "bioetl-ops-http"
+    assert datasource["access"] == "proxy"
+    assert datasource["url"] == expected_backend_url
+    assert datasource["jsonData"]["allowedHosts"] == [expected_backend_url]
+
 
 def test_ops_http_compose_targets_main_health_server() -> None:
     """Grafana Infinity reaches main bioetl health server on the monitoring network."""
@@ -114,6 +122,10 @@ def test_monitoring_images_are_pinned_and_legacy_pushgateway_datasource_is_inert
     None
 ):
     monitoring = _load_monitoring_compose()
+    assert monitoring["services"]["grafana"]["image"] == (
+        "grafana/grafana:12.0.0@sha256:"
+        "263cbefd5d9b179893c47c415daab4da5c1f3d6770154741eca4f45c81119884"
+    )
     assert monitoring["services"]["prometheus"]["image"] == (
         "prom/prometheus:v3.13.1@sha256:3c42b892cf723fa54d2f262c37a0e1f80aa8c8ddb1da7b9b0df9455a35a7f893"
     )

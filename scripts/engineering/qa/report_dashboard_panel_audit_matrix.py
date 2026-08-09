@@ -17,7 +17,7 @@ HTTP_DATASOURCE_HINTS = (
     "bioetl-ops-http",
     "infinity",
 )
-EXPECTED_PANEL_COUNT = 218
+EXPECTED_PANEL_COUNT = 223
 
 
 def _iter_panels(payload: dict[str, object]) -> list[dict[str, object]]:
