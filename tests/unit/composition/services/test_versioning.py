@@ -52,14 +52,17 @@ def test_get_git_commit_returns_full_hash_on_success(mock_run: MagicMock) -> Non
     mock_run.return_value = SimpleNamespace(returncode=0, stdout=f"{full_hash}\n")
 
     assert versioning.get_git_commit() == full_hash
-    mock_run.assert_called_once_with(
-        ["git", "rev-parse", "HEAD"],
-        cwd=versioning._REPO_ROOT,
-        capture_output=True,
-        text=True,
-        timeout=5,
-        check=False,
-    )
+    # Check that git was called with rev-parse HEAD (allow for full git path)
+    call_args = mock_run.call_args[0][0]
+    assert call_args[-2:] == ["rev-parse", "HEAD"]
+    assert "git" in call_args[0]
+    mock_run.assert_called_once()
+    # Check other kwargs
+    assert mock_run.call_args.kwargs["cwd"] == versioning._REPO_ROOT
+    assert mock_run.call_args.kwargs["capture_output"] is True
+    assert mock_run.call_args.kwargs["text"] is True
+    assert mock_run.call_args.kwargs["timeout"] == 5
+    assert mock_run.call_args.kwargs["check"] is False
 
 
 @pytest.mark.unit
