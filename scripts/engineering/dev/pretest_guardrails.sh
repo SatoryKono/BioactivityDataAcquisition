@@ -30,6 +30,7 @@ SESSION_STATUS="ok"
 PRETEST_START_TS=""
 MEMORY_TMP_OUTPUT=""
 MEMORY_RAG_VALIDATION_REPORT=""
+FINAL_REPORT_PATH=""
 
 usage() {
     cat <<'EOF'
@@ -100,8 +101,19 @@ record_step() {
     local status="$2"
     local duration_seconds="$3"
     local command_text="$4"
-    printf '%s\t%s\t%s\t%s\n' "$label" "$status" "$duration_seconds" "$command_text" >>"$STEP_LOG_FILE"
+    local skip_reason="${5:-}"
+    local follow_up="${6:-}"
+    printf '%s\t%s\t%s\t%s\t%s\t%s\n' \
+        "$label" "$status" "$duration_seconds" "$command_text" \
+        "$skip_reason" "$follow_up" >>"$STEP_LOG_FILE"
     return 0
+}
+
+record_skip() {
+    local label="$1"
+    local reason="$2"
+    local follow_up="$3"
+    record_step "$label" "skip" "0.0" "not executed" "$reason" "$follow_up"
 }
 
 run_step() {
@@ -117,7 +129,10 @@ run_step() {
     command_text="$(printf '%q ' "$@")"
 
     if [[ "$DRY_RUN" == "1" ]]; then
-        record_step "$label" "dry-run" "0.0" "$command_text"
+        record_step \
+            "$label" "dry-run" "0.0" "$command_text" \
+            "command execution disabled by --dry-run" \
+            "rerun without --dry-run when execution evidence is required"
         return 0
     fi
 
@@ -211,6 +226,7 @@ write_report() {
     fi
 
     mkdir -p "$(dirname "$report_path")"
+    FINAL_REPORT_PATH="$report_path"
     "$PYTHON_BIN" - "$STEP_LOG_FILE" "$report_path" "$MODE" "$SCOPE" "$SESSION_STATUS" "$PRETEST_START_TS" "$STRICT_DOCS" "$MEMORY_RAG_VALIDATION_REPORT" "$MEMORY_TMP_OUTPUT" <<'PY'
 from __future__ import annotations
 
@@ -234,13 +250,24 @@ if step_file.exists():
     for line in step_file.read_text(encoding="utf-8").splitlines():
         if not line:
             continue
-        label, step_status, duration_seconds, command = line.split("\t", 3)
+        fields = line.split("\t", 5)
+        if len(fields) != 6:
+            continue
+        label, step_status, duration_seconds, command, skip_reason, follow_up = fields
         steps.append(
             {
                 "label": label,
                 "status": step_status,
+                "proof_status": {
+                    "ok": "pass",
+                    "failed": "fail",
+                    "dry-run": "skip",
+                    "skip": "skip",
+                }.get(step_status, "unavailable"),
                 "duration_seconds": float(duration_seconds),
                 "command": command.strip(),
+                "skip_reason": skip_reason or None,
+                "follow_up": follow_up or None,
             }
         )
 
@@ -292,6 +319,88 @@ print(f"[pretest-guardrails] report: {report_path}")
 PY
 }
 
+emit_proof_receipts() {
+    [[ -n "${PROOF_OR_STOP_RUN_ID:-}" ]] || return 0
+    [[ -n "${PROOF_OR_STOP_TASK_ID:-}" ]] || {
+        echo "[pretest-guardrails][proof] PROOF_OR_STOP_TASK_ID is required" >&2
+        return 0
+    }
+
+    local trust_tier="${PROOF_OR_STOP_TRUST_TIER:-local_single_host}"
+    local ci_run_id="${PROOF_OR_STOP_CI_RUN_ID:-${GITHUB_RUN_ID:-}}"
+    local governance_status="pass"
+    local governance_exit="0"
+    local -a governance_extra=()
+    if [[ "$DRY_RUN" == "1" ]]; then
+        governance_status="skip"
+        governance_exit=""
+        governance_extra+=(
+            --skip-reason "pretest guardrails ran in dry-run mode"
+            --follow-up "rerun without --dry-run"
+        )
+    elif [[ "$SESSION_STATUS" != "ok" ]]; then
+        governance_status="fail"
+        governance_exit="1"
+    fi
+    local -a common_args=(
+        --run-id "$PROOF_OR_STOP_RUN_ID"
+        --task-id "$PROOF_OR_STOP_TASK_ID"
+        --claim "${PROOF_OR_STOP_CLAIM:-ready_to_merge}"
+        --trust-tier "$trust_tier"
+    )
+    if [[ -n "$ci_run_id" ]]; then
+        common_args+=(--ci-run-id "$ci_run_id")
+    fi
+
+    local -a governance_args=(
+        "${common_args[@]}"
+        --receipt-id "pretest-guardrails-${GITHUB_JOB:-local}"
+        --producer pretest_guardrails
+        --evidence-kind governance
+        --command "bash scripts/engineering/dev/pretest_guardrails.sh"
+        --status "$governance_status"
+        --output-artifact "$FINAL_REPORT_PATH"
+        "${governance_extra[@]}"
+    )
+    if [[ -n "$governance_exit" ]]; then
+        governance_args+=(--exit-code "$governance_exit")
+    fi
+    "$PYTHON_BIN" -m scripts.engineering.qa proof-or-stop receipt \
+        "${governance_args[@]}" || \
+        echo "[pretest-guardrails][proof] governance receipt capture failed" >&2
+
+    local docs_status="pass"
+    local docs_exit="0"
+    local -a docs_extra=()
+    if [[ "$SKIP_DOCS" == "1" || "$RUN_DOCS_VERIFY" != "1" ]]; then
+        docs_status="skip"
+        docs_exit=""
+        docs_extra+=(
+            --skip-reason "docs verification is outside the selected pretest profile"
+            --follow-up "rerun with --scope full or --scope strict"
+        )
+    elif [[ "$SESSION_STATUS" != "ok" ]]; then
+        docs_status="fail"
+        docs_exit="1"
+    fi
+    local -a docs_args=(
+        "${common_args[@]}"
+        --receipt-id "docs-runtime-${GITHUB_JOB:-local}"
+        --producer docs_runtime_checks
+        --evidence-kind docs_runtime
+        --command "python -m scripts.docs verify"
+        --status "$docs_status"
+        --output-artifact "$FINAL_REPORT_PATH"
+        "${docs_extra[@]}"
+    )
+    if [[ -n "$docs_exit" ]]; then
+        docs_args+=(--exit-code "$docs_exit")
+    fi
+    "$PYTHON_BIN" -m scripts.engineering.qa proof-or-stop receipt \
+        "${docs_args[@]}" || \
+        echo "[pretest-guardrails][proof] docs receipt capture failed" >&2
+}
+
 cleanup_temp() {
     if [[ -n "$MEMORY_TMP_OUTPUT" && -d "$MEMORY_TMP_OUTPUT" ]]; then
         rm -rf "$MEMORY_TMP_OUTPUT"
@@ -311,6 +420,7 @@ on_exit() {
         SESSION_STATUS="failed"
     fi
     write_report
+    emit_proof_receipts
     cleanup_temp
     return 0
 }
@@ -417,14 +527,18 @@ load_profile() {
 }
 
 run_cleanup() {
-    [[ "$SKIP_CLEANUP" == "0" ]] || return 0
-    [[ "$RUN_CLEANUP" == "1" ]] || return 0
+    if [[ "$SKIP_CLEANUP" != "0" || "$RUN_CLEANUP" != "1" ]]; then
+        record_skip cleanup "cleanup disabled by option or profile" "rerun without --skip-cleanup when cleanup evidence is required"
+        return 0
+    fi
     run_step cleanup env BIOETL_PREFLIGHT_PRESERVE_PYTEST_CACHE=1 bash scripts/engineering/repo/preflight_cleanup.sh
 }
 
 run_auto_fix() {
-    [[ "$MODE" == "auto" ]] || return 0
-    [[ "$RUN_AUTO_FIX" == "1" ]] || return 0
+    if [[ "$MODE" != "auto" || "$RUN_AUTO_FIX" != "1" ]]; then
+        record_skip auto-fix "write-capable auto-fix is not selected" "rerun with --mode auto only when deterministic refresh is authorized"
+        return 0
+    fi
 
     echo "[pretest-guardrails][write] auto mode enabled; running repository metadata sync steps"
     run_step integration-vcr-policy-sync \
@@ -443,8 +557,10 @@ run_auto_fix() {
 }
 
 run_repo_checks() {
-    [[ "$SKIP_REPO" == "0" ]] || return 0
-    [[ "$RUN_REPO_CHECKS" == "1" ]] || return 0
+    if [[ "$SKIP_REPO" != "0" || "$RUN_REPO_CHECKS" != "1" ]]; then
+        record_skip repo-checks "repository checks disabled by option or profile" "rerun without --skip-repo"
+        return 0
+    fi
 
     if [[ "$MODE" == "auto" ]]; then
         # Ensure the inventory is completely up to date before running checks that depend on it.
@@ -489,8 +605,10 @@ run_repo_checks() {
 }
 
 run_docs_identity_checks() {
-    [[ "$SKIP_DOCS" == "0" ]] || return 0
-    [[ "$RUN_DOCS_IDENTITY_CHECKS" == "1" ]] || return 0
+    if [[ "$SKIP_DOCS" != "0" || "$RUN_DOCS_IDENTITY_CHECKS" != "1" ]]; then
+        record_skip docs-identity "docs identity checks disabled by option or profile" "rerun without --skip-docs using a docs-enabled profile"
+        return 0
+    fi
 
     run_step repo-identity-check \
         "$PYTHON_BIN" -m scripts.docs sync-repo-identity --check
@@ -499,8 +617,10 @@ run_docs_identity_checks() {
 }
 
 run_docs_verify() {
-    [[ "$SKIP_DOCS" == "0" ]] || return 0
-    [[ "$RUN_DOCS_VERIFY" == "1" ]] || return 0
+    if [[ "$SKIP_DOCS" != "0" || "$RUN_DOCS_VERIFY" != "1" ]]; then
+        record_skip docs-verify "docs verification disabled by option or profile" "rerun with --scope full or --scope strict"
+        return 0
+    fi
 
     local -a cmd=("$PYTHON_BIN" -m scripts.docs verify)
     if [[ "$STRICT_DOCS" != "1" ]]; then
@@ -510,8 +630,10 @@ run_docs_verify() {
 }
 
 run_memory_checks() {
-    [[ "$SKIP_MEMORY" == "0" ]] || return 0
-    [[ "$RUN_MEMORY_CHECKS" == "1" ]] || return 0
+    if [[ "$SKIP_MEMORY" != "0" || "$RUN_MEMORY_CHECKS" != "1" ]]; then
+        record_skip memory-checks "memory checks disabled by option or profile" "rerun without --skip-memory"
+        return 0
+    fi
 
     local memory_pythonpath="$REPO_ROOT/src:$REPO_ROOT"
     if [[ -n "${PYTHONPATH:-}" ]]; then
@@ -561,11 +683,16 @@ run_memory_checks() {
 }
 
 run_architecture_checks() {
-    [[ "$SKIP_ARCHITECTURE" == "0" ]] || return 0
-    [[ -n "$ARCHITECTURE_GROUP" ]] || return 0
+    if [[ "$SKIP_ARCHITECTURE" != "0" || -z "$ARCHITECTURE_GROUP" ]]; then
+        record_skip architecture-checks "architecture checks disabled by option or profile" "rerun without --skip-architecture using a profile with an architecture group"
+        return 0
+    fi
 
     mapfile -t architecture_targets < <(config_architecture_targets "$ARCHITECTURE_GROUP")
-    [[ "${#architecture_targets[@]}" -gt 0 ]] || return 0
+    if [[ "${#architecture_targets[@]}" -eq 0 ]]; then
+        record_skip architecture-checks "profile architecture group has no targets" "repair configs/quality/pretest_guardrails.yaml"
+        return 0
+    fi
 
     local -a cmd=(
         bash scripts/engineering/dev/run_pytest.sh

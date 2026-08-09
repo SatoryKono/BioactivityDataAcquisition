@@ -88,6 +88,31 @@ runtime/docs mirror status, and debt outcome (`improved`, `unchanged`, or
 determinism, security, or technical-debt gate. `worsened` cannot be hidden by
 raising a budget or exemption limit.
 
+## Proof-or-Stop Closeout
+
+Agent prose is a claim, not lifecycle state. For write-capable tasks, create a
+source-bound closeout plan and, after the existing validation commands finish,
+assemble and verify their normalized receipts:
+
+```bash
+<python> -m scripts.engineering.qa proof-or-stop plan \
+  --task-id <task-id> --claim done --run-id <run-id>
+<python> -m scripts.engineering.qa proof-or-stop assemble \
+  --task-id <task-id> --claim done --run-id <run-id> \
+  --actor <agent> --runtime <runtime> --trust-tier local_single_host \
+  --receipt <receipt.json>
+<python> -m scripts.engineering.qa proof-or-stop verify \
+  --bundle reports/quality/proof-or-stop/<run-id>/bundle.json
+```
+
+Use `.venv-win/Scripts/python.exe` on native Windows and
+`.venv/bin/python` in WSL/Linux. `ADMIT` is the only outcome that can qualify a
+lifecycle transition at the policy-required trust tier. `DEGRADED` and `STOP`
+must be reported with reasons and follow-up; unavailable evidence is never
+pass. Optional vendor evaluators may add receipts but cannot override the core
+verifier. EvidenceStore ingestion is a separate explicit operation and never
+creates a waiver or `DecisionRecord`.
+
 ## Related Runtime Surfaces
 
 - `.codex/agents/ORCHESTRATION.md`

@@ -179,6 +179,22 @@ Templates do not broaden user authority. Diagnosis and review stay read-only unl
 
 Every closeout reports checks run, skipped checks with exact reasons/follow-up, runtime/docs mirror status, and debt outcome (`improved`, `unchanged`, or `worsened`). A lower tier cannot bypass an applicable architecture, determinism, security, or technical-debt gate. `worsened` cannot be hidden by raising a budget or exemption limit.
 
+## Proof-or-Stop Closeout
+
+Agent prose is a claim, not lifecycle state. For every write-capable task, run
+`python -m scripts.engineering.qa proof-or-stop plan` before closeout, capture
+the existing validation reports as normalized receipts, then run
+`proof-or-stop assemble` and `proof-or-stop verify`. Use
+`.venv-win/Scripts/python.exe` on native Windows and `.venv/bin/python` in
+WSL/Linux.
+
+Only `ADMIT` at the policy-required trust tier can qualify `tested`, `reviewed`,
+`done`, or `ready_to_merge`. `DEGRADED` and `STOP` remain non-qualified claims
+and require explicit reasons/follow-up. Unavailable evidence is never pass.
+Optional vendor evaluators can add evidence but cannot override the offline
+core verifier. EvidenceStore ingestion is a separate, explicitly authorized
+command and never creates a waiver or `DecisionRecord`.
+
 ## Foreground vs Background Strategy
 
 ### Foreground Subagents

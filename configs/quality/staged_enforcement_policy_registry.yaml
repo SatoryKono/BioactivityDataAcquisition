@@ -7,6 +7,18 @@ rationale: >
   policy drift stays reviewable without hard-coded calendar windows.
 contract_subset_policy: fail_fast_subset_of_registry_only
 policies:
+  - check_name: proof_or_stop_closeout
+    current_stage: observe
+    failure_threshold: 1.0
+    warning_threshold: 0.0
+    policy_group: governance
+    included_in_contract_subset: false
+    domain_engine: false
+    rollback_stage: observe
+    promotion_requirements:
+      - adversarial_pilot_zero_false_admit
+      - adversarial_pilot_zero_tamper_accepts
+      - two_clean_ci_observation_runs
   - check_name: fixture_governance
     current_stage: soft_fail
     failure_threshold: 0.8

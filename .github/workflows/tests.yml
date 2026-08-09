@@ -1387,3 +1387,228 @@ jobs:
           path: reports/quality/test-runs/
           if-no-files-found: warn
           retention-days: 14
+
+  proof-or-stop-advisory:
+    name: Proof-or-Stop advisory closeout
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    needs:
+      - dependency-preflight
+      - governance-preflight
+      - quality-metrics-gate
+      - test-fast
+      - repo-backed-unit
+      - unit-scripts-tooling
+      - test-matrix
+      - memory-tests
+      - coverage-verify
+      - duration-telemetry
+    env:
+      PROOF_OR_STOP_RUN_ID: github-${{ github.run_id }}-${{ github.run_attempt }}
+      PROOF_OR_STOP_TASK_ID: github-${{ github.run_id }}-${{ github.run_attempt }}
+      PROOF_OR_STOP_CLAIM: ready_to_merge
+      PROOF_OR_STOP_TRUST_TIER: ci
+      PROOF_OR_STOP_CI_RUN_ID: ${{ github.run_id }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          lfs: false
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+
+      - name: Download existing test-health evidence
+        continue-on-error: true
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: test-health-telemetry
+          path: reports/quality/proof-or-stop/${{ env.PROOF_OR_STOP_RUN_ID }}/upstream/test-health
+
+      - name: Download existing quality evidence
+        continue-on-error: true
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: ci-quality-metrics
+          path: reports/quality/proof-or-stop/${{ env.PROOF_OR_STOP_RUN_ID }}/upstream/quality
+
+      - name: Download existing coverage evidence
+        continue-on-error: true
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: coverage-report
+          path: reports/quality/proof-or-stop/${{ env.PROOF_OR_STOP_RUN_ID }}/upstream/coverage
+
+      - name: Record upstream job identities
+        env:
+          UPSTREAM_NEEDS: ${{ toJSON(needs) }}
+        run: |
+          mkdir -p "reports/quality/proof-or-stop/${PROOF_OR_STOP_RUN_ID}/upstream"
+          printf '%s\n' "$UPSTREAM_NEEDS" > \
+            "reports/quality/proof-or-stop/${PROOF_OR_STOP_RUN_ID}/upstream/needs.json"
+
+      - name: Run docs and runtime parity evidence producer
+        id: docs_runtime
+        shell: bash
+        run: |
+          set +e
+          mkdir -p "reports/quality/proof-or-stop/${PROOF_OR_STOP_RUN_ID}/upstream"
+          {
+            uv run --frozen --no-build python -m scripts.docs verify --skip-build
+            bash scripts/ai/junie/check_junie_mirror.sh --check
+          } > "reports/quality/proof-or-stop/${PROOF_OR_STOP_RUN_ID}/upstream/docs-runtime.log" 2>&1
+          rc=$?
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Normalize required producer receipts
+        shell: bash
+        env:
+          GOVERNANCE_RESULT: ${{ needs.governance-preflight.result }}
+          QUALITY_RESULT: ${{ needs.quality-metrics-gate.result }}
+          TEST_RESULTS: >-
+            ${{ needs.test-fast.result }} ${{ needs.repo-backed-unit.result }}
+            ${{ needs.unit-scripts-tooling.result }} ${{ needs.test-matrix.result }}
+            ${{ needs.memory-tests.result }} ${{ needs.coverage-verify.result }}
+            ${{ needs.duration-telemetry.result }}
+          DOCS_RUNTIME_RC: ${{ steps.docs_runtime.outputs.rc }}
+        run: |
+          set -euo pipefail
+          needs_path="reports/quality/proof-or-stop/${PROOF_OR_STOP_RUN_ID}/upstream/needs.json"
+          docs_path="reports/quality/proof-or-stop/${PROOF_OR_STOP_RUN_ID}/upstream/docs-runtime.log"
+
+          capture_receipt() {
+            local producer="$1"
+            local kind="$2"
+            local command_text="$3"
+            local result="$4"
+            local output_path="$5"
+            local status="pass"
+            local -a outcome_args=(--exit-code 0)
+            if [[ "$result" == *failure* ]]; then
+              status="fail"
+              outcome_args=(--exit-code 1)
+            elif [[ "$result" == *cancelled* || "$result" == *skipped* ]]; then
+              status="unavailable"
+              outcome_args=(
+                --skip-reason "required CI producer did not complete"
+                --follow-up "rerun the complete Tests workflow"
+              )
+            fi
+            uv run --frozen --no-build python -m scripts.engineering.qa proof-or-stop receipt \
+              --run-id "$PROOF_OR_STOP_RUN_ID" \
+              --task-id "$PROOF_OR_STOP_TASK_ID" \
+              --claim "$PROOF_OR_STOP_CLAIM" \
+              --producer "$producer" \
+              --receipt-id "${producer}-${GITHUB_JOB}" \
+              --evidence-kind "$kind" \
+              --command "$command_text" \
+              --status "$status" \
+              --trust-tier "$PROOF_OR_STOP_TRUST_TIER" \
+              --ci-run-id "$PROOF_OR_STOP_CI_RUN_ID" \
+              --output-artifact "$output_path" \
+              "${outcome_args[@]}"
+          }
+
+          capture_receipt \
+            test_health tests \
+            "python -m scripts.engineering.qa run-tests" \
+            "$TEST_RESULTS" "$needs_path"
+          capture_receipt \
+            pretest_guardrails governance \
+            "bash scripts/engineering/dev/pretest_guardrails.sh" \
+            "$GOVERNANCE_RESULT" "$needs_path"
+          capture_receipt \
+            debt_governance_gates debt \
+            "python -m scripts.engineering.qa report-debt-governance-gates" \
+            "$GOVERNANCE_RESULT" "$needs_path"
+          capture_receipt \
+            quality_integral_gate quality \
+            "python -m scripts.engineering.ci.quality_integral_gate" \
+            "$QUALITY_RESULT" "$needs_path"
+
+          docs_result="success"
+          if [[ "$DOCS_RUNTIME_RC" != "0" ]]; then
+            docs_result="failure"
+          fi
+          capture_receipt \
+            docs_runtime_checks docs_runtime \
+            "python -m scripts.docs verify" \
+            "$docs_result" "$docs_path"
+
+      - name: Assemble and verify the closeout bundle
+        id: proof_verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_dir="reports/quality/proof-or-stop/${PROOF_OR_STOP_RUN_ID}"
+          receipt_args=()
+          while IFS= read -r -d '' receipt_path; do
+            receipt_args+=(--receipt "$receipt_path")
+          done < <(find "$run_dir/receipts" -type f -name '*.json' -print0 | sort -z)
+
+          uv run --frozen --no-build python -m scripts.engineering.qa proof-or-stop assemble \
+            --run-id "$PROOF_OR_STOP_RUN_ID" \
+            --task-id "$PROOF_OR_STOP_TASK_ID" \
+            --claim "$PROOF_OR_STOP_CLAIM" \
+            --actor github-actions \
+            --runtime github-actions \
+            --trust-tier "$PROOF_OR_STOP_TRUST_TIER" \
+            --ci-run-id "$PROOF_OR_STOP_CI_RUN_ID" \
+            "${receipt_args[@]}"
+
+          set +e
+          uv run --frozen --no-build python -m scripts.engineering.qa proof-or-stop verify \
+            --bundle "$run_dir/bundle.json"
+          rc=$?
+          set -e
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+
+      - name: Publish Proof-or-Stop summary
+        if: always()
+        shell: bash
+        run: |
+          run_dir="reports/quality/proof-or-stop/${PROOF_OR_STOP_RUN_ID}"
+          if [[ -f "$run_dir/verification.json" ]]; then
+            outcome="$(uv run --frozen --no-build python -c 'import json,sys; print(json.load(open(sys.argv[1]))["outcome"])' "$run_dir/verification.json")"
+          else
+            outcome="STOP"
+          fi
+          {
+            echo "## Proof-or-Stop closeout"
+            echo "Outcome: **${outcome}**"
+            echo "Enforcement is controlled by configs/quality/staged_enforcement_policy_registry.yaml."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Proof-or-Stop bundle
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: proof-or-stop-${{ github.run_id }}-${{ github.run_attempt }}
+          path: reports/quality/proof-or-stop/${{ env.PROOF_OR_STOP_RUN_ID }}/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Apply staged Proof-or-Stop enforcement
+        if: always()
+        env:
+          VERIFY_RC: ${{ steps.proof_verify.outputs.rc }}
+        run: |
+          stage="$(uv run --frozen --no-build python -c 'import yaml; data=yaml.safe_load(open("configs/quality/staged_enforcement_policy_registry.yaml")); print(next(item["current_stage"] for item in data["policies"] if item["check_name"] == "proof_or_stop_closeout"))')"
+          if [[ "${VERIFY_RC:-2}" == "0" ]]; then
+            exit 0
+          fi
+          if [[ "$stage" == "hard_fail" ]]; then
+            echo "::error::Proof-or-Stop blocked the closeout."
+            exit "${VERIFY_RC:-2}"
+          fi
+          if [[ "$stage" == "soft_fail" ]]; then
+            echo "::warning::Proof-or-Stop closeout is not admitted (soft_fail stage)."
+          else
+            echo "::notice::Proof-or-Stop closeout is advisory (observe stage)."
+          fi
