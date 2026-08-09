@@ -185,9 +185,7 @@ def main() -> int:
     parser.add_argument(
         "--backup", action="store_true", help="Backup current wiki files"
     )
-    parser.add_argument(
-        "--validate", action="store_true", help="Validate wiki files"
-    )
+    parser.add_argument("--validate", action="store_true", help="Validate wiki files")
     parser.add_argument(
         "--check",
         action="store_true",
@@ -222,7 +220,9 @@ def main() -> int:
 
     # Default: print summary
     updater.print_update_summary()
-    print("\nUse --backup to backup, --validate to validate, or follow the manual workflow in .devin/workflows/deepwiki-regeneration.md")
+    print(
+        "\nUse --backup to backup, --validate to validate, or follow the manual workflow in .devin/workflows/deepwiki-regeneration.md"
+    )
     return 0
 
 

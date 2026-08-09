@@ -2131,9 +2131,11 @@ fields:
 | [ADR-053](../02-architecture/decisions/ADR-053-optional-grafana-scenes-app-shell.md) | Optional Grafana Scenes App Shell as Presentation Adapter | Accepted | 2026-07-28 |
 | [ADR-054](../02-architecture/decisions/ADR-054-passport-documentation-projections.md) | Evidence-backed Passport Documentation Projections | Accepted | 2026-07-29 |
 | [ADR-055](../02-architecture/decisions/ADR-055-workflow-reconciliation-data-step-ownership.md) | Retain Foreign-key Reconciliation as a Governed Workflow Data Step | Accepted | 2026-07-29 |
+| [ADR-056](../02-architecture/decisions/ADR-056-proof-or-stop-lifecycle-control.md) | Proof-or-Stop Lifecycle Control | Accepted | 2026-08-09 |
 
 ## История Изменений (Changelog)
 
+- **6.1.8** (2026-08-09): ADR Registry Governance Sync. Приложение F синхронизировано через ADR-056 (Proof-or-Stop lifecycle control).
 - **6.1.7** (2026-07-30): ADR Registry Governance Sync. Приложение F синхронизировано через ADR-055; добавлены ADR-054 (passport documentation projections) и ADR-055 (workflow reconciliation data-step ownership).
 - **6.1.6** (2026-07-28): ADR Registry Governance Sync. Приложение F синхронизировано через ADR-053 (optional Grafana Scenes App Shell as presentation adapter; dual-path with provisioned JSON under ADR-010).
 - **6.1.5** (2026-07-16): Qodo rules reconciliation. 66 unique Qodo rule IDs

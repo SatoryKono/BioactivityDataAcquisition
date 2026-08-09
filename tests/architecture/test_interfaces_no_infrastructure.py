@@ -365,29 +365,19 @@ class TestApplicationServicesExist:
     def test_quarantine_service_exists(self):
         """Test QuarantineService exists."""
         service_path = (
-            SRC_PATH
-            / "application"
-            / "services"
-            / "quality"
-            / "quarantine_service.py"
+            SRC_PATH / "application" / "services" / "quality" / "quarantine_service.py"
         )
         assert service_path.exists(), "QuarantineService should exist"
 
     def test_lock_service_exists(self):
         """Test LockService exists."""
-        service_path = (
-            SRC_PATH / "application" / "services" / "ops" / "lock_service.py"
-        )
+        service_path = SRC_PATH / "application" / "services" / "ops" / "lock_service.py"
         assert service_path.exists(), "LockService should exist"
 
     def test_bronze_cleanup_service_exists(self):
         """Test BronzeCleanupService exists."""
         service_path = (
-            SRC_PATH
-            / "application"
-            / "services"
-            / "ops"
-            / "bronze_cleanup_service.py"
+            SRC_PATH / "application" / "services" / "ops" / "bronze_cleanup_service.py"
         )
         assert service_path.exists(), "BronzeCleanupService should exist"
 

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-09T12:58:29.013811+00:00",
+  "generated_at": "2026-08-09T13:23:54.121852+00:00",
   "summary": {
     "total_scripts": 573,
     "status_counts": {
@@ -5869,13 +5869,13 @@
           "path": "tests/unit/repo_backed/tools/test_differentiate_linkstyle_security.py",
           "line": 28,
           "source_group": "tests",
-          "text": "\"\"\"Security regression tests for src/tools/differentiate_linkstyle.py.\"\"\""
+          "text": "\"\"\"Security regression tests for scripts/diagrams/fix/differentiate_linkstyle.py.\"\"\""
         },
         {
           "path": "tests/unit/repo_backed/tools/test_differentiate_linkstyle_security.py",
-          "line": 44,
+          "line": 45,
           "source_group": "tests",
-          "text": "module_path = repo_root / \"src\" / \"tools\" / \"differentiate_linkstyle.py\""
+          "text": "repo_root / \"scripts\" / \"diagrams\" / \"fix\" / \"differentiate_linkstyle.py\""
         }
       ]
     },
@@ -8870,7 +8870,7 @@
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
           "line": 344,
           "source_group": "tests",
-          "text": "\"scripts/engineering/ci/apply-ci-optimizations.ps1\": ("
+          "text": "\"scripts/engineering/ci/apply-ci-optimizations.ps1\": (\"legacy_manual_utility\"),"
         }
       ],
       "owner": "@bioetl-platform",
@@ -9124,7 +9124,7 @@
         },
         {
           "path": "docs/00-project/ai/prompts/test_speed_optimization_loop.md",
-          "line": 30,
+          "line": 101,
           "source_group": "docs",
           "text": "- `scripts/engineering/dev/run_pytest.sh`, `scripts/engineering/dev/run_pytest.ps1`, `scripts/engineering/ci/run_pytest_resilient.py`"
         },
@@ -10176,13 +10176,13 @@
         },
         {
           "path": "docs/00-project/ai/prompts/test_fix_retest_loop.md",
-          "line": 18,
+          "line": 89,
           "source_group": "docs",
           "text": "- Linux/WSL: `bash scripts/engineering/dev/run_pytest.sh <scope> --maxfail=1 -q`"
         },
         {
           "path": "docs/00-project/ai/prompts/test_speed_optimization_loop.md",
-          "line": 20,
+          "line": 91,
           "source_group": "docs",
           "text": "- Для mixed Windows + WSL checkout в WSL используй `bash scripts/engineering/dev/run_pytest.sh`, для CI/single-OS допускается `uv run python -m pytest`."
         }
@@ -11297,7 +11297,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 306,
+      "reference_count": 304,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -14407,7 +14407,7 @@
         },
         {
           "path": "tests/architecture/test_observability_metric_governance.py",
-          "line": 299,
+          "line": 297,
           "source_group": "tests",
           "text": "== \"scripts/engineering/qa/report_observability_metric_inventory.py\""
         }
@@ -15470,7 +15470,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 347,
+          "line": 345,
           "source_group": "tests",
           "text": "\"scripts/engineering/repo/apply_branch_cleanup_phases_0_2.sh\": ("
         }
@@ -15489,9 +15489,9 @@
       "references": [
         {
           "path": "tests/unit/repo_backed/scripts/test_apply_entity_naming_rename_plan.py",
-          "line": 45,
+          "line": 50,
           "source_group": "tests",
-          "text": "module_path = repo_root / \"src\" / \"tools\" / \"apply_entity_naming_rename_plan.py\""
+          "text": "/ \"apply_entity_naming_rename_plan.py\""
         }
       ]
     },
