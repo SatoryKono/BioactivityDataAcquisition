@@ -54,7 +54,6 @@ def _write_governance_files(tmp_path: Path) -> None:
                 },
                 "docs_code_zones": {
                     "approved_roots": [
-                        {"path": "docs/plugins/link_checker"},
                         {"path": "docs/00-project/ai/agents/scripts"},
                     ],
                 },
@@ -94,15 +93,11 @@ def test_run_audit_allows_tests_tree_support_package(tmp_path: Path) -> None:
     assert not result.should_violations
 
 
-def test_run_audit_allows_cataloged_docs_code_zones_and_tolerated_hidden_roots(
+def test_run_audit_allows_cataloged_docs_code_zone_and_tolerated_hidden_roots(
     tmp_path: Path,
 ) -> None:
     _write_governance_files(tmp_path)
     _write_minimal_repo_tree(tmp_path)
-    (tmp_path / "docs" / "plugins" / "link_checker").mkdir(parents=True)
-    (tmp_path / "docs" / "plugins" / "link_checker" / "plugin.py").write_text(
-        "print('ok')\n", encoding="utf-8"
-    )
     (tmp_path / "docs" / "00-project" / "ai" / "agents" / "scripts").mkdir(
         parents=True, exist_ok=True
     )
