@@ -2,21 +2,23 @@
 
 from __future__ import annotations
 
+from bioetl.application.observability.control_plane_evidence import (
+    EvidenceCheckResult,
+    EvidenceStatus,
+)
 from bioetl.application.services.control_plane.evidence.failure_reasons import (
     FAILURE_REASON_CATEGORIES,
     build_unknown_failure_reason_rows,
 )
 from bioetl.application.services.control_plane.evidence.models import (
     CONTROL_PLANE_EVIDENCE_CONTRACT,
-    EvidenceCheck,
-    EvidenceStatus,
 )
 from bioetl.application.services.control_plane.evidence.service import (
     DEFAULT_CONTROL_PLANE_RETENTION_DAYS,
     ControlPlaneEvidenceService,
 )
 from bioetl.application.services.control_plane.evidence.service_support import (
-    EvidenceScope,
+    EvidenceScopeContext,
 )
 
 __all__ = [
@@ -24,8 +26,8 @@ __all__ = [
     "DEFAULT_CONTROL_PLANE_RETENTION_DAYS",
     "FAILURE_REASON_CATEGORIES",
     "ControlPlaneEvidenceService",
-    "EvidenceCheck",
-    "EvidenceScope",
+    "EvidenceCheckResult",
+    "EvidenceScopeContext",
     "EvidenceStatus",
     "build_unknown_failure_reason_rows",
 ]

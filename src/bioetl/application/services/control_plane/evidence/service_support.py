@@ -4,16 +4,16 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 
-from bioetl.application.services.control_plane.evidence.models import (
-    EvidenceCheck,
-    evidence_payload,
+from bioetl.application.observability.control_plane_evidence import (
+    EvidenceCheckResult,
 )
+from bioetl.application.services.control_plane.evidence.models import evidence_payload
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.ports import RunLedgerPort
 
 
 @dataclass(frozen=True, slots=True)
-class EvidenceScope:
+class EvidenceScopeContext:
     """Resolved selector context passed from the HTTP interface."""
 
     requested_pipeline: str
@@ -26,8 +26,8 @@ class EvidenceScope:
 def service_payload(
     *,
     endpoint: str,
-    scope: EvidenceScope,
-    checks: tuple[EvidenceCheck, ...],
+    scope: EvidenceScopeContext,
+    checks: tuple[EvidenceCheckResult, ...],
     additional_data: dict[str, object] | None = None,
 ) -> dict[str, object]:
     """Build the shared service payload from one resolved selector scope."""
@@ -44,9 +44,9 @@ def service_payload(
 
 
 def sanitized_manifest_payload_scope(
-    scope: EvidenceScope,
-    checks: tuple[EvidenceCheck, ...],
-) -> EvidenceScope:
+    scope: EvidenceScopeContext,
+    checks: tuple[EvidenceCheckResult, ...],
+) -> EvidenceScopeContext:
     """Discard coerced manifest identity when raw parse/schema evidence failed."""
     identity_untrusted = any(
         check.status == "ERROR" and check.check in {"parse", "schema"}
@@ -58,7 +58,7 @@ def sanitized_manifest_payload_scope(
 def source_error_payload(
     *,
     endpoint: str,
-    scope: EvidenceScope,
+    scope: EvidenceScopeContext,
     reason: str,
     check: str,
 ) -> dict[str, object]:
@@ -67,7 +67,7 @@ def source_error_payload(
         endpoint=endpoint,
         scope=scope,
         checks=(
-            EvidenceCheck(
+            EvidenceCheckResult(
                 check,
                 "ERROR",
                 reason,
@@ -88,7 +88,7 @@ def ledger_entries(
 
 
 __all__ = [
-    "EvidenceScope",
+    "EvidenceScopeContext",
     "ledger_entries",
     "sanitized_manifest_payload_scope",
     "service_payload",
