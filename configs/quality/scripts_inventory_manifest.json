@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-10T14:22:03.249311+00:00",
+  "generated_at": "2026-08-10T15:00:10.122190+00:00",
   "summary": {
     "total_scripts": 580,
     "status_counts": {
@@ -2629,7 +2629,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1571,
+          "line": 1598,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
@@ -9605,7 +9605,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1189,
+          "line": 1195,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -9641,7 +9641,7 @@
         },
         {
           "path": "tests/architecture/test_ci_test_strategy.py",
-          "line": 83,
+          "line": 85,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/run_pytest_resilient.py\","
         },
@@ -10332,7 +10332,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1637,
+          "line": 1664,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
