@@ -51,19 +51,26 @@ entries:
     summary: Default operator response language
 
   # --- active operator-paste cards ---
+  - id: prompt.session.grok-bootstrap
+    path: library/session/grok-bootstrap.md
+    status: active
+    class: operator-paste
+    tags: [session, grok, bootstrap, operator]
+    summary: Short daily-work bootstrap for Grok sessions on BioETL
+
   - id: prompt.closeout.grok
     path: library/closeout/grok-closeout.md
     status: active
     class: operator-paste
     tags: [closeout, grok, operator]
-    summary: Short issue/PR closeout paste template
+    summary: Issue/PR closeout paste with verdicts, evidence, ship-profile note
 
   - id: prompt.audit.grok-cycle
     path: library/audit/grok-audit-cycle.md
     status: active
     class: operator-paste
     tags: [audit, grok, operator]
-    summary: Short one-cycle audit paste template
+    summary: One-cycle audit paste with severity, stop conditions, Windows/memory gates
 
   - id: prompt.tests.speed-optimization
     path: library/tests/speed-optimization-loop.md

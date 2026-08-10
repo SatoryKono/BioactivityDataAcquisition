@@ -554,6 +554,11 @@ nav:
           - "Runtime Agent Memory Alias": 00-project/ai/agents/runtime/agent-memory.md
           - "Test Agent Profile": 00-project/ai/agents/agents/py-test-bot.md
           - "Orchestration": 00-project/ai/agents/agents/ORCHESTRATION.md
+          - "Grok Runtime Overview": 00-project/ai/grok/README.md
+          - "Grok Session Skill": 00-project/ai/grok/skills/bioetl-session/SKILL.md
+          - "Grok Post-Change Skill": 00-project/ai/grok/skills/bioetl-post-change/SKILL.md
+          - "Grok Closeout Skill": 00-project/ai/grok/skills/bioetl-closeout/SKILL.md
+          - "Grok Bootstrap Prompt": 00-project/ai/prompts/library/session/grok-bootstrap.md
       - "Project Architecture Index": 00-project/architecture-index.md
       - "Legacy Documentation Index": INDEX.md
       - "Architecture Extras":
