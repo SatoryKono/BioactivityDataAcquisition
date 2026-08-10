@@ -261,15 +261,10 @@ def _source_context(
     head_sha = git_text("rev-parse", "HEAD")
     tree_sha = git_text("rev-parse", "HEAD^{tree}")
     branch = git_text("branch", "--show-current") or "detached"
-    index_state = git_run("diff-index", "--quiet", "HEAD", "--")
-    worktree_state = git_run("diff-files", "--quiet", "--")
-    if index_state.returncode not in {0, 1} or worktree_state.returncode not in {0, 1}:
-        raise OSError("git could not determine bounded worktree state")
-    untracked_paths = sorted(
-        path
-        for path in git_text("ls-files", "--others", "--exclude-standard").splitlines()
-        if path
-    )
+    # This producer is advisory and intentionally avoids any working-tree scan.
+    # On LFS-heavy mounted worktrees, both status and untracked enumeration can
+    # exceed the entire vendor timeout before the vendor process starts. The
+    # weaker binding is explicit and relies on HEAD plus reviewed materials.
     policy_hash = canonical_digest(policy)
     bound_materials = []
     for path in materials:
@@ -280,9 +275,7 @@ def _source_context(
                 "sha256": hashlib.sha256(safe_path.read_bytes()).hexdigest(),
             }
         )
-    dirty = bool(
-        index_state.returncode == 1 or worktree_state.returncode == 1 or untracked_paths
-    )
+    dirty: bool | None = None
     repository = {
         "repo_id": ROOT.name.lower(),
         "branch": branch,
@@ -294,9 +287,9 @@ def _source_context(
         "material_hash": hashlib.sha256(tree_sha.encode()).hexdigest(),
         "task_diff_hash": canonical_digest(
             {
-                "index_changed": index_state.returncode == 1,
-                "worktree_changed": worktree_state.returncode == 1,
-                "untracked_paths": untracked_paths,
+                "tracked_dirty": dirty,
+                "tracked_worktree_state": "not-collected",
+                "untracked_inventory": "not-collected",
                 "bound_materials": bound_materials,
                 "scope": scope,
                 "policy_hash": policy_hash,
@@ -305,7 +298,9 @@ def _source_context(
         "policy_hash": policy_hash,
         "command_set_hash": command_set_hash(policy, "ready_to_merge"),
         "dirty": dirty,
-        "untracked_paths": untracked_paths,
+        "tracked_worktree_state": "not-collected",
+        "untracked_paths": [],
+        "untracked_inventory": "not-collected",
         "bound_materials": bound_materials,
         "scope": scope,
         "binding_mode": "bounded-advisory-v1",
@@ -410,6 +405,16 @@ def _summary(
             "sha256": canonical_digest(ADVISORY_POLICY),
         },
         **identity,
+    }
+    source_binding = identity.get("source")
+    payload["optional_evaluator_evidence"] = {
+        "schema_version": 1,
+        "evidence_kind": "review",
+        "producer": f"optional_{spec.report_subdir}",
+        "vendor_verdict": verdict,
+        "receipt_eligible": False,
+        "lifecycle_authority": False,
+        "source_binding": source_binding if isinstance(source_binding, dict) else None,
     }
     if detail:
         payload["detail"] = _redact(detail)
