@@ -16,7 +16,7 @@ from bioetl.application.services.control_plane.evidence.lineage_identity import 
 from bioetl.application.services.control_plane.evidence.persistence_profile import (
     resolve_persistence_profile,
 )
-from bioetl.application.services.control_plane_evidence import EvidenceCheck
+from bioetl.application.services.control_plane.evidence.types import EvidenceCheck
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.lineage import LineageGraphFragment
 
