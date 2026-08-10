@@ -1834,6 +1834,7 @@
         "tests/unit/infrastructure/adapters/openalex/test_adapter.py",
         "tests/unit/infrastructure/adapters/pubchem/test_adapter.py",
         "tests/unit/infrastructure/adapters/pubmed/test_pubmed_client.py",
+        "tests/unit/infrastructure/adapters/test_health_check_contract.py",
         "tests/unit/infrastructure/adapters/test_http_base.py",
         "tests/unit/infrastructure/adapters/test_sync_base.py",
         "tests/unit/infrastructure/adapters/uniprot/test_adapter.py",

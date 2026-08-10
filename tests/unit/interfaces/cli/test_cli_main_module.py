@@ -69,9 +69,13 @@ class TestCliMainModule:
         # They should be the same function
         assert main is main_from_module
 
-    def test_top_level_module_entrypoint_delegates_to_cli_main(self) -> None:
+    def test_top_level_module_entrypoint_delegates_to_cli_main(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
         """The retained python -m bioetl seam must stay a thin CLI delegate."""
         calls: list[str] = []
+        monkeypatch.delitem(sys.modules, "bioetl.__main__", raising=False)
 
         with patch(
             "bioetl.interfaces.cli._main_module.main",
