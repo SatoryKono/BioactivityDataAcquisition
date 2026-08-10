@@ -39,10 +39,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.application.services.ops.health_service import HealthService
-from bioetl.application.services.control_plane.manifest.integrity_metrics import (
+from bioetl.application.observability.control_plane_integrity_metrics import (
     ControlPlaneIntegrityMetricsService,
 )
+from bioetl.application.services.ops.health_service import HealthService
 from bioetl.composition.bootstrap.cli.health import (
     HealthServerDependencies,
     bootstrap_health_server_dependencies,

@@ -1,0 +1,94 @@
+# BioETL Prompt Library registry
+# Epic: #8513 | Schema: _schema/prompt.schema.json
+# Operator paste templates only — not runtime SSOT.
+
+version: 1.0.0
+root: docs/00-project/ai/prompts
+schema: _schema/prompt.schema.json
+
+entries:
+  # --- fragments ---
+  - id: prompt.fragment.read-order
+    path: fragments/read-order.md
+    status: active
+    class: fragment
+    tags: [guardrail, read-order]
+    summary: Mandatory read order before planning or editing
+
+  - id: prompt.fragment.git-safety
+    path: fragments/git-safety.md
+    status: active
+    class: fragment
+    tags: [guardrail, git]
+    summary: Git and worktree safety for operator sessions
+
+  - id: prompt.fragment.debt-budget-ban
+    path: fragments/debt-budget-ban.md
+    status: active
+    class: fragment
+    tags: [guardrail, debt]
+    summary: Technical-debt budgets must not increase
+
+  - id: prompt.fragment.env-guardrail
+    path: fragments/env-guardrail.md
+    status: active
+    class: fragment
+    tags: [guardrail, env]
+    summary: Secret-bearing .env surface guardrail
+
+  - id: prompt.fragment.evidence-contract
+    path: fragments/evidence-contract.md
+    status: active
+    class: fragment
+    tags: [guardrail, evidence]
+    summary: Minimum evidence format for findings and closeout
+
+  - id: prompt.fragment.language-ru
+    path: fragments/language-ru.md
+    status: active
+    class: fragment
+    tags: [guardrail, language]
+    summary: Default operator response language
+
+  # --- active operator-paste cards ---
+  - id: prompt.closeout.grok
+    path: library/closeout/grok-closeout.md
+    status: active
+    class: operator-paste
+    tags: [closeout, grok, operator]
+    summary: Short issue/PR closeout paste template
+
+  - id: prompt.audit.grok-cycle
+    path: library/audit/grok-audit-cycle.md
+    status: active
+    class: operator-paste
+    tags: [audit, grok, operator]
+    summary: Short one-cycle audit paste template
+
+  - id: prompt.tests.speed-optimization
+    path: library/tests/speed-optimization-loop.md
+    status: active
+    class: operator-paste
+    tags: [tests, performance, operator]
+    summary: Accelerate test runs without weakening coverage
+
+  - id: prompt.tests.fix-retest
+    path: library/tests/fix-retest-loop.md
+    status: active
+    class: operator-paste
+    tags: [tests, debug, operator]
+    summary: Run → fix → retest until green or blocked
+
+  - id: prompt.docs.ai-audit-planning
+    path: library/docs/ai-audit-planning.md
+    status: active
+    class: operator-paste
+    tags: [docs, audit, planning, operator]
+    summary: Plan an audit of docs/00-project/ai surfaces
+
+  - id: prompt.architecture.review
+    path: library/architecture/review-assessment.md
+    status: active
+    class: operator-paste
+    tags: [architecture, review, operator]
+    summary: Read-only architecture review and refactoring assessment
