@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -73,6 +74,22 @@ def test_coverage_job_combines_shard_coverage_and_runs_serial_pass() -> None:
     assert "coverage report --show-missing --fail-under=85" in workflow, (
         "coverage-verify job must enforce the 85% threshold on combined coverage"
     )
+
+
+def test_repo_backed_lane_is_included_in_existing_serial_coverage_pass() -> None:
+    """Repo-backed product tests must be serial-classified for coverage."""
+    conftest = Path("tests/conftest.py").read_text(encoding="utf-8")
+
+    assert 'relative_path.parts[:3] == ("tests", "unit", "repo_backed")' in conftest
+    assert "item.add_marker(pytest.mark.serial)" in conftest
+
+
+def test_coverage_policy_excludes_type_only_protocol_declarations() -> None:
+    """Ellipsis-only type declarations must not create synthetic branch debt."""
+    config = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
+    excluded = config["tool"]["coverage"]["report"]["exclude_lines"]
+
+    assert r"^\s*(?:async\s+)?def\s+.+:\s*\.\.\.\s*$" in excluded
 
 
 def test_resilient_pytest_runner_supports_direct_script_invocation() -> None:

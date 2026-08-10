@@ -85,6 +85,12 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
             continue
         if relative_path.as_posix() in fs_contract_modules:
             item.add_marker(pytest.mark.fs_contract)
+        if relative_path.parts[:3] == ("tests", "unit", "repo_backed"):
+            # Repository-backed contracts are intentionally serial.  Keep the
+            # marker explicit at collection time so the existing serial
+            # coverage pass measures the product branches exercised by this
+            # canonical lane without weakening the coverage threshold.
+            item.add_marker(pytest.mark.serial)
 
     raw_seed = os.environ.get("BIOETL_RANDOM_ORDER_SEED")
     if raw_seed is None:
