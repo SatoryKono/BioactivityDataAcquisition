@@ -103,12 +103,7 @@ def list_pipeline_reports(
     limit: int = 20,
     root: Path | None = None,
 ) -> list[ReportIndexEntry]:
-    return _list_reports(
-        kind="pipeline",
-        owner=pipeline_name,
-        limit=limit,
-        root=root,
-    )
+    return _list_reports(kind="pipeline", owner=pipeline_name, limit=limit, root=root)
 
 def list_workflow_reports(
     *,
@@ -116,12 +111,7 @@ def list_workflow_reports(
     limit: int = 20,
     root: Path | None = None,
 ) -> list[ReportIndexEntry]:
-    return _list_reports(
-        kind="workflow",
-        owner=workflow_name,
-        limit=limit,
-        root=root,
-    )
+    return _list_reports(kind="workflow", owner=workflow_name, limit=limit, root=root)
 
 def _list_reports(
     *,
@@ -130,13 +120,7 @@ def _list_reports(
     limit: int,
     root: Path | None,
 ) -> list[ReportIndexEntry]:
-    """List newest reports without reading every JSON body first.
-
-    On large pipelines (dozens of run dirs) over Docker Desktop bind mounts,
-    reading identity meta for every report before applying ``limit`` can exceed
-    the forensic HTTP budget (~12s) and empty Grafana Browse Recent Runs.
-    Rank by file mtime first, then load meta only for the top ``limit`` rows.
-    """
+    """List newest reports by mtime first; hydrate meta only for top ``limit``."""
     base = _root(root) / kind
     if not base.is_dir():
         return []
@@ -155,7 +139,6 @@ def _list_reports(
         )
         for mtime, owner_name, run_dir, json_path in candidates[:capped]
     ]
-
 
 def _collect_report_candidates(
     *,
@@ -182,7 +165,6 @@ def _collect_report_candidates(
             candidates.append((mtime, owner_dir.name, run_dir, json_path))
     return candidates
 
-
 def _build_report_index_entry(
     *,
     kind: str,
@@ -192,28 +174,6 @@ def _build_report_index_entry(
     json_path: Path,
 ) -> ReportIndexEntry:
     """Hydrate one ranked report candidate."""
-    status, completed_at = _read_identity_meta(json_path)
-    md_path = run_dir / f"{kind}-run-report.md"
-    return ReportIndexEntry(
-        kind=kind,
-        owner=owner_name,
-        run_id=run_dir.name,
-        json_path=json_path,
-        markdown_path=md_path if md_path.is_file() else None,
-        status=status,
-        completed_at=completed_at,
-        mtime=mtime,
-    )
-
-def _build_report_index_entry(
-    *,
-    kind: str,
-    mtime: float,
-    owner_name: str,
-    run_dir: Path,
-    json_path: Path,
-) -> ReportIndexEntry:
-    """Hydrate one index entry from ranked candidate paths."""
     status, completed_at = _read_identity_meta(json_path)
     md_path = run_dir / f"{kind}-run-report.md"
     return ReportIndexEntry(
@@ -239,13 +199,11 @@ def diff_pipeline_reports(
     """Compute funnel and reason deltas between two pipeline report payloads."""
     left_payload = _as_mapping(left)
     right_payload = _as_mapping(right)
-    funnel_delta = _funnel_delta(left_payload, right_payload)
-    reasons_delta = _reasons_delta(left_payload, right_payload)
     return {
         "left_run_id": (left_payload.get("identity") or {}).get("run_id"),
         "right_run_id": (right_payload.get("identity") or {}).get("run_id"),
-        "funnel_delta": funnel_delta,
-        "reasons_delta": reasons_delta,
+        "funnel_delta": _funnel_delta(left_payload, right_payload),
+        "reasons_delta": _reasons_delta(left_payload, right_payload),
     }
 
 def _funnel_rows(
