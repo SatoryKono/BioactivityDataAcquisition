@@ -569,9 +569,7 @@ class TestProjectSchemaForLayer:
         writer = _Writer(data_schema=SimpleNamespace(gold=object()))
         schema = object()
         converted_projection = object()
-        writer._project_via_to_schema = MagicMock(
-            return_value=converted_projection
-        )
+        writer._project_via_to_schema = MagicMock(return_value=converted_projection)
         writer._project_via_select_columns = MagicMock()
         writer._project_pyarrow_schema = MagicMock()
 
@@ -588,9 +586,7 @@ class TestProjectSchemaForLayer:
         schema = object()
         direct_projection = object()
         writer._project_via_to_schema = MagicMock(return_value=None)
-        writer._project_via_select_columns = MagicMock(
-            return_value=direct_projection
-        )
+        writer._project_via_select_columns = MagicMock(return_value=direct_projection)
         writer._project_pyarrow_schema = MagicMock()
 
         assert (
