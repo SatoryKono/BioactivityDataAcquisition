@@ -139,54 +139,60 @@ def _list_reports(
     limit: int,
     root: Path | None,
 ) -> list[ReportIndexEntry]:
+    """List newest reports without reading every JSON body first.
+
+    On large pipelines (dozens of run dirs) over Docker Desktop bind mounts,
+    reading identity meta for every report before applying ``limit`` can exceed
+    the forensic HTTP budget (~12s) and empty Grafana Browse Recent Runs.
+    Rank by file mtime first, then load meta only for the top ``limit`` rows.
+    """
     base = _root(root) / kind
     if not base.is_dir():
         return []
+    capped = max(0, limit)
+    if capped == 0:
+        return []
     owners = _owner_directories(base, owner)
-    entries: list[ReportIndexEntry] = []
+    candidates: list[tuple[float, str, Path, Path]] = []
     for owner_dir in owners:
-        entries.extend(_owner_entries(kind, owner_dir))
-    entries.sort(key=lambda item: item.mtime, reverse=True)
-    return entries[: max(0, limit)]
+        if not owner_dir.is_dir():
+            continue
+        report_name = f"{kind}-run-report.json"
+        for run_dir in owner_dir.iterdir():
+            if not run_dir.is_dir() or run_dir.name.startswith("."):
+                continue
+            json_path = run_dir / report_name
+            if not json_path.is_file():
+                continue
+            try:
+                mtime = json_path.stat().st_mtime
+            except OSError:
+                continue
+            candidates.append((mtime, owner_dir.name, run_dir, json_path))
+    candidates.sort(key=lambda item: item[0], reverse=True)
+    entries: list[ReportIndexEntry] = []
+    for mtime, owner_name, run_dir, json_path in candidates[:capped]:
+        status, completed_at = _read_identity_meta(json_path)
+        md_path = run_dir / f"{kind}-run-report.md"
+        entries.append(
+            ReportIndexEntry(
+                kind=kind,
+                owner=owner_name,
+                run_id=run_dir.name,
+                json_path=json_path,
+                markdown_path=md_path if md_path.is_file() else None,
+                status=status,
+                completed_at=completed_at,
+                mtime=mtime,
+            )
+        )
+    return entries
 
 
 def _owner_directories(base: Path, owner: str | None) -> list[Path]:
     if owner:
         return [base / _safe_segment(owner)]
     return [path for path in base.iterdir() if path.is_dir()]
-
-
-def _owner_entries(kind: str, owner_dir: Path) -> list[ReportIndexEntry]:
-    if not owner_dir.is_dir():
-        return []
-    entries = (
-        _report_entry(kind, owner_dir, run_dir) for run_dir in owner_dir.iterdir()
-    )
-    return [entry for entry in entries if entry is not None]
-
-
-def _report_entry(
-    kind: str,
-    owner_dir: Path,
-    run_dir: Path,
-) -> ReportIndexEntry | None:
-    if not run_dir.is_dir() or run_dir.name.startswith("."):
-        return None
-    json_path = run_dir / f"{kind}-run-report.json"
-    if not json_path.is_file():
-        return None
-    status, completed_at = _read_identity_meta(json_path)
-    md_path = run_dir / f"{kind}-run-report.md"
-    return ReportIndexEntry(
-        kind=kind,
-        owner=owner_dir.name,
-        run_id=run_dir.name,
-        json_path=json_path,
-        markdown_path=md_path if md_path.is_file() else None,
-        status=status,
-        completed_at=completed_at,
-        mtime=json_path.stat().st_mtime,
-    )
 
 
 def diff_pipeline_reports(
