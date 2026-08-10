@@ -5,9 +5,10 @@ from __future__ import annotations
 from typing import Protocol, runtime_checkable
 
 from bioetl.domain.ports import CheckpointPort
+from bioetl.domain.types import MetaDict, RunID
 from bioetl.interfaces.http._health_server_control_plane_scope import _IdentityScope
 
-_CheckpointTuple = tuple[object, dict[str, object]]
+_CheckpointTuple = tuple[RunID, MetaDict]
 _CheckpointEvidence = tuple[_CheckpointTuple | None, str, str | None, bool]
 
 
