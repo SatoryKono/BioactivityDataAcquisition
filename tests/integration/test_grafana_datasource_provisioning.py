@@ -23,6 +23,7 @@ RENDERER_IMAGE = (
     "grafana/grafana-image-renderer"
     "@sha256:c0c920e6974b0d30ae25313051344afcd2054362529968ebd9545a4b2bc8119b"
 )
+INFINITY_PLUGIN_VERSION = "3.8.0"
 
 _REMOVED_MONITORING_SERVICES = (
     "loki",
@@ -106,16 +107,28 @@ def test_audit_overlay_no_longer_ships_loki_or_quarantine() -> None:
         assert name not in (services or {})
 
 
-def test_grafana_compose_installs_infinity_plugin() -> None:
-    """Grafana must preinstall Infinity for BioETL Ops HTTP panels."""
-    compose_path = Path("docker-compose.monitoring.yml")
-    content = compose_path.read_text(encoding="utf-8")
-    # Accept either preinstall env or bootstrap-era install marker in docs/image.
+def test_grafana_compose_pins_compatible_infinity_plugin() -> None:
+    """Grafana must enforce the Infinity version compatible with Grafana 12.0."""
+    monitoring = _load_monitoring_compose()
+    grafana_environment = monitoring["services"]["grafana"]["environment"]
     assert (
-        "GF_PLUGINS_PREINSTALL=yesoreyeram-infinity-datasource" in content
-        or "yesoreyeram-infinity-datasource" in content
-        or Path("grafana/provisioning/datasources-core/bioetl-ops-http.yml").exists()
+        "BIOETL_INFINITY_PLUGIN_VERSION="
+        "${BIOETL_INFINITY_PLUGIN_VERSION:-3.8.0}"
+        in grafana_environment
     )
+    assert not any(
+        str(item).startswith("GF_INSTALL_PLUGINS=") for item in grafana_environment
+    )
+
+    bootstrap = Path("grafana/scripts/bootstrap-datasources.sh").read_text(
+        encoding="utf-8"
+    )
+    assert (
+        'INFINITY_PLUGIN_VERSION="${BIOETL_INFINITY_PLUGIN_VERSION:-3.8.0}"'
+        in bootstrap
+    )
+    assert '"${INFINITY_PLUGIN_ID}" "${INFINITY_PLUGIN_VERSION}"' in bootstrap
+    assert INFINITY_PLUGIN_VERSION in bootstrap
 
 
 def test_monitoring_images_are_pinned_and_legacy_pushgateway_datasource_is_inert() -> (
