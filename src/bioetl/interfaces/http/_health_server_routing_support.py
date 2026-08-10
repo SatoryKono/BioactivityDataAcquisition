@@ -148,15 +148,6 @@ async def dispatch_control_plane_request(
         )
         return
 
-    handlers = {
-        "/ops/control-plane/ready": lambda h, w, q: handle_control_plane_ready(h, w),
-        "/ops/control-plane/filter-options": handle_control_plane_filter_options,
-        "/ops/control-plane/selector-context": handle_control_plane_selector_context,
-        "/ops/control-plane/identity-table": handle_control_plane_identity_table,
-        "/ops/control-plane/identity-evidence": handle_control_plane_identity_evidence,
-        "/ops/control-plane/checkpoint-freshness": handle_control_plane_checkpoint_freshness,
-    }
-
     try:
         if await _dispatch_ops_endpoints(host, writer, path, query):
             return
