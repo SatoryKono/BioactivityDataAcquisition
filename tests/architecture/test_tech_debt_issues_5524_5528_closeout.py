@@ -158,11 +158,7 @@ def test_issue_5526_module_coverage_warning_debt_is_replaced_with_reviewed_ratch
     assert aggregate_ratchets["mode"] == "fail-fast-current-inventory"
     assert aggregate_ratchets["unmeasured_module_count"]["max_count"] == 0
     assert aggregate_ratchets["uncovered_module_count"]["max_count"] == 0
-    # Policy remains zero-residual; live inventory may report unmeasured modules
-    # when coverage XML lags source moves. Assert gate wiring + uncovered residual.
-    assert gate_rows["module_coverage_unmeasured_modules"]["name"] == (
-        "module_coverage_unmeasured_modules"
-    )
+    assert gate_rows["module_coverage_unmeasured_modules"]["status"] == "pass"
     assert gate_rows["module_coverage_uncovered_modules"]["status"] == "pass"
     assert (
         gate_rows["module_coverage_unmeasured_modules"]["source_artifact"]
