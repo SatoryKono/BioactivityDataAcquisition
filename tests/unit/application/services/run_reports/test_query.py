@@ -279,6 +279,7 @@ def test_listing_filters_entries_sorts_by_mtime_and_honors_limits(
         mtime=200.0,
     )
     invalid_path.write_text("{invalid", encoding="utf-8")
+    os.utime(invalid_path, (200.0, 200.0))
     newest_path = _write_raw_report(
         tmp_path,
         kind="pipeline",
