@@ -98,4 +98,16 @@ if [ -n "${RENDERING_SERVER_URL}" ] && [ -d "${STALE_RENDERER_PLUGIN_DIR}" ]; th
   echo "[bioetl-grafana] removed stale local grafana-image-renderer plugin for remote renderer mode"
 fi
 
+# Ensure Infinity plugin exists even when GF_INSTALL_PLUGINS was skipped or the
+# plugins volume was wiped. Run Explorer / Ops HTTP panels depend on it.
+INFINITY_PLUGIN_ID="yesoreyeram-infinity-datasource"
+INFINITY_PLUGIN_DIR="/var/lib/grafana/plugins/${INFINITY_PLUGIN_ID}"
+if [ ! -d "${INFINITY_PLUGIN_DIR}" ]; then
+  echo "[bioetl-grafana] installing ${INFINITY_PLUGIN_ID} (required for BioETL Ops HTTP)"
+  if ! grafana cli --pluginsDir /var/lib/grafana/plugins plugins install "${INFINITY_PLUGIN_ID}"; then
+    echo "[bioetl-grafana] ERROR: failed to install ${INFINITY_PLUGIN_ID}" >&2
+    exit 1
+  fi
+fi
+
 exec /run.sh
