@@ -223,12 +223,45 @@ def test_bootstrap_script_prunes_stale_local_renderer_plugin_in_remote_mode() ->
     assert 'rm -rf "${STALE_RENDERER_PLUGIN_DIR}"' in content
 
 
-def test_bootstrap_fails_closed_on_ops_http_source_identity_drift() -> None:
+def test_bootstrap_ops_http_identity_gate_is_soft_by_default() -> None:
+    """Ops HTTP trust is fail-closed; Grafana UI start is not blocked by default.
+
+    Cold start polls bioetl:8000 ready (default 30×2s). On timeout/mismatch/
+    unmanaged identity the script defers Ops HTTP and still execs /run.sh unless
+    BIOETL_GRAFANA_REQUIRE_OPS_HTTP=1.
+    """
     content = Path("grafana/scripts/bootstrap-datasources.sh").read_text(
         encoding="utf-8"
     )
 
     assert "BIOETL_EXPECTED_RUNTIME_SOURCE_ID" in content
     assert "/ops/control-plane/ready" in content
-    assert 'if [ "${SOURCE_ID_MATCHED}" -ne 1 ]' in content
-    assert "runtime source identity mismatch" in content
+    assert 'REQUIRE_OPS_HTTP="${BIOETL_GRAFANA_REQUIRE_OPS_HTTP:-0}"' in content
+    assert 'OPS_READY_ATTEMPTS="${BIOETL_GRAFANA_OPS_READY_ATTEMPTS:-30}"' in content
+    assert 'OPS_READY_SLEEP_SEC="${BIOETL_GRAFANA_OPS_READY_SLEEP_SEC:-2}"' in content
+    assert "fail_or_defer_ops" in content
+    assert "identity_mismatch_or_timeout" in content
+    assert "invalid_or_unmanaged_identity" in content
+    assert "starting Grafana with Prometheus only" in content
+    assert "bioetl-bootstrap-status.json" in content
+    assert "exec /run.sh" in content
+    # Hard fail only when audit/render explicitly requires Ops HTTP.
+    assert 'if [ "${REQUIRE_OPS_HTTP}" = "1" ]' in content
+    assert "Ops HTTP required but unavailable" in content
+
+
+def test_monitoring_compose_exposes_ops_http_soft_gate_env() -> None:
+    monitoring = _load_monitoring_compose()
+    grafana_environment = monitoring["services"]["grafana"]["environment"]
+    assert (
+        "BIOETL_GRAFANA_REQUIRE_OPS_HTTP=${BIOETL_GRAFANA_REQUIRE_OPS_HTTP:-0}"
+        in grafana_environment
+    )
+    assert (
+        "BIOETL_GRAFANA_OPS_READY_ATTEMPTS=${BIOETL_GRAFANA_OPS_READY_ATTEMPTS:-30}"
+        in grafana_environment
+    )
+    assert (
+        "BIOETL_GRAFANA_OPS_READY_SLEEP_SEC=${BIOETL_GRAFANA_OPS_READY_SLEEP_SEC:-2}"
+        in grafana_environment
+    )
