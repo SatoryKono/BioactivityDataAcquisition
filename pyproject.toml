@@ -292,6 +292,7 @@ exclude_lines = [
     "@overload",
     "^\\s*pass\\s*$",
     "^\\s*\\.\\.\\.\\s*$",
+    "^\\s*(?:async\\s+)?def\\s+.+:\\s*\\.\\.\\.\\s*$",
 ]
 # Note: fail_under is NOT set here because:
 # 1. CI test-matrix runs parallel test groups that cover partial codebase
