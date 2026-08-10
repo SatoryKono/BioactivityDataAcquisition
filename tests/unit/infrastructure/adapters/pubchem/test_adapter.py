@@ -66,6 +66,12 @@ async def _consume_async(iterator: AsyncIterator[Any]) -> list[Any]:
     return items
 
 
+async def _records(*items: dict[str, object]) -> AsyncIterator[dict[str, object]]:
+    """Yield deterministic adapter records for routing tests."""
+    for item in items:
+        yield item
+
+
 @pytest.fixture
 def mock_logger():
     """Create a mock logger for testing."""
@@ -269,6 +275,41 @@ async def test_fetch_unsupported_entity(pubchem_adapter):
     """Test fetching unsupported entity raises ValueError."""
     with pytest.raises(ValueError, match="Unsupported entity type"):
         await _consume_async(pubchem_adapter.fetch("invalid_entity"))
+
+
+@pytest.mark.parametrize(
+    ("filter_field", "strategy_method"),
+    [
+        ("smiles", "fetch_by_smiles"),
+        ("canonical_smiles", "fetch_by_smiles"),
+        ("cid", "fetch_by_cids"),
+        ("inchikey", "fetch_by_inchikey"),
+        ("inchi_key", "fetch_by_inchikey"),
+    ],
+)
+async def test_fetch_filtered_routes_supported_identifier_aliases(
+    pubchem_adapter,
+    filter_field: str,
+    strategy_method: str,
+) -> None:
+    """Public filtered fetch dispatches every supported identifier alias."""
+    strategies = MagicMock()
+    selected = MagicMock(return_value=_records({"route": strategy_method}))
+    setattr(strategies, strategy_method, selected)
+    pubchem_adapter._strategies = strategies
+
+    result = await _consume_async(
+        pubchem_adapter.fetch(
+            "compound",
+            limit=1,
+            filter_ids=["identifier"],
+            filter_field=filter_field,
+            offset=20,
+        )
+    )
+
+    assert result == [{"route": strategy_method}]
+    selected.assert_called_once_with(["identifier"], 1)
 
 
 async def test_fetch_compound_missing_query(pubchem_adapter):

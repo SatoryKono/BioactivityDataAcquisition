@@ -53,6 +53,7 @@ from bioetl.application.core.batch_execution import (
 )
 from bioetl.application.core.lifecycle.batch_fsm import (
     BatchExecutionFSM,
+    BatchExecutionState,
 )
 from bioetl.application.core.batch_processing_contracts import BatchProcessingOutcome
 from bioetl.application.core.batch_executor import (
@@ -1201,6 +1202,91 @@ class TestBatchExecutorLoopHelpers:
         )
 
         checkpoint_recovery_service.save_checkpoint_now.assert_not_awaited()
+
+
+@pytest.mark.unit
+class TestBatchExecutorFacadeBranches:
+    """Exercise the facade properties and lifecycle branches directly."""
+
+    def test_entity_type_delegates_to_processor_config(self, batch_executor) -> None:
+        """The public entity identity is sourced from the immutable run config."""
+        assert batch_executor.entity_type == "test_entity"
+
+    @pytest.mark.parametrize(
+        "initial_state",
+        [BatchExecutionState.IDLE, BatchExecutionState.STREAMING],
+    )
+    async def test_run_extraction_loop_normalizes_start_and_completion_states(
+        self,
+        batch_executor,
+        initial_state: BatchExecutionState,
+    ) -> None:
+        """Direct loop entry starts an idle FSM and always marks exhaustion done."""
+        loop_service = MagicMock()
+        loop_service.run = AsyncMock(return_value=None)
+        batch_executor._extraction_loop_service = loop_service
+        batch_executor._fsm_state = initial_state
+        execution_context = MagicMock()
+
+        await batch_executor._run_extraction_loop(execution_context)
+
+        assert batch_executor._fsm_state is BatchExecutionState.DONE
+        loop_service.run.assert_awaited_once_with(
+            execution_context,
+            batch_size=batch_executor.batch_size,
+            process_batch=batch_executor._process_batch_and_update_state,
+            progress_state=batch_executor,
+        )
+
+    def test_debug_export_result_and_empty_diagnostics_are_explicit(
+        self,
+        batch_executor,
+    ) -> None:
+        """Disabled debug export and absent memory decisions expose empty values."""
+        batch_executor._debug_export_result = None
+        batch_executor._memory.decision_trace_dicts = MagicMock(return_value=[])
+
+        assert batch_executor.debug_export_result is None
+        assert batch_executor.execution_diagnostics == {}
+
+    async def test_finalize_debug_export_handles_disabled_and_cached_paths(
+        self,
+        batch_executor,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Debug packs are disabled safely and persisted at most once per run."""
+        batch_executor._debug_export_service = None
+        assert (
+            await batch_executor.finalize_debug_export(
+                status="success",
+                manifest_id="manifest-1",
+            )
+            is None
+        )
+
+        expected = object()
+        debug_export = MagicMock()
+        batch_executor._debug_export_service = debug_export
+        batch_executor._debug_export_result = None
+        to_thread = AsyncMock(return_value=expected)
+        monkeypatch.setattr(asyncio, "to_thread", to_thread)
+
+        first = await batch_executor.finalize_debug_export(
+            status="success",
+            manifest_id="manifest-1",
+        )
+        second = await batch_executor.finalize_debug_export(
+            status="failed",
+            manifest_id="manifest-2",
+        )
+
+        assert first is expected
+        assert second is expected
+        to_thread.assert_awaited_once_with(
+            debug_export.finalize,
+            status="success",
+            manifest_id="manifest-1",
+        )
 
     @pytest.mark.asyncio
     async def test_ensure_extraction_not_shutdown_checkpoints_and_raises_when_requested(

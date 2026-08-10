@@ -410,6 +410,50 @@ class TestHealthCheck:
         assert status == HealthStatus.DEGRADED
         mock_http_client.get_once.assert_awaited_once()
 
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("status_code", "expected"),
+        [
+            (429, HealthStatus.DEGRADED),
+            (403, HealthStatus.DEGRADED),
+            (503, HealthStatus.UNHEALTHY),
+        ],
+    )
+    async def test_probe_health_classifies_rate_limits_and_server_failures(
+        self,
+        adapter: SemanticScholarAdapter,
+        mock_http_client: MagicMock,
+        status_code: int,
+        expected: HealthStatus,
+    ) -> None:
+        """HTTP status boundaries map to bounded provider health states."""
+        response = MagicMock(status_code=status_code)
+        mock_http_client.get_once.return_value = response
+
+        assert await adapter._probe_health() == expected
+
+    @pytest.mark.asyncio
+    async def test_probe_health_treats_rate_limit_exception_as_degraded(
+        self,
+        adapter: SemanticScholarAdapter,
+        mock_http_client: MagicMock,
+    ) -> None:
+        """Rate-limit exceptions degrade health instead of escaping the probe."""
+        mock_http_client.get_once.side_effect = RuntimeError("HTTP 429 rate limited")
+
+        assert await adapter._probe_health() == HealthStatus.DEGRADED
+
+    @pytest.mark.asyncio
+    async def test_aclose_closes_http_client(
+        self,
+        adapter: SemanticScholarAdapter,
+        mock_http_client: MagicMock,
+    ) -> None:
+        """Adapter shutdown forwards the async context-manager close contract."""
+        await adapter.aclose()
+
+        mock_http_client.__aexit__.assert_awaited_once_with(None, None, None)
+
 
 class TestFetchMultiFiltered:
     """Tests for fetch_multi_filtered method."""
