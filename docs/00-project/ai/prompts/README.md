@@ -45,7 +45,7 @@ docs/00-project/ai/prompts/
   _schema/prompt.schema.json
   fragments/                # composable guardrail blocks
   library/                  # active operator-paste cards
-    audit/ closeout/ tests/ docs/ architecture/
+    audit/ closeout/ tests/ docs/ architecture/ observability/
   archive/                  # mirrors + campaigns (not default paste)
   generated/CATALOG.md      # generated from REGISTRY
   COLLECTED_PROMPTS_INDEX.md
@@ -61,6 +61,7 @@ docs/00-project/ai/prompts/
 | `prompt.tests.fix-retest` | [library/tests/fix-retest-loop.md](library/tests/fix-retest-loop.md) | Run → fix → retest |
 | `prompt.docs.ai-audit-planning` | [library/docs/ai-audit-planning.md](library/docs/ai-audit-planning.md) | Docs/AI surface audit plan |
 | `prompt.architecture.review` | [library/architecture/review-assessment.md](library/architecture/review-assessment.md) | Read-only architecture review |
+| `prompt.observability.dashboard-panel-audit` | [library/observability/dashboard-panel-audit.md](library/observability/dashboard-panel-audit.md) | Grafana panel audit (5 phases) |
 
 Root-level `grok-*.md` / `test_*.md` paths remain as **redirect stubs** for
 bookmarks from #8279.
@@ -71,6 +72,8 @@ bookmarks from #8279.
 python -m scripts.ai.prompts list
 python -m scripts.ai.prompts show prompt.audit.grok-cycle
 python -m scripts.ai.prompts render prompt.audit.grok-cycle --param SCOPE="src/bioetl/domain"
+python -m scripts.ai.prompts render prompt.observability.dashboard-panel-audit \
+  --param SCOPE="grafana/dashboards" --param AUDIT_MODE=full
 python -m scripts.ai.prompts check-registry
 python -m scripts.ai.prompts check
 python -m scripts.ai.prompts new --id prompt.example --class operator-paste

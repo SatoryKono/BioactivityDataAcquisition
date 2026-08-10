@@ -16,6 +16,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.tests.fix-retest` | `library/tests/fix-retest-loop.md` | Run → fix → retest until green or blocked |
 | `prompt.docs.ai-audit-planning` | `library/docs/ai-audit-planning.md` | Plan an audit of docs/00-project/ai surfaces |
 | `prompt.architecture.review` | `library/architecture/review-assessment.md` | Read-only architecture review and refactoring assessment |
+| `prompt.observability.dashboard-panel-audit` | `library/observability/dashboard-panel-audit.md` | Five-phase Grafana panel audit — render, GH issues, fix, closeout |
 
 ## Active fragments
 
@@ -44,3 +45,4 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.tests.fix-retest` | operator-paste | active | `library/tests/fix-retest-loop.md` |
 | `prompt.docs.ai-audit-planning` | operator-paste | active | `library/docs/ai-audit-planning.md` |
 | `prompt.architecture.review` | operator-paste | active | `library/architecture/review-assessment.md` |
+| `prompt.observability.dashboard-panel-audit` | operator-paste | active | `library/observability/dashboard-panel-audit.md` |
