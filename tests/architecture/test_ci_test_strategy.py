@@ -73,6 +73,8 @@ def test_coverage_job_combines_shard_coverage_and_runs_serial_pass() -> None:
     assert "coverage report --show-missing --fail-under=85" in workflow, (
         "coverage-verify job must enforce the 85% threshold on combined coverage"
     )
+    assert "coverage-inventory-currentness:" in workflow
+    assert "needs: coverage-verify" in workflow
 
 
 def test_resilient_pytest_runner_supports_direct_script_invocation() -> None:
