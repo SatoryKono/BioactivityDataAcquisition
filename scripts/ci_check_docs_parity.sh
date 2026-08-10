@@ -8,8 +8,8 @@ set -e
 
 echo "🔍 Running documentation parity check..."
 
-# Run the parity check
-python3 scripts/check_entity_config_parity.py
+# Run the canonical package entry point.
+python3 -m scripts.data_quality check-entity-config-parity
 
 # Capture exit code
 EXIT_CODE=$?

@@ -6,7 +6,7 @@ This script verifies that all active entity configurations have corresponding
 pipeline specification documents and vice versa.
 
 Usage:
-    python3 scripts/check_entity_config_parity.py
+    python3 -m scripts.data_quality check-entity-config-parity
 
 Exit Codes:
     0: All checks passed

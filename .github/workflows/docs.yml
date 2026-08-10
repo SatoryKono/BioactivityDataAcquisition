@@ -205,7 +205,9 @@ jobs:
           path: reports/docs-link-check-report.json
 
       - name: Run docs-config parity gate
-        run: uv run --frozen --no-build python scripts/check_entity_config_parity.py
+        run: >-
+          uv run --frozen --no-build python -m scripts.data_quality
+          check-entity-config-parity
 
       - name: Run canonical docs verification chain
         run: uv run --frozen --no-build python -m scripts.docs verify
