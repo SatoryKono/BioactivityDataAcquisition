@@ -18,7 +18,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-07-27-r1",
   "audited_commit_sha": "1cb1e6e5741dcd0efec8408d3b3d4b6c45cdeece",
-  "evidence_surface_sha256": "bf439d55ecb07a8cc81230e0d4ad90a80d0d48a99d5a6aadb39a4bdc1d9360db",
+  "evidence_surface_sha256": "5ee46baf0f2fb7e4de9b0579b12e1213aa582ffca9aa878c53a3c38c5c96c552",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
