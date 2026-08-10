@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bioetl.local/schemas/prompt-card.schema.json",
+  "title": "BioETL Prompt Library card frontmatter",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["id", "version", "status", "class", "owner"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^prompt\\.[a-z0-9]+(\\.[a-z0-9-]+)+$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "deprecated", "archived"]
+    },
+    "class": {
+      "type": "string",
+      "enum": ["operator-paste", "campaign", "fragment", "mirror", "historical", "index"]
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runtimes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["grok", "codex", "junie", "devin", "any"]
+      },
+      "uniqueItems": true
+    },
+    "params": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z][A-Z0-9_]*$"
+      },
+      "uniqueItems": true
+    },
+    "includes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "related_ssot": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "anti_patterns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "summary": {
+      "type": "string"
+    },
+    "supersedes": {
+      "type": "string"
+    },
+    "successor": {
+      "type": "string"
+    },
+    "waive_guardrails": {
+      "type": "string",
+      "description": "Required reason when mandatory guardrail fragments are omitted"
+    },
+    "max_body_lines": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Optional override for paste-body line budget"
+    }
+  }
+}

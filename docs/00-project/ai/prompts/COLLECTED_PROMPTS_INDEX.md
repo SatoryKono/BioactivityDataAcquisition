@@ -63,12 +63,16 @@ Contains time-bound repository state and should not be treated as active policy.
 
 ## Related Entry Points
 
-- `docs/00-project/ai/prompts/README.md` — repo-only prompts surface README
-- `docs/00-project/ai/prompts/docs_ai_audit_planning_codex_prompt.md` — working
-  AI documentation-audit planning prompt
-- `docs/00-project/ai/prompts/architecture_review_and_refactoring_assessment.md`
-  — working architecture review prompt
-- `docs/00-project/ai/prompts/test_speed_optimization_loop.md` — working test
-  speed optimization prompt
+- `docs/00-project/ai/prompts/README.md` — Prompt Library entrypoint
+- `docs/00-project/ai/prompts/REGISTRY.yaml` — machine-readable active catalog
+- `docs/00-project/ai/prompts/library/` — active operator-paste cards
+- `docs/00-project/ai/prompts/archive/` — mirrors + campaign megaprompts
+- `docs/00-project/ai/prompts/library/docs/ai-audit-planning.md` —
+  `prompt.docs.ai-audit-planning`
+- `docs/00-project/ai/prompts/library/architecture/review-assessment.md` —
+  `prompt.architecture.review`
+- `docs/00-project/ai/prompts/library/tests/speed-optimization-loop.md` —
+  `prompt.tests.speed-optimization`
 - [Skills Practical Index](../skills/SKILLS-PRACTICAL-INDEX.md)
 - [Agent Orchestration Rules](../agents/policy/agent-orchestration-rules.md)
+- Epic: #8513

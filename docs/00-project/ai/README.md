@@ -25,8 +25,8 @@ supporting internal artifacts.
   discoverable docs mirrors, guides и runtime-facing helper docs.
 - **Memory surface**: `docs/00-project/ai/memory/` хранит project memory entry
   point и role-specific memory sheets.
-- **Prompts surface**: `docs/00-project/ai/prompts/` хранит working prompts,
-  collected prompts и prompt indexes.
+- **Prompts surface**: `docs/00-project/ai/prompts/` — Prompt Library
+  (operator paste cards, fragments, `REGISTRY.yaml`, archive); not runtime SSOT.
 - **Skills surface**: `docs/00-project/ai/skills/` хранит published mirrors,
   catalogs и reference mirrors для локальных/global skills.
 
@@ -64,8 +64,8 @@ See [AI Runtime Mirror Ownership](agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
   published mirrors, guides, policy notes
 - [AI Memory Surface](memory/README.md) — project memory entry point and
   role-specific memory sheets
-- [AI Prompts Surface](prompts/README.md) — working prompts, historical prompt
-  collections, prompt indexes
+- [AI Prompts Surface](prompts/README.md) — Prompt Library (registry, fragments,
+  active paste cards, archive)
 - [Skills Mirror](skills/README.md) — published mirrors, practical indexes and
   skill references
 
@@ -83,5 +83,8 @@ See [AI Runtime Mirror Ownership](agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
 
 - [agents/guides/grok-operator-runbook.md](agents/guides/grok-operator-runbook.md)
 - [agents/guides/grok-tui-config-checklist.md](agents/guides/grok-tui-config-checklist.md)
-- [prompts/grok-closeout.md](prompts/grok-closeout.md)
-- [prompts/grok-audit-cycle.md](prompts/grok-audit-cycle.md)
+- [prompts/library/closeout/grok-closeout.md](prompts/library/closeout/grok-closeout.md)
+  (`prompt.closeout.grok`)
+- [prompts/library/audit/grok-audit-cycle.md](prompts/library/audit/grok-audit-cycle.md)
+  (`prompt.audit.grok-cycle`)
+- CLI: `python -m scripts.ai.prompts list|render|check`
