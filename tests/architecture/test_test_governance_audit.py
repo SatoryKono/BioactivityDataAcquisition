@@ -402,6 +402,23 @@ def test_test_governance_report_defines_test_file_and_repo_backed_counts() -> No
 
 
 @pytest.mark.architecture
+def test_test_file_inventory_is_independent_of_pycache(tmp_path: Path) -> None:
+    """Ignored interpreter caches must not change committed governance evidence."""
+    tests_root = tmp_path / "tests"
+    (tests_root / "unit").mkdir(parents=True)
+
+    without_cache = governance_audit._collect_test_file_inventory(tmp_path, [])
+    (tests_root / "__pycache__").mkdir()
+    with_cache = governance_audit._collect_test_file_inventory(tmp_path, [])
+
+    assert with_cache == without_cache
+    assert "tests/__pycache__/" not in with_cache["top_level_directories"]
+    assert "tests/__pycache__/" not in with_cache[
+        "top_level_directories_including_pycache"
+    ]
+
+
+@pytest.mark.architecture
 def test_rf_009_test_governance_closeout_tracks_live_zero_debt_metrics() -> None:
     """RF-009 closeout now tracks duplicate names (reduced to 0 after cleanup)."""
     payload = _load_yaml(CONFIG_PATH)

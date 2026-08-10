@@ -464,13 +464,10 @@ def _collect_fixture_asset_duplication(root: Path) -> dict[str, Any]:
 
 def _collect_test_file_inventory(root: Path, test_files: list[Path]) -> dict[str, Any]:
     tests_root = root / TESTS_ROOT
-    all_top_level_dirs = [
+    top_level_dirs = [
         path.relative_to(root).as_posix() + "/"
         for path in sorted(tests_root.iterdir(), key=lambda item: item.name.lower())
-        if path.is_dir()
-    ]
-    top_level_dirs = [
-        path for path in all_top_level_dirs if not path.endswith("__pycache__/")
+        if path.is_dir() and path.name != "__pycache__"
     ]
 
     return {
@@ -481,9 +478,11 @@ def _collect_test_file_inventory(root: Path, test_files: list[Path]) -> dict[str
         "test_glob_file_count": len(test_files),
         "test_python_file_count": len(_iter_all_test_python_files(root)),
         "top_level_directory_count": len(top_level_dirs),
-        "top_level_directory_count_including_pycache": len(all_top_level_dirs),
+        # Retain the legacy keys for artifact compatibility, but keep the
+        # committed projection independent of ignored interpreter cache state.
+        "top_level_directory_count_including_pycache": len(top_level_dirs),
         "top_level_directories": top_level_dirs,
-        "top_level_directories_including_pycache": all_top_level_dirs,
+        "top_level_directories_including_pycache": top_level_dirs,
     }
 
 
