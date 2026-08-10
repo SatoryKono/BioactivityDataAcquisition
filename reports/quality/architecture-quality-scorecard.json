@@ -30,9 +30,9 @@
       },
       "id": "ddd_invariants",
       "name": "DDD / aggregates / invariants",
-      "score": 0.0,
+      "score": 9.0,
       "weight": 0.09,
-      "weighted_score": 0.0
+      "weighted_score": 0.81
     },
     {
       "evidence_metrics": {
@@ -74,13 +74,13 @@
       "evidence_metrics": {
         "compatibility_test_file_count": 0,
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 17
+        "unmeasured_module_count": 0
       },
       "id": "test_strategy_testability",
       "name": "Test strategy / testability",
-      "score": 0.0,
+      "score": 9.9,
       "weight": 0.12,
-      "weighted_score": 0.0
+      "weighted_score": 1.188
     },
     {
       "evidence_metrics": {
@@ -162,8 +162,8 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 7.41,
-  "interpretation": "satisfactory_system_refactoring_required",
+  "integral_score": 9.41,
+  "interpretation": "good_targeted_improvements",
   "metrics": {
     "accepted_adr_count": 54,
     "adr_enforcement_blocking_gap_count": 0,
@@ -195,7 +195,7 @@
     "transition_compat_count": 0,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 17
+    "unmeasured_module_count": 0
   },
   "schema_version": 1,
   "source_artifacts": {
@@ -225,7 +225,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "d9626579a2235c4e4be3a354389a641fbfa7a36d9c318cde8917205a479f7d20"
+      "source_fingerprint": "a12ccf2d71c7eedcbb26c13cb9892014a066270d4ff06ad6470a880ba9d93e54"
     },
     "duplication_baseline": {
       "path": "reports/quality/full-app-duplication-baseline.json",
@@ -238,9 +238,9 @@
       "snapshot_date": "2026-07-27"
     },
     "module_coverage_inventory": {
-      "coverage_xml_sha256": "8e96c24561143c734517ffb530992fd185119321cfdbeedd1310b284bf93a18c",
+      "coverage_xml_sha256": "c5b653e09fc69f0802d6f758b2a23643b32726c4e3a5704b20783bc901b542fb",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "6fae5fc47c7b3d1c3d223ace5b2353401161a89c5067f46f493315daa72d7f5e"
+      "source_tree_sha256": "d0ebd1299bc119046a3e9395c3fe88077d0b6f714b50d5acd5b596f9a624d236"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

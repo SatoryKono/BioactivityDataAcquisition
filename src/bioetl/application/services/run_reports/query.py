@@ -156,13 +156,14 @@ def _list_reports(
         for mtime, owner_name, run_dir, json_path in candidates[:capped]
     ]
 
+
 def _collect_report_candidates(
     *,
     base: Path,
     kind: str,
     owner: str | None,
 ) -> list[tuple[float, str, Path, Path]]:
-    """Collect (mtime, owner, run_dir, json_path) candidates for one report kind."""
+    """Collect sortable report paths without hydrating report payloads."""
     report_name = f"{kind}-run-report.json"
     candidates: list[tuple[float, str, Path, Path]] = []
     for owner_dir in _owner_directories(base, owner):
@@ -180,6 +181,29 @@ def _collect_report_candidates(
                 continue
             candidates.append((mtime, owner_dir.name, run_dir, json_path))
     return candidates
+
+
+def _build_report_index_entry(
+    *,
+    kind: str,
+    mtime: float,
+    owner_name: str,
+    run_dir: Path,
+    json_path: Path,
+) -> ReportIndexEntry:
+    """Hydrate one ranked report candidate."""
+    status, completed_at = _read_identity_meta(json_path)
+    md_path = run_dir / f"{kind}-run-report.md"
+    return ReportIndexEntry(
+        kind=kind,
+        owner=owner_name,
+        run_id=run_dir.name,
+        json_path=json_path,
+        markdown_path=md_path if md_path.is_file() else None,
+        status=status,
+        completed_at=completed_at,
+        mtime=mtime,
+    )
 
 def _build_report_index_entry(
     *,
