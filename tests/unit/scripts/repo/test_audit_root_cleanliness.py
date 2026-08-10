@@ -147,6 +147,37 @@ def test_unexpected_local_root_dirs_on_disk_reject_uncataloged_root_dirs(
     assert violations == ["logs"]
 
 
+def test_unexpected_local_root_dirs_on_disk_preserves_nonempty_worktrees(
+    tmp_path: Path,
+) -> None:
+    worktrees = tmp_path / ".worktrees"
+    (worktrees / "active-checkout").mkdir(parents=True)
+
+    violations = module._unexpected_local_root_dirs_on_disk(
+        tmp_path,
+        tracked_root_dirs=set(),
+        allowed_root_dirs=frozenset(),
+        tolerated_local_root_dirs=frozenset(),
+    )
+
+    assert violations == []
+
+
+def test_unexpected_local_root_dirs_on_disk_rejects_empty_worktrees(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / ".worktrees").mkdir()
+
+    violations = module._unexpected_local_root_dirs_on_disk(
+        tmp_path,
+        tracked_root_dirs=set(),
+        allowed_root_dirs=frozenset(),
+        tolerated_local_root_dirs=frozenset(),
+    )
+
+    assert violations == [".worktrees"]
+
+
 def test_unexpected_local_root_python_files_reject_untracked_root_python(
     tmp_path: Path,
 ) -> None:
