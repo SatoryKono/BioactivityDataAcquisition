@@ -16,6 +16,11 @@ class TestGrafanaScopeHandling:
         """Test that 'All' is recognized as Grafana All scope."""
         assert HealthServerRoutingMixin._is_all_scope_token("All")
 
+    def test_is_all_scope_token_with_lowercase_all(self):
+        """Lowercase 'all' must not filter run_id lists to empty."""
+        assert HealthServerRoutingMixin._is_all_scope_token("all")
+        assert HealthServerRoutingMixin._is_all_scope_token(" ALL ")
+
     def test_is_all_scope_token_with_dollar_all(self):
         """Test that '$__all' is recognized as Grafana All scope."""
         assert HealthServerRoutingMixin._is_all_scope_token("$__all")
@@ -36,12 +41,28 @@ class TestGrafanaScopeHandling:
         """Test that specific values are not recognized as Grafana All scope."""
         assert not HealthServerRoutingMixin._is_all_scope_token("chembl")
         assert not HealthServerRoutingMixin._is_all_scope_token("pubchem")
+        assert not HealthServerRoutingMixin._is_all_scope_token("backfill")
 
     def test_is_all_scope_token_with_whitespace(self):
         """Test that whitespace is handled correctly."""
         assert HealthServerRoutingMixin._is_all_scope_token(" All ")
         assert HealthServerRoutingMixin._is_all_scope_token(" $__all ")
         assert not HealthServerRoutingMixin._is_all_scope_token(" chembl ")
+
+    def test_read_scope_csv_param_collapses_lowercase_all(self):
+        """CSV scope with lowercase all becomes unbounded (empty tuple)."""
+        assert (
+            HealthServerRoutingMixin._read_scope_csv_param(
+                {"run_type": "all"}, "run_type"
+            )
+            == ()
+        )
+        assert (
+            HealthServerRoutingMixin._read_scope_csv_param(
+                {"workflow": "all,chembl_baseline"}, "workflow"
+            )
+            == ()
+        )
 
 
 class TestQueryParameterParsing:

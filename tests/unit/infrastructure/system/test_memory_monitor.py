@@ -29,12 +29,15 @@
 
 from __future__ import annotations
 
+from io import StringIO
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from bioetl.domain.config import MemoryConfig
 from bioetl.domain.ports import MemoryStats
+import bioetl.infrastructure.system.memory_monitor as memory_monitor_module
 from bioetl.infrastructure.system.memory_monitor import MemoryMonitor
 
 
@@ -172,6 +175,33 @@ class TestMemoryMonitor:
 
         # Should always return False when disabled
         assert monitor.is_under_pressure() is False
+
+    def test_pressure_state_accessors_track_enabled_decisions(self, mock_logger):
+        """Operator-facing mode/state accessors expose the most recent decision."""
+        monitor = MemoryMonitor(config=MemoryConfig(), logger=mock_logger)
+        assert monitor.get_monitor_mode() == "unknown"
+        assert monitor.get_last_pressure_state() is None
+
+        with patch.object(monitor, "get_memory_stats") as get_stats:
+            get_stats.return_value = MemoryStats(
+                used_mb=7200.0,
+                available_mb=800.0,
+                total_mb=8000.0,
+                percent_used=0.9,
+                process_mb=256.0,
+            )
+            assert monitor.is_under_pressure() is True
+            assert monitor.get_last_pressure_state() is True
+
+            get_stats.return_value = MemoryStats(
+                used_mb=3200.0,
+                available_mb=4800.0,
+                total_mb=8000.0,
+                percent_used=0.4,
+                process_mb=256.0,
+            )
+            assert monitor.is_under_pressure() is False
+            assert monitor.get_last_pressure_state() is False
 
     def test_get_recommended_batch_size_no_pressure(self, mock_logger):
         """Test batch size unchanged when no pressure."""
@@ -381,6 +411,30 @@ class TestMemoryMonitorPsutil:
         assert 0 <= stats.percent_used <= 1
         assert stats.process_mb > 0
 
+    def test_psutil_process_handle_is_cached(self, mock_logger, monkeypatch) -> None:
+        """Repeated sampling reuses the expensive process handle."""
+        process = MagicMock()
+        process.memory_info.return_value = SimpleNamespace(rss=256 * 1024 * 1024)
+        psutil = MagicMock()
+        psutil.Process.return_value = process
+        psutil.virtual_memory.return_value = SimpleNamespace(
+            used=6 * 1024 * 1024,
+            available=2 * 1024 * 1024,
+            total=8 * 1024 * 1024,
+            percent=75.0,
+        )
+        monkeypatch.setattr(memory_monitor_module, "_psutil_module", psutil)
+        monitor = MemoryMonitor(config=MemoryConfig(), logger=mock_logger)
+        monitor._psutil_available = True
+
+        first = monitor.get_memory_stats()
+        second = monitor.get_memory_stats()
+
+        assert first == second
+        assert monitor.get_monitor_mode() == "psutil"
+        psutil.Process.assert_called_once_with()
+        assert process.memory_info.call_count == 2
+
 
 @pytest.mark.unit
 class TestMemoryMonitorFallback:
@@ -534,3 +588,70 @@ class TestMemoryMonitorResourceFallback:
             monitor = MemoryMonitor(config=config, logger=mock_logger)
 
             assert monitor._psutil_available is False
+
+    def test_resource_fallback_parses_linux_meminfo(
+        self,
+        mock_logger,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Unix fallback reports process and host values without psutil."""
+        meminfo = "MemTotal: 8192 kB\nMemAvailable: 2048 kB\n"
+        monkeypatch.setattr(
+            memory_monitor_module.Path,
+            "open",
+            lambda *_args, **_kwargs: StringIO(meminfo),
+        )
+        monitor = MemoryMonitor(config=MemoryConfig(), logger=mock_logger)
+
+        with patch(
+            "resource.getrusage",
+            return_value=SimpleNamespace(ru_maxrss=1024),
+        ):
+            stats = monitor._get_stats_resource()
+
+        assert monitor.get_monitor_mode() == "resource"
+        assert stats.total_mb == pytest.approx(8.0)
+        assert stats.available_mb == pytest.approx(2.0)
+        assert stats.used_mb == pytest.approx(6.0)
+        assert stats.percent_used == pytest.approx(0.75)
+        assert stats.process_mb == pytest.approx(1.0)
+
+    def test_resource_fallback_uses_estimate_when_meminfo_is_unreadable(
+        self,
+        mock_logger,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Unreadable procfs degrades to deterministic conservative estimates."""
+        monkeypatch.setattr(
+            memory_monitor_module.Path,
+            "open",
+            MagicMock(side_effect=OSError("procfs unavailable")),
+        )
+        monitor = MemoryMonitor(config=MemoryConfig(), logger=mock_logger)
+
+        with patch(
+            "resource.getrusage",
+            return_value=SimpleNamespace(ru_maxrss=1024),
+        ):
+            stats = monitor._get_stats_resource()
+
+        assert monitor.get_monitor_mode() == "estimate"
+        assert stats.percent_used == pytest.approx(0.5)
+
+    def test_recovery_completion_and_pressure_reduction_work_without_logger(
+        self,
+    ) -> None:
+        """Adaptive sizing is functional even when no structured logger is injected."""
+        monitor = MemoryMonitor(config=MemoryConfig(), logger=None)
+        low = MemoryStats(4000.0, 4000.0, 8000.0, 0.5, 256.0)
+        high = MemoryStats(7200.0, 800.0, 8000.0, 0.9, 256.0)
+        monitor._recovery_target_batch_size = 101
+        monitor._last_batch_size = 101
+
+        with patch.object(monitor, "get_memory_stats", return_value=low):
+            assert monitor.get_recommended_batch_size(100) == 101
+        assert monitor._recovery_target_batch_size is None
+        assert monitor._last_batch_size == 101
+
+        with patch.object(monitor, "get_memory_stats", return_value=high):
+            assert monitor.get_recommended_batch_size(100) == 50

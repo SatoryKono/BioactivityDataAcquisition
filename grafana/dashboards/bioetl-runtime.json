@@ -1570,7 +1570,16 @@
               "mode": "multi",
               "sort": "desc"
             },
-            "showHeader": true
+            "showHeader": true,
+            "cellHeight": "sm",
+            "footer": {
+              "show": false,
+              "reducer": [
+                "sum"
+              ],
+              "countRows": false,
+              "fields": ""
+            }
           },
           "targets": [
             {
@@ -1704,7 +1713,8 @@
             "showHeader": true,
             "footer": {
               "show": false
-            }
+            },
+            "cellHeight": "sm"
           },
           "targets": [
             {
@@ -3544,7 +3554,7 @@
   "templating": {
     "list": [
       {
-        "allValue": null,
+        "allValue": "$__all",
         "current": {
           "selected": true,
           "text": "All",
@@ -3607,7 +3617,7 @@
         "description": "Core scope: pipeline selector from canonical runtime pipeline/run_type universe, including runs that emitted no records. Single-select; no All scope. Unknown is the explicit fail-closed default."
       },
       {
-        "allValue": null,
+        "allValue": "$__all",
         "current": {
           "selected": true,
           "text": "backfill",
