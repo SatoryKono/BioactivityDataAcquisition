@@ -11,5 +11,5 @@
 | `application_core` | 190 | 23076 | 0 | 0.363 | 0 | 8 | `bioetl.application.core.batch_runtime_failure_policy` | `files_ge_250_loc=0, max_internal_fan_in=10` | `-` | `near_budget:max_internal_fan_in=8/10` |
 | `composition_bootstrap_runtime` | 51 | 6318 | 0 | 0.325 | 0 | 2 | `bioetl.composition.bootstrap.runtime.tracing_bootstrap` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
 | `composition_factories_pipeline` | 32 | 3998 | 1 | 0.342 | 0 | 2 | `bioetl.composition.factories.pipeline.transformer_builder` | `files_ge_250_loc=2, max_internal_fan_in=3` | `-` | `-` |
-| `application_services_control_plane` | 155 | 17862 | 0 | 0.444 | 0 | 8 | `bioetl.application.services.control_plane.evidence.models` | `files_ge_250_loc=0, max_internal_fan_in=3` | `over_budget:max_internal_fan_in=8/3` | `near_budget:max_internal_fan_in=8/3` |
+| `application_services_control_plane` | 156 | 18027 | 0 | 0.443 | 0 | 8 | `bioetl.application.services.control_plane.evidence.models` | `files_ge_250_loc=0, max_internal_fan_in=3` | `over_budget:max_internal_fan_in=8/3` | `near_budget:max_internal_fan_in=8/3` |
 | `composition_runtime_builders` | 56 | 7186 | 0 | 0.358 | 0 | 3 | `bioetl.composition.runtime_builders.run_manifest_support` | `files_ge_250_loc=0, max_internal_fan_in=5` | `-` | `-` |

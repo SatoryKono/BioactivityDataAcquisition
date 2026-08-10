@@ -81,7 +81,11 @@ def _iter_candidate_configs(manifest: RunManifest) -> tuple[Mapping[str, object]
         candidates.append(current)
         for key in _NESTED_CONFIG_KEYS:
             nested = _as_mapping(current.get(key))
-            if nested is not None and nested not in candidates and nested not in pending:
+            if (
+                nested is not None
+                and nested not in candidates
+                and nested not in pending
+            ):
                 pending.append(nested)
     return tuple(candidates)
 
@@ -150,7 +154,9 @@ class ControlPlaneIntegrityMetricsService:
                 continue
             scope = (manifest.pipeline_name, manifest.run_type.value)
             scope_counts = counts.setdefault(scope, [0, 0])
-            scope_counts[0 if _ledger_matches_manifest(manifest, self.ledger_port) else 1] += 1
+            scope_counts[
+                0 if _ledger_matches_manifest(manifest, self.ledger_port) else 1
+            ] += 1
 
         results = tuple(
             ManifestLedgerIntegrityScope(

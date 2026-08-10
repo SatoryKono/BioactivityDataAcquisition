@@ -64,10 +64,7 @@ def test_platform_installers_default_to_none_and_isolate_optional_failures() -> 
 
 
 def test_rollback_is_documented_without_env_mutation() -> None:
-    readme = (ROOT / "scripts/ai/agent_tools/README.md").read_text(
-        encoding="utf-8"
-    )
+    readme = (ROOT / "scripts/ai/agent_tools/README.md").read_text(encoding="utf-8")
     assert "## Uninstall and rollback" in readme
     assert "pip uninstall agentdebugx proofagent-harness" in readme
     assert "requires no code or configuration rollback" in readme
-
