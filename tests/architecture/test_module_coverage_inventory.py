@@ -803,6 +803,10 @@ def test_test_matrix_declares_module_coverage_inventory_contract() -> None:
         inventory["committed_artifact_refresh_policy"]
         == "green_coverage_verify_run_only"
     )
+    assert inventory["trusted_candidate_producer_job"] == "coverage-verify"
+    assert (
+        inventory["required_currentness_gate_job"] == "coverage-inventory-currentness"
+    )
     assert inventory["local_semantic_check"] == (
         "pytest tests/architecture/test_module_coverage_inventory.py -q --tb=short"
     )
