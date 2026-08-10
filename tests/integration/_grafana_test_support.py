@@ -450,6 +450,7 @@ def _assert_standard_variable_contract(
     )
     expected_pipeline_metric_by_dashboard = {
         "bioetl-control-plane-v1.json": "bioetl_control_plane_run_type_universe",
+        "bioetl-run-explorer-v1.json": "bioetl_control_plane_run_type_universe",
         "bioetl-runtime.json": "bioetl_runtime_pipeline_run_type_universe",
     }
     expected_pipeline_metric = expected_pipeline_metric_by_dashboard.get(
@@ -494,6 +495,13 @@ def _assert_workflow_context_variable(
     assert workflow_var is not None, (
         f"Dashboard {dashboard_path.name} must define shared 'workflow' context"
     )
+    if dashboard_path.name == "bioetl-run-explorer-v1.json":
+        assert workflow_var.get("type") == "custom"
+        assert workflow_var.get("includeAll") is True
+        assert workflow_var.get("allValue") == "$__all"
+        assert workflow_var.get("query") == "chembl_baseline"
+        assert workflow_var.get("current", {}).get("value") == "$__all"
+        return
     assert "bioetl_workflow_universe" in _query_text(workflow_var), (
         f"Dashboard {dashboard_path.name} 'workflow' query must use workflow universe"
     )

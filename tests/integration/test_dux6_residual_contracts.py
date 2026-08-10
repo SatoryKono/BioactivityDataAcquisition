@@ -137,8 +137,9 @@ def test_pfill_12_browse_explains_artifact_backing_and_backend_failure() -> None
     description = str(browse.get("description") or "")
     target = (browse.get("targets") or [])[0]
 
-    assert "No pipeline-run-report artifacts" in no_value
-    assert "reports/run-reports/pipeline/<name>/" in no_value
+    assert "No pipeline-run-report files" in no_value
+    assert "reports/run-reports/pipeline/<pipeline>/" in no_value
+    assert "has no report artifacts yet" in no_value
     # Operator help distinguishes valid empty vs backend unavailable (#7248).
     assert "empty table is valid" in description.lower()
     assert "/health/live" in description

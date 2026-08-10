@@ -1034,6 +1034,13 @@ def test_pipeline_and_provider_variables_are_single_select_unknown_default() -> 
                     f"{dashboard_path.name} 'pipeline' must default to All"
                 )
                 continue
+            if (
+                dashboard_path.name == "bioetl-run-explorer-v1.json"
+                and variable_name == "pipeline"
+            ):
+                assert variable.get("includeAll") is False
+                assert current.get("value") == "chembl_assay"
+                continue
             assert variable.get("includeAll") is False, (
                 f"{dashboard_path.name} '{variable_name}' must disable All"
             )
