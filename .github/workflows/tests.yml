@@ -919,6 +919,7 @@ jobs:
         with:
           name: coverage-data-${{ matrix.test-group.name }}
           path: reports/coverage/.coverage.${{ matrix.test-group.name }}
+          include-hidden-files: true
           if-no-files-found: warn
           retention-days: 7
 
