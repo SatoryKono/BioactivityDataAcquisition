@@ -1,9 +1,9 @@
 {
   "source_branch": "main",
-  "source_commit": "da9712f7ea64a93eea392beea9daaa758236faea",
-  "source_run_id": "merge-resolve-8216-20260806",
-  "source_tree_sha256": "2e483519602040c80eda8e28868150727069eb49de977be3042268cefa72e0ea",
-  "refreshed_at_utc": "2026-08-07T13:33:52.973234+00:00",
+  "source_commit": "7017e7277a30fcf56cffd92fb5bd13879bd260f8",
+  "source_run_id": "31404786271",
+  "source_tree_sha256": "2f6884b3fa9188d6609eed681f774f0a8e2849493fbf22c2addf8122bb01e73a",
+  "refreshed_at_utc": "2026-08-10T16:08:42.519813+00:00",
   "refresh_status": "captured",
   "coverage_percent": 95.24,
   "coverage": {
