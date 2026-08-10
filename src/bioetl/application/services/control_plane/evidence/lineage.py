@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 
+from bioetl.application.observability.control_plane_evidence import (
+    EvidenceCheckResult,
+)
 from bioetl.application.services.control_plane.evidence.lineage_closure import (
     closure_gaps,
 )
@@ -12,9 +15,6 @@ from bioetl.application.services.control_plane.evidence.lineage_graph_validation
 )
 from bioetl.application.services.control_plane.evidence.lineage_identity import (
     identity_gaps,
-)
-from bioetl.application.observability.control_plane_evidence import (
-    EvidenceCheckResult,
 )
 from bioetl.application.services.control_plane.evidence.persistence_profile import (
     resolve_persistence_profile,

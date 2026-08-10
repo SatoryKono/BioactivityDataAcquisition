@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from bioetl.application.services.control_plane.evidence.models import EvidenceCheck
+from bioetl.application.observability.control_plane_evidence import EvidenceCheckResult
 from bioetl.application.services.control_plane.evidence.persistence_profile import (
     STRICT_PERSISTENCE_PROFILES,
     resolve_persistence_profile,
@@ -22,7 +22,7 @@ def retention_evidence_checks(
     artifacts: tuple[ControlPlaneArtifactRef, ...],
     *,
     cutoff: datetime,
-) -> tuple[EvidenceCheck, ...]:
+) -> tuple[EvidenceCheckResult, ...]:
     """Build explicit retention, evidence-floor, and archive results."""
     required_profile, profile_valid = resolve_persistence_profile(manifest)
     delete_count = sum(
@@ -48,7 +48,7 @@ def retention_evidence_checks(
             required_profile=required_profile,
             profile_valid=profile_valid,
         ),
-        EvidenceCheck(
+        EvidenceCheckResult(
             "archive",
             "UNKNOWN",
             "archive_evidence_not_recorded",
@@ -88,15 +88,15 @@ def _missing_surfaces(
     return sorted(surface.value for surface in required - present)
 
 
-def _retention_policy_check(delete_count: int) -> EvidenceCheck:
+def _retention_policy_check(delete_count: int) -> EvidenceCheckResult:
     if delete_count:
-        return EvidenceCheck(
+        return EvidenceCheckResult(
             "retention_policy",
             "ERROR",
             "retention_delete_candidates_present",
             f"{delete_count} selected-run artifacts are delete candidates.",
         )
-    return EvidenceCheck(
+    return EvidenceCheckResult(
         "retention_policy",
         "OK",
         "retention_policy_satisfied",
@@ -110,36 +110,36 @@ def _evidence_floor_check(
     protected: bool,
     profile_valid: bool,
     stale: bool,
-) -> EvidenceCheck:
+) -> EvidenceCheckResult:
     if not profile_valid:
-        return EvidenceCheck(
+        return EvidenceCheckResult(
             "evidence_floor",
             "ERROR",
             "retention_persistence_profile_unsupported",
             "Retention validation rejects an unsupported persistence profile.",
         )
     if required_profile not in STRICT_PERSISTENCE_PROFILES:
-        return EvidenceCheck(
+        return EvidenceCheckResult(
             "evidence_floor",
             "OK",
             "reproducibility_evidence_floor_satisfied",
             "No strict replay evidence floor is declared for this run.",
         )
     if not stale:
-        return EvidenceCheck(
+        return EvidenceCheckResult(
             "evidence_floor",
             "OK",
             "reproducibility_evidence_within_retention",
             "Strict replay evidence remains inside the retention window.",
         )
     if protected:
-        return EvidenceCheck(
+        return EvidenceCheckResult(
             "evidence_floor",
             "OK",
             "reproducibility_evidence_floor_satisfied",
             f"The {required_profile} evidence floor is protected.",
         )
-    return EvidenceCheck(
+    return EvidenceCheckResult(
         "evidence_floor",
         "ERROR",
         "reproducibility_evidence_floor_unprotected",
@@ -152,20 +152,20 @@ def _required_evidence_check(
     *,
     required_profile: str,
     profile_valid: bool,
-) -> EvidenceCheck:
+) -> EvidenceCheckResult:
     missing_surfaces = _missing_surfaces(
         artifacts,
         required_profile=required_profile,
         profile_valid=profile_valid,
     )
     if missing_surfaces:
-        return EvidenceCheck(
+        return EvidenceCheckResult(
             "required_evidence",
             "ERROR",
             "required_evidence_surfaces_missing",
             "Missing lifecycle evidence surfaces: " + ", ".join(missing_surfaces),
         )
-    return EvidenceCheck(
+    return EvidenceCheckResult(
         "required_evidence",
         "OK",
         "required_evidence_surfaces_present",
@@ -179,16 +179,16 @@ def _snapshot_evidence_check(
     *,
     required_profile: str,
     profile_valid: bool,
-) -> EvidenceCheck:
+) -> EvidenceCheckResult:
     if not profile_valid:
-        return EvidenceCheck(
+        return EvidenceCheckResult(
             "snapshot_evidence",
             "ERROR",
             "retention_persistence_profile_unsupported",
             "Snapshot requirements cannot be evaluated for an unsupported profile.",
         )
     if required_profile not in STRICT_PERSISTENCE_PROFILES:
-        return EvidenceCheck(
+        return EvidenceCheckResult(
             "snapshot_evidence",
             "OK",
             "snapshot_evidence_not_required",
@@ -200,7 +200,7 @@ def _snapshot_evidence_check(
         for snapshot in source.input_snapshots
     }
     if not snapshot_ids:
-        return EvidenceCheck(
+        return EvidenceCheckResult(
             "snapshot_evidence",
             "ERROR",
             "manifest_snapshot_evidence_missing",
@@ -214,13 +214,13 @@ def _snapshot_evidence_check(
     }
     missing_count = len(snapshot_ids - observed_snapshot_ids)
     if missing_count == 0:
-        return EvidenceCheck(
+        return EvidenceCheckResult(
             "snapshot_evidence",
             "OK",
             "snapshot_lifecycle_evidence_present",
             "The lifecycle plan contains every manifested cached snapshot.",
         )
-    return EvidenceCheck(
+    return EvidenceCheckResult(
         "snapshot_evidence",
         "UNKNOWN",
         "snapshot_lifecycle_evidence_incomplete",

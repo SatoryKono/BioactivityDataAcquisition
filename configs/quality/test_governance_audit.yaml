@@ -732,7 +732,7 @@ assertless_triage:
       rationale: Verification is delegated to explicit check/validate/verify helper calls.
       next_review: "2026-09-30"
     intentional_no_exception_contract:
-      count: 89
+      count: 85
       decision: retained-with-rationale
       rationale: No-op, close/aclose, smoke, or does-not-raise behavior is the contract under test.
       next_review: "2026-09-30"
@@ -1004,6 +1004,12 @@ repo_backed_unit_test_exceptions:
     and run in the repo-backed-unit lane, not unit-fast.
   review_date: "2026-09-30"
   entries:
+    - path: tests/unit/repo_backed/scripts/ai/agent_tools/test_install_contracts.py
+      target_lane: repo-backed-unit
+      protected_surface: pyproject.toml + uv.lock + scripts/engineering/dev/setup_env_{wsl.sh,windows.ps1}
+    - path: tests/unit/repo_backed/scripts/ai/mcp/test_wrappers.py
+      target_lane: repo-backed-unit
+      protected_surface: scripts/ops/runtime/mcp/shared-servers.json + generated platform wrapper contract
     - path: tests/unit/repo_backed/application/composite/test_preflight_validator.py
       target_lane: repo-backed-unit
       protected_surface: configs/composites/*.yaml preflight field-priority and source-schema contracts
