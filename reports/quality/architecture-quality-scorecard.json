@@ -25,14 +25,14 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2390,
+        "source_module_count": 2413,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
       "name": "DDD / aggregates / invariants",
-      "score": 3.0,
+      "score": 0.0,
       "weight": 0.09,
-      "weighted_score": 0.27
+      "weighted_score": 0.0
     },
     {
       "evidence_metrics": {
@@ -74,7 +74,7 @@
       "evidence_metrics": {
         "compatibility_test_file_count": 0,
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 8
+        "unmeasured_module_count": 17
       },
       "id": "test_strategy_testability",
       "name": "Test strategy / testability",
@@ -162,7 +162,7 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 7.68,
+  "integral_score": 7.41,
   "interpretation": "satisfactory_system_refactoring_required",
   "metrics": {
     "accepted_adr_count": 54,
@@ -189,13 +189,13 @@
     "retained_public_export_facade_count": 4,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2390,
+    "source_module_count": 2413,
     "sunset_compat_count": 0,
     "total_duplicate_clusters": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 8
+    "unmeasured_module_count": 17
   },
   "schema_version": 1,
   "source_artifacts": {
@@ -238,7 +238,7 @@
       "snapshot_date": "2026-07-27"
     },
     "module_coverage_inventory": {
-      "coverage_xml_sha256": "5f0f03863fed75cfd01286787599931c7f35fa7aeb8a7d600a9c47b1110300f4",
+      "coverage_xml_sha256": "8e96c24561143c734517ffb530992fd185119321cfdbeedd1310b284bf93a18c",
       "path": "reports/quality/module-coverage-inventory.json",
       "source_tree_sha256": "72aeecbb69f5be9e8d9d796ebe42ad689a3ef7b4e4a36a94b3be06ae1fc844b2"
     },
