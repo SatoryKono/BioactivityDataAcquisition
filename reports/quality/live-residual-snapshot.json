@@ -3,7 +3,7 @@
   "linked_issue": "#6891",
   "follow_up_issue": "#7464",
   "parent_epic": "#6890",
-  "snapshot_date": "2026-08-09",
+  "snapshot_date": "2026-08-10",
   "generated_by": "scripts.engineering.qa.report_live_residual_snapshot",
   "policy": {
     "direction": "shrink_only",
@@ -16,7 +16,7 @@
       "max_internal_fan_in": 8,
       "helper_function_ratio": 0.363,
       "files": 190,
-      "total_loc": 23077,
+      "total_loc": 23076,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 10
     },
@@ -25,7 +25,7 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.325,
       "files": 51,
-      "total_loc": 6310,
+      "total_loc": 6306,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     },
@@ -43,7 +43,7 @@
       "max_internal_fan_in": 3,
       "helper_function_ratio": 0.421,
       "files": 140,
-      "total_loc": 15981,
+      "total_loc": 15980,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     },
@@ -52,7 +52,7 @@
       "max_internal_fan_in": 3,
       "helper_function_ratio": 0.358,
       "files": 56,
-      "total_loc": 7177,
+      "total_loc": 7176,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 5
     }
@@ -64,7 +64,7 @@
     "repo_wide_candidates_without_owner_tests_count": 0
   },
   "config_surface": {
-    "duplicate_cluster_count": 9
+    "duplicate_cluster_count": 16
   },
   "module_coverage": {
     "uncovered_module_count": 0,
