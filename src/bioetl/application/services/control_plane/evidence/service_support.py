@@ -5,9 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 
 from bioetl.application.services.control_plane.evidence.models import (
+    EvidenceCheck,
     evidence_payload,
 )
-from bioetl.application.services.control_plane.evidence.models import EvidenceCheck
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.ports import RunLedgerPort
 
