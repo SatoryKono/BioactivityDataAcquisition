@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 
 from bioetl.application.services.control_plane.evidence.models import (
-    EvidenceCheck,
+    EvidenceCheckResult,
     evidence_payload,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
@@ -27,7 +27,7 @@ def service_payload(
     *,
     endpoint: str,
     scope: EvidenceScope,
-    checks: tuple[EvidenceCheck, ...],
+    checks: tuple[EvidenceCheckResult, ...],
     additional_data: dict[str, object] | None = None,
 ) -> dict[str, object]:
     """Build the shared service payload from one resolved selector scope."""
@@ -45,7 +45,7 @@ def service_payload(
 
 def sanitized_manifest_payload_scope(
     scope: EvidenceScope,
-    checks: tuple[EvidenceCheck, ...],
+    checks: tuple[EvidenceCheckResult, ...],
 ) -> EvidenceScope:
     """Discard coerced manifest identity when raw parse/schema evidence failed."""
     identity_untrusted = any(
@@ -67,7 +67,7 @@ def source_error_payload(
         endpoint=endpoint,
         scope=scope,
         checks=(
-            EvidenceCheck(
+            EvidenceCheckResult(
                 check,
                 "ERROR",
                 reason,

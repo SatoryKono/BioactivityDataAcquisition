@@ -12,7 +12,7 @@ from scripts.ai.mcp import wrappers
 from scripts.engineering.common.platform import PlatformInfo, PlatformKind
 
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
 
 def test_catalog_has_unique_safe_wrapper_bindings() -> None:

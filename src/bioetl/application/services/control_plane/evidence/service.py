@@ -20,7 +20,7 @@ from bioetl.application.services.control_plane.evidence.manifest_validation impo
     build_manifest_checks,
 )
 from bioetl.application.services.control_plane.evidence.models import (
-    EvidenceCheck,
+    EvidenceCheckResult,
     unresolved_scope_check,
 )
 from bioetl.application.services.control_plane.evidence.retention import (
@@ -112,7 +112,7 @@ class ControlPlaneEvidenceService:
                 endpoint="lineage-validation",
                 scope=scope,
                 checks=(
-                    EvidenceCheck(
+                    EvidenceCheckResult(
                         "lineage_store",
                         "UNKNOWN",
                         "lineage_store_unavailable",
@@ -161,7 +161,7 @@ class ControlPlaneEvidenceService:
                 endpoint="retention-compliance",
                 scope=scope,
                 checks=(
-                    EvidenceCheck(
+                    EvidenceCheckResult(
                         "retention_policy",
                         "UNKNOWN",
                         "lifecycle_planner_unavailable",
@@ -208,7 +208,7 @@ class ControlPlaneEvidenceService:
             return payload
         if self.ledger_port is None:
             checks = (
-                EvidenceCheck(
+                EvidenceCheckResult(
                     "ledger",
                     "UNKNOWN",
                     "run_ledger_unavailable",
@@ -222,7 +222,7 @@ class ControlPlaneEvidenceService:
                 ledger_entries(self.ledger_port, scope.manifest)
             )
             checks = (
-                EvidenceCheck(
+                EvidenceCheckResult(
                     "classification",
                     "OK",
                     "failure_reasons_bounded",

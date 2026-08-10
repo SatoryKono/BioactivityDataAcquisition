@@ -5,8 +5,8 @@ from __future__ import annotations
 import asyncio
 from typing import Protocol
 
+from bioetl.application.observability.control_plane_evidence import EvidenceCheckResult
 from bioetl.application.services.control_plane.evidence import EvidenceScope
-from bioetl.application.services.control_plane.evidence.models import EvidenceCheck
 from bioetl.application.services.control_plane.evidence.service_support import (
     service_payload,
     source_error_payload,
@@ -97,7 +97,7 @@ def evidence_service_unavailable_payload(
             resolved_via="evidence_service_unavailable",
         ),
         checks=(
-            EvidenceCheck(
+            EvidenceCheckResult(
                 "evidence_service",
                 "UNKNOWN",
                 "control_plane_evidence_service_unavailable",

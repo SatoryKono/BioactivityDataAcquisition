@@ -47810,7 +47810,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-08",
-  "source_tree_sha256": "9572008e06162b5461b74860d6d787e9acf3feee0f3c8ab972eb1ec4b7db223f",
+  "source_tree_sha256": "77b5acc67953d805a28a2c69e31a391fe692519a4477e1755515e8aebd8027ac",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

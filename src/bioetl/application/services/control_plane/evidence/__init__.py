@@ -8,7 +8,7 @@ from bioetl.application.services.control_plane.evidence.failure_reasons import (
 )
 from bioetl.application.services.control_plane.evidence.models import (
     CONTROL_PLANE_EVIDENCE_CONTRACT,
-    EvidenceCheck,
+    EvidenceCheckResult,
     EvidenceStatus,
 )
 from bioetl.application.services.control_plane.evidence.service import (
@@ -24,7 +24,7 @@ __all__ = [
     "DEFAULT_CONTROL_PLANE_RETENTION_DAYS",
     "FAILURE_REASON_CATEGORIES",
     "ControlPlaneEvidenceService",
-    "EvidenceCheck",
+    "EvidenceCheckResult",
     "EvidenceScope",
     "EvidenceStatus",
     "build_unknown_failure_reason_rows",
