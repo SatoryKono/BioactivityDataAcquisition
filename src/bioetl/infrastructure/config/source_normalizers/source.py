@@ -37,41 +37,38 @@ def _deep_merge(
 def _sync_timeout_aliases(
     data: JsonDict,  # Any: normalizer; input types vary
 ) -> JsonDict:  # Any: normalizer; input types vary
-    """Ensure ``timeout`` and ``timeout_sec`` are kept in sync.
+    """Normalize the registered ``timeout`` alias to canonical ``timeout_sec``.
 
     Returns:
-        Dictionary copy with both timeout aliases present and synchronized.
+        Dictionary copy containing only the canonical timeout key.
     """
     result = data.copy()
-    if "timeout" in result and "timeout_sec" not in result:
+    if "timeout" in result and "timeout_sec" in result:
+        if result["timeout"] != result["timeout_sec"]:
+            raise ValueError("Conflicting timeout and timeout_sec values")
+    elif "timeout" in result:
         result["timeout_sec"] = result["timeout"]
-    elif "timeout_sec" in result and "timeout" not in result:
-        result["timeout"] = result["timeout_sec"]
+    result.pop("timeout", None)
     return result
 
 
 def _normalize_rate_limit(
     source: JsonDict,  # Any: normalizer; input types vary
 ) -> None:
-    """Reconcile ``with_api_key`` ↔ ``authenticated`` aliases in-place."""
+    """Normalize the registered ``authenticated`` alias to ``with_api_key``."""
     rate_limit = source.get("rate_limit")
     if not isinstance(rate_limit, dict):
         return
     rl = rate_limit.copy()
-    if isinstance(rl.get("with_api_key"), dict) and "authenticated" not in rl:
-        rl["authenticated"] = rl["with_api_key"]
-    if isinstance(rl.get("authenticated"), dict) and "with_api_key" not in rl:
+    if "authenticated" in rl and "with_api_key" in rl:
+        if rl["authenticated"] != rl["with_api_key"]:
+            raise ValueError(
+                "Conflicting rate_limit.authenticated and with_api_key values"
+            )
+    elif isinstance(rl.get("authenticated"), dict):
         rl["with_api_key"] = rl["authenticated"]
+    rl.pop("authenticated", None)
     source["rate_limit"] = rl
-
-
-def _normalize_health_check(
-    source: JsonDict,  # Any: normalizer; input types vary
-) -> None:
-    """Reconcile ``timeout`` ↔ ``timeout_sec`` in health_check in-place."""
-    hc = source.get("health_check")
-    if isinstance(hc, dict):
-        source["health_check"] = _sync_timeout_aliases(hc)
 
 
 def _get_dict_or_empty(
@@ -101,9 +98,8 @@ def _copy_keys(
 def _normalize_source_rate_limits(
     source: JsonDict,  # Any: normalizer; input types vary
 ) -> None:
-    """Normalize rate limiting aliases and health check timeouts."""
+    """Normalize registered rate limiting aliases."""
     _normalize_rate_limit(source)
-    _normalize_health_check(source)
 
 
 def _reject_retired_source_pagination_aliases(

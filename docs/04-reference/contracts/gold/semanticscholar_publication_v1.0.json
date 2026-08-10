@@ -220,7 +220,7 @@
     },
     "corpus_id": {
       "type": [
-        "number",
+        "string",
         "null"
       ],
       "nullable": true,
@@ -260,7 +260,7 @@
     },
     "is_oa": {
       "type": [
-        "object",
+        "boolean",
         "null"
       ],
       "nullable": true,

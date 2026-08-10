@@ -6,9 +6,6 @@ source:
         base_url: https://api.openalex.org
         auth_type: api_key
         api_key_env: BIOETL_OPENALEX_API_KEY
-        # Documentation-only request attribution. Runtime operators set the
-        # real technical contact through BIOETL_DEFAULT_EMAIL.
-        mailto: "your-email@example.com"
         client:
             timeout_sec: 30.0
             max_retries: 3
@@ -32,21 +29,6 @@ source:
     rate_limit:
         requests_per_second: 10
         burst: 20
-        credit_model:
-            enabled: true
-            budget_source: provider_account
-        rate_limit_headers:
-            - X-RateLimit-Limit
-            - X-RateLimit-Remaining
-            - X-RateLimit-Credits-Used
-            - X-RateLimit-Reset
-    health_check:
-        endpoint: /works
-        params:
-            per-page: 1
-        timeout: 5
-    retry:
-        use_retry_after: true
 entities:
     - publication
 entity_notes:

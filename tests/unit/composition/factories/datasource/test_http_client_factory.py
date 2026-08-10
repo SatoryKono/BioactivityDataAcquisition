@@ -74,7 +74,10 @@ class TestHttpClientFactory:
         from bioetl.composition.factories.datasource import http_client as module
 
         source_config = SimpleNamespace(
-            rate_limit=SimpleNamespace(requests_per_second=7.5, burst=15),
+            rate_limit=SimpleNamespace(
+                requests_per_second=7.5, burst=15, with_api_key=None
+            ),
+            provider_config=SimpleNamespace(api_key_env=None),
             circuit_breaker=SimpleNamespace(failure_threshold=9, recovery_timeout=120),
             timeout_sec=42.0,
             max_retries=5,
@@ -114,21 +117,32 @@ class TestHttpClientFactory:
         assert kwargs["max_keepalive_connections"] == 20
         assert kwargs["trust_env"] is False
 
-    def test_create_applies_rate_override_from_settings(
+    def test_create_selects_authenticated_rate_from_source_config(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """Settings with API key should apply provider rate override."""
+        """Settings credential presence selects the typed provider rate bucket."""
         from bioetl.composition.factories.datasource import http_client as module
 
-        http_config = HttpConfig(
-            rate=3.0,
-            capacity=6,
-            rate_overrides={"pubmed_api_key": 12.0},
+        source_config = SimpleNamespace(
+            rate_limit=SimpleNamespace(
+                requests_per_second=3.0,
+                burst=6,
+                with_api_key=SimpleNamespace(requests_per_second=12.0, burst=24),
+            ),
+            provider_config=SimpleNamespace(api_key_env="BIOETL_PUBMED_API_KEY"),
+            circuit_breaker=SimpleNamespace(failure_threshold=5, recovery_timeout=300),
+            timeout_sec=30.0,
+            max_retries=3,
+            retry_base_delay=1.0,
+            retry_max_delay=60.0,
+            max_connections=50,
+            max_keepalive_connections=10,
+            trust_env=True,
         )
         client_ctor = MagicMock(return_value="client-with-override")
         registry = MagicMock()
         registry.is_registered.return_value = True
-        registry.get_http_config.return_value = http_config
+        registry.get_http_config.return_value = HttpConfig(rate=3.0, capacity=6)
 
         monkeypatch.setattr(
             module,
@@ -136,10 +150,7 @@ class TestHttpClientFactory:
             lambda provider_registry=None: registry,
         )
 
-        def _raise_missing_source_config(_: str):
-            raise ValueError("missing source config")
-
-        monkeypatch.setattr(module, "load_source_config", _raise_missing_source_config)
+        monkeypatch.setattr(module, "load_source_config", lambda _: source_config)
         monkeypatch.setattr(module, "UnifiedHTTPClient", client_ctor)
 
         settings = SimpleNamespace(pubmed_api_key="non-empty")
@@ -161,7 +172,10 @@ class TestHttpClientFactory:
         from bioetl.composition.factories.datasource import http_client as module
 
         source_config = SimpleNamespace(
-            rate_limit=SimpleNamespace(requests_per_second=7.5, burst=15),
+            rate_limit=SimpleNamespace(
+                requests_per_second=7.5, burst=15, with_api_key=None
+            ),
+            provider_config=SimpleNamespace(api_key_env=None),
             circuit_breaker=SimpleNamespace(failure_threshold=9, recovery_timeout=120),
             timeout_sec=42.0,
             max_retries=5,
@@ -252,7 +266,10 @@ class TestResolvedHttpConfig:
         from bioetl.composition.factories.datasource import http_client as module
 
         source_config = SimpleNamespace(
-            rate_limit=SimpleNamespace(requests_per_second=7.5, burst=15),
+            rate_limit=SimpleNamespace(
+                requests_per_second=7.5, burst=15, with_api_key=None
+            ),
+            provider_config=SimpleNamespace(api_key_env=None),
             circuit_breaker=SimpleNamespace(failure_threshold=9, recovery_timeout=120),
             timeout_sec=42.0,
             max_retries=5,
@@ -316,15 +333,13 @@ class TestResolvedHttpConfig:
         assert cfg.max_delay == pytest.approx(60.0)
         assert cfg.trust_env is True
 
-    def test_resolve_applies_rate_override(
+    def test_resolve_ignores_legacy_registry_rate_override_without_source_config(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """API key in settings should boost rate via rate_overrides."""
+        """Legacy registry overrides are not a second authenticated-rate authority."""
         from bioetl.composition.factories.datasource import http_client as module
 
-        http_config = HttpConfig(
-            rate=3.0, capacity=6, rate_overrides={"pubmed_api_key": 12.0}
-        )
+        http_config = HttpConfig(rate=3.0, capacity=6)
         registry = MagicMock()
         registry.get_http_config.return_value = http_config
 
@@ -341,8 +356,42 @@ class TestResolvedHttpConfig:
         settings = SimpleNamespace(pubmed_api_key="non-empty")
         cfg = HttpClientFactory._resolve_config("pubmed", settings)
 
-        assert cfg.rate == pytest.approx(12.0)
-        assert cfg.capacity == 24
+        assert cfg.rate == pytest.approx(3.0)
+        assert cfg.capacity == 6
+
+    @pytest.mark.parametrize(
+        ("provider", "setting_name", "anonymous", "authenticated"),
+        [
+            ("chembl", None, (0.1, 1), (0.1, 1)),
+            ("crossref", None, (50.0, 100), (50.0, 100)),
+            ("openalex", "openalex_api_key", (10.0, 20), (10.0, 20)),
+            ("pubchem", None, (5.0, 10), (5.0, 10)),
+            ("pubmed", "pubmed_api_key", (3.0, 5), (10.0, 20)),
+            (
+                "semanticscholar",
+                "semanticscholar_api_key",
+                (0.1, 1),
+                (1.0, 5),
+            ),
+            ("uniprot", "uniprot_api_key", (10.0, 20), (100.0, 200)),
+        ],
+    )
+    def test_provider_rate_selection_matrix(
+        self,
+        provider: str,
+        setting_name: str | None,
+        anonymous: tuple[float, int],
+        authenticated: tuple[float, int],
+    ) -> None:
+        """All tracked providers select rates from their one strict source model."""
+        without_key = HttpClientFactory._resolve_config(provider, SimpleNamespace())
+        assert (without_key.rate, without_key.capacity) == anonymous
+
+        settings = SimpleNamespace()
+        if setting_name is not None:
+            setattr(settings, setting_name, "present")
+        with_key = HttpClientFactory._resolve_config(provider, settings)
+        assert (with_key.rate, with_key.capacity) == authenticated
 
     def test_resolved_http_config_is_frozen(self) -> None:
         """ResolvedHttpConfig should be immutable."""

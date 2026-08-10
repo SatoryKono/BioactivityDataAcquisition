@@ -21,11 +21,6 @@ source:
     rate_limit:
         requests_per_second: 0.1
         burst: 1
-    health_check:
-        endpoint: null
-        timeout: 15
-    retry:
-        use_retry_after: false
 entities:
     - activity
     - assay

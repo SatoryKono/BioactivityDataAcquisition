@@ -93,7 +93,7 @@
     },
     "taxonomy_id": {
       "type": [
-        "integer",
+        "number",
         "null"
       ],
       "nullable": true,
@@ -109,7 +109,7 @@
     },
     "record_id": {
       "type": [
-        "integer",
+        "number",
         "null"
       ],
       "nullable": true,
@@ -117,7 +117,7 @@
     },
     "src_id": {
       "type": [
-        "integer",
+        "number",
         "null"
       ],
       "nullable": true,

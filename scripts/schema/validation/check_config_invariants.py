@@ -537,12 +537,12 @@ CHECK_FUNCTIONS = (
 )
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Validate CI invariants for configs/**"
     )
     parser.add_argument("--verbose", "-v", action="store_true")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     all_errors: list[str] = []
     parse_errors = check_inv_000(args.verbose)

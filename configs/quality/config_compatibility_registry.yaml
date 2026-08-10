@@ -37,17 +37,17 @@ policy:
 accepted_shapes:
   - id: source.timeout_timeout_sec_alias
     status: canonical-alias
-    canonical_target: source.*.timeout
+    canonical_target: source.provider_config.client.timeout_sec
     aliases:
-      - timeout_sec
+      - timeout
     source_files:
       - src/bioetl/infrastructure/config/source_normalizers/source.py
     test_files:
       - tests/unit/infrastructure/config/test_source_normalizers.py
     permanent_rationale: >
       Provider source configs historically expose timeout and timeout_sec on
-      nested transport sections. The normalizer keeps them synchronized before
-      pydantic validation and does not affect domain identity or persisted data.
+      nested transport sections. The normalizer materializes only timeout_sec
+      before strict pydantic validation.
     review_decision: retain-permanent
     decision_recorded_on: "2026-05-12"
     exit_strategy: retain-permanent-canonical-alias
@@ -55,17 +55,16 @@ accepted_shapes:
 
   - id: source.rate_limit_with_api_key_alias
     status: canonical-alias
-    canonical_target: source.rate_limit.authenticated
+    canonical_target: source.rate_limit.with_api_key
     aliases:
-      - source.rate_limit.with_api_key
+      - source.rate_limit.authenticated
     source_files:
       - src/bioetl/infrastructure/config/source_normalizers/source.py
     test_files:
       - tests/unit/infrastructure/config/test_source_normalizers.py
     permanent_rationale: >
       with_api_key and authenticated describe the same bounded rate-limit bucket.
-      Keeping both synchronized preserves provider config readability without
-      widening runtime behavior or metric labels.
+      The normalizer materializes only with_api_key before strict validation.
     review_decision: retain-permanent
     decision_recorded_on: "2026-05-12"
     exit_strategy: retain-permanent-canonical-alias

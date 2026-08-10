@@ -1483,8 +1483,37 @@ def _write_deprecation_report(path: Path, payload: dict[str, object]) -> None:
 
 
 def _load_json(path: Path) -> dict[str, object]:
+    raw_text = path.read_text(encoding="utf-8")
+
+    def _key_locations(key: str) -> str:
+        encoded_key = json.dumps(key, ensure_ascii=False)
+        matches = list(re.finditer(rf"{re.escape(encoded_key)}\s*:", raw_text))
+        locations = []
+        for match in matches:
+            line = raw_text.count("\n", 0, match.start()) + 1
+            last_newline = raw_text.rfind("\n", 0, match.start())
+            column = match.start() - last_newline
+            locations.append(f"line {line}, column {column}")
+        return ", ".join(locations) or "location unavailable"
+
+    def _reject_duplicate_keys(
+        pairs: list[tuple[str, object]],
+    ) -> dict[str, object]:
+        payload: dict[str, object] = {}
+        for key, value in pairs:
+            if key in payload:
+                raise ValueError(
+                    f"Duplicate JSON object key {key!r} in {path}; "
+                    f"occurrences: {_key_locations(key)}"
+                )
+            payload[key] = value
+        return payload
+
     try:
-        raw = json.loads(path.read_text(encoding="utf-8"))
+        raw = json.loads(
+            raw_text,
+            object_pairs_hook=_reject_duplicate_keys,
+        )
     except json.JSONDecodeError as exc:
         raise ValueError(f"Invalid JSON in {path}: {exc}") from exc
     if not isinstance(raw, dict):

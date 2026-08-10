@@ -79,7 +79,7 @@ class PaginationConfig(BaseModel):
         max_url_length: Maximum URL length for GET requests.
     """
 
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="forbid")
 
     page_size: int | None = Field(default=None, ge=1, le=10000)
     id_batch_size: int | None = Field(default=None, ge=1, le=5000)
@@ -90,7 +90,7 @@ class PaginationConfig(BaseModel):
 class FallbackPolicyYamlConfig(BaseModel):
     """Provider fallback orchestration policy from YAML."""
 
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="forbid")
 
     enabled: bool = Field(default=False)
     supported_filter_field: str | None = None
@@ -112,21 +112,22 @@ class ProviderConfigYaml(BaseModel):
         base_url: Base URL for the API.
         client: HTTP client settings.
         pagination: API pagination settings (single source of truth).
-        default_email: Default email for NCBI APIs (PubMed specific).
+        api_key_env: Typed Settings credential source name, never a secret value.
     """
 
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="forbid")
 
     provider: str = ""
     base_url: str | None = None
     auth_type: str | None = None
-    api_key_env: str | None = None
-    api_key: str | None = None
-    mailto: str | None = None
+    api_key_env: str | None = Field(
+        default=None,
+        pattern=r"^BIOETL_[A-Z0-9_]+_API_KEY$",
+        description="Typed Settings credential environment-variable name",
+    )
     client: ClientYamlConfig = Field(default_factory=ClientYamlConfig)
     pagination: PaginationConfig = Field(default_factory=PaginationConfig)
     api_version: str | None = None
-    default_email: str | None = None
     fallback: FallbackPolicyYamlConfig | None = None
 
     @model_validator(mode="before")
@@ -170,7 +171,7 @@ class SourceSectionConfig(BaseModel):
         rate_limit: Rate limiting configuration.
     """
 
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="forbid")
 
     provider_config: ProviderConfigYaml = Field(
         default_factory=lambda: ProviderConfigYaml()
@@ -201,7 +202,7 @@ class SourceYamlConfig(BaseModel):
                 burst: 10
     """
 
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="forbid")
 
     source: SourceSectionConfig = Field(default_factory=SourceSectionConfig)
 

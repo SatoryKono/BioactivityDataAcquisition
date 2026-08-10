@@ -7,19 +7,19 @@ Canonical live ADR index: `docs/02-architecture/decisions/README.md`.
 This page is a generated governance mirror and MUST be regenerated via
 `python3 scripts/generate_adr_registry.py` after ADR additions or metadata changes.
 
-**Total ADRs**: 56
-**Last Updated**: 2026-08-09
+**Total ADRs**: 57
+**Last Updated**: 2026-08-10
 
 ## 📊 Status Summary
 
 | Status | Count | Percentage |
 |--------|-------|------------|
-| `accepted` | 54 | 96.4% |
-| `superseded` | 2 | 3.6% |
+| `accepted` | 55 | 96.5% |
+| `superseded` | 2 | 3.5% |
 
 ## 🟢 Accepted ADRs
 
-### 54 decisions
+### 55 decisions
 
 ### ADR-001: Delta Lake vs Parquet
 
@@ -663,6 +663,19 @@ architecture, and debt gates. It also has an immutable EvidenceStore. The
 mi...
 
 [📄 View Full ADR](../decisions/ADR-056-proof-or-stop-lifecycle-control.md)
+
+---
+
+### ADR-057: Deterministic Runtime Config Authority and Identity
+
+**Status**: `accepted` | **Category**: `Configuration` | **Owner**: `BioETL Team`
+
+**Relationships**: Related: ADR-032, ADR-044, ADR-046, ADR-052
+
+**Context**: Runtime Settings previously accepted an implicit `config.yaml` from the current
+working directory before explicit initialization and process environme...
+
+[📄 View Full ADR](../decisions/ADR-057-deterministic-runtime-config-authority-and-identity.md)
 
 ---
 

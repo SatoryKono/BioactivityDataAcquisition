@@ -83,13 +83,8 @@ def test_two_registry_clones_do_not_share_mutable_provider_config(
     second_config = second.get("chembl")
 
     first_config.default_kwargs["leak"] = True
-    if first_config.http_config is not None:
-        first_config.http_config.rate_overrides["leak"] = 1.0
 
     assert "leak" not in second_config.default_kwargs
-    assert second_config.http_config is None or (
-        "leak" not in second_config.http_config.rate_overrides
-    )
 
 
 def test_cached_bootstrap_metadata_is_order_stable_across_rebuilds(

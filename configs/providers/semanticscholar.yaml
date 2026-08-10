@@ -31,20 +31,9 @@ source:
     rate_limit:
         requests_per_second: 0.1
         burst: 1
-        window: 300
         with_api_key:
             requests_per_second: 1.0
             burst: 5
-    health_check:
-        endpoint: /paper/search
-        params:
-            query: test
-            limit: 1
-            fields: paperId
-        timeout: 30
-        skip_on_429: true
-    retry:
-        use_retry_after: true
 entities:
     - publication
 entity_notes:

@@ -27,7 +27,7 @@
       "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
       "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
     ],
-    "scanned_test_count": 357,
+    "scanned_test_count": 360,
     "unreviewed_count": 0
   },
   "assertion_branch_reachability_percent": 100.0,
@@ -1200,7 +1200,7 @@
       "test_count": 44
     },
     "test_governance": {
-      "assertion_backed_tests": 39,
+      "assertion_backed_tests": 40,
       "assertion_examples": [
         "tests/architecture/test_test_governance_audit.py:114",
         "tests/architecture/test_test_governance_audit.py:133",
@@ -1211,14 +1211,14 @@
         "tests/architecture/test_test_governance_audit.py:283",
         "tests/architecture/test_test_governance_audit.py:377",
         "tests/architecture/test_test_governance_audit.py:405",
-        "tests/architecture/test_test_governance_audit.py:445"
+        "tests/architecture/test_test_governance_audit.py:422"
       ],
       "assertless_tests": [],
       "intentional_no_exception_tests": 0,
       "paths": [
         "tests/architecture/test_test_governance_audit.py"
       ],
-      "test_count": 39
+      "test_count": 40
     }
   },
   "date_today_call_sites": 0,
@@ -1293,7 +1293,7 @@
         "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
         "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
       ],
-      "scanned_test_count": 357,
+      "scanned_test_count": 360,
       "unreviewed_count": 0
     },
     "assertion_branch_reachability_percent": 100.0,
@@ -2163,7 +2163,7 @@
         "test_count": 44
       },
       "test_governance": {
-        "assertion_backed_tests": 39,
+        "assertion_backed_tests": 40,
         "assertion_examples": [
           "tests/architecture/test_test_governance_audit.py:114",
           "tests/architecture/test_test_governance_audit.py:133",
@@ -2174,14 +2174,14 @@
           "tests/architecture/test_test_governance_audit.py:283",
           "tests/architecture/test_test_governance_audit.py:377",
           "tests/architecture/test_test_governance_audit.py:405",
-          "tests/architecture/test_test_governance_audit.py:445"
+          "tests/architecture/test_test_governance_audit.py:422"
         ],
         "assertless_tests": [],
         "intentional_no_exception_tests": 0,
         "paths": [
           "tests/architecture/test_test_governance_audit.py"
         ],
-        "test_count": 39
+        "test_count": 40
       }
     },
     "date_today_call_sites": 0,
@@ -2232,8 +2232,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2263,
-      "test_python_file_count": 2489,
+      "test_glob_file_count": 2265,
+      "test_python_file_count": 2491,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2252,7 +2252,6 @@
         "tests/unit/"
       ],
       "top_level_directories_including_pycache": [
-        "tests/__pycache__/",
         "tests/architecture/",
         "tests/benchmarks/",
         "tests/contract/",
@@ -2270,16 +2269,16 @@
         "tests/unit/"
       ],
       "top_level_directory_count": 15,
-      "top_level_directory_count_including_pycache": 16
+      "top_level_directory_count_including_pycache": 15
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2263,
-    "total_test_functions": 23918,
+    "total_test_files": 2265,
+    "total_test_functions": 23936,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "bf107ae1a143072a5d04863390b2196dd9d5df0c709375f4630d3457d97c611a",
+  "source_tree_sha256": "b399789f12c10584089722f9a5eacea810c203bf4160a3f6ec52d1cc72987623",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 101,
@@ -2299,8 +2298,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2263,
-    "test_python_file_count": 2489,
+    "test_glob_file_count": 2265,
+    "test_python_file_count": 2491,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2319,7 +2318,6 @@
       "tests/unit/"
     ],
     "top_level_directories_including_pycache": [
-      "tests/__pycache__/",
       "tests/architecture/",
       "tests/benchmarks/",
       "tests/contract/",
@@ -2337,11 +2335,11 @@
       "tests/unit/"
     ],
     "top_level_directory_count": 15,
-    "top_level_directory_count_including_pycache": 16
+    "top_level_directory_count_including_pycache": 15
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2263,
-  "total_test_functions": 23918,
+  "total_test_files": 2265,
+  "total_test_functions": 23936,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
