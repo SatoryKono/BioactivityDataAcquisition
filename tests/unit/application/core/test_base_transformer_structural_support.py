@@ -39,11 +39,17 @@ from bioetl.application.core import _base_transformer_structural_support  # noqa
 pytestmark = pytest.mark.unit
 
 from bioetl.application.core._base_transformer_structural_support import (
+    _log_structural_policy_events,
+    apply_silver_filter,
     apply_structural_policy,
     classify_structural_action,
     classify_structural_shadow_comparison,
     evaluate_semantic_shadow_decision,
     record_structural_policy_metrics,
+)
+from bioetl.application.core.base_transformer._structural_policy_types import (
+    StructuralPolicyOutcome,
+    StructuralPolicySignal,
 )
 from bioetl.application.core.base_transformer.errors import FilteredOutError
 from bioetl.domain.filtering import FilterDecision
@@ -329,6 +335,170 @@ class TestApplyStructuralPolicySingleFilterEval:
 
         assert result == kept
         mock_owner._silver_filters.evaluate.assert_called_once_with(kept)
+
+
+class TestApplySilverFilter:
+    """Directly exercise guard, precomputed, and rejection paths."""
+
+    @pytest.mark.parametrize("result", [None, {"entity_id": "e1"}])
+    def test_noop_when_record_or_filters_are_absent(self, result: object) -> None:
+        """No record or no configured filters means there is nothing to enforce."""
+        owner = MagicMock()
+        owner._silver_filters = None
+        apply_silver_filter(owner, MagicMock(), result, index=0)
+
+    def test_noop_when_filter_collection_is_empty(self) -> None:
+        """An empty filter collection must not evaluate the record."""
+        owner = MagicMock()
+        owner._silver_filters.is_empty.return_value = True
+
+        apply_silver_filter(owner, MagicMock(), {"entity_id": "e1"}, index=0)
+
+        owner._silver_filters.evaluate.assert_not_called()
+
+    def test_reuses_precomputed_passing_decision(self) -> None:
+        """Shadow evaluation may be reused without evaluating filters twice."""
+        owner = MagicMock(provider="chembl", entity_type="activity")
+        owner._silver_filters.is_empty.return_value = False
+        decision = FilterDecision(
+            include=True,
+            reason_code="accepted",
+            rule_type="allow",
+            field=None,
+            message=None,
+        )
+
+        apply_silver_filter(
+            owner,
+            MagicMock(),
+            {"entity_id": "e1"},
+            index=2,
+            precomputed_decision=decision,
+        )
+
+        owner._silver_filters.evaluate.assert_not_called()
+
+    def test_evaluates_and_raises_bounded_filter_details(self) -> None:
+        """A rejecting decision is logged and raised with structural-stage details."""
+        owner = MagicMock(provider="chembl", entity_type="activity")
+        owner._silver_filters.is_empty.return_value = False
+        decision = FilterDecision(
+            include=False,
+            reason_code="missing_id",
+            rule_type="required",
+            field="entity_id",
+            message=None,
+        )
+        owner._silver_filters.evaluate.return_value = decision
+        context = MagicMock()
+
+        with pytest.raises(FilteredOutError, match="Record excluded by silver filters"):
+            apply_silver_filter(
+                owner,
+                context,
+                {"value": 1},
+                index=4,
+            )
+
+        context.logger.debug.assert_called_once_with(
+            "silver_filter_quarantined",
+            provider="chembl",
+            entity_type="activity",
+            record_index=4,
+            filter_reason_code="missing_id",
+            filter_rule_type="required",
+            filter_field="entity_id",
+        )
+
+
+class TestStructuralPolicyQuarantine:
+    """Exercise event logging, null-record, and quarantine evidence paths."""
+
+    def test_log_structural_policy_events_uses_declared_log_level(self) -> None:
+        """Each structural signal is emitted through its bounded severity method."""
+        owner = MagicMock(provider="chembl", entity_type="activity")
+        context = MagicMock()
+        events = (
+            StructuralPolicySignal(
+                level="warning",
+                event="silver_structural_type_coerced_to_null",
+                details={"field": "value"},
+            ),
+            StructuralPolicySignal(
+                level="error",
+                event="silver_structural_required_field_missing",
+                details={"field": "entity_id"},
+            ),
+        )
+
+        _log_structural_policy_events(owner, context, 6, events)
+
+        context.logger.warning.assert_called_once_with(
+            "silver_structural_type_coerced_to_null",
+            provider="chembl",
+            entity_type="activity",
+            record_index=6,
+            field="value",
+        )
+        context.logger.error.assert_called_once_with(
+            "silver_structural_required_field_missing",
+            provider="chembl",
+            entity_type="activity",
+            record_index=6,
+            field="entity_id",
+        )
+
+    def test_apply_structural_policy_returns_none_without_policy_call(self) -> None:
+        """A transformer result of None bypasses structural policy entirely."""
+        owner = MagicMock()
+
+        assert apply_structural_policy(owner, MagicMock(), None, index=0) is None
+        owner._structural_policy.apply.assert_not_called()
+
+    def test_apply_structural_policy_raises_with_shadow_evidence(self) -> None:
+        """Quarantine errors preserve structural and shadow-filter classifications."""
+        original = {"value": "not-an-integer"}
+        outcome = StructuralPolicyOutcome(
+            record=original,
+            quarantine_reason="Required field entity_id is missing",
+            details={
+                "reason_code": "required_field_missing",
+                "field": "entity_id",
+                "action_taken": "quarantine",
+            },
+            events=(
+                StructuralPolicySignal(
+                    level="error",
+                    event="silver_structural_required_field_missing",
+                    details={"field": "entity_id"},
+                ),
+            ),
+        )
+        owner = MagicMock(provider="chembl", entity_type="activity")
+        owner._structural_policy.apply.return_value = outcome
+        owner._silver_filters.is_empty.return_value = False
+        owner._silver_filters.evaluate.return_value = FilterDecision(
+            include=False,
+            reason_code="semantic_reject",
+            rule_type="required",
+            field="entity_id",
+            message="missing",
+        )
+        context = MagicMock()
+
+        with pytest.raises(FilteredOutError) as exc_info:
+            apply_structural_policy(owner, context, original, index=8)
+
+        assert exc_info.value.details["policy_stage"] == "structural"
+        assert exc_info.value.details["shadow_comparison"] == (
+            "structural_reject_silver_filter_reject"
+        )
+        assert (
+            exc_info.value.details["silver_filter_shadow_reason_code"]
+            == "semantic_reject"
+        )
+        context.logger.error.assert_called_once()
+        context.logger.debug.assert_called_once()
 
     def test_kept_record_raises_filtered_out_without_second_evaluate(self) -> None:
         mock_owner = MagicMock()

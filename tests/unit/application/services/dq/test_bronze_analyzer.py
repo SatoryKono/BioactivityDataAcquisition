@@ -204,6 +204,51 @@ class TestBronzeDQAnalyzer:
         assert report.checks["raw_field_presence"]["name"] == pytest.approx(1.0)
         assert report.checks["raw_field_presence"]["optional"] == pytest.approx(0.5)
 
+    def test_schema_and_presence_ignore_malformed_or_non_object_records(self) -> None:
+        """Malformed JSON and non-object payloads must not pollute field evidence."""
+        analyzer = BronzeDQAnalyzer()
+        records = [b"{malformed", b"[]", orjson.dumps({"id": 1})]
+
+        schema = analyzer._check_schema_snapshot(records)
+        presence = analyzer._check_field_presence(records)
+
+        assert schema.fields_detected == 1
+        assert schema.schema == {"id": "integer"}
+        assert presence == {"id": pytest.approx(1 / 3, abs=0.0001)}
+
+    def test_field_presence_empty_batch_is_empty(self) -> None:
+        """An empty Bronze batch has no field-presence ratios."""
+        assert BronzeDQAnalyzer()._check_field_presence([]) == {}
+
+    def test_encoding_check_reports_invalid_record_indexes(self) -> None:
+        """Invalid UTF-8 bytes are counted and retain their input positions."""
+        result = BronzeDQAnalyzer()._check_encoding([b"valid", b"\xff", b"also-valid"])
+
+        assert result.encoding_errors == 1
+        assert result.invalid_utf8_records == (1,)
+        assert result.status == DQCheckStatus.FAIL
+
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            (None, "null"),
+            (True, "boolean"),
+            (1, "integer"),
+            (1.5, "float"),
+            ("text", "string"),
+            ([], "array"),
+            ({}, "object"),
+            (object(), "unknown"),
+        ],
+    )
+    def test_infer_type_covers_json_types_and_unknown_values(
+        self,
+        value: object,
+        expected: str,
+    ) -> None:
+        """Type inference distinguishes every JSON kind and safe fallback."""
+        assert BronzeDQAnalyzer()._infer_type(value) == expected
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
