@@ -1258,10 +1258,10 @@
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
-    "marked_test_files": 53,
+    "marked_test_files": 54,
     "marker": "pytest.mark.repo_backed",
     "subtree": "tests/unit/repo_backed/",
-    "test_files": 53,
+    "test_files": 54,
     "unmarked_test_files": []
   },
   "report": {
@@ -2220,10 +2220,10 @@
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
-      "marked_test_files": 53,
+      "marked_test_files": 54,
       "marker": "pytest.mark.repo_backed",
       "subtree": "tests/unit/repo_backed/",
-      "test_files": 53,
+      "test_files": 54,
       "unmarked_test_files": []
     },
     "root": ".",
@@ -2279,7 +2279,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "60c67677146263cf93b933c7a3aa53ec4132976c2acbfa6a4c4a80ae41e07e02",
+  "source_tree_sha256": "3e890420bb510fc626e064dc801f3262d7a04ef628e43fe35ada640da8fc02e0",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 101,

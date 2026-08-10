@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-10T09:49:45.054369+00:00",
+  "generated_at": "2026-08-10T10:04:43.429652+00:00",
   "summary": {
     "total_scripts": 580,
     "status_counts": {
-      "active": 339,
-      "supporting": 237,
+      "active": 338,
+      "supporting": 238,
       "temporary_diagnostic": 4
     },
     "reference_group_coverage": {
@@ -2629,7 +2629,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1463,
+          "line": 1464,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
@@ -3326,7 +3326,7 @@
           "text": "CONTEXT7_PS1 = MCP_DIR / \"mcp_context7_wrapper.ps1\""
         },
         {
-          "path": "tests/unit/scripts/ai/mcp/test_wrappers.py",
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_wrappers.py",
           "line": 32,
           "source_group": "tests",
           "text": "assert windows_command[-1].endswith(\"mcp_context7_wrapper.ps1\")"
@@ -3369,7 +3369,7 @@
           "text": "CONTEXT7_SH = MCP_DIR / \"mcp_context7_wrapper.sh\""
         },
         {
-          "path": "tests/unit/scripts/ai/mcp/test_wrappers.py",
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_wrappers.py",
           "line": 35,
           "source_group": "tests",
           "text": "assert linux_command[1].endswith(\"mcp_context7_wrapper.sh\")"
@@ -4833,7 +4833,7 @@
           "text": "\"wrappers\": module_command(\"scripts.ai.mcp.wrappers\"),"
         },
         {
-          "path": "tests/unit/scripts/ai/mcp/test_wrappers.py",
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_wrappers.py",
           "line": 11,
           "source_group": "tests",
           "text": "from scripts.ai.mcp import wrappers"
@@ -4847,7 +4847,7 @@
     {
       "path": "scripts/ai/prompts/__main__.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 25,
       "references": [
@@ -4899,7 +4899,11 @@
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts new --id prompt.example --class operator-paste"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "compatibility_wrapper",
+      "review_by": "2026-11-30",
+      "next_step": "Retain direct python -m scripts.ai.prompts invocation as a compatibility surface; keep the canonical operator route at python -m scripts.ai prompts."
     },
     {
       "path": "scripts/ai/prompts/check.py",
@@ -9595,7 +9599,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1082,
+          "line": 1083,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -9631,7 +9635,7 @@
         },
         {
           "path": "tests/architecture/test_ci_test_strategy.py",
-          "line": 80,
+          "line": 83,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/run_pytest_resilient.py\","
         },
@@ -9973,7 +9977,7 @@
           "text": "from scripts.engineering.common.platform import ("
         },
         {
-          "path": "tests/unit/scripts/ai/mcp/test_wrappers.py",
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_wrappers.py",
           "line": 12,
           "source_group": "tests",
           "text": "from scripts.engineering.common.platform import PlatformInfo, PlatformKind"
@@ -10322,7 +10326,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1529,
+          "line": 1530,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
@@ -13621,7 +13625,7 @@
         },
         {
           "path": "tests/architecture/test_live_residual_snapshot.py",
-          "line": 47,
+          "line": 50,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.hotspot_family_metrics import ("
         },
@@ -14719,7 +14723,7 @@
       "references": [
         {
           "path": "tests/architecture/test_live_residual_snapshot.py",
-          "line": 117,
+          "line": 120,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_live_residual_snapshot import ("
         }

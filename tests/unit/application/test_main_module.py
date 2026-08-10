@@ -4,7 +4,6 @@ import sys
 from pathlib import Path
 from unittest import mock
 
-
 import pytest
 
 from bioetl.__main__ import _clear_known_stale_windows_bytecode
