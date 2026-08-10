@@ -53,6 +53,7 @@ async def load_checkpoint_freshness_evidence(
     checkpoint_tuple, evidence_source, manifest_id, aggregate_scope_unknown = res
     return checkpoint_tuple, evidence_source, manifest_id, aggregate_scope_unknown
 
+
 async def _load_checkpoint_freshness_evidence_impl(
     host: _CheckpointLookupHost,
     scope: _IdentityScope,

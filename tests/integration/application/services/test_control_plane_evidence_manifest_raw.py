@@ -20,7 +20,7 @@ from bioetl.infrastructure.control_plane.file_run_manifest_store import (
     FileRunManifestStore,
 )
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.integration
 
 
 def _manifest() -> RunManifest:
