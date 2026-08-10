@@ -11329,7 +11329,7 @@
         },
         {
           "path": "pyproject.toml",
-          "line": 330,
+          "line": 334,
           "source_group": "build",
           "text": "# only (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py)."
         },
