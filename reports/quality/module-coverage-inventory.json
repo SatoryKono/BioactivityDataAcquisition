@@ -48270,7 +48270,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-10",
-  "source_tree_sha256": "6fae5fc47c7b3d1c3d223ace5b2353401161a89c5067f46f493315daa72d7f5e",
+  "source_tree_sha256": "060c2e2e28cfaeb91000fde16dbb5adbf47d48ca7fb2a6dbd2067346e4b33296",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
