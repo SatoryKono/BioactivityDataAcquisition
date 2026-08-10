@@ -1,14 +1,22 @@
 schema_version: 1
 policy_scope: staged_enforcement_policy_registry
-linked_issue: "#5813"
+linked_issue: "#8415"
 owner: "@bioetl-architecture"
+review_cadence: weekly
+escalation: "@bioetl-platform"
+supported_versions:
+  - python: ">=3.13"
+  - policy_id: bioetl-proof-or-stop-v1
 rationale: >
   Staged enforcement thresholds are governed outside the domain runtime so
   policy drift stays reviewable without hard-coded calendar windows.
+  Proof-or-Stop closeout is promoted observe -> soft_fail after the adversarial
+  pilot GO recommendation (#8414) and validation/rollback gates (#8415).
+  hard_fail remains a separate promotion requiring additional clean soak.
 contract_subset_policy: fail_fast_subset_of_registry_only
 policies:
   - check_name: proof_or_stop_closeout
-    current_stage: observe
+    current_stage: soft_fail
     failure_threshold: 1.0
     warning_threshold: 0.0
     policy_group: governance
@@ -19,6 +27,10 @@ policies:
       - adversarial_pilot_zero_false_admit
       - adversarial_pilot_zero_tamper_accepts
       - two_clean_ci_observation_runs
+    next_stage: hard_fail
+    next_stage_requirements:
+      - soft_fail_soak_without_false_admit
+      - independent_review_of_false_reject_rate
   - check_name: fixture_governance
     current_stage: soft_fail
     failure_threshold: 0.8

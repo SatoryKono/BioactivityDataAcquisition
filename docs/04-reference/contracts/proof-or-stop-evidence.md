@@ -104,7 +104,25 @@ The `proof_or_stop_closeout` entry in
 `configs/quality/staged_enforcement_policy_registry.yaml` uses the existing
 `observe` → `soft_fail` → `hard_fail` vocabulary. `observe` publishes the
 outcome, `soft_fail` adds a visible non-blocking warning, and `hard_fail` blocks
-non-admitted closeout. Promotion requires a zero-false-ADMIT adversarial pilot
-and two clean CI observation runs. Rollback returns the entry to `observe`;
-existing evidence remains immutable. Branch-protection changes are outside
-this mechanism and require separate authorization.
+non-admitted closeout.
+
+### Current rollout (#8415)
+
+- **Current stage:** `soft_fail` (non-blocking warning on non-admitted closeout).
+- **Rollback stage:** `observe` (return only the Proof-or-Stop aggregator/hook
+  stage; do not disable existing quality, debt, architecture, or docs gates).
+- **Next stage:** `hard_fail`, gated by soft-fail soak without false-ADMIT and
+  independent review of false-reject rate.
+- **Promotion prerequisites already required for soft_fail:** zero-false-ADMIT
+  adversarial pilot, zero accepted stale/tampered bundles, and two clean CI
+  observation runs while the gate was advisory.
+- **Owners:** `@bioetl-architecture` (policy), `@bioetl-platform` (escalation).
+- **Review cadence:** weekly while below `hard_fail`.
+- **Supported surface:** Python `>=3.13`, policy id `bioetl-proof-or-stop-v1`.
+- **CI credential posture:** first-party verifier remains offline and
+  credential-free; optional vendor evaluators cannot override a mechanical STOP.
+
+Rollback returns the entry to `observe`; existing evidence remains immutable.
+Historical proof/evidence artifacts are retained per retention policy and must
+not be rewritten or deleted during rollback. Branch-protection changes are
+outside this mechanism and require separate authorization.
