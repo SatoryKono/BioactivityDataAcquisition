@@ -20,21 +20,6 @@ from bioetl.domain.composite.aggregation import (
     AggregationFunction,
     EnricherCardinality,
 )
-from bioetl.domain.composite.config_merge import ColumnGroupConfig
-from bioetl.domain.composite.config_models import (
-    CompositeConfig,
-    CompositeDQConfig,
-    CrossValidationConfig,
-    DataSchemaConfig,
-    DependencyConfig,
-    DQOverrideConfig,
-    EnricherConfig,
-    ExecutionConfig,
-    LayerColumnConfig,
-    LineageConfig,
-    MergeConfig,
-    SeedConfig,
-)
 from bioetl.domain.composite.cross_validation import (
     ComparisonMethod,
     CrossValidationStats,
@@ -78,6 +63,25 @@ from bioetl.domain.composite.strategy import (
     FallbackStrategy,
     MergeStrategy,
 )
+
+from .config_composite_serialization import composite_from_dict, composite_to_dict
+from .config_composite_validation import validate_composite_config
+from .config_merge import ColumnGroupConfig
+from .config_models import (
+    CompositeConfig,
+    CompositeDQConfig,
+    CrossValidationConfig,
+    DataSchemaConfig,
+    DependencyConfig,
+    DQOverrideConfig,
+    EnricherConfig,
+    ExecutionConfig,
+    LayerColumnConfig,
+    LineageConfig,
+    MergeConfig,
+    SeedConfig,
+)
+from .config_validators import require_non_empty, validate_positive
 
 __all__ = [
     "AggregationConfig",
@@ -126,6 +130,11 @@ __all__ = [
     "TransitionRules",
     "build_field_group_registry",
     "can_transition",
+    "composite_from_dict",
+    "composite_to_dict",
     "get_transition_rules",
+    "require_non_empty",
+    "validate_composite_config",
+    "validate_positive",
     "validate_transition",
 ]

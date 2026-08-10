@@ -1,108 +1,98 @@
 {
-  "snapshot_date": "2026-07-29",
-  "status": "implemented_local_closeable",
-  "budget_policy": "no_growth_ratchet_only",
-  "issues": [
-    {
-      "issue": "#6159",
-      "theme": "Umbrella governance issue for architecture debt",
-      "debt_types": ["Governance gap", "Architecture debt", "Budget debt"],
-      "action": "Governed umbrella architecture debt issues with proper tracking and artifact alignment.",
-      "risk": "medium",
-      "evidence": [
-        "reports/quality/compatibility-importer-census.json",
-        "reports/quality/module-coverage-inventory.json",
-        "reports/quality/dead-code-inventory.json",
-        "reports/quality/config-discrepancy-baseline.json",
-        "reports/quality/pipeline-config-contract-ownership-map.json",
-        "reports/quality/debt-governance-gates.json",
-        "reports/quality/hotspot-family-baseline.json",
-        "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py"
-      ]
-    },
-    {
-      "issue": "#6160",
-      "theme": "Generated artifact coherence",
-      "debt_types": ["Governance gap", "Quality debt", "Documentation debt"],
-      "action": "Ensured generated artifact coherence with proper alignment and validation.",
-      "risk": "low",
+  "outcomes": {
+    "6160": {
+      "debt_type": "generated_artifact_coherence",
       "evidence": [
         "reports/quality/module-coverage-inventory.json",
         "configs/quality/scripts_inventory_manifest.json",
-        "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py"
+        "reports/quality/tasks_architecture_metric_exemptions_2026-07-12-12-33.json",
+        "reports/quality/architecture_debt_execution_plan_2026-07-12-12-34.json"
       ]
     },
-    {
-      "issue": "#6162",
-      "theme": "Compatibility facade freeze",
-      "debt_types": ["Compatibility debt", "Governance gap", "Public API debt"],
-      "action": "Frozen compatibility facade with zero duplicate exports and proper retention policy.",
-      "risk": "low",
-      "evidence": [
-        "reports/quality/compatibility-importer-census.json",
-        "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py"
-      ]
+    "6162": {
+      "debt_type": "compatibility_facade_freeze",
+      "rationale": "Retained public entrypoints and export facades remain frozen public API seams with zero duplicate exports, resolution conflicts, wrapper drift, or first-party source importer burden.",
+      "retained_entrypoint_count": 12,
+      "retained_public_export_facade_count": 4
     },
-    {
-      "issue": "#6163",
-      "theme": "Application service hotspot reduction",
-      "debt_types": ["Hotspot", "Governance gap", "Architecture debt"],
-      "action": "Reduced application service hotspots with proper helper extraction and LOC budgeting.",
-      "risk": "medium",
-      "evidence": [
-        "reports/quality/hotspot-family-baseline.json",
-        "src/bioetl/application/services/quality/data_quality_service.py",
-        "src/bioetl/application/services/quality/data_quality_anomalies.py",
-        "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py"
-      ]
+    "6163": {
+      "control_plane_extracted_helper_owner": "src/bioetl/application/services/control_plane/replay/historical_identity_models.py#HistoricalReplayUniverseRecord",
+      "control_plane_family": "application_services_control_plane",
+      "control_plane_files_ge_250_loc": 0,
+      "control_plane_files_ge_250_loc_budget": 16,
+      "control_plane_reduced_surface": "src/bioetl/application/services/control_plane/replay/historical_universe_service.py",
+      "control_plane_reduced_surface_line_count_after_max": 249,
+      "control_plane_reduced_surface_line_count_before": 260,
+      "debt_type": "application_service_hotspot_reduction",
+      "extracted_helper_owner": "src/bioetl/application/services/quality/data_quality_anomalies.py#DataQualityMetricsMixin._emit_validation_gauges",
+      "line_count_after_max": 157,
+      "line_count_before": 178,
+      "reduced_surface": "src/bioetl/application/services/quality/data_quality_service.py"
     },
-    {
-      "issue": "#6164",
-      "theme": "Coverage floor ratchet",
-      "debt_types": ["Coverage debt", "Governance gap", "Test debt"],
-      "action": "Ratcheted coverage floors with proper hotspot family tracking and replay sensitivity.",
-      "risk": "low",
-      "evidence": [
-        "reports/quality/module-coverage-inventory.json",
-        "configs/quality/module_coverage_gates.yaml",
-        "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py"
-      ]
+    "6164": {
+      "authoritative_artifact": "reports/quality/module-coverage-inventory.json",
+      "debt_type": "coverage_floor_ratchet",
+      "hotspot_family_covered_line_percent_floors": {
+        "application_core": 96.0,
+        "application_services_control_plane": 96.0,
+        "composition_bootstrap_runtime": 96.0,
+        "composition_factories_pipeline": 96.5,
+        "composition_runtime_builders": 96.0
+      },
+      "replay_sensitive_floor_percent": 100.0
     },
-    {
-      "issue": "#6165",
-      "theme": "Dead code zero import review",
-      "debt_types": ["Governance gap", "Architecture debt", "Test debt"],
-      "action": "Reviewed dead code with proper zero import tracking and owner test anchoring.",
-      "risk": "medium",
-      "evidence": [
-        "reports/quality/dead-code-inventory.json",
-        "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py"
-      ]
+    "6165": {
+      "debt_type": "dead_code_zero_import_review",
+      "repo_wide_owner_test_anchored_candidate_count": 5,
+      "repo_wide_untriaged_zero_import_candidate_count": 0,
+      "repo_wide_zero_import_candidate_count": 5
     },
-    {
-      "issue": "#6166",
-      "theme": "Config contract drift control",
-      "debt_types": ["Config debt", "Governance gap", "Contract drift"],
-      "action": "Controlled config contract drift with proper parameter tracking and blocking issue detection.",
-      "risk": "low",
-      "evidence": [
-        "reports/quality/config-discrepancy-baseline.json",
-        "reports/quality/pipeline-config-contract-ownership-map.json",
-        "reports/quality/debt-governance-gates.json",
-        "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py"
-      ]
+    "6166": {
+      "config_inconsistent_parameter_count": 0,
+      "config_raw_inconsistent_parameter_count": 0,
+      "config_sanctioned_partial_parameter_count": 0,
+      "contract_blocking_issue_count": 0,
+      "debt_type": "config_contract_drift_control",
+      "dq_contract_blocking_issue_count": 0
     },
-    {
-      "issue": "#6169",
-      "theme": "Script governance ratchet",
-      "debt_types": ["Governance gap", "Process debt", "Documentation debt"],
-      "action": "Governed scripts with proper lifecycle tracking and zero reference triage.",
-      "risk": "low",
-      "evidence": [
-        "configs/quality/scripts_inventory_manifest.json",
-        "configs/quality/scripts_lifecycle_registry.json",
-        "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py"
-      ]
+    "6169": {
+      "active_script_count": 339,
+      "active_script_count_max": 349,
+      "debt_type": "script_governance_ratchet",
+      "newly_governed_supporting_scripts": [
+        "scripts/ai/gemini/setup-bash-alias.sh",
+        "scripts/docs/matrix/structural_contract.py",
+        "scripts/docs/matrix/enrich_normalization_details.py",
+        "scripts/docs/matrix/export_structural_contract.py",
+        "scripts/docs/matrix/filter_rows.py",
+        "scripts/docs/matrix/generate_field_matrix.py",
+        "scripts/engineering/ci/apply-ci-optimizations-fixed.ps1",
+        "scripts/engineering/ci/apply-ci-optimizations.ps1",
+        "scripts/engineering/repo/apply_branch_cleanup_phases_0_2.sh"
+      ],
+      "untriaged_zero_reference_supporting_script_count": 0,
+      "zero_reference_supporting_script_count": 4
     }
-  ]
+  },
+  "schema_version": "1.0",
+  "selected_issues": [
+    6159,
+    6160,
+    6162,
+    6163,
+    6164,
+    6165,
+    6166,
+    6169
+  ],
+  "snapshot_date": "2026-07-12",
+  "umbrella_issue": {
+    "full_umbrella_blockers_outside_selected_scope": [
+      6161,
+      6167,
+      6168
+    ],
+    "issue": 6159,
+    "selected_scope_complete": true
+  }
 }

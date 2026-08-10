@@ -1050,6 +1050,7 @@
         "name": "workflow",
         "type": "custom",
         "label": "workflow",
+        "description": "Browse scope: optional workflow context. All keeps pipeline browsing unbounded; chembl_baseline narrows the handoff context without hiding exact-run evidence.",
         "hide": 0,
         "includeAll": true,
         "allValue": "$__all",
@@ -1104,7 +1105,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Core scope: pipeline selector for pipeline-centric dashboards; default is All pipelines on overview so the landing page renders meaningful L0 state instead of a fail-closed empty scope."
+        "description": "Exact-run browse scope from control-plane evidence; defaults to chembl_assay so Browse Recent Runs opens on a concrete pipeline with persisted report artifacts."
       },
       {
         "allValue": "$__all",

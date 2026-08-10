@@ -46,9 +46,23 @@ from bioetl.domain.composite.config_parsing import (
     require_str,
     require_str_tuple,
 )
+from bioetl.domain.composite.config_validators import (
+    _validate_optional_threshold,
+    _validate_positive,
+    _validate_threshold_order,
+)
 
 
 pytestmark = pytest.mark.unit
+
+
+def test_validation_helpers_raise_on_invalid_values() -> None:
+    with pytest.raises(ValueError, match="must be positive"):
+        _validate_positive(0, "timeout")
+    with pytest.raises(ValueError, match=r"must be between 0\.0 and 1\.0"):
+        _validate_optional_threshold(1.2, "soft_fail_threshold")
+    with pytest.raises(ValueError, match="soft_fail_threshold must be less than"):
+        _validate_threshold_order(0.5, 0.5)
 
 
 class TestRequireObjectDict:

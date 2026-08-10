@@ -506,7 +506,51 @@ def _is_ignored_single_file_cluster(
         return True
     if block_path.startswith("entries.scripts/"):
         return True
+    if _is_composite_layer_projection_cluster(cluster):
+        return True
     return False
+
+
+def _is_composite_layer_projection_cluster(cluster: dict[str, Any]) -> bool:
+    """Return whether a cluster is an intentional composite contract projection.
+
+    Composite entity contracts repeat one ``include_groups`` list for Silver and
+    Gold when both layers intentionally expose the same semantic groups.  This
+    is layer parity inside one contract, not an independently owned config debt
+    cluster.
+    """
+    occurrences = cluster["occurrences"]
+    if len(occurrences) != 2:
+        return False
+    paths = {str(entry["path"]) for entry in occurrences}
+    block_paths = {str(entry["block_path"]) for entry in occurrences}
+    return (
+        len(paths) == 1
+        and next(iter(paths)).startswith("configs/entities/composite/")
+        and block_paths
+        == {"schema.silver.include_groups", "schema.gold.include_groups"}
+    )
+
+
+def _is_composite_runtime_contract_mirror(cluster: dict[str, Any]) -> bool:
+    """Return whether column groups are the documented runtime/contract mirror."""
+    occurrences = cluster["occurrences"]
+    if len(occurrences) != 2:
+        return False
+    by_kind = {str(entry["surface_kind"]): entry for entry in occurrences}
+    if set(by_kind) != {"composite_config", "entity_config"}:
+        return False
+    runtime_path = Path(str(by_kind["composite_config"]["path"]))
+    contract_path = Path(str(by_kind["entity_config"]["path"]))
+    return (
+        str(cluster["block_path"]) == "composite.merge.column_groups"
+        and str(by_kind["composite_config"]["block_path"])
+        == "composite.merge.column_groups"
+        and str(by_kind["entity_config"]["block_path"]) == "schema.column_groups"
+        and runtime_path.parent.as_posix() == "configs/composites"
+        and contract_path.parent.as_posix() == "configs/entities/composite"
+        and runtime_path.stem == contract_path.stem
+    )
 
 
 def _duplicate_cluster_payload(cluster: dict[str, Any]) -> dict[str, Any]:
@@ -546,6 +590,8 @@ def _select_duplicate_clusters(
         if len(unique_locations) < 2:
             continue
         if _is_ignored_single_file_cluster(cluster, unique_paths=unique_paths):
+            continue
+        if _is_composite_runtime_contract_mirror(cluster):
             continue
         affected_files.update(entry["path"] for entry in occurrences)
         duplicate_clusters.append(_duplicate_cluster_payload(cluster))

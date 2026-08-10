@@ -132,6 +132,31 @@ def list_workflow_reports(
     )
 
 
+def _owner_report_candidates(
+    *,
+    kind: str,
+    owner_dir: Path,
+) -> list[tuple[float, str, Path, Path]]:
+    """Collect sortable report paths for one owner directory."""
+    if not owner_dir.is_dir():
+        return []
+
+    candidates: list[tuple[float, str, Path, Path]] = []
+    report_name = f"{kind}-run-report.json"
+    for run_dir in owner_dir.iterdir():
+        if not run_dir.is_dir() or run_dir.name.startswith("."):
+            continue
+        json_path = run_dir / report_name
+        if not json_path.is_file():
+            continue
+        try:
+            mtime = json_path.stat().st_mtime
+        except OSError:
+            continue
+        candidates.append((mtime, owner_dir.name, run_dir, json_path))
+    return candidates
+
+
 def _list_reports(
     *,
     kind: str,
@@ -153,22 +178,11 @@ def _list_reports(
     if capped == 0:
         return []
     owners = _owner_directories(base, owner)
-    candidates: list[tuple[float, str, Path, Path]] = []
-    for owner_dir in owners:
-        if not owner_dir.is_dir():
-            continue
-        report_name = f"{kind}-run-report.json"
-        for run_dir in owner_dir.iterdir():
-            if not run_dir.is_dir() or run_dir.name.startswith("."):
-                continue
-            json_path = run_dir / report_name
-            if not json_path.is_file():
-                continue
-            try:
-                mtime = json_path.stat().st_mtime
-            except OSError:
-                continue
-            candidates.append((mtime, owner_dir.name, run_dir, json_path))
+    candidates = [
+        candidate
+        for owner_dir in owners
+        for candidate in _owner_report_candidates(kind=kind, owner_dir=owner_dir)
+    ]
     candidates.sort(key=lambda item: item[0], reverse=True)
     entries: list[ReportIndexEntry] = []
     for mtime, owner_name, run_dir, json_path in candidates[:capped]:

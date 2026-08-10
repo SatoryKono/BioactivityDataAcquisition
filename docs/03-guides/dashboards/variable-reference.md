@@ -34,9 +34,12 @@ Human family guide: [selector-architecture.md](selector-architecture.md)
   hidden `$provider_hint` (Runtime).
 - `$workflow` is context/evidence unless a dashboard explicitly documents a
   truthful current-status intersection.
-- `$workflow` is Single-select with Include All. It remains single-select with Include All across primary dashboards.
-- `$pipeline` is single-select; Overview landing default is `All`; other boards
-  fail-close to `unknown`.
+- `$workflow` remains single-select with Include All across primary dashboards.
+  Run Explorer uses the bounded
+  custom context `chembl_baseline`; the other primary dashboards derive it from
+  `bioetl_workflow_universe`.
+- `$pipeline` is single-select; Overview landing default is `All`; Run Explorer
+  starts at `chembl_assay`; other boards fail-close to `unknown`.
 - `$run_type` uses Include All. Overview landing default is `All`. Non-Overview
   primary boards default to `backfill`.
 - `$run_id` is HTTP-backed control-plane identity context for Ops HTTP `ID` /
@@ -50,8 +53,8 @@ Human family guide: [selector-architecture.md](selector-architecture.md)
 
 | Variable | Dashboards | Datasource / query family | Selection | Default | Notes |
 | --- | --- | --- | --- | --- | --- |
-| `$workflow` | all 7 shipped | Prometheus `label_values(bioetl_workflow_universe, workflow)` | Single + Include All | `All` / `$__all` | Shared shell context |
-| `$pipeline` | all 7 shipped | Universe per board (see `selector-contracts.yaml#pipeline_universe_contract`) | Single | Overview: `All`; else `unknown` | Canonical pipeline scope |
+| `$workflow` | all 7 shipped | Prometheus `label_values(bioetl_workflow_universe, workflow)`; Run Explorer: custom `chembl_baseline` context | Single + Include All | `All` / `$__all` | Shared shell context |
+| `$pipeline` | all 7 shipped | Universe per board (see `selector-contracts.yaml#pipeline_universe_contract`) | Single | Overview: `All`; Run Explorer: `chembl_assay`; else `unknown` | Canonical or persisted-evidence pipeline scope |
 | `$run_type` | all 7 shipped | Same universe as `$pipeline` | Multi + Include All | Overview: `All`; else `backfill` | Never hand off `run_type=unknown` |
 | `$run_id` | all 7 shipped | BioETL Ops HTTP filter-options | Single, no Include All | `-` | Identity only; not PromQL |
 | `$stage` | `bioetl-runtime`, `bioetl-dq-v2` | Runtime expected-stage / DQ processed totals | Multi + Include All | `All` / `$__all` | Bounded stage filter |
@@ -77,7 +80,8 @@ Human family guide: [selector-architecture.md](selector-architecture.md)
 - **`bioetl-provider-health-v2`:** `$provider` is primary business selector;
   shell is secondary; hidden `$pipeline_context` + `$adapter`.
 - **`bioetl-incident-v1`:** shell + `$provider` for triage.
-- **`bioetl-run-explorer-v1`:** shell only; canonical Ops HTTP ID/Processed hub.
+- **`bioetl-run-explorer-v1`:** control-plane pipeline/run_type universe plus a
+  bounded custom workflow context; canonical Ops HTTP ID/Processed hub.
 - **`bioetl-overview-v2` / `bioetl-control-plane-v1`:** shell only; aggregate
   Status does not use `$run_id` as PromQL scope.
 

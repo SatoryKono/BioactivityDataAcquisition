@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from bioetl.domain.composite.config_validators import (
+from .config_validators import (
     validate_optional_threshold,
     validate_threshold_order,
 )

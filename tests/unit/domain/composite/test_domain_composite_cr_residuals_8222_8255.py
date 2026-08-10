@@ -12,13 +12,19 @@ from bioetl.domain.composite.aggregation import (
     AggregationFieldSpec,
     AggregationFunction,
 )
-from bioetl.domain.composite.config import (
+from bioetl.domain.composite import (
     CompositeConfig,
     DependencyConfig,
     EnricherConfig,
     MergeConfig,
     SeedConfig,
     composite_from_dict,
+)
+from bioetl.domain.composite.config_composite_section_decoders import (
+    build_cross_validation_config,
+    build_dq_config,
+    build_execution_config,
+    build_lineage_config,
 )
 from bioetl.domain.composite.config_cross_validation import (
     CrossValidationConfig,
@@ -45,6 +51,77 @@ from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 
 pytestmark = pytest.mark.unit
+
+
+def test_composite_section_decoders_filter_invalid_nested_shapes() -> None:
+    dq = build_dq_config(
+        {
+            "required_fields": ["doi"],
+            "enricher_overrides": {
+                "openalex": {
+                    "soft_fail_threshold": 0.2,
+                    "hard_fail_threshold": 0.7,
+                },
+                "ignored": "not-an-object",
+            },
+        }
+    )
+    execution = build_execution_config({})
+    lineage = build_lineage_config(
+        {
+            "provider_lookup_fields": {
+                "openalex": {"work_id": "id"},
+                "ignored": "not-an-object",
+            },
+            "track_source_for_fields": ["title"],
+        }
+    )
+    cross_validation = build_cross_validation_config(
+        {
+            "enricher_pairings": [
+                "not-an-object",
+                {
+                    "enricher_pipeline": "openalex_publication",
+                    "fields": [
+                        "not-an-object",
+                        {
+                            "field_name": "doi",
+                            "method": ComparisonMethod.EXACT,
+                            "threshold": 0.0,
+                        },
+                    ],
+                },
+            ]
+        }
+    )
+
+    assert set(dq.enricher_overrides) == {"openalex"}
+    assert execution.max_concurrency == 4
+    assert lineage.provider_lookup_fields == {"openalex": {"work_id": "id"}}
+    assert cross_validation.enricher_pairings[0].fields[0].method is (
+        ComparisonMethod.EXACT
+    )
+
+
+def test_cross_validation_decoder_handles_non_sequence_nested_values() -> None:
+    assert (
+        build_cross_validation_config(
+            {"enricher_pairings": "not-a-sequence"}
+        ).enricher_pairings
+        == ()
+    )
+
+    with pytest.raises(ValueError, match="must have at least one field"):
+        build_cross_validation_config(
+            {
+                "enricher_pairings": [
+                    {
+                        "enricher_pipeline": "openalex_publication",
+                        "fields": "not-a-sequence",
+                    }
+                ]
+            }
+        )
 
 
 def test_enrichment_timeout_rejects_non_finite_timeout() -> None:

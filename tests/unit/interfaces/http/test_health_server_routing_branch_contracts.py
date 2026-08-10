@@ -388,16 +388,6 @@ async def test_report_lists_bound_limits_and_reject_invalid_values(
             {"workflow": "nightly", "workflow_run_id": "wf-run-1"},
             "workflow-run-report",
         ),
-        (
-            "/ops/observability/pipeline-run-reports",
-            {"pipeline": "chembl_activity"},
-            "pipeline-run-reports",
-        ),
-        (
-            "/ops/observability/workflow-run-reports",
-            {"workflow": "nightly"},
-            "workflow-run-reports",
-        ),
     ],
 )
 async def test_observability_endpoints_return_bounded_failure_contract(

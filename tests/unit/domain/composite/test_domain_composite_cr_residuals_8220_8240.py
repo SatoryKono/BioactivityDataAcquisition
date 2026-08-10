@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 import pytest
-from bioetl.domain.composite.config import (
+from bioetl.domain.composite import (
     CompositeConfig,
     CompositeDQConfig,
     DependencyConfig,

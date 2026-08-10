@@ -8,30 +8,31 @@ from bioetl.domain.composite.aggregation import (
     AggregationConfig,
     EnricherCardinality,
 )
-from bioetl.domain.composite.config_composite_serialization import (
+from bioetl.domain.composite.strategy import FallbackStrategy
+
+from .config_composite_serialization import (
     composite_from_dict as _composite_from_dict,
 )
-from bioetl.domain.composite.config_composite_serialization import (
+from .config_composite_serialization import (
     composite_to_dict as _composite_to_dict,
 )
-from bioetl.domain.composite.config_composite_validation import (
+from .config_composite_validation import (
     coerce_composite_collections as _coerce_composite_collections,
 )
-from bioetl.domain.composite.config_composite_validation import (
+from .config_composite_validation import (
     validate_composite_config as _validate_composite_config,
 )
-from bioetl.domain.composite.config_cross_validation import CrossValidationConfig
-from bioetl.domain.composite.config_dq import CompositeDQConfig, DQOverrideConfig
-from bioetl.domain.composite.config_merge import MergeConfig
-from bioetl.domain.composite.config_runtime import ExecutionConfig, LineageConfig
-from bioetl.domain.composite.config_schema import DataSchemaConfig, LayerColumnConfig
-from bioetl.domain.composite.config_validators import (
+from .config_cross_validation import CrossValidationConfig
+from .config_dq import CompositeDQConfig, DQOverrideConfig
+from .config_merge import MergeConfig
+from .config_runtime import ExecutionConfig, LineageConfig
+from .config_schema import DataSchemaConfig, LayerColumnConfig
+from .config_validators import (
     coerce_to_tuple,
     require_non_empty,
     validate_positive,
     validate_positive_limit,
 )
-from bioetl.domain.composite.strategy import FallbackStrategy
 
 __all__ = [
     "CompositeConfig",

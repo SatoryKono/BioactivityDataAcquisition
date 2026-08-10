@@ -10,6 +10,7 @@ EXPECTED_GITHUB_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/github-mcp-wrapper.sh"
 EXPECTED_DOCKER_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_docker_wrapper.sh"
 EXPECTED_CONTEXT7_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_context7_wrapper.sh"
 EXPECTED_AST_GREP_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_ast_grep_wrapper.sh"
+EXPECTED_AST_GREP_WINDOWS_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_ast_grep_wrapper.ps1"
 EXPECTED_CODE_INTERPRETER_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_code_interpreter_wrapper.sh"
 EXPECTED_PROMETHEUS_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_prometheus_wrapper.sh"
 EXPECTED_GRAFANA_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_grafana_wrapper.sh"
@@ -146,6 +147,13 @@ if ! command -v codex >/dev/null 2>&1; then
 fi
 
 status=0
+
+if [[ -f "$EXPECTED_AST_GREP_WINDOWS_WRAPPER_PATH" ]]; then
+  ok "Windows AST Grep compatibility wrapper is present"
+else
+  fail "Windows AST Grep compatibility wrapper is missing"
+  status=1
+fi
 
 list_out="$(codex mcp list 2>&1 || true)"
 if grep -Eq "No MCP servers configured|Error:" <<<"$list_out"; then

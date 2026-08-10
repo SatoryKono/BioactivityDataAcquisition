@@ -139,7 +139,6 @@ pipeline_universe_contract:
     bioetl-provider-health-v2: bioetl_overview_pipeline_run_type_universe
     bioetl-dq-v2: bioetl_overview_pipeline_run_type_universe
     bioetl-incident-v1: bioetl_overview_pipeline_run_type_universe
-    bioetl-run-explorer-v1: bioetl_overview_pipeline_run_type_universe
   role_local_exceptions:
     bioetl-control-plane-v1:
       query_metric: bioetl_control_plane_run_type_universe
@@ -163,6 +162,20 @@ pipeline_universe_contract:
         selector. Every difference MUST be explained by the declared source
 
         families; unexplained divergence is forbidden.
+
+        "
+      out_of_scope_handoff: fail_closed_with_overview_return_path
+    bioetl-run-explorer-v1:
+      query_metric: bioetl_control_plane_run_type_universe
+      required_relation: persisted_run_evidence_scope
+      reason:
+        "Run Explorer browses persisted run reports and exact control-plane
+
+        identities. Its pipeline and run_type selectors therefore use the
+
+        control-plane universe instead of a broader data-plane telemetry
+
+        universe that can contain scopes with no browsable run evidence.
 
         "
       out_of_scope_handoff: fail_closed_with_overview_return_path
@@ -351,8 +364,8 @@ dashboard_families:
       - run_id
     notes:
       "Run Explorer is the exact-run Ops HTTP hub for identity and accounting.
-      pipeline/run_type selectors use the shared overview universe for browse scope;
-      run_id is control-plane catalog identity only."
+      pipeline/run_type selectors use the control-plane universe for browsable
+      persisted evidence; run_id is control-plane catalog identity only."
   forensic_explorer:
     status: retired
     uids: []
@@ -527,9 +540,9 @@ shipped_selector_registry:
       - run_type
       - run_id
     query_source_families:
-      workflow: prometheus_workflow_runs_total
-      pipeline: prometheus_overview_pipeline_run_type_universe
-      run_type: prometheus_overview_pipeline_run_type_universe
+      workflow: custom_static_workflow_context
+      pipeline: prometheus_control_plane_run_type_universe
+      run_type: prometheus_control_plane_run_type_universe
       run_id: control_plane_filter_options_api
 ship_now_selector_contract_by_uid:
   bioetl-control-plane-v1:

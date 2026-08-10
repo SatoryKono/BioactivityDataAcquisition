@@ -94,7 +94,6 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
         "bioetl-runtime.json",
         "bioetl-dq-v2.json",
         "bioetl-incident-v1.json",
-        "bioetl-run-explorer-v1.json",
     ):
         variables = _variables(dashboard_name)
         pipeline = variables["pipeline"]
@@ -108,6 +107,18 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
         assert run_type.get("current", {}).get("value") == "backfill"
         assert run_id.get("sort") == 0
         assert run_id.get("current", {}).get("value") == "-"
+
+    run_explorer = _variables("bioetl-run-explorer-v1.json")
+    assert run_explorer["workflow"].get("type") == "custom"
+    assert run_explorer["workflow"].get("query") == "chembl_baseline"
+    assert run_explorer["workflow"].get("current", {}).get("value") == "$__all"
+    assert run_explorer["pipeline"].get("multi") is False
+    assert run_explorer["pipeline"].get("includeAll") is False
+    assert run_explorer["pipeline"].get("current", {}).get("value") == "chembl_assay"
+    assert run_explorer["run_type"].get("includeAll") is True
+    assert run_explorer["run_type"].get("current", {}).get("value") == "backfill"
+    assert run_explorer["run_id"].get("sort") == 0
+    assert run_explorer["run_id"].get("current", {}).get("value") == "-"
 
     provider = _variables("bioetl-provider-health-v2.json")
     assert provider["workflow"].get("multi") is False

@@ -72,6 +72,7 @@ class MockDataSource:
         self._health_status = health_status
         self._fetch_call_count = 0
         self._health_check_call_count = 0
+        self._close_call_count = 0
 
     @property
     def provider_name(self) -> str:
@@ -109,6 +110,7 @@ class MockDataSource:
         return asyncio.sleep(0, result=self._health_status)
 
     def aclose(self) -> Awaitable[None]:
+        self._close_call_count += 1
         return asyncio.sleep(0)
 
 
@@ -241,8 +243,9 @@ class TestCircuitBreakerDecoratorBasics:
             data_source=mock_data_source,
             circuit_breaker=mock_circuit_breaker,
         )
-        # Should not raise
         await decorator.aclose()
+
+        assert mock_data_source._close_call_count == 1
 
 
 class TestCircuitBreakerDecoratorFetch:

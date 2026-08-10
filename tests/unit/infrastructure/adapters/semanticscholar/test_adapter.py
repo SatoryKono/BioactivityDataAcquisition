@@ -444,7 +444,7 @@ class TestHealthCheck:
         assert await adapter._probe_health() == HealthStatus.DEGRADED
 
     @pytest.mark.asyncio
-    async def test_aclose_closes_http_client(
+    async def test_aclose_forwards_http_client_context_exit(
         self,
         adapter: SemanticScholarAdapter,
         mock_http_client: MagicMock,
@@ -452,6 +452,7 @@ class TestHealthCheck:
         """Adapter shutdown forwards the async context-manager close contract."""
         await adapter.aclose()
 
+        assert mock_http_client.__aexit__.await_count == 1
         mock_http_client.__aexit__.assert_awaited_once_with(None, None, None)
 
 

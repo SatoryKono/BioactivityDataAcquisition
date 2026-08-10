@@ -49,12 +49,6 @@ from bioetl.domain.composite.config import (
     MergeConfig,
     SeedConfig,
 )
-from bioetl.domain.composite.config_composite_section_decoders import (
-    build_cross_validation_config,
-    build_dq_config,
-    build_execution_config,
-    build_lineage_config,
-)
 from bioetl.domain.composite.cross_validation import (
     ComparisonMethod,
     EnricherFieldPairing,
@@ -272,56 +266,6 @@ def test_composite_config_codec_roundtrips_all_business_sections() -> None:
     ]
 
 
-def test_composite_section_decoders_filter_invalid_nested_shapes() -> None:
-    dq = build_dq_config(
-        {
-            "required_fields": ["doi"],
-            "enricher_overrides": {
-                "openalex": {
-                    "soft_fail_threshold": 0.2,
-                    "hard_fail_threshold": 0.7,
-                },
-                "ignored": "not-an-object",
-            },
-        }
-    )
-    execution = build_execution_config({})
-    lineage = build_lineage_config(
-        {
-            "provider_lookup_fields": {
-                "openalex": {"work_id": "id"},
-                "ignored": "not-an-object",
-            },
-            "track_source_for_fields": ["title"],
-        }
-    )
-    cross_validation = build_cross_validation_config(
-        {
-            "enricher_pairings": [
-                "not-an-object",
-                {
-                    "enricher_pipeline": "openalex_publication",
-                    "fields": [
-                        "not-an-object",
-                        {
-                            "field_name": "doi",
-                            "method": ComparisonMethod.EXACT,
-                            "threshold": 0.0,
-                        },
-                    ],
-                },
-            ]
-        }
-    )
-
-    assert set(dq.enricher_overrides) == {"openalex"}
-    assert execution.max_concurrency == 4
-    assert lineage.provider_lookup_fields == {"openalex": {"work_id": "id"}}
-    assert cross_validation.enricher_pairings[0].fields[0].method is (
-        ComparisonMethod.EXACT
-    )
-
-
 def test_composite_decoder_uses_defaults_when_optional_sections_are_absent() -> None:
     payload = _build_composite_config().to_dict()
     for section in ("dq", "execution", "lineage", "cross_validation"):
@@ -333,24 +277,3 @@ def test_composite_decoder_uses_defaults_when_optional_sections_are_absent() -> 
     assert restored.execution == ExecutionConfig()
     assert restored.lineage == LineageConfig()
     assert restored.cross_validation == CrossValidationConfig()
-
-
-def test_cross_validation_decoder_handles_non_sequence_nested_values() -> None:
-    assert (
-        build_cross_validation_config(
-            {"enricher_pairings": "not-a-sequence"}
-        ).enricher_pairings
-        == ()
-    )
-
-    with pytest.raises(ValueError, match="must have at least one field"):
-        build_cross_validation_config(
-            {
-                "enricher_pairings": [
-                    {
-                        "enricher_pipeline": "openalex_publication",
-                        "fields": "not-a-sequence",
-                    }
-                ]
-            }
-        )

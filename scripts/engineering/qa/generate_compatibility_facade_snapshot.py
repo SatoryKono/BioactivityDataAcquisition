@@ -7,8 +7,10 @@ import argparse
 import sys
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[3]
+
 if __package__ in {None, ""}:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "ci"))
+    sys.path.insert(0, str(ROOT))
     from scripts.engineering.ci._compatibility_registry import (  # type: ignore[import-not-found]
         DEFAULT_REGISTRY_PATH,
         DEFAULT_SRC_ROOT,
@@ -25,8 +27,6 @@ else:
         "Run this generator as a script from the repository root, not as a package module."
     )
 
-
-ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_OUTPUT = (
     ROOT / "docs" / "02-architecture" / "07-compatibility-facade-snapshot.md"
 )
