@@ -126,7 +126,7 @@
             "align": "left",
             "inspect": true
           },
-          "noValue": "No pipeline-run-report artifacts for this pipeline under reports/run-reports/pipeline/<name>/. Has reports: chembl_assay, chembl_target, chembl_publication. chembl_activity may appear in run_id (control-plane) but has no report artifacts yet. If host has reports and this is empty: bind mismatch — python -m scripts.ops.runtime.docker.verify_report_bind"
+          "noValue": "No pipeline-run-report artifacts for this pipeline (reports/run-reports/pipeline/<name>/). Not Prometheus — run the pipeline, pick a pipeline with reports, or if host has reports but this stays empty: bind mismatch — check /health/ready report_root and run scripts/ops/runtime/docker/verify_report_bind.py"
         },
         "overrides": [
           {
@@ -1058,7 +1058,7 @@
           "uid": "prometheus"
         },
         "definition": "label_values(bioetl_workflow_universe, workflow)",
-        "description": "Shared operator context: workflow evidence selector. This selector does not imply exact current-status intersection unless the dashboard explicitly documents that semantics.",
+        "description": "Optional workflow evidence context and workflow-dashboard handoff selector. Overview remains pipeline-summary-first: workflow does not yet drive exact intersection filtering for the current-status PromQL surfaces.",
         "hide": 0,
         "includeAll": true,
         "label": "Workflow",

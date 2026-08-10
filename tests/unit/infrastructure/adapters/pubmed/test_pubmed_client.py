@@ -78,7 +78,7 @@ def adapter(mock_http_client, mock_logger):
 
 
 @pytest.mark.asyncio
-async def test_aclose_closes_http_client(adapter, mock_http_client):
+async def test_pubmed_client_aclose_closes_http_client(adapter, mock_http_client):
     """Test that aclose() properly closes the HTTP client."""
     await adapter.aclose()
 
