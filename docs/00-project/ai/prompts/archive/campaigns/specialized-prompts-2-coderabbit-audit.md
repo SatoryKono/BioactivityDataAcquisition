@@ -216,7 +216,7 @@ Fingerprint (для de-dupe): normalize(path) + normalize(claim) [+ optional sym
 
 ## Формат issue
 - **Title:**
-  `[CR-FULL][Wave X][severity] residual in \`path\` — <short claim ≤80 chars>`
+  ``[CR-FULL][Wave X][severity] residual in `path` — <short claim ≤80 chars>``
   Для blocker:
   `[CR-FULL][Wave X][P2] blocker: <rate_limit|all_files_ignored|…> <leaf_id>`
 - **Body (обязательные секции):**

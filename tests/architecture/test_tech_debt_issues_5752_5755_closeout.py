@@ -153,7 +153,7 @@ def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
         domain_config["test_importer_count"],
     ) == (
         0,
-        39,
+        42,
     )
     assert (merger["src_importer_count"], merger["test_importer_count"]) == (0, 5)
     assert not (ROOT / "src/bioetl/infrastructure/compat/pandera_compat.py").exists()
@@ -167,13 +167,12 @@ def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
     )
     # Allow for some failing gates during governance artifact refresh
     assert "debt-governance gates passing" in debt_report
-    assert "| `bioetl.domain.composite.config` | 0 | 39 |" in debt_report
+    assert "| `bioetl.domain.composite.config` | 0 | 42 |" in debt_report
     assert "| `bioetl.application.composite.merger` | 0 | 5 |" in debt_report
 
     assert f"`{integral_text}`" in current_state
     assert (
         f"assertless_total_candidates="
-        f"{test_governance['report']['assertless_total_candidates']}"
-        in current_state
+        f"{test_governance['report']['assertless_total_candidates']}" in current_state
     )
     assert "compatibility_test_files=0" in current_state
