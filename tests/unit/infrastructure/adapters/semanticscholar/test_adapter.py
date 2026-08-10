@@ -444,7 +444,7 @@ class TestHealthCheck:
         assert await adapter._probe_health() == HealthStatus.DEGRADED
 
     @pytest.mark.asyncio
-    async def test_aclose_closes_http_client(
+    async def test_semanticscholar_aclose_closes_http_client(
         self,
         adapter: SemanticScholarAdapter,
         mock_http_client: MagicMock,
