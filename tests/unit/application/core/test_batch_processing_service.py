@@ -49,12 +49,18 @@ from bioetl.application.core.batch_processing_service import (
     BatchProcessingOutcome,
     BatchProcessingService,
 )
+from bioetl.application.core.batch_processing_runtime import (
+    build_bronze_refs,
+    execute_with_layer_span,
+    get_source_metadata,
+)
 from bioetl.application.core.batch_processing_support import (
     BatchProcessingSupportService,
 )
 from bioetl.application.core.batch_transformer import TransformResult
 from bioetl.domain.aggregates.events import BatchCreated, BatchFailed, BatchSealed
 from bioetl.domain.exceptions import BioETLError, SchemaViolationError
+from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import BronzeRecord, RunType
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
@@ -922,6 +928,107 @@ class TestGetSourceMetadata:
         result = svc._get_source_metadata(None)
 
         assert result is None
+
+
+@pytest.mark.unit
+class TestBatchProcessingRuntimeHelpers:
+    """Cover metadata enrichment and low-level span normalization branches."""
+
+    _make_svc = TestGetSourceMetadata._make_svc
+
+    @staticmethod
+    def _source(metadata: object):
+        class _Source:
+            def get_source_metadata(self) -> object:
+                return metadata
+
+        return _Source()
+
+    def test_get_source_metadata_adds_missing_query_without_mutation(self) -> None:
+        """A run query enriches source metadata while preserving the source object."""
+        original = SourceMetadata(type="api", url="https://example.invalid")
+
+        result = get_source_metadata(
+            data_source=self._source(original),
+            logger=MagicMock(),
+            query_string="target=CHEMBL25",
+        )
+
+        assert result is not original
+        assert result is not None
+        assert result.url == original.url
+        assert result.query_string == "target=CHEMBL25"
+        assert original.query_string is None
+
+    def test_get_source_metadata_preserves_existing_query(self) -> None:
+        """Provider-authored query provenance wins over a caller fallback query."""
+        original = SourceMetadata(type="api", query_string="provider=query")
+
+        result = get_source_metadata(
+            data_source=self._source(original),
+            logger=MagicMock(),
+            query_string="caller=query",
+        )
+
+        assert result is original
+        assert result.query_string == "provider=query"
+
+    def test_get_source_metadata_returns_valid_metadata_without_query(self) -> None:
+        """Valid source metadata is returned unchanged when no enrichment is needed."""
+        original = SourceMetadata(type="csv", file_path="input.csv")
+
+        assert (
+            get_source_metadata(
+                data_source=self._source(original),
+                logger=MagicMock(),
+                query_string=None,
+            )
+            is original
+        )
+
+    def test_get_source_metadata_ignores_wrong_return_type(self) -> None:
+        """A structurally valid provider cannot inject an untyped metadata payload."""
+        assert (
+            get_source_metadata(
+                data_source=self._source({"type": "api"}),
+                logger=MagicMock(),
+                query_string=None,
+            )
+            is None
+        )
+
+    async def test_execute_with_layer_span_reraises_without_error_callback(
+        self,
+    ) -> None:
+        """Failure still closes the layer span when no callback is configured."""
+        tracing = MagicMock()
+        span = object()
+        tracing.start_layer_span.return_value = span
+
+        async def _fail() -> object:
+            raise BioETLError("write failed")
+
+        with pytest.raises(BioETLError, match="write failed"):
+            await execute_with_layer_span(
+                tracing=tracing,
+                name="silver",
+                coro=_fail(),
+                batch_id=deterministic_batch_uuid_from_callsite(
+                    "test_batch_processing_service"
+                ),
+                count=1,
+            )
+
+        tracing.end_span.assert_called_once()
+        assert tracing.end_span.call_args.args[0] is span
+        assert isinstance(tracing.end_span.call_args.args[1], BioETLError)
+
+    def test_build_bronze_refs_normalizes_present_and_absent_results(self) -> None:
+        """Writer lineage receives either one typed reference or explicit absence."""
+        bronze_result = MagicMock()
+
+        assert build_bronze_refs(bronze_result) == [bronze_result]
+        assert build_bronze_refs(None) is None
 
     def test_creates_source_metadata_from_query_string_when_no_data_source_meta(
         self,

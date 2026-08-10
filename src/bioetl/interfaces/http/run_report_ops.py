@@ -68,6 +68,19 @@ def load_workflow_run_report_payload(
     return _load_versioned_payload(path, expected_schema="workflow_run_report_v1")
 
 
+def _normalize_list_owner(name: str | None) -> str | None:
+    """Treat Grafana All-scope tokens as unbounded list (all pipelines)."""
+    if name is None:
+        return None
+    text = name.strip()
+    if not text:
+        return None
+    lowered = text.casefold()
+    if lowered in {"all", "*"} or text in {"$__all", "__all", "All"}:
+        return None
+    return text
+
+
 def list_pipeline_run_report_payloads(
     *,
     pipeline_name: str | None = None,
@@ -77,7 +90,7 @@ def list_pipeline_run_report_payloads(
     """List recent pipeline run reports (index only, not full bodies)."""
     base = _effective_root(root)
     entries = list_pipeline_reports(
-        pipeline_name=pipeline_name,
+        pipeline_name=_normalize_list_owner(pipeline_name),
         limit=limit,
         root=base,
     )
@@ -113,7 +126,7 @@ def list_workflow_run_report_payloads(
     """List recent workflow run reports (index only)."""
     base = _effective_root(root)
     entries = list_workflow_reports(
-        workflow_name=workflow_name,
+        workflow_name=_normalize_list_owner(workflow_name),
         limit=limit,
         root=base,
     )

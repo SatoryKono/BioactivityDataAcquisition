@@ -348,6 +348,102 @@ class TestUniProtIDMappingClient:
 
         assert url is None
 
+    def test_select_primary_entry_ranks_and_retains_all_mappings(
+        self,
+        idmapping_client: UniProtIDMappingClient,
+    ) -> None:
+        """Reviewed mappings win, then annotation score determines stable order."""
+        entries = [
+            {
+                "uniprot_accession": "LOW",
+                "reviewed": False,
+                "annotation_score": 5,
+            },
+            {
+                "uniprot_accession": "BEST",
+                "reviewed": True,
+                "annotation_score": 4,
+            },
+            {
+                "uniprot_accession": "SECOND",
+                "reviewed": True,
+                "annotation_score": 2,
+            },
+        ]
+
+        selected = idmapping_client._select_primary_entry(entries)
+
+        assert selected is not None
+        assert selected["uniprot_accession"] == "BEST"
+        assert selected["all_mappings"] == '["BEST", "SECOND", "LOW"]'
+
+    @pytest.mark.parametrize(
+        ("description", "expected"),
+        [
+            ({"recommendedName": "invalid"}, None),
+            ({"recommendedName": {"fullName": "invalid"}}, None),
+            (
+                {"recommendedName": {"fullName": {"value": "Kinase"}}},
+                "Kinase",
+            ),
+        ],
+    )
+    def test_extract_protein_name_handles_malformed_and_valid_nesting(
+        self,
+        idmapping_client: UniProtIDMappingClient,
+        description: object,
+        expected: str | None,
+    ) -> None:
+        """Malformed nested protein-name objects fail closed without exceptions."""
+        assert idmapping_client._extract_protein_name(description) == expected
+
+    @pytest.mark.parametrize(
+        ("genes", "expected"),
+        [
+            (["invalid"], None),
+            ([{"geneName": "invalid"}], None),
+            ([{"geneName": {"value": "TP53"}}], "TP53"),
+        ],
+    )
+    def test_extract_gene_primary_handles_malformed_and_valid_nesting(
+        self,
+        idmapping_client: UniProtIDMappingClient,
+        genes: object,
+        expected: str | None,
+    ) -> None:
+        """Gene parsing accepts only the expected nested object structure."""
+        assert idmapping_client._extract_gene_primary(genes) == expected
+
+    def test_extract_sequence_info_returns_length_and_mass(
+        self,
+        idmapping_client: UniProtIDMappingClient,
+    ) -> None:
+        """Sequence parsing retains both supported numeric metadata fields."""
+        assert idmapping_client._extract_sequence_info(
+            {"length": 393, "molWeight": 43653}
+        ) == (393, 43653)
+
+    @pytest.mark.parametrize(
+        ("to_entry", "expected"),
+        [
+            ([], None),
+            ({}, None),
+        ],
+    )
+    def test_parse_mapping_entry_rejects_malformed_or_accessionless_targets(
+        self,
+        idmapping_client: UniProtIDMappingClient,
+        to_entry: object,
+        expected: None,
+    ) -> None:
+        """Malformed and accessionless mapping targets remain unresolved."""
+        source_id, parsed = idmapping_client._parse_mapping_entry(
+            {"from": "CHEMBL1", "to": to_entry}
+        )
+
+        assert source_id == "CHEMBL1"
+        assert parsed is expected
+
     @pytest.mark.asyncio
     async def test_poll_returns_redirect_url_used_by_fetch(
         self, idmapping_client, mock_http_client

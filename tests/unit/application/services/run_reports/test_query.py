@@ -119,6 +119,37 @@ def test_list_and_latest(tmp_path: Path) -> None:
     assert latest["identity"]["run_id"] == "run-b"
 
 
+def test_list_pipeline_reports_respects_limit_by_mtime(tmp_path: Path) -> None:
+    """Only the newest ``limit`` reports are returned (mtime rank, not full scan meta)."""
+    base = tmp_path / "pipeline" / "chembl_assay"
+    for index in range(5):
+        run_id = f"run-{index}"
+        path = base / run_id / "pipeline-run-report.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(
+            json.dumps(
+                {
+                    "schema_version": "pipeline_run_report_v1",
+                    "identity": {
+                        "run_id": run_id,
+                        "status": "success",
+                        "completed_at": f"2026-01-0{index + 1}T00:00:00+00:00",
+                    },
+                }
+            ),
+            encoding="utf-8",
+        )
+        # Increasing mtime so run-4 is newest.
+        os.utime(path, (1_700_000_000 + index, 1_700_000_000 + index))
+
+    entries = list_pipeline_reports(
+        pipeline_name="chembl_assay",
+        root=tmp_path,
+        limit=2,
+    )
+    assert [item.run_id for item in entries] == ["run-4", "run-3"]
+
+
 def test_diff_and_prune_dry_run(tmp_path: Path) -> None:
     _write_simple(tmp_path, run_id="run-a", silver=9)
     _write_simple(tmp_path, run_id="run-b", silver=7)
@@ -164,6 +195,7 @@ def test_prune_by_age_uses_explicit_time_seam(tmp_path: Path) -> None:
 def test_load_helpers_handle_absent_non_mapping_and_invalid_json(
     tmp_path: Path,
 ) -> None:
+    assert list_pipeline_reports(root=tmp_path) == []
     assert load_latest_pointer(kind="pipeline", owner="missing", root=tmp_path) is None
     assert (
         load_pipeline_report(

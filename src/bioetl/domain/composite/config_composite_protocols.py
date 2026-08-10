@@ -19,7 +19,7 @@ from bioetl.domain.composite.strategy import (
 __all__ = ["CompositeConfigProtocol"]
 
 
-class _SeedConfigProtocol(Protocol):  # pragma: no cover - declaration-only contract
+class _SeedConfigProtocol(Protocol):
     @property
     def pipeline(self) -> str: ...
     @property
@@ -30,9 +30,7 @@ class _SeedConfigProtocol(Protocol):  # pragma: no cover - declaration-only cont
     def limit(self) -> int | None: ...
 
 
-class _DependencyConfigProtocol(
-    Protocol
-):  # pragma: no cover - declaration-only contract
+class _DependencyConfigProtocol(Protocol):
     @property
     def pipeline(self) -> str: ...
     @property
@@ -53,9 +51,7 @@ class _DependencyConfigProtocol(
     def key_filter(self) -> str | None: ...
 
 
-class _AggregationFieldProtocol(
-    Protocol
-):  # pragma: no cover - declaration-only contract
+class _AggregationFieldProtocol(Protocol):
     @property
     def source_field(self) -> str: ...
     @property
@@ -66,9 +62,7 @@ class _AggregationFieldProtocol(
     def output_field(self) -> str | None: ...
 
 
-class _AggregationConfigProtocol(
-    Protocol
-):  # pragma: no cover - declaration-only contract
+class _AggregationConfigProtocol(Protocol):
     @property
     def group_by(self) -> str: ...
     @property
@@ -77,7 +71,7 @@ class _AggregationConfigProtocol(
     def fields(self) -> Sequence[_AggregationFieldProtocol]: ...
 
 
-class _EnricherConfigProtocol(Protocol):  # pragma: no cover - declaration-only contract
+class _EnricherConfigProtocol(Protocol):
     @property
     def pipeline(self) -> str: ...
     @property
@@ -100,7 +94,7 @@ class _EnricherConfigProtocol(Protocol):  # pragma: no cover - declaration-only 
     def aggregation(self) -> _AggregationConfigProtocol | None: ...
 
 
-class _ColumnGroupProtocol(Protocol):  # pragma: no cover - declaration-only contract
+class _ColumnGroupProtocol(Protocol):
     @property
     def name(self) -> str: ...
     @property
@@ -111,7 +105,7 @@ class _ColumnGroupProtocol(Protocol):  # pragma: no cover - declaration-only con
     def provider_order(self) -> tuple[str, ...]: ...
 
 
-class _MergeConfigProtocol(Protocol):  # pragma: no cover - declaration-only contract
+class _MergeConfigProtocol(Protocol):
     @property
     def strategy(self) -> MergeStrategy: ...
     @property
@@ -138,14 +132,14 @@ class _MergeConfigProtocol(Protocol):  # pragma: no cover - declaration-only con
     def preserve_all_sources(self) -> bool: ...
 
 
-class _DQOverrideProtocol(Protocol):  # pragma: no cover - declaration-only contract
+class _DQOverrideProtocol(Protocol):
     @property
     def soft_fail_threshold(self) -> float | None: ...
     @property
     def hard_fail_threshold(self) -> float | None: ...
 
 
-class _DQConfigProtocol(Protocol):  # pragma: no cover - declaration-only contract
+class _DQConfigProtocol(Protocol):
     @property
     def soft_fail_threshold(self) -> float: ...
     @property
@@ -156,9 +150,7 @@ class _DQConfigProtocol(Protocol):  # pragma: no cover - declaration-only contra
     def enricher_overrides(self) -> Mapping[str, _DQOverrideProtocol]: ...
 
 
-class _ExecutionConfigProtocol(
-    Protocol
-):  # pragma: no cover - declaration-only contract
+class _ExecutionConfigProtocol(Protocol):
     @property
     def max_concurrency(self) -> int: ...
     @property
@@ -169,7 +161,7 @@ class _ExecutionConfigProtocol(
     def retry_backoff_multiplier(self) -> float: ...
 
 
-class _LineageConfigProtocol(Protocol):  # pragma: no cover - declaration-only contract
+class _LineageConfigProtocol(Protocol):
     @property
     def track_field_sources(self) -> bool: ...
     @property
@@ -182,9 +174,7 @@ class _LineageConfigProtocol(Protocol):  # pragma: no cover - declaration-only c
     def track_source_for_fields(self) -> tuple[str, ...]: ...
 
 
-class _FieldComparisonProtocol(
-    Protocol
-):  # pragma: no cover - declaration-only contract
+class _FieldComparisonProtocol(Protocol):
     @property
     def field_name(self) -> str: ...
     @property
@@ -193,18 +183,14 @@ class _FieldComparisonProtocol(
     def threshold(self) -> float: ...
 
 
-class _EnricherPairingProtocol(
-    Protocol
-):  # pragma: no cover - declaration-only contract
+class _EnricherPairingProtocol(Protocol):
     @property
     def enricher_pipeline(self) -> str: ...
     @property
     def fields(self) -> Sequence[_FieldComparisonProtocol]: ...
 
 
-class _CrossValidationConfigProtocol(
-    Protocol
-):  # pragma: no cover - declaration-only contract
+class _CrossValidationConfigProtocol(Protocol):
     @property
     def enabled(self) -> bool: ...
     @property
@@ -221,7 +207,7 @@ class _CrossValidationConfigProtocol(
     def enricher_pairings(self) -> Sequence[_EnricherPairingProtocol]: ...
 
 
-class CompositeConfigProtocol(Protocol):  # pragma: no cover - declaration-only contract
+class CompositeConfigProtocol(Protocol):
     @property
     def name(self) -> str: ...
     @property
