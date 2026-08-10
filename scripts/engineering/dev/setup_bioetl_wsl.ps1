@@ -65,7 +65,7 @@ function Convert-NativeOutputToText {
         if ($null -eq $item) {
             continue
         }
-        ([string]$item).Replace([char]0, '')
+        ([string]$item).Replace(([char]0).ToString(), [string]::Empty)
     }
     return (($lines -join [Environment]::NewLine).Trim())
 }

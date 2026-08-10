@@ -32,6 +32,11 @@ Bootstrap commands:
 .\scripts\engineering\dev\setup_env_windows.ps1
 ```
 
+To drive the WSL bootstrap safely from Windows PowerShell, use the canonical
+`scripts/engineering/dev/setup_bioetl_wsl.ps1` wrapper. It passes native
+arguments to `wsl.exe` and delegates environment creation to the WSL setup
+script below.
+
 ```bash
 bash scripts/engineering/dev/setup_env_wsl.sh
 ```
@@ -249,6 +254,7 @@ python -m scripts.engineering.dev <command> [args...]
 | `scripts/engineering/dev/run_pytest_sharded.sh`              | Run the recommended path-based pytest shard plan (shell variant)                          |
 | `scripts/engineering/dev/quality_gate_probe.py`              | Diagnose narrow pytest/mypy startup latency and timeout behavior                          |
 | `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock `/ops/quarantine/*` endpoints for Silver Reject Explorer smoke checks          |
+| `scripts/engineering/dev/setup_bioetl_wsl.ps1`               | Drive the canonical WSL setup safely from Windows PowerShell                              |
 | `scripts/engineering/dev/setup_env_windows.ps1`              | Create/update the stable Windows virtualenv at `.venv-win`                                |
 | `scripts/engineering/dev/setup_env_wsl.sh`                   | Create/update the stable WSL virtualenv outside the repo (default: `$HOME/.venvs/bioetl`) |
 | `scripts/engineering/dev/.wsl-vpn-fix.ps1`                   | Recover Windows-side VPN proxy settings for WSL interoperability                          |

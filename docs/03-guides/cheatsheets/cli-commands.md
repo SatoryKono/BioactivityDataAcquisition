@@ -777,7 +777,7 @@ Prefer `python -m scripts.<domain> ...` (or `uv run python -m ...`) over ad-hoc 
 | `scripts.docs` | Docs links, drift, cleanup inventory | `python -m scripts.docs generate-cleanup-inventory --check` |
 | `scripts.diagrams` | Diagram lint / render / quality gates | `python -m scripts.diagrams lint` |
 | `scripts.ops` | Ops helpers (docker setup, data maintenance) | `scripts/ops/docker-setup.ps1` / `.sh` |
-| `scripts.data_quality` / related | DQ tooling surfaces | Prefer `bioetl dq ...` for operator flows |
+| `scripts/data_quality/__main__.py` via `python -m scripts.data_quality` | DQ tooling surfaces | Prefer `bioetl dq ...` for operator flows |
 
 Architecture / quality refresh (post-change):
 

@@ -15,7 +15,7 @@ from scripts.ai.prompts.registry import (
 from scripts.ai.prompts.render import render_by_id, substitute_params
 from scripts.ai.prompts.__main__ import main as prompts_main
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
 
 def test_registry_loads_and_ids_unique() -> None:

@@ -991,4 +991,3 @@ _Generated: 2026-07-08T19:20:43+03:00_
 ![50-exception-hierarchy-overview](./50-exception-hierarchy-overview.svg)
 
 ---
-

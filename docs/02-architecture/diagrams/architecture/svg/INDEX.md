@@ -499,4 +499,3 @@ _Generated: 2026-07-08T19:23:31+03:00_
 ![48-effective-config-artifact-domain-model](./48-effective-config-artifact-domain-model.svg)
 
 ---
-

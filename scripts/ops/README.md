@@ -20,6 +20,8 @@ AI-facing setup and MCP operational scripts live under `scripts/ai/`.
 - launchers under `launchers/codex/`
 - setup/bootstrap commands such as `launchers/codex/setup_plugins.sh`
 - supported non-memory Python commands exposed through `python -m scripts.ops`
+- `scripts/ops/neo4j_memory_sync.py` remains a compatibility module alias;
+  new project-memory calls use `python -m memory.graph.sync`
 - observability smoke checks such as
   `python -m scripts.ops check-observability-ports --json`
 
