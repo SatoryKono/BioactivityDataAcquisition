@@ -320,6 +320,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side companion for the canonical AST Grep MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
     },
+    "scripts/ai/mcp/mcp_ast_grep_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the catalog-selected AST Grep transport implementation behind scripts.ai.mcp wrappers; keep it supporting during the compatibility transition and retire the shell implementation after a platform-neutral backend replaces it."
+    },
     "scripts/ai/mcp/mcp_brave_search_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",
