@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-10T15:51:48.659141+00:00",
+  "generated_at": "2026-08-10T17:33:42.184056+00:00",
   "summary": {
     "total_scripts": 580,
     "status_counts": {
@@ -11329,7 +11329,7 @@
         },
         {
           "path": "pyproject.toml",
-          "line": 334,
+          "line": 330,
           "source_group": "build",
           "text": "# only (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py)."
         },
@@ -19322,7 +19322,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/docker-compose-project-migration.md",
-          "line": 207,
+          "line": 208,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/_rf017_finalize_observation.py"
         }
@@ -19650,7 +19650,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/docker-compose-project-migration.md",
-          "line": 193,
+          "line": 194,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/recreate_cutover_stacks.py \\"
         },
