@@ -1,6 +1,5 @@
 {
-  "decision": "reviewed_inventory_clear",
-  "evidence_scope": "Curated flaky-test inventory bound to the current tracked static test-governance fingerprint, reconciled against SWARM-001 telemetry (reports/test-swarm/SWARM-001/flakiness-database.json and reports/test-swarm/SWARM-001/telemetry/failure_frequency_summary.md). This inventory does not replace repeated-run CI telemetry or claim that static analysis can detect intermittent outcomes.",
+  "schema_version": "flaky-test-burndown-review-v2",
   "generated_by": "scripts.engineering.qa.report_flaky_test_burndown_review",
   "linked_issue": "#5514",
   "linked_issues": [
@@ -8,6 +7,9 @@
     "#5962",
     "#6351"
   ],
+  "reviewed_on": "2026-08-03",
+  "decision": "reviewed_inventory_clear",
+  "evidence_scope": "Curated flaky-test inventory bound to the current tracked static test-governance fingerprint, reconciled against SWARM-001 telemetry (reports/test-swarm/SWARM-001/flakiness-database.json and reports/test-swarm/SWARM-001/telemetry/failure_frequency_summary.md). This inventory does not replace repeated-run CI telemetry or claim that static analysis can detect intermittent outcomes.",
   "policy": {
     "flaky_test_definition": [
       "intermittent pass/fail outcome across repeated or sharded runs",
@@ -17,35 +19,33 @@
       "nondeterministic ID, clock, random, VCR, fixture, or golden-data behavior"
     ],
     "no_growth_gate": "reports/quality/debt-governance-gates.json::flaky_test_total_count",
+    "untriaged_gate": "reports/quality/debt-governance-gates.json::flaky_test_untriaged_count",
     "remediation_workflow": [
       "stabilize with deterministic clock, ID, and fixture seams",
       "quarantine only with owner, triage_status, cause, and removal condition",
       "do not hide nondeterminism with retries or relaxed assertions"
-    ],
-    "untriaged_gate": "reports/quality/debt-governance-gates.json::flaky_test_untriaged_count"
+    ]
   },
-  "review_notes": [
-    "The curated residual flaky-test inventory is empty at this review point.",
-    "SWARM-001 flakiness-database.json reports total_flaky=0 with empty flaky_tests.",
-    "Current suite size and source identity are derived from test-governance-current.json.",
-    "Repeated-run CI telemetry remains the authority for discovering intermittent outcomes.",
-    "Review owner: BioETL Team (governance closeout for issue #5514)."
-  ],
-  "reviewed_flaky_tests": [],
-  "reviewed_on": "2026-08-03",
-  "schema_version": "flaky-test-burndown-review-v2",
   "source_artifacts": [
     "configs/quality/flaky_test_inventory.yaml",
     "reports/quality/test-governance-current.json"
   ],
   "source_fingerprints": {
     "curated_inventory_sha256": "fcc0223fda92af30984526c1ed95253c46c20b031234f0240a698b6484e3b651",
-    "test_governance_source_tree_sha256": "3e890420bb510fc626e064dc801f3262d7a04ef628e43fe35ada640da8fc02e0"
+    "test_governance_source_tree_sha256": "7e4a3dfa3347b804bee8cf1348afe98d3e42013f4879c919524a251c7232b15a"
   },
   "summary": {
-    "by_alert_level": {
-      "critical": 0,
-      "warning": 0
+    "total_tests_analyzed": 23782,
+    "total_test_files": 2248,
+    "test_governance_budget_violation_count": 0,
+    "test_governance_source_tree_sha256": "7e4a3dfa3347b804bee8cf1348afe98d3e42013f4879c919524a251c7232b15a",
+    "total_flaky": 0,
+    "by_layer": {
+      "application": 0,
+      "composition": 0,
+      "domain": 0,
+      "infrastructure": 0,
+      "interfaces": 0
     },
     "by_category": {
       "Contract": 0,
@@ -54,13 +54,6 @@
       "Infrastructure": 0,
       "State": 0,
       "Type": 0
-    },
-    "by_layer": {
-      "application": 0,
-      "composition": 0,
-      "domain": 0,
-      "infrastructure": 0,
-      "interfaces": 0
     },
     "by_severity": {
       "P1": 0,
@@ -73,10 +66,17 @@
       "needs-triage": 0,
       "quarantined": 0
     },
-    "test_governance_budget_violation_count": 0,
-    "test_governance_source_tree_sha256": "3e890420bb510fc626e064dc801f3262d7a04ef628e43fe35ada640da8fc02e0",
-    "total_flaky": 0,
-    "total_test_files": 2244,
-    "total_tests_analyzed": 23725
-  }
+    "by_alert_level": {
+      "critical": 0,
+      "warning": 0
+    }
+  },
+  "reviewed_flaky_tests": [],
+  "review_notes": [
+    "The curated residual flaky-test inventory is empty at this review point.",
+    "SWARM-001 flakiness-database.json reports total_flaky=0 with empty flaky_tests.",
+    "Current suite size and source identity are derived from test-governance-current.json.",
+    "Repeated-run CI telemetry remains the authority for discovering intermittent outcomes.",
+    "Review owner: BioETL Team (governance closeout for issue #5514)."
+  ]
 }
