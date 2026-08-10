@@ -18,8 +18,10 @@ from pathlib import Path
 from typing import Any
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-if str(SCRIPT_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPT_DIR))
+REPO_ROOT = SCRIPT_DIR.parents[2]
+for import_root in (REPO_ROOT, SCRIPT_DIR):
+    if str(import_root) not in sys.path:
+        sys.path.insert(0, str(import_root))
 
 try:
     from scripts.diagrams.core.diagram_paths import VISUAL_SMOKE_MANIFEST

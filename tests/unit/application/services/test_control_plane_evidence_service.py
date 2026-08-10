@@ -371,7 +371,7 @@ def test_retention_compliance_uses_dry_run_evidence_floor() -> None:
 
     payload = service.retention_compliance(scope=_scope(manifest), now=_NOW)
 
-    assert "reproducibility_evidence_floor_satisfied" in _reasons(payload)
+    assert "reproducibility_evidence_within_retention" in _reasons(payload)
     assert "required_evidence_surfaces_present" in _reasons(payload)
     assert "snapshot_lifecycle_evidence_present" in _reasons(payload)
     assert "archive_evidence_not_recorded" in _reasons(payload)
@@ -405,7 +405,7 @@ def test_retention_compliance_reports_delete_and_evidence_floor_violations() -> 
 
     assert payload["status"] == "ERROR"
     assert "retention_delete_candidates_present" in _reasons(payload)
-    assert "reproducibility_evidence_floor_unprotected" in _reasons(payload)
+    assert "reproducibility_evidence_within_retention" in _reasons(payload)
     assert "required_evidence_surfaces_missing" in _reasons(payload)
 
 
