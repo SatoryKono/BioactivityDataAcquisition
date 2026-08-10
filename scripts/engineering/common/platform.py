@@ -133,9 +133,7 @@ def script_command(path: Path, *, host: PlatformInfo | None = None) -> list[str]
     return ["bash", str(path)]
 
 
-def ensure_user_executable(
-    path: Path, *, host: PlatformInfo | None = None
-) -> None:
+def ensure_user_executable(path: Path, *, host: PlatformInfo | None = None) -> None:
     """Add only the POSIX owner execute bit; native Windows needs no chmod."""
 
     resolved_host = host or detect_platform()

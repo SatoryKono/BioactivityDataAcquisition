@@ -264,7 +264,13 @@ def _load_yaml_payload(config_path: Path) -> dict[str, Any] | None:
     return payload if isinstance(payload, dict) else None
 
 
-def _append_prefixed(messages: list[str], prefix: Path, items: list[str], *, configs_root: Path | None = None) -> None:
+def _append_prefixed(
+    messages: list[str],
+    prefix: Path,
+    items: list[str],
+    *,
+    configs_root: Path | None = None,
+) -> None:
     """Append validation messages with a config path prefix."""
     if configs_root is not None:
         try:
@@ -558,9 +564,17 @@ def _process_entity_config(
     if payload is None:
         errors.append(f"{config_path}: entity config must be a YAML mapping")
         return
-    _append_prefixed(errors, config_path, _validate_entity_config_sections(payload), configs_root=configs_root)
     _append_prefixed(
-        errors, config_path, _validate_provider_entity_consistency(payload), configs_root=configs_root
+        errors,
+        config_path,
+        _validate_entity_config_sections(payload),
+        configs_root=configs_root,
+    )
+    _append_prefixed(
+        errors,
+        config_path,
+        _validate_provider_entity_consistency(payload),
+        configs_root=configs_root,
     )
     pipeline_payload = payload.get("pipeline")
     if not isinstance(pipeline_payload, dict):
@@ -571,7 +585,12 @@ def _process_entity_config(
     )
     if not valid_pipeline:
         errors.append(f"{config_path}: {pipeline_schema_error}")
-    _append_prefixed(errors, config_path, _validate_pipeline_payload(pipeline_payload), configs_root=configs_root)
+    _append_prefixed(
+        errors,
+        config_path,
+        _validate_pipeline_payload(pipeline_payload),
+        configs_root=configs_root,
+    )
     normalized_payload = _build_normalized_pipeline_payload(
         payload,
         pipeline_payload,
@@ -585,7 +604,10 @@ def _process_entity_config(
             configs_root=configs_root,
         )
     _append_prefixed(
-        warnings, config_path, _validate_sink_paths_and_sort(normalized_payload), configs_root=configs_root
+        warnings,
+        config_path,
+        _validate_sink_paths_and_sort(normalized_payload),
+        configs_root=configs_root,
     )
 
 
