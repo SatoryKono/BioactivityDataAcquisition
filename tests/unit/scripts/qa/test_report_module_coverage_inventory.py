@@ -17,6 +17,7 @@ import pytest
 
 from scripts.engineering.qa.report_module_coverage_inventory import (
     _SourceModuleSnapshot,
+    _coverage_filename_to_repo_path,
     _module_is_declaration_only,
     _read_source_module_snapshots,
     _read_stable_source_module_snapshots,
@@ -24,6 +25,25 @@ from scripts.engineering.qa.report_module_coverage_inventory import (
 )
 
 pytestmark = pytest.mark.unit
+
+
+def test_coverage_filename_prefers_bioetl_for_ambiguous_source_roots(
+    tmp_path: Path,
+) -> None:
+    scripts_root = tmp_path / "scripts"
+    bioetl_root = tmp_path / "src" / "bioetl"
+    scripts_root.mkdir()
+    bioetl_root.mkdir(parents=True)
+    (scripts_root / "__init__.py").write_text("", encoding="utf-8")
+    (bioetl_root / "__init__.py").write_text("", encoding="utf-8")
+
+    repo_path = _coverage_filename_to_repo_path(
+        "__init__.py",
+        repo_root=tmp_path,
+        source_roots=(scripts_root, bioetl_root),
+    )
+
+    assert repo_path == "src/bioetl/__init__.py"
 
 
 def test_read_source_module_snapshots_skips_vanished_path(
