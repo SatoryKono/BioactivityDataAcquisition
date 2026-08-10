@@ -98,6 +98,34 @@ def test_filter_records_honors_exact_run_id_before_other_dimensions() -> None:
     ) == (second,)
 
 
+def test_filter_records_ignores_lowercase_all_scope_tokens() -> None:
+    """Literal 'all' must not filter as a run_type/workflow label."""
+    first = _record(
+        "1",
+        workflow_candidates=("wf-a",),
+        pipeline="chembl_assay",
+        run_type="backfill",
+        run_status="success",
+        completed_offset=1,
+    )
+    second = _record(
+        "2",
+        workflow_candidates=("wf-b",),
+        pipeline="chembl_assay",
+        run_type="incremental",
+        run_status="success",
+        completed_offset=2,
+    )
+    assert subject.filter_records(
+        (first, second),
+        selected_workflows=("all",),
+        selected_pipelines=("chembl_assay",),
+        selected_run_types=("all",),
+        selected_run_statuses=(),
+        selected_run_id=None,
+    ) == (first, second)
+
+
 def test_filter_records_requires_all_selected_dimensions_to_match() -> None:
     first = _record(
         "1",

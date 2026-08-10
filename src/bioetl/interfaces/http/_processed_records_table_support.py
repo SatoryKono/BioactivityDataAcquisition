@@ -148,7 +148,7 @@ _GOLD_PARAMETERS = frozenset(
     for spec in PROCESSED_RECORDS_ROW_SPECS
     if spec.parameter[3:7] == "gold"
 )
-_ALL_SCOPE_TOKENS = {"All", "$__all", "__all", "*"}
+_ALL_SCOPE_TOKENS = {"All", "all", "$__all", "__all", "*"}
 _UNKNOWN_SCOPE = "unknown"
 
 

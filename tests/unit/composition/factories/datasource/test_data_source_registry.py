@@ -109,6 +109,55 @@ class TestCanonicalDataSourceCreator:
         assert result is expected
         creator.assert_called_once()
 
+    def test_bound_creator_builds_registry_callback_once(self) -> None:
+        """Repeated calls reuse the provider-bound callback after lazy resolution."""
+        registry = MagicMock()
+        registry.list_providers.return_value = ["isolated_provider"]
+        registry.is_registered.return_value = True
+        expected = MagicMock(name="data_source")
+        registered_creator = MagicMock(return_value=expected)
+        registry.build_data_source_creator.return_value = registered_creator
+
+        bound_creator = get_data_source_creator(
+            "isolated_provider",
+            provider_registry=registry,
+        )
+        call_kwargs = {
+            "settings": MagicMock(),
+            "pipeline_config": MagicMock(),
+            "logger": MagicMock(),
+        }
+
+        assert bound_creator(**call_kwargs) is expected
+        assert bound_creator(**call_kwargs) is expected
+        registry.build_data_source_creator.assert_called_once_with("isolated_provider")
+        assert registered_creator.call_count == 2
+
+    def test_default_registry_rejects_name_outside_configured_provider_set(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """An unloaded default registry still fails closed on unknown config names."""
+        registry = MagicMock()
+        registry.list_providers.return_value = []
+        registry.is_registered.return_value = False
+        monkeypatch.setattr(
+            data_source_factory_module,
+            "resolve_provider_registry",
+            lambda *_args, **_kwargs: registry,
+        )
+        monkeypatch.setattr(
+            data_source_factory_module,
+            "_get_default_provider_names",
+            lambda: frozenset({"chembl", "pubchem"}),
+        )
+
+        with pytest.raises(
+            KeyError,
+            match="Unknown provider: missing. Available: chembl, pubchem",
+        ):
+            get_data_source_creator("missing")
+
     def test_default_provider_names_resolve_through_config_root_seam(
         self,
         tmp_path,

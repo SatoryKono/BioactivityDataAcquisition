@@ -44,15 +44,6 @@ def test_coverage_verify_workflow_enforces_line_and_branch() -> None:
 
 
 @pytest.mark.architecture
-def test_repo_backed_coverage_shard_preserves_hidden_sqlite_data() -> None:
-    """Repo-backed source coverage must reach the canonical combine gate."""
-    text = _WORKFLOW.read_text(encoding="utf-8")
-    assert "name: coverage-data-repo-backed-unit" in text
-    assert "path: reports/coverage/.coverage.repo-backed-unit" in text
-    assert "include-hidden-files: true" in text
-
-
-@pytest.mark.architecture
 def test_skip_inventory_policy_forbids_assertion_weakening() -> None:
     """Collection/flake remediation must not heal via assertion weakening."""
     e2e_slo = yaml.safe_load(

@@ -31,13 +31,8 @@ services:
       - NEO4J_USERNAME=${NEO4J_USERNAME:-neo4j}
       - NEO4J_PASSWORD=${NEO4J_PASSWORD:?Set NEO4J_PASSWORD}
       - BIOETL_PROMETHEUS_URL=http://prometheus:9090
-      # runtime_manager replaces the unmanaged sentinel with an opaque identity
-      # derived from the selected repository/data/report roots.
-      - BIOETL_RUNTIME_SOURCE_ID=ea4ea8cfbdad8ca16fa9d50a1ad087aa4c4f5a3554c5b409544469685f0f2e9b
-      # Single run-reports root shared by Ops HTTP list/load and CLI writers.
-      # Host bind is BIOETL_DASHBOARD_REPORT_ROOT → /app/reports; run reports
-      # live under /app/reports/run-reports. Marker reports/.bioetl-report-root
-      # proves the bind is the real checkout tree (not a stale Desktop cache).
+      # Must match Grafana BIOETL_EXPECTED_RUNTIME_SOURCE_ID (runtime_manager injects).
+      - BIOETL_RUNTIME_SOURCE_ID=${BIOETL_RUNTIME_SOURCE_ID:-unmanaged}
       - BIOETL_REPORT_ROOT=${BIOETL_REPORT_ROOT:-/app/reports/run-reports}
       - BIOETL_ENFORCE_REPORT_ROOT_MARKER=${BIOETL_ENFORCE_REPORT_ROOT_MARKER:-1}
     labels:
