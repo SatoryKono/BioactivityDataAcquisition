@@ -8,7 +8,7 @@ import pytest
 
 from bioetl.application.services.control_plane.manifest.replay_write_risk import (
     REPLAY_WRITE_RISK_METRIC,
-    ReplayWriteRiskType,
+    ReplayWriteRiskClassification,
     assess_replay_write_risks,
     emit_replay_write_risk_metrics,
 )
@@ -94,7 +94,10 @@ def test_replay_append_and_destructive_modes_emit_both_bounded_risks() -> None:
     )
 
     assert assess_replay_write_risks(manifest) == frozenset(
-        {ReplayWriteRiskType.DUPLICATE, ReplayWriteRiskType.OVERWRITE}
+        {
+            ReplayWriteRiskClassification.DUPLICATE,
+            ReplayWriteRiskClassification.OVERWRITE,
+        }
     )
 
 
@@ -118,7 +121,7 @@ def test_rebuild_family_clear_policy_creates_overwrite_risk(run_type: RunType) -
     manifest = make_run_manifest(run_type=run_type)
 
     assert assess_replay_write_risks(manifest) == frozenset(
-        {ReplayWriteRiskType.OVERWRITE}
+        {ReplayWriteRiskClassification.OVERWRITE}
     )
 
 
@@ -128,5 +131,5 @@ def test_composite_resume_replace_semantics_create_overwrite_risk() -> None:
     )
 
     assert assess_replay_write_risks(manifest) == frozenset(
-        {ReplayWriteRiskType.OVERWRITE}
+        {ReplayWriteRiskClassification.OVERWRITE}
     )

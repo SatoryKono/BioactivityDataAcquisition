@@ -129,6 +129,8 @@ tracked_suite_inventory:
     normalization_and_pipeline_support:
     - tests/integration/application/core/test_postrun_compact_service.py
     - tests/integration/application/core/test_record_processor.py
+    - tests/integration/application/services/test_control_plane_evidence_manifest_raw.py
+    - tests/integration/application/services/test_control_plane_evidence_retention_profiles.py
     - tests/integration/application/services/test_forensic_diff_service.py
     - tests/integration/application/services/test_run_manifest_file_store.py
     - tests/integration/determinism/test_chembl_assay_reproducibility_determinism_gate.py

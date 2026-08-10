@@ -13,7 +13,9 @@ from bioetl.application.services.control_plane.evidence.lineage_graph_validation
 from bioetl.application.services.control_plane.evidence.lineage_identity import (
     identity_gaps,
 )
-from bioetl.application.services.control_plane.evidence.models import EvidenceCheck
+from bioetl.application.observability.control_plane_evidence import (
+    EvidenceCheckResult,
+)
 from bioetl.application.services.control_plane.evidence.persistence_profile import (
     resolve_persistence_profile,
 )
@@ -26,7 +28,7 @@ def build_lineage_checks(
     manifest: RunManifest,
     fragments: tuple[LineageGraphFragment, ...],
     ledger_entries: tuple[RunLedgerEntry, ...],
-) -> tuple[EvidenceCheck, ...]:
+) -> tuple[EvidenceCheckResult, ...]:
     """Validate the persisted lineage graph for one manifested run."""
     if not fragments:
         return _missing_fragment_checks(manifest)
@@ -67,23 +69,25 @@ def build_lineage_checks(
     )
 
 
-def _missing_fragment_checks(manifest: RunManifest) -> tuple[EvidenceCheck, ...]:
+def _missing_fragment_checks(
+    manifest: RunManifest,
+) -> tuple[EvidenceCheckResult, ...]:
     required_profile, profile_valid = resolve_persistence_profile(manifest)
     lineage_required = not profile_valid or required_profile == "forensic_grade"
     return (
-        EvidenceCheck(
+        EvidenceCheckResult(
             "closure",
             "ERROR" if lineage_required else "UNKNOWN",
             "lineage_fragments_missing",
             "No persisted lineage fragments resolved for the selected run.",
         ),
-        EvidenceCheck(
+        EvidenceCheckResult(
             "identity_consistency",
             "UNKNOWN",
             "lineage_identity_not_observable",
             "Lineage identity cannot be validated without persisted fragments.",
         ),
-        EvidenceCheck(
+        EvidenceCheckResult(
             "cycle_detection",
             "UNKNOWN",
             "lineage_cycle_not_observable",
@@ -101,11 +105,11 @@ def _gap_check(
     error_reason: str,
     ok_detail: str,
     error_prefix: str,
-) -> EvidenceCheck:
+) -> EvidenceCheckResult:
     items = tuple(gaps)
     if not items:
-        return EvidenceCheck(check, "OK", ok_reason, ok_detail)
-    return EvidenceCheck(
+        return EvidenceCheckResult(check, "OK", ok_reason, ok_detail)
+    return EvidenceCheckResult(
         check,
         "ERROR",
         error_reason,
@@ -118,30 +122,30 @@ def _persistence_profile_check(
     fragments: tuple[LineageGraphFragment, ...],
     *,
     validation_complete: bool,
-) -> EvidenceCheck:
+) -> EvidenceCheckResult:
     required_profile, profile_valid = resolve_persistence_profile(manifest)
     if not profile_valid:
-        return EvidenceCheck(
+        return EvidenceCheckResult(
             "persistence_profile",
             "ERROR",
             "lineage_persistence_profile_unsupported",
             "Lineage validation rejects an unsupported persistence profile.",
         )
     if fragments and validation_complete:
-        return EvidenceCheck(
+        return EvidenceCheckResult(
             "persistence_profile",
             "OK",
             "lineage_persistence_profile_observed",
             f"Persisted lineage evidence is present for {required_profile}.",
         )
     if required_profile == "forensic_grade":
-        return EvidenceCheck(
+        return EvidenceCheckResult(
             "persistence_profile",
             "ERROR",
             "lineage_persistence_profile_unsatisfied",
             f"{required_profile} requires complete persisted lineage evidence.",
         )
-    return EvidenceCheck(
+    return EvidenceCheckResult(
         "persistence_profile",
         "WARNING",
         "lineage_persistence_profile_degraded",

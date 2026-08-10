@@ -2,32 +2,13 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Literal
-
+from bioetl.application.observability.control_plane_evidence import (
+    EvidenceCheckResult,
+    EvidenceStatus,
+)
 from bioetl.domain.control_plane import RunManifest
 
 CONTROL_PLANE_EVIDENCE_CONTRACT = "control_plane_validation_evidence_v1"
-EvidenceStatus = Literal["OK", "WARNING", "ERROR", "UNKNOWN"]
-
-
-@dataclass(frozen=True, slots=True)
-class EvidenceCheck:
-    """One bounded validation result suitable for an operator table."""
-
-    check: str
-    status: EvidenceStatus
-    reason: str
-    detail: str
-
-    def to_dict(self) -> dict[str, object]:
-        """Return a JSON-safe table row."""
-        return {
-            "check": self.check,
-            "status": self.status,
-            "reason": self.reason,
-            "detail": self.detail,
-        }
 
 
 _STATUS_PRIORITY: dict[EvidenceStatus, int] = {
@@ -41,7 +22,7 @@ _STATUS_PRIORITY: dict[EvidenceStatus, int] = {
 def evidence_payload(
     *,
     endpoint: str,
-    checks: tuple[EvidenceCheck, ...],
+    checks: tuple[EvidenceCheckResult, ...],
     requested_pipeline: str,
     selected_run_id: str | None,
     selected_run_types: tuple[str, ...],
@@ -74,13 +55,13 @@ def evidence_payload(
     return payload
 
 
-def _overall_status(checks: tuple[EvidenceCheck, ...]) -> EvidenceStatus:
+def _overall_status(checks: tuple[EvidenceCheckResult, ...]) -> EvidenceStatus:
     if not checks:
         return "UNKNOWN"
     return max(checks, key=lambda check: _STATUS_PRIORITY[check.status]).status
 
 
-def _status_counts(checks: tuple[EvidenceCheck, ...]) -> dict[str, int]:
+def _status_counts(checks: tuple[EvidenceCheckResult, ...]) -> dict[str, int]:
     return {
         value: sum(check.status == value for check in checks)
         for value in ("OK", "WARNING", "ERROR", "UNKNOWN")
@@ -106,7 +87,7 @@ def _scope_identity(
 
 
 def _summary(
-    checks: tuple[EvidenceCheck, ...],
+    checks: tuple[EvidenceCheckResult, ...],
     counts: dict[str, int],
 ) -> dict[str, int]:
     return {
@@ -118,14 +99,14 @@ def _summary(
     }
 
 
-def unresolved_scope_check(resolved_via: str) -> EvidenceCheck:
+def unresolved_scope_check(resolved_via: str) -> EvidenceCheckResult:
     """Return an explicit non-fabricated result for an unresolved run scope."""
     reason = (
         "selected_run_id_not_found"
         if resolved_via == "selected_run_id_not_found"
         else "manifest_not_found_for_scope"
     )
-    return EvidenceCheck(
+    return EvidenceCheckResult(
         check="scope_resolution",
         status="UNKNOWN",
         reason=reason,
@@ -135,7 +116,7 @@ def unresolved_scope_check(resolved_via: str) -> EvidenceCheck:
 
 __all__ = [
     "CONTROL_PLANE_EVIDENCE_CONTRACT",
-    "EvidenceCheck",
+    "EvidenceCheckResult",
     "EvidenceStatus",
     "evidence_payload",
     "unresolved_scope_check",

@@ -25,7 +25,7 @@ _READ_FAILURES = (BioETLError, OSError, RuntimeError, TypeError, ValueError)
 
 
 @dataclass(frozen=True, slots=True)
-class ManifestLedgerIntegrityScope:
+class ManifestLedgerIntegritySummary:
     """Aggregate referential-integrity result for one bounded run scope."""
 
     pipeline: str
@@ -146,7 +146,7 @@ class ControlPlaneIntegrityMetricsService:
         repr=False,
     )
 
-    def refresh(self) -> tuple[ManifestLedgerIntegrityScope, ...]:
+    def refresh(self) -> tuple[ManifestLedgerIntegritySummary, ...]:
         """Reconcile all persisted manifests and atomically refresh scope ratios."""
         counts: dict[tuple[str, str], list[int]] = {}
         for manifest in self.manifest_port.list_all():
@@ -159,7 +159,7 @@ class ControlPlaneIntegrityMetricsService:
             ] += 1
 
         results = tuple(
-            ManifestLedgerIntegrityScope(
+            ManifestLedgerIntegritySummary(
                 pipeline=pipeline,
                 run_type=run_type,
                 consistent=scope_counts[0],
@@ -203,6 +203,6 @@ class ControlPlaneIntegrityMetricsService:
 __all__ = [
     "MANIFEST_LEDGER_INTEGRITY_METRIC",
     "ControlPlaneIntegrityMetricsService",
-    "ManifestLedgerIntegrityScope",
+    "ManifestLedgerIntegritySummary",
     "manifest_expects_ledger",
 ]

@@ -1341,7 +1341,6 @@ def test_control_plane_remaining_replay_safety_text_is_not_stale() -> None:
         ),
         None,
     )
-
     assert panel is not None
     content = str(panel.get("options", {}).get("content", ""))
     assert panel.get("options", {}).get("mode") == "html"
