@@ -68,7 +68,7 @@
   },
   "module_coverage": {
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 8
+    "unmeasured_module_count": 17
   },
   "closeout_program": {
     "tech_debt_closeout_test_file_count": 51,

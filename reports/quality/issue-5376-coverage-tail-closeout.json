@@ -29,11 +29,11 @@
     "tests/architecture/test_module_coverage_inventory.py"
   ],
   "current_live_metrics": {
-    "below_85_module_count": 51,
+    "below_85_module_count": 88,
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 0,
-    "tracked_module_coverage_percent": 94.12,
-    "tracked_module_status": "partially_covered"
+    "unmeasured_module_count": 17,
+    "tracked_module_coverage_percent": 100.0,
+    "tracked_module_status": "fully_covered"
   },
   "closeout": {
     "status": "regressed_after_closeout",
