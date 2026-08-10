@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from bioetl.application.services.control_plane.ledger.service import (
-    RunLedgerService,
-)
+from bioetl.application.services.control_plane.ledger.service import RunLedgerService
 from bioetl.application.services.control_plane.manifest.service import (
     RunManifestCreateSpec,
     RunManifestService,

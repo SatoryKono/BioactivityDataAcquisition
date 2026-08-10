@@ -13,9 +13,7 @@ from bioetl.composition.runtime_builders._runner_builder_orchestration import (
 from bioetl.composition.runtime_builders.config_access import (
     load_source_config as _load_source_config,
 )
-from bioetl.composition.runtime_builders.inputs_resolver import (
-    prepare_runner_inputs,
-)
+from bioetl.composition.runtime_builders.inputs_resolver import prepare_runner_inputs
 from bioetl.composition.runtime_builders.ledger_collaborator import (
     PipelineRunnerProtocol,
 )

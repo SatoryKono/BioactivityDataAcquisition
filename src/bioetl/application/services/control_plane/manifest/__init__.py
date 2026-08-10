@@ -27,14 +27,8 @@ _EXPORTS: dict[str, tuple[str, str]] = {
         "bioetl.application.services.control_plane.manifest.models",
         "RunManifestCreateSpec",
     ),
-    "RunManifestDiffEntry": (
-        _INSPECTION_MODELS,
-        "RunManifestDiffEntry",
-    ),
-    "RunManifestDiffResult": (
-        _INSPECTION_MODELS,
-        "RunManifestDiffResult",
-    ),
+    "RunManifestDiffEntry": (_INSPECTION_MODELS, "RunManifestDiffEntry"),
+    "RunManifestDiffResult": (_INSPECTION_MODELS, "RunManifestDiffResult"),
     "RunManifestInspectionResult": (
         _INSPECTION_MODELS,
         "RunManifestInspectionResult",

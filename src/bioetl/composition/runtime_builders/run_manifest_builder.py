@@ -5,9 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import bioetl.composition.runtime_builders.run_manifest_support as _manifest_support
-from bioetl.application.services.control_plane.ledger.service import (
-    RunLedgerService,
-)
+from bioetl.application.services.control_plane.ledger.service import RunLedgerService
 from bioetl.composition.runtime_builders._manifest_publication_context_support import (
     ResolvedManifestPublicationContext,
     resolve_manifest_publication_identity,
