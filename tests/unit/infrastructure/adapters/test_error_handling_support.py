@@ -27,7 +27,7 @@ class TestBuildAdapterErrorContext:
             "circuit_breaker_state": "OPEN",
             "retry_after": 10.5,
             "some_extra": "value",
-            "status_code": 500, # reserved, should be stripped from extra
+            "status_code": 500,  # reserved, should be stripped from extra
         }
 
         result = build_adapter_error_context(
@@ -124,9 +124,7 @@ class TestEmitErrorTelemetry:
     def test_handles_none_metrics(self) -> None:
         mock_logger = MagicMock()
         error = ValueError("Test error")
-        context = AdapterErrorContext(
-            provider="p", operation="o"
-        )
+        context = AdapterErrorContext(provider="p", operation="o")
 
         emit_error_telemetry(
             logger=mock_logger,
@@ -158,7 +156,9 @@ class TestExtractRetryAfter:
 
     def test_returns_default_for_invalid_value(self) -> None:
         # e.g. HTTP date formats which we don't parse yet
-        response = httpx.Response(429, headers={"Retry-After": "Wed, 21 Oct 2015 07:28:00 GMT"})
+        response = httpx.Response(
+            429, headers={"Retry-After": "Wed, 21 Oct 2015 07:28:00 GMT"}
+        )
         assert extract_retry_after(response) == 60.0
 
 
@@ -173,7 +173,7 @@ class TestSafeOptionalStr:
             (None, None),
             (123, None),
             ({"key": "value"}, None),
-        ]
+        ],
     )
     def test_safe_optional_str(self, value: object, expected: str | None) -> None:
         assert safe_optional_str(value) == expected

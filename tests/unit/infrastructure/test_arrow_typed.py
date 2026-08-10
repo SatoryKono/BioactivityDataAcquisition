@@ -39,6 +39,7 @@ def test_arrow_typed_struct_and_list_builders() -> None:
     assert isinstance(nested, pa.DataType)
     assert isinstance(listed, pa.DataType)
 
+
 def test_arrow_typed_metadata() -> None:
     meta = {"key": "value"}
     field = arrow_typed.field("id", arrow_typed.string(), metadata=meta)
