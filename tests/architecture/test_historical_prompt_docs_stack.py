@@ -20,8 +20,12 @@ from pathlib import Path
 pytestmark = pytest.mark.architecture
 
 HISTORICAL_PROMPT_FILES = (
-    Path("docs/00-project/ai/prompts/documentation_diagrams_audit.md"),
-    Path("docs/00-project/ai/prompts/refactor_orchestration_prompt.md"),
+    Path(
+        "docs/00-project/ai/prompts/archive/campaigns/documentation_diagrams_audit.md"
+    ),
+    Path(
+        "docs/00-project/ai/prompts/archive/campaigns/refactor_orchestration_prompt.md"
+    ),
 )
 
 
