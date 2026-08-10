@@ -245,5 +245,4 @@ def test_issue_5654_hotspot_warnings_are_reduced_without_budget_growth() -> None
         architecture["source_artifacts"]["hotspot_family_baseline"]["budget_warnings"]
         == 0
     )
-    # Floor tracks the committed architecture scorecard integral (currently 7.41).
-    assert architecture["integral_score"] >= 7.41
+    assert architecture["integral_score"] >= 8.31

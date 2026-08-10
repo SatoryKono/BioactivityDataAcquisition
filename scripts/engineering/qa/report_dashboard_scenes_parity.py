@@ -231,7 +231,7 @@ def _parser() -> argparse.ArgumentParser:
 def main() -> int:
     args = _parser().parse_args()
     payload = build_payload()
-    json_text = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
+    json_text = json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
     md_text = _render_markdown(payload)
     if args.check:
         if (
