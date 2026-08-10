@@ -6,7 +6,9 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.composition.runtime_builders import run_manifest_contract_identity as identity
+from bioetl.composition.runtime_builders import (
+    run_manifest_contract_identity as identity,
+)
 
 pytestmark = pytest.mark.unit
 

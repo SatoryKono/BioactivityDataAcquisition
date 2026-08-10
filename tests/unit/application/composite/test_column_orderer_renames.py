@@ -150,7 +150,7 @@ class TestColumnOrderServiceRenames:
         assert renamed == ["same_name", "same_name"]
 
 
-class TestColumnOrdererGroupFlowBranches:
+class TestColumnOrderServiceGroupFlowBranches:
     """Cover empty configuration, DQ suffix, and exclusion behavior."""
 
     def test_order_by_yaml_groups_without_groups_preserves_input_order(self) -> None:
