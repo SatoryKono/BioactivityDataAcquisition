@@ -7,7 +7,7 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.application.services.control_plane.evidence import (
+from bioetl.application.observability.control_plane_evidence import (
     FAILURE_REASON_CATEGORIES,
     ControlPlaneEvidenceService,
     EvidenceScopeContext,

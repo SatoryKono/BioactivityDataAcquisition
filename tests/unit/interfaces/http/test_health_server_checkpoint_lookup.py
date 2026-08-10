@@ -9,7 +9,7 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.application.services.control_plane.evidence import (
+from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
 )
 from bioetl.domain.control_plane import RunManifest
