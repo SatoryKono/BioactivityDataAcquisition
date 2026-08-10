@@ -164,9 +164,8 @@ def test_prune_by_age_uses_explicit_time_seam(tmp_path: Path) -> None:
 def test_load_helpers_handle_absent_non_mapping_and_invalid_json(
     tmp_path: Path,
 ) -> None:
-    assert (
-        load_latest_pointer(kind="pipeline", owner="missing", root=tmp_path) is None
-    )
+    assert list_pipeline_reports(root=tmp_path) == []
+    assert load_latest_pointer(kind="pipeline", owner="missing", root=tmp_path) is None
     assert (
         load_pipeline_report(
             pipeline_name="missing",
@@ -451,9 +450,7 @@ def test_workflow_prune_removes_recursive_duplicate_candidate_once(
     assert removed == [old_path.parent.as_posix()]
     assert not old_path.parent.exists()
     assert new_path.is_file()
-    assert [entry.run_id for entry in list_workflow_reports(root=tmp_path)] == [
-        "new"
-    ]
+    assert [entry.run_id for entry in list_workflow_reports(root=tmp_path)] == ["new"]
 
 
 def test_identity_metadata_handles_os_error_and_non_mapping_payloads(

@@ -32,6 +32,7 @@ Tests the OpenAlexAdapter class with mocked HTTP client.
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -44,6 +45,9 @@ from bioetl.infrastructure.adapters.common.api_request_collector import (
 from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
 from bioetl.infrastructure.adapters.openalex._client_support import (
     _create_openalex_adapter,
+)
+from bioetl.infrastructure.adapters.openalex._filter_fetch_flow import (
+    build_primary_record_fetcher,
 )
 from bioetl.infrastructure.adapters.openalex.client_runtime_helpers import (
     OpenAlexRuntimeServicesRequest,
@@ -58,6 +62,12 @@ from tests.helpers.adapter_runtime import (
 pytestmark = pytest.mark.unit
 
 LEGACY_HTTP_DOI = "http" + "://doi.org/10.1038/test"
+
+
+async def _records(*items: dict[str, object]) -> AsyncIterator[dict[str, object]]:
+    """Yield deterministic OpenAlex records for delegation tests."""
+    for item in items:
+        yield item
 
 
 @pytest.fixture
@@ -260,6 +270,46 @@ class TestOpenAlexAdapter:
 
         assert params["api_key"] == "openalex-key"
         assert params["mailto"] == "test@example.com"
+
+    @pytest.mark.asyncio
+    async def test_internal_fetch_helpers_delegate_to_runtime_services(
+        self,
+        adapter: OpenAlexAdapter,
+    ) -> None:
+        """Thin adapter helpers preserve arguments and records across collaborators."""
+        query_executor = MagicMock()
+        query_executor.request_works_payload = AsyncMock(
+            return_value={"results": [{"id": "W-query"}]}
+        )
+        cursor_flow = MagicMock()
+        cursor_flow.iter_doi_batches_for_fallback.return_value = _records(
+            {"id": "W-primary"}
+        )
+        cursor_flow.iter_by_dois.return_value = _records({"id": "W-doi"})
+        cursor_flow.search_by_title = AsyncMock(return_value=[{"id": "W-title"}])
+        adapter._query_executor = query_executor
+        adapter._cursor_flow = cursor_flow
+
+        payload = await adapter._request_works_payload({"search": "kinase"})
+        primary_fetcher = build_primary_record_fetcher(adapter)
+        primary = [record async for record in primary_fetcher(["10.1/a"], 2)]
+        by_doi = [record async for record in adapter._fetch_by_dois(["10.1/b"])]
+        by_title = await adapter._search_by_title("Kinase study", limit=4)
+
+        assert payload == {"results": [{"id": "W-query"}]}
+        assert primary == [{"id": "W-primary"}]
+        assert by_doi == [{"id": "W-doi"}]
+        assert by_title == [{"id": "W-title"}]
+        query_executor.request_works_payload.assert_awaited_once_with(
+            {"search": "kinase"}
+        )
+        cursor_flow.iter_doi_batches_for_fallback.assert_called_once_with(
+            primary_ids=["10.1/a"],
+            limit=2,
+            start_count=0,
+        )
+        cursor_flow.iter_by_dois.assert_called_once_with(["10.1/b"])
+        cursor_flow.search_by_title.assert_awaited_once_with("Kinase study", 4)
 
 
 class TestNormalizeDoi:
