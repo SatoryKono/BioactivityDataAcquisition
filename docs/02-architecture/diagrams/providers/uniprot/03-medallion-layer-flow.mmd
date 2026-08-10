@@ -4,13 +4,14 @@
 %% @date 2026-07-28
 %% @type flowchart
 %% @level system
-%% @nodes 46
+%% @nodes   35
 %% @adr ADR-014,ADR-018,ADR-040
 
 %% @version 1.0.0
 %% @date 2026-07-28
 %% @type flowchart
 %% @level system
+%%{init: {'layout': 'elk'}}%%
 flowchart TD
     API[Provider API] --> B[Bronze JSONL+zstd append-only]
     B --> T[Transform + normalize]

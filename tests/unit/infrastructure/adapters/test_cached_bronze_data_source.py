@@ -287,10 +287,10 @@ class TestCachedBronzeDataSourceFetch:
         assert "cached_bronze_filter_ignored" in warning_events
 
     @pytest.mark.asyncio
-    async def test_fetch_completes_without_reaching_limit(
+    async def test_fetch_completes_without_limit(
         self, base_logger: MagicMock, bound_logger: MagicMock
     ) -> None:
-        """Fetch should log completion when not hitting a limit."""
+        """Fetch should complete and log when no limit is provided."""
         reader = _FakeBronzeReader(
             base_path=str(BRONZE_ROOT),
             flat_structure=False,

@@ -4,13 +4,14 @@
 %% @date 2026-07-28
 %% @type flowchart
 %% @level system
-%% @nodes 46
+%% @nodes   35
 %% @adr ADR-040
 
 %% @version 1.0.0
 %% @date 2026-07-28
 %% @type flowchart
 %% @level system
+%%{init: {'layout': 'elk'}}%%
 flowchart TD
     Raw[Raw provider records] --> Map[Field mapping FieldSpec/profile]
     Map --> Norm[Domain normalization profiles]
