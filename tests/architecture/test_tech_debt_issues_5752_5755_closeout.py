@@ -170,14 +170,9 @@ def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
     assert "| `bioetl.domain.composite.config` | 0 | 42 |" in debt_report
     assert "| `bioetl.application.composite.merger` | 0 | 5 |" in debt_report
 
+    assert f"`{integral_text}`" in current_state
     assert (
-        f"`{integral_text}`" in current_state
-        or "`8.92`" in current_state
-        or "`9.11`" in current_state
-    )
-    assert (
-        "assertless_total_candidates=105" in current_state
-        or "assertless_total_candidates=106" in current_state
-        or "assertless_total_candidates=0" in current_state
+        f"assertless_total_candidates="
+        f"{test_governance['report']['assertless_total_candidates']}" in current_state
     )
     assert "compatibility_test_files=0" in current_state
