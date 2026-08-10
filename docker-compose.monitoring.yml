@@ -89,6 +89,11 @@ services:
       - GF_LOG_LEVEL=info
       - GF_SERVER_ROOT_URL=http://localhost:3000
       - GF_SERVER_SERVE_FROM_SUB_PATH=false
+      # Required for BioETL Ops HTTP panels (Run Explorer, identity tables, etc.).
+      # Keep the frontend compatible with pinned Grafana 12.0.0. Infinity 3.11.3
+      # imports react/jsx-runtime, which this Grafana build does not expose and
+      # leaves the datasource-backed panels blank. Bootstrap enforces this pin.
+      - BIOETL_INFINITY_PLUGIN_VERSION=${BIOETL_INFINITY_PLUGIN_VERSION:-3.8.0}
       - GF_RENDERING_SERVER_URL=http://renderer:8081/render
       - GF_RENDERING_CALLBACK_URL=http://grafana:3000/
       - GF_RENDERING_RENDERER_TOKEN=${GF_RENDERING_RENDERER_TOKEN:?GF_RENDERING_RENDERER_TOKEN is required}
