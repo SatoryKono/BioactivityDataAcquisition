@@ -47810,13 +47810,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-08",
-<<<<<<< HEAD
-  "source_tree_sha256": "26bb627076cc40981124f6ecb10a379d229f731508ff20019f7abf3bee3a39e4",
-||||||| 2b5f2f5fda
-  "source_tree_sha256": "a16e65a102cd82696e91da0e7c4ddc471046cd9d949f9241ec65b60f34ca5456",
-=======
-  "source_tree_sha256": "9572008e06162b5461b74860d6d787e9acf3feee0f3c8ab972eb1ec4b7db223f",
->>>>>>> fix/rf-004-proof-or-stop-core
+  "source_tree_sha256": "",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

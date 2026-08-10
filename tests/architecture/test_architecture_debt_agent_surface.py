@@ -27,6 +27,8 @@ HISTORICAL_PROMPT_FILES = (
     / "00-project"
     / "ai"
     / "prompts"
+    / "archive"
+    / "campaigns"
     / "architecture_metric_exemptions_tasks_json_prompt.md",
 )
 
