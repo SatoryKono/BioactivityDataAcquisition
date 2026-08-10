@@ -114,7 +114,7 @@ def _snapshot_manifest(**overrides: object) -> RunManifest:
 
 def test_checkpoint_validation_keeps_legacy_checksum_unknown() -> None:
     service = ControlPlaneEvidenceService()
-    manifest = _manifest()
+    manifest = _manifest(created_at=_NOW - timedelta(days=90))
 
     payload = service.checkpoint_validation(
         scope=_scope(manifest),
@@ -139,7 +139,7 @@ def test_checkpoint_validation_keeps_legacy_checksum_unknown() -> None:
 
 
 def test_checkpoint_validation_reports_schema_and_anchor_mismatch_reasons() -> None:
-    manifest = _manifest()
+    manifest = _manifest(created_at=_NOW - timedelta(days=90))
 
     payload = ControlPlaneEvidenceService().checkpoint_validation(
         scope=_scope(manifest),
@@ -220,7 +220,7 @@ class _LineageStore:
 
 
 def test_lineage_validation_detects_directed_cycle() -> None:
-    manifest = _manifest()
+    manifest = _manifest(created_at=_NOW - timedelta(days=90))
     node_a = LineageNodeRef(LineageNodeType.DATASET, "dataset:a")
     node_b = LineageNodeRef(LineageNodeType.TRANSFORM, "transform:b")
     run_node = LineageNodeRef(
@@ -255,7 +255,7 @@ def test_lineage_validation_detects_directed_cycle() -> None:
 
 
 def test_lineage_validation_detects_conflicting_node_definitions() -> None:
-    manifest = _manifest()
+    manifest = _manifest(created_at=_NOW - timedelta(days=90))
     fragment_a = LineageGraphFragment(
         fragment_id="fragment-a",
         run_id=str(manifest.run_id),
@@ -326,7 +326,7 @@ class _LifecyclePlanner:
 
 
 def test_retention_compliance_uses_dry_run_evidence_floor() -> None:
-    manifest = _snapshot_manifest()
+    manifest = _snapshot_manifest(created_at=_NOW - timedelta(days=90))
     artifacts = tuple(
         ControlPlaneArtifactRef(
             surface=surface,
@@ -379,7 +379,7 @@ def test_retention_compliance_uses_dry_run_evidence_floor() -> None:
 
 
 def test_retention_compliance_reports_delete_and_evidence_floor_violations() -> None:
-    manifest = _manifest()
+    manifest = _manifest(created_at=_NOW - timedelta(days=90))
     plan = ControlPlaneArtifactLifecyclePlan(
         generated_at=_NOW,
         cutoff=_NOW + timedelta(seconds=1),
@@ -430,7 +430,7 @@ def test_retention_rejects_unknown_persistence_profile() -> None:
 
 
 def test_failure_reasons_expose_only_fixed_categories() -> None:
-    manifest = _manifest()
+    manifest = _manifest(created_at=_NOW - timedelta(days=90))
     ledger = InMemoryRunLedgerStore()
     for index, error_type in enumerate(
         ("ApiError", "SchemaViolationError", "ConnectionTimeout", "NovelCrash")
