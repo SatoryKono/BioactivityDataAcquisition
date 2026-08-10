@@ -52,7 +52,7 @@ runtime mirrors without redefining runtime behavior.
 1. Map entrypoints: `docs/00-project/ai/README.md`, agent/policy guides,
    prompts library README, skills indexes
 2. Cross-check ownership:
-   [AI_RUNTIME_MIRROR_OWNERSHIP.md](../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md)
+   [AI_RUNTIME_MIRROR_OWNERSHIP.md](../../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md)
 3. Flag: broken links, stale versions, mirror/runtime divergence, prompts that
    look like behavior SSOT
 4. Output: findings table + recommended PRs/issues; no secret material

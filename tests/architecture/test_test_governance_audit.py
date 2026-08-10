@@ -347,8 +347,7 @@ def test_test_audit_closeout_2026_07_08_tracks_corrected_tst_plan() -> None:
     assert int(repo_backed_inventory["test_files"]) >= int(
         invariants["repo_backed_unit_test_files"]
     )
-    # One unmarked test file is allowed: tests/unit/repo_backed/scripts/ops/docker/test_verify_report_bind.py
-    assert len(repo_backed_inventory["unmarked_test_files"]) == 1
+    assert repo_backed_inventory["unmarked_test_files"] == []
 
     assert parallel_policy["local_pytest_default"] == invariants["local_pytest_default"]
     assert (
@@ -396,12 +395,10 @@ def test_test_governance_report_defines_test_file_and_repo_backed_counts() -> No
     assert repo_backed_inventory["lane"] == "repo-backed-unit"
     assert repo_backed_inventory["subtree"] == "tests/unit/repo_backed/"
     assert int(repo_backed_inventory["test_files"]) > 0
-    # marked_test_files may be less than test_files due to unmarked files
-    assert int(repo_backed_inventory["marked_test_files"]) <= int(
+    assert int(repo_backed_inventory["marked_test_files"]) == int(
         repo_backed_inventory["test_files"]
     )
-    # One unmarked test file is allowed: tests/unit/repo_backed/scripts/ops/docker/test_verify_report_bind.py
-    assert len(repo_backed_inventory["unmarked_test_files"]) == 1
+    assert repo_backed_inventory["unmarked_test_files"] == []
 
 
 @pytest.mark.architecture

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import pytest
 
 from scripts.ai.prompts.check import check_hygiene, check_registry
@@ -14,8 +12,10 @@ from scripts.ai.prompts.registry import (
     load_registry,
     parse_frontmatter,
 )
-from scripts.ai.prompts.render import render_by_id, render_card, substitute_params
+from scripts.ai.prompts.render import render_by_id, substitute_params
 from scripts.ai.prompts.__main__ import main as prompts_main
+
+pytestmark = pytest.mark.unit
 
 
 def test_registry_loads_and_ids_unique() -> None:
@@ -92,7 +92,9 @@ def test_cli_show(capsys: pytest.CaptureFixture[str]) -> None:
 
 
 def test_cli_render(capsys: pytest.CaptureFixture[str]) -> None:
-    code = prompts_main(["render", "prompt.tests.fix-retest", "--param", "SCOPE=tests/unit"])
+    code = prompts_main(
+        ["render", "prompt.tests.fix-retest", "--param", "SCOPE=tests/unit"]
+    )
     assert code == 0
     out = capsys.readouterr().out
     assert "prompt-id: prompt.tests.fix-retest" in out

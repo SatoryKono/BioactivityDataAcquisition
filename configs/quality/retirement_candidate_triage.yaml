@@ -39,15 +39,6 @@ repo_wide_zero_import_classification:
     - retain_compat_shim
     - retain_canonical_owner_module
   entries:
-    - module_path: src/bioetl/__main__.py
-      module_name: bioetl.__main__
-      disposition: retain_module_entrypoint
-      reviewed_on: "2026-07-23"
-      review_by: "2026-10-21"
-      linked_issue: "#4541"
-      rationale:
-        Module entrypoint for `python -m bioetl`; static import scans stay
-        at zero because the interpreter dispatches the module directly.
     - module_path: src/bioetl/domain/ports/stage_accounting.py
       module_name: bioetl.domain.ports.stage_accounting
       disposition: retain_canonical_owner_module

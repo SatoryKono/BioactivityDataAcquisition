@@ -30,7 +30,7 @@ BioETL.
 
 - [docs_ai_audit_planning_codex_prompt.md](../docs_ai_audit_planning_codex_prompt.md)
   — internal planning prompt for AI documentation audits
-- [documentation_diagrams_audit.md](../documentation_diagrams_audit.md) —
+- [documentation_diagrams_audit.md](../archive/campaigns/documentation_diagrams_audit.md) —
   working prompt for full documentation and diagram audits aligned to the live
   BioETL repo structure
 - [architecture_review_and_refactoring_assessment.md](../architecture_review_and_refactoring_assessment.md)

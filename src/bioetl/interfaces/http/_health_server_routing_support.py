@@ -5,10 +5,10 @@ from __future__ import annotations
 import asyncio
 from typing import Protocol
 
-from bioetl.application.runtime_clock import current_utc_time
 from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
 )
+from bioetl.application.runtime_clock import current_utc_time
 from bioetl.domain.control_plane import WorkflowManifest
 from bioetl.domain.ports import (
     CheckpointPort,
