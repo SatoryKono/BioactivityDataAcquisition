@@ -5,11 +5,11 @@ from __future__ import annotations
 import asyncio
 from typing import Protocol
 
-from bioetl.application.services.control_plane.evidence import (
+from bioetl.application.observability.control_plane_evidence import (
     EvidenceCheckResult,
     EvidenceScopeContext,
 )
-from bioetl.application.services.control_plane.evidence.service_support import (
+from bioetl.application.observability.control_plane_evidence.service_support import (
     service_payload,
     source_error_payload,
 )

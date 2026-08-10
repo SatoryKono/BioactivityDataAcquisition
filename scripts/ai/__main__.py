@@ -9,6 +9,7 @@ Surfaces:
     agent_tools  Optional AgentDebugX and ProofAgent adapters
     codex    Codex setup/check tooling
     mcp      MCP operational tooling
+    prompts  Prompt Library list/render/check (epic #8513)
     vibe     Vibe launch tooling
 """
 
@@ -21,7 +22,7 @@ from pathlib import Path
 from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
 _DIR = Path(__file__).parent
-SURFACES = ("agent_tools", "codex", "mcp", "vibe")
+SURFACES = ("agent_tools", "codex", "mcp", "prompts", "vibe")
 
 
 def _codex_command(rest: list[str]) -> list[str]:

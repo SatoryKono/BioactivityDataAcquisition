@@ -9,7 +9,7 @@ from pathlib import Path
 from bioetl.application.observability.control_plane_integrity_metrics import (
     ControlPlaneIntegrityMetricsService,
 )
-from bioetl.application.services.control_plane.evidence import (
+from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
 )
 from bioetl.composition.runtime_builders.config_access import get_settings

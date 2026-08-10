@@ -7,10 +7,10 @@ from collections.abc import Callable, Coroutine
 from typing import Protocol
 
 from bioetl.application.runtime_clock import current_utc_time
-from bioetl.application.services.control_plane.evidence import (
+from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
 )
-from bioetl.application.services.control_plane.evidence.service_support import (
+from bioetl.application.observability.control_plane_evidence.service_support import (
     source_error_payload,
 )
 from bioetl.domain.ports import CheckpointPort
