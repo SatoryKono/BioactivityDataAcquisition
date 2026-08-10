@@ -81,10 +81,14 @@ See [AI Runtime Mirror Ownership](agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
 
 ## Grok operator aids
 
+- [grok/README.md](grok/README.md) — skills sources + install
 - [agents/guides/grok-operator-runbook.md](agents/guides/grok-operator-runbook.md)
 - [agents/guides/grok-tui-config-checklist.md](agents/guides/grok-tui-config-checklist.md)
+- [prompts/library/session/grok-bootstrap.md](prompts/library/session/grok-bootstrap.md)
+  (`prompt.session.grok-bootstrap`)
 - [prompts/library/closeout/grok-closeout.md](prompts/library/closeout/grok-closeout.md)
-  (`prompt.closeout.grok`)
+  (`prompt.closeout.grok`, v2.2)
 - [prompts/library/audit/grok-audit-cycle.md](prompts/library/audit/grok-audit-cycle.md)
-  (`prompt.audit.grok-cycle`)
+  (`prompt.audit.grok-cycle`, v2.2)
+- Install skills: `.\scripts\ai\grok\install_skills.ps1`
 - CLI: `python -m scripts.ai.prompts list|render|check`

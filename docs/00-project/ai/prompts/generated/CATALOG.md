@@ -10,8 +10,9 @@ Operator paste templates and fragments. Not runtime SSOT.
 
 | Id | Path | Summary |
 | --- | --- | --- |
-| `prompt.closeout.grok` | `library/closeout/grok-closeout.md` | Short issue/PR closeout paste template |
-| `prompt.audit.grok-cycle` | `library/audit/grok-audit-cycle.md` | Short one-cycle audit paste template |
+| `prompt.session.grok-bootstrap` | `library/session/grok-bootstrap.md` | Short daily-work bootstrap for Grok sessions on BioETL |
+| `prompt.closeout.grok` | `library/closeout/grok-closeout.md` | Issue/PR closeout paste with verdicts, evidence, ship-profile note |
+| `prompt.audit.grok-cycle` | `library/audit/grok-audit-cycle.md` | One-cycle audit paste with severity, stop conditions, Windows/memory gates |
 | `prompt.tests.speed-optimization` | `library/tests/speed-optimization-loop.md` | Accelerate test runs without weakening coverage |
 | `prompt.tests.fix-retest` | `library/tests/fix-retest-loop.md` | Run → fix → retest until green or blocked |
 | `prompt.docs.ai-audit-planning` | `library/docs/ai-audit-planning.md` | Plan an audit of docs/00-project/ai surfaces |
@@ -39,6 +40,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.fragment.env-guardrail` | fragment | active | `fragments/env-guardrail.md` |
 | `prompt.fragment.evidence-contract` | fragment | active | `fragments/evidence-contract.md` |
 | `prompt.fragment.language-ru` | fragment | active | `fragments/language-ru.md` |
+| `prompt.session.grok-bootstrap` | operator-paste | active | `library/session/grok-bootstrap.md` |
 | `prompt.closeout.grok` | operator-paste | active | `library/closeout/grok-closeout.md` |
 | `prompt.audit.grok-cycle` | operator-paste | active | `library/audit/grok-audit-cycle.md` |
 | `prompt.tests.speed-optimization` | operator-paste | active | `library/tests/speed-optimization-loop.md` |
