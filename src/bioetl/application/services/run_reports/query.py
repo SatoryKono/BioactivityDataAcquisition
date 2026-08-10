@@ -152,12 +152,32 @@ def _list_reports(
     capped = max(0, limit)
     if capped == 0:
         return []
-    owners = _owner_directories(base, owner)
+    candidates = _collect_report_candidates(base=base, kind=kind, owner=owner)
+    candidates.sort(key=lambda item: item[0], reverse=True)
+    return [
+        _build_report_index_entry(
+            kind=kind,
+            mtime=mtime,
+            owner_name=owner_name,
+            run_dir=run_dir,
+            json_path=json_path,
+        )
+        for mtime, owner_name, run_dir, json_path in candidates[:capped]
+    ]
+
+
+def _collect_report_candidates(
+    *,
+    base: Path,
+    kind: str,
+    owner: str | None,
+) -> list[tuple[float, str, Path, Path]]:
+    """Collect sortable report paths without hydrating report payloads."""
+    report_name = f"{kind}-run-report.json"
     candidates: list[tuple[float, str, Path, Path]] = []
-    for owner_dir in owners:
+    for owner_dir in _owner_directories(base, owner):
         if not owner_dir.is_dir():
             continue
-        report_name = f"{kind}-run-report.json"
         for run_dir in owner_dir.iterdir():
             if not run_dir.is_dir() or run_dir.name.startswith("."):
                 continue
@@ -169,24 +189,30 @@ def _list_reports(
             except OSError:
                 continue
             candidates.append((mtime, owner_dir.name, run_dir, json_path))
-    candidates.sort(key=lambda item: item[0], reverse=True)
-    entries: list[ReportIndexEntry] = []
-    for mtime, owner_name, run_dir, json_path in candidates[:capped]:
-        status, completed_at = _read_identity_meta(json_path)
-        md_path = run_dir / f"{kind}-run-report.md"
-        entries.append(
-            ReportIndexEntry(
-                kind=kind,
-                owner=owner_name,
-                run_id=run_dir.name,
-                json_path=json_path,
-                markdown_path=md_path if md_path.is_file() else None,
-                status=status,
-                completed_at=completed_at,
-                mtime=mtime,
-            )
-        )
-    return entries
+    return candidates
+
+
+def _build_report_index_entry(
+    *,
+    kind: str,
+    mtime: float,
+    owner_name: str,
+    run_dir: Path,
+    json_path: Path,
+) -> ReportIndexEntry:
+    """Hydrate one ranked report candidate."""
+    status, completed_at = _read_identity_meta(json_path)
+    md_path = run_dir / f"{kind}-run-report.md"
+    return ReportIndexEntry(
+        kind=kind,
+        owner=owner_name,
+        run_id=run_dir.name,
+        json_path=json_path,
+        markdown_path=md_path if md_path.is_file() else None,
+        status=status,
+        completed_at=completed_at,
+        mtime=mtime,
+    )
 
 
 def _owner_directories(base: Path, owner: str | None) -> list[Path]:
