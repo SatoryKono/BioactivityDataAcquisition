@@ -6,13 +6,13 @@ import asyncio
 from collections.abc import Callable, Coroutine
 from typing import Protocol
 
-from bioetl.application.runtime_clock import current_utc_time
 from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
 )
 from bioetl.application.observability.control_plane_evidence.service_support import (
     source_error_payload,
 )
+from bioetl.application.runtime_clock import current_utc_time
 from bioetl.domain.ports import CheckpointPort
 from bioetl.interfaces.http._forensic_request_budget import (
     ForensicEndpointUnavailable,
