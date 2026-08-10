@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-10T09:14:57.228222+00:00",
+  "generated_at": "2026-08-10T09:49:45.054369+00:00",
   "summary": {
     "total_scripts": 580,
     "status_counts": {
@@ -4849,7 +4849,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 24,
+      "reference_count": 25,
       "references": [
         {
           "path": "docs/00-project/ai/README.md",
@@ -4859,45 +4859,45 @@
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 71,
+          "line": 72,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts list"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 72,
+          "line": 73,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts show prompt.audit.grok-cycle"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 73,
+          "line": 74,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.audit.grok-cycle --param SCOPE=\"src/bioetl/domain\""
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 74,
+          "line": 75,
+          "source_group": "docs",
+          "text": "python -m scripts.ai.prompts render prompt.observability.dashboard-panel-audit \\"
+        },
+        {
+          "path": "docs/00-project/ai/prompts/README.md",
+          "line": 77,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts check-registry"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 75,
+          "line": 78,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts check"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 76,
+          "line": 79,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts new --id prompt.example --class operator-paste"
-        },
-        {
-          "path": "docs/00-project/ai/prompts/architecture_review_and_refactoring_assessment.md",
-          "line": 9,
-          "source_group": "docs",
-          "text": "> Render: `python -m scripts.ai.prompts render prompt.architecture.review`"
         }
       ]
     },
@@ -12687,13 +12687,13 @@
         },
         {
           "path": "tests/architecture/test_test_governance_audit.py",
-          "line": 473,
+          "line": 472,
           "source_group": "tests",
           "text": "command = \"scripts/engineering/qa/check_test_audit_preflight.py --strict\""
         },
         {
           "path": "tests/architecture/test_test_governance_audit.py",
-          "line": 499,
+          "line": 498,
           "source_group": "tests",
           "text": "assert \"check_test_audit_preflight.py --strict\" in body"
         }
@@ -13334,7 +13334,7 @@
         },
         {
           "path": "tests/architecture/test_architecture_debt_agent_surface.py",
-          "line": 37,
+          "line": 39,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"generate_architecture_debt_tasks.py\""
         },
@@ -13839,7 +13839,7 @@
         },
         {
           "path": "tests/architecture/test_architecture_debt_agent_surface.py",
-          "line": 40,
+          "line": 42,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"reduce_architecture_debt.py\""
         },
