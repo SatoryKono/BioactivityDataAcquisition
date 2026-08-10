@@ -268,6 +268,7 @@ def test_issue_5575_hotspot_coverage_tails_have_owner_tests() -> None:
     tail_map = _load_json(COVERAGE_TAIL_MAP)
     family_coverage = coverage["summary"]["hotspot_family_coverage"]
 
+    assert coverage["summary"]["unmeasured_module_count"] == 0
     assert coverage["summary"]["uncovered_module_count"] == 0
     assert coverage["summary"]["unmeasured_module_count"] == 0
     assert tail_map["linked_issue"] == "#5575"
