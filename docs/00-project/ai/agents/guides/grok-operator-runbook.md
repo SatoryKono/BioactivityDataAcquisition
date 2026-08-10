@@ -60,12 +60,37 @@ Local config is machine-only — **do not commit** API keys or full `config.toml
 
 ## 4. Prompts
 
-Prefer short templates:
+Prefer short library cards (render, do not hand-expand RULES/ADR):
 
-- [grok-closeout.md](../../prompts/grok-closeout.md)
-- [grok-audit-cycle.md](../../prompts/grok-audit-cycle.md)
+| Id | Card | When |
+| --- | --- | --- |
+| `prompt.session.grok-bootstrap` | [library/session/grok-bootstrap.md](../../prompts/library/session/grok-bootstrap.md) | Daily work start |
+| `prompt.audit.grok-cycle` | [library/audit/grok-audit-cycle.md](../../prompts/library/audit/grok-audit-cycle.md) | One audit cycle |
+| `prompt.closeout.grok` | [library/closeout/grok-closeout.md](../../prompts/library/closeout/grok-closeout.md) | Issue/PR closeout |
 
-Do not inline full RULES/ADR text into user prompts.
+```powershell
+.\.venv-win\Scripts\python.exe -m scripts.ai.prompts render prompt.session.grok-bootstrap `
+  --param TASK="..." --param MODE=implement --param SCOPE="src/bioetl/domain"
+.\.venv-win\Scripts\python.exe -m scripts.ai.prompts render prompt.audit.grok-cycle `
+  --param SCOPE="src/bioetl/domain"
+.\.venv-win\Scripts\python.exe -m scripts.ai.prompts render prompt.closeout.grok `
+  --param SCOPE="issues: #NNNN"
+```
+
+Redirect stubs (bookmarks): [grok-closeout.md](../../prompts/grok-closeout.md),
+[grok-audit-cycle.md](../../prompts/grok-audit-cycle.md).
+
+### Project skills (machine-local)
+
+Tracked sources live under `docs/00-project/ai/grok/skills/` (repo root `.grok/`
+is gitignored). Install into `~/.grok/skills/` or project `.grok/skills/`:
+
+```powershell
+.\scripts\ai\grok\install_skills.ps1          # user: ~/.grok/skills
+.\scripts\ai\grok\install_skills.ps1 -Project # project: .grok/skills
+```
+
+Skills: `bioetl-session`, `bioetl-closeout`, `bioetl-post-change`.
 
 ## 5. Models / session (recommended local)
 
