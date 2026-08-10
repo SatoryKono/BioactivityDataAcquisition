@@ -6,106 +6,157 @@
     {
       "issue": "#5570",
       "theme": "Composition bootstrap owner map governance",
-      "debt_types": ["Architecture debt", "Governance gap", "DDD violation"],
+      "debt_types": [
+        "Architecture debt",
+        "Governance gap",
+        "DDD violation"
+      ],
       "action": "Governed composition bootstrap owner map with proper owner tracking and accountability.",
       "risk": "low",
       "evidence": [
         "configs/quality/composition_bootstrap_owner_map.yaml",
         "tests/architecture/test_tech_debt_issues_5570_5578_closeout.py"
-      ]
+      ],
+      "number": 5570
     },
     {
       "issue": "#5571",
       "theme": "Internal compatibility shim inventory",
-      "debt_types": ["Compatibility debt", "Governance gap", "Architecture debt"],
+      "debt_types": [
+        "Compatibility debt",
+        "Governance gap",
+        "Architecture debt"
+      ],
       "action": "Governed internal compatibility shim inventory with proper tracking and sunset policies.",
       "risk": "medium",
       "evidence": [
         "configs/quality/internal_compatibility_shim_inventory.yaml",
         "tests/architecture/test_tech_debt_issues_5570_5578_closeout.py"
-      ]
+      ],
+      "number": 5571
     },
     {
       "issue": "#5572",
       "theme": "Observability metric inventory allowlist",
-      "debt_types": ["Observability gap", "Governance gap", "Quality debt"],
+      "debt_types": [
+        "Observability gap",
+        "Governance gap",
+        "Quality debt"
+      ],
       "action": "Governed observability metric inventory allowlist with proper review and emission tracking.",
       "risk": "low",
       "evidence": [
         "configs/quality/observability_metric_inventory_allowlist.yaml",
         "reports/observability/runtime_cardinality_inventory.json",
         "tests/architecture/test_tech_debt_issues_5570_5578_closeout.py"
-      ]
+      ],
+      "number": 5572
     },
     {
       "issue": "#5573",
       "theme": "Compatibility facade sunset enforcement",
-      "debt_types": ["Compatibility debt", "Governance gap", "Policy debt"],
+      "debt_types": [
+        "Compatibility debt",
+        "Governance gap",
+        "Policy debt"
+      ],
       "action": "Enforced compatibility facade sunset policies with proper date tracking and removal enforcement.",
       "risk": "medium",
       "evidence": [
         "configs/quality/compatibility_facade_inventory.yaml",
         "reports/quality/compatibility-importer-census.json",
         "tests/architecture/test_tech_debt_issues_5570_5578_closeout.py"
-      ]
+      ],
+      "number": 5573
     },
     {
       "issue": "#5574",
       "theme": "Composition entrypoint governance",
-      "debt_types": ["Architecture debt", "Governance gap", "Public API debt"],
+      "debt_types": [
+        "Architecture debt",
+        "Governance gap",
+        "Public API debt"
+      ],
       "action": "Governed composition entrypoints with proper import tracking and public export budgets.",
       "risk": "low",
       "evidence": [
         "reports/quality/compatibility-importer-census.json",
         "configs/quality/compatibility_facade_inventory.yaml",
         "tests/architecture/test_tech_debt_issues_5570_5578_closeout.py"
-      ]
+      ],
+      "number": 5574
     },
     {
       "issue": "#5575",
       "theme": "Internal caller zero-growth enforcement",
-      "debt_types": ["Architecture debt", "Governance gap", "DDD violation"],
+      "debt_types": [
+        "Architecture debt",
+        "Governance gap",
+        "DDD violation"
+      ],
       "action": "Enforced internal caller zero-growth policy with proper tracking and fail-fast enforcement.",
       "risk": "low",
       "evidence": [
         "reports/quality/compatibility-importer-census.json",
         "tests/architecture/test_tech_debt_issues_5570_5578_closeout.py"
-      ]
+      ],
+      "number": 5575
     },
     {
       "issue": "#5576",
       "theme": "Shim lifecycle governance",
-      "debt_types": ["Compatibility debt", "Governance gap", "Architecture debt"],
+      "debt_types": [
+        "Compatibility debt",
+        "Governance gap",
+        "Architecture debt"
+      ],
       "action": "Governed shim lifecycle with proper sunset dates and removal tracking.",
       "risk": "medium",
       "evidence": [
         "configs/quality/internal_compatibility_shim_inventory.yaml",
         "tests/architecture/test_tech_debt_issues_5570_5578_closeout.py"
-      ]
+      ],
+      "number": 5576
     },
     {
       "issue": "#5577",
       "theme": "Observability metric governance",
-      "debt_types": ["Observability gap", "Governance gap", "Quality debt"],
+      "debt_types": [
+        "Observability gap",
+        "Governance gap",
+        "Quality debt"
+      ],
       "action": "Governed observability metrics with proper allowlist and cardinality tracking.",
       "risk": "low",
       "evidence": [
         "configs/quality/observability_metric_inventory_allowlist.yaml",
         "reports/observability/runtime_cardinality_inventory.json",
         "tests/architecture/test_tech_debt_issues_5570_5578_closeout.py"
-      ]
+      ],
+      "number": 5577
     },
     {
       "issue": "#5578",
       "theme": "Governance artifact consistency",
-      "debt_types": ["Governance gap", "Architecture debt", "Documentation debt"],
+      "debt_types": [
+        "Governance gap",
+        "Architecture debt",
+        "Documentation debt"
+      ],
       "action": "Maintained governance artifact consistency across compatibility, observability, and composition surfaces.",
       "risk": "low",
       "evidence": [
         "reports/quality/compatibility-importer-census.json",
         "reports/observability/runtime_cardinality_inventory.json",
         "tests/architecture/test_tech_debt_issues_5570_5578_closeout.py"
-      ]
+      ],
+      "number": 5578
     }
-  ]
+  ],
+  "summary": {
+    "removed_internal_private_shim_count": 1,
+    "observability_allowlist_review_count": 6,
+    "dead_code_untriaged_zero_import_candidate_count": 0,
+    "dead_code_candidates_without_owner_tests_count": 0
+  }
 }

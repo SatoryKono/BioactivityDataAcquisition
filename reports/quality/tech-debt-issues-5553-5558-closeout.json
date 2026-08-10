@@ -6,7 +6,11 @@
     {
       "issue": "#5553",
       "theme": "Governance artifacts are aligned to committed inventory",
-      "debt_types": ["Governance gap", "Architecture debt", "Quality debt"],
+      "debt_types": [
+        "Governance gap",
+        "Architecture debt",
+        "Quality debt"
+      ],
       "action": "Aligned governance artifacts to committed inventory with proper hash verification.",
       "risk": "low",
       "evidence": [
@@ -18,7 +22,11 @@
     {
       "issue": "#5554",
       "theme": "Control plane public facade has zero first-party interface importers",
-      "debt_types": ["Architecture debt", "Governance gap", "Compatibility debt"],
+      "debt_types": [
+        "Architecture debt",
+        "Governance gap",
+        "Compatibility debt"
+      ],
       "action": "Ensured control plane public facade has zero first-party interface importers.",
       "risk": "low",
       "evidence": [
@@ -29,7 +37,11 @@
     {
       "issue": "#5555",
       "theme": "Hotspot reviewed baselines capture current reductions",
-      "debt_types": ["Architecture debt", "Governance gap", "Budget debt"],
+      "debt_types": [
+        "Architecture debt",
+        "Governance gap",
+        "Budget debt"
+      ],
       "action": "Captured current reductions in hotspot reviewed baselines with proper ratchet tracking.",
       "risk": "low",
       "evidence": [
@@ -41,7 +53,11 @@
     {
       "issue": "#5556",
       "theme": "Missing checkpoint compatibility context fails closed",
-      "debt_types": ["Architecture debt", "Governance gap", "Process debt"],
+      "debt_types": [
+        "Architecture debt",
+        "Governance gap",
+        "Process debt"
+      ],
       "action": "Ensured missing checkpoint compatibility context fails closed with proper disposition.",
       "risk": "low",
       "evidence": [
@@ -52,7 +68,11 @@
     {
       "issue": "#5557",
       "theme": "PR hygiene policy and workflow stay narrow",
-      "debt_types": ["Governance gap", "Process debt", "Quality debt"],
+      "debt_types": [
+        "Governance gap",
+        "Process debt",
+        "Quality debt"
+      ],
       "action": "Maintained narrow PR hygiene policy and workflow with proper tracking.",
       "risk": "low",
       "evidence": [
@@ -64,7 +84,11 @@
     {
       "issue": "#5558",
       "theme": "Tracker closeout metrics stay green",
-      "debt_types": ["Governance gap", "Quality debt", "Budget debt"],
+      "debt_types": [
+        "Governance gap",
+        "Quality debt",
+        "Budget debt"
+      ],
       "action": "Maintained green tracker closeout metrics with proper gate tracking.",
       "risk": "low",
       "evidence": [
@@ -72,5 +96,10 @@
         "tests/architecture/test_tech_debt_issues_5553_5558_closeout.py"
       ]
     }
-  ]
+  ],
+  "metrics": {
+    "remote_main_sha": "c8e5e43b2d485a8a58a3d6a2c674bc169dde42a7",
+    "generated_artifact_drift_count": 0,
+    "replay_missing_context_disposition": "missing_context_hard_fail_raised"
+  }
 }

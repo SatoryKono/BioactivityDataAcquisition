@@ -205,10 +205,10 @@ hash_policy:
   entity: molecule
   contract:
     version: 1.0.0
-    migration_note: 'Composite entity contract identity explicit for issue #5509.'
+    migration_note: Explicit composite contract identity for composite.molecule (#5509).
   hash_policy:
     algorithm: sha256
-    canonicalization: provider + canonical_json_dumps(normalized_record)
+    canonicalization: composite.molecule + canonical_json_dumps(normalized_record)
     include_fields:
     - entity_id
     exclude_fields:
@@ -219,8 +219,10 @@ hash_policy:
     - _dq_error
     - _source_batch_id
     - _index
+    - _molecule_runtime_only
     exclude_patterns:
     - ^_dq_
+    - ^_molecule_meta_
     normalization:
       trim_strings: true
       round_floats:
