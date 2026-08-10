@@ -5,8 +5,10 @@ from __future__ import annotations
 import asyncio
 from typing import Protocol
 
-from bioetl.application.services.control_plane.evidence import EvidenceScope
-from bioetl.application.services.control_plane.evidence.models import EvidenceCheck
+from bioetl.application.services.control_plane.evidence import (
+    EvidenceCheckResult,
+    EvidenceScopeContext,
+)
 from bioetl.application.services.control_plane.evidence.service_support import (
     service_payload,
     source_error_payload,
@@ -71,9 +73,9 @@ async def resolve_evidence_scope(
     return scope, None
 
 
-def to_evidence_scope(scope: _IdentityScope) -> EvidenceScope:
+def to_evidence_scope(scope: _IdentityScope) -> EvidenceScopeContext:
     """Project the shared HTTP identity scope to the application DTO."""
-    return EvidenceScope(
+    return EvidenceScopeContext(
         requested_pipeline=scope.requested_pipeline,
         selected_run_id=scope.selected_run_id,
         selected_run_types=scope.selected_run_types,
@@ -97,7 +99,7 @@ def evidence_service_unavailable_payload(
             resolved_via="evidence_service_unavailable",
         ),
         checks=(
-            EvidenceCheck(
+            EvidenceCheckResult(
                 "evidence_service",
                 "UNKNOWN",
                 "control_plane_evidence_service_unavailable",
@@ -112,8 +114,8 @@ def _unresolved_evidence_scope(
     query: dict[str, str],
     *,
     resolved_via: str,
-) -> EvidenceScope:
-    return EvidenceScope(
+) -> EvidenceScopeContext:
+    return EvidenceScopeContext(
         requested_pipeline=host._read_required_param(query, "pipeline"),
         selected_run_id=read_selected_run_id(host, query),
         selected_run_types=host._read_scope_csv_param(query, "run_type"),
