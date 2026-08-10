@@ -339,7 +339,7 @@ Generate test reports with:
 
 - [Script Documentation Standards](script-documentation-standards.md) - Documentation standards for scripts
 - [Script Naming Conventions](script-naming-conventions.md) - Naming standards for scripts
-- [Script Inventory Audit](../../reports/scripts_inventory_audit_report.md) - Overall script inventory
+- [Scripts Inventory Manifest](../../../configs/quality/scripts_inventory_manifest.json) - Governed script inventory
 - [pytest Documentation](https://docs.pytest.org/)
 
 ## Revision History

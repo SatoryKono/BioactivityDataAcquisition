@@ -2,7 +2,7 @@
 
 Complete catalog of all Prometheus metrics defined in BioETL observability system.
 
-**Runtime Metrics: 161** (excluding aliases; derived from
+**Runtime Metrics: 163** (excluding aliases; derived from
 `REGISTERED_PROMETHEUS_METRIC_NAMES`)
 **Governed Recording/Current-State Metrics: 40**
 
@@ -16,12 +16,12 @@ Canonical reconciliation command:
 - [Health Metrics](#health-metrics) - 11 metrics
 - [Pipeline Checkpoint Metrics](#pipeline-checkpoint-metrics) - 7 metrics
 - [Pipeline Composite Metrics](#pipeline-composite-metrics) - 1 metric
-- [Pipeline Control Plane Metrics](#pipeline-control-plane-metrics) - 10 metrics
+- [Pipeline Control Plane Metrics](#pipeline-control-plane-metrics) - 11 metrics
 - [Pipeline Lifecycle Metrics](#pipeline-lifecycle-metrics) - 8 metrics
 - [Pipeline Lineage Metrics](#pipeline-lineage-metrics) - 3 metrics
 - [Pipeline Memory Metrics](#pipeline-memory-metrics) - 4 metrics
 - [Pipeline Quality Metrics](#pipeline-quality-metrics) - 6 metrics
-- [Pipeline Replay Metrics](#pipeline-replay-metrics) - 3 metrics
+- [Pipeline Replay Metrics](#pipeline-replay-metrics) - 4 metrics
 - [Pipeline Transform Metrics](#pipeline-transform-metrics) - 3 metrics
 - [Pipeline Workflow Metrics](#pipeline-workflow-metrics) - 13 metrics
 - [Storage Metrics](#storage-metrics) - 30 metrics
@@ -166,6 +166,7 @@ Canonical reconciliation command:
 | `bioetl_control_plane_ledger_appends_total` | Counter | pipeline, event_type, status | Total append attempts for run-ledger entries |
 | `bioetl_control_plane_ledger_append_duration_seconds` | Histogram | pipeline, event_type, status | Latency of run-ledger append operations in seconds |
 | `bioetl_control_plane_terminal_events_total` | Counter | pipeline, terminal_status | Total terminal run outcomes mirrored from persisted run-ledger entries |
+| `bioetl_manifest_ledger_integrity_ratio` | Gauge | pipeline, run_type, integrity_type | Complementary `consistent`/`inconsistent` ratios over ledger-expected manifests; an empty denominator never publishes a healthy value |
 | `bioetl_control_plane_reads_total` | Counter | store, operation, status | Total control-plane read and lookup operations by store, operation, and outcome |
 | `bioetl_control_plane_read_duration_seconds` | Histogram | store, operation, status | Latency of control-plane read and lookup operations in seconds |
 | `bioetl_control_plane_lifecycle_deleted_total` | Counter | surface, replay_impact | Total control-plane lifecycle artifacts deleted by retention application |
@@ -239,6 +240,7 @@ Canonical reconciliation command:
 |-------------|------|--------|-------------|
 | `bioetl_replay_reconstructability_events_total` | Counter | pipeline, replay_capability, strict_requirement, status | Total replay reconstructability observations recorded during manifest assembly |
 | `bioetl_replay_drift_events_total` | Counter | pipeline, run_type, replay_capability, drift_type, status | Total bounded replay drift observations recorded during manifest assembly |
+| `bioetl_replay_duplicate_overwrite_risk_total` | Counter | pipeline, run_type, risk_type | Accepted replay manifests exposing bounded `duplicate` or `overwrite` write risk; both risk series are initialized with zero per accepted manifest |
 | `bioetl_replay_lag_seconds` | Gauge | pipeline, run_type, replay_capability, status | Current bounded replay lag observed during manifest assembly |
 
 ---
@@ -399,13 +401,13 @@ separate from actual `record:` outputs and direct runtime collector families.
 
 ## Summary
 
-- **Runtime Metrics**: 161 (excluding aliases; canonical registry-backed count)
+- **Runtime Metrics**: 163 (excluding aliases; canonical registry-backed count)
 - **Governed Recording/Current-State Metrics**: 40
 - **Total Categories**: 15
 - **Metric Types Distribution**:
-  - Counter: 111 metrics
+  - Counter: 112 metrics
   - Histogram: 25 metrics
-  - Gauge: 25 metrics
+  - Gauge: 26 metrics
 
 ## Notes
 

@@ -15,8 +15,8 @@ from __future__ import annotations
 from scripts.engineering.common.cli_dispatch import dispatch_cli, module_command
 
 COMMANDS = {
-    "query": "scripts.memory.queries.query",
-    "sync": "scripts.memory.operations.sync",
+    "query": "memory.graph.query",
+    "sync": "memory.graph.sync",
 }
 COMMAND_SPECS = {name: module_command(module) for name, module in COMMANDS.items()}
 

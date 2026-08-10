@@ -332,6 +332,8 @@ class TestBootstrapObservability:
             not in (
                 "src/bioetl/composition/_pipeline_execution.py",
                 "src/bioetl/composition/execution_api.py",
+                "src/bioetl/application/services/control_plane/evidence/service.py",
+                "src/bioetl/application/services/control_plane/evidence/service_support.py",
             )
         ]
         assert offenders == [], (

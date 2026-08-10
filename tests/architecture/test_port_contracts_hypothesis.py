@@ -241,6 +241,11 @@ class TestCheckpointPortProperties:
                 run_id = deterministic_uuid_from_callsite(
                     "test_port_contracts_hypothesis"
                 )
+                caller_metadata = {
+                    key: value
+                    for key, value in metadata.items()
+                    if key != "checkpoint_checksum_valid"
+                }
 
                 try:
                     await checkpoint.save(pipeline, run_id, metadata)
@@ -250,13 +255,17 @@ class TestCheckpointPortProperties:
                     loaded_run_id, loaded_metadata = result
 
                     assert loaded_run_id == run_id, "Run ID mismatch after roundtrip"
-                    for key, expected_value in metadata.items():
+                    for key, expected_value in caller_metadata.items():
                         assert loaded_metadata[key] == expected_value, (
                             "Caller metadata mismatch after roundtrip"
                         )
 
-                    extra_keys = set(loaded_metadata) - set(metadata)
-                    assert extra_keys <= {"checkpoint_saved_at_epoch_seconds"}
+                    extra_keys = set(loaded_metadata) - set(caller_metadata)
+                    assert extra_keys <= {
+                        "checkpoint_saved_at_epoch_seconds",
+                        "checkpoint_checksum_valid",
+                    }
+                    assert loaded_metadata["checkpoint_checksum_valid"] is True
                     if "checkpoint_saved_at_epoch_seconds" not in metadata:
                         assert isinstance(
                             loaded_metadata["checkpoint_saved_at_epoch_seconds"],

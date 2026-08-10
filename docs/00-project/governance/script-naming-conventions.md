@@ -240,9 +240,8 @@ Exceptions to this policy require explicit approval from the BioETL Team and mus
 
 ## Related Documents
 
-- [Script Naming Violations Analysis](../../reports/script_naming_violations_analysis.md) - Detailed analysis of violating scripts
-- [Script Naming Standardization Plan](../../reports/script_naming_standardization_plan.md) - Migration plan with phases and timeline
-- [Script Inventory Audit](../../reports/scripts_inventory_audit_report.md) - Overall script inventory
+- [Makefile and Temporary Scripts Management](makefile-and-temporary-scripts-management.md) - Script lifecycle and cleanup policy
+- [Scripts Inventory Manifest](../../../configs/quality/scripts_inventory_manifest.json) - Governed script inventory
 - [PEP 8 Style Guide](https://peps.org/pep-0008/)
 - [PowerShell Naming Conventions](https://learn.microsoft.com/en-us/powershell/scripting/dev-cross-plat/guidelines/using-correct-casing)
 - [Shell Script Best Practices](https://github.com/koalaman/shellcheck)

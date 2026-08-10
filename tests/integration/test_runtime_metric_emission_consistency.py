@@ -32,6 +32,7 @@ def test_critical_observability_metric_families_are_runtime_emitted() -> None:
         "bioetl_control_plane_ledger_appends_total",
         "bioetl_checkpoint_compatibility_events_total",
         "bioetl_replay_drift_events_total",
+        "bioetl_replay_duplicate_overwrite_risk_total",
         "bioetl_replay_lag_seconds",
         "bioetl_replay_reconstructability_events_total",
         "bioetl_record_flow_invariants_total",
@@ -40,6 +41,7 @@ def test_critical_observability_metric_families_are_runtime_emitted() -> None:
         "bioetl_postrun_phase_events_total",
         "bioetl_postrun_phase_duration_seconds",
         "bioetl_metrics_publication_events_total",
+        "bioetl_manifest_ledger_integrity_ratio",
     }
 
     missing = sorted(critical_families - emitted_metrics)
@@ -64,6 +66,12 @@ def test_critical_observability_metric_families_have_runtime_emitters() -> None:
         ),
         "bioetl_replay_drift_events_total": (
             "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py"
+        ),
+        "bioetl_replay_duplicate_overwrite_risk_total": (
+            "src/bioetl/application/services/control_plane/manifest/replay_write_risk.py"
+        ),
+        "bioetl_manifest_ledger_integrity_ratio": (
+            "src/bioetl/application/services/control_plane/manifest/integrity_metrics.py"
         ),
         "bioetl_replay_lag_seconds": (
             "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py"

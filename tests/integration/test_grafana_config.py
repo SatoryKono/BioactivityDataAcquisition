@@ -1345,15 +1345,21 @@ def test_control_plane_remaining_replay_safety_text_is_not_stale() -> None:
     assert panel is not None
     content = str(panel.get("options", {}).get("content", ""))
     assert panel.get("options", {}).get("mode") == "html"
-    assert "Remaining replay-safety signals" in content
-    assert "duplicate-record evidence" in content
+    assert "Remaining replay-safety signal:" in content
     assert "occurrence-only vs semantic drift" in content
+    assert (
+        "Duplicate/overwrite write risk is now bounded Prometheus telemetry" in content
+    )
     assert "checkpoint_age <= recovery window / RPO" not in content
     assert "manifest_id/run_id identity table in Grafana" not in content
+    assert "duplicate-record evidence" not in content
     description = str(panel.get("description", "")).lower()
-    assert "manifest/run identity" in description
-    assert "execution/config/contract/input anchors" in description
-    assert "checkpoint freshness lag" in description
+    assert "residual semantic-drift evidence" in description
+    assert "duplicate/overwrite write risk is now instrumented" in description
+    assert "not yet covered" not in description
+    assert "manifest/run identity" not in description
+    assert "execution/config/contract/input anchors" not in description
+    assert "checkpoint freshness lag" not in description
 
 
 def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:

@@ -10,6 +10,10 @@ from uuid import UUID
 
 from bioetl.domain.serialization import deserialize_from_json
 from bioetl.domain.types import JsonDict, RunID
+from bioetl.infrastructure.checkpoint._local_checkpoint_integrity import (
+    inject_checkpoint_checksum_verdict,
+    strip_reserved_checksum_metadata,
+)
 
 _HISTORY_DIR_NAME = ".history"
 
@@ -44,7 +48,7 @@ def extract_manifest_id(metadata: JsonDict) -> str | None:
 
 def normalize_saved_metadata(metadata: JsonDict | None) -> JsonDict:
     """Return caller-owned checkpoint metadata without adding wall-clock state."""
-    return dict(metadata or {})
+    return strip_reserved_checksum_metadata(metadata)
 
 
 def read_json_file(path: Path) -> JsonDict:
@@ -56,10 +60,15 @@ def read_json_file(path: Path) -> JsonDict:
     return data
 
 
-def normalize_loaded_metadata(path: Path, metadata: object) -> JsonDict:
+def normalize_loaded_metadata(
+    path: Path,
+    checkpoint_data: JsonDict,
+    metadata: object,
+) -> JsonDict:
     if not isinstance(metadata, dict):
-        return {}
+        raise ValueError("Checkpoint metadata must be a dictionary")
     normalized = dict(metadata)
+    normalized = inject_checkpoint_checksum_verdict(checkpoint_data, normalized)
     normalized.setdefault("checkpoint_saved_at_epoch_seconds", path.stat().st_mtime)
     return normalized
 
@@ -67,7 +76,11 @@ def normalize_loaded_metadata(path: Path, metadata: object) -> JsonDict:
 def load_checkpoint_tuple(path: Path) -> tuple[RunID, JsonDict]:
     checkpoint_data = read_json_file(path)
     run_id = RunID(UUID(checkpoint_data["run_id"]))
-    metadata = normalize_loaded_metadata(path, checkpoint_data.get("metadata", {}))
+    metadata = normalize_loaded_metadata(
+        path,
+        checkpoint_data,
+        checkpoint_data.get("metadata", {}),
+    )
     return (run_id, metadata)
 
 

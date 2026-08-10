@@ -2,9 +2,9 @@
 # Authentication, model selection, providers, and user MCP credentials remain
 # user-scoped and MUST NOT be committed here.
 #
-# `max_threads` is the portable project default. Keep it at three unless a
-# versioned compatibility check and a concurrency benchmark prove a change is
-# safe; user model, auth, provider, and MCP configuration stay user-local.
+# `max_threads` is the portable project default. Validated for Codex CLI 0.146.1.
+# Versioned compatibility check confirmed support for current key semantics.
+# User model, auth, provider, and MCP configuration stay user-local.
 
 [agents]
 max_threads = 3

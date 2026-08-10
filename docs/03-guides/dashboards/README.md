@@ -74,7 +74,12 @@ shadow review. The seven JSON UIDs remain authoritative and reachable. See
   Navigation bus **`0..6` on every board** (Provider on-bus; Incident/Run adjunct
   row). No Silver Reject Explorer, no Loki/Tempo Explore adjuncts.
 - Identity HTTP panels use datasource **BioETL Ops HTTP** → main health server
-  `:8000` (`BIOETL_OPS_HTTP_URL`).
+  `:8000`. `BIOETL_OPS_HTTP_URL` is the Grafana-server-to-backend URL and may
+  legitimately contain Docker or host-specific addressing.
+- Browser-facing Ops HTTP health CTAs never expose that backend hostname. They
+  use the same-origin Grafana datasource proxy
+  `/api/datasources/proxy/uid/bioetl-ops-http/health/live`, so the links remain
+  portable across Docker, WSL, remote hosts, and production ingress.
 - Record-level quarantine forensics: CLI `bioetl quarantine inspect` (not Grafana).
 - Monitoring stack is **opt-in**: `make docker-start-monitoring`.
 - See [monitoring-surface-reduction](../../05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md).

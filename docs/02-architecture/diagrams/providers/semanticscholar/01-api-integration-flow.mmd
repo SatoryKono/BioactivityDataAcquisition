@@ -4,13 +4,14 @@
 %% @date 2026-07-28
 %% @type flowchart
 %% @level system
-%% @nodes 46
+%% @nodes   35
 %% @adr ADR-032,ADR-010,ADR-040
 
 %% @version 1.0.0
 %% @date 2026-07-28
 %% @type flowchart
 %% @level system
+%%{init: {'layout': 'elk'}}%%
 flowchart TD
     Start([Start Semantic Scholar extract]) --> Client[UnifiedHTTPClient ADR-032]
     Client --> RL{Rate limit OK?}

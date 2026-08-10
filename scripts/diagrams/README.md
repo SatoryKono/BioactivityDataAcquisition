@@ -53,6 +53,7 @@ python -m scripts.diagrams <command> [args...]
 | Command              | Script                                          | Description                      |
 | -------------------- | ----------------------------------------------- | -------------------------------- |
 | `apply-elk`          | `apply_elk_layout.py`                           | Add or audit ELK init            |
+| `convert-provider-diagrams` | `fix/convert_provider_diagrams.py`       | Convert legacy provider metadata |
 | `differentiate-linkstyle` | `differentiate_linkstyle.py`                | Add semantic linkStyle groups    |
 | `fix-operators`      | `fix_mermaid_operators.py`                      | Fix Mermaid operators            |
 | `fix-svg-text`       | `add_svg_text_fallback.py`                      | Add SVG text fallback            |
@@ -97,6 +98,7 @@ python -m scripts.diagrams <command> [args...]
 | `check-pdf-bounds`    | After generating PDF bundles; validates image bounds                                                        | Manual, post-render                    |
 | `check-padding`       | When diagrams have layout issues; analyzes padding problems                                                 | Manual, on-demand                      |
 | `apply-elk`           | When large flowchart diagrams need ELK init or routing normalization                                        | Manual codemod                         |
+| `convert-provider-diagrams` | When provider diagrams still use legacy YAML frontmatter                                            | Manual codemod / governance check      |
 | `differentiate-linkstyle` | When dense flowcharts need semantic linkStyle classes                                                   | Manual codemod                         |
 | `harmonize-link-styles` | After rendering when SVG link styles need cross-diagram harmonization                                     | Manual/CI post-render                  |
 | `fix-operators`       | When diagrams contain invalid thick-arrow operators (`==>` → `-->`)                                         | Manual codemod                         |

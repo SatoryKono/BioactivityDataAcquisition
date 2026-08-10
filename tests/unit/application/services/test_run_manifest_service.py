@@ -49,6 +49,7 @@ from bioetl.domain.control_plane import (
     RunSourceRef,
 )
 from bioetl.domain.types import RunID, RunType
+from tests.fakes.metrics_fake import RecordingMetrics
 from tests.helpers.control_plane import InMemoryRunManifestStore
 from tests.helpers.clock import FixedClock
 
@@ -645,6 +646,45 @@ def test_create_manifest_fails_closed_when_persisted_manifest_is_not_resolvable(
         match="manifest is not resolvable by manifest_id",
     ):
         service.create_manifest(_make_request())
+
+
+def test_create_manifest_emits_replay_risk_series_only_after_persistence_acceptance() -> (
+    None
+):
+    metrics = RecordingMetrics()
+    service = RunManifestService(
+        manifest_port=_InMemoryRunManifestStore(),
+        metrics=metrics,
+        _manifest_id_factory=lambda: "manifest-risk-metrics",
+    )
+
+    service.create_manifest(_make_request())
+
+    risk_calls = [
+        call
+        for call in metrics.calls
+        if call.name == "bioetl_replay_duplicate_overwrite_risk_total"
+    ]
+    assert [(call.value, call.labels["risk_type"]) for call in risk_calls] == [
+        (0, "duplicate"),
+        (0, "overwrite"),
+    ]
+
+
+def test_create_manifest_does_not_emit_replay_risk_when_persistence_is_rejected() -> (
+    None
+):
+    metrics = RecordingMetrics()
+    service = RunManifestService(
+        manifest_port=_MissingLookupRunManifestStore(),
+        metrics=metrics,
+        _manifest_id_factory=lambda: "manifest-risk-rejected",
+    )
+
+    with pytest.raises(RuntimeError, match="not resolvable"):
+        service.create_manifest(_make_request())
+
+    assert metrics.calls == []
 
 
 def test_create_manifest_uses_store_specific_post_save_assertion() -> None:

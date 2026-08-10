@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-10T06:28:39.653620+00:00",
+  "generated_at": "2026-08-10T07:00:25.952220+00:00",
   "summary": {
-    "total_scripts": 577,
+    "total_scripts": 576,
     "status_counts": {
-      "active": 339,
+      "active": 338,
       "supporting": 234,
       "temporary_diagnostic": 4
     },
@@ -14,9 +14,9 @@
       "ci": 81,
       "docs": 244,
       "other": 76,
-      "scripts": 477,
+      "scripts": 476,
       "skills": 11,
-      "tests": 367
+      "tests": 366
     }
   },
   "scripts": [
@@ -2710,7 +2710,7 @@
         },
         {
           "path": "scripts/memory/README.md",
-          "line": 21,
+          "line": 23,
           "source_group": "scripts",
           "text": "- `python -m scripts.ai.mcp smoke-neo4j-memory`"
         }
@@ -4242,7 +4242,7 @@
         },
         {
           "path": "scripts/memory/README.md",
-          "line": 31,
+          "line": 34,
           "source_group": "scripts",
           "text": "- `scripts/ai/mcp/neo4j_memory_mcp_adapter.py` bridges Codex framed stdio to the upstream line-delimited server."
         },
@@ -4275,7 +4275,7 @@
         },
         {
           "path": "scripts/memory/README.md",
-          "line": 30,
+          "line": 33,
           "source_group": "scripts",
           "text": "- `scripts/ai/mcp/neo4j_memory_mcp_smoke.py` validates framed stdio behavior for the `neo4j-memory` MCP server."
         },
@@ -5490,7 +5490,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 67,
+      "reference_count": 70,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -5575,7 +5575,7 @@
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 73,
+          "line": 75,
           "source_group": "scripts",
           "text": "\"check/check_class_method_render_integrity.py\""
         },
@@ -5787,7 +5787,7 @@
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 75,
+          "line": 77,
           "source_group": "scripts",
           "text": "\"check-pdf-bounds\": python_command(\"check/check_pdf_image_bounds.py\"),"
         },
@@ -5871,7 +5871,7 @@
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 76,
+          "line": 78,
           "source_group": "scripts",
           "text": "\"check-padding\": python_command(\"check/report_diagram_padding.py\"),"
         }
@@ -5886,7 +5886,7 @@
       "references": [
         {
           "path": "scripts/diagrams/README.md",
-          "line": 125,
+          "line": 127,
           "source_group": "scripts",
           "text": "| `scripts/diagrams/core/diagram_paths.py`                          | Shared diagram path/constants helper used by rendering and validation tooling                 |"
         },
@@ -5928,7 +5928,7 @@
         },
         {
           "path": "scripts/diagrams/check/check_diagram_visual_smoke.py",
-          "line": 25,
+          "line": 27,
           "source_group": "scripts",
           "text": "from scripts.diagrams.core.diagram_paths import VISUAL_SMOKE_MANIFEST"
         }
@@ -6016,13 +6016,13 @@
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 58,
+          "line": 59,
           "source_group": "scripts",
           "text": "| `fix-svg-text`       | `add_svg_text_fallback.py`                      | Add SVG text fallback            |"
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 81,
+          "line": 84,
           "source_group": "scripts",
           "text": "\"fix-svg-text\": python_command(\"fix/add_svg_text_fallback.py\"),"
         }
@@ -6061,7 +6061,7 @@
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 78,
+          "line": 80,
           "source_group": "scripts",
           "text": "\"apply-elk\": python_command(\"fix/apply_elk_layout.py\"),"
         },
@@ -6086,6 +6086,51 @@
       ]
     },
     {
+      "path": "scripts/diagrams/fix/convert_provider_diagrams.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": "scripts/diagrams/README.md",
+          "line": 56,
+          "source_group": "scripts",
+          "text": "| `convert-provider-diagrams` | `fix/convert_provider_diagrams.py`       | Convert legacy provider metadata |"
+        },
+        {
+          "path": "scripts/diagrams/__main__.py",
+          "line": 81,
+          "source_group": "scripts",
+          "text": "\"convert-provider-diagrams\": python_command(\"fix/convert_provider_diagrams.py\"),"
+        },
+        {
+          "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
+          "line": 129,
+          "source_group": "tests",
+          "text": "\"convert_provider_diagrams.py\","
+        },
+        {
+          "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
+          "line": 137,
+          "source_group": "tests",
+          "text": "assert not (REPO_ROOT / \"scripts\" / \"convert_provider_diagrams.py\").exists()"
+        },
+        {
+          "path": "tests/unit/scripts/diagrams/test_convert_provider_diagrams.py",
+          "line": 10,
+          "source_group": "tests",
+          "text": "from scripts.diagrams.fix import convert_provider_diagrams as converter"
+        },
+        {
+          "path": "tests/unit/scripts/diagrams/test_convert_provider_diagrams.py",
+          "line": 79,
+          "source_group": "tests",
+          "text": "assert spec.target == \"fix/convert_provider_diagrams.py\""
+        }
+      ]
+    },
+    {
       "path": "scripts/diagrams/fix/differentiate_linkstyle.py",
       "type": "py",
       "status": "active",
@@ -6106,19 +6151,19 @@
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 56,
+          "line": 57,
           "source_group": "scripts",
           "text": "| `differentiate-linkstyle` | `differentiate_linkstyle.py`                | Add semantic linkStyle groups    |"
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 79,
+          "line": 82,
           "source_group": "scripts",
           "text": "\"differentiate-linkstyle\": python_command(\"fix/differentiate_linkstyle.py\"),"
         },
         {
           "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
-          "line": 129,
+          "line": 130,
           "source_group": "tests",
           "text": "\"differentiate_linkstyle.py\","
         },
@@ -6184,13 +6229,13 @@
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 59,
+          "line": 60,
           "source_group": "scripts",
           "text": "| `fix-svg-styles`     | `scripts/diagrams/fix/fix_svg_styles.py`         | Inject SVG styles                |"
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 82,
+          "line": 85,
           "source_group": "scripts",
           "text": "\"fix-svg-styles\": python_command(\"fix/fix_svg_styles.py\"),"
         }
@@ -6201,7 +6246,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -6211,21 +6256,15 @@
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 61,
+          "line": 62,
           "source_group": "scripts",
           "text": "| `harmonize-link-styles` | `harmonize_link_styles.py`                   | Harmonize rendered SVG links     |"
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 84,
+          "line": 87,
           "source_group": "scripts",
           "text": "\"harmonize-link-styles\": python_command(\"fix/harmonize_link_styles.py\"),"
-        },
-        {
-          "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
-          "line": 130,
-          "source_group": "tests",
-          "text": "\"harmonize_link_styles.py\","
         }
       ]
     },
@@ -6307,13 +6346,13 @@
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 60,
+          "line": 61,
           "source_group": "scripts",
           "text": "| `fix-foreign-object` | `strip_svg_foreign_object.py`                   | Strip SVG foreignObject elements |"
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 83,
+          "line": 86,
           "source_group": "scripts",
           "text": "\"fix-foreign-object\": python_command(\"fix/strip_svg_foreign_object.py\"),"
         },
@@ -6376,13 +6415,13 @@
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 63,
+          "line": 64,
           "source_group": "scripts",
           "text": "| `fix-sizes`          | `uniform_diagram_sizes.py`                      | Uniform diagram sizes            |"
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 86,
+          "line": 89,
           "source_group": "scripts",
           "text": "\"fix-sizes\": python_command(\"fix/uniform_diagram_sizes.py\"),"
         },
@@ -6403,13 +6442,13 @@
       "references": [
         {
           "path": "scripts/diagrams/README.md",
-          "line": 57,
+          "line": 58,
           "source_group": "scripts",
           "text": "| `fix-operators`      | `fix_mermaid_operators.py`                      | Fix Mermaid operators            |"
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 80,
+          "line": 83,
           "source_group": "scripts",
           "text": "\"fix-operators\": python_command(\"fix/fix_mermaid_operators.py\"),"
         },
@@ -6454,7 +6493,7 @@
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 65,
+          "line": 67,
           "source_group": "scripts",
           "text": "\"lint-budget\": python_command(\"lint/enforce_diagram_quality_budget.py\"),"
         },
@@ -6552,7 +6591,7 @@
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 64,
+          "line": 66,
           "source_group": "scripts",
           "text": "\"lint-summarize\": python_command(\"lint/summarize_diagram_lint.py\"),"
         }
@@ -6675,13 +6714,13 @@
       "references": [
         {
           "path": "scripts/diagrams/README.md",
-          "line": 64,
+          "line": 65,
           "source_group": "scripts",
           "text": "| `fix-pagebreaks`     | `scripts/diagrams/render/fix_pagebreaks_in_bundles.py` | Fix pagebreaks in bundles        |"
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 87,
+          "line": 90,
           "source_group": "scripts",
           "text": "\"fix-pagebreaks\": python_command(\"render/fix_pagebreaks_in_bundles.py\"),"
         },
@@ -6714,43 +6753,43 @@
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 72,
+          "line": 73,
           "source_group": "scripts",
           "text": "| `render-pdf`          | `generate_all_bundles.py --collection architecture` | Refresh architecture Markdown bundle via the canonical generator |"
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 75,
+          "line": 76,
           "source_group": "scripts",
           "text": "| `render-views`        | `generate_all_bundles.py --collection views`       | Refresh views Markdown bundle via the canonical generator  |"
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 122,
+          "line": 124,
           "source_group": "scripts",
           "text": "| `scripts/diagrams/render/generate_all_bundles.py`                   | Canonical Markdown bundle generator; supports `--collection` for targeted publication refresh |"
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 136,
+          "line": 138,
           "source_group": "scripts",
           "text": "- `scripts/diagrams/render/generate_all_bundles.py` is the canonical Markdown bundle generator for `architecture`, `class-diagrams`, `foundation`, and `views`."
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 143,
+          "line": 145,
           "source_group": "scripts",
           "text": "- When bundle drift is corrected, prefer regenerating the narrow affected collection via `generate_all_bundles.py --collection <name>` instead of broad refresh of every derived artifact."
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 94,
+          "line": 97,
           "source_group": "scripts",
           "text": "\"render/generate_all_bundles.py\", \"--collection\", \"architecture\""
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 99,
+          "line": 102,
           "source_group": "scripts",
           "text": "\"render/generate_all_bundles.py\", \"--collection\", \"views\""
         }
@@ -6765,25 +6804,25 @@
       "references": [
         {
           "path": "scripts/diagrams/README.md",
-          "line": 76,
+          "line": 77,
           "source_group": "scripts",
           "text": "| `render-desc-indexes` | `scripts/diagrams/render/generate_description_indexes.py` | Refresh family-oriented description indexes                |"
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 123,
+          "line": 125,
           "source_group": "scripts",
           "text": "| `scripts/diagrams/render/generate_description_indexes.py`           | Canonical generator for family-oriented description indexes                                   |"
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 139,
+          "line": 141,
           "source_group": "scripts",
           "text": "- `scripts/diagrams/render/generate_description_indexes.py` is the canonical generator for `descriptions/INDEX.md` and `descriptions/class/INDEX.md`."
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 101,
+          "line": 104,
           "source_group": "scripts",
           "text": "\"render-desc-indexes\": python_command(\"render/generate_description_indexes.py\"),"
         },
@@ -6822,7 +6861,7 @@
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 124,
+          "line": 126,
           "source_group": "scripts",
           "text": "| `scripts/diagrams/render/generate_package_family_class_diagrams.py` | Supplemental package-family class-diagram generator                                           |"
         }
@@ -6867,13 +6906,13 @@
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 70,
+          "line": 71,
           "source_group": "scripts",
           "text": "| `generate-dataflows`  | `generate_pipeline_dataflows.py`                   | Generate source-backed pipeline views, passport, JSON IR, and field CSV |"
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 90,
+          "line": 93,
           "source_group": "scripts",
           "text": "\"scripts.diagrams.render.generate_pipeline_dataflows\""
         },
@@ -6906,25 +6945,25 @@
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 74,
+          "line": 75,
           "source_group": "scripts",
           "text": "| `render-docx`         | `generate_with_descriptions_docx.py`               | Generate DOCX with descriptions                            |"
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 128,
+          "line": 130,
           "source_group": "scripts",
           "text": "| `scripts/diagrams/render/generate_with_descriptions_docx.py`        | Canonical DOCX exporter for description bundles                                               |"
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 137,
+          "line": 139,
           "source_group": "scripts",
           "text": "- `scripts/diagrams/run_diagram_checks.sh`, `run_diagram_docs_agent.sh`, `generate_with_descriptions_docx.py`, and `generate_with_descriptions_pdf.py` are the canonical operational entrypoints; legacy"
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 97,
+          "line": 100,
           "source_group": "scripts",
           "text": "\"render-docx\": python_command(\"render/generate_with_descriptions_docx.py\"),"
         },
@@ -6957,25 +6996,25 @@
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 73,
+          "line": 74,
           "source_group": "scripts",
           "text": "| `render-pdf-desc`     | `generate_with_descriptions_pdf.py`                | Generate PDF with descriptions                             |"
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 129,
+          "line": 131,
           "source_group": "scripts",
           "text": "| `scripts/diagrams/render/generate_with_descriptions_pdf.py`         | Canonical PDF exporter for description bundles                                                |"
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 137,
+          "line": 139,
           "source_group": "scripts",
           "text": "- `scripts/diagrams/run_diagram_checks.sh`, `run_diagram_docs_agent.sh`, `generate_with_descriptions_docx.py`, and `generate_with_descriptions_pdf.py` are the canonical operational entrypoints; legacy"
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 96,
+          "line": 99,
           "source_group": "scripts",
           "text": "\"render-pdf-desc\": python_command(\"render/generate_with_descriptions_pdf.py\"),"
         },
@@ -7145,25 +7184,25 @@
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 71,
+          "line": 72,
           "source_group": "scripts",
           "text": "| `docs-agent`          | `run_diagram_docs_agent.sh`                        | Run checks + DOCX export + PDF export pipeline             |"
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 127,
+          "line": 129,
           "source_group": "scripts",
           "text": "| `scripts/diagrams/run_diagram_docs_agent.sh`                 | Canonical shell entrypoint for checks + export pipeline                                       |"
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 137,
+          "line": 139,
           "source_group": "scripts",
           "text": "- `scripts/diagrams/run_diagram_checks.sh`, `run_diagram_docs_agent.sh`, `generate_with_descriptions_docx.py`, and `generate_with_descriptions_pdf.py` are the canonical operational entrypoints; legacy"
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 92,
+          "line": 95,
           "source_group": "scripts",
           "text": "\"docs-agent\": shell_command(\"run_diagram_docs_agent.sh\"),"
         }
@@ -7208,13 +7247,13 @@
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 82,
+          "line": 83,
           "source_group": "scripts",
           "text": "| `nightly` | `run_diagram_nightly_suite.py` | Run full diagram nightly suite |"
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 103,
+          "line": 106,
           "source_group": "scripts",
           "text": "\"nightly\": python_command(\"run_diagram_nightly_suite.py\"),"
         },
@@ -7253,7 +7292,7 @@
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 131,
+          "line": 133,
           "source_group": "scripts",
           "text": "| `scripts/diagrams/svg2png.mjs`                               | Node.js SVG-to-PNG converter                                                                  |"
         },
@@ -9660,7 +9699,7 @@
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 54,
+          "line": 56,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.cli_dispatch import ("
         },
@@ -10114,7 +10153,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1524,
+          "line": 1529,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
@@ -11639,7 +11678,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 312,
+      "reference_count": 315,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -13119,7 +13158,7 @@
         },
         {
           "path": "tests/architecture/test_architecture_debt_agent_surface.py",
-          "line": 43,
+          "line": 37,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"generate_architecture_debt_tasks.py\""
         },
@@ -13617,7 +13656,7 @@
         },
         {
           "path": "tests/architecture/test_architecture_debt_agent_surface.py",
-          "line": 46,
+          "line": 40,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"reduce_architecture_debt.py\""
         },
@@ -15054,7 +15093,7 @@
       "references": [
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 255,
+          "line": 301,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_closure_campaign.py --require-global-claim`"
         },
@@ -15093,19 +15132,19 @@
       "references": [
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 252,
+          "line": 298,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py` persists"
         },
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 258,
+          "line": 304,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py --require-universal-claim`"
         },
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 261,
+          "line": 307,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py --require-durable-evidence-coverage`"
         },
@@ -16558,7 +16597,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 117,
+      "reference_count": 119,
       "references": [
         {
           "path": "docs/00-project/ai/memory/README.md",
@@ -16611,45 +16650,6 @@
       ]
     },
     {
-      "path": "scripts/memory/operations/sync.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 5,
-      "references": [
-        {
-          "path": "scripts/memory/README.md",
-          "line": 28,
-          "source_group": "scripts",
-          "text": "- `sync.py` is now a compatibility module alias to `memory.graph.sync`."
-        },
-        {
-          "path": "scripts/memory/__init__.py",
-          "line": 22,
-          "source_group": "scripts",
-          "text": "from scripts.memory.operations import sync"
-        },
-        {
-          "path": "scripts/memory/__main__.py",
-          "line": 19,
-          "source_group": "scripts",
-          "text": "\"sync\": \"scripts.memory.operations.sync\","
-        },
-        {
-          "path": "scripts/memory/operations/__init__.py",
-          "line": 4,
-          "source_group": "scripts",
-          "text": "from scripts.memory.operations.sync import main"
-        },
-        {
-          "path": "tests/unit/memory/test_graph_entrypoints.py",
-          "line": 54,
-          "source_group": "tests",
-          "text": "assert sync_path.name == \"sync.py\""
-        }
-      ]
-    },
-    {
       "path": "scripts/memory/prompts/print_seed.sh",
       "type": "sh",
       "status": "supporting",
@@ -16658,7 +16658,7 @@
       "references": [
         {
           "path": "scripts/memory/README.md",
-          "line": 24,
+          "line": 26,
           "source_group": "scripts",
           "text": "- `bash scripts/memory/prompts/print_seed.sh`"
         }
@@ -16667,63 +16667,6 @@
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded manual prompt-printing helper for memory seeding; replace with canonical memory workflow documentation before promoting it to an active command surface."
-    },
-    {
-      "path": "scripts/memory/queries/query.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 8,
-      "references": [
-        {
-          "path": "scripts/memory/README.md",
-          "line": 29,
-          "source_group": "scripts",
-          "text": "- `query.py` is now a compatibility module alias to `memory.graph.query`."
-        },
-        {
-          "path": "scripts/memory/__init__.py",
-          "line": 21,
-          "source_group": "scripts",
-          "text": "from scripts.memory.queries import query"
-        },
-        {
-          "path": "scripts/memory/__main__.py",
-          "line": 18,
-          "source_group": "scripts",
-          "text": "\"query\": \"scripts.memory.queries.query\","
-        },
-        {
-          "path": "scripts/memory/queries/__init__.py",
-          "line": 4,
-          "source_group": "scripts",
-          "text": "from scripts.memory.queries.query import main"
-        },
-        {
-          "path": "tests/integration/memory/test_workflow_tooling.py",
-          "line": 362,
-          "source_group": "tests",
-          "text": "\"source_path\": \"src/memory/query.py\","
-        },
-        {
-          "path": "tests/unit/memory/test_rag_indexing.py",
-          "line": 55,
-          "source_group": "tests",
-          "text": "assert infer_source_type(Path(\"src/memory/query.py\")) == \"memory\""
-        },
-        {
-          "path": "tests/unit/memory/test_rag_indexing.py",
-          "line": 70,
-          "source_group": "tests",
-          "text": "assert infer_domain(Path(\"src/memory/query.py\")) == \"memory_subsystem\""
-        },
-        {
-          "path": "tests/unit/memory/test_review_curated.py",
-          "line": 126,
-          "source_group": "tests",
-          "text": "\"source_refs\": [\"src/memory/query.py\", \"src/memory/README.md\"],"
-        }
-      ]
     },
     {
       "path": "scripts/memory/run_workflow.sh",
@@ -16803,7 +16746,7 @@
         },
         {
           "path": "scripts/memory/README.md",
-          "line": 23,
+          "line": 25,
           "source_group": "scripts",
           "text": "- `bash scripts/memory/setup/wsl_startup.sh`"
         }
@@ -18687,7 +18630,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 157,
+          "line": 162,
           "source_group": "docs",
           "text": "`scripts/ops/observability/grafana/render_nav_bus.py`). The current dashboard"
         },
@@ -18919,7 +18862,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 147,
+          "line": 152,
           "source_group": "docs",
           "text": "- On Linux, `setup_grafana_screenshot_runtime.sh` is the canonical bootstrap"
         },

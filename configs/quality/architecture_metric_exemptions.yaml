@@ -2,23 +2,24 @@ schema_version: 1
 policy:
   default_gate_mode: block
   review_history:
-    - issue: "#4929"
-      reviewed_on: "2026-06-01"
-      owner: architecture-governance
-      outcome: held_flat_no_new_exemptions
-      rationale: Active metric exemptions are reduced to zero; all registries remain present, empty, and governed by the scorecard no-growth policy.
+  - issue: '#4929'
+    reviewed_on: '2026-06-01'
+    owner: architecture-governance
+    outcome: held_flat_no_new_exemptions
+    rationale: Active metric exemptions are reduced to zero; all registries remain
+      present, empty, and governed by the scorecard no-growth policy.
   owner_diversification_sync:
     source: configs/quality/debt_scorecard.yaml#governance.owner_diversification
     starts_quarter: 2026-Q3
-    review_on: "2026-06-30"
+    review_on: '2026-06-30'
   required_fields:
-    - value
-    - owner
-    - reason
-    - classification
-    - linked_rf
-    - expires_on
-    - removal_step
+  - value
+  - owner
+  - reason
+  - classification
+  - linked_rf
+  - expires_on
+  - removal_step
 registries:
   file_size_limits: {}
   function_complexity: {}
@@ -27,3 +28,9 @@ registries:
   class_method_count: {}
   god_object: {}
   domain_complexity: {}
+lint_diagrams:
+- rule: SIZE-001
+  scope: docs/02-architecture/diagrams/providers/*
+  reason: Provider integration and transformation flows have slightly larger node
+    counts but use ELK layout to maintain readability.
+  owner: bioetl

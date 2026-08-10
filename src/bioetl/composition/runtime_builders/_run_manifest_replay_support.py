@@ -64,7 +64,7 @@ def build_manifest_launch_context(
     reproducibility_context: ManifestReproducibilityContext,
 ) -> dict[str, object]:
     """Build the launch-context payload recorded on the run manifest."""
-    return manifest_support.build_launch_context_snapshot(
+    snapshot = manifest_support.build_launch_context_snapshot(
         request_inputs.ctx,
         run_type_value=request_inputs.run_type_value,
         execution_context_value=request_inputs.execution_context_value,
@@ -86,6 +86,10 @@ def build_manifest_launch_context(
         replay_support_scope=reproducibility_context.support_scope,
         replay_support_reason=reproducibility_context.reason,
     )
+    snapshot["run_ledger_enabled"] = bool(
+        getattr(request_inputs, "ledger_enabled", True)
+    )
+    return snapshot
 
 
 def build_replay_assessment(

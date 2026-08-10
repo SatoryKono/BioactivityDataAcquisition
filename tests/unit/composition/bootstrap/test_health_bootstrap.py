@@ -40,6 +40,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.application.services.ops.health_service import HealthService
+from bioetl.application.services.control_plane.manifest.integrity_metrics import (
+    ControlPlaneIntegrityMetricsService,
+)
 from bioetl.composition.bootstrap.cli.health import (
     HealthServerDependencies,
     bootstrap_health_server_dependencies,
@@ -162,6 +165,17 @@ class TestHealthServerDependencies:
         assert deps.run_ledger_port.base_path == control_root / "run_ledger"
         assert deps.workflow_manifest_port.base_path == (
             control_root / "workflow_manifest"
+        )
+        assert isinstance(
+            deps.control_plane_integrity_refresher,
+            ControlPlaneIntegrityMetricsService,
+        )
+        assert (
+            deps.control_plane_integrity_refresher.manifest_port
+            is deps.run_manifest_port
+        )
+        assert (
+            deps.control_plane_integrity_refresher.ledger_port is deps.run_ledger_port
         )
 
 

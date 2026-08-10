@@ -10,6 +10,8 @@ from importlib import import_module
 from typing import Any
 
 __all__ = [
+    "ControlPlaneIntegrityMetricsService",
+    "ManifestLedgerIntegrityScope",
     "RunManifestCreateSpec",
     "RunManifestDiffEntry",
     "RunManifestDiffResult",
@@ -23,6 +25,14 @@ _INSPECTION_MODELS = (
     "bioetl.application.services.control_plane.manifest.inspection_models"
 )
 _EXPORTS: dict[str, tuple[str, str]] = {
+    "ControlPlaneIntegrityMetricsService": (
+        "bioetl.application.services.control_plane.manifest.integrity_metrics",
+        "ControlPlaneIntegrityMetricsService",
+    ),
+    "ManifestLedgerIntegrityScope": (
+        "bioetl.application.services.control_plane.manifest.integrity_metrics",
+        "ManifestLedgerIntegrityScope",
+    ),
     "RunManifestCreateSpec": (
         "bioetl.application.services.control_plane.manifest.models",
         "RunManifestCreateSpec",

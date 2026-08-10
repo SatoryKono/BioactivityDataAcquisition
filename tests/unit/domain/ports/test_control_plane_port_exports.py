@@ -11,6 +11,8 @@ from bioetl.domain.ports.control_plane import (
     ArtifactByteComparisonPort,
     EffectiveConfigArtifactStorePort,
     LineageStorePort,
+    RawManifestInspection,
+    RawRunManifestInspectionPort,
     RunLedgerPort,
     RunManifestPort,
     WorkflowExecutionStatePort,
@@ -23,6 +25,8 @@ EXPECTED_EXPORTS = frozenset(
         "ArtifactByteComparisonPort",
         "EffectiveConfigArtifactStorePort",
         "LineageStorePort",
+        "RawManifestInspection",
+        "RawRunManifestInspectionPort",
         "RunLedgerPort",
         "RunManifestPort",
         "WorkflowExecutionStatePort",
@@ -40,11 +44,10 @@ def test_control_plane_package_all_matches_expected_public_surface() -> None:
 
 @pytest.mark.unit
 @pytest.mark.parametrize("export_name", sorted(EXPECTED_EXPORTS))
-def test_control_plane_export_is_importable_protocol(export_name: str) -> None:
-    """Each public export is importable from the package and is a Protocol type."""
+def test_control_plane_export_is_importable_type(export_name: str) -> None:
+    """Each public export is importable from the package as its class object."""
     symbol = getattr(control_plane, export_name)
     assert symbol is not None
-    # Protocol classes are types; ensure re-export is the class object itself.
     assert isinstance(symbol, type)
     assert symbol.__name__ == export_name
 
@@ -58,6 +61,8 @@ def test_control_plane_named_imports_resolve_to_package_exports() -> None:
     assert control_plane.WorkflowLedgerPort is WorkflowLedgerPort
     assert control_plane.WorkflowExecutionStatePort is WorkflowExecutionStatePort
     assert control_plane.LineageStorePort is LineageStorePort
+    assert control_plane.RawManifestInspection is RawManifestInspection
+    assert control_plane.RawRunManifestInspectionPort is RawRunManifestInspectionPort
     assert (
         control_plane.EffectiveConfigArtifactStorePort
         is EffectiveConfigArtifactStorePort

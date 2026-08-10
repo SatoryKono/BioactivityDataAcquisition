@@ -25,6 +25,7 @@ from bioetl.infrastructure.observability._metrics_defs_pipeline_control_plane im
     CONTROL_PLANE_READ_DURATION_SECONDS,
     CONTROL_PLANE_READS_TOTAL,
     CONTROL_PLANE_TERMINAL_EVENTS_TOTAL,
+    MANIFEST_LEDGER_INTEGRITY_RATIO,
 )
 from bioetl.infrastructure.observability._metrics_defs_pipeline_lifecycle import (
     OBSERVABILITY_EVENTS_TOTAL,
@@ -57,6 +58,7 @@ from bioetl.infrastructure.observability._metrics_defs_pipeline_quality import (
 )
 from bioetl.infrastructure.observability._metrics_defs_pipeline_replay import (
     REPLAY_DRIFT_EVENTS_TOTAL,
+    REPLAY_DUPLICATE_OVERWRITE_RISK_TOTAL,
     REPLAY_LAG_SECONDS,
     REPLAY_RECONSTRUCTABILITY_EVENTS_TOTAL,
 )
@@ -105,6 +107,7 @@ __all__ = [
     "FILTER_COMBINATIONS_LOADED_TOTAL",
     "LINEAGE_FRAGMENTS_EMITTED_TOTAL",
     "LINEAGE_REFS_MISSING_TOTAL",
+    "MANIFEST_LEDGER_INTEGRITY_RATIO",
     "MEMORY_BATCH_RESIZE_EVENTS_TOTAL",
     "MEMORY_MONITOR_FALLBACK_EVENTS_TOTAL",
     "MEMORY_PRESSURE_EVENTS_TOTAL",
@@ -115,6 +118,7 @@ __all__ = [
     "POSTRUN_PHASE_DURATION_SECONDS",
     "POSTRUN_PHASE_EVENTS_TOTAL",
     "REPLAY_DRIFT_EVENTS_TOTAL",
+    "REPLAY_DUPLICATE_OVERWRITE_RISK_TOTAL",
     "REPLAY_LAG_SECONDS",
     "REPLAY_RECONSTRUCTABILITY_EVENTS_TOTAL",
     "SHUTDOWN_COMPLETED",

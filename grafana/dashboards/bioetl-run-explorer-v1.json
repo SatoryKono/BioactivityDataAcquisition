@@ -233,7 +233,7 @@
             },
             {
               "title": "Check BioETL Ops HTTP health",
-              "url": "http://localhost:8000/health/live",
+              "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
               "targetBlank": true
             },
             {
@@ -384,7 +384,7 @@
           "links": [
             {
               "title": "Check BioETL Ops HTTP health",
-              "url": "http://localhost:8000/health/live",
+              "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
               "targetBlank": true
             },
             {
