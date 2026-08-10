@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from bioetl.application.services.control_plane.evidence.models import (
     evidence_payload,
@@ -43,6 +43,18 @@ def service_payload(
     )
 
 
+def sanitized_manifest_payload_scope(
+    scope: EvidenceScope,
+    checks: tuple[EvidenceCheck, ...],
+) -> EvidenceScope:
+    """Discard coerced manifest identity when raw parse/schema evidence failed."""
+    identity_untrusted = any(
+        check.status == "ERROR" and check.check in {"parse", "schema"}
+        for check in checks
+    )
+    return replace(scope, manifest=None) if identity_untrusted else scope
+
+
 def source_error_payload(
     *,
     endpoint: str,
@@ -78,6 +90,7 @@ def ledger_entries(
 __all__ = [
     "EvidenceScope",
     "ledger_entries",
+    "sanitized_manifest_payload_scope",
     "service_payload",
     "source_error_payload",
 ]

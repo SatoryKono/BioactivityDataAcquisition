@@ -30,6 +30,7 @@ from bioetl.application.services.control_plane.evidence.retention import (
 from bioetl.application.services.control_plane.evidence.service_support import (
     EvidenceScope,
     ledger_entries,
+    sanitized_manifest_payload_scope,
     service_payload,
 )
 from bioetl.application.services.control_plane_evidence import EvidenceCheck
@@ -93,7 +94,7 @@ class ControlPlaneEvidenceService:
         )
         return service_payload(
             endpoint="manifest-validation",
-            scope=scope,
+            scope=sanitized_manifest_payload_scope(scope, checks),
             checks=checks,
         )
 

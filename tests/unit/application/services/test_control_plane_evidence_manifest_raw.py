@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import cast
 from uuid import UUID
 
 import pytest
@@ -38,7 +39,7 @@ def _manifest() -> RunManifest:
 
 def _scope(manifest: RunManifest) -> EvidenceScope:
     return EvidenceScope(
-        requested_pipeline=manifest.pipeline_name,
+        requested_pipeline="chembl_activity",
         selected_run_id=str(manifest.run_id),
         selected_run_types=(manifest.run_type.value,),
         resolved_via="selected_run_id",
@@ -47,11 +48,8 @@ def _scope(manifest: RunManifest) -> EvidenceScope:
 
 
 def _reasons(payload: dict[str, object]) -> set[str]:
-    return {
-        str(row["reason"])
-        for row in payload["rows"]  # type: ignore[union-attr]
-        if isinstance(row, dict)
-    }
+    rows = cast("list[dict[str, object]]", payload["rows"])
+    return {str(row["reason"]) for row in rows}
 
 
 def test_manifest_validation_reports_raw_schema_errors_before_coercion(
@@ -73,8 +71,10 @@ def test_manifest_validation_reports_raw_schema_errors_before_coercion(
     )
     path.write_text(json.dumps(raw), encoding="utf-8")
     service = ControlPlaneEvidenceService(manifest_inspector=store)
+    coerced_manifest = store.get(manifest.manifest_id)
+    assert coerced_manifest is not None
 
-    payload = service.manifest_validation(scope=_scope(manifest))
+    payload = service.manifest_validation(scope=_scope(coerced_manifest))
 
     assert payload["status"] == "ERROR"
     assert {
@@ -84,6 +84,8 @@ def test_manifest_validation_reports_raw_schema_errors_before_coercion(
         "manifest_launch_context_not_object",
         "manifest_source_refs_not_array",
     } <= _reasons(payload)
+    assert payload["pipeline"] == "chembl_activity"
+    assert payload["manifest_id"] is None
     assert "spoofed" not in str(payload)
     assert "wrong-shape" not in str(payload)
 
