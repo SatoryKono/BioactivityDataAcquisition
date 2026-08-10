@@ -60,6 +60,9 @@ def test_coverage_job_combines_shard_coverage_and_runs_serial_pass() -> None:
     assert "pattern: coverage-data-*" in workflow, (
         "coverage-verify job must download all coverage shard artifacts"
     )
+    assert "include-hidden-files: true" in workflow, (
+        "coverage shard uploads must include hidden .coverage.* data files"
+    )
     assert (
         '--parallel-marker "serial and not e2e and not benchmark and not memory"'
         in workflow
