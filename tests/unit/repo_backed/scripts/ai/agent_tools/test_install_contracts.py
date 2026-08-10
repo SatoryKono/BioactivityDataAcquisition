@@ -10,7 +10,7 @@ import pytest
 
 pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
-ROOT = Path(__file__).resolve().parents[5]
+ROOT = Path(__file__).resolve().parents[6]
 
 
 def test_optional_vendor_extras_are_exact_and_absent_from_core_dependencies() -> None:

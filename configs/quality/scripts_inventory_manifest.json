@@ -1,22 +1,22 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-10T07:44:39.458795+00:00",
+  "generated_at": "2026-08-10T09:14:57.228222+00:00",
   "summary": {
-    "total_scripts": 576,
+    "total_scripts": 580,
     "status_counts": {
-      "active": 338,
-      "supporting": 234,
+      "active": 339,
+      "supporting": 237,
       "temporary_diagnostic": 4
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 16,
       "ci": 81,
-      "docs": 244,
+      "docs": 247,
       "other": 76,
-      "scripts": 476,
+      "scripts": 482,
       "skills": 11,
-      "tests": 366
+      "tests": 370
     }
   },
   "scripts": [
@@ -25,7 +25,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 15,
       "references": [
         {
           "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
@@ -52,6 +52,12 @@
           "text": "python -m scripts.ai vibe --prompt \"fix the failing architecture test\" --max-turns 5"
         },
         {
+          "path": "scripts/ai/prompts/README.md",
+          "line": 15,
+          "source_group": "scripts",
+          "text": "Also: `python -m scripts.ai prompts ...` (unified AI surface router)."
+        },
+        {
           "path": "scripts/ai/vibe/README.md",
           "line": 9,
           "source_group": "scripts",
@@ -68,12 +74,6 @@
           "line": 15,
           "source_group": "scripts",
           "text": "python -m scripts.ai vibe check"
-        },
-        {
-          "path": "scripts/ai/vibe/README.md",
-          "line": 16,
-          "source_group": "scripts",
-          "text": "python -m scripts.ai vibe setup"
         }
       ]
     },
@@ -347,7 +347,7 @@
           "text": "python3 scripts/ai/codex/doctor.py static --no-write"
         },
         {
-          "path": "docs/00-project/ai/prompts/runtime-agentry-1-CODEX-RUNTIME.md",
+          "path": "docs/00-project/ai/prompts/archive/mirrors/runtime-agentry-1-CODEX-RUNTIME.md",
           "line": 77,
           "source_group": "docs",
           "text": "`python3 scripts/ai/codex/doctor.py static --no-write`."
@@ -1372,7 +1372,7 @@
         },
         {
           "path": "scripts/ai/__main__.py",
-          "line": 29,
+          "line": 30,
           "source_group": "scripts",
           "text": "launcher = _DIR / \"codex\" / \"run-codex.ps1\""
         }
@@ -1417,7 +1417,7 @@
         },
         {
           "path": "scripts/ai/__main__.py",
-          "line": 39,
+          "line": 40,
           "source_group": "scripts",
           "text": "return [\"bash\", str((_DIR / \"codex\" / \"run-codex.sh\").resolve()), *rest]"
         },
@@ -4845,6 +4845,174 @@
       "next_step": "Retain as the catalog-driven implementation behind the canonical scripts.ai.mcp router; keep it supporting because operators enter through the package command surface."
     },
     {
+      "path": "scripts/ai/prompts/__main__.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 24,
+      "references": [
+        {
+          "path": "docs/00-project/ai/README.md",
+          "line": 90,
+          "source_group": "docs",
+          "text": "- CLI: `python -m scripts.ai.prompts list|render|check`"
+        },
+        {
+          "path": "docs/00-project/ai/prompts/README.md",
+          "line": 71,
+          "source_group": "docs",
+          "text": "python -m scripts.ai.prompts list"
+        },
+        {
+          "path": "docs/00-project/ai/prompts/README.md",
+          "line": 72,
+          "source_group": "docs",
+          "text": "python -m scripts.ai.prompts show prompt.audit.grok-cycle"
+        },
+        {
+          "path": "docs/00-project/ai/prompts/README.md",
+          "line": 73,
+          "source_group": "docs",
+          "text": "python -m scripts.ai.prompts render prompt.audit.grok-cycle --param SCOPE=\"src/bioetl/domain\""
+        },
+        {
+          "path": "docs/00-project/ai/prompts/README.md",
+          "line": 74,
+          "source_group": "docs",
+          "text": "python -m scripts.ai.prompts check-registry"
+        },
+        {
+          "path": "docs/00-project/ai/prompts/README.md",
+          "line": 75,
+          "source_group": "docs",
+          "text": "python -m scripts.ai.prompts check"
+        },
+        {
+          "path": "docs/00-project/ai/prompts/README.md",
+          "line": 76,
+          "source_group": "docs",
+          "text": "python -m scripts.ai.prompts new --id prompt.example --class operator-paste"
+        },
+        {
+          "path": "docs/00-project/ai/prompts/architecture_review_and_refactoring_assessment.md",
+          "line": 9,
+          "source_group": "docs",
+          "text": "> Render: `python -m scripts.ai.prompts render prompt.architecture.review`"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/prompts/check.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ai/prompts/__main__.py",
+          "line": 20,
+          "source_group": "scripts",
+          "text": "from scripts.ai.prompts.check import ("
+        },
+        {
+          "path": "tests/unit/scripts/ai/test_prompt_library.py",
+          "line": 7,
+          "source_group": "tests",
+          "text": "from scripts.ai.prompts.check import check_hygiene, check_registry"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the validation helper behind the canonical python -m scripts.ai.prompts command surface; keep direct operator use routed through that package entrypoint."
+    },
+    {
+      "path": "scripts/ai/prompts/registry.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 32,
+      "references": [
+        {
+          "path": "docs/00-project/ai/memory/MEMORY_ARCHITECTURE.md",
+          "line": 40,
+          "source_group": "docs",
+          "text": "`src/memory/registry.py`. Unknown vendor use is recorded as `NOT_PROVEN`."
+        },
+        {
+          "path": "docs/00-project/governance/04-extending-bioetl.md",
+          "line": 65,
+          "source_group": "docs",
+          "text": "- `PIPELINE_CONFIGS` entry in `pipeline/registry.py`"
+        },
+        {
+          "path": "docs/00-project/governance/04-extending-bioetl.md",
+          "line": 109,
+          "source_group": "docs",
+          "text": "- [ ] `pipeline/registry.py` updated (`PIPELINE_CONFIGS`, imports)."
+        },
+        {
+          "path": "docs/02-architecture/05-composition-layer.md",
+          "line": 120,
+          "source_group": "docs",
+          "text": "| `pipeline/registry.py`              | Реестр фабрик                                   | Все зарегистрированные pipeline factories                      |"
+        },
+        {
+          "path": "docs/02-architecture/05-composition-layer.md",
+          "line": 152,
+          "source_group": "docs",
+          "text": "`observability_api.py`, `observability.py`, `registry.py`, `types.py`,"
+        },
+        {
+          "path": "docs/02-architecture/05-composition-layer.md",
+          "line": 230,
+          "source_group": "docs",
+          "text": "### 2.4. `registry.py` — Реестр пайплайнов"
+        },
+        {
+          "path": "docs/02-architecture/05-composition-layer.md",
+          "line": 268,
+          "source_group": "docs",
+          "text": "- **Декларативность:** `GenericPipelineFactory`, `PIPELINE_CONFIGS` и `factories/pipeline/registry.py` позволяют добавлять новые пайплайны без дублирования шаблонного assembly-кода."
+        },
+        {
+          "path": "docs/02-architecture/current-state-inventory.md",
+          "line": 100,
+          "source_group": "docs",
+          "text": "| Pipeline factory registry | `src/bioetl/composition/factories/pipeline/registry.py` | Registers provider/composite factories for composition-time lookup. | Composition registry API and pipeline fact"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the Prompt Library registry-loading helper behind the canonical python -m scripts.ai.prompts command surface; do not expose it as a second standalone entrypoint."
+    },
+    {
+      "path": "scripts/ai/prompts/render.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ai/prompts/__main__.py",
+          "line": 27,
+          "source_group": "scripts",
+          "text": "from scripts.ai.prompts.render import ("
+        },
+        {
+          "path": "tests/unit/scripts/ai/test_prompt_library.py",
+          "line": 15,
+          "source_group": "tests",
+          "text": "from scripts.ai.prompts.render import render_by_id, substitute_params"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the Prompt Library rendering helper behind the canonical python -m scripts.ai.prompts command surface; do not promote this implementation module into a duplicate active CLI."
+    },
+    {
       "path": "scripts/ai/sync/cursor.py",
       "type": "py",
       "status": "supporting",
@@ -5060,7 +5228,7 @@
       "references": [
         {
           "path": "scripts/ai/__main__.py",
-          "line": 66,
+          "line": 67,
           "source_group": "scripts",
           "text": "str(helper_dir / \"setup-env.ps1\"),"
         },
@@ -5150,7 +5318,7 @@
         },
         {
           "path": "scripts/ai/__main__.py",
-          "line": 74,
+          "line": 75,
           "source_group": "scripts",
           "text": "str(vibe_dir / \"launch.ps1\"),"
         },
@@ -5201,7 +5369,7 @@
         },
         {
           "path": "scripts/ai/__main__.py",
-          "line": 82,
+          "line": 83,
           "source_group": "scripts",
           "text": "return [\"bash\", str(vibe_dir / \"launch.sh\"), *rest]"
         },
@@ -5257,8 +5425,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/filters/README.md",
+          "line": 51,
+          "source_group": "docs",
+          "text": "python -m scripts.data_quality inventory-silver-filters-migration"
+        }
+      ],
       "owner": "@bioetl-dq",
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-11-30",
@@ -5384,19 +5559,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 7,
       "references": [
         {
           "path": "docs/docs-folder-analysis.md",
           "line": 66,
           "source_group": "docs",
           "text": "- Регенерируется через `python scripts/data_quality/inventory_silver_filters_migration.py`"
-        },
-        {
-          "path": "docs/filters/README.md",
-          "line": 51,
-          "source_group": "docs",
-          "text": "python scripts/data_quality/inventory_silver_filters_migration.py"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
@@ -8358,19 +8527,19 @@
         },
         {
           "path": "docs/filters/inventory-baseline.csv",
-          "line": 169,
+          "line": 177,
           "source_group": "docs",
           "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/docs/matrix/generate_pipeline_normalization_matrix.py,5,1694,Source-profile extraction policy,extraction_"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
-          "line": 2174,
+          "line": 2276,
           "source_group": "docs",
           "text": "\"path\": \"scripts/docs/matrix/generate_pipeline_normalization_matrix.py\","
         },
         {
           "path": "docs/filters/inventory-baseline.md",
-          "line": 127,
+          "line": 124,
           "source_group": "docs",
           "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | 5 | 1694 | Source-profile extraction policy |"
         }
@@ -9431,7 +9600,7 @@
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
         {
-          "path": "docs/00-project/ai/prompts/test_speed_optimization_loop.md",
+          "path": "docs/00-project/ai/prompts/archive/campaigns/pre-library-test_speed_optimization_loop.md",
           "line": 101,
           "source_group": "docs",
           "text": "- `scripts/engineering/dev/run_pytest.sh`, `scripts/engineering/dev/run_pytest.ps1`, `scripts/engineering/ci/run_pytest_resilient.py`"
@@ -9854,7 +10023,7 @@
         },
         {
           "path": "scripts/ai/__main__.py",
-          "line": 21,
+          "line": 22,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.repo_paths import ensure_safe_cli_argv"
         },
@@ -10446,7 +10615,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 40,
+      "reference_count": 43,
       "references": [
         {
           "path": ".github/ISSUES/DOC-AUDIT-003-Align-Windows-Pytest-Docs-With-Xdist-Policy.md",
@@ -10505,7 +10674,7 @@
       "agent_usage": [
         "py-test-bot"
       ],
-      "reference_count": 48,
+      "reference_count": 52,
       "references": [
         {
           "path": ".codex/skills/py-test-bot/SKILL.md",
@@ -10544,16 +10713,16 @@
           "text": "- WSL/Linux: `setup_env_wsl.sh`, `run_pytest.sh`, `run_mypy.sh`"
         },
         {
-          "path": "docs/00-project/ai/prompts/test_fix_retest_loop.md",
+          "path": "docs/00-project/ai/prompts/archive/campaigns/pre-library-test_fix_retest_loop.md",
           "line": 89,
           "source_group": "docs",
           "text": "- Linux/WSL: `bash scripts/engineering/dev/run_pytest.sh <scope> --maxfail=1 -q`"
         },
         {
-          "path": "docs/00-project/ai/prompts/test_speed_optimization_loop.md",
+          "path": "docs/00-project/ai/prompts/archive/campaigns/pre-library-test_speed_optimization_loop.md",
           "line": 91,
           "source_group": "docs",
-          "text": "- Для mixed Windows + WSL checkout в WSL используй `bash scripts/engineering/dev/run_pytest.sh`, для CI/single-OS допускается `uv run python -m pytest`."
+          "text": "- ╨ö╨╗╤Å mixed Windows + WSL checkout ╨▓ WSL ╨╕╤ü╨┐╨╛╨╗╤î╨╖╤â╨╣ `bash scripts/engineering/dev/run_pytest.sh`, ╨┤╨╗╤Å CI/single-OS ╨┤╨╛╨┐╤â╤ü╨║╨░╨╡╤é╤ü╤Å `uv run python -m pytest`."
         }
       ]
     },
@@ -10826,7 +10995,7 @@
           "text": "- Windows PowerShell: `setup_env_windows.ps1`, `run_pytest.ps1`, `run_mypy.ps1`"
         },
         {
-          "path": "docs/00-project/ai/prompts/agent-memory.md",
+          "path": "docs/00-project/ai/prompts/archive/mirrors/agent-memory.md",
           "line": 100,
           "source_group": "docs",
           "text": "environment with `.\\scripts\\engineering\\dev\\setup_env_windows.ps1`."
@@ -11678,7 +11847,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 315,
+      "reference_count": 317,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -12259,13 +12428,13 @@
       "reference_count": 5,
       "references": [
         {
-          "path": "docs/00-project/ai/prompts/architecture_metric_exemptions_tasks_json_prompt.md",
+          "path": "docs/00-project/ai/prompts/archive/campaigns/architecture_metric_exemptions_tasks_json_prompt.md",
           "line": 165,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off`"
         },
         {
-          "path": "docs/00-project/ai/prompts/architecture_metric_exemptions_tasks_json_prompt.md",
+          "path": "docs/00-project/ai/prompts/archive/campaigns/architecture_metric_exemptions_tasks_json_prompt.md",
           "line": 511,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off`"
@@ -12518,13 +12687,13 @@
         },
         {
           "path": "tests/architecture/test_test_governance_audit.py",
-          "line": 475,
+          "line": 473,
           "source_group": "tests",
           "text": "command = \"scripts/engineering/qa/check_test_audit_preflight.py --strict\""
         },
         {
           "path": "tests/architecture/test_test_governance_audit.py",
-          "line": 501,
+          "line": 499,
           "source_group": "tests",
           "text": "assert \"check_test_audit_preflight.py --strict\" in body"
         }
@@ -12582,19 +12751,19 @@
       "references": [
         {
           "path": "docs/filters/inventory-baseline.csv",
-          "line": 170,
+          "line": 178,
           "source_group": "docs",
           "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/engineering/qa/config_surface_governance.py,2,8,Source-profile extraction policy,extraction_params are pr"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
-          "line": 2185,
+          "line": 2287,
           "source_group": "docs",
           "text": "\"path\": \"scripts/engineering/qa/config_surface_governance.py\","
         },
         {
           "path": "docs/filters/inventory-baseline.md",
-          "line": 128,
+          "line": 125,
           "source_group": "docs",
           "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/engineering/qa/config_surface_governance.py` | 2 | 8 | Source-profile extraction policy |"
         },
@@ -12639,8 +12808,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/README.md",
+          "line": 40,
+          "source_group": "scripts",
+          "text": "`scripts/engineering/qa/count_source_lines.py` and"
+        }
+      ],
       "owner": "@bioetl-architecture",
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
@@ -13386,8 +13562,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/README.md",
+          "line": 41,
+          "source_group": "scripts",
+          "text": "`scripts/engineering/qa/get_large_modules.py` remain available. Their output is"
+        }
+      ],
       "owner": "@bioetl-architecture",
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
@@ -16682,7 +16865,7 @@
           "text": "`PYTHONPATH=src` (or `bash scripts/memory/run_workflow.sh pre-task ...`) so"
         },
         {
-          "path": "docs/00-project/ai/prompts/setup-prompts-1-devin-setup-prompt.md",
+          "path": "docs/00-project/ai/prompts/archive/mirrors/setup-prompts-1-devin-setup-prompt.md",
           "line": 48,
           "source_group": "docs",
           "text": "bash scripts/memory/run_workflow.sh pre-task \\"
@@ -19052,7 +19235,7 @@
           "text": "**Launcher:** `scripts/ops/run-coderabbit-reviews.sh`"
         },
         {
-          "path": "docs/00-project/ai/prompts/specialized-prompts-2-coderabbit-audit.md",
+          "path": "docs/00-project/ai/prompts/archive/campaigns/specialized-prompts-2-coderabbit-audit.md",
           "line": 69,
           "source_group": "docs",
           "text": "- `scripts/ops/run-coderabbit-reviews.sh`"

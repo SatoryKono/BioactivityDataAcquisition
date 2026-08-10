@@ -7,10 +7,10 @@ import asyncio
 from typing import TYPE_CHECKING
 from urllib.parse import parse_qs, urlsplit
 
-from bioetl.application.runtime_clock import current_utc_time
 from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
 )
+from bioetl.application.runtime_clock import current_utc_time
 from bioetl.application.services.quality.quarantine_service import QuarantineService
 from bioetl.domain.ports import (
     CheckpointPort,

@@ -131,7 +131,9 @@ def load_card(path: Path) -> PromptCard:
             str(meta["waive_guardrails"]) if meta.get("waive_guardrails") else None
         ),
         max_body_lines=(
-            int(meta["max_body_lines"]) if meta.get("max_body_lines") is not None else None
+            int(meta["max_body_lines"])
+            if meta.get("max_body_lines") is not None
+            else None
         ),
         raw_frontmatter=meta,
     )

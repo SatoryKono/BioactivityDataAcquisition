@@ -59,9 +59,7 @@ def cmd_list(args: argparse.Namespace) -> int:
         return EXIT_OK
     for entry in entries:
         summary = f" — {entry.summary}" if entry.summary else ""
-        print(
-            f"{entry.id}  [{entry.class_}/{entry.status}]  {entry.path}{summary}"
-        )
+        print(f"{entry.id}  [{entry.class_}/{entry.status}]  {entry.path}{summary}")
     return EXIT_OK
 
 
@@ -121,7 +119,9 @@ def cmd_check(args: argparse.Namespace) -> int:
         "errors": len(reg.errors),
         "warnings": len(reg.warnings),
     }
-    sys.stdout.write(format_report(reg, title="Prompt Library check (registry + hygiene)"))
+    sys.stdout.write(
+        format_report(reg, title="Prompt Library check (registry + hygiene)")
+    )
     artifact = args.artifact or "reports/quality/prompts/check.json"
     if args.write_artifact or args.artifact:
         write_quality_artifact(reg, REPO_ROOT / artifact)
@@ -131,7 +131,9 @@ def cmd_check(args: argparse.Namespace) -> int:
 
 def cmd_catalog(args: argparse.Namespace) -> int:
     text = generate_catalog_markdown()
-    out = Path(args.output) if args.output else PROMPTS_ROOT / "generated" / "CATALOG.md"
+    out = (
+        Path(args.output) if args.output else PROMPTS_ROOT / "generated" / "CATALOG.md"
+    )
     if not out.is_absolute():
         out = REPO_ROOT / out if str(out).startswith("reports") else out
         if not out.is_absolute():
@@ -263,7 +265,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_check.set_defaults(func=cmd_check)
 
-    p_cat = sub.add_parser("catalog", help="Generate generated/CATALOG.md from REGISTRY")
+    p_cat = sub.add_parser(
+        "catalog", help="Generate generated/CATALOG.md from REGISTRY"
+    )
     p_cat.add_argument(
         "--output",
         default=None,
