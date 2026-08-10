@@ -810,6 +810,60 @@ def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
     )
 
 
+def test_short_table_panels_use_compact_cell_height() -> None:
+    """Short tables (gridPos.h ≤ 6) must use cellHeight=sm to avoid internal scroll.
+
+    Issue #8530 / UX cycle 2026-08-10: layout contracts pin many gridPos values, so
+    density is achieved via table cell height rather than growing panel height.
+    """
+    short_tables: list[tuple[str, int | str, str, int]] = []
+    violations: list[str] = []
+
+    for dashboard_path in sorted(Path("grafana/dashboards").glob("*.json")):
+        dashboard = load_dashboard(dashboard_path)
+        for panel in get_dashboard_panels(dashboard):
+            if panel.get("type") != "table":
+                continue
+            height = panel.get("gridPos", {}).get("h")
+            if not isinstance(height, int) or height > 6:
+                continue
+            panel_id = panel.get("id", "?")
+            title = panel.get("title") or f"id={panel_id}"
+            short_tables.append((dashboard_path.name, panel_id, str(title), height))
+            cell_height = panel.get("options", {}).get("cellHeight")
+            if cell_height != "sm":
+                violations.append(
+                    f"{dashboard_path.name} panel {panel_id} ({title!r}) "
+                    f"h={height} cellHeight={cell_height!r}"
+                )
+
+    assert short_tables, "expected at least one short table panel in shipped dashboards"
+    assert not violations, (
+        "short tables (h≤6) must set options.cellHeight='sm':\n"
+        + "\n".join(violations)
+    )
+
+
+def test_dq_ultra_short_timeseries_hides_legend() -> None:
+    """Ultra-short timeseries (h≤4) free vertical chrome by hiding the legend.
+
+    Issue #8530: DQ panel 153 Track Volume-Weighted DQ Score.
+    """
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("id") == 153
+        ),
+        None,
+    )
+    assert panel is not None, "DQ panel 153 must exist"
+    assert panel.get("type") == "timeseries"
+    assert panel.get("gridPos", {}).get("h") == 4
+    assert panel.get("options", {}).get("legend", {}).get("showLegend") is False
+
+
 def test_dashboard_metadata_policy_invariants() -> None:
     """Metadata should follow documented policy without mechanical suite-wide rewrites."""
     allowed_schema_versions = {30, 39}
