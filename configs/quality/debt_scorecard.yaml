@@ -457,7 +457,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 190
-      total_loc: 23077
+      total_loc: 23076
       files_ge_250_loc: 0
       helper_function_ratio: 0.363
       max_internal_fan_in: 8
@@ -487,7 +487,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 51
-      total_loc: 6310
+      total_loc: 6318
       files_ge_250_loc: 0
       helper_function_ratio: 0.325
       max_internal_fan_in: 2
@@ -540,12 +540,12 @@ hotspot_family_ratchets:
       max_internal_fan_in: 3
     metrics:
       duplication_clusters: 0
-      files: 140
-      total_loc: 15981
+      files: 156
+      total_loc: 18027
       files_ge_250_loc: 0
-      helper_function_ratio: 0.421
-      max_internal_fan_in: 3
-      max_internal_fan_in_module: bioetl.application.services.control_plane.run_manifest_reproducibility_scoring_support
+      helper_function_ratio: 0.443
+      max_internal_fan_in: 8
+      max_internal_fan_in_module: bioetl.application.services.control_plane.evidence.models
     trend:
       status: reviewed_2026-07-29_td2_02_package_reexport_trim
       next_action: 2026-07-28 ARCH-REF-03/04 reduces control_plane files_ge_250_loc to 0 and max_internal_fan_in
@@ -567,7 +567,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 56
-      total_loc: 7177
+      total_loc: 7186
       files_ge_250_loc: 0
       helper_function_ratio: 0.358
       max_internal_fan_in: 3

@@ -52,17 +52,13 @@ def test_generate_wrapper_shims_is_deterministic(tmp_path: Path) -> None:
     assert len(manifest["servers"]) == 19
     assert len(manifest["generated_files"]) == 38
     assert (tmp_path / "context7.sh").stat().st_mode & stat.S_IXUSR
-    assert "--no-upload" not in (tmp_path / "context7.sh").read_text(
-        encoding="utf-8"
-    )
+    assert "--no-upload" not in (tmp_path / "context7.sh").read_text(encoding="utf-8")
 
 
 def test_unsafe_catalog_wrapper_is_rejected(tmp_path: Path) -> None:
     catalog = tmp_path / "shared-servers.json"
     catalog.write_text(
-        json.dumps(
-            {"servers": {"safe": {"wrapper": "../escape", "wrapper_order": 1}}}
-        ),
+        json.dumps({"servers": {"safe": {"wrapper": "../escape", "wrapper_order": 1}}}),
         encoding="utf-8",
     )
     with pytest.raises(ValueError, match="unsafe wrapper stem"):
