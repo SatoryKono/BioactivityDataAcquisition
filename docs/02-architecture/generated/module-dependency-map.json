@@ -1,30 +1,30 @@
 {
   "summary": {
-    "scanned_modules": 2388,
-    "total_internal_imports": 7430,
+    "scanned_modules": 2407,
+    "total_internal_imports": 7503,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
-    "cross_layer_group_edges_total": 312,
+    "cross_layer_group_edges_total": 314,
     "violations": 0,
-    "source_fingerprint": "2cd6cd23f7bc0b8b0fdb87c1bb238691842502e3a95ff2a4b60a89554702b657"
+    "source_fingerprint": "01124565ce16c4c798337a4a6c4e3ebe6d8ba642258f029050d82dda5aff1e85"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1493,
+      "imports": 1519,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 947,
+      "imports": 971,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "application",
-      "imports": 159,
+      "imports": 161,
       "allowed": true
     },
     {
@@ -42,7 +42,7 @@
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 230,
+      "imports": 232,
       "allowed": true
     },
     {
@@ -66,7 +66,7 @@
     {
       "source": "interfaces",
       "target": "application",
-      "imports": 41,
+      "imports": 50,
       "allowed": true
     },
     {
@@ -78,13 +78,13 @@
     {
       "source": "interfaces",
       "target": "domain",
-      "imports": 59,
+      "imports": 63,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 371,
+      "imports": 377,
       "allowed": true
     }
   ],
@@ -92,7 +92,7 @@
     {
       "source": "application.services",
       "target": "domain.control_plane",
-      "imports": 119
+      "imports": 134
     },
     {
       "source": "infrastructure.adapters",
@@ -112,7 +112,7 @@
     {
       "source": "application.services",
       "target": "domain.types",
-      "imports": 79
+      "imports": 80
     },
     {
       "source": "infrastructure.storage",
@@ -147,12 +147,12 @@
     {
       "source": "application.services",
       "target": "domain.ports",
-      "imports": 40
+      "imports": 42
     },
     {
       "source": "composition.bootstrap",
       "target": "application.services",
-      "imports": 37
+      "imports": 39
     },
     {
       "source": "composition.factories",
@@ -225,6 +225,11 @@
       "imports": 22
     },
     {
+      "source": "application.services",
+      "target": "domain.lineage",
+      "imports": 22
+    },
+    {
       "source": "composition.factories",
       "target": "domain.schemas",
       "imports": 22
@@ -245,6 +250,11 @@
       "imports": 20
     },
     {
+      "source": "application.services",
+      "target": "domain.exceptions",
+      "imports": 20
+    },
+    {
       "source": "composition.bootstrap",
       "target": "application.composite",
       "imports": 20
@@ -260,19 +270,9 @@
       "imports": 20
     },
     {
-      "source": "application.services",
-      "target": "domain.exceptions",
-      "imports": 19
-    },
-    {
       "source": "composition.runtime_builders",
       "target": "infrastructure.config",
       "imports": 19
-    },
-    {
-      "source": "application.services",
-      "target": "domain.lineage",
-      "imports": 18
     },
     {
       "source": "composition.factories",
@@ -345,6 +345,16 @@
       "imports": 13
     },
     {
+      "source": "interfaces.http",
+      "target": "application.services",
+      "imports": 13
+    },
+    {
+      "source": "composition.bootstrap",
+      "target": "infrastructure.control_plane",
+      "imports": 12
+    },
+    {
       "source": "composition.factories",
       "target": "domain.behavior",
       "imports": 12
@@ -353,16 +363,6 @@
       "source": "composition.providers",
       "target": "infrastructure.adapters",
       "imports": 12
-    },
-    {
-      "source": "infrastructure.schemas",
-      "target": "domain.filtering",
-      "imports": 12
-    },
-    {
-      "source": "application.pipelines",
-      "target": "domain.normalization",
-      "imports": 11
     }
   ],
   "violations": []

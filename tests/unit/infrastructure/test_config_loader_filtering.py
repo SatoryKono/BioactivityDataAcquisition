@@ -1,9 +1,11 @@
-from unittest.mock import Mock
 import pytest
+from unittest.mock import Mock
 
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 from bioetl.infrastructure.config_loader_filtering import apply_hierarchical_filter_config
+
+pytestmark = [pytest.mark.unit]
 
 def test_apply_hierarchical_filter_config_missing_provider_entity() -> None:
     config: JsonDict = {}

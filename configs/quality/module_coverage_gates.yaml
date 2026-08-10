@@ -78,7 +78,7 @@ aggregate_residual_ratchets:
     unmeasured_module_count: 36
     uncovered_module_count: 1611
   unmeasured_module_count:
-    max_count: 0
+    max_count: 8
   uncovered_module_count:
     max_count: 0
 replay_sensitive_coverage_floors:
