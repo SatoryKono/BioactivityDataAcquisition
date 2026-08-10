@@ -541,7 +541,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 140
-      total_loc: 15986
+      total_loc: 15980
       files_ge_250_loc: 0
       helper_function_ratio: 0.421
       max_internal_fan_in: 3
@@ -567,7 +567,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 56
-      total_loc: 7186
+      total_loc: 7176
       files_ge_250_loc: 0
       helper_function_ratio: 0.358
       max_internal_fan_in: 3
@@ -908,9 +908,9 @@ retirement_governance_metrics:
       max_count: 5
       linked_issue: '#6791'
       owner: '@bioetl-architecture'
-      rationale: 'Reviewed 2026-08-10 after RF-005: five fully classified zero-import surfaces
-        (stage_accounting, three diagnostics dynamic loaders, maintenance.py external re-export). Not actionable
-        dead-code debt.'
+      rationale: 'Reviewed 2026-08-10 after RF-005: five fully classified zero-import surfaces (stage_accounting,
+        three diagnostics dynamic loaders, maintenance.py external re-export). Not actionable dead-code
+        debt.'
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh updates the classified
         candidate set intentionally.
     repo_wide_classified_zero_import_candidate_count:
@@ -934,8 +934,8 @@ retirement_governance_metrics:
       max_count: 5
       linked_issue: '#6353'
       owner: '@bioetl-architecture'
-      rationale: All five repo-wide zero-import candidates are anchored by explicit owner-test or
-        runtime-reachability evidence.
+      rationale: All five repo-wide zero-import candidates are anchored by explicit owner-test or runtime-reachability
+        evidence.
       ratchet_policy: Non-growth fail-fast unless the reviewed candidate set intentionally shrinks and
         the owner-test evidence is regenerated in lockstep.
     repo_wide_candidates_without_owner_tests_count:
@@ -943,8 +943,8 @@ retirement_governance_metrics:
       max_count: 0
       linked_issue: '#6791'
       owner: '@bioetl-architecture'
-      rationale: No classified zero-import surface remains without explicit owner-test or
-        runtime-reachability evidence.
+      rationale: No classified zero-import surface remains without explicit owner-test or runtime-reachability
+        evidence.
       ratchet_policy: Non-growth fail-fast unless the reviewed candidate set intentionally shrinks and
         owner-test evidence is added.
     repo_wide_non_static_reachability_candidate_count:
@@ -952,8 +952,8 @@ retirement_governance_metrics:
       max_count: 4
       linked_issue: '#6786'
       owner: '@bioetl-architecture'
-      rationale: Non-static reachability residue is the three dynamic diagnostics loaders and the
-        maintenance public re-export; must not grow silently.
+      rationale: Non-static reachability residue is the three dynamic diagnostics loaders and the maintenance
+        public re-export; must not grow silently.
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh intentionally
         expands the classified non-static residue.
     triaged_retained_owner_test_anchored_count:
