@@ -45,6 +45,49 @@
         }
       },
       {
+        "block_path": "hash_policy.hash_policy",
+        "fingerprint": "ebb3d5770ddb",
+        "governance": {
+          "decision": "review_required",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-architecture",
+          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 5,
+        "occurrences": [
+          {
+            "block_path": "hash_policy.hash_policy",
+            "path": "configs/entities/composite/activity.yaml",
+            "surface_kind": "entity_config"
+          },
+          {
+            "block_path": "hash_policy.hash_policy",
+            "path": "configs/entities/composite/assay.yaml",
+            "surface_kind": "entity_config"
+          },
+          {
+            "block_path": "hash_policy.hash_policy",
+            "path": "configs/entities/composite/molecule.yaml",
+            "surface_kind": "entity_config"
+          },
+          {
+            "block_path": "hash_policy.hash_policy",
+            "path": "configs/entities/composite/publication.yaml",
+            "surface_kind": "entity_config"
+          },
+          {
+            "block_path": "hash_policy.hash_policy",
+            "path": "configs/entities/composite/target.yaml",
+            "surface_kind": "entity_config"
+          }
+        ],
+        "serialized_bytes": 483,
+        "surface_kind_counts": {
+          "entity_config": 5
+        }
+      },
+      {
         "block_path": "$defs.FieldValidationConfig",
         "fingerprint": "7769fb18a6b5",
         "governance": {
@@ -510,9 +553,9 @@
     },
     "summary": {
       "affected_file_count": 17,
-      "duplicate_cluster_count": 16,
-      "duplicate_occurrence_count": 38,
-      "reported_cluster_count": 16
+      "duplicate_cluster_count": 17,
+      "duplicate_occurrence_count": 43,
+      "reported_cluster_count": 17
     }
   },
   "entity_effective": {

@@ -9,7 +9,7 @@ pipeline:
   entity_type: target
   description: Composite target entity merging data from multiple providers
   business_primary_keys:
-    - entity_id
+  - entity_id
   sink:
     silver:
       mode: merge
@@ -21,172 +21,172 @@ schema:
     include: []
     exclude: []
   column_groups:
-    - name: system
-      fields:
-        - entity_id
-        - content_hash
-        - _source
-        - _index
-        - _lookup_method
-        - _original_id
-      pattern: ^_composite_|^_source_providers|^_enrichment_|^_lineage_|^_dq_
-      provider_order:
-        - chembl
-        - uniprot
-    - name: identifiers
-      fields:
-        - target_id
-        - primary_component_id
-        - uniprot_accession
-        - mapping_status
-      provider_order:
-        - chembl
-        - uniprot
-    - name: classification
-      fields:
-        - target_type
-        - organism
-        - taxonomy_id
-        - species_group_flag
-      provider_order:
-        - chembl
-    - name: descriptors
-      fields:
-        - pref_name
-        - target_description
-      provider_order:
-        - chembl
-    - name: components
-      fields:
-        - component_ids
-        - component_accessions
-        - component_types
-        - component_relationships
-        - component_descriptions
-        - component_organisms
-        - component_taxonomy_ids
-        - target_component_synonyms
-      provider_order:
-        - chembl
-    - name: enriched_components
-      fields:
-        - component_type
-        - component_description
-        - protein_classification_id
-        - protein_classification_ids
-      provider_order:
-        - chembl
-    - name: protein_classification_summary
-      fields:
-        - protein_classifications
-        - target_protein_class_id_L1
-        - target_protein_class_name_L1
-        - target_protein_class_desc_L1
-        - target_protein_class_id_L2
-        - target_protein_class_name_L2
-        - target_protein_class_desc_L2
-        - target_protein_class_id_L3
-        - target_protein_class_name_L3
-        - target_protein_class_desc_L3
-        - target_protein_class_id_L4
-        - target_protein_class_name_L4
-        - target_protein_class_desc_L4
-        - target_protein_class_id_L5
-        - target_protein_class_name_L5
-        - target_protein_class_desc_L5
-        - target_protein_class_type
-        - top_level_count
-        - canonical_top_levels
-        - counted_top_levels
-        - ignored_top_levels
-        - primary_top_level
-        - target_type_reason_code
-        - multifunctional_origin
-        - major_family
-        - major_family_rule_version
-        - target_type_rule_version
-        - l1_mapping_version
-      provider_order:
-        - chembl
-    - name: protein_function
-      fields:
-        - function_comment
-        - catalytic_activity
-        - activity_regulation
-        - pathway
-        - subcellular_location
-        - tissue_specificity
-        - subunit
-      provider_order:
-        - uniprot
-    - name: disease_pharma
-      fields:
-        - disease_involvement
-        - drugbank_ids
-        - guidetopharmacology_ids
-        - chembl_ids
-      provider_order:
-        - uniprot
-    - name: ontology_structure
-      fields:
-        - go_terms
-        - pdb_xrefs
-        - interpro_xrefs
-        - pfam_xrefs
-        - reactome_xrefs
-        - keywords
-      provider_order:
-        - uniprot
-    - name: protein_properties
-      fields:
-        - protein_name
-        - gene_primary
-        - protein_existence
-        - annotation_score
-        - reviewed
-        - sequence_length
-        - sequence_mass
-      provider_order:
-        - uniprot
+  - name: system
+    fields:
+    - entity_id
+    - content_hash
+    - _source
+    - _index
+    - _lookup_method
+    - _original_id
+    pattern: ^_composite_|^_source_providers|^_enrichment_|^_lineage_|^_dq_
+    provider_order:
+    - chembl
+    - uniprot
+  - name: identifiers
+    fields:
+    - target_id
+    - primary_component_id
+    - uniprot_accession
+    - mapping_status
+    provider_order:
+    - chembl
+    - uniprot
+  - name: classification
+    fields:
+    - target_type
+    - organism
+    - taxonomy_id
+    - species_group_flag
+    provider_order:
+    - chembl
+  - name: descriptors
+    fields:
+    - pref_name
+    - target_description
+    provider_order:
+    - chembl
+  - name: components
+    fields:
+    - component_ids
+    - component_accessions
+    - component_types
+    - component_relationships
+    - component_descriptions
+    - component_organisms
+    - component_taxonomy_ids
+    - target_component_synonyms
+    provider_order:
+    - chembl
+  - name: enriched_components
+    fields:
+    - component_type
+    - component_description
+    - protein_classification_id
+    - protein_classification_ids
+    provider_order:
+    - chembl
+  - name: protein_classification_summary
+    fields:
+    - protein_classifications
+    - target_protein_class_id_L1
+    - target_protein_class_name_L1
+    - target_protein_class_desc_L1
+    - target_protein_class_id_L2
+    - target_protein_class_name_L2
+    - target_protein_class_desc_L2
+    - target_protein_class_id_L3
+    - target_protein_class_name_L3
+    - target_protein_class_desc_L3
+    - target_protein_class_id_L4
+    - target_protein_class_name_L4
+    - target_protein_class_desc_L4
+    - target_protein_class_id_L5
+    - target_protein_class_name_L5
+    - target_protein_class_desc_L5
+    - target_protein_class_type
+    - top_level_count
+    - canonical_top_levels
+    - counted_top_levels
+    - ignored_top_levels
+    - primary_top_level
+    - target_type_reason_code
+    - multifunctional_origin
+    - major_family
+    - major_family_rule_version
+    - target_type_rule_version
+    - l1_mapping_version
+    provider_order:
+    - chembl
+  - name: protein_function
+    fields:
+    - function_comment
+    - catalytic_activity
+    - activity_regulation
+    - pathway
+    - subcellular_location
+    - tissue_specificity
+    - subunit
+    provider_order:
+    - uniprot
+  - name: disease_pharma
+    fields:
+    - disease_involvement
+    - drugbank_ids
+    - guidetopharmacology_ids
+    - chembl_ids
+    provider_order:
+    - uniprot
+  - name: ontology_structure
+    fields:
+    - go_terms
+    - pdb_xrefs
+    - interpro_xrefs
+    - pfam_xrefs
+    - reactome_xrefs
+    - keywords
+    provider_order:
+    - uniprot
+  - name: protein_properties
+    fields:
+    - protein_name
+    - gene_primary
+    - protein_existence
+    - annotation_score
+    - reviewed
+    - sequence_length
+    - sequence_mass
+    provider_order:
+    - uniprot
   silver:
     include_groups:
-      - system
-      - identifiers
-      - classification
-      - descriptors
-      - components
-      - enriched_components
-      - protein_classification_summary
-      - protein_function
-      - disease_pharma
-      - ontology_structure
-      - protein_properties
+    - system
+    - identifiers
+    - classification
+    - descriptors
+    - components
+    - enriched_components
+    - protein_classification_summary
+    - protein_function
+    - disease_pharma
+    - ontology_structure
+    - protein_properties
     exclude_fields: []
   gold:
     include_groups:
-      - system
-      - identifiers
-      - classification
-      - descriptors
-      - components
-      - enriched_components
-      - protein_classification_summary
-      - protein_function
-      - disease_pharma
-      - ontology_structure
-      - protein_properties
+    - system
+    - identifiers
+    - classification
+    - descriptors
+    - components
+    - enriched_components
+    - protein_classification_summary
+    - protein_function
+    - disease_pharma
+    - ontology_structure
+    - protein_properties
     exclude_fields:
-      - _dq_*
-      - _index
-      - _lookup_method
-      - _original_id
+    - _dq_*
+    - _index
+    - _lookup_method
+    - _original_id
 quality:
   version: 1.0.0
   provider: composite
   entity: target
   thresholds:
     soft_fail: 0.05
-    hard_fail: 0.50
+    hard_fail: 0.5
   entity_field_validations: []
   entity_cross_field_validations: []
 filters:
@@ -202,19 +202,58 @@ filters:
     checkpoint_interval: 1000
   silver_filters:
     required_fields:
-      - entity_id
-      - target_id
+    - entity_id
+    - target_id
   gold_filters:
     required_fields:
-      - entity_id
-      - target_id
+    - entity_id
+    - target_id
 contracts:
   primary_key:
-    - entity_id
+  - entity_id
   merge_keys:
-    - entity_id
+  - entity_id
   hash_include: []
   hash_exclude: []
   contract_ref: composite.target
   active_version: 1.0.0
+  rollout:
+    mode: single
+    read_order:
+    - 1.0.0
+    write_versions:
+    - 1.0.0
+    affects_hash: false
 status: active
+hash_policy:
+  provider: composite
+  entity: target
+  contract:
+    version: 1.0.0
+    migration_note: 'Composite entity contract identity explicit for issue #5509.'
+  hash_policy:
+    algorithm: sha256
+    canonicalization: provider + canonical_json_dumps(normalized_record)
+    include_fields:
+    - entity_id
+    exclude_fields:
+    - _ingestion_ts
+    - _run_id
+    - _run_type
+    - _dq_warn
+    - _dq_error
+    - _source_batch_id
+    - _index
+    exclude_patterns:
+    - ^_dq_
+    normalization:
+      trim_strings: true
+      round_floats:
+        enabled: true
+        precision: 10
+      dates:
+        enabled: true
+        format: YYYY-MM-DD
+      null_handling:
+        nan_to_null: true
+        inf_to_null: true
