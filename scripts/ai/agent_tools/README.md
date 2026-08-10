@@ -45,6 +45,11 @@ Stable exit codes are `0` (completed), `2` (invalid input), `3` (unavailable),
 `7` (malformed vendor output). ProofAgent's own `NOT_READY` exit code is
 normalized into an advisory `FAIL` verdict, not a BioETL process failure.
 
+Completed adapter summaries include `optional_evaluator_evidence` with the
+bounded source binding used by the run. This block is structurally suitable for
+review evidence transport, but is deliberately marked `receipt_eligible: false`
+and cannot satisfy a required Proof-or-Stop receipt.
+
 Inputs are restricted to `tests/fixtures/agent-tools/` and
 `reports/ai/agent-tools/inputs/`. Results are written only below
 `reports/ai/agent-tools/<tool>/<task-id>/`. Captured output is redacted and
@@ -62,4 +67,3 @@ python -m pip uninstall agentdebugx proofagent-harness
 
 Removing these packages requires no code or configuration rollback because the
 adapters detect `UNAVAILABLE` and core BioETL execution does not import them.
-
