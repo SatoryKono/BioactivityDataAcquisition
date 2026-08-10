@@ -143,4 +143,3 @@ def ensure_user_executable(
         return
     current_mode = path.stat().st_mode
     path.chmod(current_mode | stat.S_IXUSR)
-
