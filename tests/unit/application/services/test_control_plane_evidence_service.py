@@ -200,9 +200,7 @@ def test_manifest_validation_does_not_overclaim_registry_compatibility() -> None
 
 
 def test_manifest_validation_rejects_unknown_persistence_profile() -> None:
-    manifest = _manifest(
-        launch_context={"required_persistence_profile": "replay_redy"}
-    )
+    manifest = _manifest(launch_context={"required_persistence_profile": "replay_redy"})
 
     payload = ControlPlaneEvidenceService().manifest_validation(scope=_scope(manifest))
 
@@ -296,8 +294,8 @@ def test_lineage_validation_detects_conflicting_node_definitions() -> None:
 @pytest.mark.parametrize(
     ("profile", "expected_status", "profile_reason"),
     (
-        ("degraded_observable", "UNKNOWN", "lineage_persistence_profile_degraded"),
-        ("replay_ready", "UNKNOWN", "lineage_persistence_profile_degraded"),
+        ("degraded_observable", "WARNING", "lineage_persistence_profile_degraded"),
+        ("replay_ready", "WARNING", "lineage_persistence_profile_degraded"),
         ("forensic_grade", "ERROR", "lineage_persistence_profile_unsatisfied"),
         ("replay_redy", "ERROR", "lineage_persistence_profile_unsupported"),
     ),

@@ -65,4 +65,3 @@ async def test_selected_run_not_found_never_falls_back_to_latest_checkpoint() ->
 
     assert evidence == (None, "selected_run_id_not_found", None, False)
     assert port.calls == []
-

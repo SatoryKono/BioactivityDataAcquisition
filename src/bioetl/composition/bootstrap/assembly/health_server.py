@@ -25,6 +25,9 @@ from bioetl.domain.ports import (
     RunManifestPort,
     WorkflowManifestPort,
 )
+from bioetl.domain.ports.control_plane.run_manifest import (
+    RawRunManifestInspectionPort,
+)
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.control_plane.file_artifact_lifecycle_store import (
     FileControlPlaneArtifactLifecycleStore,
@@ -155,6 +158,14 @@ def create_health_server_dependencies(
         control_plane_evidence_service=ControlPlaneEvidenceService(
             ledger_port=control_plane_ports.ledger_port,
             lineage_store=control_plane_ports.lineage_port,
+            manifest_inspector=(
+                control_plane_ports.manifest_port
+                if isinstance(
+                    control_plane_ports.manifest_port,
+                    RawRunManifestInspectionPort,
+                )
+                else None
+            ),
             lifecycle_planner=FileControlPlaneArtifactLifecycleStore(
                 base_path=resolved_data_root / "output" / "control",
                 metrics=resolved_metrics,

@@ -3,14 +3,17 @@
 from __future__ import annotations
 
 from bioetl.domain.control_plane import RunManifest
+from bioetl.domain.control_plane.reproducibility_policy import (
+    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+    STRICT_PERSISTENCE_PROFILES,
+)
 
-DEFAULT_PERSISTENCE_PROFILE = "degraded_observable"
+DEFAULT_PERSISTENCE_PROFILE = DEFAULT_REQUIRED_PERSISTENCE_PROFILE
 PERSISTENCE_PROFILES = (
-    DEFAULT_PERSISTENCE_PROFILE,
+    "degraded_observable",
     "replay_ready",
     "forensic_grade",
 )
-STRICT_PERSISTENCE_PROFILES = frozenset({"replay_ready", "forensic_grade"})
 
 
 def resolve_persistence_profile(manifest: RunManifest) -> tuple[str, bool]:

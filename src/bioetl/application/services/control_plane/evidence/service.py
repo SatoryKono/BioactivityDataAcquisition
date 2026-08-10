@@ -35,6 +35,9 @@ from bioetl.application.services.control_plane.evidence.service_support import (
 )
 from bioetl.domain.control_plane import ControlPlaneArtifactLifecyclePolicy
 from bioetl.domain.ports import LineageStorePort, RunLedgerPort
+from bioetl.domain.ports.control_plane.run_manifest import (
+    RawRunManifestInspectionPort,
+)
 
 DEFAULT_CONTROL_PLANE_RETENTION_DAYS = 90
 
@@ -46,6 +49,7 @@ class ControlPlaneEvidenceService:
     ledger_port: RunLedgerPort | None = None
     lineage_store: LineageStorePort | None = None
     lifecycle_planner: ControlPlaneLifecyclePlanner | None = None
+    manifest_inspector: RawRunManifestInspectionPort | None = None
     retention_days: int = DEFAULT_CONTROL_PLANE_RETENTION_DAYS
 
     def checkpoint_validation(
@@ -80,7 +84,12 @@ class ControlPlaneEvidenceService:
         checks = (
             (unresolved_scope_check(scope.resolved_via),)
             if scope.manifest is None
-            else build_manifest_checks(scope.manifest)
+            else build_manifest_checks(
+                scope.manifest,
+                self.manifest_inspector.inspect_raw_manifest(scope.manifest.manifest_id)
+                if self.manifest_inspector is not None
+                else None,
+            )
         )
         return service_payload(
             endpoint="manifest-validation",

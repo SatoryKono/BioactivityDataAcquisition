@@ -8,28 +8,106 @@ from bioetl.application.services.control_plane.evidence.persistence_profile impo
     resolve_persistence_profile,
 )
 from bioetl.domain.control_plane import RunManifest
+from bioetl.domain.ports.control_plane.run_manifest import RawManifestInspection
 
 SUPPORTED_RUN_MANIFEST_SCHEMA_MAJOR = "1"
 
 
-def build_manifest_checks(manifest: RunManifest) -> tuple[EvidenceCheck, ...]:
+def build_manifest_checks(
+    manifest: RunManifest,
+    inspection: RawManifestInspection | None = None,
+) -> tuple[EvidenceCheck, ...]:
     """Validate typed manifest shape, schema compatibility, and contract anchors."""
+    return (
+        *_raw_manifest_checks(inspection),
+        _schema_version_check(manifest.schema_version),
+        _persistence_profile_check(manifest),
+        _contract_check(_missing_contract_anchors(manifest)),
+    )
+
+
+def _raw_manifest_checks(
+    inspection: RawManifestInspection | None,
+) -> tuple[EvidenceCheck, ...]:
+    if inspection is None:
+        return (
+            EvidenceCheck(
+                "parse",
+                "UNKNOWN",
+                "manifest_raw_inspection_unavailable",
+                "The persisted raw manifest payload was not inspected.",
+            ),
+            EvidenceCheck(
+                "schema",
+                "UNKNOWN",
+                "manifest_raw_schema_not_verified",
+                "Raw manifest schema compatibility was not verified.",
+            ),
+        )
+    if not inspection.parse_ok:
+        reason = (
+            inspection.schema_errors[0]
+            if inspection.schema_errors
+            else "manifest_parse_error"
+        )
+        return (
+            EvidenceCheck(
+                "parse",
+                "ERROR",
+                reason,
+                "The persisted manifest payload could not be parsed.",
+            ),
+            EvidenceCheck(
+                "schema",
+                "UNKNOWN",
+                "manifest_raw_schema_not_observable",
+                "Raw schema validation requires a parsed manifest object.",
+            ),
+        )
+    if not inspection.schema_errors:
+        return (
+            EvidenceCheck(
+                "parse",
+                "OK",
+                "manifest_parse_ok",
+                "The persisted manifest contains a JSON object.",
+            ),
+            EvidenceCheck(
+                "schema",
+                "OK",
+                "manifest_schema_valid",
+                "The raw manifest satisfies the supported persisted schema.",
+            ),
+        )
+    schema_checks = tuple(
+        EvidenceCheck(
+            "schema",
+            "ERROR",
+            reason,
+            "A persisted manifest field violates its bounded raw-schema contract.",
+        )
+        for reason in inspection.schema_errors[:12]
+    )
     return (
         EvidenceCheck(
             "parse",
             "OK",
             "manifest_parse_ok",
-            "The manifest store parsed the persisted JSON payload.",
+            "The persisted manifest contains a JSON object.",
         ),
-        EvidenceCheck(
-            "schema",
-            "OK",
-            "manifest_schema_valid",
-            "Typed manifest invariants and required identity fields are valid.",
+        *schema_checks,
+        *(
+            (
+                EvidenceCheck(
+                    "schema",
+                    "ERROR",
+                    "manifest_raw_schema_additional_errors",
+                    "Additional bounded raw-schema violations were omitted.",
+                ),
+            )
+            if len(inspection.schema_errors) > 12
+            else ()
         ),
-        _schema_version_check(manifest.schema_version),
-        _persistence_profile_check(manifest),
-        _contract_check(_missing_contract_anchors(manifest)),
     )
 
 

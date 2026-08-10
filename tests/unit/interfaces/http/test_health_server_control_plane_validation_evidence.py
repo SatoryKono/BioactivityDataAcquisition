@@ -21,6 +21,9 @@ from bioetl.infrastructure.control_plane.file_artifact_lifecycle_store import (
     FileControlPlaneArtifactLifecycleStore,
 )
 from bioetl.infrastructure.control_plane.file_lineage_store import FileLineageStore
+from bioetl.infrastructure.control_plane.file_run_manifest_store import (
+    FileRunManifestStore,
+)
 from bioetl.interfaces.http.health_server import HealthServer
 from tests.helpers.control_plane import InMemoryRunLedgerStore, InMemoryRunManifestStore
 
@@ -167,6 +170,57 @@ async def test_checkpoint_parse_failure_has_stable_reason_without_raw_error() ->
             row.get("reason") == "checkpoint_parse_error" for row in payload["rows"]
         )
         assert "raw corrupt checkpoint secret" not in str(payload)
+    finally:
+        await server.stop()
+
+
+@pytest.mark.asyncio
+async def test_manifest_endpoint_reports_raw_schema_errors_before_coercion(
+    tmp_path,
+) -> None:
+    manifest = _manifest()
+    manifests = FileRunManifestStore(tmp_path / "control" / "run_manifest")
+    manifests.save(manifest)
+    manifest_path = manifests.base_path / f"{manifest.manifest_id}.json"
+    raw = json.loads(manifest_path.read_text(encoding="utf-8"))
+    raw.update(
+        {
+            "pipeline_name": {"raw": "secret"},
+            "provider": ["chembl"],
+            "entity": 42,
+            "launch_context": "wrong-shape",
+            "source_refs": {"wrong": "shape"},
+        }
+    )
+    manifest_path.write_text(json.dumps(raw), encoding="utf-8")
+    server = HealthServer(
+        host="127.0.0.1",
+        port=0,
+        run_manifest_port=manifests,
+        control_plane_evidence_service=ControlPlaneEvidenceService(
+            manifest_inspector=manifests
+        ),
+    )
+    await server.start()
+    try:
+        status, payload = await _get_json(
+            server,
+            "/ops/control-plane/manifest-validation?pipeline=chembl_activity"
+            f"&run_id={manifest.run_id}",
+        )
+
+        reasons = {row["reason"] for row in payload["rows"]}
+        assert status == 200
+        assert payload["status"] == "ERROR"
+        assert {
+            "manifest_pipeline_name_not_string",
+            "manifest_provider_not_string",
+            "manifest_entity_not_string",
+            "manifest_launch_context_not_object",
+            "manifest_source_refs_not_array",
+        } <= reasons
+        assert "secret" not in str(payload)
+        assert "wrong-shape" not in str(payload)
     finally:
         await server.stop()
 
