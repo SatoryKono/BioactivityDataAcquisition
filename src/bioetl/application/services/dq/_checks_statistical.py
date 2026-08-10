@@ -58,7 +58,7 @@ def _build_null_rate_metric(
     if baseline_null_rate is None:
         return None
 
-    total_nulls = sum(df[col].null_count() for col in df.columns)
+    total_nulls = sum(df.null_count().row(0)) if df.columns else 0
     total_cells = len(df) * len(df.columns)
     current_null_rate = total_nulls / total_cells if total_cells > 0 else 0.0
     ratio = current_null_rate / baseline_null_rate if baseline_null_rate > 0 else 1.0
@@ -141,7 +141,7 @@ def _build_null_rate_anomaly_metric(
     baseline_stats: JsonDict,
 ) -> AnomalyMetric:
     """Build null-rate anomaly metric."""
-    total_nulls = sum(df[col].null_count() for col in df.columns)
+    total_nulls = sum(df.null_count().row(0)) if df.columns else 0
     total_cells = len(df) * len(df.columns)
     current_null_rate = total_nulls / total_cells if total_cells > 0 else 0.0
     baseline_null_rate = baseline_stats.get("null_rate_ma30", current_null_rate)
