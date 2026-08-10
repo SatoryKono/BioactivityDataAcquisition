@@ -12,6 +12,7 @@
 
 from __future__ import annotations
 
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -58,3 +59,13 @@ def test_module_coverage_gates_branch_policy_matches_matrix() -> None:
     assert int(gates["branch_coverage"]["hard_gate_threshold_percent"]) == 85
     assert int(surface["threshold_policy"]["hard_branch_coverage_threshold"]) == 85
     assert surface["threshold_policy"]["enforced_in_job"] == "coverage-verify"
+
+
+@pytest.mark.architecture
+def test_typing_stub_partial_branch_policy_is_narrow() -> None:
+    """Typing stubs may suppress only their impossible alternate branch."""
+    pyproject = tomllib.loads((_REPO / "pyproject.toml").read_text(encoding="utf-8"))
+
+    assert pyproject["tool"]["coverage"]["report"]["partial_also"] == [
+        r"^\s*(?:async\s+)?def .*:\s*\.\.\.$"
+    ]

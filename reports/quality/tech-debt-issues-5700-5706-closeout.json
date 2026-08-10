@@ -90,13 +90,13 @@
       "workflow_contains_strict_preflight": true
     },
     "5701": {
-      "coverage_actual_percent": 92.44,
+      "coverage_actual_percent": 95.24,
       "coverage_percent_fallback_used": true,
       "coverage_xml_present": false,
-      "refreshed_at_utc": "2026-08-05T15:47:40.312973+00:00",
+      "refreshed_at_utc": "2026-08-07T13:33:52.973234+00:00",
       "slowest_total_cases": 46742,
-      "source_commit": "6e73ceacc72fd8c68b0c2c62d671b199287b6976",
-      "source_run_id": "local-duration-rebuild-2026-07-23",
+      "source_commit": "da9712f7ea64a93eea392beea9daaa758236faea",
+      "source_run_id": "merge-resolve-8216-20260806",
       "top_slow_zone": {
         "zone": "tests.unit.scripts.docs.passports.test_passport_projector",
         "test_count": 12,
@@ -129,7 +129,7 @@
       "topology_guard_owner": "tests/architecture/test_test_topology_canonical_paths.py"
     },
     "5705": {
-      "direct_reachable_cassette_count": 128,
+      "direct_reachable_cassette_count": 109,
       "generated_reachable_cassette_count": 69,
       "metadata_review_required_cassette_count": 0,
       "metadata_reviewed_count": 0,
@@ -190,7 +190,7 @@
       ],
       "under_70_count": 15,
       "under_85_count": 68,
-      "unmeasured_count": 0,
+      "unmeasured_count": 17,
       "zero_coverage_count": 0
     }
   },
