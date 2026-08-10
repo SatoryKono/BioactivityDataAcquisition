@@ -47,4 +47,3 @@ server-specific `.sh` and `.ps1` files remain compatibility implementations
 during the migration; their catalog pairing is enforced in CI. A new shared
 server must add one catalog entry and both implementation variants until that
 server has a platform-neutral Python backend.
-
