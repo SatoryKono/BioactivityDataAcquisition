@@ -11,6 +11,7 @@
 %% @date 2026-07-28
 %% @type flowchart
 %% @level system
+%%{init: {'layout': 'elk'}}%%
 flowchart TD
     Start([Start CrossRef extract]) --> Client[UnifiedHTTPClient ADR-032]
     Client --> RL{Rate limit OK?}
