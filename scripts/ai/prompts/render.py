@@ -147,11 +147,7 @@ def generate_catalog_markdown(
         "",
         "# Prompt Library Catalog",
         "",
-        f"Source: `{PROMPTS_ROOT.relative_to(PROMPTS_ROOT.parents[3]) / 'REGISTRY.yaml'}`".replace(
-            "\\", "/"
-        )
-        if False
-        else "Source: `docs/00-project/ai/prompts/REGISTRY.yaml`",
+        "Source: `docs/00-project/ai/prompts/REGISTRY.yaml`",
         "",
         "Operator paste templates and fragments. Not runtime SSOT.",
         "",
