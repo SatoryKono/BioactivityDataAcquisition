@@ -36,11 +36,13 @@ python -m scripts.engineering.baselines dq-baseline --dry-run
 python -m scripts.engineering.dev migrate-deprecated-names src/
 ```
 
-For manual, non-gating structural inspection, the bounded supporting utilities
-`scripts/engineering/qa/count_source_lines.py` and
-`scripts/engineering/qa/get_large_modules.py` remain available. Their output is
-diagnostic only; committed module-coverage and hotspot artifacts remain the
-authoritative quality inputs.
+The former ad hoc `count_source_lines.py` and `get_large_modules.py` utilities
+have been retired. Use `reports/quality/module-coverage-inventory.json`
+(`source_lines` per module) for module sizing and
+`reports/quality/hotspot-family-baseline.json` for governed hotspot review;
+refresh or validate them through `report-module-coverage` and
+`report-family-baseline`. These committed artifacts remain the authoritative
+quality inputs.
 
 ## Catalog
 
