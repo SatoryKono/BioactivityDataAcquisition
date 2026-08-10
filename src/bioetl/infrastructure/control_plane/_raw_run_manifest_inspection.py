@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Protocol, cast
 from uuid import UUID
 
-from bioetl.domain.ports.control_plane.run_manifest import RawManifestInspection
+from bioetl.domain.ports import RawManifestInspection
 from bioetl.domain.serialization import deserialize_from_json
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.control_plane._raw_run_manifest_nested_validation import (
