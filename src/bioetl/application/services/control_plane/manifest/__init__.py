@@ -11,7 +11,7 @@ from typing import Any
 
 __all__ = [
     "ControlPlaneIntegrityMetricsService",
-    "ManifestLedgerIntegrityScope",
+    "ManifestLedgerIntegritySummary",
     "RunManifestCreateSpec",
     "RunManifestDiffEntry",
     "RunManifestDiffResult",
@@ -29,9 +29,9 @@ _EXPORTS: dict[str, tuple[str, str]] = {
         "bioetl.application.services.control_plane.manifest.integrity_metrics",
         "ControlPlaneIntegrityMetricsService",
     ),
-    "ManifestLedgerIntegrityScope": (
+    "ManifestLedgerIntegritySummary": (
         "bioetl.application.services.control_plane.manifest.integrity_metrics",
-        "ManifestLedgerIntegrityScope",
+        "ManifestLedgerIntegritySummary",
     ),
     "RunManifestCreateSpec": (
         "bioetl.application.services.control_plane.manifest.models",

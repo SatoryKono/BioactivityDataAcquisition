@@ -5,7 +5,9 @@ from __future__ import annotations
 from collections.abc import Iterable
 from typing import Protocol
 
-from bioetl.application.services.control_plane.evidence.models import EvidenceCheck
+from bioetl.application.observability.control_plane_evidence import (
+    EvidenceCheckResult,
+)
 from bioetl.application.services.control_plane.evidence.retention_checks import (
     retention_evidence_checks,
 )
@@ -32,7 +34,7 @@ def build_retention_checks(
     *,
     manifest: RunManifest,
     plan: ControlPlaneArtifactLifecyclePlan,
-) -> tuple[tuple[EvidenceCheck, ...], tuple[ControlPlaneArtifactRef, ...]]:
+) -> tuple[tuple[EvidenceCheckResult, ...], tuple[ControlPlaneArtifactRef, ...]]:
     """Classify lifecycle-plan evidence for one manifest without applying it."""
     relevant = tuple(
         artifact

@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.evidence.models import EvidenceCheck
+from bioetl.application.observability.control_plane_evidence import (
+    EvidenceCheckResult,
+)
 from bioetl.application.services.control_plane.evidence.persistence_profile import (
     STRICT_PERSISTENCE_PROFILES,
     resolve_persistence_profile,
@@ -16,7 +18,7 @@ SUPPORTED_RUN_MANIFEST_SCHEMA_MAJOR = "1"
 def build_manifest_checks(
     manifest: RunManifest,
     inspection: RawManifestInspection | None = None,
-) -> tuple[EvidenceCheck, ...]:
+) -> tuple[EvidenceCheckResult, ...]:
     """Validate typed manifest shape, schema compatibility, and contract anchors."""
     return (
         *_raw_manifest_checks(inspection),
@@ -28,16 +30,16 @@ def build_manifest_checks(
 
 def _raw_manifest_checks(
     inspection: RawManifestInspection | None,
-) -> tuple[EvidenceCheck, ...]:
+) -> tuple[EvidenceCheckResult, ...]:
     if inspection is None:
         return (
-            EvidenceCheck(
+            EvidenceCheckResult(
                 "parse",
                 "UNKNOWN",
                 "manifest_raw_inspection_unavailable",
                 "The persisted raw manifest payload was not inspected.",
             ),
-            EvidenceCheck(
+            EvidenceCheckResult(
                 "schema",
                 "UNKNOWN",
                 "manifest_raw_schema_not_verified",
@@ -51,13 +53,13 @@ def _raw_manifest_checks(
             else "manifest_parse_error"
         )
         return (
-            EvidenceCheck(
+            EvidenceCheckResult(
                 "parse",
                 "ERROR",
                 reason,
                 "The persisted manifest payload could not be parsed.",
             ),
-            EvidenceCheck(
+            EvidenceCheckResult(
                 "schema",
                 "UNKNOWN",
                 "manifest_raw_schema_not_observable",
@@ -66,13 +68,13 @@ def _raw_manifest_checks(
         )
     if not inspection.schema_errors:
         return (
-            EvidenceCheck(
+            EvidenceCheckResult(
                 "parse",
                 "OK",
                 "manifest_parse_ok",
                 "The persisted manifest contains a JSON object.",
             ),
-            EvidenceCheck(
+            EvidenceCheckResult(
                 "schema",
                 "OK",
                 "manifest_schema_valid",
@@ -80,7 +82,7 @@ def _raw_manifest_checks(
             ),
         )
     schema_checks = tuple(
-        EvidenceCheck(
+        EvidenceCheckResult(
             "schema",
             "ERROR",
             reason,
@@ -89,7 +91,7 @@ def _raw_manifest_checks(
         for reason in inspection.schema_errors[:12]
     )
     return (
-        EvidenceCheck(
+        EvidenceCheckResult(
             "parse",
             "OK",
             "manifest_parse_ok",
@@ -98,7 +100,7 @@ def _raw_manifest_checks(
         *schema_checks,
         *(
             (
-                EvidenceCheck(
+                EvidenceCheckResult(
                     "schema",
                     "ERROR",
                     "manifest_raw_schema_additional_errors",
@@ -111,18 +113,18 @@ def _raw_manifest_checks(
     )
 
 
-def _schema_version_check(schema_version: str) -> EvidenceCheck:
+def _schema_version_check(schema_version: str) -> EvidenceCheckResult:
     compatible = (
         schema_version.split(".", maxsplit=1)[0] == SUPPORTED_RUN_MANIFEST_SCHEMA_MAJOR
     )
     if compatible:
-        return EvidenceCheck(
+        return EvidenceCheckResult(
             "schema_version",
             "OK",
             "manifest_schema_version_compatible",
             "Manifest schema major version is supported.",
         )
-    return EvidenceCheck(
+    return EvidenceCheckResult(
         "schema_version",
         "ERROR",
         "manifest_schema_version_incompatible",
@@ -146,16 +148,16 @@ def _missing_contract_anchors(manifest: RunManifest) -> list[str]:
     return [name for name in fields if not str(getattr(provenance, name) or "").strip()]
 
 
-def _persistence_profile_check(manifest: RunManifest) -> EvidenceCheck:
+def _persistence_profile_check(manifest: RunManifest) -> EvidenceCheckResult:
     _, profile_valid = resolve_persistence_profile(manifest)
     if profile_valid:
-        return EvidenceCheck(
+        return EvidenceCheckResult(
             "persistence_profile",
             "OK",
             "manifest_persistence_profile_supported",
             "The required persistence profile belongs to the supported vocabulary.",
         )
-    return EvidenceCheck(
+    return EvidenceCheckResult(
         "persistence_profile",
         "ERROR",
         "manifest_persistence_profile_unsupported",
@@ -163,15 +165,15 @@ def _persistence_profile_check(manifest: RunManifest) -> EvidenceCheck:
     )
 
 
-def _contract_check(missing: list[str]) -> EvidenceCheck:
+def _contract_check(missing: list[str]) -> EvidenceCheckResult:
     if missing:
-        return EvidenceCheck(
+        return EvidenceCheckResult(
             "contract_compatibility",
             "ERROR",
             "manifest_contract_anchors_incomplete",
             "Required contract anchors are absent: " + ", ".join(sorted(set(missing))),
         )
-    return EvidenceCheck(
+    return EvidenceCheckResult(
         "contract_compatibility",
         "UNKNOWN",
         "manifest_contract_compatibility_not_verified",

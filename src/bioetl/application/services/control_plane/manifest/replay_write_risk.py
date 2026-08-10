@@ -16,14 +16,16 @@ if TYPE_CHECKING:
 REPLAY_WRITE_RISK_METRIC = "bioetl_replay_duplicate_overwrite_risk_total"
 
 
-class ReplayWriteRiskType(StrEnum):
+class ReplayWriteRiskClassification(StrEnum):
     """Bounded replay write-risk vocabulary exposed to Prometheus."""
 
     DUPLICATE = "duplicate"
     OVERWRITE = "overwrite"
 
 
-_RISK_TYPES: tuple[ReplayWriteRiskType, ...] = tuple(ReplayWriteRiskType)
+_RISK_TYPES: tuple[ReplayWriteRiskClassification, ...] = tuple(
+    ReplayWriteRiskClassification
+)
 _REPLAY_MODES = frozenset({"exact_replay", "rebuild", "replay", "resume"})
 _CLEAR_POLICIES = frozenset({"both", "gold", "silver", "silver_and_gold"})
 
@@ -145,15 +147,21 @@ def _has_overwrite_risk(
 
 def assess_replay_write_risks(
     manifest: RunManifest,
-) -> frozenset[ReplayWriteRiskType]:
+) -> frozenset[ReplayWriteRiskClassification]:
     """Classify duplicate/overwrite exposure for one accepted replay manifest."""
     if not _is_reprocessing_manifest(manifest):
         return frozenset()
 
     modes = _iter_sink_modes(manifest)
     risk_checks = (
-        (ReplayWriteRiskType.DUPLICATE, _has_duplicate_risk(manifest, modes)),
-        (ReplayWriteRiskType.OVERWRITE, _has_overwrite_risk(manifest, modes)),
+        (
+            ReplayWriteRiskClassification.DUPLICATE,
+            _has_duplicate_risk(manifest, modes),
+        ),
+        (
+            ReplayWriteRiskClassification.OVERWRITE,
+            _has_overwrite_risk(manifest, modes),
+        ),
     )
     return frozenset(risk for risk, detected in risk_checks if detected)
 
@@ -185,7 +193,7 @@ def emit_replay_write_risk_metrics(
 
 __all__ = [
     "REPLAY_WRITE_RISK_METRIC",
-    "ReplayWriteRiskType",
+    "ReplayWriteRiskClassification",
     "assess_replay_write_risks",
     "emit_replay_write_risk_metrics",
 ]

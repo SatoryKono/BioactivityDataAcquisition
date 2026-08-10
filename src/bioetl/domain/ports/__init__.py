@@ -1,7 +1,5 @@
 """Lazy compatibility facade for dependency-inversion port protocols."""
 
-from __future__ import annotations
-
 from importlib import import_module
 
 from bioetl.domain.ports._facade_support import build_export_modules

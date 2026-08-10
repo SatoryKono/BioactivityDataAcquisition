@@ -6,7 +6,9 @@ from collections.abc import Mapping
 from math import isfinite
 from typing import cast
 
-from bioetl.application.services.control_plane.evidence.models import EvidenceCheck
+from bioetl.application.observability.control_plane_evidence import (
+    EvidenceCheckResult,
+)
 from bioetl.domain.control_plane import RunManifest
 
 
@@ -15,11 +17,11 @@ def build_checkpoint_checks(
     manifest: RunManifest | None,
     checkpoint: tuple[object, dict[str, object]] | None,
     aggregate_scope_unknown: bool,
-) -> tuple[EvidenceCheck, ...]:
+) -> tuple[EvidenceCheckResult, ...]:
     """Validate one loaded checkpoint without inventing absent integrity data."""
     if aggregate_scope_unknown:
         return (
-            EvidenceCheck(
+            EvidenceCheckResult(
                 "scope",
                 "UNKNOWN",
                 "aggregate_scope_requires_exact_pipeline",
@@ -28,7 +30,7 @@ def build_checkpoint_checks(
         )
     if checkpoint is None:
         return (
-            EvidenceCheck(
+            EvidenceCheckResult(
                 "parse",
                 "UNKNOWN",
                 "checkpoint_not_found",
@@ -37,7 +39,7 @@ def build_checkpoint_checks(
         )
     checkpoint_run_id, metadata = checkpoint
     checks = [
-        EvidenceCheck(
+        EvidenceCheckResult(
             "parse",
             "OK",
             "checkpoint_parse_ok",
@@ -56,12 +58,12 @@ def build_checkpoint_checks(
     return tuple(checks)
 
 
-def _checkpoint_schema_check(metadata: Mapping[str, object]) -> EvidenceCheck:
+def _checkpoint_schema_check(metadata: Mapping[str, object]) -> EvidenceCheckResult:
     records_processed = metadata.get("records_processed")
     if records_processed is not None and (
         not isinstance(records_processed, int) or isinstance(records_processed, bool)
     ):
-        return EvidenceCheck(
+        return EvidenceCheckResult(
             "schema",
             "ERROR",
             "checkpoint_records_processed_invalid",
@@ -77,13 +79,13 @@ def _checkpoint_schema_check(metadata: Mapping[str, object]) -> EvidenceCheck:
         else:
             saved_at_number = float("nan")
         if not isfinite(saved_at_number):
-            return EvidenceCheck(
+            return EvidenceCheckResult(
                 "schema",
                 "ERROR",
                 "checkpoint_saved_at_invalid",
                 "checkpoint_saved_at_epoch_seconds must be finite when present.",
             )
-    return EvidenceCheck(
+    return EvidenceCheckResult(
         "schema",
         "OK",
         "checkpoint_schema_valid",
@@ -91,23 +93,23 @@ def _checkpoint_schema_check(metadata: Mapping[str, object]) -> EvidenceCheck:
     )
 
 
-def _checkpoint_checksum_check(metadata: Mapping[str, object]) -> EvidenceCheck:
+def _checkpoint_checksum_check(metadata: Mapping[str, object]) -> EvidenceCheckResult:
     explicit_status = metadata.get("checkpoint_checksum_valid")
     if explicit_status is True:
-        return EvidenceCheck(
+        return EvidenceCheckResult(
             "checksum",
             "OK",
             "checkpoint_checksum_verified",
             "Persisted checkpoint evidence records a successful checksum verification.",
         )
     if explicit_status is False:
-        return EvidenceCheck(
+        return EvidenceCheckResult(
             "checksum",
             "ERROR",
             "checkpoint_checksum_mismatch",
             "Persisted checkpoint evidence records a checksum mismatch.",
         )
-    return EvidenceCheck(
+    return EvidenceCheckResult(
         "checksum",
         "UNKNOWN",
         "checkpoint_checksum_not_recorded",
@@ -120,10 +122,10 @@ def _checkpoint_anchor_checks(
     manifest: RunManifest | None,
     checkpoint_run_id: str,
     metadata: Mapping[str, object],
-) -> tuple[EvidenceCheck, ...]:
+) -> tuple[EvidenceCheckResult, ...]:
     if manifest is None:
         return (
-            EvidenceCheck(
+            EvidenceCheckResult(
                 "anchors",
                 "UNKNOWN",
                 "manifest_unavailable_for_anchor_validation",
@@ -151,7 +153,7 @@ def _checkpoint_anchor_checks(
     )
     if mismatches:
         return (
-            EvidenceCheck(
+            EvidenceCheckResult(
                 "anchors",
                 "ERROR",
                 "checkpoint_anchor_mismatch",
@@ -162,7 +164,7 @@ def _checkpoint_anchor_checks(
     missing = sorted(name for name, value in actual.items() if value is None)
     if missing:
         return (
-            EvidenceCheck(
+            EvidenceCheckResult(
                 "anchors",
                 "WARNING",
                 "checkpoint_anchor_incomplete",
@@ -170,7 +172,7 @@ def _checkpoint_anchor_checks(
             ),
         )
     return (
-        EvidenceCheck(
+        EvidenceCheckResult(
             "anchors",
             "OK",
             "checkpoint_anchors_match_manifest",

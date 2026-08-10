@@ -38,6 +38,7 @@
     "bioetl_l0_status",
     "bioetl_lineage_fragments_emitted_total",
     "bioetl_lineage_refs_missing_total",
+    "bioetl_manifest_ledger_integrity_ratio",
     "bioetl_memory_pressure_state",
     "bioetl_overview_pipeline_run_type_universe",
     "bioetl_overview_pipeline_universe",
@@ -66,6 +67,7 @@
     "bioetl_record_flow_invariants_total",
     "bioetl_records_processed_total",
     "bioetl_replay_drift_events_total",
+    "bioetl_replay_duplicate_overwrite_risk_total",
     "bioetl_replay_lag_seconds",
     "bioetl_replay_reconstructability_events_total",
     "bioetl_replay_safety_blockers_15m",
@@ -247,6 +249,7 @@
     "bioetl_lineage_fragments_emitted_total",
     "bioetl_lineage_refs_missing_total",
     "bioetl_manifest_ledger_failures_15m",
+    "bioetl_manifest_ledger_integrity_ratio",
     "bioetl_memory_batch_resize_events_total",
     "bioetl_memory_monitor_fallback_events_total",
     "bioetl_memory_pressure_events_total",
@@ -296,6 +299,7 @@
     "bioetl_record_flow_records_total",
     "bioetl_records_processed_total",
     "bioetl_replay_drift_events_total",
+    "bioetl_replay_duplicate_overwrite_risk_total",
     "bioetl_replay_lag_seconds",
     "bioetl_replay_reconstructability_events_total",
     "bioetl_replay_safety_blockers_15m",
@@ -420,6 +424,7 @@
     "bioetl_health_check_latency_seconds",
     "bioetl_health_check_success_total",
     "bioetl_http_request_duration_seconds",
+    "bioetl_manifest_ledger_integrity_ratio",
     "bioetl_memory_batch_resize_events_total",
     "bioetl_memory_monitor_fallback_events_total",
     "bioetl_memory_pressure_events_total",
@@ -432,6 +437,7 @@
     "bioetl_rate_limiter_tokens_available",
     "bioetl_rate_limiter_wait_seconds",
     "bioetl_replay_drift_events_total",
+    "bioetl_replay_duplicate_overwrite_risk_total",
     "bioetl_replay_lag_seconds",
     "bioetl_silver_csv_export_failures_total",
     "bioetl_silver_csv_export_start_total",
@@ -576,6 +582,7 @@
     "bioetl_lineage_fragments_emitted_total",
     "bioetl_lineage_refs_missing_total",
     "bioetl_manifest_ledger_failures_15m",
+    "bioetl_manifest_ledger_integrity_ratio",
     "bioetl_memory_batch_resize_events_total",
     "bioetl_memory_monitor_fallback_events_total",
     "bioetl_memory_pressure_events_total",
@@ -640,6 +647,7 @@
     "bioetl_record_flow_records_total",
     "bioetl_records_processed_total",
     "bioetl_replay_drift_events_total",
+    "bioetl_replay_duplicate_overwrite_risk_total",
     "bioetl_replay_lag_seconds",
     "bioetl_replay_reconstructability_events_total",
     "bioetl_replay_safety_blockers_15m",
@@ -908,6 +916,7 @@
     "bioetl_infrastructure_validated",
     "bioetl_lineage_fragments_emitted_total",
     "bioetl_lineage_refs_missing_total",
+    "bioetl_manifest_ledger_integrity_ratio",
     "bioetl_memory_batch_resize_events_total",
     "bioetl_memory_monitor_fallback_events_total",
     "bioetl_memory_pressure_events_total",
@@ -936,6 +945,7 @@
     "bioetl_record_flow_records_total",
     "bioetl_records_processed_total",
     "bioetl_replay_drift_events_total",
+    "bioetl_replay_duplicate_overwrite_risk_total",
     "bioetl_replay_lag_seconds",
     "bioetl_replay_reconstructability_events_total",
     "bioetl_shutdown_completed_total",
@@ -1692,6 +1702,13 @@
       "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
+    "bioetl_manifest_ledger_integrity_ratio": [
+      "docs/03-guides/dashboards/panel-contract-inventory.json",
+      "docs/03-guides/metrics-monitoring.md",
+      "docs/04-reference/contracts/observability.md",
+      "docs/04-reference/observability/metrics-catalog.md",
+      "grafana/dashboards/bioetl-control-plane-v1.json"
+    ],
     "bioetl_memory_batch_resize_events_total": [
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md"
@@ -1975,6 +1992,13 @@
     "bioetl_replay_drift_events_total": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
+      "docs/04-reference/observability/metrics-catalog.md",
+      "grafana/dashboards/bioetl-control-plane-v1.json"
+    ],
+    "bioetl_replay_duplicate_overwrite_risk_total": [
+      "docs/03-guides/dashboards/panel-contract-inventory.json",
+      "docs/03-guides/metrics-monitoring.md",
+      "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
@@ -2473,6 +2497,7 @@
     "bioetl_infrastructure_validated",
     "bioetl_lineage_fragments_emitted_total",
     "bioetl_lineage_refs_missing_total",
+    "bioetl_manifest_ledger_integrity_ratio",
     "bioetl_memory_batch_resize_events_total",
     "bioetl_memory_monitor_fallback_events_total",
     "bioetl_memory_pressure_events_total",
@@ -2514,6 +2539,7 @@
     "bioetl_record_flow_records_total",
     "bioetl_records_processed_total",
     "bioetl_replay_drift_events_total",
+    "bioetl_replay_duplicate_overwrite_risk_total",
     "bioetl_replay_lag_seconds",
     "bioetl_replay_reconstructability_events_total",
     "bioetl_shutdown_completed_total",
@@ -2751,6 +2777,7 @@
     "bioetl_infrastructure_validated",
     "bioetl_lineage_fragments_emitted_total",
     "bioetl_lineage_refs_missing_total",
+    "bioetl_manifest_ledger_integrity_ratio",
     "bioetl_memory_batch_resize_events_total",
     "bioetl_memory_monitor_fallback_events_total",
     "bioetl_memory_pressure_events_total",
@@ -2792,6 +2819,7 @@
     "bioetl_record_flow_records_total",
     "bioetl_records_processed_total",
     "bioetl_replay_drift_events_total",
+    "bioetl_replay_duplicate_overwrite_risk_total",
     "bioetl_replay_lag_seconds",
     "bioetl_replay_reconstructability_events_total",
     "bioetl_shutdown_completed_total",
@@ -3033,6 +3061,7 @@
     "bioetl_lineage_fragments_emitted_total",
     "bioetl_lineage_refs_missing_total",
     "bioetl_manifest_ledger_failures_15m",
+    "bioetl_manifest_ledger_integrity_ratio",
     "bioetl_memory_batch_resize_events_total",
     "bioetl_memory_monitor_fallback_events_total",
     "bioetl_memory_pressure_events_total",
@@ -3097,6 +3126,7 @@
     "bioetl_record_flow_records_total",
     "bioetl_records_processed_total",
     "bioetl_replay_drift_events_total",
+    "bioetl_replay_duplicate_overwrite_risk_total",
     "bioetl_replay_lag_seconds",
     "bioetl_replay_reconstructability_events_total",
     "bioetl_replay_safety_blockers_15m",
@@ -3326,6 +3356,9 @@
       "grafana/prometheus-rules/bioetl_control_plane_current_status.yml",
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
+    "bioetl_manifest_ledger_integrity_ratio": [
+      "grafana/prometheus-rules/bioetl_control_plane_current_status.yml"
+    ],
     "bioetl_memory_pressure_state": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
@@ -3410,6 +3443,9 @@
     "bioetl_replay_drift_events_total": [
       "grafana/prometheus-rules/bioetl_control_plane_current_status.yml",
       "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_replay_duplicate_overwrite_risk_total": [
+      "grafana/prometheus-rules/bioetl_control_plane_current_status.yml"
     ],
     "bioetl_replay_lag_seconds": [
       "grafana/prometheus-rules/bioetl_observability.yml"
@@ -3874,6 +3910,9 @@
     "bioetl_lineage_refs_missing_total": [
       "observed_series_count=0"
     ],
+    "bioetl_manifest_ledger_integrity_ratio": [
+      "observed_series_count=0"
+    ],
     "bioetl_memory_batch_resize_events_total": [
       "observed_series_count=0"
     ],
@@ -3962,6 +4001,9 @@
       "observed_series_count=0"
     ],
     "bioetl_replay_drift_events_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_replay_duplicate_overwrite_risk_total": [
       "observed_series_count=0"
     ],
     "bioetl_replay_lag_seconds": [
@@ -4373,6 +4415,9 @@
     "bioetl_lineage_refs_missing_total": [
       "src/bioetl/infrastructure/storage/lineage_persistence.py"
     ],
+    "bioetl_manifest_ledger_integrity_ratio": [
+      "src/bioetl/application/services/control_plane/manifest/integrity_metrics.py"
+    ],
     "bioetl_memory_batch_resize_events_total": [
       "src/bioetl/application/core/batch_memory_metrics.py"
     ],
@@ -4465,6 +4510,9 @@
     ],
     "bioetl_replay_drift_events_total": [
       "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py"
+    ],
+    "bioetl_replay_duplicate_overwrite_risk_total": [
+      "src/bioetl/application/services/control_plane/manifest/replay_write_risk.py"
     ],
     "bioetl_replay_lag_seconds": [
       "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py"
