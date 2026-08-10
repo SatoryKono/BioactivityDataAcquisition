@@ -1,540 +1,24 @@
 {
+  "snapshot_date": "2026-08-10",
+  "families": {
+    "entity_effective": {
+      "config_count": 22,
+      "unique_parameter_count": 262,
+      "inconsistent_parameter_count": 0,
+      "sanctioned_partial_parameter_count": 0,
+      "raw_inconsistent_parameter_count": 0
+    },
+    "composite_runtime": {
+      "config_count": 5,
+      "unique_parameter_count": 157,
+      "inconsistent_parameter_count": 0,
+      "sanctioned_partial_parameter_count": 0,
+      "raw_inconsistent_parameter_count": 0
+    }
+  },
   "duplication_audit": {
-    "clusters": [
-      {
-        "block_path": "composite.normalized_anchor_policy",
-        "fingerprint": "e46c148477ca",
-        "governance": {
-          "decision": "retain_shared_composite_policy",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-composite",
-          "rationale": "Composite normalized-anchor policy is shared to keep join-key normalization deterministic across composite entities.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 5,
-        "occurrences": [
-          {
-            "block_path": "composite.normalized_anchor_policy",
-            "path": "configs/composites/activity.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "composite.normalized_anchor_policy",
-            "path": "configs/composites/assay.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "composite.normalized_anchor_policy",
-            "path": "configs/composites/molecule.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "composite.normalized_anchor_policy",
-            "path": "configs/composites/publication.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "composite.normalized_anchor_policy",
-            "path": "configs/composites/target.yaml",
-            "surface_kind": "composite_config"
-          }
-        ],
-        "serialized_bytes": 743,
-        "surface_kind_counts": {
-          "composite_config": 5
-        }
-      },
-      {
-        "block_path": "hash_policy.hash_policy",
-        "fingerprint": "ebb3d5770ddb",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 5,
-        "occurrences": [
-          {
-            "block_path": "hash_policy.hash_policy",
-            "path": "configs/entities/composite/activity.yaml",
-            "surface_kind": "entity_config"
-          },
-          {
-            "block_path": "hash_policy.hash_policy",
-            "path": "configs/entities/composite/assay.yaml",
-            "surface_kind": "entity_config"
-          },
-          {
-            "block_path": "hash_policy.hash_policy",
-            "path": "configs/entities/composite/molecule.yaml",
-            "surface_kind": "entity_config"
-          },
-          {
-            "block_path": "hash_policy.hash_policy",
-            "path": "configs/entities/composite/publication.yaml",
-            "surface_kind": "entity_config"
-          },
-          {
-            "block_path": "hash_policy.hash_policy",
-            "path": "configs/entities/composite/target.yaml",
-            "surface_kind": "entity_config"
-          }
-        ],
-        "serialized_bytes": 483,
-        "surface_kind_counts": {
-          "entity_config": 5
-        }
-      },
-      {
-        "block_path": "$defs.FieldValidationConfig",
-        "fingerprint": "7769fb18a6b5",
-        "governance": {
-          "decision": "retain_generated_schema_contract",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-contracts",
-          "rationale": "Field validation definitions are duplicated by generated schema artifacts; retention is contract-owned rather than unresolved review-required debt.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 3,
-        "occurrences": [
-          {
-            "block_path": "$defs.FieldValidationConfig",
-            "path": "configs/_schema/composite.json",
-            "surface_kind": "other_config"
-          },
-          {
-            "block_path": "$defs.FieldValidationConfig",
-            "path": "configs/_schema/dq.json",
-            "surface_kind": "other_config"
-          },
-          {
-            "block_path": "$defs.FieldValidationConfig",
-            "path": "configs/_schema/pipeline.json",
-            "surface_kind": "other_config"
-          }
-        ],
-        "serialized_bytes": 1892,
-        "surface_kind_counts": {
-          "other_config": 3
-        }
-      },
-      {
-        "block_path": "$defs.CrossFieldValidationConfig",
-        "fingerprint": "d3ef6ba00ead",
-        "governance": {
-          "decision": "retain_generated_schema_contract",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-contracts",
-          "rationale": "Cross-field validation definitions are generated schema contract mirrors and remain explicit contract-owned duplication.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 3,
-        "occurrences": [
-          {
-            "block_path": "$defs.CrossFieldValidationConfig",
-            "path": "configs/_schema/composite.json",
-            "surface_kind": "other_config"
-          },
-          {
-            "block_path": "$defs.CrossFieldValidationConfig",
-            "path": "configs/_schema/dq.json",
-            "surface_kind": "other_config"
-          },
-          {
-            "block_path": "$defs.CrossFieldValidationConfig",
-            "path": "configs/_schema/pipeline.json",
-            "surface_kind": "other_config"
-          }
-        ],
-        "serialized_bytes": 1391,
-        "surface_kind_counts": {
-          "other_config": 3
-        }
-      },
-      {
-        "block_path": "pipeline.sink.gold",
-        "fingerprint": "224fb15fbaa3",
-        "governance": {
-          "decision": "retain_shared_entity_gold_sink_policy",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-config",
-          "rationale": "Gold sink settings are shared intentionally across matching entity configs to preserve deterministic sink layout policy.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 3,
-        "occurrences": [
-          {
-            "block_path": "pipeline.sink.gold",
-            "path": "configs/entities/chembl/assay.yaml",
-            "surface_kind": "entity_config"
-          },
-          {
-            "block_path": "pipeline.sink.gold",
-            "path": "configs/entities/chembl/publication.yaml",
-            "surface_kind": "entity_config"
-          },
-          {
-            "block_path": "pipeline.sink.gold",
-            "path": "configs/entities/chembl/target.yaml",
-            "surface_kind": "entity_config"
-          }
-        ],
-        "serialized_bytes": 205,
-        "surface_kind_counts": {
-          "entity_config": 3
-        }
-      },
-      {
-        "block_path": "composite.merge.column_groups",
-        "fingerprint": "4be2a0f66fdc",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "composite.merge.column_groups",
-            "path": "configs/composites/publication.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "schema.column_groups",
-            "path": "configs/entities/composite/publication.yaml",
-            "surface_kind": "entity_config"
-          }
-        ],
-        "serialized_bytes": 2895,
-        "surface_kind_counts": {
-          "composite_config": 1,
-          "entity_config": 1
-        }
-      },
-      {
-        "block_path": "composite.merge.column_groups",
-        "fingerprint": "bb932a6ea906",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "composite.merge.column_groups",
-            "path": "configs/composites/target.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "schema.column_groups",
-            "path": "configs/entities/composite/target.yaml",
-            "surface_kind": "entity_config"
-          }
-        ],
-        "serialized_bytes": 2641,
-        "surface_kind_counts": {
-          "composite_config": 1,
-          "entity_config": 1
-        }
-      },
-      {
-        "block_path": "composite.merge.column_groups",
-        "fingerprint": "282a5e5c6a6d",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "composite.merge.column_groups",
-            "path": "configs/composites/activity.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "schema.column_groups",
-            "path": "configs/entities/composite/activity.yaml",
-            "surface_kind": "entity_config"
-          }
-        ],
-        "serialized_bytes": 2169,
-        "surface_kind_counts": {
-          "composite_config": 1,
-          "entity_config": 1
-        }
-      },
-      {
-        "block_path": "composite.merge.column_groups",
-        "fingerprint": "483900068e07",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "composite.merge.column_groups",
-            "path": "configs/composites/molecule.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "schema.column_groups",
-            "path": "configs/entities/composite/molecule.yaml",
-            "surface_kind": "entity_config"
-          }
-        ],
-        "serialized_bytes": 1794,
-        "surface_kind_counts": {
-          "composite_config": 1,
-          "entity_config": 1
-        }
-      },
-      {
-        "block_path": "composite.merge.column_groups",
-        "fingerprint": "a2dae532ddb0",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "composite.merge.column_groups",
-            "path": "configs/composites/assay.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "schema.column_groups",
-            "path": "configs/entities/composite/assay.yaml",
-            "surface_kind": "entity_config"
-          }
-        ],
-        "serialized_bytes": 1751,
-        "surface_kind_counts": {
-          "composite_config": 1,
-          "entity_config": 1
-        }
-      },
-      {
-        "block_path": "$defs.GoldFiltersConfig.properties",
-        "fingerprint": "ecd4f7b37f6e",
-        "governance": {
-          "decision": "retain_generated_gold_filter_schema_contract",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-contracts",
-          "rationale": "Gold filter schema properties are generated contract surfaces and stay contract-owned until the generated definitions collapse.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "$defs.GoldFiltersConfig.properties",
-            "path": "configs/_schema/pipeline.json",
-            "surface_kind": "other_config"
-          },
-          {
-            "block_path": "$defs.SilverFiltersConfig.properties",
-            "path": "configs/_schema/pipeline.json",
-            "surface_kind": "other_config"
-          }
-        ],
-        "serialized_bytes": 1037,
-        "surface_kind_counts": {
-          "other_config": 2
-        }
-      },
-      {
-        "block_path": "pipelines.*.shadow_analysis",
-        "fingerprint": "5978e7a685a1",
-        "governance": {
-          "decision": "retain_shared_quality_shadow_analysis_policy",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-dq",
-          "rationale": "Quality-registry shadow-analysis blocks intentionally share provider-family boundary policy; retained duplication stays visible in the config backlog and must not grow without review.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "pipelines.chembl_cell_line.shadow_analysis",
-            "path": "configs/quality/silver_filter_boundary_inventory.yaml",
-            "surface_kind": "quality_registry"
-          },
-          {
-            "block_path": "pipelines.chembl_tissue.shadow_analysis",
-            "path": "configs/quality/silver_filter_boundary_inventory.yaml",
-            "surface_kind": "quality_registry"
-          }
-        ],
-        "serialized_bytes": 1009,
-        "surface_kind_counts": {
-          "quality_registry": 2
-        }
-      },
-      {
-        "block_path": "$defs.ConditionalValidationConfig",
-        "fingerprint": "5abe5348de02",
-        "governance": {
-          "decision": "retain_generated_schema_contract",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-contracts",
-          "rationale": "Conditional validation definitions are generated schema contract mirrors and remain explicit contract-owned duplication.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "$defs.ConditionalValidationConfig",
-            "path": "configs/_schema/dq.json",
-            "surface_kind": "other_config"
-          },
-          {
-            "block_path": "$defs.ConditionalValidationConfig",
-            "path": "configs/_schema/pipeline.json",
-            "surface_kind": "other_config"
-          }
-        ],
-        "serialized_bytes": 920,
-        "surface_kind_counts": {
-          "other_config": 2
-        }
-      },
-      {
-        "block_path": "$defs.DQReportYamlConfig",
-        "fingerprint": "100ac5201f77",
-        "governance": {
-          "decision": "retain_generated_dq_schema_contract",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-dq",
-          "rationale": "DQ report YAML schema definitions are duplicated by generated contract artifacts and remain DQ-owned until schema generation is consolidated.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "$defs.DQReportYamlConfig",
-            "path": "configs/_schema/dq.json",
-            "surface_kind": "other_config"
-          },
-          {
-            "block_path": "$defs.DQReportYamlConfig",
-            "path": "configs/_schema/pipeline.json",
-            "surface_kind": "other_config"
-          }
-        ],
-        "serialized_bytes": 805,
-        "surface_kind_counts": {
-          "other_config": 2
-        }
-      },
-      {
-        "block_path": "$defs.ColumnGroupSchema",
-        "fingerprint": "c2443d564c4f",
-        "governance": {
-          "decision": "retain_generated_schema_contract",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-contracts",
-          "rationale": "Column-group schema definitions are generated contract mirrors; the backlog keeps them visible without leaving them review-free.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "$defs.ColumnGroupSchema",
-            "path": "configs/_schema/composite.json",
-            "surface_kind": "other_config"
-          },
-          {
-            "block_path": "$defs.ColumnGroupSchema",
-            "path": "configs/_schema/pipeline.json",
-            "surface_kind": "other_config"
-          }
-        ],
-        "serialized_bytes": 681,
-        "surface_kind_counts": {
-          "other_config": 2
-        }
-      },
-      {
-        "block_path": "schema.gold.include_groups",
-        "fingerprint": "99c4316b0650",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "schema.gold.include_groups",
-            "path": "configs/entities/composite/activity.yaml",
-            "surface_kind": "entity_config"
-          },
-          {
-            "block_path": "schema.silver.include_groups",
-            "path": "configs/entities/composite/activity.yaml",
-            "surface_kind": "entity_config"
-          }
-        ],
-        "serialized_bytes": 221,
-        "surface_kind_counts": {
-          "entity_config": 2
-        }
-      },
-      {
-        "block_path": "schema.gold.include_groups",
-        "fingerprint": "d4aa51ec3c98",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "schema.gold.include_groups",
-            "path": "configs/entities/composite/target.yaml",
-            "surface_kind": "entity_config"
-          },
-          {
-            "block_path": "schema.silver.include_groups",
-            "path": "configs/entities/composite/target.yaml",
-            "surface_kind": "entity_config"
-          }
-        ],
-        "serialized_bytes": 211,
-        "surface_kind_counts": {
-          "entity_config": 2
-        }
-      }
-    ],
-    "notes": [
-      "This audit covers structured config/contract/registry surfaces under configs/** that JSCPD intentionally ignores.",
-      "Clusters report exact canonical JSON subtree duplicates only; near-duplicate prose and comment drift stay out of scope.",
-      "The audit is report-only and exists to make YAML/JSON governance duplication reviewable in CI-visible artifacts.",
-      "Every reported duplicate cluster carries owner/rationale metadata so retained duplication is explicit debt rather than implicit residue."
-    ],
     "scope": {
+      "root": "configs",
       "file_suffixes": [
         ".yaml",
         ".yml",
@@ -547,49 +31,565 @@
         "**/*.yml",
         "**/*.json"
       ],
-      "max_traversal_depth": 2,
-      "root": "configs",
-      "structured_block_min_bytes": 200
+      "structured_block_min_bytes": 200,
+      "max_traversal_depth": 2
     },
     "summary": {
-      "affected_file_count": 17,
       "duplicate_cluster_count": 17,
+      "reported_cluster_count": 17,
       "duplicate_occurrence_count": 43,
-      "reported_cluster_count": 17
-    }
+      "affected_file_count": 17
+    },
+    "clusters": [
+      {
+        "fingerprint": "e46c148477ca",
+        "serialized_bytes": 743,
+        "block_path": "composite.normalized_anchor_policy",
+        "occurrence_count": 5,
+        "governance": {
+          "owner": "@bioetl-composite",
+          "decision": "retain_shared_composite_policy",
+          "linked_issue": "#5568",
+          "review_date": "2026-09-30",
+          "rationale": "Composite normalized-anchor policy is shared to keep join-key normalization deterministic across composite entities."
+        },
+        "surface_kind_counts": {
+          "composite_config": 5
+        },
+        "occurrences": [
+          {
+            "path": "configs/composites/activity.yaml",
+            "surface_kind": "composite_config",
+            "block_path": "composite.normalized_anchor_policy"
+          },
+          {
+            "path": "configs/composites/assay.yaml",
+            "surface_kind": "composite_config",
+            "block_path": "composite.normalized_anchor_policy"
+          },
+          {
+            "path": "configs/composites/molecule.yaml",
+            "surface_kind": "composite_config",
+            "block_path": "composite.normalized_anchor_policy"
+          },
+          {
+            "path": "configs/composites/publication.yaml",
+            "surface_kind": "composite_config",
+            "block_path": "composite.normalized_anchor_policy"
+          },
+          {
+            "path": "configs/composites/target.yaml",
+            "surface_kind": "composite_config",
+            "block_path": "composite.normalized_anchor_policy"
+          }
+        ]
+      },
+      {
+        "fingerprint": "ebb3d5770ddb",
+        "serialized_bytes": 483,
+        "block_path": "hash_policy.hash_policy",
+        "occurrence_count": 5,
+        "governance": {
+          "owner": "@bioetl-architecture",
+          "decision": "review_required",
+          "linked_issue": "#5568",
+          "review_date": "2026-09-30",
+          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed."
+        },
+        "surface_kind_counts": {
+          "entity_config": 5
+        },
+        "occurrences": [
+          {
+            "path": "configs/entities/composite/activity.yaml",
+            "surface_kind": "entity_config",
+            "block_path": "hash_policy.hash_policy"
+          },
+          {
+            "path": "configs/entities/composite/assay.yaml",
+            "surface_kind": "entity_config",
+            "block_path": "hash_policy.hash_policy"
+          },
+          {
+            "path": "configs/entities/composite/molecule.yaml",
+            "surface_kind": "entity_config",
+            "block_path": "hash_policy.hash_policy"
+          },
+          {
+            "path": "configs/entities/composite/publication.yaml",
+            "surface_kind": "entity_config",
+            "block_path": "hash_policy.hash_policy"
+          },
+          {
+            "path": "configs/entities/composite/target.yaml",
+            "surface_kind": "entity_config",
+            "block_path": "hash_policy.hash_policy"
+          }
+        ]
+      },
+      {
+        "fingerprint": "7769fb18a6b5",
+        "serialized_bytes": 1892,
+        "block_path": "$defs.FieldValidationConfig",
+        "occurrence_count": 3,
+        "governance": {
+          "owner": "@bioetl-contracts",
+          "decision": "retain_generated_schema_contract",
+          "linked_issue": "#5568",
+          "review_date": "2026-09-30",
+          "rationale": "Field validation definitions are duplicated by generated schema artifacts; retention is contract-owned rather than unresolved review-required debt."
+        },
+        "surface_kind_counts": {
+          "other_config": 3
+        },
+        "occurrences": [
+          {
+            "path": "configs/_schema/composite.json",
+            "surface_kind": "other_config",
+            "block_path": "$defs.FieldValidationConfig"
+          },
+          {
+            "path": "configs/_schema/dq.json",
+            "surface_kind": "other_config",
+            "block_path": "$defs.FieldValidationConfig"
+          },
+          {
+            "path": "configs/_schema/pipeline.json",
+            "surface_kind": "other_config",
+            "block_path": "$defs.FieldValidationConfig"
+          }
+        ]
+      },
+      {
+        "fingerprint": "d3ef6ba00ead",
+        "serialized_bytes": 1391,
+        "block_path": "$defs.CrossFieldValidationConfig",
+        "occurrence_count": 3,
+        "governance": {
+          "owner": "@bioetl-contracts",
+          "decision": "retain_generated_schema_contract",
+          "linked_issue": "#5568",
+          "review_date": "2026-09-30",
+          "rationale": "Cross-field validation definitions are generated schema contract mirrors and remain explicit contract-owned duplication."
+        },
+        "surface_kind_counts": {
+          "other_config": 3
+        },
+        "occurrences": [
+          {
+            "path": "configs/_schema/composite.json",
+            "surface_kind": "other_config",
+            "block_path": "$defs.CrossFieldValidationConfig"
+          },
+          {
+            "path": "configs/_schema/dq.json",
+            "surface_kind": "other_config",
+            "block_path": "$defs.CrossFieldValidationConfig"
+          },
+          {
+            "path": "configs/_schema/pipeline.json",
+            "surface_kind": "other_config",
+            "block_path": "$defs.CrossFieldValidationConfig"
+          }
+        ]
+      },
+      {
+        "fingerprint": "224fb15fbaa3",
+        "serialized_bytes": 205,
+        "block_path": "pipeline.sink.gold",
+        "occurrence_count": 3,
+        "governance": {
+          "owner": "@bioetl-config",
+          "decision": "retain_shared_entity_gold_sink_policy",
+          "linked_issue": "#5568",
+          "review_date": "2026-09-30",
+          "rationale": "Gold sink settings are shared intentionally across matching entity configs to preserve deterministic sink layout policy."
+        },
+        "surface_kind_counts": {
+          "entity_config": 3
+        },
+        "occurrences": [
+          {
+            "path": "configs/entities/chembl/assay.yaml",
+            "surface_kind": "entity_config",
+            "block_path": "pipeline.sink.gold"
+          },
+          {
+            "path": "configs/entities/chembl/publication.yaml",
+            "surface_kind": "entity_config",
+            "block_path": "pipeline.sink.gold"
+          },
+          {
+            "path": "configs/entities/chembl/target.yaml",
+            "surface_kind": "entity_config",
+            "block_path": "pipeline.sink.gold"
+          }
+        ]
+      },
+      {
+        "fingerprint": "4be2a0f66fdc",
+        "serialized_bytes": 2895,
+        "block_path": "composite.merge.column_groups",
+        "occurrence_count": 2,
+        "governance": {
+          "owner": "@bioetl-architecture",
+          "decision": "review_required",
+          "linked_issue": "#5568",
+          "review_date": "2026-09-30",
+          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed."
+        },
+        "surface_kind_counts": {
+          "composite_config": 1,
+          "entity_config": 1
+        },
+        "occurrences": [
+          {
+            "path": "configs/composites/publication.yaml",
+            "surface_kind": "composite_config",
+            "block_path": "composite.merge.column_groups"
+          },
+          {
+            "path": "configs/entities/composite/publication.yaml",
+            "surface_kind": "entity_config",
+            "block_path": "schema.column_groups"
+          }
+        ]
+      },
+      {
+        "fingerprint": "bb932a6ea906",
+        "serialized_bytes": 2641,
+        "block_path": "composite.merge.column_groups",
+        "occurrence_count": 2,
+        "governance": {
+          "owner": "@bioetl-architecture",
+          "decision": "review_required",
+          "linked_issue": "#5568",
+          "review_date": "2026-09-30",
+          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed."
+        },
+        "surface_kind_counts": {
+          "composite_config": 1,
+          "entity_config": 1
+        },
+        "occurrences": [
+          {
+            "path": "configs/composites/target.yaml",
+            "surface_kind": "composite_config",
+            "block_path": "composite.merge.column_groups"
+          },
+          {
+            "path": "configs/entities/composite/target.yaml",
+            "surface_kind": "entity_config",
+            "block_path": "schema.column_groups"
+          }
+        ]
+      },
+      {
+        "fingerprint": "282a5e5c6a6d",
+        "serialized_bytes": 2169,
+        "block_path": "composite.merge.column_groups",
+        "occurrence_count": 2,
+        "governance": {
+          "owner": "@bioetl-architecture",
+          "decision": "review_required",
+          "linked_issue": "#5568",
+          "review_date": "2026-09-30",
+          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed."
+        },
+        "surface_kind_counts": {
+          "composite_config": 1,
+          "entity_config": 1
+        },
+        "occurrences": [
+          {
+            "path": "configs/composites/activity.yaml",
+            "surface_kind": "composite_config",
+            "block_path": "composite.merge.column_groups"
+          },
+          {
+            "path": "configs/entities/composite/activity.yaml",
+            "surface_kind": "entity_config",
+            "block_path": "schema.column_groups"
+          }
+        ]
+      },
+      {
+        "fingerprint": "483900068e07",
+        "serialized_bytes": 1794,
+        "block_path": "composite.merge.column_groups",
+        "occurrence_count": 2,
+        "governance": {
+          "owner": "@bioetl-architecture",
+          "decision": "review_required",
+          "linked_issue": "#5568",
+          "review_date": "2026-09-30",
+          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed."
+        },
+        "surface_kind_counts": {
+          "composite_config": 1,
+          "entity_config": 1
+        },
+        "occurrences": [
+          {
+            "path": "configs/composites/molecule.yaml",
+            "surface_kind": "composite_config",
+            "block_path": "composite.merge.column_groups"
+          },
+          {
+            "path": "configs/entities/composite/molecule.yaml",
+            "surface_kind": "entity_config",
+            "block_path": "schema.column_groups"
+          }
+        ]
+      },
+      {
+        "fingerprint": "a2dae532ddb0",
+        "serialized_bytes": 1751,
+        "block_path": "composite.merge.column_groups",
+        "occurrence_count": 2,
+        "governance": {
+          "owner": "@bioetl-architecture",
+          "decision": "review_required",
+          "linked_issue": "#5568",
+          "review_date": "2026-09-30",
+          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed."
+        },
+        "surface_kind_counts": {
+          "composite_config": 1,
+          "entity_config": 1
+        },
+        "occurrences": [
+          {
+            "path": "configs/composites/assay.yaml",
+            "surface_kind": "composite_config",
+            "block_path": "composite.merge.column_groups"
+          },
+          {
+            "path": "configs/entities/composite/assay.yaml",
+            "surface_kind": "entity_config",
+            "block_path": "schema.column_groups"
+          }
+        ]
+      },
+      {
+        "fingerprint": "ecd4f7b37f6e",
+        "serialized_bytes": 1037,
+        "block_path": "$defs.GoldFiltersConfig.properties",
+        "occurrence_count": 2,
+        "governance": {
+          "owner": "@bioetl-contracts",
+          "decision": "retain_generated_gold_filter_schema_contract",
+          "linked_issue": "#5568",
+          "review_date": "2026-09-30",
+          "rationale": "Gold filter schema properties are generated contract surfaces and stay contract-owned until the generated definitions collapse."
+        },
+        "surface_kind_counts": {
+          "other_config": 2
+        },
+        "occurrences": [
+          {
+            "path": "configs/_schema/pipeline.json",
+            "surface_kind": "other_config",
+            "block_path": "$defs.GoldFiltersConfig.properties"
+          },
+          {
+            "path": "configs/_schema/pipeline.json",
+            "surface_kind": "other_config",
+            "block_path": "$defs.SilverFiltersConfig.properties"
+          }
+        ]
+      },
+      {
+        "fingerprint": "5978e7a685a1",
+        "serialized_bytes": 1009,
+        "block_path": "pipelines.*.shadow_analysis",
+        "occurrence_count": 2,
+        "governance": {
+          "owner": "@bioetl-dq",
+          "decision": "retain_shared_quality_shadow_analysis_policy",
+          "linked_issue": "#5568",
+          "review_date": "2026-09-30",
+          "rationale": "Quality-registry shadow-analysis blocks intentionally share provider-family boundary policy; retained duplication stays visible in the config backlog and must not grow without review."
+        },
+        "surface_kind_counts": {
+          "quality_registry": 2
+        },
+        "occurrences": [
+          {
+            "path": "configs/quality/silver_filter_boundary_inventory.yaml",
+            "surface_kind": "quality_registry",
+            "block_path": "pipelines.chembl_cell_line.shadow_analysis"
+          },
+          {
+            "path": "configs/quality/silver_filter_boundary_inventory.yaml",
+            "surface_kind": "quality_registry",
+            "block_path": "pipelines.chembl_tissue.shadow_analysis"
+          }
+        ]
+      },
+      {
+        "fingerprint": "5abe5348de02",
+        "serialized_bytes": 920,
+        "block_path": "$defs.ConditionalValidationConfig",
+        "occurrence_count": 2,
+        "governance": {
+          "owner": "@bioetl-contracts",
+          "decision": "retain_generated_schema_contract",
+          "linked_issue": "#5568",
+          "review_date": "2026-09-30",
+          "rationale": "Conditional validation definitions are generated schema contract mirrors and remain explicit contract-owned duplication."
+        },
+        "surface_kind_counts": {
+          "other_config": 2
+        },
+        "occurrences": [
+          {
+            "path": "configs/_schema/dq.json",
+            "surface_kind": "other_config",
+            "block_path": "$defs.ConditionalValidationConfig"
+          },
+          {
+            "path": "configs/_schema/pipeline.json",
+            "surface_kind": "other_config",
+            "block_path": "$defs.ConditionalValidationConfig"
+          }
+        ]
+      },
+      {
+        "fingerprint": "100ac5201f77",
+        "serialized_bytes": 805,
+        "block_path": "$defs.DQReportYamlConfig",
+        "occurrence_count": 2,
+        "governance": {
+          "owner": "@bioetl-dq",
+          "decision": "retain_generated_dq_schema_contract",
+          "linked_issue": "#5568",
+          "review_date": "2026-09-30",
+          "rationale": "DQ report YAML schema definitions are duplicated by generated contract artifacts and remain DQ-owned until schema generation is consolidated."
+        },
+        "surface_kind_counts": {
+          "other_config": 2
+        },
+        "occurrences": [
+          {
+            "path": "configs/_schema/dq.json",
+            "surface_kind": "other_config",
+            "block_path": "$defs.DQReportYamlConfig"
+          },
+          {
+            "path": "configs/_schema/pipeline.json",
+            "surface_kind": "other_config",
+            "block_path": "$defs.DQReportYamlConfig"
+          }
+        ]
+      },
+      {
+        "fingerprint": "c2443d564c4f",
+        "serialized_bytes": 681,
+        "block_path": "$defs.ColumnGroupSchema",
+        "occurrence_count": 2,
+        "governance": {
+          "owner": "@bioetl-contracts",
+          "decision": "retain_generated_schema_contract",
+          "linked_issue": "#5568",
+          "review_date": "2026-09-30",
+          "rationale": "Column-group schema definitions are generated contract mirrors; the backlog keeps them visible without leaving them review-free."
+        },
+        "surface_kind_counts": {
+          "other_config": 2
+        },
+        "occurrences": [
+          {
+            "path": "configs/_schema/composite.json",
+            "surface_kind": "other_config",
+            "block_path": "$defs.ColumnGroupSchema"
+          },
+          {
+            "path": "configs/_schema/pipeline.json",
+            "surface_kind": "other_config",
+            "block_path": "$defs.ColumnGroupSchema"
+          }
+        ]
+      },
+      {
+        "fingerprint": "99c4316b0650",
+        "serialized_bytes": 221,
+        "block_path": "schema.gold.include_groups",
+        "occurrence_count": 2,
+        "governance": {
+          "owner": "@bioetl-architecture",
+          "decision": "review_required",
+          "linked_issue": "#5568",
+          "review_date": "2026-09-30",
+          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed."
+        },
+        "surface_kind_counts": {
+          "entity_config": 2
+        },
+        "occurrences": [
+          {
+            "path": "configs/entities/composite/activity.yaml",
+            "surface_kind": "entity_config",
+            "block_path": "schema.gold.include_groups"
+          },
+          {
+            "path": "configs/entities/composite/activity.yaml",
+            "surface_kind": "entity_config",
+            "block_path": "schema.silver.include_groups"
+          }
+        ]
+      },
+      {
+        "fingerprint": "d4aa51ec3c98",
+        "serialized_bytes": 211,
+        "block_path": "schema.gold.include_groups",
+        "occurrence_count": 2,
+        "governance": {
+          "owner": "@bioetl-architecture",
+          "decision": "review_required",
+          "linked_issue": "#5568",
+          "review_date": "2026-09-30",
+          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed."
+        },
+        "surface_kind_counts": {
+          "entity_config": 2
+        },
+        "occurrences": [
+          {
+            "path": "configs/entities/composite/target.yaml",
+            "surface_kind": "entity_config",
+            "block_path": "schema.gold.include_groups"
+          },
+          {
+            "path": "configs/entities/composite/target.yaml",
+            "surface_kind": "entity_config",
+            "block_path": "schema.silver.include_groups"
+          }
+        ]
+      }
+    ],
+    "notes": [
+      "This audit covers structured config/contract/registry surfaces under configs/** that JSCPD intentionally ignores.",
+      "Clusters report exact canonical JSON subtree duplicates only; near-duplicate prose and comment drift stay out of scope.",
+      "The audit is report-only and exists to make YAML/JSON governance duplication reviewable in CI-visible artifacts.",
+      "Every reported duplicate cluster carries owner/rationale metadata so retained duplication is explicit debt rather than implicit residue."
+    ]
   },
   "entity_effective": {
-    "actionable_partial_key_count": 0,
-    "categories": {},
     "config_count": 22,
+    "unique_parameter_count": 262,
     "inconsistent_parameter_count": 0,
+    "sanctioned_partial_parameter_count": 0,
+    "raw_inconsistent_parameter_count": 0,
     "partial_key_count": 0,
     "presence_histogram": {},
-    "raw_inconsistent_parameter_count": 0,
-    "sanctioned_partial_parameter_count": 0,
-    "unique_parameter_count": 262
-  },
-  "families": {
-    "composite_runtime": {
-      "config_count": 5,
-      "inconsistent_parameter_count": 0,
-      "raw_inconsistent_parameter_count": 0,
-      "sanctioned_partial_parameter_count": 0,
-      "unique_parameter_count": 157
-    },
-    "entity_effective": {
-      "config_count": 22,
-      "inconsistent_parameter_count": 0,
-      "raw_inconsistent_parameter_count": 0,
-      "sanctioned_partial_parameter_count": 0,
-      "unique_parameter_count": 262
-    }
+    "actionable_partial_key_count": 0,
+    "categories": {}
   },
   "notes": [
     "actionable_partial_key_count excludes keys under INTENTIONAL_PREFIXES.",
     "hash_policy is common across all 22 entity configs after Stream B design review.",
     "composite_runtime family is at zero inconsistent keys as of Stream B plateau.",
     "Residual entity drift is limited to intentional entity-specific filters, metadata policy blocks, schema field-alias surfaces, and pipeline overrides."
-  ],
-  "snapshot_date": "2026-08-10"
+  ]
 }
