@@ -1,3 +1,6 @@
+> Archived snapshot. The maintained guide remains at
+> [DUX3 residual contracts](../../../03-guides/dashboards/dux3-residual-contracts.md).
+
 ______________________________________________________________________
 
 Version: 1.0.0

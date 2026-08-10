@@ -7,10 +7,10 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2657 |
-| Tracked doc-like files | 2657 |
+| Doc-like files | 2666 |
+| Tracked doc-like files | 2666 |
 | Ignored local docs/reports files | 0 |
-| Duplicate groups | 11 |
+| Duplicate groups | 3 |
 | Generated without route or exception | 0 |
 | Generated routes | 70 |
 
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 2657 |
+| tracked | 2666 |
 
 ## Lifecycle Counts
 
@@ -40,7 +40,7 @@
 | issue_pack | 50 |
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
-| published_skill_reference_redirect | 20 |
+| published_skill_reference_redirect | 21 |
 | working_report | 264 |
 
 ## GitHub Issue Drafts And Packs
@@ -57,22 +57,20 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 726 |
+| Active | 741 |
 | Archived | 169 |
 | Canonical | 69 |
-| Duplicate | 8 |
-| Generated | 963 |
+| Generated | 965 |
 | Working | 722 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 726 |
+| active | 741 |
 | archive | 169 |
 | canonical | 69 |
-| duplicate | 8 |
-| generated | 963 |
+| generated | 965 |
 | working | 722 |
 
 ## Recommended Actions
@@ -81,23 +79,14 @@
 | --- | --- |
 | archive-after-github-state-check | 320 |
 | archive-after-migration | 257 |
-| generate-automatically | 963 |
-| keep | 1105 |
-| merge | 8 |
+| generate-automatically | 965 |
+| keep | 1120 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
 
 | Path | Status | Inbound | Action |
 | --- | --- | --- | --- |
-| `docs/03-guides/dashboards/dux3-audit-selection-notes.md` | Duplicate | 0 | merge |
-| `docs/03-guides/dashboards/dux3-residual-contracts.md` | Duplicate | 3 | merge |
-| `docs/03-guides/dashboards/dux3-screenshot-regression-protocol.md` | Duplicate | 0 | merge |
-| `docs/03-guides/dashboards/dux3-semantic-fixtures.md` | Duplicate | 0 | merge |
-| `docs/03-guides/dashboards/dux4-title-scope-harness.md` | Duplicate | 1 | merge |
-| `docs/03-guides/dashboards/dux5-copy-dictionary.md` | Duplicate | 3 | merge |
-| `docs/03-guides/dashboards/dux5-screenshot-regression-protocol.md` | Duplicate | 2 | merge |
-| `docs/03-guides/dashboards/dux6-residual-readability.md` | Duplicate | 1 | merge |
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-05.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
@@ -170,6 +159,14 @@
 | `reports/quality/coderabbit/20260806-full/_S15c-tests-residual-3.txt` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260806-full/_S15c-tests-residual-4.txt` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260806-full/_S16b-configs-other.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S17-docs-00-project-root.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S20-scripts-root.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_diag277_by_file.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_diag_by_file.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_diag_files.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_domain_behavior_open.json` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_live_errors.json` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_live_errors_src.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 

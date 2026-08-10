@@ -1,3 +1,6 @@
+> Archived snapshot. The maintained guide remains at
+> [DUX5 operator copy dictionary](../../../03-guides/dashboards/dux5-copy-dictionary.md).
+
 # DUX5 operator copy dictionary
 
 **Status:** active  
