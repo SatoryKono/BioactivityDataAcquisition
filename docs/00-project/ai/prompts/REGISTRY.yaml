@@ -92,3 +92,10 @@ entries:
     class: operator-paste
     tags: [architecture, review, operator]
     summary: Read-only architecture review and refactoring assessment
+
+  - id: prompt.observability.dashboard-panel-audit
+    path: library/observability/dashboard-panel-audit.md
+    status: active
+    class: operator-paste
+    tags: [observability, dashboard, grafana, audit, operator]
+    summary: Five-phase Grafana panel audit — render, GH issues, fix, closeout
