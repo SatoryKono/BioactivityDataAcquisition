@@ -340,12 +340,26 @@ class TestApplyStructuralPolicySingleFilterEval:
 class TestApplySilverFilter:
     """Directly exercise guard, precomputed, and rejection paths."""
 
-    @pytest.mark.parametrize("result", [None, {"entity_id": "e1"}])
-    def test_noop_when_record_or_filters_are_absent(self, result: object) -> None:
+    @pytest.mark.parametrize(
+        ("result", "filters_configured"),
+        [(None, True), ({"entity_id": "e1"}, False)],
+    )
+    def test_noop_when_record_or_filters_are_absent(
+        self,
+        result: object,
+        filters_configured: bool,
+    ) -> None:
         """No record or no configured filters means there is nothing to enforce."""
         owner = MagicMock()
-        owner._silver_filters = None
-        apply_silver_filter(owner, MagicMock(), result, index=0)
+        filters = MagicMock()
+        filters.is_empty.return_value = False
+        owner._silver_filters = filters if filters_configured else None
+        context = MagicMock()
+
+        apply_silver_filter(owner, context, result, index=0)
+
+        filters.evaluate.assert_not_called()
+        context.logger.debug.assert_not_called()
 
     def test_noop_when_filter_collection_is_empty(self) -> None:
         """An empty filter collection must not evaluate the record."""

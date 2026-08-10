@@ -316,10 +316,14 @@ async def test_report_lists_bound_limits_and_reject_invalid_values(
     writer = _writer()
     calls: list[tuple[str, str | None, int]] = []
     monkeypatch.setattr(observability_routing.asyncio, "to_thread", _inline_to_thread)
+
+    async def unexpected_bounded_operation(**_kwargs: object) -> object:
+        raise AssertionError("report list endpoints must bypass the forensic limiter")
+
     monkeypatch.setattr(
         observability_routing,
         "run_bounded_forensic_operation",
-        _run_operation_directly,
+        unexpected_bounded_operation,
     )
 
     def list_pipeline(*, pipeline_name: str | None, limit: int) -> dict[str, object]:
@@ -387,16 +391,6 @@ async def test_report_lists_bound_limits_and_reject_invalid_values(
             "/ops/observability/workflow-run-report",
             {"workflow": "nightly", "workflow_run_id": "wf-run-1"},
             "workflow-run-report",
-        ),
-        (
-            "/ops/observability/pipeline-run-reports",
-            {"pipeline": "chembl_activity"},
-            "pipeline-run-reports",
-        ),
-        (
-            "/ops/observability/workflow-run-reports",
-            {"workflow": "nightly"},
-            "workflow-run-reports",
         ),
     ],
 )
