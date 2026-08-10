@@ -271,12 +271,7 @@ QA image, rule fixtures, and monitoring-profile pins in one reviewed change.
   1. Убедитесь, что Grafana datasource **BioETL Ops HTTP** указывает на
      `http://bioetl:8000` (или `BIOETL_OPS_HTTP_URL` override).
   1. Infinity plugin must be available for HTTP panels
-     (`yesoreyeram-infinity-datasource`). The Grafana 12.0.0 stack pins
-     Infinity `3.8.0`; a newer incompatible frontend can leave the panels blank
-     with `bioetl-ops-http was not found` while direct Ops HTTP queries still
-     work. Confirm the browser/Grafana log has no `/react/jsx-runtime` `404`,
-     then recreate `grafana` from the current monitoring compose when the
-     installed plugin version differs from the pin.
+     (`yesoreyeram-infinity-datasource`).
   1. Если Grafana уходит в restart loop, проверьте `docker logs bioetl-grafana`:
      bootstrap намеренно не запускает Grafana при несовпадении managed source
      identity между monitoring и main; тот же shipped entrypoint удаляет stale

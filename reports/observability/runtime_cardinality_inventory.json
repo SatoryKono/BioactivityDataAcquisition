@@ -1283,8 +1283,7 @@
     "bioetl_control_plane_run_type_universe": [
       "docs/03-guides/dashboards/contracts/selector-contracts.yaml",
       "grafana/README.md",
-      "grafana/dashboards/bioetl-control-plane-v1.json",
-      "grafana/dashboards/bioetl-run-explorer-v1.json"
+      "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
     "bioetl_control_plane_status": [
       "docs/04-reference/observability/metrics-catalog.md"
@@ -1760,7 +1759,8 @@
       "grafana/dashboards/bioetl-dq-v2.json",
       "grafana/dashboards/bioetl-incident-v1.json",
       "grafana/dashboards/bioetl-overview-v2.json",
-      "grafana/dashboards/bioetl-provider-health-v2.json"
+      "grafana/dashboards/bioetl-provider-health-v2.json",
+      "grafana/dashboards/bioetl-run-explorer-v1.json"
     ],
     "bioetl_phase_duration_seconds": [
       "docs/03-guides/metrics-monitoring.md",
@@ -2390,6 +2390,7 @@
       "grafana/dashboards/bioetl-incident-v1.json",
       "grafana/dashboards/bioetl-overview-v2.json",
       "grafana/dashboards/bioetl-provider-health-v2.json",
+      "grafana/dashboards/bioetl-run-explorer-v1.json",
       "grafana/dashboards/bioetl-runtime.json"
     ]
   },
