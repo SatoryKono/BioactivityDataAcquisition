@@ -35,9 +35,10 @@ from bioetl.application.services.control_plane.evidence.service_support import (
     service_payload,
 )
 from bioetl.domain.control_plane import ControlPlaneArtifactLifecyclePolicy
-from bioetl.domain.ports import LineageStorePort, RunLedgerPort
-from bioetl.domain.ports.control_plane.run_manifest import (
+from bioetl.domain.ports import (
+    LineageStorePort,
     RawRunManifestInspectionPort,
+    RunLedgerPort,
 )
 
 DEFAULT_CONTROL_PLANE_RETENTION_DAYS = 90

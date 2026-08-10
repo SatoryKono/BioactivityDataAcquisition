@@ -21,12 +21,10 @@ from bioetl.domain.ports import (
     HealthStatePort,
     LineageStorePort,
     MetricsPort,
+    RawRunManifestInspectionPort,
     RunLedgerPort,
     RunManifestPort,
     WorkflowManifestPort,
-)
-from bioetl.domain.ports.control_plane.run_manifest import (
-    RawRunManifestInspectionPort,
 )
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.control_plane.file_artifact_lifecycle_store import (

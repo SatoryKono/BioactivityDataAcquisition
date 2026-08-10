@@ -8,7 +8,7 @@ from bioetl.application.services.control_plane.evidence.persistence_profile impo
     resolve_persistence_profile,
 )
 from bioetl.domain.control_plane import RunManifest
-from bioetl.domain.ports.control_plane.run_manifest import RawManifestInspection
+from bioetl.domain.ports import RawManifestInspection
 
 SUPPORTED_RUN_MANIFEST_SCHEMA_MAJOR = "1"
 
