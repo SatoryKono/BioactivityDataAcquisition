@@ -206,23 +206,25 @@ def _snapshot_evidence_check(
             "manifest_snapshot_evidence_missing",
             "The strict persistence profile requires manifest input snapshots.",
         )
-    observed = any(
-        artifact.surface is ControlPlaneArtifactSurface.CACHED_BRONZE
-        and artifact.artifact_id in snapshot_ids
+    observed_snapshot_ids = {
+        artifact.artifact_id
         for artifact in artifacts
-    )
-    if observed:
+        if artifact.surface is ControlPlaneArtifactSurface.CACHED_BRONZE
+        and artifact.artifact_id in snapshot_ids
+    }
+    missing_count = len(snapshot_ids - observed_snapshot_ids)
+    if missing_count == 0:
         return EvidenceCheck(
             "snapshot_evidence",
             "OK",
             "snapshot_lifecycle_evidence_present",
-            "The lifecycle plan contains the manifested cached snapshot evidence.",
+            "The lifecycle plan contains every manifested cached snapshot.",
         )
     return EvidenceCheck(
         "snapshot_evidence",
         "UNKNOWN",
-        "snapshot_lifecycle_evidence_not_observed",
-        "The lifecycle plan cannot prove the manifested cached snapshot evidence.",
+        "snapshot_lifecycle_evidence_incomplete",
+        f"Missing cached snapshot lifecycle evidence count: {missing_count}.",
     )
 
 

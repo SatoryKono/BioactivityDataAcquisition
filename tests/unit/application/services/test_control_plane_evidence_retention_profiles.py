@@ -6,6 +6,7 @@ import hashlib
 import json
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import cast
 from uuid import UUID
 
 import pytest
@@ -35,7 +36,11 @@ def _write_json(path: Path, payload: dict[str, object]) -> None:
     path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
 
 
-def _manifest(profile: str) -> RunManifest:
+def _manifest(
+    profile: str,
+    *,
+    snapshot_payloads: tuple[bytes, ...] | None = None,
+) -> RunManifest:
     suffix = {
         "degraded_observable": 84930,
         "replay_ready": 84931,
@@ -44,16 +49,20 @@ def _manifest(profile: str) -> RunManifest:
     run_id = RunID(UUID(f"00000000-0000-0000-0000-{suffix:012d}"))
     source_refs: tuple[RunSourceRef, ...] = ()
     if profile != "degraded_observable":
-        snapshot = RunInputSnapshotRef(
-            snapshot_id=f"sha256:{hashlib.sha256(profile.encode()).hexdigest()}",
-            content_hash=hashlib.sha256(profile.encode()).hexdigest(),
+        payloads = snapshot_payloads or (profile.encode(),)
+        snapshots = tuple(
+            RunInputSnapshotRef(
+                snapshot_id=f"sha256:{hashlib.sha256(payload).hexdigest()}",
+                content_hash=hashlib.sha256(payload).hexdigest(),
+            )
+            for payload in payloads
         )
         source_refs = (
             RunSourceRef(
                 provider="chembl",
                 entity="activity",
                 pipeline_name="chembl_activity",
-                input_snapshots=(snapshot,),
+                input_snapshots=snapshots,
             ),
         )
     return RunManifest(
@@ -73,7 +82,12 @@ def _manifest(profile: str) -> RunManifest:
     )
 
 
-def _persist_profile_evidence(control_root: Path, manifest: RunManifest) -> None:
+def _persist_profile_evidence(
+    control_root: Path,
+    manifest: RunManifest,
+    *,
+    observed_snapshot_payloads: tuple[bytes, ...] | None = None,
+) -> None:
     _write_json(
         control_root / "run_manifest" / f"{manifest.manifest_id}.json",
         manifest.to_dict(),
@@ -85,9 +99,11 @@ def _persist_profile_evidence(control_root: Path, manifest: RunManifest) -> None
         control_root / "effective_config" / f"effective-config-{profile}.json",
         {"artifact_id": f"effective-config-{profile}"},
     )
-    snapshot_path = control_root.parent / "bronze" / f"{profile}.jsonl.zst"
-    snapshot_path.parent.mkdir(parents=True, exist_ok=True)
-    snapshot_path.write_bytes(profile.encode())
+    payloads = observed_snapshot_payloads or (profile.encode(),)
+    for index, payload in enumerate(payloads):
+        snapshot_path = control_root.parent / "bronze" / f"{profile}-{index}.zst"
+        snapshot_path.parent.mkdir(parents=True, exist_ok=True)
+        snapshot_path.write_bytes(payload)
     if profile != "forensic_grade":
         return
     ledger_path = control_root / "run_ledger" / f"{manifest.manifest_id}.jsonl"
@@ -126,11 +142,8 @@ def _scope(manifest: RunManifest) -> EvidenceScope:
 
 
 def _rows(payload: dict[str, object]) -> dict[str, dict[str, object]]:
-    return {
-        str(row["check"]): row
-        for row in payload["rows"]  # type: ignore[union-attr]
-        if isinstance(row, dict)
-    }
+    rows = cast("list[dict[str, object]]", payload["rows"])
+    return {str(row["check"]): row for row in rows}
 
 
 @pytest.mark.parametrize(
@@ -161,3 +174,40 @@ def test_retention_profile_matrix_uses_production_planner(
         else "snapshot_lifecycle_evidence_present"
     )
     assert rows["snapshot_evidence"]["reason"] == expected_snapshot_reason
+
+
+@pytest.mark.parametrize(
+    ("observed_count", "expected_status", "expected_reason"),
+    (
+        (1, "UNKNOWN", "snapshot_lifecycle_evidence_incomplete"),
+        (2, "OK", "snapshot_lifecycle_evidence_present"),
+    ),
+)
+def test_retention_requires_every_manifested_snapshot_in_lifecycle_plan(
+    tmp_path: Path,
+    observed_count: int,
+    expected_status: str,
+    expected_reason: str,
+) -> None:
+    snapshot_payloads = (b"snapshot-a", b"snapshot-b")
+    manifest = _manifest("replay_ready", snapshot_payloads=snapshot_payloads)
+    control_root = tmp_path / "control"
+    _persist_profile_evidence(
+        control_root,
+        manifest,
+        observed_snapshot_payloads=snapshot_payloads[:observed_count],
+    )
+    service = ControlPlaneEvidenceService(
+        lifecycle_planner=FileControlPlaneArtifactLifecycleStore(control_root)
+    )
+
+    payload = service.retention_compliance(scope=_scope(manifest), now=_NOW)
+
+    snapshot_row = _rows(payload)["snapshot_evidence"]
+    assert snapshot_row["status"] == expected_status
+    assert snapshot_row["reason"] == expected_reason
+    if observed_count == 1:
+        assert snapshot_row["detail"] == (
+            "Missing cached snapshot lifecycle evidence count: 1."
+        )
+        assert "sha256:" not in str(snapshot_row)
