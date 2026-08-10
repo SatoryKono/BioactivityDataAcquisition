@@ -124,12 +124,10 @@ def _has_destructive_sink_mode(modes: tuple[tuple[str, str], ...]) -> bool:
 def _is_composite_replace_replay(manifest: RunManifest) -> bool:
     """Return whether composite replay uses replace-style publication."""
     launch = manifest.launch_context
-    return _normalized_text(
-        launch.get("execution_context")
-    ) == "composite" and _normalized_text(launch.get("replay_mode")) in {
-        "rebuild",
-        "resume",
-    }
+    return (
+        _normalized_text(launch.get("execution_context")) == "composite"
+        and _normalized_text(launch.get("replay_mode")) in {"rebuild", "resume"}
+    )
 
 
 def _has_overwrite_risk(

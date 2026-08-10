@@ -6,12 +6,12 @@
 - next_review_by: 2026-10-30
 - review_cycle_days: 90
 - triaged_entry_count: 18
-- repo_wide_zero_import_candidate_count: 5
-- repo_wide_classified_zero_import_candidate_count: 5
+- repo_wide_zero_import_candidate_count: 6
+- repo_wide_classified_zero_import_candidate_count: 6
 - repo_wide_untriaged_zero_import_candidate_count: 0
-- repo_wide_owner_test_anchored_candidate_count: 5
+- repo_wide_owner_test_anchored_candidate_count: 6
 - repo_wide_candidates_without_owner_tests_count: 0
-- repo_wide_non_static_reachability_candidate_count: 4
+- repo_wide_non_static_reachability_candidate_count: 5
 - triaged_retained_owner_test_anchored_count: 14
 - triaged_retained_without_owner_tests_count: 0
 - note: zero static importer count is a review signal, not automatic removal proof
@@ -44,6 +44,7 @@
 
 | Module | Disposition | Path |
 | --- | --- | --- |
+| `bioetl.__main__` | `retain_module_entrypoint` | `src/bioetl/__main__.py` |
 | `bioetl.application.services.control_plane.manifest.diagnostics.base` | `retain_dynamic_entrypoint` | `src/bioetl/application/services/control_plane/manifest/diagnostics/base.py` |
 | `bioetl.application.services.control_plane.manifest.diagnostics.finalization` | `retain_dynamic_entrypoint` | `src/bioetl/application/services/control_plane/manifest/diagnostics/finalization.py` |
 | `bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support` | `retain_dynamic_entrypoint` | `src/bioetl/application/services/control_plane/manifest/diagnostics/replay_refresh_support.py` |
@@ -68,6 +69,7 @@
 | `triaged_retained` | `src/bioetl/application/composite/runner_pkg/runner_support_types.py` | `retained_module_owner_suite` | `tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py`, `tests/unit/application/composite/test_runner.py` |
 | `triaged_retained` | `src/bioetl/application/composite/runtime_models.py` | `retained_module_owner_suite` | `tests/unit/application/composite/test_runtime_models.py` |
 | `triaged_retained` | `src/bioetl/application/composite/runtime_wiring_api.py` | `retained_module_owner_suite` | `tests/architecture/test_composite_canonical_surfaces.py`, `tests/architecture/test_column_ordering_family.py`, `tests/unit/composition/bootstrap/runtime/test_composite_support_service_builders.py` |
+| `repo_wide_zero_import` | `src/bioetl/__main__.py` | `module_entrypoint_owner_suite` | `tests/unit/interfaces/cli/test_cli_main_module.py` |
 | `repo_wide_zero_import` | `src/bioetl/application/services/control_plane/manifest/diagnostics/base.py` | `dynamic_runtime_entrypoint` | `tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py` |
 | `repo_wide_zero_import` | `src/bioetl/application/services/control_plane/manifest/diagnostics/finalization.py` | `dynamic_runtime_entrypoint` | `tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py` |
 | `repo_wide_zero_import` | `src/bioetl/application/services/control_plane/manifest/diagnostics/replay_refresh_support.py` | `dynamic_runtime_entrypoint` | `tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py` |
@@ -78,6 +80,7 @@
 
 | Module | Disposition | Evidence Lane | Owner Tests |
 | --- | --- | --- | --- |
+| `bioetl.__main__` | `retain_module_entrypoint` | `module_entrypoint_owner_suite` | `tests/unit/interfaces/cli/test_cli_main_module.py` |
 | `bioetl.application.services.control_plane.manifest.diagnostics.base` | `retain_dynamic_entrypoint` | `dynamic_runtime_entrypoint` | `tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py` |
 | `bioetl.application.services.control_plane.manifest.diagnostics.finalization` | `retain_dynamic_entrypoint` | `dynamic_runtime_entrypoint` | `tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py` |
 | `bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support` | `retain_dynamic_entrypoint` | `dynamic_runtime_entrypoint` | `tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py` |

@@ -69,7 +69,9 @@ def test_refresh_publishes_complementary_scope_ratios() -> None:
     inconsistent = make_run_manifest(manifest_id="manifest-inconsistent")
     manifests.save(consistent)
     manifests.save(inconsistent)
-    ledger.append(_entry(consistent, MANIFEST_CREATED_EVENT, "entry-manifest-created"))
+    ledger.append(
+        _entry(consistent, MANIFEST_CREATED_EVENT, "entry-manifest-created")
+    )
     metrics = RecordingMetrics()
 
     result = _service(manifests, ledger, metrics).refresh()
@@ -165,5 +167,6 @@ def test_zero_denominator_clears_stale_series_without_claiming_healthy() -> None
 
     assert result == ()
     assert [
-        (call.value, call.labels["integrity_type"]) for call in metrics.calls[-2:]
+        (call.value, call.labels["integrity_type"])
+        for call in metrics.calls[-2:]
     ] == [(0.0, "consistent"), (0.0, "inconsistent")]

@@ -144,151 +144,6 @@
         }
       },
       {
-        "block_path": "composite.merge.column_groups",
-        "fingerprint": "4be2a0f66fdc",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "composite.merge.column_groups",
-            "path": "configs/composites/publication.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "schema.column_groups",
-            "path": "configs/entities/composite/publication.yaml",
-            "surface_kind": "entity_config"
-          }
-        ],
-        "serialized_bytes": 2895,
-        "surface_kind_counts": {
-          "composite_config": 1,
-          "entity_config": 1
-        }
-      },
-      {
-        "block_path": "composite.merge.column_groups",
-        "fingerprint": "bb932a6ea906",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "composite.merge.column_groups",
-            "path": "configs/composites/target.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "schema.column_groups",
-            "path": "configs/entities/composite/target.yaml",
-            "surface_kind": "entity_config"
-          }
-        ],
-        "serialized_bytes": 2641,
-        "surface_kind_counts": {
-          "composite_config": 1,
-          "entity_config": 1
-        }
-      },
-      {
-        "block_path": "composite.merge.column_groups",
-        "fingerprint": "282a5e5c6a6d",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "composite.merge.column_groups",
-            "path": "configs/composites/activity.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "schema.column_groups",
-            "path": "configs/entities/composite/activity.yaml",
-            "surface_kind": "entity_config"
-          }
-        ],
-        "serialized_bytes": 2169,
-        "surface_kind_counts": {
-          "composite_config": 1,
-          "entity_config": 1
-        }
-      },
-      {
-        "block_path": "composite.merge.column_groups",
-        "fingerprint": "483900068e07",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "composite.merge.column_groups",
-            "path": "configs/composites/molecule.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "schema.column_groups",
-            "path": "configs/entities/composite/molecule.yaml",
-            "surface_kind": "entity_config"
-          }
-        ],
-        "serialized_bytes": 1794,
-        "surface_kind_counts": {
-          "composite_config": 1,
-          "entity_config": 1
-        }
-      },
-      {
-        "block_path": "composite.merge.column_groups",
-        "fingerprint": "a2dae532ddb0",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "composite.merge.column_groups",
-            "path": "configs/composites/assay.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "schema.column_groups",
-            "path": "configs/entities/composite/assay.yaml",
-            "surface_kind": "entity_config"
-          }
-        ],
-        "serialized_bytes": 1751,
-        "surface_kind_counts": {
-          "composite_config": 1,
-          "entity_config": 1
-        }
-      },
-      {
         "block_path": "$defs.GoldFiltersConfig.properties",
         "fingerprint": "ecd4f7b37f6e",
         "governance": {
@@ -427,62 +282,6 @@
         "surface_kind_counts": {
           "other_config": 2
         }
-      },
-      {
-        "block_path": "schema.gold.include_groups",
-        "fingerprint": "99c4316b0650",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "schema.gold.include_groups",
-            "path": "configs/entities/composite/activity.yaml",
-            "surface_kind": "entity_config"
-          },
-          {
-            "block_path": "schema.silver.include_groups",
-            "path": "configs/entities/composite/activity.yaml",
-            "surface_kind": "entity_config"
-          }
-        ],
-        "serialized_bytes": 221,
-        "surface_kind_counts": {
-          "entity_config": 2
-        }
-      },
-      {
-        "block_path": "schema.gold.include_groups",
-        "fingerprint": "d4aa51ec3c98",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "schema.gold.include_groups",
-            "path": "configs/entities/composite/target.yaml",
-            "surface_kind": "entity_config"
-          },
-          {
-            "block_path": "schema.silver.include_groups",
-            "path": "configs/entities/composite/target.yaml",
-            "surface_kind": "entity_config"
-          }
-        ],
-        "serialized_bytes": 211,
-        "surface_kind_counts": {
-          "entity_config": 2
-        }
       }
     ],
     "notes": [
@@ -509,10 +308,10 @@
       "structured_block_min_bytes": 200
     },
     "summary": {
-      "affected_file_count": 17,
-      "duplicate_cluster_count": 16,
-      "duplicate_occurrence_count": 38,
-      "reported_cluster_count": 16
+      "affected_file_count": 12,
+      "duplicate_cluster_count": 9,
+      "duplicate_occurrence_count": 24,
+      "reported_cluster_count": 9
     }
   },
   "entity_effective": {
@@ -548,5 +347,5 @@
     "composite_runtime family is at zero inconsistent keys as of Stream B plateau.",
     "Residual entity drift is limited to intentional entity-specific filters, metadata policy blocks, schema field-alias surfaces, and pipeline overrides."
   ],
-  "snapshot_date": "2026-08-10"
+  "snapshot_date": "2026-08-09"
 }
