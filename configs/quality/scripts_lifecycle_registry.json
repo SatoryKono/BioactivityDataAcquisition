@@ -320,6 +320,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side companion for the canonical AST Grep MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
     },
+    "scripts/ai/mcp/mcp_ast_grep_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the catalog-selected AST Grep transport implementation behind scripts.ai.mcp wrappers; keep it supporting during the compatibility transition and retire the shell implementation after a platform-neutral backend replaces it."
+    },
     "scripts/ai/mcp/mcp_brave_search_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",
@@ -494,6 +500,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as the internal shell uvx resolution and proxy-cleanup helper shared by MCP wrappers; keep it supporting unless command resolution becomes a standalone governed MCP command."
     },
+    "scripts/ai/mcp/wrappers.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the catalog-driven implementation behind the canonical scripts.ai.mcp router; keep it supporting because operators enter through the package command surface."
+    },
     "scripts/ai/sync/governance.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
@@ -643,6 +655,12 @@
       "decision": "shared_helper_module",
       "review_by": "2026-07-15",
       "next_step": "Retain as the shared CLI dispatch helper for canonical scripts.engineering and adjacent routers; promote it to active inventory once helper modules receive explicit catalog classification."
+    },
+    "scripts/engineering/common/platform.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the shared platform-detection implementation used by governed setup and MCP commands; keep it supporting rather than exposing another standalone entrypoint."
     },
     "scripts/engineering/common/repo_paths.py": {
       "owner": "@bioetl-platform",
@@ -854,25 +872,25 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as a bounded manual artifact-duplication audit utility while architecture governance tests and generated quality artifacts still depend on this exact surface; promote it into the canonical scripts.engineering.qa reporting lane or retire it after duplication governance consolidates elsewhere."
     },
-    "scripts/engineering/qa/report_basedpyright_error_snapshot.py": {
+    "scripts/temp/report_basedpyright_error_snapshot.py": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
       "review_by": "2026-09-30",
       "next_step": "Retain as a bounded basedpyright error-snapshot utility while the typing debt campaign needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
     },
-    "scripts/engineering/qa/report_basedpyright_suppression_inventory.py": {
+    "scripts/temp/report_basedpyright_suppression_inventory.py": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
       "review_by": "2026-09-30",
       "next_step": "Retain as a bounded basedpyright suppression-inventory utility while suppression governance needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
     },
-    "scripts/engineering/qa/report_basedpyright_tests_snapshot.py": {
+    "scripts/temp/report_basedpyright_tests_snapshot.py": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
       "review_by": "2026-09-30",
       "next_step": "Retain as a bounded basedpyright test-snapshot utility while the test typing campaign needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
     },
-    "scripts/engineering/qa/report_basedpyright_warning_snapshot.py": {
+    "scripts/temp/report_basedpyright_warning_snapshot.py": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
       "review_by": "2026-09-30",
