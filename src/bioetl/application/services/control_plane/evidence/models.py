@@ -46,7 +46,7 @@ def evidence_payload(
     selected_run_types: tuple[str, ...],
     resolved_via: str,
     manifest: RunManifest | None,
-    extra: dict[str, object] | None = None,
+    additional_fields: dict[str, object] | None = None,
 ) -> dict[str, object]:
     """Build the shared bounded response envelope for validation endpoints."""
     counts = _status_counts(checks)
@@ -68,8 +68,8 @@ def evidence_payload(
         "summary": _summary(checks, counts),
         "rows": [check.to_dict() for check in checks],
     }
-    if extra:
-        payload.update(extra)
+    if additional_fields:
+        payload.update(additional_fields)
     return payload
 
 
