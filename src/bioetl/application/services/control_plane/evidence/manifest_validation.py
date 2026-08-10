@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.evidence.models import EvidenceCheck
 from bioetl.application.services.control_plane.evidence.persistence_profile import (
     STRICT_PERSISTENCE_PROFILES,
     resolve_persistence_profile,
 )
+from bioetl.application.services.control_plane_evidence import EvidenceCheck
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.ports.control_plane.run_manifest import RawManifestInspection
 

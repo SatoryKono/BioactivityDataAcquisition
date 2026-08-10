@@ -49,15 +49,15 @@
     },
     {
       "evidence_metrics": {
-        "hotspot_budget_warning_count": 1,
+        "hotspot_budget_warning_count": 0,
         "hotspot_family_count": 5,
         "total_duplicate_clusters": 0
       },
       "id": "module_boundaries_coupling",
       "name": "Module boundaries / coupling",
-      "score": 9.0,
+      "score": 9.5,
       "weight": 0.14,
-      "weighted_score": 1.26
+      "weighted_score": 1.33
     },
     {
       "evidence_metrics": {
@@ -112,7 +112,7 @@
     {
       "evidence_metrics": {
         "expired_compat_count": 0,
-        "hotspot_budget_warning_count": 1,
+        "hotspot_budget_warning_count": 0,
         "public_entrypoint_growth_count": 0,
         "public_export_facade_conflict_count": 0,
         "public_export_facade_growth_count": 0,
@@ -123,9 +123,9 @@
       },
       "id": "debt_burden_evolution_friction",
       "name": "Debt burden / evolution friction",
-      "score": 9.8,
+      "score": 9.9,
       "weight": 0.06,
-      "weighted_score": 0.588
+      "weighted_score": 0.594
     }
   ],
   "debt_budget_policy": {
@@ -162,7 +162,7 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 7.61,
+  "integral_score": 7.68,
   "interpretation": "satisfactory_system_refactoring_required",
   "metrics": {
     "accepted_adr_count": 54,
@@ -174,9 +174,11 @@
     "dashboarded_without_emission_count": 0,
     "dq_blocking_issue_count": 0,
     "expired_compat_count": 0,
-    "families_at_budget": [],
-    "families_at_budget_count": 0,
-    "hotspot_budget_warning_count": 1,
+    "families_at_budget": [
+      "application_services_control_plane"
+    ],
+    "families_at_budget_count": 1,
+    "hotspot_budget_warning_count": 0,
     "hotspot_family_count": 5,
     "layer_violations": 0,
     "public_entrypoint_growth_count": 0,
@@ -231,7 +233,7 @@
       "total_duplicate_clusters": 0
     },
     "hotspot_family_baseline": {
-      "budget_warnings": 1,
+      "budget_warnings": 0,
       "path": "reports/quality/hotspot-family-baseline.json",
       "snapshot_date": "2026-07-27"
     },
