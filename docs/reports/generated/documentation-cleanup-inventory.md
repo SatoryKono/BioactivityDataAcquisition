@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2674 |
-| Tracked doc-like files | 2669 |
+| Doc-like files | 2697 |
+| Tracked doc-like files | 2692 |
 | Ignored local docs/reports files | 5 |
 | Duplicate groups | 3 |
 | Generated without route or exception | 0 |
@@ -19,7 +19,7 @@
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 5 |
-| tracked | 2669 |
+| tracked | 2692 |
 
 ## Lifecycle Counts
 
@@ -61,7 +61,7 @@
 | Active | 741 |
 | Archived | 169 |
 | Canonical | 69 |
-| Generated | 965 |
+| Generated | 988 |
 | Working | 730 |
 
 ## Surface Families
@@ -71,7 +71,7 @@
 | active | 741 |
 | archive | 169 |
 | canonical | 69 |
-| generated | 965 |
+| generated | 988 |
 | working | 730 |
 
 ## Recommended Actions
@@ -80,7 +80,7 @@
 | --- | --- |
 | archive-after-github-state-check | 320 |
 | archive-after-migration | 265 |
-| generate-automatically | 965 |
+| generate-automatically | 988 |
 | keep | 1120 |
 | reconcile-with-github-state | 4 |
 
@@ -219,40 +219,40 @@
 | `docs/00-project/ai/memory/neo4j-project-memory-seed.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/memory/neo4j-project-memory-seed.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/COLLECTED_PROMPTS_INDEX.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/INVENTORY.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/README.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/agent-memory.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/architecture_metric_exemptions_tasks_json_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/REGISTRY.yaml` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/_schema/prompt.schema.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/architecture_review_and_refactoring_assessment.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/README.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/campaigns/architecture_metric_exemptions_tasks_json_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/campaigns/documentation_diagrams_audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/campaigns/pre-library-architecture_review_and_refactoring_assessment.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/campaigns/pre-library-docs_ai_audit_planning_codex_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/campaigns/pre-library-grok-audit-cycle.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/campaigns/pre-library-grok-closeout.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/campaigns/pre-library-test_fix_retest_loop.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/campaigns/pre-library-test_speed_optimization_loop.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/campaigns/refactor_orchestration_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/campaigns/scripts_inventory_consolidation_cleanup_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/campaigns/specialized-prompts-1-scripts-inventory.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/campaigns/specialized-prompts-2-coderabbit-audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/mirrors/agent-memory.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/mirrors/memory-py-audit-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/mirrors/role-specific-agents-1-py-audit-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/mirrors/role-specific-agents-2-py-debug-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/mirrors/runtime-agentry-1-CODEX-RUNTIME.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/mirrors/runtime-agentry-2-JUNIE-RUNTIME.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/mirrors/setup-prompts-1-devin-setup-prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/mirrors/setup-prompts-2-optimization-prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/mirrors/skills-1-research-workflow.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/mirrors/skills-2-verify-architecture.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/mirrors/workflows-1-master.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/mirrors/workflows-2-post-change.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/docs_ai_audit_planning_codex_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/documentation_diagrams_audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/grok-audit-cycle.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/grok-closeout.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/memory-py-audit-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/refactor_orchestration_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/role-specific-agents-1-py-audit-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/role-specific-agents-2-py-debug-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/runtime-agentry-1-CODEX-RUNTIME.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/runtime-agentry-2-JUNIE-RUNTIME.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/scripts_inventory_consolidation_cleanup_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/setup-prompts-1-devin-setup-prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/setup-prompts-2-optimization-prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/skills-1-research-workflow.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/skills-2-verify-architecture.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/specialized-prompts-1-scripts-inventory.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/specialized-prompts-2-coderabbit-audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/test_fix_retest_loop.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/test_speed_optimization_loop.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/trash/README.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/workflows-1-master.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/workflows-2-post-change.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/skills/_references/README.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/_references/local/deep-research/references/critique-framework.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/_references/local/deep-research/references/report-templates.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/_references/local/deep-research/references/search-patterns.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/_references/local/deep-research/references/source-evaluation.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/_references/local/documentation-audit/references/audit-checklist.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/_references/local/documentation-audit/references/report-template.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
-| `docs/00-project/ai/skills/_references/local/technical-designer-mermaid/references/patterns.md` | ai-skill-reference-mirror |  |  | scripts/ai/codex/check_skills_mirror.sh |
+| `docs/00-project/ai/prompts/fragments/debt-budget-ban.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/env-guardrail.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/evidence-contract.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 
 ## GitHub Issue Evidence Examples
 
