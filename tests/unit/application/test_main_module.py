@@ -5,6 +5,7 @@ from pathlib import Path
 from unittest import mock
 
 import runpy
+import pytest
 
 import pytest
 
