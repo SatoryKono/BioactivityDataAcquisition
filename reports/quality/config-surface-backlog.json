@@ -35,9 +35,9 @@
       "max_traversal_depth": 2
     },
     "summary": {
-      "duplicate_cluster_count": 17,
-      "reported_cluster_count": 17,
-      "duplicate_occurrence_count": 43,
+      "duplicate_cluster_count": 16,
+      "reported_cluster_count": 16,
+      "duplicate_occurrence_count": 38,
       "affected_file_count": 17
     },
     "clusters": [
@@ -81,49 +81,6 @@
             "path": "configs/composites/target.yaml",
             "surface_kind": "composite_config",
             "block_path": "composite.normalized_anchor_policy"
-          }
-        ]
-      },
-      {
-        "fingerprint": "ebb3d5770ddb",
-        "serialized_bytes": 483,
-        "block_path": "hash_policy.hash_policy",
-        "occurrence_count": 5,
-        "governance": {
-          "owner": "@bioetl-architecture",
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "review_date": "2026-09-30",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed."
-        },
-        "surface_kind_counts": {
-          "entity_config": 5
-        },
-        "occurrences": [
-          {
-            "path": "configs/entities/composite/activity.yaml",
-            "surface_kind": "entity_config",
-            "block_path": "hash_policy.hash_policy"
-          },
-          {
-            "path": "configs/entities/composite/assay.yaml",
-            "surface_kind": "entity_config",
-            "block_path": "hash_policy.hash_policy"
-          },
-          {
-            "path": "configs/entities/composite/molecule.yaml",
-            "surface_kind": "entity_config",
-            "block_path": "hash_policy.hash_policy"
-          },
-          {
-            "path": "configs/entities/composite/publication.yaml",
-            "surface_kind": "entity_config",
-            "block_path": "hash_policy.hash_policy"
-          },
-          {
-            "path": "configs/entities/composite/target.yaml",
-            "surface_kind": "entity_config",
-            "block_path": "hash_policy.hash_policy"
           }
         ]
       },
@@ -232,11 +189,11 @@
         "block_path": "composite.merge.column_groups",
         "occurrence_count": 2,
         "governance": {
-          "owner": "@bioetl-architecture",
-          "decision": "review_required",
+          "owner": "@bioetl-composite",
+          "decision": "retain_shared_composite_policy",
           "linked_issue": "#5568",
           "review_date": "2026-09-30",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed."
+          "rationale": "Composite column_groups are intentionally mirrored between runtime composite configs and entity contract surfaces so merge field sets stay deterministic across providers."
         },
         "surface_kind_counts": {
           "composite_config": 1,
@@ -261,11 +218,11 @@
         "block_path": "composite.merge.column_groups",
         "occurrence_count": 2,
         "governance": {
-          "owner": "@bioetl-architecture",
-          "decision": "review_required",
+          "owner": "@bioetl-composite",
+          "decision": "retain_shared_composite_policy",
           "linked_issue": "#5568",
           "review_date": "2026-09-30",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed."
+          "rationale": "Composite column_groups are intentionally mirrored between runtime composite configs and entity contract surfaces so merge field sets stay deterministic across providers."
         },
         "surface_kind_counts": {
           "composite_config": 1,
@@ -290,11 +247,11 @@
         "block_path": "composite.merge.column_groups",
         "occurrence_count": 2,
         "governance": {
-          "owner": "@bioetl-architecture",
-          "decision": "review_required",
+          "owner": "@bioetl-composite",
+          "decision": "retain_shared_composite_policy",
           "linked_issue": "#5568",
           "review_date": "2026-09-30",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed."
+          "rationale": "Composite column_groups are intentionally mirrored between runtime composite configs and entity contract surfaces so merge field sets stay deterministic across providers."
         },
         "surface_kind_counts": {
           "composite_config": 1,
@@ -319,11 +276,11 @@
         "block_path": "composite.merge.column_groups",
         "occurrence_count": 2,
         "governance": {
-          "owner": "@bioetl-architecture",
-          "decision": "review_required",
+          "owner": "@bioetl-composite",
+          "decision": "retain_shared_composite_policy",
           "linked_issue": "#5568",
           "review_date": "2026-09-30",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed."
+          "rationale": "Composite column_groups are intentionally mirrored between runtime composite configs and entity contract surfaces so merge field sets stay deterministic across providers."
         },
         "surface_kind_counts": {
           "composite_config": 1,
@@ -348,11 +305,11 @@
         "block_path": "composite.merge.column_groups",
         "occurrence_count": 2,
         "governance": {
-          "owner": "@bioetl-architecture",
-          "decision": "review_required",
+          "owner": "@bioetl-composite",
+          "decision": "retain_shared_composite_policy",
           "linked_issue": "#5568",
           "review_date": "2026-09-30",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed."
+          "rationale": "Composite column_groups are intentionally mirrored between runtime composite configs and entity contract surfaces so merge field sets stay deterministic across providers."
         },
         "surface_kind_counts": {
           "composite_config": 1,
@@ -517,11 +474,11 @@
         "block_path": "schema.gold.include_groups",
         "occurrence_count": 2,
         "governance": {
-          "owner": "@bioetl-architecture",
-          "decision": "review_required",
+          "owner": "@bioetl-composite",
+          "decision": "retain_entity_specific",
           "linked_issue": "#5568",
           "review_date": "2026-09-30",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed."
+          "rationale": "Gold include_groups blocks are entity-local contract copies retained until a shared gold projection schema object exists."
         },
         "surface_kind_counts": {
           "entity_config": 2
@@ -545,11 +502,11 @@
         "block_path": "schema.gold.include_groups",
         "occurrence_count": 2,
         "governance": {
-          "owner": "@bioetl-architecture",
-          "decision": "review_required",
+          "owner": "@bioetl-composite",
+          "decision": "retain_entity_specific",
           "linked_issue": "#5568",
           "review_date": "2026-09-30",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed."
+          "rationale": "Gold include_groups blocks are entity-local contract copies retained until a shared gold projection schema object exists."
         },
         "surface_kind_counts": {
           "entity_config": 2

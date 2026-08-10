@@ -421,15 +421,19 @@ def _coverage_filename_to_repo_path(
         return normalized
     if normalized.startswith("bioetl/"):
         return f"src/{normalized}"
+    candidates: list[str] = []
     for source_root in source_roots:
         candidate = (source_root / normalized).resolve()
         if not candidate.exists():
             continue
         try:
-            return candidate.relative_to(repo_root).as_posix()
+            candidates.append(candidate.relative_to(repo_root).as_posix())
         except ValueError:
             continue
-    return None
+    return next(
+        (path for path in candidates if path.startswith("src/bioetl/")),
+        candidates[0] if candidates else None,
+    )
 
 
 def _parse_coverage_xml(
