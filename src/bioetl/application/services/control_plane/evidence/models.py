@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane_evidence import (
+from bioetl.application.services.control_plane.evidence.types import (
     EvidenceCheck,
     EvidenceStatus,
 )

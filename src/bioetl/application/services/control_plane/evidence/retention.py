@@ -8,7 +8,7 @@ from typing import Protocol
 from bioetl.application.services.control_plane.evidence.retention_checks import (
     retention_evidence_checks,
 )
-from bioetl.application.services.control_plane_evidence import EvidenceCheck
+from bioetl.application.services.control_plane.evidence.types import EvidenceCheck
 from bioetl.domain.control_plane import (
     ControlPlaneArtifactLifecyclePlan,
     ControlPlaneArtifactLifecyclePolicy,

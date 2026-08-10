@@ -6,7 +6,7 @@ from bioetl.application.services.control_plane.evidence.persistence_profile impo
     STRICT_PERSISTENCE_PROFILES,
     resolve_persistence_profile,
 )
-from bioetl.application.services.control_plane_evidence import EvidenceCheck
+from bioetl.application.services.control_plane.evidence.types import EvidenceCheck
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.ports.control_plane.run_manifest import RawManifestInspection
 
