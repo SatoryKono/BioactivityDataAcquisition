@@ -1,3 +1,6 @@
+> Archived snapshot. The maintained guide remains at
+> [DUX3 screenshot regression protocol](../../../03-guides/dashboards/dux3-screenshot-regression-protocol.md).
+
 ______________________________________________________________________
 
 Version: 1.0.0

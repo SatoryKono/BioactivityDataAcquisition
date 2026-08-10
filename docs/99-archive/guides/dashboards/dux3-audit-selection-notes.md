@@ -1,3 +1,6 @@
+> Archived snapshot. The maintained guide remains at
+> [DUX3 audit selection notes](../../../03-guides/dashboards/dux3-audit-selection-notes.md).
+
 # DUX3 audit selection notes (#7054)
 
 **Issue:** #7054 (DUX3-01)  
