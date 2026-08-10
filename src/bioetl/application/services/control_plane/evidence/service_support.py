@@ -7,7 +7,7 @@ from dataclasses import dataclass, replace
 from bioetl.application.services.control_plane.evidence.models import (
     evidence_payload,
 )
-from bioetl.application.services.control_plane.evidence.types import EvidenceCheck
+from bioetl.application.services.control_plane.evidence.models import EvidenceCheck
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.ports import RunLedgerPort
 

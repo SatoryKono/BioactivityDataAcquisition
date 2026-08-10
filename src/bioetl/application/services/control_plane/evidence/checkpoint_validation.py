@@ -6,7 +6,7 @@ from collections.abc import Mapping
 from math import isfinite
 from typing import cast
 
-from bioetl.application.services.control_plane.evidence.types import EvidenceCheck
+from bioetl.application.services.control_plane.evidence.models import EvidenceCheck
 from bioetl.domain.control_plane import RunManifest
 
 

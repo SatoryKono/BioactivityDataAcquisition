@@ -33,7 +33,7 @@ from bioetl.application.services.control_plane.evidence.service_support import (
     sanitized_manifest_payload_scope,
     service_payload,
 )
-from bioetl.application.services.control_plane.evidence.types import EvidenceCheck
+from bioetl.application.services.control_plane.evidence.models import EvidenceCheck
 from bioetl.domain.control_plane import ControlPlaneArtifactLifecyclePolicy
 from bioetl.domain.ports import LineageStorePort, RunLedgerPort
 from bioetl.domain.ports.control_plane.run_manifest import (
