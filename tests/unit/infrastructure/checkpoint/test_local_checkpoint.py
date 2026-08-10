@@ -273,6 +273,26 @@ class TestLocalCheckpointSaveLoad:
         assert loaded_metadata["offset"] == 4
 
     @pytest.mark.asyncio
+    async def test_nested_run_context_manifest_id_is_indexed(
+        self,
+        checkpoint: LocalCheckpointAdapter,
+        run_id: RunID,
+    ) -> None:
+        """Legacy nested run-context identity remains resolvable by manifest id."""
+        await checkpoint.save(
+            "pipeline",
+            run_id,
+            {"run_context": {"manifest_id": "manifest-nested"}, "offset": 5},
+        )
+
+        result = await checkpoint.load_for_manifest_id("manifest-nested")
+
+        assert result is not None
+        loaded_run_id, loaded_metadata = result
+        assert loaded_run_id == run_id
+        assert loaded_metadata["offset"] == 5
+
+    @pytest.mark.asyncio
     async def test_load_latest_for_pipeline_reads_latest_history_across_runs(
         self, checkpoint: LocalCheckpointAdapter
     ) -> None:
@@ -289,6 +309,54 @@ class TestLocalCheckpointSaveLoad:
         loaded_run_id, loaded_metadata = result
         assert loaded_run_id == run_id_2
         assert loaded_metadata["offset"] == 2
+
+    @pytest.mark.asyncio
+    async def test_load_latest_returns_none_for_absent_or_non_checkpoint_history(
+        self,
+        checkpoint: LocalCheckpointAdapter,
+    ) -> None:
+        """History fallback ignores stray files and directories without JSON entries."""
+        assert await checkpoint.load_latest_for_pipeline("pipeline") is None
+
+        history_root = checkpoint.base_path / ".history" / "by_pipeline" / "pipeline"
+        history_root.mkdir(parents=True)
+        (history_root / "stray.json").write_text("{}", encoding="utf-8")
+        run_dir = history_root / "run-a"
+        run_dir.mkdir()
+        (run_dir / "checkpoint.txt").write_text("not a checkpoint", encoding="utf-8")
+
+        assert await checkpoint.load_latest_for_pipeline("pipeline") is None
+
+    @pytest.mark.asyncio
+    async def test_load_rejects_non_object_checkpoint_payload(
+        self,
+        checkpoint: LocalCheckpointAdapter,
+    ) -> None:
+        """A syntactically valid non-object JSON checkpoint fails closed."""
+        (checkpoint.base_path / "pipeline.json").write_text("[]", encoding="utf-8")
+
+        with pytest.raises(ValueError, match="must be a dictionary"):
+            await checkpoint.load("pipeline")
+
+    @pytest.mark.asyncio
+    async def test_failed_atomic_replace_removes_temporary_checkpoint(
+        self,
+        checkpoint: LocalCheckpointAdapter,
+        run_id: RunID,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """A failed final replace leaves neither a pointer nor temp-file debris."""
+
+        def _fail_replace(_self: Path, _target: Path) -> Path:
+            raise OSError("replace failed")
+
+        monkeypatch.setattr(Path, "replace", _fail_replace)
+
+        with pytest.raises(OSError, match="replace failed"):
+            await checkpoint.save("pipeline", run_id, {"offset": 1})
+
+        assert not (checkpoint.base_path / "pipeline.json").exists()
+        assert tuple(checkpoint.base_path.glob(".checkpoint_*.tmp")) == ()
 
     @pytest.mark.asyncio
     async def test_load_injects_saved_at_from_file_mtime_for_legacy_checkpoint(

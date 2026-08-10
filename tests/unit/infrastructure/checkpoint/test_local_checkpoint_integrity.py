@@ -126,6 +126,36 @@ async def test_malformed_persisted_digest_reports_invalid(tmp_path: Path) -> Non
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("field", "replacement"),
+    [
+        ("pipeline", None),
+        ("version", 2),
+    ],
+)
+async def test_checksum_fails_closed_for_incomplete_or_wrongly_typed_envelope(
+    tmp_path: Path,
+    field: str,
+    replacement: object,
+) -> None:
+    """Persisted envelope corruption cannot retain a valid checksum verdict."""
+    adapter = LocalCheckpointAdapter(tmp_path)
+    await adapter.save("pipeline", _run_id(), {"offset": 4})
+    path = _checkpoint_path(tmp_path)
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    if replacement is None:
+        raw.pop(field)
+    else:
+        raw[field] = replacement
+    path.write_text(json.dumps(raw), encoding="utf-8")
+
+    loaded = await adapter.load("pipeline")
+
+    assert loaded is not None
+    assert loaded[1]["checkpoint_checksum_valid"] is False
+
+
+@pytest.mark.asyncio
 async def test_non_object_metadata_is_rejected_before_schema_coercion(
     tmp_path: Path,
 ) -> None:
