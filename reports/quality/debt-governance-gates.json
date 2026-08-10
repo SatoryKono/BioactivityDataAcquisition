@@ -56,16 +56,16 @@
     },
     {
       "current": {
-        "source_module_count": 2390,
+        "source_module_count": 2413,
         "source_tree_sha256": "72aeecbb69f5be9e8d9d796ebe42ad689a3ef7b4e4a36a94b3be06ae1fc844b2",
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 8
+        "unmeasured_module_count": 17
       },
       "limit": {
-        "source_module_count": 2390,
+        "source_module_count": 2413,
         "source_tree_sha256": "72aeecbb69f5be9e8d9d796ebe42ad689a3ef7b4e4a36a94b3be06ae1fc844b2",
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 8
+        "unmeasured_module_count": 17
       },
       "metric": "module_coverage_scorecard_alignment",
       "name": "module_coverage_scorecard_coherence",
@@ -74,7 +74,7 @@
       "status": "pass"
     },
     {
-      "current": 8,
+      "current": 17,
       "limit": 0,
       "metric": "unmeasured_module_count",
       "name": "module_coverage_unmeasured_modules",
@@ -460,7 +460,7 @@
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 7.68,
+    "architecture_quality_scorecard_integral_score": 7.41,
     "architecture_quality_scorecard_interpretation": "satisfactory_system_refactoring_required",
     "fail_count": 1,
     "failing_gates": [
