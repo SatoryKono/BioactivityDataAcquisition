@@ -1,9 +1,10 @@
-import sys
+import runpy
 import subprocess
+import sys
 from pathlib import Path
 from unittest import mock
 
-import runpy
+import pytest
 
 from bioetl.__main__ import _clear_known_stale_windows_bytecode
 
