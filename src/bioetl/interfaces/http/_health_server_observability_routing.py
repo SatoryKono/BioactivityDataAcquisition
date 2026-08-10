@@ -208,32 +208,22 @@ async def handle_pipeline_run_reports_list(
     writer: asyncio.StreamWriter,
     query: dict[str, str],
 ) -> None:
-    """List recent pipeline run reports for a pipeline (or all)."""
+    """List recent pipeline run reports for a pipeline (or all).
+
+    Index listing is intentionally outside the forensic budget: Browse Recent
+    Runs must stay responsive even when retention/detail forensic slots are busy.
+    """
     pipeline = host._read_optional_param(query, "pipeline")
     limit_raw = host._read_optional_param(query, "limit") or "20"
     try:
         limit = max(1, min(100, int(limit_raw)))
     except ValueError as exc:
         raise ValueError("limit must be an integer") from exc
-    try:
-        payload = await run_bounded_forensic_operation(
-            limiter=host._forensic_endpoint_limiter,
-            operation_factory=lambda: asyncio.to_thread(
-                list_pipeline_run_report_payloads,
-                pipeline_name=pipeline,
-                limit=limit,
-            ),
-        )
-    except ForensicEndpointUnavailable as exc:
-        await host._send_payload_response(
-            writer,
-            exc.status_code,
-            forensic_unavailable_payload(
-                endpoint="pipeline-run-reports",
-                reason=exc.reason,
-            ),
-        )
-        return
+    payload = await asyncio.to_thread(
+        list_pipeline_run_report_payloads,
+        pipeline_name=pipeline,
+        limit=limit,
+    )
     await host._send_payload_response(writer, 200, payload)
 
 
@@ -242,32 +232,21 @@ async def handle_workflow_run_reports_list(
     writer: asyncio.StreamWriter,
     query: dict[str, str],
 ) -> None:
-    """List recent workflow run reports for a workflow (or all)."""
+    """List recent workflow run reports for a workflow (or all).
+
+    Same as pipeline list: keep index listing off the forensic semaphore.
+    """
     workflow = host._read_optional_param(query, "workflow")
     limit_raw = host._read_optional_param(query, "limit") or "20"
     try:
         limit = max(1, min(100, int(limit_raw)))
     except ValueError as exc:
         raise ValueError("limit must be an integer") from exc
-    try:
-        payload = await run_bounded_forensic_operation(
-            limiter=host._forensic_endpoint_limiter,
-            operation_factory=lambda: asyncio.to_thread(
-                list_workflow_run_report_payloads,
-                workflow_name=workflow,
-                limit=limit,
-            ),
-        )
-    except ForensicEndpointUnavailable as exc:
-        await host._send_payload_response(
-            writer,
-            exc.status_code,
-            forensic_unavailable_payload(
-                endpoint="workflow-run-reports",
-                reason=exc.reason,
-            ),
-        )
-        return
+    payload = await asyncio.to_thread(
+        list_workflow_run_report_payloads,
+        workflow_name=workflow,
+        limit=limit,
+    )
     await host._send_payload_response(writer, 200, payload)
 
 
