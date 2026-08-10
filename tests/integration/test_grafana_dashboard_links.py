@@ -59,7 +59,9 @@ from tests.integration._grafana_dashboard_links_support import (
 
 pytestmark = pytest.mark.integration
 
-_OPS_HTTP_BROWSER_PROXY = "/api/datasources/proxy/uid/bioetl-ops-http/health/live"
+_OPS_HTTP_BROWSER_PROXY = (
+    "/api/datasources/proxy/uid/bioetl-ops-http/health/live"
+)
 _FORBIDDEN_OPS_HTTP_BROWSER_HOST_RE = re.compile(
     r"^https?://(?:localhost|127(?:\.\d{1,3}){3}|host\.docker\.internal|"
     r"[a-z0-9_-]+)(?::\d+)?/health(?:/|$)",

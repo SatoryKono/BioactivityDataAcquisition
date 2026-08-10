@@ -44,12 +44,9 @@ async def load_checkpoint_freshness_evidence(
     evidence_source = "mutable_latest_pointer"
     manifest_id: str | None = None
 
-    res = await _load_checkpoint_freshness_evidence_impl(
-        host, scope, target_pipeline, checkpoint_port
-    )
+    res = await _load_checkpoint_freshness_evidence_impl(host, scope, target_pipeline, checkpoint_port)
     checkpoint_tuple, evidence_source, manifest_id, aggregate_scope_unknown = res
     return checkpoint_tuple, evidence_source, manifest_id, aggregate_scope_unknown
-
 
 async def _load_checkpoint_freshness_evidence_impl(
     host: _CheckpointLookupHost,

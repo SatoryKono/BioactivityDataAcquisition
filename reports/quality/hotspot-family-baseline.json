@@ -88,10 +88,10 @@
         "src/bioetl/application/services/control_plane/"
       ],
       "duplication_clusters": 0,
-      "files": 156,
-      "total_loc": 18027,
+      "files": 155,
+      "total_loc": 17862,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.443,
+      "helper_function_ratio": 0.444,
       "max_internal_fan_in": 8,
       "max_internal_fan_in_module": "bioetl.application.services.control_plane.evidence.models",
       "bounded_growth_budgets": {
