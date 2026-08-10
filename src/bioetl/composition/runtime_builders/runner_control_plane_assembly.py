@@ -5,9 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.control_plane.ledger.service import (
-    RunLedgerService,
-)
+from bioetl.application.services.control_plane.ledger.service import RunLedgerService
 from bioetl.composition.observability import (
     bind_manifest_logger_context as _bind_manifest_logger_context,
 )

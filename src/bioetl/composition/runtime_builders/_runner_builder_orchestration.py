@@ -7,9 +7,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.services.control_plane.ledger.service import (
-    RunLedgerService,
-)
+from bioetl.application.services.control_plane.ledger.service import RunLedgerService
 from bioetl.composition.pipeline_runner_request import (
     PipelineCreateRunnerCore,
     PipelineCreateRunnerExtras,
