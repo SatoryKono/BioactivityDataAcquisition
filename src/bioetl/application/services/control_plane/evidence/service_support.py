@@ -28,7 +28,7 @@ def service_payload(
     endpoint: str,
     scope: EvidenceScope,
     checks: tuple[EvidenceCheck, ...],
-    extra: dict[str, object] | None = None,
+    additional_data: dict[str, object] | None = None,
 ) -> dict[str, object]:
     """Build the shared service payload from one resolved selector scope."""
     return evidence_payload(
@@ -39,7 +39,7 @@ def service_payload(
         selected_run_types=scope.selected_run_types,
         resolved_via=scope.resolved_via,
         manifest=scope.manifest,
-        extra=extra,
+        additional_fields=additional_data,
     )
 
 

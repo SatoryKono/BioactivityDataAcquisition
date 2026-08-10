@@ -66,7 +66,7 @@ class ControlPlaneEvidenceService:
                 endpoint="checkpoint-validation",
                 scope=scope,
                 checks=(unresolved_scope_check(scope.resolved_via),),
-                extra={"evidence_source": evidence_source},
+                additional_data={"evidence_source": evidence_source},
             )
         return service_payload(
             endpoint="checkpoint-validation",
@@ -76,7 +76,7 @@ class ControlPlaneEvidenceService:
                 checkpoint=checkpoint,
                 aggregate_scope_unknown=aggregate_scope_unknown,
             ),
-            extra={"evidence_source": evidence_source},
+            additional_data={"evidence_source": evidence_source},
         )
 
     def manifest_validation(self, *, scope: EvidenceScope) -> dict[str, object]:
@@ -132,7 +132,7 @@ class ControlPlaneEvidenceService:
                 fragments=fragments,
                 ledger_entries=run_ledger_entries,
             ),
-            extra={
+            additional_data={
                 "fragment_count": len(fragments),
                 "edge_count": sum(len(fragment.edges) for fragment in fragments),
                 "node_count": len(
@@ -182,7 +182,7 @@ class ControlPlaneEvidenceService:
             endpoint="retention-compliance",
             scope=scope,
             checks=checks,
-            extra={
+            additional_data={
                 "retention_days": self.retention_days,
                 "cutoff": plan.cutoff.isoformat(),
                 "artifacts": summarize_retention_artifacts(relevant_artifacts),
@@ -197,7 +197,7 @@ class ControlPlaneEvidenceService:
                 endpoint="failure-reasons",
                 scope=scope,
                 checks=(scope_check,),
-                extra={
+                additional_data={
                     "categories": list(FAILURE_REASON_CATEGORIES),
                     "total_failure_count": None,
                 },
@@ -231,7 +231,7 @@ class ControlPlaneEvidenceService:
             endpoint="failure-reasons",
             scope=scope,
             checks=checks,
-            extra={
+            additional_data={
                 "categories": list(FAILURE_REASON_CATEGORIES),
                 "total_failure_count": total,
             },

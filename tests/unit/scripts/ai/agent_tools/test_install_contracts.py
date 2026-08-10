@@ -70,4 +70,3 @@ def test_rollback_is_documented_without_env_mutation() -> None:
     assert "## Uninstall and rollback" in readme
     assert "pip uninstall agentdebugx proofagent-harness" in readme
     assert "requires no code or configuration rollback" in readme
-
