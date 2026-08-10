@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-10T15:39:03.949010+00:00",
+  "generated_at": "2026-08-10T15:47:34.536435+00:00",
   "summary": {
     "total_scripts": 577,
     "status_counts": {
@@ -13,7 +13,7 @@
       "build": 16,
       "ci": 81,
       "docs": 247,
-      "other": 76,
+      "other": 75,
       "scripts": 482,
       "skills": 11,
       "tests": 370
@@ -19781,7 +19781,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/03-guides/dashboards/dux4-field-override-inventory.json",
@@ -19820,16 +19820,16 @@
           "text": "python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay"
         },
         {
-          "path": "grafana/dashboards/bioetl-run-explorer-v1.json",
-          "line": 129,
-          "source_group": "other",
-          "text": "\"noValue\": \"No pipeline-run-report artifacts for this pipeline (reports/run-reports/pipeline/<name>/). Not Prometheus — run the pipeline, pick a pipeline with reports, or if host has reports but this "
-        },
-        {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
           "line": 1388,
           "source_group": "scripts",
           "text": "from scripts.ops.runtime.docker import verify_report_bind as bind_verify"
+        },
+        {
+          "path": "tests/unit/scripts/ops/docker/test_verify_report_bind.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "from scripts.ops.runtime.docker import verify_report_bind as mod"
         }
       ]
     },

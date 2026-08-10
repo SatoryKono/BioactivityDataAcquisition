@@ -160,13 +160,6 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "344",
-      "path": "tests/unit/application/core/test_base_transformer_structural_support.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_noop_when_record_or_filters_are_absent"
-    },
-    {
-      "category": "intentional_no_exception_contract",
       "line": "48",
       "path": "tests/unit/application/core/test_batch_metrics_accounting.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -751,7 +744,7 @@
     "architecture_helper_guard": 16,
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
-    "intentional_no_exception_contract": 86,
+    "intentional_no_exception_contract": 85,
     "weak_no_value": 0
   },
   "assertless_examples": [
@@ -773,13 +766,13 @@
     "tests/architecture/test_quality_debt_scorecard.py:1127",
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
     "tests/integration/infrastructure/storage/test_delta_reader.py:586",
-    "tests/unit/application/core/test_base_transformer_structural_support.py:344",
     "tests/unit/application/core/test_batch_metrics_accounting.py:48",
     "tests/unit/application/core/test_batch_tracing.py:137",
     "tests/unit/application/core/test_batch_writer_tracing_mixin.py:106",
     "tests/unit/application/core/test_batch_writer_tracing_mixin.py:282",
     "tests/unit/application/core/test_dq_metrics.py:60",
-    "tests/unit/application/core/test_otel_spans.py:586"
+    "tests/unit/application/core/test_otel_spans.py:586",
+    "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:129"
   ],
   "assertless_families": {
     "tests/architecture/test_antipatterns.py": {
@@ -831,12 +824,6 @@
       }
     },
     "tests/integration/infrastructure/storage/test_delta_reader.py": {
-      "assertless_tests": 1,
-      "categories": {
-        "intentional_no_exception_contract": 1
-      }
-    },
-    "tests/unit/application/core/test_base_transformer_structural_support.py": {
       "assertless_tests": 1,
       "categories": {
         "intentional_no_exception_contract": 1
@@ -1089,7 +1076,7 @@
       }
     }
   },
-  "assertless_total_candidates": 102,
+  "assertless_total_candidates": 101,
   "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
@@ -1263,7 +1250,7 @@
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 86,
+  "intentional_no_exception_contract": 85,
   "markerless_examples": [],
   "markerless_test_functions": 0,
   "parse_errors": [],
@@ -1436,13 +1423,6 @@
         "path": "tests/integration/infrastructure/storage/test_delta_reader.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_aclose_is_noop"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "344",
-        "path": "tests/unit/application/core/test_base_transformer_structural_support.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_noop_when_record_or_filters_are_absent"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -2030,7 +2010,7 @@
       "architecture_helper_guard": 16,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
-      "intentional_no_exception_contract": 86,
+      "intentional_no_exception_contract": 85,
       "weak_no_value": 0
     },
     "assertless_examples": [
@@ -2052,15 +2032,15 @@
       "tests/architecture/test_quality_debt_scorecard.py:1127",
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
       "tests/integration/infrastructure/storage/test_delta_reader.py:586",
-      "tests/unit/application/core/test_base_transformer_structural_support.py:344",
       "tests/unit/application/core/test_batch_metrics_accounting.py:48",
       "tests/unit/application/core/test_batch_tracing.py:137",
       "tests/unit/application/core/test_batch_writer_tracing_mixin.py:106",
       "tests/unit/application/core/test_batch_writer_tracing_mixin.py:282",
       "tests/unit/application/core/test_dq_metrics.py:60",
-      "tests/unit/application/core/test_otel_spans.py:586"
+      "tests/unit/application/core/test_otel_spans.py:586",
+      "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:129"
     ],
-    "assertless_total_candidates": 102,
+    "assertless_total_candidates": 101,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -2298,15 +2278,15 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "8de2363224ae39de1103fb5584226e3f35ad55a207d0e380adb4c43de7d10306",
+  "source_tree_sha256": "6024fba3e9e6eb45261c282d2fe1e698ae06d8b7c0c8bf6bdef57dbfcd6c6316",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 102,
+    "assertless_total_candidates": 101,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
-    "intentional_no_exception_contract": 86,
+    "intentional_no_exception_contract": 85,
     "markerless_examples": [],
     "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
