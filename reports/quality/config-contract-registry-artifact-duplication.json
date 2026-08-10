@@ -47,7 +47,6 @@
     "reports/quality/*ownership*.json": 2,
     "reports/quality/*ownership*.md": 1,
     "reports/quality/*registry*.json": 3,
-    "reports/quality/*registry*.md": 1,
     "tests/fixtures/contracts/**/*.json": 7,
     "tests/fixtures/contracts/**/*.yaml": 1,
     "tests/fixtures/golden/**/*.json": 30
@@ -60,9 +59,9 @@
     "contract": 48,
     "golden": 27,
     "quality_report": 9,
-    "registry": 26
+    "registry": 25
   },
-  "total_files": 298,
+  "total_files": 297,
   "tracked_extensions": [
     ".csv",
     ".json",
