@@ -75,6 +75,7 @@ FORBIDDEN_LOCAL_ROOT_FILES: frozenset[str] = frozenset(
         "Test Results - Pytest_All.xml",
     }
 )
+WORKTREES_DIR = ".worktrees"
 
 
 class RootLayoutState(TypedDict):
@@ -674,6 +675,20 @@ def _unexpected_local_root_dirs_on_disk(
             continue
         if entry.name in tolerated_local_root_dirs:
             continue
+        if entry.name == WORKTREES_DIR and not entry.is_symlink():
+            try:
+                next(entry.iterdir())
+            except StopIteration:
+                # Empty .worktrees remains strict clutter and is handled by
+                # the cleanup tool's empty-only deletion path.
+                pass
+            except OSError:
+                # Fail closed when the directory cannot be inspected.
+                pass
+            else:
+                # Repository guides permit active local worktrees here, while
+                # cleanup intentionally refuses to delete a non-empty tree.
+                continue
         violations.append(entry.name)
     return sorted(violations)
 
