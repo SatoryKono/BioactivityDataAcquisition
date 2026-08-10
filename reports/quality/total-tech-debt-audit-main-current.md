@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `1f08fba3eb8d373991c00b14df9b3a857798e50b`
 
-Evidence surface SHA-256: `ab8577a4477790dbb7c08c86f5e9b8edd41ce79fe5db72eaee6504c99ff22a6c`
+Evidence surface SHA-256: `b8ac7a54fd9e927624ac4767e8ed594a67d82c5003ecc329a26fd49bbf6c73cc`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,27 +18,27 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-07-27-r1",
   "audited_commit_sha": "1f08fba3eb8d373991c00b14df9b3a857798e50b",
-  "evidence_surface_sha256": "ab8577a4477790dbb7c08c86f5e9b8edd41ce79fe5db72eaee6504c99ff22a6c",
+  "evidence_surface_sha256": "b8ac7a54fd9e927624ac4767e8ed594a67d82c5003ecc329a26fd49bbf6c73cc",
   "metrics": {
-    "architecture_integral_score": 7.68,
+    "architecture_integral_score": 7.41,
     "architecture_interpretation": "satisfactory_system_refactoring_required",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "debt_gate_count": 45,
-    "debt_gate_fail_count": 2,
-    "debt_gate_pass_count": 43,
+    "debt_gate_fail_count": 1,
+    "debt_gate_pass_count": 44,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 1402,
+    "fully_covered_module_count": 1467,
     "layer_violation_count": 0,
-    "no_executable_lines_module_count": 9,
-    "partially_covered_module_count": 971,
-    "source_module_count": 2390,
+    "no_executable_lines_module_count": 2,
+    "partially_covered_module_count": 927,
+    "source_module_count": 2413,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 8
+    "unmeasured_module_count": 17
   },
   "schema_version": "technical-debt-audit-summary-v1"
 }
@@ -48,16 +48,16 @@ Refresh reason: #7517 Stream B terminal sync - re-pin evidence_surface_sha256 wi
 
 ## Executive summary
 
-1. Debt-governance gates: **43 pass / 2 fail** (`45/45` debt-governance gates passing).
-1. Architecture quality integral score: **7.68** (`satisfactory_system_refactoring_required`). Integral score `7.68`.
+1. Debt-governance gates: **44 pass / 1 fail** (`45/45` debt-governance gates passing).
+1. Architecture quality integral score: **7.41** (`satisfactory_system_refactoring_required`). Integral score `7.41`.
 1. Module inventory (from `module-coverage-inventory.json` only):
-   - source_module_count: **2390**
-   - fully_covered: **1402**
-   - partially_covered: **971**
-   - no_executable_lines: **9**
+   - source_module_count: **2413**
+   - fully_covered: **1467**
+   - partially_covered: **927**
+   - no_executable_lines: **2**
    - uncovered: **0**
-   - unmeasured: **8**
-   - check: fully + partial + no_exec + uncovered + unmeasured = 2390 == source_module_count
+   - unmeasured: **17**
+   - check: fully + partial + no_exec + uncovered + unmeasured = 2413 == source_module_count
 1. Contract coverage matrix schema: **contract-coverage-matrix-v3** (v3: strict Gold required for availability).
 1. Constructor waivers (shrink-only inventory): **1** entries.
 1. Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**.
@@ -88,7 +88,7 @@ python -m scripts.engineering.qa validate-technical-debt-audit --json
 
 | module | src importers | test importers |
 | --- | ---: | ---: |
-| `bioetl.domain.composite.config` | 0 | 39 |
+| `bioetl.domain.composite.config` | 0 | 42 |
 | `bioetl.application.composite.merger` | 0 | 5 |
 
 ## TD2 residual closeout (2026-07-29)
