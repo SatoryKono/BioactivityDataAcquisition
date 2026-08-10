@@ -134,7 +134,8 @@ class TestLocalCheckpointSaveLoad:
         assert result is not None
         _, loaded_metadata = result
         assert isinstance(loaded_metadata["checkpoint_saved_at_epoch_seconds"], float)
-        assert len(loaded_metadata) == 1
+        assert loaded_metadata["checkpoint_checksum_valid"] is True
+        assert len(loaded_metadata) == 2
 
     @pytest.mark.asyncio
     async def test_save_with_none_metadata(
@@ -146,7 +147,8 @@ class TestLocalCheckpointSaveLoad:
         assert result is not None
         _, loaded_metadata = result
         assert isinstance(loaded_metadata["checkpoint_saved_at_epoch_seconds"], float)
-        assert len(loaded_metadata) == 1
+        assert loaded_metadata["checkpoint_checksum_valid"] is True
+        assert len(loaded_metadata) == 2
 
     @pytest.mark.asyncio
     async def test_checkpoint_save_load__returns_none__6a39deff(

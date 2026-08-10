@@ -178,7 +178,7 @@ scope used by the control-plane dashboard:
 | Endpoint | Evidence checks |
 | --- | --- |
 | `/ops/control-plane/checkpoint-validation` | persisted parse, supported metadata schema, checksum evidence, manifest anchor agreement |
-| `/ops/control-plane/manifest-validation` | persisted parse, typed schema, schema-major compatibility, contract anchors |
+| `/ops/control-plane/manifest-validation` | persisted parse, pre-coercion raw schema, schema-major compatibility, contract anchors |
 | `/ops/control-plane/lineage-validation` | graph closure, run/manifest identity consistency, directed-cycle detection, persistence profile |
 | `/ops/control-plane/retention-compliance` | 90-day dry-run retention policy, reproducibility evidence floor, required evidence surfaces, archive evidence |
 | `/ops/control-plane/failure-reasons` | fixed failure categories `api`, `dq`, `schema`, `storage`, `network`, `validation`, `unknown` |
@@ -188,10 +188,27 @@ The shared response contract is
 `WARNING`, `ERROR`, or `UNKNOWN` and a stable machine reason. Missing legacy
 checkpoint checksum evidence is `UNKNOWN` with
 `checkpoint_checksum_not_recorded`; successful parsing must not be presented as
-checksum verification. Retention is always evaluated through planner dry-run
-and never deletes data from an HTTP request. Failure-reason responses contain
-category counts only: raw exception types and messages are deliberately omitted
-and are never promoted into Prometheus labels.
+checksum verification. New local checkpoints persist a canonical
+`payload_sha256`, and the adapter recomputes it for mutable and historical
+reads. A mismatch is `ERROR`; a caller-provided checksum verdict is ignored.
+Manifest validation inspects persisted JSON before `RunManifest.from_dict`
+coercion, so wrong scalar/container types remain explicit bounded schema
+errors. Complete contract anchors remain `UNKNOWN` until a compatible registry
+comparison is available; anchor presence alone is not compatibility proof.
+
+`required_persistence_profile` is a closed vocabulary:
+`degraded_observable`, `replay_ready`, or `forensic_grade`. Unsupported values
+fail closed. Missing lineage is an error for `forensic_grade`; for
+`replay_ready` it is a warning because richer forensic lineage is optional,
+while any fragments that are present are still fully checked for closure,
+identity conflicts, and cycles.
+
+Retention is always evaluated through planner dry-run and never deletes data
+from an HTTP request. Failure-reason responses contain category counts only:
+raw exception types and messages are deliberately omitted and are never
+promoted into Prometheus labels. When scope or ledger evidence is unavailable,
+all seven fixed category rows remain visible with `status=UNKNOWN`, a stable
+reason, and `count=null`; zero is never used to disguise missing evidence.
 
 All five routes use the same bounded forensic execution budget as the other
 expensive operator endpoints. Capacity exhaustion and deadline expiry return

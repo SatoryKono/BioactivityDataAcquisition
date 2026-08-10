@@ -15,6 +15,9 @@ from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.control_plane._file_run_manifest_persistence import (
     persist_manifest,
 )
+from bioetl.infrastructure.control_plane._raw_run_manifest_inspection import (
+    RawRunManifestInspectionMixin,
+)
 from bioetl.infrastructure.control_plane._read_metrics import (
     emit_control_plane_read_metrics,
 )
@@ -78,7 +81,7 @@ def _load_latest_scope_manifest(
 
 
 @dataclass(slots=True)
-class FileRunManifestStore(RunManifestPort):
+class FileRunManifestStore(RawRunManifestInspectionMixin, RunManifestPort):
     """Persist manifests as JSON files under the control-plane output tree."""
 
     base_path: Path

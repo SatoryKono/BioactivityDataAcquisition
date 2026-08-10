@@ -8,6 +8,10 @@ from typing import Any, cast
 
 from bioetl.domain.serialization import serialize_to_json
 from bioetl.domain.types import JsonDict, RunID
+from bioetl.infrastructure.checkpoint._local_checkpoint_integrity import (
+    CHECKPOINT_PAYLOAD_SHA256_KEY,
+    compute_checkpoint_payload_sha256,
+)
 from bioetl.infrastructure.checkpoint._local_checkpoint_io import (
     atomic_write_text,
     build_history_entry_path,
@@ -43,6 +47,9 @@ class LocalCheckpointSyncMixin:
             "metadata": saved_metadata,
             "version": "2.0",
         }
+        checkpoint_data[CHECKPOINT_PAYLOAD_SHA256_KEY] = (
+            compute_checkpoint_payload_sha256(checkpoint_data)
+        )
         checkpoint_json = serialize_to_json(checkpoint_data, ensure_ascii=False)
         atomic_write_text(full_path, checkpoint_json)
         self._write_history_checkpoint(
