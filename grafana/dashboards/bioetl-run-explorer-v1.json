@@ -126,7 +126,7 @@
             "align": "left",
             "inspect": true
           },
-          "noValue": "No pipeline-run-report files for this pipeline under reports/run-reports/pipeline/<pipeline>/. Has reports: chembl_assay, chembl_target, chembl_publication. chembl_activity may appear in run_id (control-plane) but has no report artifacts yet. If host has reports and this is empty: bind mismatch — python -m scripts.ops.runtime.docker.verify_report_bind"
+          "noValue": "No pipeline-run-report artifacts for this pipeline (reports/run-reports/pipeline/<name>/). Not Prometheus — run the pipeline, pick a pipeline with reports, or if host has reports but this stays empty: bind mismatch — check /health/ready report_root and run scripts/ops/runtime/docker/verify_report_bind.py"
         },
         "overrides": [
           {
@@ -1047,44 +1047,50 @@
   "templating": {
     "list": [
       {
-        "name": "workflow",
-        "type": "custom",
-        "label": "workflow",
-        "hide": 0,
-        "includeAll": true,
         "allValue": "$__all",
-        "multi": false,
-        "query": "chembl_baseline",
         "current": {
           "selected": true,
           "text": "All",
           "value": "$__all"
         },
-        "options": [
-          {
-            "selected": true,
-            "text": "All",
-            "value": "$__all"
-          },
-          {
-            "selected": false,
-            "text": "chembl_baseline",
-            "value": "chembl_baseline"
-          }
-        ]
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(bioetl_workflow_universe, workflow)",
+        "description": "Optional workflow evidence context and workflow-dashboard handoff selector. Overview remains pipeline-summary-first: workflow does not yet drive exact intersection filtering for the current-status PromQL surfaces.",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Workflow",
+        "multi": false,
+        "name": "workflow",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_workflow_universe, workflow)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       },
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "text": "chembl_assay",
-          "value": "chembl_assay"
+          "selected": false,
+          "text": "unknown",
+          "value": "unknown"
         },
         "datasource": {
           "type": "prometheus",
           "uid": "prometheus"
         },
-        "definition": "label_values(bioetl_control_plane_run_type_universe, pipeline)",
+        "definition": "label_values(bioetl_overview_pipeline_run_type_universe, pipeline)",
         "hide": 0,
         "includeAll": false,
         "label": "Pipeline",
@@ -1092,7 +1098,7 @@
         "name": "pipeline",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_control_plane_run_type_universe, pipeline)",
+          "query": "label_values(bioetl_overview_pipeline_run_type_universe, pipeline)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -1117,7 +1123,7 @@
           "type": "prometheus",
           "uid": "prometheus"
         },
-        "definition": "label_values(bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\"}, run_type)",
+        "definition": "label_values(bioetl_overview_pipeline_run_type_universe{pipeline=~\"$pipeline\"}, run_type)",
         "hide": 0,
         "includeAll": true,
         "label": "Run Type",
@@ -1125,7 +1131,7 @@
         "name": "run_type",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\"}, run_type)",
+          "query": "label_values(bioetl_overview_pipeline_run_type_universe{pipeline=~\"$pipeline\"}, run_type)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,

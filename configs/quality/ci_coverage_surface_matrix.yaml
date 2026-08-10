@@ -45,6 +45,12 @@ coverage_aggregation:
     - reports/coverage/.coverage.contract-confidence
     - reports/coverage/.coverage.repo-backed-unit
     - reports/coverage/.coverage.unit-scripts-tooling
+    - reports/coverage/.coverage.unit-domain
+    - reports/coverage/.coverage.unit-application
+    - reports/coverage/.coverage.unit-infrastructure
+    - reports/coverage/.coverage.unit-other
+    - reports/coverage/.coverage.integration
+    - reports/coverage/.coverage.security
   excluded_execution_surfaces:
     - live-provider-contracts
     - control-plane-e2e
@@ -171,6 +177,13 @@ lanes:
     coverage_artifact: coverage-data-${matrix.test-group.name}
     coverage_python_versions:
       - "3.12"
+    coverage_files:
+      - reports/coverage/.coverage.unit-domain
+      - reports/coverage/.coverage.unit-application
+      - reports/coverage/.coverage.unit-infrastructure
+      - reports/coverage/.coverage.unit-other
+      - reports/coverage/.coverage.integration
+      - reports/coverage/.coverage.security
     participates_in_hard_threshold: true
     threshold_enforced_in_job: false
     execution_confidence_role: breadth_parallel_execution
@@ -194,6 +207,19 @@ lanes:
       branch coverage thresholds. Offline contract execution arrives through
       the contract-confidence shard; live e2e, live provider contracts, and
       dedicated memory tests stay outside the aggregate.
+  - job: coverage-inventory-currentness
+    lane_type: artifact_currentness_gate
+    emits_coverage_artifact: false
+    downloads_coverage_artifacts: true
+    participates_in_hard_threshold: false
+    threshold_enforced_in_job: false
+    execution_confidence_role: committed_inventory_currentness
+    notes: >-
+      This required downstream gate compares the committed inventory with the
+      candidate emitted by a successful SHA-bound coverage-verify producer. It
+      may fail while that producer remains a trusted source for the one-time
+      inventory refresh, avoiding a bootstrap deadlock without weakening the
+      currentness check.
   - job: duration-telemetry
     lane_type: telemetry_only
     emits_coverage_artifact: false
