@@ -52,8 +52,16 @@ mcp-code-interpreter, filesystem, dockerhub
 - [ ] `.venv-win/Scripts/basedpyright-langserver.exe` exists
 - [ ] `.grok/lsp.json` paths still valid for this checkout
 
+## P6 Skills + prompts (#8279 / #8513)
+
+- [ ] `.\scripts\ai\grok\install_skills.ps1` (user) or `-Project`
+- [ ] Skills present: `bioetl-session`, `bioetl-closeout`, `bioetl-post-change`
+- [ ] Prompt render smoke:
+  `.\.venv-win\Scripts\python.exe -m scripts.ai.prompts render prompt.session.grok-bootstrap --param TASK=smoke --param MODE=plan-only --param SCOPE=docs`
+
 ## After change
 
 - [ ] Restart Grok TUI / new session
 - [ ] Spot-check: permission prompt appears for risky bash
 - [ ] Spot-check: MCP list matches slim profile
+- [ ] Spot-check: skills listed / invocable after restart

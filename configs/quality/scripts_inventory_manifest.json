@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-10T17:33:42.184056+00:00",
+  "generated_at": "2026-08-10T17:46:15.937533+00:00",
   "summary": {
-    "total_scripts": 580,
+    "total_scripts": 581,
     "status_counts": {
-      "active": 338,
+      "active": 339,
       "supporting": 238,
       "temporary_diagnostic": 4
     },
@@ -12,9 +12,9 @@
       "agents": 4,
       "build": 16,
       "ci": 81,
-      "docs": 247,
+      "docs": 248,
       "other": 75,
-      "scripts": 483,
+      "scripts": 484,
       "skills": 11,
       "tests": 370
     }
@@ -100,19 +100,19 @@
         },
         {
           "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
-          "line": 111,
+          "line": 136,
           "source_group": "docs",
           "text": "python -m scripts.ai.agent_tools doctor"
         },
         {
           "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
-          "line": 112,
+          "line": 137,
           "source_group": "docs",
           "text": "python -m scripts.ai.agent_tools debug --task-id <id> \\"
         },
         {
           "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
-          "line": 114,
+          "line": 139,
           "source_group": "docs",
           "text": "python -m scripts.ai.agent_tools evaluate --task-id <id> \\"
         },
@@ -2566,6 +2566,63 @@
       ]
     },
     {
+      "path": "scripts/ai/grok/install_skills.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 8,
+      "references": [
+        {
+          "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
+          "line": 89,
+          "source_group": "docs",
+          "text": ".\\scripts\\ai\\grok\\install_skills.ps1          # user: ~/.grok/skills"
+        },
+        {
+          "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
+          "line": 90,
+          "source_group": "docs",
+          "text": ".\\scripts\\ai\\grok\\install_skills.ps1 -Project # project: .grok/skills"
+        },
+        {
+          "path": "docs/00-project/ai/agents/guides/grok-tui-config-checklist.md",
+          "line": 57,
+          "source_group": "docs",
+          "text": "- [ ] `.\\scripts\\ai\\grok\\install_skills.ps1` (user) or `-Project`"
+        },
+        {
+          "path": "docs/00-project/ai/grok/README.md",
+          "line": 24,
+          "source_group": "docs",
+          "text": ".\\scripts\\ai\\grok\\install_skills.ps1"
+        },
+        {
+          "path": "docs/00-project/ai/grok/README.md",
+          "line": 27,
+          "source_group": "docs",
+          "text": ".\\scripts\\ai\\grok\\install_skills.ps1 -Project"
+        },
+        {
+          "path": "docs/00-project/ai/grok/README.md",
+          "line": 30,
+          "source_group": "docs",
+          "text": ".\\scripts\\ai\\grok\\install_skills.ps1 -WhatIf"
+        },
+        {
+          "path": "docs/00-project/ai/prompts/README.md",
+          "line": 92,
+          "source_group": "docs",
+          "text": ".\\scripts\\ai\\grok\\install_skills.ps1"
+        },
+        {
+          "path": "scripts/ai/grok/README.md",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "| `install_skills.ps1` | Copy tracked skills from `docs/00-project/ai/grok/skills/` into `~/.grok/skills` or project `.grok/skills` |"
+        }
+      ]
+    },
+    {
       "path": "scripts/ai/junie/check_junie_mirror.py",
       "type": "py",
       "status": "supporting",
@@ -2607,7 +2664,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 29,
+      "reference_count": 30,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -4849,7 +4906,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 25,
+      "reference_count": 28,
       "references": [
         {
           "path": "docs/00-project/ai/README.md",
@@ -4859,45 +4916,45 @@
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 72,
+          "line": 73,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts list"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 73,
+          "line": 74,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts show prompt.audit.grok-cycle"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 74,
-          "source_group": "docs",
-          "text": "python -m scripts.ai.prompts render prompt.audit.grok-cycle --param SCOPE=\"src/bioetl/domain\""
-        },
-        {
-          "path": "docs/00-project/ai/prompts/README.md",
           "line": 75,
           "source_group": "docs",
-          "text": "python -m scripts.ai.prompts render prompt.observability.dashboard-panel-audit \\"
+          "text": "python -m scripts.ai.prompts render prompt.session.grok-bootstrap \\"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
           "line": 77,
           "source_group": "docs",
-          "text": "python -m scripts.ai.prompts check-registry"
+          "text": "python -m scripts.ai.prompts render prompt.audit.grok-cycle --param SCOPE=\"src/bioetl/domain\""
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
           "line": 78,
           "source_group": "docs",
-          "text": "python -m scripts.ai.prompts check"
+          "text": "python -m scripts.ai.prompts render prompt.closeout.grok --param SCOPE=\"issues: #NNNN\""
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
           "line": 79,
           "source_group": "docs",
-          "text": "python -m scripts.ai.prompts new --id prompt.example --class operator-paste"
+          "text": "python -m scripts.ai.prompts render prompt.observability.dashboard-panel-audit \\"
+        },
+        {
+          "path": "docs/00-project/ai/prompts/README.md",
+          "line": 81,
+          "source_group": "docs",
+          "text": "python -m scripts.ai.prompts check-registry"
         }
       ],
       "owner": "@bioetl-platform",
@@ -19964,7 +20021,7 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md",
@@ -19977,6 +20034,12 @@
           "line": 153,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\apply-shared-to-grok.ps1 -DisableDockerGateways"
+        },
+        {
+          "path": "scripts/ai/grok/README.md",
+          "line": 7,
+          "source_group": "scripts",
+          "text": "MCP dual-config apply remains under `scripts/ops/runtime/mcp/apply-shared-to-grok.ps1`."
         },
         {
           "path": "scripts/ops/runtime/mcp/OPERATOR.md",
