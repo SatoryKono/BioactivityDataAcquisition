@@ -1,3 +1,6 @@
+> Archived snapshot. The maintained guide remains at
+> [DUX3 semantic fixture matrix](../../../03-guides/dashboards/dux3-semantic-fixtures.md).
+
 ______________________________________________________________________
 
 Version: 1.0.0

@@ -1,3 +1,6 @@
+> Archived snapshot. The maintained guide remains at
+> [DUX6 residual readability](../../../03-guides/dashboards/dux6-residual-readability.md).
+
 # DUX6 residual readability (post-DUX5 re-audit)
 
 **Status:** active  
