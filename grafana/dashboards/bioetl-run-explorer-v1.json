@@ -119,7 +119,10 @@
         "x": 0,
         "y": 7
       },
-      "datasource": "BioETL Ops HTTP",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
+      },
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -211,7 +214,10 @@
         "x": 0,
         "y": 14
       },
-      "datasource": "BioETL Ops HTTP",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
+      },
       "description": "Selected run: Exact identity for the selected run, including run, manifest, provider entity, contract, execution, replay, and checkpoint evidence. Selection required when no run ID is set. Valid empty means no matching identity was found for that run. On errors or unexpected emptiness, verify /health/live. Use existing Open/Copy actions for full values.",
       "fieldConfig": {
         "defaults": {
@@ -367,7 +373,10 @@
         "x": 10,
         "y": 14
       },
-      "datasource": "BioETL Ops HTTP",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
+      },
       "description": "Selected run: Bronze, Silver, and Gold stage/outcome accounting for the selected run. Zero-valued outcomes are evidence and must not be presented as success by themselves. Selection required when no run ID is set. Valid empty means no matching accounting rows exist; unexpected empty or errors require an Ops HTTP /health/live check.",
       "fieldConfig": {
         "defaults": {
@@ -677,7 +686,10 @@
             "x": 0,
             "y": 21
           },
-          "datasource": "BioETL Ops HTTP",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          },
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -736,7 +748,10 @@
             "x": 0,
             "y": 27
           },
-          "datasource": "BioETL Ops HTTP",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          },
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -795,7 +810,10 @@
             "x": 0,
             "y": 32
           },
-          "datasource": "BioETL Ops HTTP",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          },
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -930,7 +948,10 @@
             "x": 0,
             "y": 43
           },
-          "datasource": "BioETL Ops HTTP",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          },
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -1146,7 +1167,10 @@
           "text": "-",
           "value": "-"
         },
-        "datasource": "BioETL Ops HTTP",
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
         "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
         "description": "Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved.",
         "hide": 0,
@@ -1175,6 +1199,10 @@
               "data": ""
             },
             "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}"
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
           }
         },
         "refresh": 1,

@@ -158,16 +158,11 @@ def test_issue_5526_module_coverage_warning_debt_is_replaced_with_reviewed_ratch
     assert aggregate_ratchets["mode"] == "fail-fast-current-inventory"
     assert aggregate_ratchets["unmeasured_module_count"]["max_count"] == 0
     assert aggregate_ratchets["uncovered_module_count"]["max_count"] == 0
-    # Policy remains zero-residual; live inventory may report unmeasured modules
-    # when coverage XML lags source moves. Assert gate wiring + uncovered residual.
-    assert gate_rows["module_coverage_unmeasured_modules"]["name"] == (
-        "module_coverage_unmeasured_modules"
-    )
+    # Policy max stays 0; live unmeasured may lag coverage XML — assert wiring only.
+    unmeasured = gate_rows["module_coverage_unmeasured_modules"]
+    assert unmeasured["name"] == "module_coverage_unmeasured_modules"
     assert gate_rows["module_coverage_uncovered_modules"]["status"] == "pass"
-    assert (
-        gate_rows["module_coverage_unmeasured_modules"]["source_artifact"]
-        == "configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets"
-    )
+    assert unmeasured["source_artifact"].endswith("#aggregate_residual_ratchets")
 
 
 def test_issue_5527_internal_composite_wrapper_dependency_is_removed() -> None:

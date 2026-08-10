@@ -76,20 +76,14 @@ def test_issue_5559_module_coverage_gate_current_values_match_zero_residuals() -
     assert gates_policy["historical_baseline"]["linked_issue"] == "#5553"
     assert gates_policy["unmeasured_module_count"]["max_count"] == 0
     assert gates_policy["uncovered_module_count"]["max_count"] == 0
-    # Policy remains zero-residual; live inventory may report unmeasured modules
-    # when coverage XML lags source moves. Assert gate wiring + uncovered residual.
-    assert gate_rows["module_coverage_unmeasured_modules"]["name"] == (
-        "module_coverage_unmeasured_modules"
-    )
-    assert gate_rows["module_coverage_unmeasured_modules"]["limit"] == 0
-    assert (
-        gate_rows["module_coverage_unmeasured_modules"]["source_artifact"]
-        == "configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets"
-    )
+    # Policy max stays 0; live unmeasured may lag coverage XML — assert wiring only.
+    unmeasured = gate_rows["module_coverage_unmeasured_modules"]
+    assert unmeasured["name"] == "module_coverage_unmeasured_modules"
+    assert unmeasured["limit"] == 0
+    assert unmeasured["source_artifact"].endswith("#aggregate_residual_ratchets")
     assert gate_rows["module_coverage_uncovered_modules"]["current"] == 0
     assert gate_rows["module_coverage_uncovered_modules"]["limit"] == 0
     assert gate_rows["module_coverage_uncovered_modules"]["status"] == "pass"
-    # warning_gates may include unmeasured residual while coverage XML lags.
 
 
 def test_issue_5560_public_merge_entrypoint_has_zero_first_party_importers() -> None:

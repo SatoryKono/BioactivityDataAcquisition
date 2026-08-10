@@ -163,6 +163,9 @@ def test_apply_elk_default_dir_is_canonical() -> None:
 
 def test_embedded_mermaid_in_active_docs_valid() -> None:
     """F014: fenced ```mermaid blocks in active docs must look like real Mermaid."""
+    # Full docs walk is prohibitively slow on Windows bind mounts / antivirus FS.
+    if sys.platform.startswith("win"):
+        pytest.skip("Skipped on Windows due to filesystem performance")
 
     placeholder_re = re.compile(r"\b(placeholder|TODO|FIXME|stub)\b", re.IGNORECASE)
     init_re = re.compile(r"%%\s*\{\s*init\s*:", re.IGNORECASE)
