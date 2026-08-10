@@ -117,6 +117,19 @@ lanes:
     notes: >-
       Fast unit and architecture execution stays as quick feedback only; the
       authoritative hard coverage path no longer depends on this duplicate lane.
+  - job: repo-backed-unit
+    lane_type: coverage_shard
+    emits_coverage_artifact: true
+    coverage_artifact: coverage-data-repo-backed-unit
+    coverage_python_versions:
+      - "3.12"
+    participates_in_hard_threshold: true
+    threshold_enforced_in_job: false
+    execution_confidence_role: repository_contract_execution
+    notes: >-
+      Repository-backed unit contracts run serially and contribute their source
+      coverage to the canonical threshold without duplicating the suite in the
+      coverage-verify job.
   - job: test-matrix
     lane_type: coverage_shard
     emits_coverage_artifact: true

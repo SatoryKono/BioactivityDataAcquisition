@@ -75,6 +75,7 @@ class TestCiCoverageSurfaceMatrix:
             "track-d-gates",
             "memory-tests",
             "test-fast",
+            "repo-backed-unit",
             "test-matrix",
             "coverage-verify",
             "duration-telemetry",
@@ -93,6 +94,15 @@ class TestCiCoverageSurfaceMatrix:
         assert matrix_entry["emits_coverage_artifact"] is True
         assert matrix_entry["participates_in_hard_threshold"] is True
         assert matrix_entry["threshold_enforced_in_job"] is False
+
+        repo_backed_entry = entries["repo-backed-unit"]
+        assert repo_backed_entry["lane_type"] == "coverage_shard"
+        assert repo_backed_entry["emits_coverage_artifact"] is True
+        assert repo_backed_entry["coverage_artifact"] == (
+            "coverage-data-repo-backed-unit"
+        )
+        assert repo_backed_entry["participates_in_hard_threshold"] is True
+        assert repo_backed_entry["threshold_enforced_in_job"] is False
 
         coverage_verify = entries["coverage-verify"]
         assert coverage_verify["lane_type"] == "hard_threshold_gate"
@@ -128,6 +138,7 @@ class TestCiCoverageSurfaceMatrix:
 
         assert "name: coverage-data-smoke" not in workflow
         assert "name: coverage-data-fast" not in workflow
+        assert "name: coverage-data-repo-backed-unit" in workflow
         assert "name: coverage-data-${{ matrix.test-group.name }}" in workflow
         assert "pattern: coverage-data-*" in workflow
         assert "coverage report --show-missing --fail-under=85" in workflow

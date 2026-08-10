@@ -796,12 +796,26 @@ jobs:
           pytest-cache-fingerprint: ${{ hashFiles('tests/unit/repo_backed/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
 
       - name: Run canonical repo-backed-unit lane
+        env:
+          COVERAGE_FILE: reports/coverage/.coverage.repo-backed-unit
         run: |
+          mkdir -p reports/coverage
           mkdir -p reports/test-telemetry
           uv run --frozen --no-build pytest tests/unit/repo_backed/ \
             -m "repo_backed and not slow and not benchmark and not memory" \
             -p no:xdist -q --tb=short \
+            --cov=src/bioetl --cov-report= \
             --junitxml=reports/test-telemetry/junit-repo-backed-unit.xml
+
+      - name: Upload repo-backed coverage shard
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: coverage-data-repo-backed-unit
+          path: reports/coverage/.coverage.repo-backed-unit
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Upload repo-backed unit telemetry
         if: always()
