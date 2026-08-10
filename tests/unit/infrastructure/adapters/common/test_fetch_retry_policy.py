@@ -363,9 +363,11 @@ async def test_run_fetch_with_fallback_policy_respects_limit() -> None:
 @pytest.mark.asyncio
 async def test_run_fetch_with_fallback_policy_zero_limit_skips_source() -> None:
     """A zero global limit prevents even the primary source from being consumed."""
+    source_consumed = False
 
     async def primary_records() -> AsyncIterator[dict[str, object]]:
-        raise AssertionError("primary source should not be consumed")
+        nonlocal source_consumed
+        source_consumed = True
         yield {}
 
     results = await collect_async_iterator(
@@ -382,6 +384,7 @@ async def test_run_fetch_with_fallback_policy_zero_limit_skips_source() -> None:
     )
 
     assert results == []
+    assert source_consumed is False
 
 
 @pytest.mark.asyncio

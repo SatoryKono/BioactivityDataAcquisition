@@ -62,7 +62,7 @@ def test_compute_config_hash_resolves_versioning_owner_lazily(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Hash calculation resolves the versioning owner only at call time."""
-    config = {"pipeline": "chembl_activity"}
+    config: dict[str, object] = {"pipeline": "chembl_activity"}
     compute = MagicMock(return_value="sha256:contract")
     monkeypatch.setattr(
         "bioetl.composition.services.versioning.compute_config_hash",
