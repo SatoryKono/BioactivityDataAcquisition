@@ -92,15 +92,29 @@ def test_uniprot_source_api_surface_is_idmapping_and_protein_only() -> None:
         assert api.get("to_db")
 
 
-def test_quality_thresholds_are_idmapping_only() -> None:
-    """UniProt idmapping is the sole entity with explicit quality.thresholds."""
+def test_quality_thresholds_are_limited_to_composites_and_idmapping() -> None:
+    """Only composite contracts and UniProt idmapping override DQ thresholds."""
     holders: list[str] = []
     for rel_key, payload in _entity_configs().items():
         quality = payload.get("quality")
         if isinstance(quality, dict) and "thresholds" in quality:
             holders.append(rel_key)
 
-    assert holders == ["uniprot/idmapping"]
+    composite_holders = [
+        "composite/activity",
+        "composite/assay",
+        "composite/molecule",
+        "composite/publication",
+        "composite/target",
+    ]
+    assert holders == [*composite_holders, "uniprot/idmapping"]
+
+    for rel_key in composite_holders:
+        assert _entity_configs()[rel_key]["quality"]["thresholds"] == {
+            "soft_fail": 0.05,
+            "hard_fail": 0.50,
+        }
+
     thresholds = _entity_configs()["uniprot/idmapping"]["quality"]["thresholds"]
     assert isinstance(thresholds, dict)
     assert "soft_fail" in thresholds

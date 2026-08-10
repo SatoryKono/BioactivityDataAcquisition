@@ -61,7 +61,11 @@ def load_wrapper_specs(catalog_path: Path = CATALOG_PATH) -> dict[str, WrapperSp
         if not isinstance(raw_entry, dict):
             raise ValueError(f"MCP server entry must be an object: {server_name}")
         raw_order = raw_entry.get("wrapper_order")
-        if not isinstance(raw_order, int) or isinstance(raw_order, bool) or raw_order < 1:
+        if (
+            not isinstance(raw_order, int)
+            or isinstance(raw_order, bool)
+            or raw_order < 1
+        ):
             raise ValueError(
                 f"MCP server {server_name!r} has invalid wrapper_order: {raw_order!r}"
             )
@@ -78,8 +82,7 @@ def load_wrapper_specs(catalog_path: Path = CATALOG_PATH) -> dict[str, WrapperSp
             wrapper_stem
         ):
             raise ValueError(
-                f"MCP server {server_name!r} has unsafe wrapper stem: "
-                f"{wrapper_stem!r}"
+                f"MCP server {server_name!r} has unsafe wrapper stem: {wrapper_stem!r}"
             )
         previous_owner = wrapper_owners.get(wrapper_stem)
         if previous_owner is not None:
@@ -169,7 +172,7 @@ def _posix_shim(server_name: str) -> str:
         "set -euo pipefail\n"
         f"cd -- {root}\n"
         f'exec "${{BIOETL_PYTHON:-python3}}" -m scripts.ai.mcp wrappers run '
-        f"{shlex.quote(server_name)} \"$@\"\n"
+        f'{shlex.quote(server_name)} "$@"\n'
     )
 
 

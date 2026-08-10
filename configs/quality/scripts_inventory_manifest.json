@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-10T07:00:25.952220+00:00",
+  "generated_at": "2026-08-10T07:44:39.458795+00:00",
   "summary": {
     "total_scripts": 576,
     "status_counts": {
@@ -2704,7 +2704,7 @@
         },
         {
           "path": "scripts/ai/mcp/wrappers.py",
-          "line": 187,
+          "line": 190,
           "source_group": "scripts",
           "text": "f\"& $python -m scripts.ai.mcp wrappers run '{quoted_server}' @args\\n\""
         },
