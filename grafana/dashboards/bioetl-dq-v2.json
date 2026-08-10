@@ -1605,7 +1605,8 @@
             "showHeader": true,
             "footer": {
               "show": false
-            }
+            },
+            "cellHeight": "sm"
           },
           "targets": [
             {
@@ -1712,7 +1713,8 @@
             "showHeader": true,
             "footer": {
               "show": false
-            }
+            },
+            "cellHeight": "sm"
           },
           "targets": [
             {
@@ -1820,7 +1822,8 @@
             "showHeader": true,
             "footer": {
               "show": false
-            }
+            },
+            "cellHeight": "sm"
           },
           "targets": [
             {
@@ -1934,7 +1937,8 @@
             "showHeader": true,
             "footer": {
               "show": false
-            }
+            },
+            "cellHeight": "sm"
           },
           "targets": [
             {
@@ -2937,7 +2941,7 @@
   "templating": {
     "list": [
       {
-        "allValue": null,
+        "allValue": "$__all",
         "current": {
           "selected": true,
           "text": "All",
@@ -3000,7 +3004,7 @@
         "description": "Core scope: pipeline selector for pipeline-centric dashboards. Single-select; no All scope. Unknown is the explicit fail-closed default when source scope is absent or the operator has not selected a concrete pipeline."
       },
       {
-        "allValue": null,
+        "allValue": "$__all",
         "current": {
           "selected": true,
           "text": "backfill",

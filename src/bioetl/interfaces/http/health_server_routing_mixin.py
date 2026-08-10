@@ -174,11 +174,20 @@ class HealthServerRoutingMixin:
 
     @staticmethod
     def _is_all_scope_token(value: str | None) -> bool:
-        """Return True when a selector token represents Grafana's All scope."""
+        """Return True when a selector token represents Grafana's All scope.
+
+        Grafana may send ``All``, ``$__all``, brace/csv expansions, or a bare
+        lowercase ``all`` depending on variable config and client version.
+        Treat all of these as unbounded filters so run_id lists stay populated.
+        """
         if value is None:
             return False
         normalized = value.strip()
-        return normalized in {"All", "$__all", "__all", "*"}
+        if not normalized:
+            return False
+        # Case-insensitive match for All/all; keep exact forms for $__all tokens.
+        lowered = normalized.casefold()
+        return lowered in {"all", "*"} or normalized in {"$__all", "__all"}
 
     def _read_optional_scope_param(
         self,

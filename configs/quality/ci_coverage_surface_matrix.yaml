@@ -19,28 +19,49 @@ confidence_accounting:
     - memory-tests
   notes: >-
     Repo health is determined by both the hard coverage threshold and the
-    blocking confidence lanes that deliberately stay outside the coverage
-    combine path.
+    blocking confidence lanes. Contract-confidence is both a blocking offline
+    confidence lane and a coverage contributor; live control-plane e2e and
+    dedicated memory confidence remain outside the coverage combine path.
 confidence_lane_policy:
   notes: >-
-    Contract, e2e, and memory confidence lanes are blocking pass/fail gates even
-    when they do not emit coverage shards and do not participate in the hard 85
+    Contract, e2e, and memory confidence lanes are blocking pass/fail gates.
+    Offline contract tests also emit a coverage shard, while live e2e and
+    environment-sensitive memory tests do not participate in the hard 85
     percent aggregate coverage threshold.
   required_blocking_jobs:
     - contract-confidence
     - control-plane-e2e
     - memory-tests
+coverage_aggregation:
+  artifact_pattern: coverage-data-*
+  required_upstream_jobs:
+    - smoke-check
+    - contract-confidence
+    - repo-backed-unit
+    - unit-scripts-tooling
+    - test-matrix
+  required_blocking_lane_shards:
+    - reports/coverage/.coverage.smoke
+    - reports/coverage/.coverage.contract-confidence
+    - reports/coverage/.coverage.repo-backed-unit
+    - reports/coverage/.coverage.unit-scripts-tooling
+  excluded_execution_surfaces:
+    - live-provider-contracts
+    - control-plane-e2e
+    - memory-tests
 lanes:
   - job: smoke-check
-    lane_type: execution_only
-    emits_coverage_artifact: false
-    participates_in_hard_threshold: false
+    lane_type: coverage_shard
+    emits_coverage_artifact: true
+    coverage_artifact: coverage-data-smoke
+    coverage_file: reports/coverage/.coverage.smoke
+    participates_in_hard_threshold: true
     threshold_enforced_in_job: false
     execution_confidence_role: dependency_smoke
     notes: >-
       Smoke check provides minimal dependency/import confidence before heavier
-      lanes start, excludes memory-marked smoke tests, and it no longer emits
-      coverage data into the hard gate.
+      lanes start, excludes memory-marked smoke tests, and contributes its real
+      execution coverage to the centralized hard gate.
   - job: control-plane-e2e
     lane_type: execution_only
     blocking_confidence_lane: true
@@ -60,10 +81,12 @@ lanes:
       It does not feed the combined hard coverage threshold, but failure blocks
       the workflow independently from the percentage gate.
   - job: contract-confidence
-    lane_type: execution_only
+    lane_type: coverage_shard
     blocking_confidence_lane: true
-    emits_coverage_artifact: false
-    participates_in_hard_threshold: false
+    emits_coverage_artifact: true
+    coverage_artifact: coverage-data-contract-confidence
+    coverage_file: reports/coverage/.coverage.contract-confidence
+    participates_in_hard_threshold: true
     threshold_enforced_in_job: false
     execution_confidence_role: offline_contract_confidence
     blocking_assertions:
@@ -75,11 +98,14 @@ lanes:
       required_artifacts:
         - test-telemetry-contract-confidence
         - reports/test-telemetry/junit-contract-confidence.xml
+        - coverage-data-contract-confidence
+        - reports/coverage/.coverage.contract-confidence
     notes: >-
       Offline contract assertions are a blocking confidence lane for schema,
       snapshot, and replay-contract drift. Live provider contracts remain in the
-      scheduled contract workflow, while this lane protects PRs without adding
-      network dependence to the coverage threshold path.
+      scheduled contract workflow, while this real offline execution also
+      contributes a coverage shard without adding network dependence to the
+      coverage threshold path.
   - job: track-d-gates
     lane_type: execution_only
     emits_coverage_artifact: false
@@ -117,6 +143,28 @@ lanes:
     notes: >-
       Fast unit and architecture execution stays as quick feedback only; the
       authoritative hard coverage path no longer depends on this duplicate lane.
+  - job: repo-backed-unit
+    lane_type: coverage_shard
+    emits_coverage_artifact: true
+    coverage_artifact: coverage-data-repo-backed-unit
+    coverage_file: reports/coverage/.coverage.repo-backed-unit
+    participates_in_hard_threshold: true
+    threshold_enforced_in_job: false
+    execution_confidence_role: repository_contract_execution
+    notes: >-
+      Serial repository-file-backed unit tests remain a dedicated blocking job
+      and contribute their real execution coverage to coverage-verify.
+  - job: unit-scripts-tooling
+    lane_type: coverage_shard
+    emits_coverage_artifact: true
+    coverage_artifact: coverage-data-unit-scripts-tooling
+    coverage_file: reports/coverage/.coverage.unit-scripts-tooling
+    participates_in_hard_threshold: true
+    threshold_enforced_in_job: false
+    execution_confidence_role: scripts_tooling_execution
+    notes: >-
+      Serial scripts/tooling tests remain isolated from the parallel unit matrix
+      and contribute any product-code coverage reached by their real execution.
   - job: test-matrix
     lane_type: coverage_shard
     emits_coverage_artifact: true
@@ -143,8 +191,9 @@ lanes:
     notes: >-
       Coverage verification combines shard artifacts, runs the canonical serial
       subset, and is the only lane that enforces the hard 85 percent line and
-      branch coverage thresholds. Contract, e2e, and dedicated memory tests are
-      explicitly excluded from the serial pass here.
+      branch coverage thresholds. Offline contract execution arrives through
+      the contract-confidence shard; live e2e, live provider contracts, and
+      dedicated memory tests stay outside the aggregate.
   - job: duration-telemetry
     lane_type: telemetry_only
     emits_coverage_artifact: false
