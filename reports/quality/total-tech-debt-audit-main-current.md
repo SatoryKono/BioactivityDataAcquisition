@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `1cb1e6e5741dcd0efec8408d3b3d4b6c45cdeece`
 
-Evidence surface SHA-256: `10c4f61cf78457a3fa5c348814dc5e507446b3e98f2a305dc7b6bc9e8a7215cc`
+Evidence surface SHA-256: `bf439d55ecb07a8cc81230e0d4ad90a80d0d48a99d5a6aadb39a4bdc1d9360db`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,7 +18,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-07-27-r1",
   "audited_commit_sha": "1cb1e6e5741dcd0efec8408d3b3d4b6c45cdeece",
-  "evidence_surface_sha256": "10c4f61cf78457a3fa5c348814dc5e507446b3e98f2a305dc7b6bc9e8a7215cc",
+  "evidence_surface_sha256": "bf439d55ecb07a8cc81230e0d4ad90a80d0d48a99d5a6aadb39a4bdc1d9360db",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
@@ -44,7 +44,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 }
 -->
 
-Refresh reason: #8415 RF-004 terminal sync - re-pin the current evidence surface without budget growth.
+Refresh reason: Stream A debt-governance closeout (#6620/#5553/#7517) - re-pin evidence surface after remote-main baseline + gates refresh; no budget growth.
 
 ## Executive summary
 
