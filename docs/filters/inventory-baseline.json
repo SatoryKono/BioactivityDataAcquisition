@@ -3,20 +3,18 @@
   "generated_by": "scripts/data_quality/inventory_silver_filters_migration.py",
   "totals": {
     "entities_total": 27,
-    "entities_with_silver_filters": 22,
-    "entities_with_gold_filters": 22,
-    "rules_total": 97,
-    "keep_in_silver": 97,
+    "entities_with_silver_filters": 27,
+    "entities_with_gold_filters": 27,
+    "rules_total": 107,
+    "keep_in_silver": 107,
     "move_to_gold": 0,
     "duplicate": 0,
     "conflict": 0
   },
   "surface_totals": {
     "surfaces_total": 103,
-
     "by_category": {
       "consumer_alias": 25,
-
       "observability": 11,
       "runtime_gate": 11,
       "silver_config": 10,
@@ -1115,71 +1113,176 @@
       "provider": "composite",
       "entity": "activity",
       "path": "configs/entities/composite/activity.yaml",
-      "has_silver_filters": false,
-      "has_gold_filters": false,
+      "has_silver_filters": true,
+      "has_gold_filters": true,
       "counts_by_action": {
-        "keep_in_silver": 0,
+        "keep_in_silver": 2,
         "move_to_gold": 0,
         "duplicate": 0,
         "conflict": 0
       },
-      "rules": []
+      "rules": [
+        {
+          "provider": "composite",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "entity_id",
+          "silver_value": "\"entity_id\"",
+          "gold_value": "\"entity_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "composite",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "activity_id",
+          "silver_value": "\"activity_id\"",
+          "gold_value": "\"activity_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
     },
     {
       "provider": "composite",
       "entity": "assay",
       "path": "configs/entities/composite/assay.yaml",
-      "has_silver_filters": false,
-      "has_gold_filters": false,
+      "has_silver_filters": true,
+      "has_gold_filters": true,
       "counts_by_action": {
-        "keep_in_silver": 0,
+        "keep_in_silver": 2,
         "move_to_gold": 0,
         "duplicate": 0,
         "conflict": 0
       },
-      "rules": []
+      "rules": [
+        {
+          "provider": "composite",
+          "entity": "assay",
+          "rule_type": "required_fields",
+          "field": "entity_id",
+          "silver_value": "\"entity_id\"",
+          "gold_value": "\"entity_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "composite",
+          "entity": "assay",
+          "rule_type": "required_fields",
+          "field": "assay_id",
+          "silver_value": "\"assay_id\"",
+          "gold_value": "\"assay_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
     },
     {
       "provider": "composite",
       "entity": "molecule",
       "path": "configs/entities/composite/molecule.yaml",
-      "has_silver_filters": false,
-      "has_gold_filters": false,
+      "has_silver_filters": true,
+      "has_gold_filters": true,
       "counts_by_action": {
-        "keep_in_silver": 0,
+        "keep_in_silver": 2,
         "move_to_gold": 0,
         "duplicate": 0,
         "conflict": 0
       },
-      "rules": []
+      "rules": [
+        {
+          "provider": "composite",
+          "entity": "molecule",
+          "rule_type": "required_fields",
+          "field": "entity_id",
+          "silver_value": "\"entity_id\"",
+          "gold_value": "\"entity_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "composite",
+          "entity": "molecule",
+          "rule_type": "required_fields",
+          "field": "molecule_id",
+          "silver_value": "\"molecule_id\"",
+          "gold_value": "\"molecule_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
     },
     {
       "provider": "composite",
       "entity": "publication",
       "path": "configs/entities/composite/publication.yaml",
-      "has_silver_filters": false,
-      "has_gold_filters": false,
+      "has_silver_filters": true,
+      "has_gold_filters": true,
       "counts_by_action": {
-        "keep_in_silver": 0,
+        "keep_in_silver": 2,
         "move_to_gold": 0,
         "duplicate": 0,
         "conflict": 0
       },
-      "rules": []
+      "rules": [
+        {
+          "provider": "composite",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "entity_id",
+          "silver_value": "\"entity_id\"",
+          "gold_value": "\"entity_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "composite",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "publication_id",
+          "silver_value": "\"publication_id\"",
+          "gold_value": "\"publication_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
     },
     {
       "provider": "composite",
       "entity": "target",
       "path": "configs/entities/composite/target.yaml",
-      "has_silver_filters": false,
-      "has_gold_filters": false,
+      "has_silver_filters": true,
+      "has_gold_filters": true,
       "counts_by_action": {
-        "keep_in_silver": 0,
+        "keep_in_silver": 2,
         "move_to_gold": 0,
         "duplicate": 0,
         "conflict": 0
       },
-      "rules": []
+      "rules": [
+        {
+          "provider": "composite",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "entity_id",
+          "silver_value": "\"entity_id\"",
+          "gold_value": "\"entity_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "composite",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_id",
+          "silver_value": "\"target_id\"",
+          "gold_value": "\"target_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
     },
     {
       "provider": "crossref",
@@ -1424,7 +1527,7 @@
       "symbol": "--silver-filter-only",
       "path": "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "occurrence_count": 1,
-      "first_line": 447,
+      "first_line": 452,
       "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
       "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
       "notes": ""
@@ -1490,7 +1593,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "occurrence_count": 1,
-      "first_line": 437,
+      "first_line": 442,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1710,7 +1813,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "docs/04-reference/observability/metrics-catalog.md",
       "occurrence_count": 1,
-      "first_line": 89,
+      "first_line": 88,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1787,7 +1890,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "src/bioetl/infrastructure/observability/prometheus_metric_registries.py",
       "occurrence_count": 1,
-      "first_line": 168,
+      "first_line": 174,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1798,8 +1901,7 @@
       "symbol": "bioetl_silver_filter_reject_total_mismatch_15m",
       "path": "grafana/README.md",
       "occurrence_count": 2,
-      "first_line": 1266,
-
+      "first_line": 1265,
       "role": "Silver reject accounting reconciliation",
       "migration_relevance": "Recording rule reconciles stage totals with bounded Silver reject breakdowns.",
       "notes": ""
@@ -2371,7 +2473,7 @@
       "symbol": "filters.extraction_params",
       "path": "configs/entities/chembl/target.yaml",
       "occurrence_count": 1,
-      "first_line": 232,
+      "first_line": 233,
       "role": "Entity source-profile policy for chembl.target",
       "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
       "notes": "non_empty; parameter_count=3"
@@ -2547,7 +2649,7 @@
       "symbol": "filters.source_profile",
       "path": "configs/entities/chembl/target.yaml",
       "occurrence_count": 1,
-      "first_line": 236,
+      "first_line": 237,
       "role": "Entity source-profile metadata for chembl.target",
       "migration_relevance": "Versioned source-profile metadata must change before source-side extraction widening.",
       "notes": "profile_id=chembl.target.curated; version=1.0.0; status=baseline"

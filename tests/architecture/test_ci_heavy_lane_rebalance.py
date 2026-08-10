@@ -117,7 +117,7 @@ class TestCiHeavyLaneRebalance:
         for excluded_path in metric["known_exclusions"]:
             assert f"--ignore={excluded_path}" in block
         assert "--skip-serial-pass" in block
-        assert "coverage combine reports/coverage" in block
+        assert "coverage combine --keep reports/coverage" in block
 
     def test_memory_and_performance_lanes_stay_isolated(self) -> None:
         policy = _load_policy()

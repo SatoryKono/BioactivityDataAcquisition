@@ -85,6 +85,7 @@
 00-project/ai/prompts/library/audit/grok-audit-cycle.md
 00-project/ai/prompts/library/closeout/grok-closeout.md
 00-project/ai/prompts/library/docs/ai-audit-planning.md
+00-project/ai/prompts/library/observability/dashboard-panel-audit.md
 00-project/ai/prompts/library/tests/fix-retest-loop.md
 00-project/ai/prompts/library/tests/speed-optimization-loop.md
 00-project/ai/prompts/test_fix_retest_loop.md

@@ -36,6 +36,12 @@ python -m scripts.engineering.baselines dq-baseline --dry-run
 python -m scripts.engineering.dev migrate-deprecated-names src/
 ```
 
+For manual, non-gating structural inspection, the bounded supporting utilities
+`scripts/engineering/qa/count_source_lines.py` and
+`scripts/engineering/qa/get_large_modules.py` remain available. Their output is
+diagnostic only; committed module-coverage and hotspot artifacts remain the
+authoritative quality inputs.
+
 ## Catalog
 
 `scripts/engineering/repo/catalog.yaml` is the governance manifest for canonical
