@@ -6,7 +6,6 @@ from unittest import mock
 
 import pytest
 
-
 from bioetl.__main__ import _clear_known_stale_windows_bytecode
 
 pytestmark = pytest.mark.unit

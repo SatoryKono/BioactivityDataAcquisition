@@ -10,7 +10,7 @@ import pytest
 from bioetl.application.services.control_plane.evidence import (
     FAILURE_REASON_CATEGORIES,
     ControlPlaneEvidenceService,
-    EvidenceScope,
+    EvidenceScopeContext,
 )
 from bioetl.domain.control_plane import (
     ControlPlaneArtifactLifecycleDecision,
@@ -65,9 +65,9 @@ def _manifest(**overrides: object) -> RunManifest:
     return RunManifest(**values)  # type: ignore[arg-type]
 
 
-def _scope(manifest: RunManifest | None = None) -> EvidenceScope:
+def _scope(manifest: RunManifest | None = None) -> EvidenceScopeContext:
     resolved = manifest or _manifest()
-    return EvidenceScope(
+    return EvidenceScopeContext(
         requested_pipeline="chembl_activity",
         selected_run_id=str(resolved.run_id),
         selected_run_types=("incremental",),
@@ -84,8 +84,10 @@ def _reasons(payload: dict[str, object]) -> set[str]:
     }
 
 
-def _unresolved_scope(reason: str = "selected_run_id_not_found") -> EvidenceScope:
-    return EvidenceScope(
+def _unresolved_scope(
+    reason: str = "selected_run_id_not_found",
+) -> EvidenceScopeContext:
+    return EvidenceScopeContext(
         requested_pipeline="chembl_activity",
         selected_run_id=str(_RUN_ID),
         selected_run_types=("incremental",),
@@ -475,7 +477,7 @@ def test_failure_reasons_expose_only_fixed_categories() -> None:
     ),
 )
 def test_failure_reasons_make_unknown_state_visible_without_zero_counts(
-    scope: EvidenceScope,
+    scope: EvidenceScopeContext,
     ledger: object | None,
     expected_reason: str,
 ) -> None:

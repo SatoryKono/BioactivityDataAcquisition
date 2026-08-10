@@ -13,7 +13,7 @@ import pytest
 
 from bioetl.application.services.control_plane.evidence import (
     ControlPlaneEvidenceService,
-    EvidenceScope,
+    EvidenceScopeContext,
 )
 from bioetl.domain.control_plane import (
     RunCodeProvenance,
@@ -131,8 +131,8 @@ def _persist_profile_evidence(
     )
 
 
-def _scope(manifest: RunManifest) -> EvidenceScope:
-    return EvidenceScope(
+def _scope(manifest: RunManifest) -> EvidenceScopeContext:
+    return EvidenceScopeContext(
         requested_pipeline=manifest.pipeline_name,
         selected_run_id=str(manifest.run_id),
         selected_run_types=(manifest.run_type.value,),

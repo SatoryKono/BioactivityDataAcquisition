@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from bioetl.application.observability.control_plane_evidence import EvidenceCheckResult
+from bioetl.application.observability.control_plane_evidence import (
+    EvidenceCheckResult,
+)
 from bioetl.application.services.control_plane.evidence.persistence_profile import (
     STRICT_PERSISTENCE_PROFILES,
     resolve_persistence_profile,
