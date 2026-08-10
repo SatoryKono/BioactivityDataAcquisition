@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-10T10:15:41.258950+00:00",
+  "generated_at": "2026-08-10T13:12:42.872555+00:00",
   "summary": {
     "total_scripts": 580,
     "status_counts": {
@@ -9641,7 +9641,7 @@
         },
         {
           "path": "tests/architecture/test_ci_test_strategy.py",
-          "line": 83,
+          "line": 100,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/run_pytest_resilient.py\","
         },
@@ -11329,7 +11329,7 @@
         },
         {
           "path": "pyproject.toml",
-          "line": 330,
+          "line": 331,
           "source_group": "build",
           "text": "# only (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py)."
         },
