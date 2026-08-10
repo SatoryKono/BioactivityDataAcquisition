@@ -108,8 +108,30 @@ jobs:
         run: uv run --frozen --no-build python -m scripts.engineering.repo check-versions
 
       - name: Smoke check (dependencies + core imports)
+        env:
+          COVERAGE_FILE: reports/coverage/.coverage.smoke
         run: |
-          uv run --frozen --no-build pytest tests/smoke/ -m "not memory" -v --tb=short
+          set +e
+          mkdir -p reports/coverage
+          uv run --frozen --no-build pytest tests/smoke/ -m "not memory" -v --tb=short \
+            --cov=src/bioetl --cov-report=
+          TEST_EXIT=$?
+          cp .coverage "$COVERAGE_FILE" 2>/dev/null || true
+          if [ ! -s "$COVERAGE_FILE" ]; then
+            echo "::error::Smoke coverage shard was not produced."
+            exit 1
+          fi
+          exit "$TEST_EXIT"
+
+      - name: Upload smoke coverage shard
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: coverage-data-smoke
+          path: reports/coverage/.coverage.smoke
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
 
   vcr-preflight:
     needs: dependency-preflight
@@ -226,9 +248,9 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-  # Blocking confidence lane outside the aggregate 85% coverage threshold.
-  # This protects offline contract surfaces while live provider contracts stay
-  # in the scheduled contract-tests workflow.
+  # Blocking offline-confidence lane that also contributes a coverage shard.
+  # Live provider contracts stay in the scheduled contract-tests workflow and
+  # remain outside this aggregate path.
   contract-confidence:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -249,13 +271,25 @@ jobs:
           pytest-cache-fingerprint: ${{ hashFiles('tests/contract/**/*.py', 'tests/unit/contracts/**/*.py', 'tests/conftest.py', 'tests/contract/conftest.py', 'pyproject.toml') }}
 
       - name: Run offline contract confidence lane
+        env:
+          COVERAGE_FILE: reports/coverage/.coverage.contract-confidence
         run: |
+          set +e
           mkdir -p reports/test-telemetry
+          mkdir -p reports/coverage
           uv run --frozen --no-build pytest \
             tests/contract/ tests/unit/contracts/ \
             -m "no_api or not network" \
             -q --tb=short \
-            --junitxml=reports/test-telemetry/junit-contract-confidence.xml
+            --junitxml=reports/test-telemetry/junit-contract-confidence.xml \
+            --cov=src/bioetl --cov-report=
+          TEST_EXIT=$?
+          cp .coverage "$COVERAGE_FILE" 2>/dev/null || true
+          if [ ! -s "$COVERAGE_FILE" ]; then
+            echo "::error::Contract confidence coverage shard was not produced."
+            exit 1
+          fi
+          exit "$TEST_EXIT"
 
       - name: Upload contract confidence telemetry
         if: always()
@@ -265,6 +299,16 @@ jobs:
           path: reports/test-telemetry/junit-contract-confidence.xml
           if-no-files-found: warn
           retention-days: 14
+
+      - name: Upload contract confidence coverage shard
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: coverage-data-contract-confidence
+          path: reports/coverage/.coverage.contract-confidence
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
 
   flaky-telemetry:
     runs-on: ubuntu-latest
@@ -796,12 +840,24 @@ jobs:
           pytest-cache-fingerprint: ${{ hashFiles('tests/unit/repo_backed/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
 
       - name: Run canonical repo-backed-unit lane
+        env:
+          COVERAGE_FILE: reports/coverage/.coverage.repo-backed-unit
         run: |
+          set +e
           mkdir -p reports/test-telemetry
+          mkdir -p reports/coverage
           uv run --frozen --no-build pytest tests/unit/repo_backed/ \
             -m "repo_backed and not slow and not benchmark and not memory" \
             -p no:xdist -q --tb=short \
-            --junitxml=reports/test-telemetry/junit-repo-backed-unit.xml
+            --junitxml=reports/test-telemetry/junit-repo-backed-unit.xml \
+            --cov=src/bioetl --cov-report=
+          TEST_EXIT=$?
+          cp .coverage "$COVERAGE_FILE" 2>/dev/null || true
+          if [ ! -s "$COVERAGE_FILE" ]; then
+            echo "::error::Repo-backed unit coverage shard was not produced."
+            exit 1
+          fi
+          exit "$TEST_EXIT"
 
       - name: Upload repo-backed unit telemetry
         if: always()
@@ -810,6 +866,16 @@ jobs:
           name: test-telemetry-repo-backed-unit
           path: reports/test-telemetry/junit-repo-backed-unit.xml
           if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload repo-backed unit coverage shard
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: coverage-data-repo-backed-unit
+          path: reports/coverage/.coverage.repo-backed-unit
+          include-hidden-files: true
+          if-no-files-found: error
           retention-days: 7
 
 
@@ -833,13 +899,25 @@ jobs:
           pytest-cache-fingerprint: ${{ hashFiles('tests/unit/scripts/**/*.py', 'tests/conftest.py', 'pyproject.toml', 'configs/quality/test_matrix.yaml') }}
 
       - name: Run canonical unit-scripts-tooling lane
+        env:
+          COVERAGE_FILE: reports/coverage/.coverage.unit-scripts-tooling
         run: |
+          set +e
           mkdir -p reports/test-telemetry
+          mkdir -p reports/coverage
           # Serial: passport projector and many script tests use repo FS/subprocess.
           uv run --frozen --no-build pytest tests/unit/scripts/ \
             -m "not benchmark and not memory" \
             -p no:xdist -q --tb=short \
-            --junitxml=reports/test-telemetry/junit-unit-scripts-tooling.xml
+            --junitxml=reports/test-telemetry/junit-unit-scripts-tooling.xml \
+            --cov=src/bioetl --cov-report=
+          TEST_EXIT=$?
+          cp .coverage "$COVERAGE_FILE" 2>/dev/null || true
+          if [ ! -s "$COVERAGE_FILE" ]; then
+            echo "::error::Unit scripts tooling coverage shard was not produced."
+            exit 1
+          fi
+          exit "$TEST_EXIT"
 
       - name: Upload unit-scripts-tooling telemetry
         if: always()
@@ -848,6 +926,16 @@ jobs:
           name: test-telemetry-unit-scripts-tooling
           path: reports/test-telemetry/junit-unit-scripts-tooling.xml
           if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload unit scripts tooling coverage shard
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: coverage-data-unit-scripts-tooling
+          path: reports/coverage/.coverage.unit-scripts-tooling
+          include-hidden-files: true
+          if-no-files-found: error
           retention-days: 7
 
 
@@ -1049,6 +1137,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - smoke-check
+      - contract-confidence
       - test-fast
       - repo-backed-unit
       - unit-scripts-tooling
@@ -1074,6 +1163,23 @@ jobs:
           pattern: coverage-data-*
           path: reports/coverage
           merge-multiple: true
+
+      - name: Verify required blocking-lane coverage shards
+        shell: bash
+        run: |
+          set -euo pipefail
+          required_shards=(
+            reports/coverage/.coverage.smoke
+            reports/coverage/.coverage.contract-confidence
+            reports/coverage/.coverage.repo-backed-unit
+            reports/coverage/.coverage.unit-scripts-tooling
+          )
+          for shard in "${required_shards[@]}"; do
+            if [ ! -s "$shard" ]; then
+              echo "::error::Required coverage shard is missing or empty: $shard"
+              exit 1
+            fi
+          done
 
       - name: Run serial-only tests with resilient pytest runner
         run: |
@@ -1366,7 +1472,8 @@ jobs:
             echo
             echo "### CI confidence accounting"
             echo "- Hard coverage gate: \`coverage-verify\` (85%)"
-            echo "- Blocking confidence lanes outside hard coverage: \`contract-confidence\`, \`control-plane-e2e\`, \`memory-tests\`"
+            echo "- Dual-purpose coverage + confidence lane: \`contract-confidence\`"
+            echo "- Blocking confidence lanes outside hard coverage: \`control-plane-e2e\`, \`memory-tests\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload slow-test telemetry

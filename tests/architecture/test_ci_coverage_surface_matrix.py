@@ -75,6 +75,8 @@ class TestCiCoverageSurfaceMatrix:
             "track-d-gates",
             "memory-tests",
             "test-fast",
+            "repo-backed-unit",
+            "unit-scripts-tooling",
             "test-matrix",
             "coverage-verify",
             "duration-telemetry",
@@ -88,11 +90,19 @@ class TestCiCoverageSurfaceMatrix:
         for job in entries:
             assert f"{job}:" in workflow, f"workflow is missing mapped job '{job}'"
 
-        matrix_entry = entries["test-matrix"]
-        assert matrix_entry["lane_type"] == "coverage_shard"
-        assert matrix_entry["emits_coverage_artifact"] is True
-        assert matrix_entry["participates_in_hard_threshold"] is True
-        assert matrix_entry["threshold_enforced_in_job"] is False
+        coverage_shard_jobs = {
+            "smoke-check",
+            "contract-confidence",
+            "repo-backed-unit",
+            "unit-scripts-tooling",
+            "test-matrix",
+        }
+        for job in coverage_shard_jobs:
+            entry = entries[job]
+            assert entry["lane_type"] == "coverage_shard"
+            assert entry["emits_coverage_artifact"] is True
+            assert entry["participates_in_hard_threshold"] is True
+            assert entry["threshold_enforced_in_job"] is False
 
         coverage_verify = entries["coverage-verify"]
         assert coverage_verify["lane_type"] == "hard_threshold_gate"
@@ -101,9 +111,7 @@ class TestCiCoverageSurfaceMatrix:
         assert coverage_verify["participates_in_hard_threshold"] is True
 
         execution_only_jobs = {
-            "smoke-check",
             "control-plane-e2e",
-            "contract-confidence",
             "track-d-gates",
             "memory-tests",
             "test-fast",
@@ -126,8 +134,13 @@ class TestCiCoverageSurfaceMatrix:
         workflow = _read_workflow(ROOT / matrix["workflow_path"])
         entries = {entry["job"]: entry for entry in matrix.get("lanes", [])}
 
-        assert "name: coverage-data-smoke" not in workflow
+        assert "name: coverage-data-smoke" in workflow
+        assert "name: coverage-data-contract-confidence" in workflow
+        assert "name: coverage-data-repo-backed-unit" in workflow
+        assert "name: coverage-data-unit-scripts-tooling" in workflow
         assert "name: coverage-data-fast" not in workflow
+        assert "name: coverage-data-control-plane-e2e" not in workflow
+        assert "name: coverage-data-memory" not in workflow
         assert "name: coverage-data-${{ matrix.test-group.name }}" in workflow
         assert "pattern: coverage-data-*" in workflow
         assert "coverage report --show-missing --fail-under=85" in workflow
@@ -146,7 +159,42 @@ class TestCiCoverageSurfaceMatrix:
         assert "control-plane-completeness" in workflow
         assert "junit-track-d.xml" in workflow
 
-    def test_excluded_confidence_lanes_have_blocking_assertions(self) -> None:
+    def test_required_coverage_contributors_are_wired_fail_closed(self) -> None:
+        matrix = _load_yaml(MATRIX_PATH)
+        workflow = _read_workflow(ROOT / matrix["workflow_path"])
+        entries = {entry["job"]: entry for entry in matrix.get("lanes", [])}
+        aggregation = matrix["coverage_aggregation"]
+        coverage_block = _job_block(workflow, "coverage-verify")
+
+        assert aggregation["artifact_pattern"] == "coverage-data-*"
+        assert "pattern: coverage-data-*" in coverage_block
+        for job in aggregation["required_upstream_jobs"]:
+            assert f"- {job}" in coverage_block, (
+                f"coverage-verify must need required coverage producer {job}"
+            )
+
+        for job in (
+            "smoke-check",
+            "contract-confidence",
+            "repo-backed-unit",
+            "unit-scripts-tooling",
+        ):
+            entry = entries[job]
+            block = _job_block(workflow, job)
+            assert entry["coverage_artifact"] in block
+            assert entry["coverage_file"] in block
+            assert "--cov=src/bioetl --cov-report=" in block
+            assert 'cp .coverage "$COVERAGE_FILE"' in block
+            assert 'if [ ! -s "$COVERAGE_FILE" ]' in block
+            assert "include-hidden-files: true" in block
+            assert "if-no-files-found: error" in block
+
+        for shard in aggregation["required_blocking_lane_shards"]:
+            assert shard in coverage_block, (
+                f"coverage-verify must fail closed when {shard} is unavailable"
+            )
+
+    def test_blocking_confidence_lanes_have_required_assertions(self) -> None:
         matrix = _load_yaml(MATRIX_PATH)
         workflow = _read_workflow(ROOT / matrix["workflow_path"])
         entries = {entry["job"]: entry for entry in matrix.get("lanes", [])}
@@ -171,11 +219,17 @@ class TestCiCoverageSurfaceMatrix:
 
         for job in sorted(required_jobs):
             entry = entries[job]
-            assert entry["lane_type"] == "execution_only"
             assert entry["blocking_confidence_lane"] is True
-            assert entry["participates_in_hard_threshold"] is False
             assert entry["threshold_enforced_in_job"] is False
-            assert entry["emits_coverage_artifact"] is False
+
+            if job == "contract-confidence":
+                assert entry["lane_type"] == "coverage_shard"
+                assert entry["participates_in_hard_threshold"] is True
+                assert entry["emits_coverage_artifact"] is True
+            else:
+                assert entry["lane_type"] == "execution_only"
+                assert entry["participates_in_hard_threshold"] is False
+                assert entry["emits_coverage_artifact"] is False
 
             block = _job_block(workflow, job)
             assertions = entry["blocking_assertions"]

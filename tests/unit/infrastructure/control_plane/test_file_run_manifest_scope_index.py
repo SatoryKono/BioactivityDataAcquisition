@@ -193,6 +193,17 @@ def test_latest_scope_index_rejects_malformed_and_missing_targets(tmp_path) -> N
         store.get_latest_for_scope("chembl_activity", (RunType.INCREMENTAL,))
 
 
+def test_latest_scope_lookup_rejects_malformed_catalog(tmp_path) -> None:
+    """A corrupt completeness catalog fails closed before any scope lookup."""
+    store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
+    store.save(_manifest("manifest-catalog-corruption"))
+    catalog_path = store.base_path / "_latest_by_scope" / "_catalog.json"
+    catalog_path.write_text("{not-json", encoding="utf-8")
+
+    with pytest.raises(RunManifestStoreCorruptionError, match="cannot load catalog"):
+        store.get_latest_for_scope("chembl_activity")
+
+
 def test_older_save_does_not_replace_newer_scope_index(tmp_path) -> None:
     store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
     newer = _manifest(
