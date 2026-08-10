@@ -48270,7 +48270,13 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-10",
+<<<<<<< HEAD
   "source_tree_sha256": "6fae5fc47c7b3d1c3d223ace5b2353401161a89c5067f46f493315daa72d7f5e",
+||||||| ef27c46efd
+  "source_tree_sha256": "3dcf7620950a30e334d6d01767abf4d9cc21c3ec8d4fb6ea6c3c123b2e2dd826",
+=======
+  "source_tree_sha256": "d0ebd1299bc119046a3e9395c3fe88077d0b6f714b50d5acd5b596f9a624d236",
+>>>>>>> main
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
