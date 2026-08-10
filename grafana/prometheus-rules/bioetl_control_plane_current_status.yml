@@ -1,48 +1,105 @@
+# Control-plane current-status recording rules.
+#
+# Ingest safety (Prometheus WARN):
+#   "Error on ingesting results from rule evaluation with different value but same timestamp"
+# is raised when a rule result vector contains two samples with identical labels
+# (or conflicts with an already-appended sample at the same timestamp). That drops
+# samples (num_dropped) and slows WAL/head recovery after restart.
+#
+# Hardening rules used below:
+# 1) Universe membership uses `group by (pipeline, run_type)` so each scope is
+#    exactly one series with value 1 (no multi-source `or` of bool vectors).
+# 2) Every multi-term arithmetic ends in `sum by (...)` / `max by (...)` so the
+#    published labelset is unique per series identity.
+# 3) Pipeline-only signals are defaulted per-term before `+` (avoid PromQL
+#    inner-join dropping scopes), then joined with `group_left` once.
+# 4) RHS of every `group_left` is aggregated to a unique `pipeline` series.
+
 groups:
   - name: bioetl_control_plane_current_status
     interval: 15s
     rules:
+      # Unique (pipeline, run_type) membership. Value is always 1.
       - record: bioetl_control_plane_run_type_universe
         expr: >-
-          (count by (pipeline, run_type) (bioetl_control_plane_manifest_writes_total) > bool 0)
-          or
-          (count by (pipeline, run_type) (bioetl_manifest_ledger_integrity_ratio) > bool 0)
-          or
-          (count by (pipeline, run_type) (bioetl_workflow_pipeline_expected) > bool 0)
+          group by (pipeline, run_type) (
+            bioetl_control_plane_manifest_writes_total
+            or on (pipeline, run_type)
+            bioetl_manifest_ledger_integrity_ratio
+            or on (pipeline, run_type)
+            bioetl_workflow_pipeline_expected
+          )
 
       - record: bioetl_replay_safety_blockers_15m
         expr: |
           round(
-            (
-              (sum by (pipeline, run_type) (increase(bioetl_control_plane_manifest_writes_total{status="failed"}[15m]))
-                or 0 * bioetl_control_plane_run_type_universe)
-              +
+            sum by (pipeline, run_type) (
               (
-                bioetl_control_plane_run_type_universe
-                * on (pipeline) group_left()
+                (
+                  sum by (pipeline, run_type) (
+                    increase(bioetl_control_plane_manifest_writes_total{status="failed"}[15m])
+                  )
+                  or (bioetl_control_plane_run_type_universe * 0)
+                )
+                +
+                (
+                  bioetl_control_plane_run_type_universe
+                  * on (pipeline) group_left()
+                  (
+                    (
+                      (
+                        sum by (pipeline) (
+                          increase(bioetl_control_plane_ledger_appends_total{status="failed"}[15m])
+                        )
+                        or (max by (pipeline) (bioetl_control_plane_run_type_universe) * 0)
+                      )
+                      +
+                      (
+                        sum by (pipeline) (
+                          increase(bioetl_checkpoint_compatibility_events_total{disposition=~".*_incompatible"}[15m])
+                        )
+                        or (max by (pipeline) (bioetl_control_plane_run_type_universe) * 0)
+                      )
+                      +
+                      (
+                        sum by (pipeline) (
+                          increase(bioetl_replay_reconstructability_events_total{status="not_reconstructable"}[15m])
+                        )
+                        or (max by (pipeline) (bioetl_control_plane_run_type_universe) * 0)
+                      )
+                      +
+                      (
+                        sum by (pipeline) (
+                          increase(bioetl_lineage_refs_missing_total[15m])
+                        )
+                        or (max by (pipeline) (bioetl_control_plane_run_type_universe) * 0)
+                      )
+                    )
+                  )
+                )
+                +
+                (
+                  sum by (pipeline, run_type) (
+                    increase(bioetl_replay_drift_events_total[15m])
+                  )
+                  or (bioetl_control_plane_run_type_universe * 0)
+                )
+                +
+                (
+                  sum by (pipeline, run_type) (
+                    increase(bioetl_replay_duplicate_overwrite_risk_total[15m])
+                  )
+                  or (bioetl_control_plane_run_type_universe * 0)
+                )
+                +
                 (
                   (
-                    sum by (pipeline) (increase(bioetl_control_plane_ledger_appends_total{status="failed"}[15m]))
-                    +
-                    sum by (pipeline) (increase(bioetl_checkpoint_compatibility_events_total{disposition=~".*_incompatible"}[15m]))
-                    +
-                    sum by (pipeline) (increase(bioetl_replay_reconstructability_events_total{status="not_reconstructable"}[15m]))
-                    +
-                    sum by (pipeline) (increase(bioetl_lineage_refs_missing_total[15m]))
-                  )
-                  or 0 * max by (pipeline) (bioetl_control_plane_run_type_universe)
+                    max by (pipeline, run_type) (
+                      bioetl_manifest_ledger_integrity_ratio{integrity_type="inconsistent"}
+                    ) > bool 0
+                  ) * 2
+                  or (bioetl_control_plane_run_type_universe * 0)
                 )
-              )
-              +
-              (sum by (pipeline, run_type) (increase(bioetl_replay_drift_events_total[15m]))
-                or 0 * bioetl_control_plane_run_type_universe)
-              +
-              (sum by (pipeline, run_type) (increase(bioetl_replay_duplicate_overwrite_risk_total[15m]))
-                or 0 * bioetl_control_plane_run_type_universe)
-              +
-              (
-                (max by (pipeline, run_type) (bioetl_manifest_ledger_integrity_ratio{integrity_type="inconsistent"}) > bool 0) * 2
-                or 0 * bioetl_control_plane_run_type_universe
               )
             )
           )
@@ -50,22 +107,34 @@ groups:
       - record: bioetl_manifest_ledger_failures_15m
         expr: |
           round(
-            (
-              (sum by (pipeline, run_type) (increase(bioetl_control_plane_manifest_writes_total{status="failed"}[15m]))
-                or 0 * bioetl_control_plane_run_type_universe)
-              +
+            sum by (pipeline, run_type) (
               (
-                bioetl_control_plane_run_type_universe
-                * on (pipeline) group_left()
                 (
-                  sum by (pipeline) (increase(bioetl_control_plane_ledger_appends_total{status="failed"}[15m]))
-                  or 0 * max by (pipeline) (bioetl_control_plane_run_type_universe)
+                  sum by (pipeline, run_type) (
+                    increase(bioetl_control_plane_manifest_writes_total{status="failed"}[15m])
+                  )
+                  or (bioetl_control_plane_run_type_universe * 0)
                 )
-              )
-              +
-              (
-                (max by (pipeline, run_type) (bioetl_manifest_ledger_integrity_ratio{integrity_type="inconsistent"}) > bool 0) * 2
-                or 0 * bioetl_control_plane_run_type_universe
+                +
+                (
+                  bioetl_control_plane_run_type_universe
+                  * on (pipeline) group_left()
+                  (
+                    sum by (pipeline) (
+                      increase(bioetl_control_plane_ledger_appends_total{status="failed"}[15m])
+                    )
+                    or (max by (pipeline) (bioetl_control_plane_run_type_universe) * 0)
+                  )
+                )
+                +
+                (
+                  (
+                    max by (pipeline, run_type) (
+                      bioetl_manifest_ledger_integrity_ratio{integrity_type="inconsistent"}
+                    ) > bool 0
+                  ) * 2
+                  or (bioetl_control_plane_run_type_universe * 0)
+                )
               )
             )
           )
@@ -73,82 +142,103 @@ groups:
       - record: bioetl_control_plane_telemetry_missing_5m
         expr: |
           clamp_max(
-            (
+            sum by (pipeline, run_type) (
               (
-                bioetl_control_plane_run_type_universe
-                unless on (pipeline, run_type)
-                sum by (pipeline, run_type) (count_over_time(bioetl_control_plane_manifest_writes_total[5m]))
-              )
-              or 0 * bioetl_control_plane_run_type_universe
-            )
-            +
-            (
-              (
-                bioetl_control_plane_run_type_universe
-                unless on (pipeline, run_type)
                 (
                   bioetl_control_plane_run_type_universe
-                  * on (pipeline) group_left()
-                  (
-                    (sum by (pipeline) (count_over_time(bioetl_control_plane_ledger_appends_total[5m])) > bool 0)
-                    or 0 * max by (pipeline) (bioetl_control_plane_run_type_universe)
+                  unless on (pipeline, run_type)
+                  sum by (pipeline, run_type) (
+                    count_over_time(bioetl_control_plane_manifest_writes_total[5m])
                   )
                 )
+                or (bioetl_control_plane_run_type_universe * 0)
               )
-              or 0 * bioetl_control_plane_run_type_universe
-            )
-            +
-            (
+              +
               (
-                bioetl_control_plane_run_type_universe
-                unless on (pipeline, run_type)
                 (
-                  count by (pipeline, run_type) (
-                    count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m])
-                  ) == 2
+                  bioetl_control_plane_run_type_universe
+                  unless on (pipeline, run_type)
+                  (
+                    bioetl_control_plane_run_type_universe
+                    * on (pipeline) group_left()
+                    (
+                      (
+                        sum by (pipeline) (
+                          count_over_time(bioetl_control_plane_ledger_appends_total[5m])
+                        ) > bool 0
+                      )
+                      or (max by (pipeline) (bioetl_control_plane_run_type_universe) * 0)
+                    )
+                  )
                 )
+                or (bioetl_control_plane_run_type_universe * 0)
               )
-              or 0 * bioetl_control_plane_run_type_universe
-            )
-            +
-            (
+              +
               (
-                bioetl_control_plane_run_type_universe
-                unless on (pipeline, run_type)
                 (
-                  count by (pipeline, run_type) (
-                    count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m])
-                  ) == 2
+                  bioetl_control_plane_run_type_universe
+                  unless on (pipeline, run_type)
+                  (
+                    count by (pipeline, run_type) (
+                      count_over_time(
+                        bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m]
+                      )
+                    ) == 2
+                  )
                 )
+                or (bioetl_control_plane_run_type_universe * 0)
               )
-              or 0 * bioetl_control_plane_run_type_universe
+              +
+              (
+                (
+                  bioetl_control_plane_run_type_universe
+                  unless on (pipeline, run_type)
+                  (
+                    count by (pipeline, run_type) (
+                      count_over_time(
+                        bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m]
+                      )
+                    ) == 2
+                  )
+                )
+                or (bioetl_control_plane_run_type_universe * 0)
+              )
             ),
             4
           )
 
       - record: bioetl_checkpoint_age_seconds
-        expr: clamp_min(time() - max by (pipeline) (bioetl_checkpoint_saved_at_seconds), 0)
+        expr: >-
+          clamp_min(
+            time() - max by (pipeline) (bioetl_checkpoint_saved_at_seconds),
+            0
+          )
 
+      # Mutual exclusion: missing checkpoint → 3; present → age severity 0..2.
+      # max by forces a single series per (pipeline, run_type).
       - record: bioetl_control_plane_checkpoint_evidence_status
         expr: >-
-          (
+          max by (pipeline, run_type) (
+            (
+              (
+                bioetl_control_plane_run_type_universe
+                unless on (pipeline) bioetl_checkpoint_age_seconds
+              ) * 3
+            )
+            or
             (
               bioetl_control_plane_run_type_universe
-              unless on (pipeline) bioetl_checkpoint_age_seconds
-            ) * 3
-          )
-          or
-          (
-            bioetl_control_plane_run_type_universe
-            * on (pipeline) group_left()
-            clamp_max(
-              (bioetl_checkpoint_age_seconds >= bool 900)
-              +
-              (bioetl_checkpoint_age_seconds >= bool 3600),
-              2
+              * on (pipeline) group_left()
+              clamp_max(
+                (bioetl_checkpoint_age_seconds >= bool 900)
+                +
+                (bioetl_checkpoint_age_seconds >= bool 3600),
+                2
+              )
             )
           )
 
+      # Worst-of evidence channels; max by collapses required_evidence variants.
       - record: bioetl_control_plane_current_status_trusted
         expr: >-
           max by (pipeline, run_type) (

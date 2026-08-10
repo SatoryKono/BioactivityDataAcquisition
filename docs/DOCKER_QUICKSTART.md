@@ -69,7 +69,7 @@ curl http://127.0.0.1:8000/ops/control-plane/ready
 
 The returned `runtime_source_id` must be a 64-character SHA-256 value, not
 `null` or `unmanaged`. A raw `docker compose up` does not establish this
-identity and Grafana provisioning therefore fails closed.
+identity.
 
 ## Monitoring stack (opt-in only)
 
@@ -82,9 +82,22 @@ python scripts/ops/runtime/docker/runtime_manager.py start --stack monitoring --
 python scripts/ops/runtime/docker/runtime_manager.py status --stack monitoring
 ```
 
-Grafana starts only when the main Ops HTTP endpoint reports the same managed
-source identity. This prevents a healthy container from serving run manifests
-from another checkout.
+Grafana bootstrap (`grafana/scripts/bootstrap-datasources.sh`) always starts the
+UI with Prometheus. Ops HTTP (Infinity / Run Explorer identity panels) is
+provisioned only when `/ops/control-plane/ready` matches the managed
+`BIOETL_RUNTIME_SOURCE_ID` within the poll budget (default 30×2s ≈ 60s). On
+timeout, unmanaged id, or mismatch the default is **Prometheus-only** (deferred
+Ops HTTP), not a crash loop. Status is written to
+`/var/lib/grafana/bioetl-bootstrap-status.json` inside the container.
+
+For audit/render fail-closed (require Ops HTTP or refuse to start Grafana):
+
+```bash
+export BIOETL_GRAFANA_REQUIRE_OPS_HTTP=1
+```
+
+Optional poll tuning: `BIOETL_GRAFANA_OPS_READY_ATTEMPTS`,
+`BIOETL_GRAFANA_OPS_READY_SLEEP_SEC`.
 
 Stop without deleting volumes:
 

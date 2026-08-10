@@ -102,9 +102,16 @@ services:
       # value wipes the compose default and provisions Infinity with url="".
       # Omit the var, or set a non-empty URL. Bootstrap also materializes a fallback.
       - BIOETL_OPS_HTTP_URL=${BIOETL_OPS_HTTP_URL:-http://bioetl:8000}
-      # Grafana bootstrap fails closed unless the Ops HTTP backend proves that
-      # it serves the same runtime/data origin selected by runtime_manager.
+      # Expected runtime origin from runtime_manager (64-char hex). Bootstrap
+      # provisions Ops HTTP only when /ops/control-plane/ready matches this id.
+      # Default "unmanaged" → Prometheus-only (Grafana still starts). Set
+      # BIOETL_GRAFANA_REQUIRE_OPS_HTTP=1 for audit/render fail-closed.
       - BIOETL_EXPECTED_RUNTIME_SOURCE_ID=${BIOETL_RUNTIME_SOURCE_ID:-unmanaged}
+      - BIOETL_GRAFANA_REQUIRE_OPS_HTTP=${BIOETL_GRAFANA_REQUIRE_OPS_HTTP:-0}
+      # Ops ready poll budget (default 30×2s ≈ 60s). Does not block Grafana UI
+      # unless REQUIRE_OPS_HTTP=1.
+      - BIOETL_GRAFANA_OPS_READY_ATTEMPTS=${BIOETL_GRAFANA_OPS_READY_ATTEMPTS:-30}
+      - BIOETL_GRAFANA_OPS_READY_SLEEP_SEC=${BIOETL_GRAFANA_OPS_READY_SLEEP_SEC:-2}
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning/datasources-core:/etc/bioetl-grafana/datasources-core:ro

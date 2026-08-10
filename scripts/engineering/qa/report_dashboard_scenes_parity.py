@@ -25,7 +25,9 @@ DEFAULT_MD = ROOT / "reports" / "observability" / "scenes-parity-ledger.md"
 
 
 def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    """Hash UTF-8 text with platform-independent newline normalization."""
+    payload = path.read_text(encoding="utf-8").encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
 
 
 def _walk_panels(panels: object) -> Iterator[dict[str, Any]]:
