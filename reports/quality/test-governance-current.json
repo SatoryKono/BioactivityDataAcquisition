@@ -2279,7 +2279,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "396cde77ff1733a2eacf0a532fd55bb036e46949facb8437907bf6818e472931",
+  "source_tree_sha256": "fca8ca7aed29dd05488c2cef47fc347de101ebdfb03495f0c3bcef4b6560793a",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 101,
