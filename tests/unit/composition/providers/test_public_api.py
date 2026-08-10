@@ -13,7 +13,7 @@ pytestmark = pytest.mark.unit
 def test_provider_package_rejects_unknown_lazy_export() -> None:
     """Unknown symbols fail with the normal module-level AttributeError contract."""
     with pytest.raises(AttributeError, match="has no attribute 'missing_provider_api'"):
-        getattr(providers, "missing_provider_api")
+        providers.__getattr__("missing_provider_api")
 
 
 def test_provider_package_dir_includes_declared_lazy_exports() -> None:

@@ -11,6 +11,7 @@ from bioetl.domain.serialization import serialize_to_json
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.checkpoint._local_checkpoint_integrity import (
     compute_checkpoint_payload_sha256,
+    inject_checkpoint_checksum_verdict,
 )
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
@@ -153,6 +154,21 @@ async def test_checksum_fails_closed_for_incomplete_or_wrongly_typed_envelope(
 
     assert loaded is not None
     assert loaded[1]["checkpoint_checksum_valid"] is False
+
+
+def test_checksum_fails_closed_for_noncanonical_runtime_metadata() -> None:
+    """A non-JSON runtime value cannot accidentally validate a stored digest."""
+    envelope = {
+        "pipeline": "pipeline",
+        "run_id": str(_run_id()),
+        "metadata": {"unsupported": object()},
+        "version": "2.0",
+        "payload_sha256": "0" * 64,
+    }
+
+    metadata = inject_checkpoint_checksum_verdict(envelope, {})
+
+    assert metadata["checkpoint_checksum_valid"] is False
 
 
 @pytest.mark.asyncio

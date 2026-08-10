@@ -29,6 +29,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from uuid import UUID
 
 import pytest
@@ -83,4 +84,26 @@ async def test_memory_lock_zero_wait_timeout_returns_without_polling() -> None:
     token = await lock.acquire("pipeline", owner_b, wait=True, wait_timeout=0)
 
     assert token is None
+    await lock.aclose()
+
+
+@pytest.mark.asyncio
+async def test_memory_lock_ttl_acquire_starts_periodic_sweep(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A TTL lease activates the background expiry sweep."""
+    lock = MemoryLock(ttl_check_interval=0.001)
+    swept = asyncio.Event()
+    original_release_expired = lock._release_expired_locks
+
+    async def _record_sweep() -> None:
+        await original_release_expired()
+        swept.set()
+
+    monkeypatch.setattr(lock, "_release_expired_locks", _record_sweep)
+    owner = RunID(UUID("00000000-0000-0000-0000-000000000511"))
+
+    assert await lock.acquire("pipeline", owner, ttl=30) is not None
+    await asyncio.wait_for(swept.wait(), timeout=1.0)
+
     await lock.aclose()
