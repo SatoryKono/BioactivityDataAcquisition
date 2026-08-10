@@ -59,7 +59,9 @@ def cmd_list(args: argparse.Namespace) -> int:
         return EXIT_OK
     for entry in entries:
         summary = f" — {entry.summary}" if entry.summary else ""
-        print(f"{entry.id}\t{entry.class_}\t{entry.status}\t{entry.path}{summary}")
+        print(
+            f"{entry.id}  [{entry.class_}/{entry.status}]  {entry.path}{summary}"
+        )
     return EXIT_OK
 
 
