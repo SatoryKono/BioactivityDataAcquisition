@@ -160,10 +160,9 @@ python scripts/ops/runtime/docker/runtime_manager.py status --stack main
 python scripts/ops/runtime/docker/runtime_manager.py status --stack monitoring
 ```
 
-Do not set legacy `GF_INSTALL_PLUGINS`: the duplicate installer delays
-readiness and can race with inspection of a restored plugin volume. The shipped
-Grafana entrypoint is the single plugin owner and enforces the compatible
-`BIOETL_INFINITY_PLUGIN_VERSION` pin before starting Grafana.
+Grafana 12 uses `GF_PLUGINS_PREINSTALL` only. Do not also set legacy
+`GF_INSTALL_PLUGINS`: the duplicate CLI installer delays readiness and can
+restart the container while a restored plugin volume is being inspected.
 
 ## Verification
 
