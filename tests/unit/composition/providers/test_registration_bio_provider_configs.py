@@ -87,13 +87,12 @@ class TestGetBioProviderConfigs:
         assert uniprot.http_config is not None
         assert uniprot.http_config.rate == pytest.approx(8.0)
         assert uniprot.http_config.capacity == 16
-        assert uniprot.http_config.rate_overrides == {"uniprot_api_key": 100.0}
         assert uniprot_idmapping.http_config is not None
         assert uniprot_idmapping.http_config.rate == pytest.approx(8.0)
         assert uniprot_idmapping.http_config.capacity == 16
 
     @patch("bioetl.composition.providers._config_helpers._get_rate_limits_from_config")
-    def test_uniprot_api_key_rate_override_is_optional(
+    def test_uniprot_registry_rate_is_anonymous_fallback_only(
         self,
         mock_get_rate_limits: MagicMock,
     ) -> None:
@@ -109,7 +108,6 @@ class TestGetBioProviderConfigs:
         assert uniprot.http_config is not None
         assert uniprot.http_config.rate == pytest.approx(8.0)
         assert uniprot.http_config.capacity == 16
-        assert uniprot.http_config.rate_overrides == {"uniprot_api_key": 100.0}
 
     @patch("bioetl.composition.providers._config_helpers._get_rate_limits_from_config")
     def test_pubchem_provider_config_uses_non_http_special_case(

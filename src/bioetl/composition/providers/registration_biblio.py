@@ -265,7 +265,6 @@ def _build_biblio_http_provider_specs(
             adapter_class=PubMedAdapter,
             rate=pubmed.rate,
             capacity=pubmed.capacity,
-            rate_overrides={"pubmed_api_key": 10.0},
             adapter_creator=cast(
                 AdapterCreatorProtocol,
                 _create_pubmed_adapter_from_settings,

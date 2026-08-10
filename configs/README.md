@@ -24,6 +24,8 @@ retired forms, removal dates, and permanent rationales are governed by
   retired source provider pagination aliases
 - source `batch_size`: retired source root alias
 - provider source `pagination.*`: canonical source pagination contract
+- provider source `rate_limit.with_api_key`: optional authenticated token-bucket values
+- provider source `health_check` and `retry`: retired; runtime behavior is code-owned
 - source `api`, `client`, and `batch`: retired migration aliases and rejected
   by normalization before schema validation
 - composite `merge.column_groups_file`: retired legacy merge alias
@@ -31,15 +33,16 @@ retired forms, removal dates, and permanent rationales are governed by
 
 ## Provider Runtime Values
 
-Tracked provider configs are deterministic documentation and policy surfaces.
-They must not contain `${ENV_VAR}` interpolation strings:
+Tracked provider configs are deterministic runtime policy surfaces. They must not
+contain `${ENV_VAR}` interpolation strings:
 
-- non-secret operator contact fields such as CrossRef/OpenAlex `mailto` use the
-  safe `your-email@example.com` placeholder; set the real runtime contact with
-  `BIOETL_DEFAULT_EMAIL` in the machine-local environment;
 - secret-bearing fields use named indirection keys such as
   `api_key_env: BIOETL_SEMANTICSCHOLAR_API_KEY`; secret values remain in the
   machine-local environment and never enter tracked YAML.
+
+Application Settings use deterministic precedence:
+`explicit init/CLI > process ENV > repository-root .env > typed defaults`.
+Current-working-directory `config.yaml` is not a runtime Settings source.
 
 ## Versioning Strategy
 

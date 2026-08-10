@@ -31,6 +31,11 @@ _FORBIDDEN_PIPELINE_SOURCE_PROVIDER_PAGINATION_KEYS: tuple[str, ...] = (
     "cursor_pagination",
 )
 
+_FORBIDDEN_PIPELINE_SOURCE_TRANSPORT_KEYS: tuple[str, ...] = (
+    "circuit_breaker",
+    "rate_limit",
+)
+
 
 @dataclass(frozen=True)
 class PipelineConfigReadPayload:
@@ -106,14 +111,20 @@ def apply_convention_defaults(
 def _collect_forbidden_pipeline_source_overrides(
     entity_source: JsonDict,  # Any: YAML config has heterogeneous values
 ) -> list[str]:
-    """Collect pipeline-level source override paths that violate pagination policy."""
+    """Collect entity-level overrides owned by provider transport config."""
     forbidden: list[str] = []
 
     if "batch_size" in entity_source:
         forbidden.append("source.batch_size")
 
+    for key in _FORBIDDEN_PIPELINE_SOURCE_TRANSPORT_KEYS:
+        if key in entity_source:
+            forbidden.append(f"source.{key}")
+
     provider_config = entity_source.get("provider_config")
     if isinstance(provider_config, dict):
+        if provider_config:
+            forbidden.append("source.provider_config")
         pagination = provider_config.get("pagination")
         if isinstance(pagination, dict) and pagination:
             forbidden.append("source.provider_config.pagination")
@@ -155,9 +166,10 @@ def load_source_section(
         if forbidden_overrides:
             joined = ", ".join(sorted(forbidden_overrides))
             raise ValueError(
-                "Pipeline source overrides must not redefine source pagination "
-                f"settings via {joined}. Use pipeline.page_size_override for "
-                "page-size overrides."
+                "Pipeline source overrides must not redefine provider transport "
+                f"settings via {joined}. Provider transport is owned by "
+                "configs/providers/<provider>.yaml; use pipeline.page_size_override "
+                "for page-size overrides."
             )
     config["source"] = config_merge(base_source, entity_source)
 

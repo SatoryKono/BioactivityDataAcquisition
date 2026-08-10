@@ -38,7 +38,6 @@ class FrozenHttpConfig:
 
     rate: float
     capacity: int
-    rate_overrides: tuple[tuple[str, float], ...]
 
 
 @dataclass(frozen=True)
@@ -146,7 +145,6 @@ def build_provider_metadata() -> tuple[FrozenProviderDefinition, ...]:
             frozen_http = FrozenHttpConfig(
                 rate=http_config.rate,
                 capacity=http_config.capacity,
-                rate_overrides=tuple(sorted(http_config.rate_overrides.items())),
             )
         definitions.append(
             FrozenProviderDefinition(
@@ -195,7 +193,6 @@ def clone_provider_registry(metadata: CachedBootstrapMetadata) -> Any:
                     else HttpConfig(
                         rate=http_config.rate,
                         capacity=http_config.capacity,
-                        rate_overrides=dict(http_config.rate_overrides),
                     )
                 ),
                 requires_http_client=definition.requires_http_client,

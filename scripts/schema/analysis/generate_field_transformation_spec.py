@@ -349,7 +349,7 @@ def write_csv(rows: list[dict[str, str]], output_path: Path) -> None:
         writer.writerows(rows)
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Generate deterministic field transformation specs for Bronze→Silver→Gold."
     )
@@ -359,11 +359,11 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_OUTPUT,
         help=f"Output CSV path (default: {DEFAULT_OUTPUT.relative_to(PROJECT_ROOT)})",
     )
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
-def main() -> int:
-    args = parse_args()
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
     output_path = args.output
     if not output_path.is_absolute():
         output_path = PROJECT_ROOT / output_path

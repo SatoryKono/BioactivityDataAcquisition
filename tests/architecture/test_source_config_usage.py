@@ -8,7 +8,7 @@
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
-"""Architecture tests for source configuration usage.
+"""ADR-057 architecture tests for source configuration authority.
 
 These tests verify that source configurations from configs/providers/*.yaml
 are used instead of hardcoded values.
@@ -35,7 +35,15 @@ class TestSourceConfigFilesExist:
 
     @pytest.mark.parametrize(
         "provider",
-        ["chembl", "pubchem", "uniprot", "pubmed"],
+        [
+            "chembl",
+            "crossref",
+            "openalex",
+            "pubchem",
+            "pubmed",
+            "semanticscholar",
+            "uniprot",
+        ],
     )
     def test_config_files_exist__source_config_exists__d188f2b9(
         self, provider_configs_dir: Path, provider: str
@@ -49,7 +57,15 @@ class TestSourceConfigFilesExist:
 
     @pytest.mark.parametrize(
         "provider",
-        ["chembl", "pubchem", "uniprot", "pubmed"],
+        [
+            "chembl",
+            "crossref",
+            "openalex",
+            "pubchem",
+            "pubmed",
+            "semanticscholar",
+            "uniprot",
+        ],
     )
     def test_source_config_has_required_sections(
         self, provider_configs_dir: Path, provider: str
@@ -107,7 +123,15 @@ class TestSourceConfigLoading:
 
     @pytest.mark.parametrize(
         "provider",
-        ["chembl", "pubchem", "uniprot", "pubmed"],
+        [
+            "chembl",
+            "crossref",
+            "openalex",
+            "pubchem",
+            "pubmed",
+            "semanticscholar",
+            "uniprot",
+        ],
     )
     def test_source_config_rate_limit_matches_yaml(self, provider: str) -> None:
         """Rate limit from SourceYamlConfig should match YAML file."""
@@ -224,6 +248,23 @@ class TestSourceConfigSchema:
         )
 
         assert config.batch_size == 100
+
+    @pytest.mark.parametrize("unknown_key", ["health_check", "retry", "typo"])
+    def test_unknown_source_sections_fail_closed(self, unknown_key: str) -> None:
+        """Removed or unknown provider leaves cannot be silently discarded."""
+        from pydantic import ValidationError
+
+        from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
+
+        with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
+            SourceYamlConfig.model_validate(
+                {
+                    "source": {
+                        "provider_config": {"provider": "test"},
+                        unknown_key: {},
+                    }
+                }
+            )
 
 
 class TestConfigValuesNotHardcoded:

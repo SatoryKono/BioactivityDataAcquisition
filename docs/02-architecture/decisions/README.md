@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.4
+Version: 1.0.5
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-28'
+  Last verified: '2026-08-10'
 
 ______________________________________________________________________
 
@@ -75,6 +75,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-054](ADR-054-passport-documentation-projections.md) | Evidence-Backed Passport Documentation Projections | Accepted | Documentation | 2026-07-29 |
 | [ADR-055](ADR-055-workflow-reconciliation-data-step-ownership.md) | Workflow Reconciliation Data-Step Ownership | Accepted | Architecture | 2026-07-29 |
 | [ADR-056](ADR-056-proof-or-stop-lifecycle-control.md) | Proof-or-Stop Lifecycle Control | Accepted | Governance | 2026-08-09 |
+| [ADR-057](ADR-057-deterministic-runtime-config-authority-and-identity.md) | Deterministic Runtime Config Authority and Identity | Accepted | Configuration | 2026-08-10 |
 
 ## ADRs by Category
 
@@ -169,6 +170,7 @@ This directory contains Architecture Decision Records documenting significant ar
 - [ADR-038](ADR-038-enum-externalization.md): ChEMBL Enum Values Externalization to YAML
 - [ADR-039](ADR-039-unified-entity-config-format.md): Unified Entity Config Format
 - [ADR-050](ADR-050-silver-structural-gold-semantic-filter-boundary.md): Silver structural and Gold semantic filter boundary
+- [ADR-057](ADR-057-deterministic-runtime-config-authority-and-identity.md): Deterministic Settings/provider authority and versioned config identity
 
 ## ADR Relationships Graph
 

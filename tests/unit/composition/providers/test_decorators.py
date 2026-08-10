@@ -92,7 +92,6 @@ class TestRegisterProviderClass:
             http_capacity=10,
             requires_http_client=True,
             requires_logger=True,
-            rate_overrides=None,
             adapter_creator=None,
             default_kwargs={},
         )
@@ -111,7 +110,6 @@ class TestRegisterProviderClass:
                 http_capacity=10,
                 requires_http_client=False,
                 requires_logger=False,
-                rate_overrides=None,
                 adapter_creator=None,
                 default_kwargs={"batch_size": 100},
             )
@@ -132,7 +130,6 @@ class TestRegisterProviderClass:
             http_capacity=40,
             requires_http_client=True,
             requires_logger=True,
-            rate_overrides={"api_key": 50.0},
             adapter_creator=None,
             default_kwargs={},
         )
@@ -141,7 +138,6 @@ class TestRegisterProviderClass:
         assert config.http_config is not None
         assert config.http_config.rate == pytest.approx(20.0)
         assert config.http_config.capacity == 40
-        assert config.http_config.rate_overrides == {"api_key": 50.0}
 
     def test_no_http_config_when_http_not_required(self) -> None:
         """http_config should be None when requires_http_client is False."""
@@ -152,7 +148,6 @@ class TestRegisterProviderClass:
             http_capacity=10,
             requires_http_client=False,
             requires_logger=True,
-            rate_overrides=None,
             adapter_creator=None,
             default_kwargs={},
         )
@@ -174,7 +169,6 @@ class TestRegisterProviderClass:
             http_capacity=10,
             requires_http_client=False,
             requires_logger=False,
-            rate_overrides=None,
             adapter_creator=None,
             default_kwargs={},
         )
@@ -191,7 +185,6 @@ class TestRegisterProviderClass:
             http_capacity=10,
             requires_http_client=False,
             requires_logger=False,
-            rate_overrides=None,
             adapter_creator=None,
             default_kwargs={"batch_size": 100, "timeout": 30},
         )
@@ -212,32 +205,12 @@ class TestRegisterProviderClass:
             http_capacity=10,
             requires_http_client=True,
             requires_logger=True,
-            rate_overrides=None,
             adapter_creator=custom,
             default_kwargs={},
         )
 
         config = ProviderRegistry.get("adapter_creator_provider")
         assert config.adapter_creator is custom
-
-    def test_empty_rate_overrides_stored_as_empty_dict(self) -> None:
-        """rate_overrides=None should result in {} in HttpConfig."""
-        _register_provider_class(
-            cls=_FakeAdapter,
-            name="no_overrides_provider",
-            http_rate=5.0,
-            http_capacity=10,
-            requires_http_client=True,
-            requires_logger=True,
-            rate_overrides=None,
-            adapter_creator=None,
-            default_kwargs={},
-        )
-
-        config = ProviderRegistry.get("no_overrides_provider")
-        assert config.http_config is not None
-        assert config.http_config.rate_overrides == {}
-
 
 # ---------------------------------------------------------------------------
 # Tests for register_provider decorator
@@ -309,23 +282,6 @@ class TestRegisterProviderDecorator:
         config = ProviderRegistry.get("no_http_provider")
         assert config.requires_http_client is False
         assert config.http_config is None
-
-    def test_decorator_with_rate_overrides(self) -> None:
-        """rate_overrides should be stored in http_config."""
-
-        @register_provider(
-            "override_provider",
-            http_rate=10.0,
-            rate_overrides={"pubmed_api_key": 100.0},
-        )
-        @dataclass
-        class _OverrideAdapter:
-            http_client: Any = None
-            logger: Any = None
-
-        config = ProviderRegistry.get("override_provider")
-        assert config.http_config is not None
-        assert config.http_config.rate_overrides == {"pubmed_api_key": 100.0}
 
     def test_decorator_with_default_kwargs(self) -> None:
         """Extra kwargs passed to @register_provider become default_kwargs."""

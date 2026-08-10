@@ -125,19 +125,13 @@ class TestHttpConfig:
 
         assert config.rate == pytest.approx(5.0)
         assert config.capacity == 10
-        assert config.rate_overrides == {}
 
     def test_http_config_accepts_custom_values(self):
         """Verify HttpConfig with custom values."""
-        config = HttpConfig(
-            rate=100.0,
-            capacity=200,
-            rate_overrides={"api_key": 150.0},
-        )
+        config = HttpConfig(rate=100.0, capacity=200)
 
         assert config.rate == pytest.approx(100.0)
         assert config.capacity == 200
-        assert config.rate_overrides == {"api_key": 150.0}
 
     def test_registry_http_config__config_is_frozen__bc612ff7(self):
         """Verify HttpConfig is immutable."""
@@ -587,25 +581,6 @@ class TestRegisterProviderDecorator:
         assert config.requires_http_client is False
         assert config.http_config is None
 
-    def test_provider_decorator_applies_rate_overrides(
-        self,
-    ):
-        """Verify decorator with rate overrides."""
-
-        @register_provider(
-            "rate_override_test",
-            http_rate=10.0,
-            rate_overrides={"api_key": 100.0},
-        )
-        @dataclass
-        class RateOverrideTestAdapter:
-            http_client: Any = None
-            logger: Any = None
-
-        config = ProviderRegistry.get("rate_override_test")
-        assert config.http_config is not None
-        assert config.http_config.rate_overrides == {"api_key": 100.0}
-
     def test_decorator_sets_provider_name_attribute(self):
         """Verify decorator sets __provider_name__ on class."""
 
@@ -807,7 +782,7 @@ class TestRealProviderRegistration:
 
         config = ProviderRegistry.get("uniprot")
         assert config.http_config is not None
-        assert "uniprot_api_key" in config.http_config.rate_overrides
+        assert config.http_config.rate > 0
 
     def test_pubmed_is_registered(self):
         """Verify PubMed provider is registered with values from source config."""

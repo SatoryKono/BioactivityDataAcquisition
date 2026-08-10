@@ -163,6 +163,16 @@ def _build_source_refs(artifact_dict: JsonDict) -> list[ConfigSourceRef]:
             source_hash_strategy=_parse_source_hash_strategy(
                 src.get("source_hash_strategy")
             ),
+            source_hash_version=(
+                str(src["source_hash_version"])
+                if src.get("source_hash_version")
+                else None
+            ),
+            raw_source_hash_version=(
+                str(src["raw_source_hash_version"])
+                if src.get("raw_source_hash_version")
+                else None
+            ),
             priority=int(src["priority"]),
         )
         for src in artifact_dict["source_refs"]
@@ -178,6 +188,9 @@ def _build_resolved_config_snapshot(
         config_type=str(resolved["config_type"]),
         config_data=dict(resolved["config_data"]),
         config_hash=str(resolved["config_hash"]),
+        identity_version=str(
+            resolved.get("identity_version", "resolved-config-legacy-v0")
+        ),
         timestamp=datetime.fromisoformat(str(resolved["timestamp"])),
     )
 
@@ -203,6 +216,9 @@ def _build_effective_execution_config(
     return EffectiveExecutionConfig(
         config_data=dict(effective["config_data"]),
         effective_hash=str(effective["effective_hash"]),
+        identity_version=str(
+            effective.get("identity_version", "effective-config-legacy-v0")
+        ),
         timestamp=datetime.fromisoformat(str(effective["timestamp"])),
     )
 

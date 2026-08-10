@@ -17,6 +17,8 @@ import pandera.pandas as pandera
 import pyarrow as pa
 import yaml
 
+from scripts.engineering.common.repo_paths import REPO_ROOT
+
 from bioetl.domain.contracts.gold import (
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
@@ -64,7 +66,7 @@ from bioetl.infrastructure.schemas.silver import (
     UNIPROT_PROTEIN_SCHEMA,
 )
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = REPO_ROOT
 BASELINE_PATH = Path(__file__).resolve().parent / "schema_parity_baseline.json"
 
 
@@ -76,6 +78,7 @@ class SchemaPair:
     silver_schema: pa.Schema
     gold_model: type[pandera.DataFrameModel]
     config_path: str
+    gold_to_silver_aliases: Mapping[str, str] | None = None
 
 
 SCHEMA_PAIRS: tuple[SchemaPair, ...] = (
@@ -84,12 +87,18 @@ SCHEMA_PAIRS: tuple[SchemaPair, ...] = (
         CHEMBL_ACTIVITY_SCHEMA,
         ChEMBLActivityGoldSchema,
         "configs/entities/chembl/activity.yaml",
+        {
+            "type": "activity_type",
+            "relation": "activity_relation",
+            "value": "activity_value",
+        },
     ),
     SchemaPair(
         "chembl_assay",
         CHEMBL_ASSAY_SCHEMA,
         ChEMBLAssayGoldSchema,
         "configs/entities/chembl/assay.yaml",
+        {"description": "assay_description"},
     ),
     SchemaPair(
         "chembl_assay_parameters",
@@ -144,6 +153,7 @@ SCHEMA_PAIRS: tuple[SchemaPair, ...] = (
         CHEMBL_TARGET_SCHEMA,
         ChEMBLTargetGoldSchema,
         "configs/entities/chembl/target.yaml",
+        {"description": "target_description"},
     ),
     SchemaPair(
         "chembl_target_component",
@@ -344,16 +354,31 @@ def check_schema_pair(
     silver_fields = {field.name: field for field in pair.silver_schema}
     gold_columns = pair.gold_model.to_schema().columns
 
-    missing_in_gold = sorted(set(silver_fields) - set(gold_columns))
-    missing_in_silver = sorted(set(gold_columns) - set(silver_fields))
+    aliases = pair.gold_to_silver_aliases or {}
+    covered_gold_columns = {
+        gold_field
+        for gold_field, silver_field in aliases.items()
+        if gold_field in gold_columns and silver_field in silver_fields
+    }
+    missing_in_gold = sorted(
+        set(silver_fields) - set(gold_columns) - set(aliases.values())
+    )
+    missing_in_silver = sorted(
+        set(gold_columns) - set(silver_fields) - covered_gold_columns
+    )
 
     # Filter out known baseline differences
     known = baseline.get(pair.name, {})
     known_silver_only = set(known.get("silver_only", []))
     known_gold_only = set(known.get("gold_only", []))
+    if missing_in_gold:
+        warnings.append(
+            f"{pair.name}: Silver-only fields excluded from the narrower Gold "
+            f"contract: {missing_in_gold}"
+        )
     _append_baseline_differences(
         pair_name=pair.name,
-        missing_in_gold=missing_in_gold,
+        missing_in_gold=[],
         missing_in_silver=missing_in_silver,
         known_silver_only=known_silver_only,
         known_gold_only=known_gold_only,
@@ -445,7 +470,7 @@ def _resolve_exit_code(
     return 1 if blocking_errors or warning_errors else 0
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     """Run parity checks and return process exit code."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -459,7 +484,7 @@ def main() -> int:
         action="store_true",
         help="Update the baseline file with current differences.",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if args.update_baseline:
         differences = _build_current_differences()

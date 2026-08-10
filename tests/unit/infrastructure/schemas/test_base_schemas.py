@@ -612,11 +612,11 @@ class TestConfigDictSettings:
         )
         assert not hasattr(config, "unknown_field")
 
-    def test_extra_ignore_circuit_breaker(self) -> None:
-        """Test that extra fields are ignored in BaseCircuitBreakerConfig."""
-        config = BaseCircuitBreakerConfig(
-            failure_threshold=5,
-            recovery_timeout=300,
-            unknown_field="ignored",  # type: ignore[call-arg]
-        )
-        assert not hasattr(config, "unknown_field")
+    def test_extra_forbid_circuit_breaker(self) -> None:
+        """Canonical transport boundaries reject unknown fields."""
+        with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
+            BaseCircuitBreakerConfig(
+                failure_threshold=5,
+                recovery_timeout=300,
+                unknown_field="rejected",  # type: ignore[call-arg]
+            )
