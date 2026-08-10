@@ -33,6 +33,8 @@ extracted from BatchWriter into a dedicated mixin.
 
 from __future__ import annotations
 
+import sys
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
@@ -448,3 +450,158 @@ class TestResolveLayerColumns:
 
         orderer.filter_by_layer_config.assert_called_once()
         assert col_order is not None
+
+
+@pytest.mark.unit
+class TestSchemaProjectionAdapters:
+    """Exercise each supported schema-projection surface and its fallbacks."""
+
+    def test_project_via_to_schema_selects_requested_columns(self) -> None:
+        """Pandera-style schemas should delegate projection to the converted schema."""
+        schema = MagicMock()
+        converted = MagicMock()
+        projected = object()
+        schema.to_schema.return_value = converted
+        converted.select_columns.return_value = projected
+
+        result = _Writer()._project_via_to_schema(schema, ["entity_id", "value"])
+
+        converted.select_columns.assert_called_once_with(["entity_id", "value"])
+        assert result is projected
+
+    def test_project_via_to_schema_returns_none_without_supported_surface(self) -> None:
+        """Objects without conversion or selection APIs are ignored safely."""
+        writer = _Writer()
+        assert writer._project_via_to_schema(object(), ["id"]) is None
+
+        schema = MagicMock()
+        schema.to_schema.return_value = MagicMock(spec=[])
+        assert writer._project_via_to_schema(schema, ["id"]) is None
+
+    @pytest.mark.parametrize("error", [OSError("io"), RuntimeError("bad schema")])
+    def test_project_via_to_schema_swallows_supported_errors(
+        self, error: Exception
+    ) -> None:
+        """Schema adapters may fail; projection must fall through to alternatives."""
+        schema = MagicMock()
+        schema.to_schema.side_effect = error
+
+        assert _Writer()._project_via_to_schema(schema, ["id"]) is None
+
+    def test_project_via_select_columns_handles_success_and_failure(self) -> None:
+        """Direct schema selection is used when available and is fail-soft."""
+        projected = object()
+        schema = MagicMock()
+        schema.select_columns.return_value = projected
+
+        writer = _Writer()
+        assert writer._project_via_select_columns(schema, ["id"]) is projected
+        schema.select_columns.assert_called_once_with(["id"])
+
+        schema.select_columns.side_effect = ValueError("unknown column")
+        assert writer._project_via_select_columns(schema, ["missing"]) is None
+        assert writer._project_via_select_columns(object(), ["id"]) is None
+
+    def test_project_pyarrow_schema_preserves_order_and_metadata(self) -> None:
+        """PyArrow fallback keeps requested existing fields and schema metadata."""
+        pa = pytest.importorskip("pyarrow")
+        schema = pa.schema(
+            [("entity_id", pa.string()), ("value", pa.int64())],
+            metadata={b"owner": b"bioetl"},
+        )
+
+        result = _Writer()._project_pyarrow_schema(
+            schema,
+            ["value", "missing", "entity_id"],
+        )
+
+        assert result.names == ["value", "entity_id"]
+        assert result.metadata == {b"owner": b"bioetl"}
+        assert _Writer()._project_pyarrow_schema(object(), ["id"]) is None
+
+    def test_project_pyarrow_schema_handles_incomplete_and_failing_adapters(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Incomplete or failing PyArrow-compatible adapters are ignored safely."""
+
+        class _FakeSchema:
+            names = ("id",)
+            field = None
+
+        fake_module = SimpleNamespace(
+            Schema=_FakeSchema,
+            schema=MagicMock(side_effect=TypeError("invalid fields")),
+        )
+        monkeypatch.setitem(sys.modules, "pyarrow", fake_module)
+
+        writer = _Writer()
+        assert writer._project_pyarrow_schema(_FakeSchema(), ["id"]) is None
+
+        instance = _FakeSchema()
+        instance.field = MagicMock(return_value=object())
+        assert writer._project_pyarrow_schema(instance, ["id"]) is None
+
+
+@pytest.mark.unit
+class TestProjectSchemaForLayer:
+    """Verify projection precedence and all fail-soft layer guards."""
+
+    def test_returns_original_when_projection_is_not_configured(self) -> None:
+        """Missing order, schema config, or layer config leaves schema unchanged."""
+        schema = object()
+        assert _Writer()._project_schema_for_layer("gold", schema, ["id"]) is schema
+        assert (
+            _Writer(data_schema=object())._project_schema_for_layer(
+                "gold", schema, ["id"]
+            )
+            is schema
+        )
+        configured = SimpleNamespace(gold=object())
+        assert (
+            _Writer(data_schema=configured)._project_schema_for_layer(
+                "gold", schema, None
+            )
+            is schema
+        )
+
+    def test_uses_first_successful_projection_strategy(self) -> None:
+        """Projection prefers converted, then direct, then PyArrow schema surfaces."""
+        writer = _Writer(data_schema=SimpleNamespace(gold=object()))
+        schema = object()
+        converted_projection = object()
+        writer._project_via_to_schema = MagicMock(return_value=converted_projection)
+        writer._project_via_select_columns = MagicMock()
+        writer._project_pyarrow_schema = MagicMock()
+
+        assert (
+            writer._project_schema_for_layer("gold", schema, ["id"])
+            is converted_projection
+        )
+        writer._project_via_select_columns.assert_not_called()
+        writer._project_pyarrow_schema.assert_not_called()
+
+    def test_falls_back_through_direct_and_pyarrow_strategies(self) -> None:
+        """Each later adapter is consulted only after the previous one declines."""
+        writer = _Writer(data_schema=SimpleNamespace(silver=object()))
+        schema = object()
+        direct_projection = object()
+        writer._project_via_to_schema = MagicMock(return_value=None)
+        writer._project_via_select_columns = MagicMock(return_value=direct_projection)
+        writer._project_pyarrow_schema = MagicMock()
+
+        assert (
+            writer._project_schema_for_layer("silver", schema, ["id"])
+            is direct_projection
+        )
+        writer._project_pyarrow_schema.assert_not_called()
+
+        pyarrow_projection = object()
+        writer._project_via_select_columns.return_value = None
+        writer._project_pyarrow_schema.return_value = pyarrow_projection
+        assert (
+            writer._project_schema_for_layer("silver", schema, ["id"])
+            is pyarrow_projection
+        )
+
+        writer._project_pyarrow_schema.return_value = None
+        assert writer._project_schema_for_layer("silver", schema, ["id"]) is schema

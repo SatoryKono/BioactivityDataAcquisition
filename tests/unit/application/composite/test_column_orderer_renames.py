@@ -33,6 +33,10 @@ from unittest.mock import MagicMock
 from bioetl.application.composite.column_service import (
     ColumnOrderService,
 )
+from bioetl.application.composite.column_orderer_group_flow import (
+    filter_columns_by_groups,
+    order_by_yaml_groups,
+)
 from bioetl.domain.composite.config import ColumnGroupConfig, LayerColumnConfig
 
 
@@ -144,3 +148,94 @@ class TestColumnOrderServiceRenames:
 
         # Both renamed to same_name (conflict not prevented at this level)
         assert renamed == ["same_name", "same_name"]
+
+
+class TestColumnOrderServiceGroupFlowBranches:
+    """Cover empty configuration, DQ suffix, and exclusion behavior."""
+
+    def test_order_by_yaml_groups_without_groups_preserves_input_order(self) -> None:
+        """Absent YAML groups are a transparent no-op rather than a sort."""
+        columns = ["z", "a", "entity_id"]
+
+        assert (
+            order_by_yaml_groups(
+                columns=columns,
+                column_groups=None,
+                collect_group_columns=MagicMock(),
+                logger=MagicMock(),
+            )
+            == columns
+        )
+
+    def test_order_by_yaml_groups_logs_ungrouped_and_moves_dq_suffix(self) -> None:
+        """Ungrouped fields are stable-sorted while DQ fields stay last exactly once."""
+        logger = MagicMock()
+        group = ColumnGroupConfig(name="core", fields=["entity_id", "_dq_error"])
+
+        def _collect(available: set[str], _group: ColumnGroupConfig) -> list[str]:
+            return [name for name in ("entity_id", "_dq_error") if name in available]
+
+        result = order_by_yaml_groups(
+            columns=["zeta", "entity_id", "alpha", "_dq_warn", "_dq_error"],
+            column_groups=[group],
+            collect_group_columns=_collect,
+            logger=logger,
+        )
+
+        assert result == ["entity_id", "alpha", "zeta", "_dq_error", "_dq_warn"]
+        logger.debug.assert_called_once_with(
+            "Ungrouped columns added at end",
+            count=2,
+            sample=["alpha", "zeta"],
+        )
+
+    def test_filter_columns_by_groups_without_definitions_warns_and_preserves(
+        self,
+    ) -> None:
+        """An include request without configured groups remains lossless and visible."""
+        logger = MagicMock()
+        config = LayerColumnConfig(include_groups=["identifiers"])
+        columns = ["entity_id", "value"]
+
+        result = filter_columns_by_groups(
+            columns=columns,
+            layer_config=config,
+            column_groups=None,
+            collect_group_columns=MagicMock(),
+            logger=logger,
+        )
+
+        assert result == columns
+        logger.warning.assert_called_once_with(
+            "include_groups specified but no column_groups configured",
+            include_groups=config.include_groups,
+        )
+
+    def test_filter_columns_by_groups_applies_exclusions_and_renames(self) -> None:
+        """Glob exclusions run before deterministic ordering and output renames."""
+        group = ColumnGroupConfig(
+            name="identifiers",
+            fields=["entity_id", "public_id", "private_secret"],
+        )
+        config = LayerColumnConfig(
+            include_groups=["identifiers"],
+            exclude_fields=["*_secret"],
+            rename_fields={"public_id": "external_id"},
+        )
+
+        def _collect(available: set[str], _group: ColumnGroupConfig) -> list[str]:
+            return [
+                name
+                for name in ("entity_id", "public_id", "private_secret")
+                if name in available
+            ]
+
+        result = filter_columns_by_groups(
+            columns=["entity_id", "public_id", "private_secret", "ignored"],
+            layer_config=config,
+            column_groups=[group],
+            collect_group_columns=_collect,
+            logger=MagicMock(),
+        )
+
+        assert result == ["entity_id", "external_id"]
