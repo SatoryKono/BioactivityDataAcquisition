@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 
+from bioetl.application.observability.control_plane_evidence import EvidenceCheckResult
 from bioetl.application.services.control_plane.evidence.checkpoint_validation import (
     build_checkpoint_checks,
 )
@@ -20,7 +21,6 @@ from bioetl.application.services.control_plane.evidence.manifest_validation impo
     build_manifest_checks,
 )
 from bioetl.application.services.control_plane.evidence.models import (
-    EvidenceCheckResult,
     unresolved_scope_check,
 )
 from bioetl.application.services.control_plane.evidence.retention import (
@@ -29,7 +29,7 @@ from bioetl.application.services.control_plane.evidence.retention import (
     summarize_retention_artifacts,
 )
 from bioetl.application.services.control_plane.evidence.service_support import (
-    EvidenceScope,
+    EvidenceScopeContext,
     ledger_entries,
     sanitized_manifest_payload_scope,
     service_payload,
@@ -57,7 +57,7 @@ class ControlPlaneEvidenceService:
     def checkpoint_validation(
         self,
         *,
-        scope: EvidenceScope,
+        scope: EvidenceScopeContext,
         checkpoint: tuple[object, dict[str, object]] | None,
         evidence_source: str,
         aggregate_scope_unknown: bool,
@@ -81,7 +81,7 @@ class ControlPlaneEvidenceService:
             additional_data={"evidence_source": evidence_source},
         )
 
-    def manifest_validation(self, *, scope: EvidenceScope) -> dict[str, object]:
+    def manifest_validation(self, *, scope: EvidenceScopeContext) -> dict[str, object]:
         """Return manifest parsing, schema, version, and contract compatibility."""
         checks = (
             (unresolved_scope_check(scope.resolved_via),)
@@ -99,7 +99,7 @@ class ControlPlaneEvidenceService:
             checks=checks,
         )
 
-    def lineage_validation(self, *, scope: EvidenceScope) -> dict[str, object]:
+    def lineage_validation(self, *, scope: EvidenceScopeContext) -> dict[str, object]:
         """Return lineage closure, identity, cycle, and persistence validation."""
         if scope.manifest is None:
             return service_payload(
@@ -146,7 +146,7 @@ class ControlPlaneEvidenceService:
     def retention_compliance(
         self,
         *,
-        scope: EvidenceScope,
+        scope: EvidenceScopeContext,
         now: datetime,
     ) -> dict[str, object]:
         """Evaluate default retention and evidence-floor policy in dry-run mode."""
@@ -191,7 +191,7 @@ class ControlPlaneEvidenceService:
             },
         )
 
-    def failure_reasons(self, *, scope: EvidenceScope) -> dict[str, object]:
+    def failure_reasons(self, *, scope: EvidenceScopeContext) -> dict[str, object]:
         """Return only fixed-category failure counts; omit raw errors/messages."""
         if scope.manifest is None:
             scope_check = unresolved_scope_check(scope.resolved_via)
@@ -245,5 +245,4 @@ class ControlPlaneEvidenceService:
 __all__ = [
     "DEFAULT_CONTROL_PLANE_RETENTION_DAYS",
     "ControlPlaneEvidenceService",
-    "EvidenceScope",
 ]

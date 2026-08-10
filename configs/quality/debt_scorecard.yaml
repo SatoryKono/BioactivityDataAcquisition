@@ -688,7 +688,7 @@ oversized_source_module_inventory:
     source: src/bioetl/domain/ports/__init__.py
     extracted_surface: src/bioetl/domain/ports/__init__.pyi
     source_lines_after_split: 203
-    extracted_surface_lines: 390
+    extracted_surface_lines: 402
     rationale: Runtime lazy export resolution remains in the Python module while static re-export type
       declarations live in the adjacent stub, preserving the public API and reducing the governed source
       module from 579 to 203 lines.

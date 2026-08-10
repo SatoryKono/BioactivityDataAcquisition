@@ -1,9 +1,7 @@
 from bioetl.domain.ports.adr import (
     AdrDocument as AdrDocument,
 )
-from bioetl.domain.ports.adr import (
-    AdrInfo as AdrInfo,
-)
+from bioetl.domain.ports.adr import AdrInfo as AdrInfo
 from bioetl.domain.ports.adr import (
     AdrIssueSeverity as AdrIssueSeverity,
 )
@@ -25,9 +23,7 @@ from bioetl.domain.ports.audit import (
 from bioetl.domain.ports.audit import (
     AuditOperation as AuditOperation,
 )
-from bioetl.domain.ports.audit import (
-    AuditPort as AuditPort,
-)
+from bioetl.domain.ports.audit import AuditPort as AuditPort
 from bioetl.domain.ports.config import (
     DomainConfigMapperPort as DomainConfigMapperPort,
 )
@@ -46,9 +42,7 @@ from bioetl.domain.ports.config import (
 from bioetl.domain.ports.config import (
     SettingsLoaderPort as SettingsLoaderPort,
 )
-from bioetl.domain.ports.config import (
-    SettingsPort as SettingsPort,
-)
+from bioetl.domain.ports.config import SettingsPort as SettingsPort
 from bioetl.domain.ports.control_plane import (
     ArtifactByteComparisonPort as ArtifactByteComparisonPort,
 )

@@ -12,7 +12,7 @@ import pytest
 
 from bioetl.application.services.control_plane.evidence import (
     ControlPlaneEvidenceService,
-    EvidenceScope,
+    EvidenceScopeContext,
 )
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.types import RunID, RunType
@@ -37,8 +37,8 @@ def _manifest() -> RunManifest:
     )
 
 
-def _scope(manifest: RunManifest) -> EvidenceScope:
-    return EvidenceScope(
+def _scope(manifest: RunManifest) -> EvidenceScopeContext:
+    return EvidenceScopeContext(
         requested_pipeline="chembl_activity",
         selected_run_id=str(manifest.run_id),
         selected_run_types=(manifest.run_type.value,),
