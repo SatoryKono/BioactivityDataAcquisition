@@ -48270,13 +48270,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-10",
-<<<<<<< HEAD
-  "source_tree_sha256": "060c2e2e28cfaeb91000fde16dbb5adbf47d48ca7fb2a6dbd2067346e4b33296",
-||||||| 1cb1e6e574
-  "source_tree_sha256": "d0ebd1299bc119046a3e9395c3fe88077d0b6f714b50d5acd5b596f9a624d236",
-=======
-  "source_tree_sha256": "f89d9ebaaccc09197c9b2d288a162349219a39e4e95377ac74dea3b73ddbf0af",
->>>>>>> fix/rf-004-staged-enforcement
+  "source_tree_sha256": "e03e37df556ee259dd2946a307e30314a1a002d0b1f21075ba00da07c4acd90f",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
