@@ -312,7 +312,9 @@ or raw error messages as Prometheus labels.
 | `bioetl_control_plane_manifest_writes_total`   | Counter   | pipeline, run_type, status               | Попытки записи immutable run manifest                                                                     |
 | `bioetl_control_plane_ledger_appends_total`    | Counter   | pipeline, event_type, status             | Попытки append в run ledger                                                                               |
 | `bioetl_control_plane_terminal_events_total`   | Counter   | pipeline, terminal_status                | Terminal run outcomes, mirrored from persisted run-ledger entries for `success` / `failed` / `shutdown`  |
+| `bioetl_manifest_ledger_integrity_ratio`       | Gauge     | pipeline, run_type, integrity_type       | Доли `consistent` / `inconsistent` среди manifest, для которых ledger ожидается; при нулевом denominator healthy-ряд не публикуется |
 | `bioetl_replay_reconstructability_events_total` | Counter  | pipeline, replay_capability, strict_requirement, status | Bounded replay reconstructability decisions emitted during manifest assembly                               |
+| `bioetl_replay_duplicate_overwrite_risk_total` | Counter   | pipeline, run_type, risk_type            | Принятые replay manifest с bounded `duplicate` / `overwrite` риском; после durable accept обе серии инициализируются через `inc(0)` |
 | `bioetl_checkpoint_compatibility_events_total` | Counter   | pipeline, disposition                    | Исходы compatibility policy при resume                                                                    |
 | `bioetl_checkpoint_load_events_total`          | Counter   | pipeline, status                         | Bounded runtime/composite checkpoint load decisions during resume paths                                   |
 | `bioetl_checkpoint_operator_operations_total`  | Counter   | operation, status                        | Bounded checkpoint admin actions for `list` / `get` / `delete` workflows                                  |
@@ -339,6 +341,14 @@ or raw error messages as Prometheus labels.
 > `selected_source` для `bioetl_composite_source_selection_total` остаётся
 > допустимым label, потому что это bounded provider/source vocabulary, а не
 > per-run или per-record идентификатор.
+
+`bioetl_manifest_ledger_integrity_ratio` обновляется bounded full-catalog
+reconciliation на startup/periodic refresh, а не при каждом append и не во
+время Prometheus scrape. Consistent означает: ledger непуст, первый и
+единственный `manifest_created` идёт первым, все entries совпадают с
+`manifest_id` / `run_id`, а run-id index возвращает тот же append order.
+Manifest с явным `run_ledger_enabled=false` исключаются; для legacy manifest
+без флага действует default `true`.
 
 Дополнительный контрольный экран `bioetl-control-plane-v1.json` собирает
 агрегированные панели по manifest write failures, ledger append failures,

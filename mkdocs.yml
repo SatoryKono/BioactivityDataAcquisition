@@ -753,6 +753,35 @@ nav:
               - "48 Composite Phase Lifecycle": 02-architecture/diagrams/descriptions/foundation/48-composite-phase-lifecycle.md
               - "49 Composite Runner Class": 02-architecture/diagrams/descriptions/foundation/49-composite-runner-class.md
               - "50 Exception Hierarchy": 02-architecture/diagrams/descriptions/foundation/50-exception-hierarchy.md
+          - "Provider Flows":
+              - "ChEMBL API Integration": 02-architecture/diagrams/descriptions/providers/chembl/01-api-integration-flow.md
+              - "ChEMBL Data Transformation": 02-architecture/diagrams/descriptions/providers/chembl/02-data-transformation-flow.md
+              - "ChEMBL Medallion Layers": 02-architecture/diagrams/descriptions/providers/chembl/03-medallion-layer-flow.md
+              - "ChEMBL Error Handling": 02-architecture/diagrams/descriptions/providers/chembl/04-error-handling-flow.md
+              - "Crossref API Integration": 02-architecture/diagrams/descriptions/providers/crossref/01-api-integration-flow.md
+              - "Crossref Data Transformation": 02-architecture/diagrams/descriptions/providers/crossref/02-data-transformation-flow.md
+              - "Crossref Medallion Layers": 02-architecture/diagrams/descriptions/providers/crossref/03-medallion-layer-flow.md
+              - "Crossref Error Handling": 02-architecture/diagrams/descriptions/providers/crossref/04-error-handling-flow.md
+              - "OpenAlex API Integration": 02-architecture/diagrams/descriptions/providers/openalex/01-api-integration-flow.md
+              - "OpenAlex Data Transformation": 02-architecture/diagrams/descriptions/providers/openalex/02-data-transformation-flow.md
+              - "OpenAlex Medallion Layers": 02-architecture/diagrams/descriptions/providers/openalex/03-medallion-layer-flow.md
+              - "OpenAlex Error Handling": 02-architecture/diagrams/descriptions/providers/openalex/04-error-handling-flow.md
+              - "PubChem API Integration": 02-architecture/diagrams/descriptions/providers/pubchem/01-api-integration-flow.md
+              - "PubChem Data Transformation": 02-architecture/diagrams/descriptions/providers/pubchem/02-data-transformation-flow.md
+              - "PubChem Medallion Layers": 02-architecture/diagrams/descriptions/providers/pubchem/03-medallion-layer-flow.md
+              - "PubChem Error Handling": 02-architecture/diagrams/descriptions/providers/pubchem/04-error-handling-flow.md
+              - "PubMed API Integration": 02-architecture/diagrams/descriptions/providers/pubmed/01-api-integration-flow.md
+              - "PubMed Data Transformation": 02-architecture/diagrams/descriptions/providers/pubmed/02-data-transformation-flow.md
+              - "PubMed Medallion Layers": 02-architecture/diagrams/descriptions/providers/pubmed/03-medallion-layer-flow.md
+              - "PubMed Error Handling": 02-architecture/diagrams/descriptions/providers/pubmed/04-error-handling-flow.md
+              - "Semantic Scholar API Integration": 02-architecture/diagrams/descriptions/providers/semanticscholar/01-api-integration-flow.md
+              - "Semantic Scholar Data Transformation": 02-architecture/diagrams/descriptions/providers/semanticscholar/02-data-transformation-flow.md
+              - "Semantic Scholar Medallion Layers": 02-architecture/diagrams/descriptions/providers/semanticscholar/03-medallion-layer-flow.md
+              - "Semantic Scholar Error Handling": 02-architecture/diagrams/descriptions/providers/semanticscholar/04-error-handling-flow.md
+              - "UniProt API Integration": 02-architecture/diagrams/descriptions/providers/uniprot/01-api-integration-flow.md
+              - "UniProt Data Transformation": 02-architecture/diagrams/descriptions/providers/uniprot/02-data-transformation-flow.md
+              - "UniProt Medallion Layers": 02-architecture/diagrams/descriptions/providers/uniprot/03-medallion-layer-flow.md
+              - "UniProt Error Handling": 02-architecture/diagrams/descriptions/providers/uniprot/04-error-handling-flow.md
           - "Views":
               - "00 Legend": 02-architecture/diagrams/descriptions/views/00-legend.md
               - "01 Full System Component Dataflow": 02-architecture/diagrams/descriptions/views/01-full-system-component-dataflow.md
@@ -948,6 +977,7 @@ nav:
               - "Skill verify-architecture": 00-project/ai/skills/global/verify-architecture/SKILL.md
           - "Local Skills":
               - "Skills Catalog": 00-project/ai/skills/local/SKILLS-CATALOG.md
+              - "Skill agent-debugging": 00-project/ai/skills/local/agent-debugging/SKILL.md
               - "Skill new-pipeline": 00-project/ai/skills/local/new-pipeline/SKILL.md
               - "Skill observability-dashboard": 00-project/ai/skills/local/observability-dashboard/SKILL.md
               - "Skill observability-prometheus": 00-project/ai/skills/local/observability-prometheus/SKILL.md

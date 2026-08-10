@@ -161,8 +161,9 @@ class TestRecordProcessorProcessBatch:
 
         await record_processor.process_batch(records, batch_id)
 
-        # Verify Bronze write received run_id and run_type from context
-        bronze_call_kwargs = mock_storage.write_bronze.call_args[1]
+        # Bronze remains an explicit Domain-port kwargs contract; its
+        # infrastructure-only request DTO must not leak into Application tests.
+        bronze_call_kwargs = mock_storage.write_bronze.call_args.kwargs
         assert bronze_call_kwargs["run_id"] == mock_context.run_id
         assert bronze_call_kwargs["run_type"] == mock_context.run_type
 

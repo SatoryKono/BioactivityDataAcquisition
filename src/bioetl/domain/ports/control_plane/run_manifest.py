@@ -2,12 +2,39 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Protocol, runtime_checkable
 
 from bioetl.domain.control_plane.run_manifest import RunManifest
 from bioetl.domain.types import RunID, RunType
 
-__all__ = ["RunManifestPort"]
+__all__ = [
+    "RawManifestInspection",
+    "RawRunManifestInspectionPort",
+    "RunManifestPort",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class RawManifestInspection:
+    """Bounded diagnostics from the persisted JSON before typed coercion."""
+
+    parse_ok: bool
+    schema_errors: tuple[str, ...] = ()
+
+    @property
+    def schema_ok(self) -> bool:
+        """Return whether parsing and raw schema validation both succeeded."""
+        return self.parse_ok and not self.schema_errors
+
+
+@runtime_checkable
+class RawRunManifestInspectionPort(Protocol):
+    """Optional raw-manifest diagnostics without widening ``RunManifestPort``."""
+
+    def inspect_raw_manifest(self, manifest_id: str) -> RawManifestInspection:
+        """Inspect one persisted manifest without hydrating typed values."""
+        ...
 
 
 @runtime_checkable

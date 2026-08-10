@@ -10,6 +10,9 @@ import asyncio
 import time
 from dataclasses import dataclass
 
+from bioetl.application.services.control_plane.evidence import (
+    ControlPlaneEvidenceService,
+)
 from bioetl.application.services.quality.quarantine_service import QuarantineService
 from bioetl.domain.ports import (
     CheckpointPort,
@@ -23,6 +26,13 @@ from bioetl.domain.ports import (
 )
 from bioetl.interfaces.http._forensic_request_budget import (
     FORENSIC_ENDPOINT_CONCURRENCY,
+)
+from bioetl.interfaces.http._health_server_control_plane_metrics_refresh import (
+    CONTROL_PLANE_METRICS_REFRESH_INTERVAL_SECONDS,
+    ControlPlaneMetricsRefresher,
+    refresh_control_plane_metrics,
+    run_periodic_control_plane_metrics_refresh,
+    stop_control_plane_metrics_refresh,
 )
 from bioetl.interfaces.http.health_server_http_mixin import HealthServerHTTPMixin
 from bioetl.interfaces.http.health_server_routing_mixin import (
@@ -60,6 +70,8 @@ class HealthServerControlPlaneDeps:
     run_manifest_port: RunManifestPort | None = None
     run_ledger_port: RunLedgerPort | None = None
     workflow_manifest_port: WorkflowManifestPort | None = None
+    control_plane_evidence_service: ControlPlaneEvidenceService | None = None
+    control_plane_integrity_refresher: ControlPlaneMetricsRefresher | None = None
     metrics_exposition: HealthMetricsExpositionPort | None = None
     runtime_source_id: str | None = None
 
@@ -81,6 +93,8 @@ class HealthServer(
             "run_manifest_port",
             "run_ledger_port",
             "workflow_manifest_port",
+            "control_plane_evidence_service",
+            "control_plane_integrity_refresher",
             "metrics_exposition",
             "runtime_source_id",
         }
@@ -148,6 +162,12 @@ class HealthServer(
         self._run_manifest_port = deps.run_manifest_port
         self._run_ledger_port = deps.run_ledger_port
         self._workflow_manifest_port = deps.workflow_manifest_port
+        self._control_plane_evidence_service = deps.control_plane_evidence_service
+        self._control_plane_integrity_refresher = deps.control_plane_integrity_refresher
+        self._control_plane_integrity_refresh_task: asyncio.Task[None] | None = None
+        self._control_plane_integrity_refresh_interval_seconds = (
+            CONTROL_PLANE_METRICS_REFRESH_INTERVAL_SECONDS
+        )
         self._runtime_source_id = deps.runtime_source_id
         self._metrics_exposition: HealthMetricsExpositionPort = (
             deps.metrics_exposition or _StaticHealthMetricsExposition()
@@ -206,11 +226,26 @@ class HealthServer(
                     reason_code="HEALTH_SERVER_BIND_FAILED",
                 )
             raise
+        if self._control_plane_integrity_refresher is not None:
+            await refresh_control_plane_metrics(self._control_plane_integrity_refresher)
+            self._control_plane_integrity_refresh_task = asyncio.create_task(
+                run_periodic_control_plane_metrics_refresh(
+                    self._control_plane_integrity_refresher,
+                    interval_seconds=(
+                        self._control_plane_integrity_refresh_interval_seconds
+                    ),
+                ),
+                name="bioetl-control-plane-integrity-refresh",
+            )
         if self._logger:
             self._logger.info("health_server_started", host=self.host, port=self.port)
 
     async def stop(self) -> None:
         """Stop the health server gracefully."""
+        await stop_control_plane_metrics_refresh(
+            self._control_plane_integrity_refresh_task
+        )
+        self._control_plane_integrity_refresh_task = None
         if not self._server:
             return
         self._server.close()
@@ -254,6 +289,8 @@ async def run_health_server(
     run_manifest_port: RunManifestPort | None = None,
     run_ledger_port: RunLedgerPort | None = None,
     workflow_manifest_port: WorkflowManifestPort | None = None,
+    control_plane_evidence_service: ControlPlaneEvidenceService | None = None,
+    control_plane_integrity_refresher: ControlPlaneMetricsRefresher | None = None,
     prometheus_base_url: str | None = None,
     logger: LoggerPort | None = None,
     clock: ClockPort | None = None,
@@ -274,6 +311,8 @@ async def run_health_server(
         run_manifest_port: Optional read-only control-plane manifest catalog.
         run_ledger_port: Optional read-only control-plane run ledger.
         workflow_manifest_port: Optional read-only workflow manifest catalog.
+        control_plane_evidence_service: Optional bounded validation collaborator.
+        control_plane_integrity_refresher: Optional periodic aggregate refresher.
         prometheus_base_url: Optional Prometheus HTTP API base URL.
         logger: Optional LoggerPort for structured server event logging.
         clock: Optional ClockPort for response timestamps.
@@ -288,6 +327,8 @@ async def run_health_server(
             run_manifest_port=run_manifest_port,
             run_ledger_port=run_ledger_port,
             workflow_manifest_port=workflow_manifest_port,
+            control_plane_evidence_service=control_plane_evidence_service,
+            control_plane_integrity_refresher=control_plane_integrity_refresher,
         ),
         prometheus_base_url=prometheus_base_url,
         logger=logger,

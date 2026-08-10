@@ -9,6 +9,7 @@ effective-config artifacts).
 | Concern | Port |
 | --- | --- |
 | Run planning artifact | `RunManifestPort` |
+| Persisted raw-manifest diagnostics | `RawRunManifestInspectionPort` |
 | Run lifecycle ledger | `RunLedgerPort` |
 | Workflow planning artifact | `WorkflowManifestPort` |
 | Workflow lifecycle ledger | `WorkflowLedgerPort` |
@@ -46,7 +47,11 @@ from bioetl.domain.ports.control_plane.effective_config_artifact import (
 )
 from bioetl.domain.ports.control_plane.lineage import LineageStorePort
 from bioetl.domain.ports.control_plane.run_ledger import RunLedgerPort
-from bioetl.domain.ports.control_plane.run_manifest import RunManifestPort
+from bioetl.domain.ports.control_plane.run_manifest import (
+    RawManifestInspection,
+    RawRunManifestInspectionPort,
+    RunManifestPort,
+)
 from bioetl.domain.ports.control_plane.workflow_execution_state import (
     WorkflowExecutionStatePort,
 )
@@ -57,6 +62,8 @@ __all__ = [
     "ArtifactByteComparisonPort",
     "EffectiveConfigArtifactStorePort",
     "LineageStorePort",
+    "RawManifestInspection",
+    "RawRunManifestInspectionPort",
     "RunLedgerPort",
     "RunManifestPort",
     "WorkflowExecutionStatePort",

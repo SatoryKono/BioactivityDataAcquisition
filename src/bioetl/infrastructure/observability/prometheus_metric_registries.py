@@ -72,6 +72,9 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
             _metrics.REPLAY_RECONSTRUCTABILITY_EVENTS_TOTAL
         ),
         "bioetl_replay_drift_events_total": _metrics.REPLAY_DRIFT_EVENTS_TOTAL,
+        "bioetl_replay_duplicate_overwrite_risk_total": (
+            _metrics.REPLAY_DUPLICATE_OVERWRITE_RISK_TOTAL
+        ),
         "bioetl_metrics_publication_events_total": _metrics.METRICS_PUBLICATION_EVENTS_TOTAL,
         "bioetl_publication_raw_vocab_unknown_total": (
             _metrics.PUBLICATION_RAW_VOCAB_UNKNOWN_TOTAL
@@ -109,6 +112,9 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
         "bioetl_stage_lag_seconds": _metrics.STAGE_LAG_SECONDS,
         "bioetl_checkpoint_saved_at_seconds": _metrics.CHECKPOINT_SAVED_AT_SECONDS,
         "bioetl_replay_lag_seconds": _metrics.REPLAY_LAG_SECONDS,
+        "bioetl_manifest_ledger_integrity_ratio": (
+            _metrics.MANIFEST_LEDGER_INTEGRITY_RATIO
+        ),
         "bioetl_workflow_current_status": _metrics.WORKFLOW_CURRENT_STATUS,
         "bioetl_workflow_expected": WORKFLOW_EXPECTED,
         "bioetl_workflow_pipeline_expected": WORKFLOW_PIPELINE_EXPECTED,

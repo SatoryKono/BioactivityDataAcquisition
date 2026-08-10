@@ -87,7 +87,13 @@
       "runtime_checkable": true
     },
     {
-      "line": 14,
+      "line": 32,
+      "name": "RawRunManifestInspectionPort",
+      "path": "src/bioetl/domain/ports/control_plane/run_manifest.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 41,
       "name": "RunManifestPort",
       "path": "src/bioetl/domain/ports/control_plane/run_manifest.py",
       "runtime_checkable": true
@@ -522,11 +528,11 @@
   "ports_root": "src/bioetl/domain/ports",
   "schema_version": 1,
   "summary": {
-    "port_module_files": 66,
-    "port_protocol_classes": 85,
+    "port_module_files": 67,
+    "port_protocol_classes": 86,
     "runtime_checkable_coverage_pct": 100.0,
-    "runtime_checkable_decorator_count": 91,
-    "runtime_checkable_port_count": 85,
-    "scanned_python_files": 75
+    "runtime_checkable_decorator_count": 92,
+    "runtime_checkable_port_count": 86,
+    "scanned_python_files": 76
   }
 }

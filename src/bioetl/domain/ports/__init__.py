@@ -34,6 +34,8 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "ArtifactByteComparisonPort",
         "EffectiveConfigArtifactStorePort",
         "LineageStorePort",
+        "RawManifestInspection",
+        "RawRunManifestInspectionPort",
         "RunLedgerPort",
         "RunManifestPort",
         "WorkflowExecutionStatePort",

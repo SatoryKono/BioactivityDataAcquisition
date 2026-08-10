@@ -6,6 +6,8 @@ groups:
         expr: >-
           (count by (pipeline, run_type) (bioetl_control_plane_manifest_writes_total) > bool 0)
           or
+          (count by (pipeline, run_type) (bioetl_manifest_ledger_integrity_ratio) > bool 0)
+          or
           (count by (pipeline, run_type) (bioetl_workflow_pipeline_expected) > bool 0)
 
       - record: bioetl_replay_safety_blockers_15m
@@ -34,6 +36,14 @@ groups:
               +
               (sum by (pipeline, run_type) (increase(bioetl_replay_drift_events_total[15m]))
                 or 0 * bioetl_control_plane_run_type_universe)
+              +
+              (sum by (pipeline, run_type) (increase(bioetl_replay_duplicate_overwrite_risk_total[15m]))
+                or 0 * bioetl_control_plane_run_type_universe)
+              +
+              (
+                (max by (pipeline, run_type) (bioetl_manifest_ledger_integrity_ratio{integrity_type="inconsistent"}) > bool 0) * 2
+                or 0 * bioetl_control_plane_run_type_universe
+              )
             )
           )
 
@@ -51,6 +61,11 @@ groups:
                   sum by (pipeline) (increase(bioetl_control_plane_ledger_appends_total{status="failed"}[15m]))
                   or 0 * max by (pipeline) (bioetl_control_plane_run_type_universe)
                 )
+              )
+              +
+              (
+                (max by (pipeline, run_type) (bioetl_manifest_ledger_integrity_ratio{integrity_type="inconsistent"}) > bool 0) * 2
+                or 0 * bioetl_control_plane_run_type_universe
               )
             )
           )
@@ -81,8 +96,34 @@ groups:
                 )
               )
               or 0 * bioetl_control_plane_run_type_universe
+            )
+            +
+            (
+              (
+                bioetl_control_plane_run_type_universe
+                unless on (pipeline, run_type)
+                (
+                  count by (pipeline, run_type) (
+                    count_over_time(bioetl_replay_duplicate_overwrite_risk_total{risk_type=~"duplicate|overwrite"}[5m])
+                  ) == 2
+                )
+              )
+              or 0 * bioetl_control_plane_run_type_universe
+            )
+            +
+            (
+              (
+                bioetl_control_plane_run_type_universe
+                unless on (pipeline, run_type)
+                (
+                  count by (pipeline, run_type) (
+                    count_over_time(bioetl_manifest_ledger_integrity_ratio{integrity_type=~"consistent|inconsistent"}[5m])
+                  ) == 2
+                )
+              )
+              or 0 * bioetl_control_plane_run_type_universe
             ),
-            2
+            4
           )
 
       - record: bioetl_checkpoint_age_seconds

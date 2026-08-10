@@ -110,9 +110,11 @@ increased as a documentation remedy.
 
 ## Version history
 
+- v1.12.2 (2026-08-09): normative traceability advanced through `RULES.md`
+  v6.1.8 and ADR-056 (Proof-or-Stop lifecycle control).
 - v1.12.1 (2026-07-28): ADR coverage extended through ADR-052 (ARCH-REF-07).
 - v1.12 (2026-07-23): restored the requirements entry point and explicit
-  traceability to all 168 crosswalk rows, `RULES.md` v6.1.7, ADR-001…ADR-055,
+  traceability to all 168 crosswalk rows, `RULES.md` v6.1.8, ADR-001…ADR-056,
   runtime/configuration surfaces, and executable evidence.
 - v6.1 (historical compact catalog): listed selected ADRs but did not provide
   complete requirement-to-evidence traceability.

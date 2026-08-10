@@ -6,6 +6,9 @@ import asyncio
 from typing import Protocol
 
 from bioetl.application.runtime_clock import current_utc_time
+from bioetl.application.services.control_plane.evidence import (
+    ControlPlaneEvidenceService,
+)
 from bioetl.domain.control_plane import WorkflowManifest
 from bioetl.domain.ports import (
     CheckpointPort,
@@ -21,6 +24,9 @@ from bioetl.interfaces.http._health_server_checkpoint_freshness_payloads import 
 )
 from bioetl.interfaces.http._health_server_checkpoint_lookup import (
     load_checkpoint_freshness_evidence,
+)
+from bioetl.interfaces.http._health_server_control_plane_evidence_routing import (
+    dispatch_control_plane_evidence_request,
 )
 from bioetl.interfaces.http._health_server_control_plane_scope import (
     _IdentityScope,
@@ -63,6 +69,14 @@ class _HealthResponseSupport(Protocol):
 
 
 class _HealthRoutingHost(_HealthResponseSupport, Protocol):
+    @property
+    def _control_plane_evidence_service(
+        self,
+    ) -> ControlPlaneEvidenceService | None: ...
+
+    @property
+    def _forensic_endpoint_limiter(self) -> asyncio.Semaphore: ...
+
     @property
     def _checkpoint_port(self) -> CheckpointPort | None: ...
 
@@ -114,6 +128,18 @@ async def dispatch_control_plane_request(
     query: dict[str, str],
 ) -> None:
     """Route control-plane selector helper endpoints."""
+    try:
+        if await dispatch_control_plane_evidence_request(
+            host,
+            writer=writer,
+            path=path,
+            query=query,
+        ):
+            return
+    except ValueError as exc:
+        await host._send_response(writer, 400, str(exc))
+        return
+
     if host._run_manifest_port is None:
         await host._send_response(
             writer,
@@ -123,23 +149,7 @@ async def dispatch_control_plane_request(
         return
 
     try:
-        if path == "/ops/control-plane/ready":
-            await handle_control_plane_ready(host, writer)
-            return
-        if path == "/ops/control-plane/filter-options":
-            await handle_control_plane_filter_options(host, writer, query)
-            return
-        if path == "/ops/control-plane/selector-context":
-            await handle_control_plane_selector_context(host, writer, query)
-            return
-        if path == "/ops/control-plane/identity-table":
-            await handle_control_plane_identity_table(host, writer, query)
-            return
-        if path == "/ops/control-plane/identity-evidence":
-            await handle_control_plane_identity_evidence(host, writer, query)
-            return
-        if path == "/ops/control-plane/checkpoint-freshness":
-            await handle_control_plane_checkpoint_freshness(host, writer, query)
+        if await _dispatch_ops_endpoints(host, writer, path, query):
             return
         await host._send_response(writer, 404, _NOT_FOUND_MESSAGE)
     except ValueError as exc:
@@ -157,6 +167,9 @@ async def handle_control_plane_ready(
         "workflow_manifest_port": getattr(host, "_workflow_manifest_port", None)
         is not None,
         "checkpoint_port": host._checkpoint_port is not None,
+        "validation_evidence_service": (
+            host._control_plane_evidence_service is not None
+        ),
         "data_root": getattr(host, "_data_root", None),
         "runtime_source_id": getattr(host, "_runtime_source_id", None),
     }
@@ -369,3 +382,30 @@ __all__ = [
     "dispatch_observability_request",
     "dispatch_quarantine_request",
 ]
+
+
+async def _dispatch_ops_endpoints(
+    host: _HealthRoutingHost,
+    writer: asyncio.StreamWriter,
+    path: str,
+    query: dict[str, str],
+) -> bool:
+    if path == "/ops/control-plane/ready":
+        await handle_control_plane_ready(host, writer)
+        return True
+    if path == "/ops/control-plane/filter-options":
+        await handle_control_plane_filter_options(host, writer, query)
+        return True
+    if path == "/ops/control-plane/selector-context":
+        await handle_control_plane_selector_context(host, writer, query)
+        return True
+    if path == "/ops/control-plane/identity-table":
+        await handle_control_plane_identity_table(host, writer, query)
+        return True
+    if path == "/ops/control-plane/identity-evidence":
+        await handle_control_plane_identity_evidence(host, writer, query)
+        return True
+    if path == "/ops/control-plane/checkpoint-freshness":
+        await handle_control_plane_checkpoint_freshness(host, writer, query)
+        return True
+    return False

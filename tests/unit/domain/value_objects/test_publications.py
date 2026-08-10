@@ -540,6 +540,11 @@ class TestORCID:
         with pytest.raises(ValueError, match="Invalid ORCID format"):
             ORCID("000X-0002-1825-0097")
 
+    def test_valid_shape_with_wrong_checksum_raises(self) -> None:
+        """A syntactically valid ORCID must still satisfy its check digit."""
+        with pytest.raises(ValueError, match="Invalid ORCID checksum"):
+            ORCID("0000-0002-1825-0098")
+
     def test_publications_o_r_c_i_d__non_string_raises__45d50f50(self) -> None:
         """Test non-string input raises ValueError."""
         with pytest.raises(ValueError, match="must be str"):

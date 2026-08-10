@@ -21,19 +21,13 @@ pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 CODEX_SKILL = ROOT / ".codex" / "skills" / "py-audit-bot" / "SKILL.md"
-PROMPT_FILES = (
+HISTORICAL_PROMPT_FILES = (
     ROOT
     / "docs"
     / "00-project"
     / "ai"
     / "prompts"
     / "architecture_metric_exemptions_tasks_json_prompt.md",
-    ROOT
-    / "docs"
-    / "00-project"
-    / "ai"
-    / "prompts"
-    / "architecture_debt_reduction_orchestration.md",
 )
 
 
@@ -59,7 +53,10 @@ def test_debt_mode_routes_config_writes_via_py_config_bot() -> None:
 
 
 def test_historical_prompts_reference_new_runtime_surface() -> None:
-    for prompt_path in PROMPT_FILES:
+    for prompt_path in HISTORICAL_PROMPT_FILES:
+        assert prompt_path.is_file(), (
+            f"tracked historical prompt is missing: {prompt_path}"
+        )
         text = prompt_path.read_text(encoding="utf-8")
         assert "py-audit-bot" in text
         assert "python -m scripts.engineering.qa generate-debt-tasks" in text

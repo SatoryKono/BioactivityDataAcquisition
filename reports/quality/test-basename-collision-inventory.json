@@ -1,347 +1,305 @@
 {
-  "schema_version": 1,
-  "linked_issue": 7032,
-  "duplicate_basename_count": 69,
-  "duplicate_file_instances": 157,
-  "top_collisions": [
-    {
-      "basename": "test_adapter.py",
-      "count": 5,
-      "paths": [
-        "tests/integration/adapters/openalex/test_adapter.py",
-        "tests/unit/infrastructure/adapters/openalex/test_adapter.py",
-        "tests/unit/infrastructure/adapters/pubchem/test_adapter.py",
-        "tests/unit/infrastructure/adapters/semanticscholar/test_adapter.py",
-        "tests/unit/infrastructure/adapters/uniprot/test_adapter.py"
-      ]
-    },
-    {
-      "basename": "test_config.py",
-      "count": 4,
-      "paths": [
-        "tests/unit/composition/bootstrap/cli/test_config.py",
-        "tests/unit/domain/test_config.py",
-        "tests/unit/infrastructure/test_config.py",
-        "tests/unit/interfaces/cli/commands/test_config.py"
-      ]
-    },
-    {
-      "basename": "test_extractors.py",
-      "count": 4,
-      "paths": [
-        "tests/unit/application/pipelines/common/test_extractors.py",
-        "tests/unit/application/pipelines/crossref/test_extractors.py",
-        "tests/unit/application/pipelines/openalex/test_extractors.py",
-        "tests/unit/application/pipelines/semanticscholar/test_extractors.py"
-      ]
-    },
-    {
-      "basename": "test_fallback.py",
-      "count": 4,
-      "paths": [
-        "tests/unit/infrastructure/adapters/crossref/test_fallback.py",
-        "tests/unit/infrastructure/adapters/openalex/test_fallback.py",
-        "tests/unit/infrastructure/adapters/pubmed/test_fallback.py",
-        "tests/unit/infrastructure/adapters/semanticscholar/test_fallback.py"
-      ]
-    },
-    {
-      "basename": "test_validation.py",
-      "count": 4,
-      "paths": [
-        "tests/unit/domain/config/test_validation.py",
-        "tests/unit/domain/test_validation.py",
-        "tests/unit/infrastructure/adapters/test_validation.py",
-        "tests/unit/infrastructure/storage/bronze_writer/test_validation.py"
-      ]
-    },
-    {
-      "basename": "test_checkpoint.py",
-      "count": 3,
-      "paths": [
-        "tests/unit/application/composite/test_checkpoint.py",
-        "tests/unit/infrastructure/test_checkpoint.py",
-        "tests/unit/interfaces/cli/commands/test_checkpoint.py"
-      ]
-    },
-    {
-      "basename": "test_chembl_activity.py",
-      "count": 3,
-      "paths": [
-        "tests/integration/pipelines/test_chembl_activity.py",
-        "tests/unit/domain/normalization/profiles/test_chembl_activity.py",
-        "tests/unit/repo_backed/application/pipelines/test_chembl_activity.py"
-      ]
-    },
-    {
-      "basename": "test_config_helpers.py",
-      "count": 3,
-      "paths": [
-        "tests/unit/composition/bootstrap/cli/test_config_helpers.py",
-        "tests/unit/composition/providers/test_config_helpers.py",
-        "tests/unit/infrastructure/config/test_config_helpers.py"
-      ]
-    },
-    {
-      "basename": "test_identifiers.py",
-      "count": 3,
-      "paths": [
-        "tests/unit/domain/normalization/test_identifiers.py",
-        "tests/unit/domain/types/test_identifiers.py",
-        "tests/unit/domain/value_objects/test_identifiers.py"
-      ]
-    },
-    {
-      "basename": "test_init.py",
-      "count": 3,
-      "paths": [
-        "tests/unit/composition/bootstrap/cli/test_init.py",
-        "tests/unit/composition/factories/test_init.py",
-        "tests/unit/domain/behavior/activity_aggregator/test_init.py"
-      ]
-    },
-    {
-      "basename": "test_publication.py",
-      "count": 3,
-      "paths": [
-        "tests/unit/domain/schemas/openalex/test_publication.py",
-        "tests/unit/domain/schemas/semanticscholar/test_publication.py",
-        "tests/unit/domain/validation/test_publication.py"
-      ]
-    },
-    {
-      "basename": "test_registry.py",
-      "count": 3,
-      "paths": [
-        "tests/unit/composition/factories/pipeline/test_registry.py",
-        "tests/unit/domain/normalization/profiles/test_registry.py",
-        "tests/unit/memory/test_registry.py"
-      ]
-    },
-    {
-      "basename": "test_transformer.py",
-      "count": 3,
-      "paths": [
-        "tests/unit/application/pipelines/openalex/test_transformer.py",
-        "tests/unit/application/pipelines/pubchem/test_transformer.py",
-        "tests/unit/application/pipelines/semanticscholar/test_transformer.py"
-      ]
-    },
-    {
-      "basename": "test_aggregation_validator.py",
-      "count": 2,
-      "paths": [
-        "tests/unit/domain/behavior/test_aggregation_validator.py",
-        "tests/unit/domain/services/test_aggregation_validator.py"
-      ]
-    },
-    {
-      "basename": "test_architecture_quality_scorecard.py",
-      "count": 2,
-      "paths": [
-        "tests/architecture/test_architecture_quality_scorecard.py",
-        "tests/unit/infrastructure/quality/test_architecture_quality_scorecard.py"
-      ]
-    },
-    {
-      "basename": "test_base.py",
-      "count": 2,
-      "paths": [
-        "tests/unit/domain/normalization/profiles/test_base.py",
-        "tests/unit/domain/value_objects/test_base.py"
-      ]
-    },
-    {
-      "basename": "test_batch.py",
-      "count": 2,
-      "paths": [
-        "tests/unit/domain/aggregates/test_batch.py",
-        "tests/unit/infrastructure/adapters/crossref/test_batch.py"
-      ]
-    },
-    {
-      "basename": "test_bootstrap_cache_fixtures.py",
-      "count": 2,
-      "paths": [
-        "tests/unit/composition/bootstrap/test_bootstrap_cache_fixtures.py",
-        "tests/unit/repo_backed/composition/test_bootstrap_cache_fixtures.py"
-      ]
-    },
-    {
-      "basename": "test_checkpoint_service.py",
-      "count": 2,
-      "paths": [
-        "tests/unit/application/composite/checkpoint/test_checkpoint_service.py",
-        "tests/unit/application/services/test_checkpoint_service.py"
-      ]
-    },
-    {
-      "basename": "test_chemical_standardization.py",
-      "count": 2,
-      "paths": [
-        "tests/unit/domain/behavior/test_chemical_standardization.py",
-        "tests/unit/domain/services/test_chemical_standardization.py"
-      ]
-    },
-    {
-      "basename": "test_client_retry_mixin.py",
-      "count": 2,
-      "paths": [
-        "tests/unit/infrastructure/adapters/http/test_client_retry_mixin.py",
-        "tests/unit/infrastructure/adapters/test_client_retry_mixin.py"
-      ]
-    },
-    {
-      "basename": "test_column_order.py",
-      "count": 2,
-      "paths": [
-        "tests/architecture/test_column_order.py",
-        "tests/unit/domain/value_objects/test_column_order.py"
-      ]
-    },
-    {
-      "basename": "test_column_order_enforcement.py",
-      "count": 2,
-      "paths": [
-        "tests/contract/test_column_order_enforcement.py",
-        "tests/unit/domain/schemas/test_column_order_enforcement.py"
-      ]
-    },
-    {
-      "basename": "test_composite_validation_layer.py",
-      "count": 2,
-      "paths": [
-        "tests/unit/domain/behavior/test_composite_validation_layer.py",
-        "tests/unit/domain/services/test_composite_validation_layer.py"
-      ]
-    },
-    {
-      "basename": "test_contract_validator.py",
-      "count": 2,
-      "paths": [
-        "tests/unit/composition/factories/pipeline/test_contract_validator.py",
-        "tests/unit/infrastructure/test_contract_validator.py"
-      ]
-    },
-    {
-      "basename": "test_control_plane.py",
-      "count": 2,
-      "paths": [
-        "tests/unit/composition/runtime_builders/test_control_plane.py",
-        "tests/unit/domain/normalization/test_control_plane.py"
-      ]
-    },
-    {
-      "basename": "test_deduplication.py",
-      "count": 2,
-      "paths": [
-        "tests/unit/infrastructure/adapters/chembl/test_deduplication.py",
-        "tests/unit/infrastructure/adapters/common/test_deduplication.py"
-      ]
-    },
-    {
-      "basename": "test_documentation_cleanup_inventory.py",
-      "count": 2,
-      "paths": [
-        "tests/architecture/test_documentation_cleanup_inventory.py",
-        "tests/unit/scripts/test_documentation_cleanup_inventory.py"
-      ]
-    },
-    {
-      "basename": "test_dq_metrics.py",
-      "count": 2,
-      "paths": [
-        "tests/unit/application/core/test_dq_metrics.py",
-        "tests/unit/domain/value_objects/test_dq_metrics.py"
-      ]
-    },
-    {
-      "basename": "test_dq_report_integration.py",
-      "count": 2,
-      "paths": [
-        "tests/integration/test_dq_report_integration.py",
-        "tests/unit/application/core/test_dq_report_integration.py"
-      ]
-    },
-    {
-      "basename": "test_dq_serializer.py",
-      "count": 2,
-      "paths": [
-        "tests/unit/domain/behavior/test_dq_serializer.py",
-        "tests/unit/domain/services/test_dq_serializer.py"
-      ]
-    },
-    {
-      "basename": "test_enum_loader.py",
-      "count": 2,
-      "paths": [
-        "tests/unit/domain/config/test_enum_loader.py",
-        "tests/unit/infrastructure/config/test_enum_loader.py"
-      ]
-    },
-    {
-      "basename": "test_family_normalization_seams.py",
-      "count": 2,
-      "paths": [
-        "tests/unit/application/core/test_family_normalization_seams.py",
-        "tests/unit/application/services/test_family_normalization_seams.py"
-      ]
-    },
-    {
-      "basename": "test_filter_config.py",
-      "count": 2,
-      "paths": [
-        "tests/unit/domain/test_filter_config.py",
-        "tests/unit/infrastructure/schemas/test_filter_config.py"
-      ]
-    },
-    {
-      "basename": "test_health.py",
-      "count": 2,
-      "paths": [
-        "tests/unit/domain/types/test_health.py",
-        "tests/unit/interfaces/cli/commands/test_health.py"
-      ]
-    },
-    {
-      "basename": "test_helper_module_coverage.py",
-      "count": 2,
-      "paths": [
-        "tests/unit/application/composite/test_helper_module_coverage.py",
-        "tests/unit/application/services/control_plane/test_helper_module_coverage.py"
-      ]
-    },
-    {
-      "basename": "test_helpers.py",
-      "count": 2,
-      "paths": [
-        "tests/unit/composition/factories/storage/test_helpers.py",
-        "tests/unit/domain/normalization/profiles/test_helpers.py"
-      ]
-    },
-    {
-      "basename": "test_lazy_exports.py",
-      "count": 2,
-      "paths": [
-        "tests/unit/composition/runtime_builders/test_lazy_exports.py",
-        "tests/unit/composition/test_lazy_exports.py"
-      ]
-    },
-    {
-      "basename": "test_medallion_policy.py",
-      "count": 2,
-      "paths": [
-        "tests/architecture/test_medallion_policy.py",
-        "tests/unit/application/core/test_medallion_policy.py"
-      ]
-    },
-    {
-      "basename": "test_merged_metadata_explainability.py",
-      "count": 2,
-      "paths": [
-        "tests/unit/domain/behavior/test_merged_metadata_explainability.py",
-        "tests/unit/domain/services/test_merged_metadata_explainability.py"
-      ]
-    }
-  ]
+  "duplicate_basename_count": 70,
+  "duplicate_basenames": {
+    "test_adapter.py": [
+      "tests/unit/infrastructure/adapters/openalex/test_adapter.py",
+      "tests/unit/infrastructure/adapters/pubchem/test_adapter.py",
+      "tests/unit/infrastructure/adapters/semanticscholar/test_adapter.py",
+      "tests/unit/infrastructure/adapters/uniprot/test_adapter.py",
+      "tests/integration/adapters/openalex/test_adapter.py"
+    ],
+    "test_aggregation_validator.py": [
+      "tests/unit/domain/behavior/test_aggregation_validator.py",
+      "tests/unit/domain/services/test_aggregation_validator.py"
+    ],
+    "test_architecture_quality_scorecard.py": [
+      "tests/architecture/test_architecture_quality_scorecard.py",
+      "tests/unit/infrastructure/quality/test_architecture_quality_scorecard.py"
+    ],
+    "test_base.py": [
+      "tests/unit/domain/value_objects/test_base.py",
+      "tests/unit/domain/normalization/profiles/test_base.py"
+    ],
+    "test_batch.py": [
+      "tests/unit/infrastructure/adapters/crossref/test_batch.py",
+      "tests/unit/domain/aggregates/test_batch.py"
+    ],
+    "test_bootstrap_cache_fixtures.py": [
+      "tests/unit/repo_backed/composition/test_bootstrap_cache_fixtures.py",
+      "tests/unit/composition/bootstrap/test_bootstrap_cache_fixtures.py"
+    ],
+    "test_checkpoint.py": [
+      "tests/unit/infrastructure/test_checkpoint.py",
+      "tests/unit/interfaces/cli/commands/test_checkpoint.py",
+      "tests/unit/application/composite/test_checkpoint.py"
+    ],
+    "test_checkpoint_service.py": [
+      "tests/unit/application/services/test_checkpoint_service.py",
+      "tests/unit/application/composite/checkpoint/test_checkpoint_service.py"
+    ],
+    "test_chembl_activity.py": [
+      "tests/unit/repo_backed/application/pipelines/test_chembl_activity.py",
+      "tests/unit/domain/normalization/profiles/test_chembl_activity.py",
+      "tests/integration/pipelines/test_chembl_activity.py"
+    ],
+    "test_chemical_standardization.py": [
+      "tests/unit/domain/behavior/test_chemical_standardization.py",
+      "tests/unit/domain/services/test_chemical_standardization.py"
+    ],
+    "test_client_retry_mixin.py": [
+      "tests/unit/infrastructure/adapters/test_client_retry_mixin.py",
+      "tests/unit/infrastructure/adapters/http/test_client_retry_mixin.py"
+    ],
+    "test_column_order.py": [
+      "tests/architecture/test_column_order.py",
+      "tests/unit/domain/value_objects/test_column_order.py"
+    ],
+    "test_column_order_enforcement.py": [
+      "tests/contract/test_column_order_enforcement.py",
+      "tests/unit/domain/schemas/test_column_order_enforcement.py"
+    ],
+    "test_composite_validation_layer.py": [
+      "tests/unit/domain/behavior/test_composite_validation_layer.py",
+      "tests/unit/domain/services/test_composite_validation_layer.py"
+    ],
+    "test_config.py": [
+      "tests/unit/domain/test_config.py",
+      "tests/unit/infrastructure/test_config.py",
+      "tests/unit/interfaces/cli/commands/test_config.py",
+      "tests/unit/composition/bootstrap/cli/test_config.py"
+    ],
+    "test_config_helpers.py": [
+      "tests/unit/infrastructure/config/test_config_helpers.py",
+      "tests/unit/composition/providers/test_config_helpers.py",
+      "tests/unit/composition/bootstrap/cli/test_config_helpers.py"
+    ],
+    "test_contract_validator.py": [
+      "tests/unit/infrastructure/test_contract_validator.py",
+      "tests/unit/composition/factories/pipeline/test_contract_validator.py"
+    ],
+    "test_control_plane.py": [
+      "tests/unit/domain/normalization/test_control_plane.py",
+      "tests/unit/composition/runtime_builders/test_control_plane.py"
+    ],
+    "test_deduplication.py": [
+      "tests/unit/infrastructure/adapters/chembl/test_deduplication.py",
+      "tests/unit/infrastructure/adapters/common/test_deduplication.py"
+    ],
+    "test_documentation_cleanup_inventory.py": [
+      "tests/architecture/test_documentation_cleanup_inventory.py",
+      "tests/unit/scripts/test_documentation_cleanup_inventory.py"
+    ],
+    "test_dq_metrics.py": [
+      "tests/unit/domain/value_objects/test_dq_metrics.py",
+      "tests/unit/application/core/test_dq_metrics.py"
+    ],
+    "test_dq_report_integration.py": [
+      "tests/integration/test_dq_report_integration.py",
+      "tests/unit/application/core/test_dq_report_integration.py"
+    ],
+    "test_dq_serializer.py": [
+      "tests/unit/domain/behavior/test_dq_serializer.py",
+      "tests/unit/domain/services/test_dq_serializer.py"
+    ],
+    "test_enum_loader.py": [
+      "tests/unit/infrastructure/config/test_enum_loader.py",
+      "tests/unit/domain/config/test_enum_loader.py"
+    ],
+    "test_extractors.py": [
+      "tests/unit/application/pipelines/common/test_extractors.py",
+      "tests/unit/application/pipelines/crossref/test_extractors.py",
+      "tests/unit/application/pipelines/openalex/test_extractors.py",
+      "tests/unit/application/pipelines/semanticscholar/test_extractors.py"
+    ],
+    "test_fallback.py": [
+      "tests/unit/infrastructure/adapters/crossref/test_fallback.py",
+      "tests/unit/infrastructure/adapters/openalex/test_fallback.py",
+      "tests/unit/infrastructure/adapters/pubmed/test_fallback.py",
+      "tests/unit/infrastructure/adapters/semanticscholar/test_fallback.py"
+    ],
+    "test_family_normalization_seams.py": [
+      "tests/unit/application/core/test_family_normalization_seams.py",
+      "tests/unit/application/services/test_family_normalization_seams.py"
+    ],
+    "test_filter_config.py": [
+      "tests/unit/domain/test_filter_config.py",
+      "tests/unit/infrastructure/schemas/test_filter_config.py"
+    ],
+    "test_generate_adr_registry.py": [
+      "tests/unit/scripts/test_generate_adr_registry.py",
+      "tests/unit/scripts/docs/test_generate_adr_registry.py"
+    ],
+    "test_health.py": [
+      "tests/unit/interfaces/cli/commands/test_health.py",
+      "tests/unit/domain/types/test_health.py"
+    ],
+    "test_helper_module_coverage.py": [
+      "tests/unit/application/composite/test_helper_module_coverage.py",
+      "tests/unit/application/services/control_plane/test_helper_module_coverage.py"
+    ],
+    "test_helpers.py": [
+      "tests/unit/domain/normalization/profiles/test_helpers.py",
+      "tests/unit/composition/factories/storage/test_helpers.py"
+    ],
+    "test_identifiers.py": [
+      "tests/unit/domain/normalization/test_identifiers.py",
+      "tests/unit/domain/types/test_identifiers.py",
+      "tests/unit/domain/value_objects/test_identifiers.py"
+    ],
+    "test_init.py": [
+      "tests/unit/domain/behavior/activity_aggregator/test_init.py",
+      "tests/unit/composition/factories/test_init.py",
+      "tests/unit/composition/bootstrap/cli/test_init.py"
+    ],
+    "test_lazy_exports.py": [
+      "tests/unit/composition/test_lazy_exports.py",
+      "tests/unit/composition/runtime_builders/test_lazy_exports.py"
+    ],
+    "test_medallion_policy.py": [
+      "tests/architecture/test_medallion_policy.py",
+      "tests/unit/application/core/test_medallion_policy.py"
+    ],
+    "test_merged_metadata_explainability.py": [
+      "tests/unit/domain/behavior/test_merged_metadata_explainability.py",
+      "tests/unit/domain/services/test_merged_metadata_explainability.py"
+    ],
+    "test_metadata_lineage_node_builders.py": [
+      "tests/unit/application/services/test_metadata_lineage_node_builders.py",
+      "tests/unit/application/services/lineage/test_metadata_lineage_node_builders.py"
+    ],
+    "test_metrics.py": [
+      "tests/unit/infrastructure/observability/test_metrics.py",
+      "tests/unit/composition/bootstrap/cli/test_metrics.py"
+    ],
+    "test_naming_conventions.py": [
+      "tests/architecture/test_naming_conventions.py",
+      "tests/contract/silver_schemas/test_naming_conventions.py"
+    ],
+    "test_noop.py": [
+      "tests/unit/domain/ports/test_noop.py",
+      "tests/unit/composition/bootstrap/cli/test_noop.py"
+    ],
+    "test_normalization_service.py": [
+      "tests/unit/domain/behavior/test_normalization_service.py",
+      "tests/unit/domain/services/test_normalization_service.py"
+    ],
+    "test_observability_contract.py": [
+      "tests/unit/composition/test_observability_contract.py",
+      "tests/unit/domain/test_observability_contract.py"
+    ],
+    "test_performance.py": [
+      "tests/architecture/test_performance.py",
+      "tests/benchmarks/test_performance.py"
+    ],
+    "test_pipeline.py": [
+      "tests/unit/domain/config/test_pipeline.py",
+      "tests/integration/adapters/openalex/test_pipeline.py"
+    ],
+    "test_pipeline_config.py": [
+      "tests/unit/application/test_pipeline_config.py",
+      "tests/unit/domain/test_pipeline_config.py"
+    ],
+    "test_primitives.py": [
+      "tests/unit/infrastructure/quality/test_primitives.py",
+      "tests/unit/domain/validation/test_primitives.py"
+    ],
+    "test_publication.py": [
+      "tests/unit/domain/validation/test_publication.py",
+      "tests/unit/domain/schemas/openalex/test_publication.py",
+      "tests/unit/domain/schemas/semanticscholar/test_publication.py"
+    ],
+    "test_publication_common_schema.py": [
+      "tests/unit/domain/contracts/gold/test_publication_common_schema.py",
+      "tests/contract/schemas/test_publication_common_schema.py"
+    ],
+    "test_publication_schema.py": [
+      "tests/unit/domain/schemas/openalex/test_publication_schema.py",
+      "tests/unit/domain/schemas/semanticscholar/test_publication_schema.py"
+    ],
+    "test_quarantine.py": [
+      "tests/unit/infrastructure/test_quarantine.py",
+      "tests/unit/interfaces/cli/commands/test_quarantine.py"
+    ],
+    "test_registry.py": [
+      "tests/unit/memory/test_registry.py",
+      "tests/unit/domain/normalization/profiles/test_registry.py",
+      "tests/unit/composition/factories/pipeline/test_registry.py"
+    ],
+    "test_registry_consistency.py": [
+      "tests/unit/interfaces/cli/test_registry_consistency.py",
+      "tests/unit/composition/factories/pipeline/test_registry_consistency.py"
+    ],
+    "test_response_parser.py": [
+      "tests/unit/infrastructure/adapters/openalex/test_response_parser.py",
+      "tests/unit/infrastructure/adapters/uniprot/test_response_parser.py"
+    ],
+    "test_runner.py": [
+      "tests/unit/application/composite/test_runner.py",
+      "tests/unit/application/core/test_runner.py"
+    ],
+    "test_runner_observability_mixin.py": [
+      "tests/unit/application/composite/test_runner_observability_mixin.py",
+      "tests/unit/application/composite/runner_pkg/test_runner_observability_mixin.py"
+    ],
+    "test_security.py": [
+      "tests/security/test_security.py",
+      "tests/unit/memory/test_security.py"
+    ],
+    "test_serialization.py": [
+      "tests/unit/domain/test_serialization.py",
+      "tests/unit/domain/ports/test_serialization.py"
+    ],
+    "test_service.py": [
+      "tests/unit/application/services/control_plane/effective_config/test_service.py",
+      "tests/unit/application/services/control_plane/ledger/test_service.py"
+    ],
+    "test_silver_writer.py": [
+      "tests/unit/infrastructure/storage/test_silver_writer.py",
+      "tests/integration/infrastructure/storage/test_silver_writer.py"
+    ],
+    "test_staged_enforcement.py": [
+      "tests/unit/domain/behavior/test_staged_enforcement.py",
+      "tests/unit/domain/services/test_staged_enforcement.py"
+    ],
+    "test_storage.py": [
+      "tests/unit/infrastructure/test_storage.py",
+      "tests/unit/domain/exceptions/test_storage.py"
+    ],
+    "test_storage_factory.py": [
+      "tests/unit/infrastructure/test_storage_factory.py",
+      "tests/unit/composition/factories/storage/test_storage_factory.py"
+    ],
+    "test_transformations.py": [
+      "tests/unit/domain/test_transformations.py",
+      "tests/unit/application/pipelines/test_transformations.py"
+    ],
+    "test_transformer.py": [
+      "tests/unit/application/pipelines/openalex/test_transformer.py",
+      "tests/unit/application/pipelines/pubchem/test_transformer.py",
+      "tests/unit/application/pipelines/semanticscholar/test_transformer.py"
+    ],
+    "test_validation.py": [
+      "tests/unit/domain/test_validation.py",
+      "tests/unit/infrastructure/adapters/test_validation.py",
+      "tests/unit/infrastructure/storage/bronze_writer/test_validation.py",
+      "tests/unit/domain/config/test_validation.py"
+    ],
+    "test_value_validator.py": [
+      "tests/unit/domain/behavior/test_value_validator.py",
+      "tests/unit/domain/services/test_value_validator.py"
+    ],
+    "test_workflow_foreign_key_reconciliation.py": [
+      "tests/unit/infrastructure/storage/test_workflow_foreign_key_reconciliation.py",
+      "tests/integration/workflow/test_workflow_foreign_key_reconciliation.py"
+    ],
+    "test_workflow_row_reconciliation.py": [
+      "tests/unit/infrastructure/storage/test_workflow_row_reconciliation.py",
+      "tests/unit/domain/ports/test_workflow_row_reconciliation.py"
+    ],
+    "test_workflow_runner_service.py": [
+      "tests/unit/repo_backed/application/services/test_workflow_runner_service.py",
+      "tests/unit/application/services/test_workflow_runner_service.py",
+      "tests/integration/workflow/test_workflow_runner_service.py"
+    ]
+  }
 }

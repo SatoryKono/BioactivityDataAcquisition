@@ -1736,6 +1736,13 @@ Grafana from Docker uses **BioETL Ops HTTP** → `http://bioetl:8000`
 main compose, set `BIOETL_OPS_HTTP_URL=http://host.docker.internal:8000` and
 bind the server to `0.0.0.0:8000` (not only `127.0.0.1`).
 
+`BIOETL_OPS_HTTP_URL` is resolved by the Grafana server and is intentionally
+environment-specific. Browser-facing `Check BioETL Ops HTTP health` links must
+instead use the same-origin datasource proxy
+`/api/datasources/proxy/uid/bioetl-ops-http/health/live`. This keeps Docker,
+WSL, remote-host, and ingress deployments portable without exposing backend
+service DNS or loopback addresses to the operator's browser.
+
 Canonical Prometheus scrape is `bioetl:8000` on the monitoring network
 (job interval 30s). Ops HTTP Prometheus target uses `/metrics`; do not point
 `metrics_path` at `/health/live` (JSON). See

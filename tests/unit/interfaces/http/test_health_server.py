@@ -112,6 +112,39 @@ class TestHealthServer:
         assert not server.is_running
 
     @pytest.mark.asyncio
+    async def test_integrity_metrics_refresh_runs_on_lifecycle_not_scrape(self) -> None:
+        """Refresh aggregate integrity metrics at start and periodically."""
+
+        class _Refresher:
+            def __init__(self) -> None:
+                self.calls = 0
+
+            def refresh(self) -> object:
+                self.calls += 1
+                return ()
+
+        refresher = _Refresher()
+        server = HealthServer(
+            host="127.0.0.1",
+            port=0,
+            control_plane_integrity_refresher=refresher,
+        )
+        server._control_plane_integrity_refresh_interval_seconds = 0.01
+
+        await server.start()
+        assert refresher.calls == 1
+        _ = server._handle_metrics()
+        assert refresher.calls == 1
+        await asyncio.sleep(0.025)
+        assert refresher.calls >= 2
+
+        await server.stop()
+        calls_after_stop = refresher.calls
+        await asyncio.sleep(0.02)
+        assert refresher.calls == calls_after_stop
+        assert server._control_plane_integrity_refresh_task is None
+
+    @pytest.mark.asyncio
     async def test_server_uptime(self) -> None:
         """Test uptime tracking."""
         server = HealthServer(host="127.0.0.1", port=0)

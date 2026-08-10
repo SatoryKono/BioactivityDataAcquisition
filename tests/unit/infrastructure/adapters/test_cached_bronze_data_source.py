@@ -287,6 +287,30 @@ class TestCachedBronzeDataSourceFetch:
         assert "cached_bronze_filter_ignored" in warning_events
 
     @pytest.mark.asyncio
+    async def test_fetch_completes_without_limit(
+        self, base_logger: MagicMock, bound_logger: MagicMock
+    ) -> None:
+        """Fetch should complete and log when no limit is provided."""
+        reader = _FakeBronzeReader(
+            base_path=str(BRONZE_ROOT),
+            flat_structure=False,
+            batches=["2026-01-01/batch_a.jsonl.zst"],
+            records_by_batch={"2026-01-01/batch_a.jsonl.zst": [{"id": 1}, {"id": 2}]},
+        )
+        source = CachedBronzeDataSource(
+            bronze_reader=reader,
+            provider="chembl",
+            entity_type="activity",
+            logger=base_logger,
+        )
+
+        records = await collect_async_iterator(source.fetch("activity"))
+
+        assert records == [{"id": 1}, {"id": 2}]
+        info_events = [call.args[0] for call in bound_logger.info.call_args_list]
+        assert "cached_bronze_fetch_complete" in info_events
+
+    @pytest.mark.asyncio
     async def test_get_total_records_counts_across_all_batches(
         self, base_logger: MagicMock
     ) -> None:

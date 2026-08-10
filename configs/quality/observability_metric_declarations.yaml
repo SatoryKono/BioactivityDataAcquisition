@@ -160,6 +160,7 @@ declared_label_contract_metrics:
   - bioetl_health_check_latency_seconds
   - bioetl_health_check_success_total
   - bioetl_http_request_duration_seconds
+  - bioetl_manifest_ledger_integrity_ratio
   - bioetl_memory_batch_resize_events_total
   - bioetl_memory_monitor_fallback_events_total
   - bioetl_memory_pressure_events_total
@@ -172,6 +173,7 @@ declared_label_contract_metrics:
   - bioetl_rate_limiter_tokens_available
   - bioetl_rate_limiter_wait_seconds
   - bioetl_replay_drift_events_total
+  - bioetl_replay_duplicate_overwrite_risk_total
   - bioetl_replay_lag_seconds
   - bioetl_silver_csv_export_failures_total
   - bioetl_silver_csv_export_start_total
