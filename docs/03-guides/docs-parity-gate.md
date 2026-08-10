@@ -70,7 +70,7 @@ To run the parity check manually:
 
 ```bash
 # Run the active config-to-spec parity gate
-uv run python scripts/check_entity_config_parity.py
+uv run python -m scripts.data_quality check-entity-config-parity
 
 # Generate the broader parity report JSON used by governance tooling
 python3 scripts/docs_parity_check.py
@@ -78,7 +78,9 @@ python3 scripts/docs_parity_check.py
 
 ## Parity Check Script
 
-The active config/spec gate is located at `scripts/check_entity_config_parity.py`. It performs the following checks:
+The active config/spec gate is located at
+`scripts/data_quality/check_entity_config_parity.py` and is invoked through the
+`scripts.data_quality` package CLI. It performs the following checks:
 
 1. **Config-to-Spec Parity**: Ensures all active entity configs have corresponding pipeline specs
 1. **Spec-to-Config Parity**: Ensures all pipeline specs have corresponding entity configs
