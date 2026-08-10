@@ -776,8 +776,7 @@ class TestGoldValidationSupport:
 
         legacy_validator = object()
         assert (
-            rebind_gold_validator_schema(legacy_validator, schema)
-            is legacy_validator
+            rebind_gold_validator_schema(legacy_validator, schema) is legacy_validator
         )
 
     @pytest.mark.parametrize(

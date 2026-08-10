@@ -133,6 +133,16 @@ def test_is_retry_exhausted_error_direct_and_wrapped() -> None:
     assert not is_retry_exhausted_error(unrelated)
 
 
+def test_is_retry_exhausted_error_follows_exception_context() -> None:
+    """Implicit exception context is inspected when no explicit cause exists."""
+    retry_error = RetryExhaustedError("https://x", attempts=3)
+    wrapped = RuntimeError("wrapper")
+    wrapped.__context__ = retry_error
+
+    assert wrapped.__cause__ is None
+    assert is_retry_exhausted_error(wrapped)
+
+
 @st.composite
 def _fallback_chain_case(
     draw: st.DrawFn,
@@ -348,3 +358,51 @@ async def test_run_fetch_with_fallback_policy_respects_limit() -> None:
 
     assert [str(item["id"]) for item in results] == ["p1"]
     assert fallback.calls == []
+
+
+@pytest.mark.asyncio
+async def test_run_fetch_with_fallback_policy_zero_limit_skips_source() -> None:
+    """A zero global limit prevents even the primary source from being consumed."""
+
+    async def primary_records() -> AsyncIterator[dict[str, object]]:
+        raise AssertionError("primary source should not be consumed")
+        yield {}
+
+    results = await collect_async_iterator(
+        run_fetch_with_fallback_policy(
+            primary_records=primary_records(),
+            primary_ids=["10.1/a"],
+            title_only_entries=[],
+            fallback_mapping={},
+            normalize_id=_normalize_identity,
+            extract_record_id=_extract_doi,
+            fallback_handler=_FallbackStub(),
+            limit=0,
+        )
+    )
+
+    assert results == []
+
+
+@pytest.mark.asyncio
+async def test_run_fetch_with_fallback_policy_without_handler_stops_after_primary() -> (
+    None
+):
+    """Fallback phases are optional when the caller provides no handler."""
+
+    async def primary_records() -> AsyncIterator[dict[str, object]]:
+        yield {"id": "primary-without-doi"}
+
+    results = await collect_async_iterator(
+        run_fetch_with_fallback_policy(
+            primary_records=primary_records(),
+            primary_ids=["10.1/missing"],
+            title_only_entries=[],
+            fallback_mapping={},
+            normalize_id=_normalize_identity,
+            extract_record_id=_extract_doi,
+            fallback_handler=None,
+        )
+    )
+
+    assert results == [{"id": "primary-without-doi"}]

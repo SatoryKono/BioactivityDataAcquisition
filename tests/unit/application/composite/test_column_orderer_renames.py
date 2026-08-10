@@ -157,12 +157,15 @@ class TestColumnOrdererGroupFlowBranches:
         """Absent YAML groups are a transparent no-op rather than a sort."""
         columns = ["z", "a", "entity_id"]
 
-        assert order_by_yaml_groups(
-            columns=columns,
-            column_groups=None,
-            collect_group_columns=MagicMock(),
-            logger=MagicMock(),
-        ) == columns
+        assert (
+            order_by_yaml_groups(
+                columns=columns,
+                column_groups=None,
+                collect_group_columns=MagicMock(),
+                logger=MagicMock(),
+            )
+            == columns
+        )
 
     def test_order_by_yaml_groups_logs_ungrouped_and_moves_dq_suffix(self) -> None:
         """Ungrouped fields are stable-sorted while DQ fields stay last exactly once."""
@@ -186,9 +189,9 @@ class TestColumnOrdererGroupFlowBranches:
             sample=["alpha", "zeta"],
         )
 
-    def test_filter_columns_by_groups_without_definitions_warns_and_preserves(self) -> (
-        None
-    ):
+    def test_filter_columns_by_groups_without_definitions_warns_and_preserves(
+        self,
+    ) -> None:
         """An include request without configured groups remains lossless and visible."""
         logger = MagicMock()
         config = LayerColumnConfig(include_groups=["identifiers"])

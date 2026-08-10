@@ -997,7 +997,9 @@ class TestBatchProcessingRuntimeHelpers:
             is None
         )
 
-    async def test_execute_with_layer_span_reraises_without_error_callback(self) -> None:
+    async def test_execute_with_layer_span_reraises_without_error_callback(
+        self,
+    ) -> None:
         """Failure still closes the layer span when no callback is configured."""
         tracing = MagicMock()
         span = object()

@@ -52,6 +52,75 @@ from tests.unit.application.pipelines.activity_transformer_shared import (
 class TestActivityTransformerTransform(SharedActivityTransformerTransformTests):
     """Base transformer tests shared with chembl-specific suite."""
 
+    @pytest.mark.parametrize(
+        ("business_data", "expected"),
+        [
+            ({"relation": "<", "standard_relation": "="}, "<"),
+            ({"relation": "   ", "standard_relation": "="}, "="),
+            ({"relation": 7, "standard_relation": "="}, 7),
+        ],
+    )
+    def test_coalesce_activity_relation_preserves_meaningful_raw_values(
+        self,
+        business_data: dict[str, object],
+        expected: object,
+    ) -> None:
+        """Raw operators win unless they are blank strings."""
+        assert (
+            ActivityTransformer._coalesce_activity_relation(business_data) == expected
+        )
+
+    def test_postprocess_blank_relation_uses_standard_relation(
+        self,
+        transformer: ActivityTransformer,
+    ) -> None:
+        """Whitespace-only raw relations must not hide a standardized operator."""
+        result = transformer._postprocess_pre_silver_record(
+            {
+                "activity_type": None,
+                "activity_relation": "   ",
+                "activity_value": None,
+                "type": "raw-type",
+                "relation": "   ",
+                "value": None,
+            },
+            business_data={
+                "standard_type": "IC50",
+                "standard_relation": "<=",
+                "standard_value": 12.5,
+            },
+        )
+
+        assert result["activity_type"] == "IC50"
+        assert result["activity_relation"] == "<="
+        assert result["activity_value"] == pytest.approx(12.5)
+        assert {"type", "relation", "value"}.isdisjoint(result)
+
+    def test_transform_for_gold_restores_published_activity_aliases(
+        self,
+        transformer: ActivityTransformer,
+        mock_context,
+    ) -> None:
+        """Gold projection exposes legacy aliases and removes Silver-only names."""
+        result = transformer.transform_for_gold(
+            mock_context,
+            {
+                "activity_type": "Ki",
+                "activity_relation": ">",
+                "activity_value": 3.5,
+                "standard_type": "Ki",
+            },
+        )
+
+        assert result["type"] == "Ki"
+        assert result["relation"] == ">"
+        assert result["value"] == pytest.approx(3.5)
+        assert {
+            "activity_type",
+            "activity_relation",
+            "activity_value",
+        }.isdisjoint(result)
+
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):
         """Test transformation with custom provider."""
