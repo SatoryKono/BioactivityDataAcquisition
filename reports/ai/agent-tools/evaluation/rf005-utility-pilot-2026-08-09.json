@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-09T17:20:00Z",
+  "pilot_scope": "Synthetic non-production fixtures on WSL/Linux and native Windows",
+  "safety_blockers": {
+    "count": 0,
+    "unauthorized_upload": 0,
+    "env_or_credential_exposure": 0,
+    "out_of_scope_mutation": 0,
+    "core_dependency_conflict": 0,
+    "unavailable_promoted_to_pass": 0,
+    "vendor_advanced_lifecycle_state": 0
+  },
+  "agentdebugx": {
+    "version": "0.3.1",
+    "cases": 2,
+    "correct_root_cause_attributions": 2,
+    "correct_root_cause_rate": "2/2",
+    "false_attributions": 0,
+    "durations_ms": {
+      "wsl_linux": 795,
+      "windows": 1145,
+      "median": 970
+    },
+    "failure_state_contracts": "20 adapter tests cover unavailable, incompatible, timeout, malformed, and nonzero-exit behavior.",
+    "recommendation": "GO"
+  },
+  "proofagent": {
+    "version": "0.11.0",
+    "cases": 4,
+    "clean_cases": {
+      "expected_pass": 2,
+      "observed_pass": 2,
+      "false_positive_warnings": 0
+    },
+    "risk_cases": {
+      "expected_warning": 2,
+      "observed_warning": 2,
+      "false_negatives": 0
+    },
+    "correct_classification_rate": "4/4",
+    "durations_ms": {
+      "wsl_linux_clean": 5414,
+      "wsl_linux_risk": 5528,
+      "windows_clean": 23976,
+      "windows_risk": 8651,
+      "median": 7089.5
+    },
+    "invocation_contract": "session --tool generic --assess never --no-upload",
+    "recommendation": "GO_WITH_CONSTRAINTS"
+  },
+  "decision": {
+    "core_blocking_enforcement_enabled": false,
+    "proof_or_stop_override_enabled": false,
+    "agentdebugx": "Retain for bounded reproducible agent failures; always verify repairs with native checks.",
+    "proofagent": "Retain for optional post-task screening; never treat PASS as ADMIT and keep the large dependency bundle outside standard environments."
+  }
+}

@@ -1,22 +1,22 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-09T15:00:04.779426+00:00",
+  "generated_at": "2026-08-10T06:28:39.653620+00:00",
   "summary": {
-    "total_scripts": 574,
+    "total_scripts": 577,
     "status_counts": {
       "active": 339,
-      "supporting": 231,
+      "supporting": 234,
       "temporary_diagnostic": 4
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 16,
-      "ci": 78,
-      "docs": 239,
+      "ci": 81,
+      "docs": 244,
       "other": 76,
-      "scripts": 470,
-      "skills": 10,
-      "tests": 363
+      "scripts": 477,
+      "skills": 11,
+      "tests": 367
     }
   },
   "scripts": [
@@ -74,6 +74,65 @@
           "line": 16,
           "source_group": "scripts",
           "text": "python -m scripts.ai vibe setup"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/agent_tools/__main__.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [
+        "agent-debugging"
+      ],
+      "reference_count": 11,
+      "references": [
+        {
+          "path": ".codex/skills/agent-debugging/SKILL.md",
+          "line": 30,
+          "source_group": "skills",
+          "text": "1. Confirm availability with `python -m scripts.ai.agent_tools doctor`."
+        },
+        {
+          "path": ".codex/skills/agent-debugging/SKILL.md",
+          "line": 36,
+          "source_group": "skills",
+          "text": "python -m scripts.ai.agent_tools debug \\"
+        },
+        {
+          "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
+          "line": 111,
+          "source_group": "docs",
+          "text": "python -m scripts.ai.agent_tools doctor"
+        },
+        {
+          "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
+          "line": 112,
+          "source_group": "docs",
+          "text": "python -m scripts.ai.agent_tools debug --task-id <id> \\"
+        },
+        {
+          "path": "docs/00-project/ai/agents/guides/grok-operator-runbook.md",
+          "line": 114,
+          "source_group": "docs",
+          "text": "python -m scripts.ai.agent_tools evaluate --task-id <id> \\"
+        },
+        {
+          "path": "docs/00-project/ai/skills/local/agent-debugging/SKILL.md",
+          "line": 39,
+          "source_group": "docs",
+          "text": "1. Confirm availability with `python -m scripts.ai.agent_tools doctor`."
+        },
+        {
+          "path": "docs/00-project/ai/skills/local/agent-debugging/SKILL.md",
+          "line": 45,
+          "source_group": "docs",
+          "text": "python -m scripts.ai.agent_tools debug \\"
+        },
+        {
+          "path": "scripts/ai/agent_tools/README.md",
+          "line": 30,
+          "source_group": "scripts",
+          "text": "python -m scripts.ai.agent_tools doctor"
         }
       ]
     },
@@ -149,7 +208,7 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 79,
+          "line": 81,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/check_skills_mirror.sh\""
         },
@@ -170,7 +229,7 @@
       "references": [
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 144,
+          "line": 140,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.bat\").exists()"
         }
@@ -191,7 +250,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 143,
+          "line": 139,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.ps1\").exists()"
         }
@@ -230,19 +289,19 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 139,
+          "line": 135,
           "source_group": "tests",
           "text": "assert \"../ai/codex/diagnose_wsl.sh\" in ops_router"
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 142,
+          "line": 138,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.sh\").exists()"
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 157,
+          "line": 153,
           "source_group": "tests",
           "text": "assert 'bash \"${SCRIPT_DIR}/diagnose_wsl.sh\"' in launcher"
         }
@@ -271,13 +330,13 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 80,
+          "line": 82,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/doctor.py\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 113,
+          "line": 117,
           "source_group": "ci",
           "text": "run: python3 scripts/ai/codex/doctor.py static --no-write"
         },
@@ -322,7 +381,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 156,
+          "line": 152,
           "source_group": "tests",
           "text": "assert 'python3 \"${SCRIPT_DIR}/efficiency_baseline.py\"' in launcher"
         },
@@ -343,7 +402,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 121,
+          "line": 155,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/headless.ps1` — PowerShell transport for headless mode;"
         }
@@ -358,7 +417,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 132,
+          "line": 166,
           "source_group": "scripts",
           "text": "bash scripts/ai/codex/headless.sh exec \"run a bounded task\""
         },
@@ -382,7 +441,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 165,
+          "line": 161,
           "source_group": "tests",
           "text": "headless = (root / \"scripts/ai/codex/headless.sh\").read_text(encoding=\"utf-8\")"
         }
@@ -403,7 +462,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 212,
+          "line": 206,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/check-env.ps1\","
         },
@@ -434,13 +493,13 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 213,
+          "line": 207,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/check-env.sh\","
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 177,
+          "line": 173,
           "source_group": "tests",
           "text": "helper = (root / \"scripts/ai/codex/helper/check-env.sh\").read_text(encoding=\"utf-8\")"
         }
@@ -516,7 +575,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 122,
+          "line": 156,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/helper/diagnose-hang.ps1` — setup-hang diagnostics;"
         },
@@ -598,13 +657,13 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 44,
+          "line": 46,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/helper/ensure-mcp.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 87,
+          "line": 91,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/helper/ensure-mcp.sh\""
         },
@@ -763,7 +822,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 214,
+          "line": 208,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/setup-env.sh\","
         },
@@ -794,7 +853,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 193,
+          "line": 227,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/helper/setup-wsl-complete.sh` for Bash setup;"
         },
@@ -920,7 +979,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 211,
+          "line": 205,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/test-basic.sh\","
         }
@@ -1075,7 +1134,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 76,
+          "line": 110,
           "source_group": "scripts",
           "text": "Remediation is a separate explicit command in `local_state_audit.py`; it"
         },
@@ -1087,7 +1146,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 172,
+          "line": 168,
           "source_group": "tests",
           "text": "assert 'local_state_audit.py\" audit' in launcher"
         },
@@ -1108,7 +1167,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 42,
+          "line": 76,
           "source_group": "scripts",
           "text": "bash scripts/ai/codex/login-codex.sh"
         }
@@ -1129,13 +1188,13 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 81,
+          "line": 83,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/mcp_profile_contract.py\""
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 159,
+          "line": 193,
           "source_group": "scripts",
           "text": "python3 scripts/ai/codex/mcp_profile_contract.py --check"
         },
@@ -1174,7 +1233,7 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 82,
+          "line": 84,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/native_runtime_contract.py\""
         },
@@ -1211,7 +1270,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 87,
+          "line": 121,
           "source_group": "scripts",
           "text": "python3 scripts/ai/codex/profile_benchmark.py \\"
         },
@@ -1238,19 +1297,19 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 108,
+          "line": 142,
           "source_group": "scripts",
           "text": "python3 scripts/ai/codex/profile_config.py audit"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 109,
+          "line": 143,
           "source_group": "scripts",
           "text": "python3 scripts/ai/codex/profile_config.py apply --confirm \\"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 111,
+          "line": 145,
           "source_group": "scripts",
           "text": "python3 scripts/ai/codex/profile_config.py restore --confirm \\"
         },
@@ -1313,7 +1372,7 @@
         },
         {
           "path": "scripts/ai/__main__.py",
-          "line": 28,
+          "line": 29,
           "source_group": "scripts",
           "text": "launcher = _DIR / \"codex\" / \"run-codex.ps1\""
         }
@@ -1328,13 +1387,13 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 45,
+          "line": 47,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/run-codex.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 88,
+          "line": 92,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/run-codex.sh\""
         },
@@ -1358,19 +1417,19 @@
         },
         {
           "path": "scripts/ai/__main__.py",
-          "line": 38,
+          "line": 39,
           "source_group": "scripts",
           "text": "return [\"bash\", str((_DIR / \"codex\" / \"run-codex.sh\").resolve()), *rest]"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 40,
+          "line": 74,
           "source_group": "scripts",
           "text": "bash scripts/ai/codex/run-codex.sh login"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 41,
+          "line": 75,
           "source_group": "scripts",
           "text": "bash scripts/ai/codex/run-codex.sh device-login"
         }
@@ -1391,7 +1450,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 192,
+          "line": 226,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/setup-codex-wsl.bat` for Windows setup;"
         },
@@ -1442,7 +1501,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 123,
+          "line": 157,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/setup-windows-dns.ps1` — explicit Windows DNS repair;"
         }
@@ -1457,7 +1516,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 124,
+          "line": 158,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/setup-wsl-dns.sh` — explicit WSL DNS repair;"
         }
@@ -1527,13 +1586,13 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 41,
+          "line": 43,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/setup_agents.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 84,
+          "line": 88,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/setup_agents.sh\""
         },
@@ -1618,7 +1677,7 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 83,
+          "line": 85,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/setup_mcp.py\""
         },
@@ -1645,13 +1704,13 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 42,
+          "line": 44,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/setup_skills.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 85,
+          "line": 89,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/setup_skills.sh\""
         },
@@ -1669,7 +1728,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 178,
+          "line": 212,
           "source_group": "scripts",
           "text": "bash scripts/ai/codex/setup_skills.sh --check"
         },
@@ -1694,13 +1753,13 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 43,
+          "line": 45,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/sync_native_skills.py\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 86,
+          "line": 90,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/sync_native_skills.py\""
         },
@@ -1979,7 +2038,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 215,
+          "line": 209,
           "source_group": "scripts",
           "text": "\"scripts/ai/gemini/helper/check-env.ps1\","
         }
@@ -2164,7 +2223,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 216,
+          "line": 210,
           "source_group": "scripts",
           "text": "\"scripts/ai/gemini/helper/setup-env.sh\","
         },
@@ -2515,13 +2574,13 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 50,
+          "line": 52,
           "source_group": "ci",
           "text": "- \"scripts/ai/junie/check_junie_mirror.py\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 93,
+          "line": 97,
           "source_group": "ci",
           "text": "- \"scripts/ai/junie/check_junie_mirror.py\""
         },
@@ -2552,19 +2611,19 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 51,
+          "line": 53,
           "source_group": "ci",
           "text": "- \"scripts/ai/junie/check_junie_mirror.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 94,
+          "line": 98,
           "source_group": "ci",
           "text": "- \"scripts/ai/junie/check_junie_mirror.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 170,
+          "line": 177,
           "source_group": "ci",
           "text": "run: bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
@@ -2605,19 +2664,55 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 9,
       "references": [
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 120,
+          "source_group": "ci",
+          "text": "run: python3 -m scripts.ai.mcp wrappers check"
+        },
+        {
+          "path": "docs/03-guides/development/platform-tooling.md",
+          "line": 28,
+          "source_group": "docs",
+          "text": "python -m scripts.ai.mcp wrappers check"
+        },
+        {
+          "path": "docs/03-guides/development/platform-tooling.md",
+          "line": 34,
+          "source_group": "docs",
+          "text": "python -m scripts.ai.mcp wrappers list"
+        },
+        {
+          "path": "docs/03-guides/development/platform-tooling.md",
+          "line": 35,
+          "source_group": "docs",
+          "text": "python -m scripts.ai.mcp wrappers run context7"
+        },
+        {
+          "path": "docs/03-guides/development/platform-tooling.md",
+          "line": 42,
+          "source_group": "docs",
+          "text": "python -m scripts.ai.mcp wrappers generate --output /tmp/bioetl-mcp-wrappers"
+        },
+        {
+          "path": "docs/03-guides/mcp-integration.md",
+          "line": 17,
+          "source_group": "docs",
+          "text": "`python -m scripts.ai.mcp wrappers check`."
+        },
+        {
+          "path": "scripts/ai/mcp/wrappers.py",
+          "line": 187,
+          "source_group": "scripts",
+          "text": "f\"& $python -m scripts.ai.mcp wrappers run '{quoted_server}' @args\\n\""
+        },
         {
           "path": "scripts/memory/README.md",
           "line": 21,
           "source_group": "scripts",
           "text": "- `python -m scripts.ai.mcp smoke-neo4j-memory`"
-        },
-        {
-          "path": "scripts/ops/README.md",
-          "line": 54,
-          "source_group": "scripts",
-          "text": "For MCP operational tooling, see [scripts/ai/mcp/__main__.py](/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/__main__.py)."
         }
       ]
     },
@@ -2728,7 +2823,7 @@
         },
         {
           "path": "scripts/ai/mcp/__main__.py",
-          "line": 27,
+          "line": 29,
           "source_group": "scripts",
           "text": "\"check\": shell_command(\"check.sh\"),"
         },
@@ -2987,7 +3082,7 @@
     {
       "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 3,
       "references": [
@@ -3009,7 +3104,11 @@
           "source_group": "scripts",
           "text": "EXPECTED_AST_GREP_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_ast_grep_wrapper.sh\""
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the catalog-selected AST Grep transport implementation behind scripts.ai.mcp wrappers; keep it supporting during the compatibility transition and retire the shell implementation after a platform-neutral backend replaces it."
     },
     {
       "path": "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
@@ -3218,13 +3317,19 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
           "line": 63,
           "source_group": "tests",
           "text": "CONTEXT7_PS1 = MCP_DIR / \"mcp_context7_wrapper.ps1\""
+        },
+        {
+          "path": "tests/unit/scripts/ai/mcp/test_wrappers.py",
+          "line": 32,
+          "source_group": "tests",
+          "text": "assert windows_command[-1].endswith(\"mcp_context7_wrapper.ps1\")"
         }
       ],
       "owner": "@bioetl-platform",
@@ -3237,7 +3342,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": ".zed/mcp.json",
@@ -3262,6 +3367,12 @@
           "line": 62,
           "source_group": "tests",
           "text": "CONTEXT7_SH = MCP_DIR / \"mcp_context7_wrapper.sh\""
+        },
+        {
+          "path": "tests/unit/scripts/ai/mcp/test_wrappers.py",
+          "line": 35,
+          "source_group": "tests",
+          "text": "assert linux_command[1].endswith(\"mcp_context7_wrapper.sh\")"
         }
       ]
     },
@@ -4158,7 +4269,7 @@
       "references": [
         {
           "path": "scripts/ai/mcp/__main__.py",
-          "line": 26,
+          "line": 28,
           "source_group": "scripts",
           "text": "\"smoke-neo4j-memory\": python_command(\"neo4j_memory_mcp_smoke.py\"),"
         },
@@ -4678,7 +4789,7 @@
         },
         {
           "path": "scripts/ai/mcp/__main__.py",
-          "line": 29,
+          "line": 31,
           "source_group": "scripts",
           "text": "\"test-env-loading\": shell_command(\"test_env_loading.sh\"),"
         },
@@ -4689,6 +4800,49 @@
           "text": "text = _read(\"scripts/ai/mcp/test_env_loading.sh\")"
         }
       ]
+    },
+    {
+      "path": "scripts/ai/mcp/wrappers.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 41,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/mcp/wrappers.py\""
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 86,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/mcp/wrappers.py\""
+        },
+        {
+          "path": "scripts/ai/codex/setup_mcp.py",
+          "line": 25,
+          "source_group": "scripts",
+          "text": "from scripts.ai.mcp.wrappers import load_wrapper_specs"
+        },
+        {
+          "path": "scripts/ai/mcp/__main__.py",
+          "line": 32,
+          "source_group": "scripts",
+          "text": "\"wrappers\": module_command(\"scripts.ai.mcp.wrappers\"),"
+        },
+        {
+          "path": "tests/unit/scripts/ai/mcp/test_wrappers.py",
+          "line": 11,
+          "source_group": "tests",
+          "text": "from scripts.ai.mcp import wrappers"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the catalog-driven implementation behind the canonical scripts.ai.mcp router; keep it supporting because operators enter through the package command surface."
     },
     {
       "path": "scripts/ai/sync/cursor.py",
@@ -4730,13 +4884,13 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 53,
+          "line": 55,
           "source_group": "ci",
           "text": "- \"scripts/ai/sync/governance.py\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 96,
+          "line": 100,
           "source_group": "ci",
           "text": "- \"scripts/ai/sync/governance.py\""
         },
@@ -4791,13 +4945,13 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 54,
+          "line": 56,
           "source_group": "ci",
           "text": "- \"scripts/ai/sync/runtime_skills.py\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 97,
+          "line": 101,
           "source_group": "ci",
           "text": "- \"scripts/ai/sync/runtime_skills.py\""
         },
@@ -4849,13 +5003,13 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 253,
+          "line": 255,
           "source_group": "build",
           "text": "@echo \"Or use: python scripts/ai/update_deepwiki.py --check\""
         },
         {
           "path": "Makefile",
-          "line": 257,
+          "line": 259,
           "source_group": "build",
           "text": "@PYTHONDONTWRITEBYTECODE=1 python3 scripts/ai/update_deepwiki.py --validate"
         }
@@ -4870,7 +5024,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 217,
+          "line": 211,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/check-env.ps1\","
         }
@@ -4891,7 +5045,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 218,
+          "line": 212,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/check-env.sh\","
         }
@@ -4906,13 +5060,13 @@
       "references": [
         {
           "path": "scripts/ai/__main__.py",
-          "line": 65,
+          "line": 66,
           "source_group": "scripts",
           "text": "str(helper_dir / \"setup-env.ps1\"),"
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 219,
+          "line": 213,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/setup-env.ps1\","
         }
@@ -4945,7 +5099,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 220,
+          "line": 214,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/setup-env.sh\","
         },
@@ -4996,7 +5150,7 @@
         },
         {
           "path": "scripts/ai/__main__.py",
-          "line": 73,
+          "line": 74,
           "source_group": "scripts",
           "text": "str(vibe_dir / \"launch.ps1\"),"
         },
@@ -5047,7 +5201,7 @@
         },
         {
           "path": "scripts/ai/__main__.py",
-          "line": 81,
+          "line": 82,
           "source_group": "scripts",
           "text": "return [\"bash\", str(vibe_dir / \"launch.sh\"), *rest]"
         },
@@ -5092,7 +5246,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 205,
+          "line": 199,
           "source_group": "scripts",
           "text": "\"scripts/ci_check_docs_parity.sh\","
         }
@@ -5131,7 +5285,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 207,
+          "line": 201,
           "source_group": "scripts",
           "text": "\"scripts/data_quality/check_dq_dsl_parity.py\","
         }
@@ -5336,7 +5490,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 66,
+      "reference_count": 67,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -5376,7 +5530,7 @@
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 80,
+          "line": 82,
           "source_group": "docs",
           "text": "uv run python -m scripts.diagrams lint"
         },
@@ -6554,7 +6708,7 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 390,
+          "line": 392,
           "source_group": "build",
           "text": "$(RUN) python scripts/diagrams/generate_all_bundles.py"
         },
@@ -6689,25 +6843,25 @@
         },
         {
           "path": "docs/03-guides/pipeline-configuration.md",
-          "line": 930,
+          "line": 968,
           "source_group": "docs",
           "text": "python scripts/diagrams/render/generate_pipeline_dataflows.py"
         },
         {
           "path": "docs/03-guides/pipeline-configuration.md",
-          "line": 933,
+          "line": 971,
           "source_group": "docs",
           "text": "python scripts/diagrams/render/generate_pipeline_dataflows.py --pipeline chembl_activity"
         },
         {
           "path": "docs/03-guides/pipeline-configuration.md",
-          "line": 936,
+          "line": 974,
           "source_group": "docs",
           "text": "python scripts/diagrams/render/generate_pipeline_dataflows.py --check-drift"
         },
         {
           "path": "docs/03-guides/pipeline-configuration.md",
-          "line": 946,
+          "line": 984,
           "source_group": "docs",
           "text": "run: python scripts/diagrams/render/generate_pipeline_dataflows.py --check-drift"
         },
@@ -6916,7 +7070,7 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 387,
+          "line": 389,
           "source_group": "build",
           "text": "bash scripts/diagrams/run_diagram_checks.sh --profile pr"
         },
@@ -7511,7 +7665,7 @@
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 50,
+          "line": 52,
           "source_group": "docs",
           "text": "uv run python -m scripts.docs check-links --links --specs --configs"
         }
@@ -8737,7 +8891,7 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 103,
+          "line": 105,
           "source_group": "docs",
           "text": "| `dq_baseline_update.py`        | scripts/engineering/baselines/   | Нет     | `uv run python -m scripts.engineering.baselines dq-baseline` | —            | Пересчёт DQ baseline                      "
         },
@@ -8764,13 +8918,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 103,
+          "line": 105,
           "source_group": "docs",
           "text": "| `dq_baseline_update.py`        | scripts/engineering/baselines/   | Нет     | `uv run python -m scripts.engineering.baselines dq-baseline` | —            | Пересчёт DQ baseline                      "
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 150,
+          "line": 152,
           "source_group": "docs",
           "text": "| RULES.md §3.4.1                                             | `dq_baseline_update.py`                                        |"
         },
@@ -8803,13 +8957,13 @@
         },
         {
           "path": "Makefile",
-          "line": 354,
+          "line": 356,
           "source_group": "build",
           "text": "$(RUN) python -m scripts.engineering.ci quality-gate \\"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 81,
+          "line": 83,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.ci quality-gate"
         },
@@ -9290,7 +9444,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 209,
+          "line": 203,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/update_test_telemetry_baseline.py\","
         },
@@ -9371,7 +9525,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 208,
+          "line": 202,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/validate_control_plane_artifacts.py\","
         },
@@ -9494,7 +9648,7 @@
       "references": [
         {
           "path": "scripts/ai/mcp/__main__.py",
-          "line": 19,
+          "line": 20,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.cli_dispatch import ("
         },
@@ -9555,7 +9709,7 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 98,
+          "line": 100,
           "source_group": "docs",
           "text": "| `file_merger.py`               | scripts/engineering/common/       | Нет     | —                                                            | —            | Объединение файлов с метаданными         "
         },
@@ -9574,11 +9728,66 @@
       ]
     },
     {
+      "path": "scripts/engineering/common/platform.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 7,
+      "references": [
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 42,
+          "source_group": "ci",
+          "text": "- \"scripts/engineering/common/platform.py\""
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 87,
+          "source_group": "ci",
+          "text": "- \"scripts/engineering/common/platform.py\""
+        },
+        {
+          "path": "scripts/ai/codex/efficiency_baseline.py",
+          "line": 140,
+          "source_group": "scripts",
+          "text": "\"python\": platform.python_version(),"
+        },
+        {
+          "path": "scripts/ai/codex/setup_mcp.py",
+          "line": 26,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.common.platform import detect_platform"
+        },
+        {
+          "path": "scripts/ai/mcp/wrappers.py",
+          "line": 17,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.common.platform import ("
+        },
+        {
+          "path": "tests/unit/scripts/ai/mcp/test_wrappers.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "from scripts.engineering.common.platform import PlatformInfo, PlatformKind"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/common/test_platform.py",
+          "line": 10,
+          "source_group": "tests",
+          "text": "from scripts.engineering.common.platform import ("
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the shared platform-detection implementation used by governed setup and MCP commands; keep it supporting rather than exposing another standalone entrypoint."
+    },
+    {
       "path": "scripts/engineering/common/repo_paths.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 228,
+      "reference_count": 230,
       "references": [
         {
           "path": "docs/00-project/ai/agents/scripts/py-config-bot-1.py",
@@ -9606,25 +9815,25 @@
         },
         {
           "path": "scripts/ai/__main__.py",
-          "line": 20,
+          "line": 21,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.repo_paths import ensure_safe_cli_argv"
         },
         {
+          "path": "scripts/ai/agent_tools/__main__.py",
+          "line": 27,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.common.repo_paths import ("
+        },
+        {
           "path": "scripts/ai/codex/setup_mcp.py",
-          "line": 656,
+          "line": 558,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.repo_paths import ("
         },
         {
           "path": "scripts/ai/mcp/protocol_smoke.py",
           "line": 247,
-          "source_group": "scripts",
-          "text": "from scripts.engineering.common.repo_paths import ensure_local_http_url"
-        },
-        {
-          "path": "scripts/ai/mcp/protocol_smoke.py",
-          "line": 371,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.repo_paths import ensure_local_http_url"
         }
@@ -9643,7 +9852,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 247,
+          "line": 254,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/.wsl-vpn-fix.ps1`                   | Recover Windows-side VPN proxy settings for WSL interoperability                          |"
         }
@@ -9664,7 +9873,7 @@
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 96,
+          "line": 98,
           "source_group": "docs",
           "text": "| `create_pipeline.py`           | scripts/engineering/dev/          | Да      | `uv run python -m scripts.engineering.dev create-pipeline`   | —            | Генерация boilerplate для новых пайплайно"
         },
@@ -9791,13 +10000,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 96,
+          "line": 98,
           "source_group": "docs",
           "text": "| `create_pipeline.py`           | scripts/engineering/dev/          | Да      | `uv run python -m scripts.engineering.dev create-pipeline`   | —            | Генерация boilerplate для новых пайплайно"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 146,
+          "line": 148,
           "source_group": "docs",
           "text": "| [03-file-policy.md](governance/03-file-policy.md)           | `audit_structure.py`, `create_pipeline.py`                     |"
         },
@@ -9848,7 +10057,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 205,
+          "line": 212,
           "source_group": "scripts",
           "text": "| `install-deps`       | `scripts/engineering/dev/install_deps.py`                    | Auxiliary helper script, not a full project bootstrap            |"
         },
@@ -9869,7 +10078,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 210,
+          "line": 217,
           "source_group": "scripts",
           "text": "| `mock-metrics`       | `scripts/engineering/dev/metrics_mock_server.py`             | Start mock metrics server                                        |"
         },
@@ -9917,31 +10126,31 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 66,
+          "line": 73,
           "source_group": "scripts",
           "text": "bash scripts/engineering/dev/pretest_guardrails.sh --mode check --scope full"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 67,
+          "line": 74,
           "source_group": "scripts",
           "text": "bash scripts/engineering/dev/pretest_guardrails.sh --mode auto --scope full  # explicit write-capable metadata refresh"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 117,
+          "line": 124,
           "source_group": "scripts",
           "text": "invoke `bash scripts/engineering/dev/pretest_guardrails.sh --scope full`"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 207,
+          "line": 214,
           "source_group": "scripts",
           "text": "| `pretest-guardrails` | `scripts/engineering/dev/pretest_guardrails.sh`              | Run cleanup + repo/docs/memory/architecture preflight            |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 239,
+          "line": 246,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/pretest_guardrails.sh`              | Run cleanup + repo/docs/memory/architecture preflight before broad bash pytest runs       |"
         },
@@ -9977,13 +10186,13 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 206,
+          "line": 213,
           "source_group": "scripts",
           "text": "| `probe-quality`      | `scripts/engineering/dev/quality_gate_probe.py`              | Measure narrow pytest/mypy startup latency and timeout behavior  |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 243,
+          "line": 250,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/quality_gate_probe.py`              | Diagnose narrow pytest/mypy startup latency and timeout behavior                          |"
         },
@@ -10004,13 +10213,13 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 211,
+          "line": 218,
           "source_group": "scripts",
           "text": "| `mock-quarantine`    | `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock quarantine explorer API server                        |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 244,
+          "line": 251,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock `/ops/quarantine/*` endpoints for Silver Reject Explorer smoke checks          |"
         },
@@ -10318,7 +10527,7 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 361,
+          "line": 363,
           "source_group": "build",
           "text": "BIOETL_PYTEST_SHARDED_TEST_HEALTH_SUITE=architecture-fast-boundary bash scripts/engineering/dev/run_pytest_sharded.sh --shard S7-architecture-fast-boundary --stream -- tests/architecture/ -m \"architec"
         },
@@ -10381,7 +10590,7 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 236,
+          "line": 243,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/run_tests.ps1`                      | Run tests (PowerShell variant)                                                            |"
         },
@@ -10444,13 +10653,13 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 208,
+          "line": 215,
           "source_group": "scripts",
           "text": "| `run-tests`          | `scripts/engineering/dev/run_tests.py`                       | Run tests                                                        |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 212,
+          "line": 219,
           "source_group": "scripts",
           "text": "| `test-changed`       | `scripts/engineering/dev/run_tests.py changed`               | Run tests for changed files only                                 |"
         },
@@ -10483,7 +10692,7 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 235,
+          "line": 242,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/run_tests.sh`                       | Run tests (shell variant)                                                                 |"
         },
@@ -10545,7 +10754,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 40,
+      "reference_count": 44,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -10602,7 +10811,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 33,
+      "reference_count": 37,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -10693,13 +10902,13 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 44,
+          "line": 51,
           "source_group": "scripts",
           "text": ".\\scripts\\engineering\\dev\\sync_pycharm_ide_templates.ps1"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 45,
+          "line": 52,
           "source_group": "scripts",
           "text": ".\\scripts\\engineering\\dev\\sync_pycharm_ide_templates.ps1 -DryRun"
         }
@@ -10744,13 +10953,13 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 49,
+          "line": 56,
           "source_group": "scripts",
           "text": "bash scripts/engineering/dev/sync_pycharm_ide_templates.sh"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 50,
+          "line": 57,
           "source_group": "scripts",
           "text": "bash scripts/engineering/dev/sync_pycharm_ide_templates.sh --dry-run"
         }
@@ -10902,7 +11111,7 @@
         },
         {
           "path": "pyproject.toml",
-          "line": 318,
+          "line": 330,
           "source_group": "build",
           "text": "# only (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py)."
         },
@@ -11157,31 +11366,31 @@
         },
         {
           "path": "Makefile",
-          "line": 340,
+          "line": 342,
           "source_group": "build",
           "text": "$(RUN) python -m scripts.engineering.diagnostics cleanup"
         },
         {
           "path": "Makefile",
-          "line": 343,
+          "line": 345,
           "source_group": "build",
           "text": "$(RUN) python -m scripts.engineering.diagnostics cleanup $(if $(DRY_RUN),,--apply) $(if $(PURGE_LOGS),--purge-logs,)"
         },
         {
           "path": "Makefile",
-          "line": 350,
+          "line": 352,
           "source_group": "build",
           "text": "$(RUN) python -m scripts.engineering.diagnostics cleanup --apply --purge-logs"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 99,
+          "line": 101,
           "source_group": "docs",
           "text": "| `cleanup_project.py`           | scripts/engineering/diagnostics/ | Нет     | `uv run python -m scripts.engineering.diagnostics cleanup`   | `make clean` | Очистка локальных кэшей и build-артефактов"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 101,
+          "line": 103,
           "source_group": "docs",
           "text": "| `audit_structure.py`           | scripts/engineering/diagnostics/ | Нет     | `uv run python -m scripts.engineering.diagnostics audit-structure` | —     | Аудит соответствия File Policy             "
         },
@@ -11253,13 +11462,13 @@
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 101,
+          "line": 103,
           "source_group": "docs",
           "text": "| `audit_structure.py`           | scripts/engineering/diagnostics/ | Нет     | `uv run python -m scripts.engineering.diagnostics audit-structure` | —     | Аудит соответствия File Policy             "
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 146,
+          "line": 148,
           "source_group": "docs",
           "text": "| [03-file-policy.md](governance/03-file-policy.md)           | `audit_structure.py`, `create_pipeline.py`                     |"
         },
@@ -11286,7 +11495,7 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 100,
+          "line": 102,
           "source_group": "docs",
           "text": "| `cleanup_consolidate.py`       | scripts/engineering/diagnostics/ | Нет     | —                                                            | —            | Консолидированный аудит очистки           "
         },
@@ -11313,13 +11522,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 99,
+          "line": 101,
           "source_group": "docs",
           "text": "| `cleanup_project.py`           | scripts/engineering/diagnostics/ | Нет     | `uv run python -m scripts.engineering.diagnostics cleanup`   | `make clean` | Очистка локальных кэшей и build-артефактов"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 147,
+          "line": 149,
           "source_group": "docs",
           "text": "| [cleanup-policy.md](../03-guides/cleanup-policy.md)         | `cleanup_project.py`, `cleanup_repository.py`, `vacuum_delta.py`, `verify_checksums.py` |"
         },
@@ -11633,7 +11842,7 @@
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 75,
+          "line": 77,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.qa check-c901 --target src/bioetl"
         },
@@ -11657,7 +11866,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 141,
+          "line": 139,
           "source_group": "scripts",
           "text": "\"check-c901\": \"scripts/engineering/qa/check_c901_baseline.py\","
         },
@@ -11895,13 +12104,13 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 142,
+          "line": 140,
           "source_group": "scripts",
           "text": "\"check-naming-pkg\": ("
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 143,
+          "line": 141,
           "source_group": "scripts",
           "text": "\"scripts/engineering/qa/check_naming_package_consistency.py\""
         },
@@ -13276,13 +13485,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 107,
+          "line": 109,
           "source_group": "docs",
           "text": "| `lint_terminology.py`          | scripts/engineering/qa/          | Нет     | `uv run python -m scripts.engineering.qa check-terminology`  | —            | Линтер терминологии                       "
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 152,
+          "line": 154,
           "source_group": "docs",
           "text": "| [glossary.md](glossary.md)                                  | `lint_terminology.py`                                          |"
         },
@@ -13333,13 +13542,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 106,
+          "line": 108,
           "source_group": "docs",
           "text": "| `naming_audit.py`              | scripts/engineering/qa/          | Нет     | `uv run python -m scripts.engineering.qa check-naming`       | —            | Аудит naming conventions                  "
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 148,
+          "line": 150,
           "source_group": "docs",
           "text": "| RULES.md §2                                                 | `naming_audit.py`                                              |"
         },
@@ -13644,82 +13853,6 @@
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
       "next_step": "Retain as a bounded manual artifact-duplication audit utility while architecture governance tests and generated quality artifacts still depend on this exact surface; promote it into the canonical scripts.engineering.qa reporting lane or retire it after duplication governance consolidates elsewhere."
-    },
-    {
-      "path": "scripts/engineering/qa/report_basedpyright_error_snapshot.py",
-      "type": "py",
-      "status": "temporary_diagnostic",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": ".github/ISSUES/PD3-2026-07-28-PROJECT-DIAGNOSTICS-STRUCTURAL-DEBT-ISSUE-PACK.md",
-          "line": 5,
-          "source_group": "other",
-          "text": "- `scripts/engineering/qa/report_basedpyright_error_snapshot.py`"
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "temporary_diagnostic",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as a bounded basedpyright error-snapshot utility while the typing debt campaign needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
-    },
-    {
-      "path": "scripts/engineering/qa/report_basedpyright_suppression_inventory.py",
-      "type": "py",
-      "status": "temporary_diagnostic",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": ".github/ISSUES/PD3-2026-07-28-PROJECT-DIAGNOSTICS-STRUCTURAL-DEBT-ISSUE-PACK.md",
-          "line": 6,
-          "source_group": "other",
-          "text": "- `scripts/engineering/qa/report_basedpyright_suppression_inventory.py`"
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "temporary_diagnostic",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as a bounded basedpyright suppression-inventory utility while suppression governance needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
-    },
-    {
-      "path": "scripts/engineering/qa/report_basedpyright_tests_snapshot.py",
-      "type": "py",
-      "status": "temporary_diagnostic",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": ".github/ISSUES/PD3-2026-07-28-PROJECT-DIAGNOSTICS-STRUCTURAL-DEBT-ISSUE-PACK.md",
-          "line": 7,
-          "source_group": "other",
-          "text": "- `scripts/engineering/qa/report_basedpyright_tests_snapshot.py`"
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "temporary_diagnostic",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as a bounded basedpyright test-snapshot utility while the test typing campaign needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
-    },
-    {
-      "path": "scripts/engineering/qa/report_basedpyright_warning_snapshot.py",
-      "type": "py",
-      "status": "temporary_diagnostic",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "docs/00-project/ai/agents/guides/BASEDPRIGHT_PROJECT_DIAGNOSTICS.md",
-          "line": 45,
-          "source_group": "docs",
-          "text": "`scripts/engineering/qa/report_basedpyright_warning_snapshot.py`."
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "temporary_diagnostic",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as a bounded basedpyright warning-snapshot utility while the typing debt campaign needs reproducible shrink-only evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
     },
     {
       "path": "scripts/engineering/qa/report_chembl_observed_value_inventory.py",
@@ -15212,7 +15345,7 @@
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 77,
+          "line": 79,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.qa.vcr check-naming"
         },
@@ -15316,7 +15449,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 147,
+          "line": 145,
           "source_group": "scripts",
           "text": "\"check-placement\": \"scripts/engineering/qa/vcr/check_root_vcr_cassettes.py\","
         }
@@ -15343,7 +15476,7 @@
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 77,
+          "line": 79,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.qa.vcr check-naming"
         },
@@ -15373,7 +15506,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 142,
+          "line": 140,
           "source_group": "scripts",
           "text": "\"check-naming-pkg\": ("
         }
@@ -15418,7 +15551,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 149,
+          "line": 147,
           "source_group": "scripts",
           "text": "\"check-metadata-age\": \"scripts/engineering/qa/vcr/check_vcr_metadata_age.py\","
         },
@@ -15914,7 +16047,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 153,
+          "line": 151,
           "source_group": "scripts",
           "text": "\"check-catalog\": \"scripts/engineering/repo/check_scripts_catalog.py\","
         }
@@ -15941,7 +16074,7 @@
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 74,
+          "line": 76,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.repo check-inventory --check"
         },
@@ -16944,19 +17077,19 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 78,
+          "line": 80,
           "source_group": "docs",
           "text": "uv run python -m scripts.ops.data check-delta"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 102,
+          "line": 104,
           "source_group": "docs",
           "text": "| `vacuum_delta.py`              | scripts/ops/data/                | Нет     | `uv run python -m scripts.ops.data vacuum`                   | —            | VACUUM Delta Lake таблиц                  "
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 104,
+          "line": 106,
           "source_group": "docs",
           "text": "| `verify_checksums.py`          | scripts/ops/data/                | Нет     | `uv run python -m scripts.ops.data checksums`                | —            | Верификация контрольных сумм              "
         },
@@ -17013,7 +17146,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/data/test_check_delta_integrity.py",
-          "line": 10,
+          "line": 9,
           "source_group": "tests",
           "text": "from scripts.ops.data.check_delta_integrity import main"
         }
@@ -17040,7 +17173,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/data/test_extract_null_fields.py",
-          "line": 11,
+          "line": 10,
           "source_group": "tests",
           "text": "from scripts.ops.data.extract_null_fields import extract_null_fields, NULL_FIELDS"
         }
@@ -17131,19 +17264,19 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 102,
+          "line": 104,
           "source_group": "docs",
           "text": "| `vacuum_delta.py`              | scripts/ops/data/                | Нет     | `uv run python -m scripts.ops.data vacuum`                   | —            | VACUUM Delta Lake таблиц                  "
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 147,
+          "line": 149,
           "source_group": "docs",
           "text": "| [cleanup-policy.md](../03-guides/cleanup-policy.md)         | `cleanup_project.py`, `cleanup_repository.py`, `vacuum_delta.py`, `verify_checksums.py` |"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 149,
+          "line": 151,
           "source_group": "docs",
           "text": "| RULES.md §2.1.1                                             | `vacuum_delta.py`                                              |"
         },
@@ -17185,13 +17318,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 104,
+          "line": 106,
           "source_group": "docs",
           "text": "| `verify_checksums.py`          | scripts/ops/data/                | Нет     | `uv run python -m scripts.ops.data checksums`                | —            | Верификация контрольных сумм              "
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 147,
+          "line": 149,
           "source_group": "docs",
           "text": "| [cleanup-policy.md](../03-guides/cleanup-policy.md)         | `cleanup_project.py`, `cleanup_repository.py`, `vacuum_delta.py`, `verify_checksums.py` |"
         },
@@ -17269,49 +17402,49 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 261,
+          "line": 263,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh check main"
         },
         {
           "path": "Makefile",
-          "line": 273,
+          "line": 275,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh start main"
         },
         {
           "path": "Makefile",
-          "line": 277,
+          "line": 279,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh start-full"
         },
         {
           "path": "Makefile",
-          "line": 281,
+          "line": 283,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh monitoring"
         },
         {
           "path": "Makefile",
-          "line": 284,
+          "line": 286,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh stop monitoring"
         },
         {
           "path": "Makefile",
-          "line": 288,
+          "line": 290,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh stop main"
         },
         {
           "path": "Makefile",
-          "line": 292,
+          "line": 294,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh stop-full"
         },
         {
           "path": "Makefile",
-          "line": 296,
+          "line": 298,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh logs main"
         }
@@ -17332,7 +17465,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 125,
+          "line": 159,
           "source_group": "scripts",
           "text": "- `scripts/ops/install-codex-cmd.bat` — optional Windows CMD installation."
         }
@@ -17371,13 +17504,13 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 129,
+          "line": 127,
           "source_group": "scripts",
           "text": "\"scripts/ops/launchers/codex/codex-exec.bat\": (\"scripts/codex-exec.bat\",),"
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 132,
+          "line": 130,
           "source_group": "scripts",
           "text": "\"scripts/codex-exec.bat\": (\"scripts/ops/launchers/codex/codex-exec.bat\",),"
         },
@@ -17542,13 +17675,13 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 130,
+          "line": 128,
           "source_group": "scripts",
           "text": "\"scripts/ops/launchers/codex/codex.bat\": (\"scripts/codex.bat\",),"
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 133,
+          "line": 131,
           "source_group": "scripts",
           "text": "\"scripts/codex.bat\": (\"scripts/ops/launchers/codex/codex.bat\",),"
         },
@@ -17632,7 +17765,7 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 337,
+          "line": 339,
           "source_group": "build",
           "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only"
         },
@@ -17650,7 +17783,7 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 109,
+          "line": 116,
           "source_group": "scripts",
           "text": "- `bash scripts/engineering/dev/run_pytest.sh` runs `bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only`"
         },
@@ -17707,7 +17840,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 83,
+          "line": 79,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"start-codex.bat\""
         }
@@ -17722,7 +17855,7 @@
       "references": [
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 86,
+          "line": 82,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"verify-setup.bat\""
         }
@@ -17737,7 +17870,7 @@
       "references": [
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 89,
+          "line": 85,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"verify-setup.ps1\""
         }
@@ -17771,13 +17904,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 105,
+          "line": 107,
           "source_group": "docs",
           "text": "| `salt_rotate.py`               | scripts/ops/                     | Нет     | —                                                            | —            | Ротация PII-соли                          "
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 151,
+          "line": 153,
           "source_group": "docs",
           "text": "| RULES.md §5.4.1                                             | `salt_rotate.py`                                               |"
         },
@@ -19488,7 +19621,7 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 323,
+          "line": 325,
           "source_group": "build",
           "text": "$(RUN) python scripts/ops/runtime/docker/runtime_manager.py clean --stack main --confirm-destructive CLEAN"
         },
@@ -19666,7 +19799,7 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 148,
+          "line": 150,
           "source_group": "build",
           "text": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/ops/runtime/mcp/apply-shared-to-devin.py"
         },
@@ -19781,37 +19914,37 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 46,
+          "line": 48,
           "source_group": "ci",
           "text": "- \"scripts/ops/runtime/mcp/health-shared.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 89,
+          "line": 93,
           "source_group": "ci",
           "text": "- \"scripts/ops/runtime/mcp/health-shared.sh\""
         },
         {
           "path": "Makefile",
-          "line": 163,
+          "line": 165,
           "source_group": "build",
           "text": "PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh daily"
         },
         {
           "path": "Makefile",
-          "line": 229,
+          "line": 231,
           "source_group": "build",
           "text": "@PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh minimal"
         },
         {
           "path": "Makefile",
-          "line": 234,
+          "line": 236,
           "source_group": "build",
           "text": "@PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh standard"
         },
         {
           "path": "Makefile",
-          "line": 239,
+          "line": 241,
           "source_group": "build",
           "text": "@PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh daily"
         },
@@ -19899,25 +20032,25 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 162,
+          "line": 164,
           "source_group": "build",
           "text": "XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --daily"
         },
         {
           "path": "Makefile",
-          "line": 228,
+          "line": 230,
           "source_group": "build",
           "text": "@XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --minimal"
         },
         {
           "path": "Makefile",
-          "line": 233,
+          "line": 235,
           "source_group": "build",
           "text": "@XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --standard"
         },
         {
           "path": "Makefile",
-          "line": 238,
+          "line": 240,
           "source_group": "build",
           "text": "@XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --daily"
         },
@@ -20057,7 +20190,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 222,
+          "line": 216,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1\","
         },
@@ -20118,7 +20251,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 223,
+          "line": 217,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/neo4j/neo4j_quick_start.sh\","
         },
@@ -20240,7 +20373,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 225,
+          "line": 219,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/neo4j/start-neo4j-audit.sh\","
         }
@@ -20434,7 +20567,7 @@
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 147,
+          "line": 149,
           "source_group": "docs",
           "text": "| [cleanup-policy.md](../03-guides/cleanup-policy.md)         | `cleanup_project.py`, `cleanup_repository.py`, `vacuum_delta.py`, `verify_checksums.py` |"
         },
@@ -20452,7 +20585,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 206,
+          "line": 200,
           "source_group": "scripts",
           "text": "\"scripts/ops/support/repo/cleanup_repository.py\","
         },
@@ -20485,19 +20618,19 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 56,
+          "line": 58,
           "source_group": "ci",
           "text": "- \"scripts/ops/support/skills/check_ai_skills_layout.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 99,
+          "line": 103,
           "source_group": "ci",
           "text": "- \"scripts/ops/support/skills/check_ai_skills_layout.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 183,
+          "line": 190,
           "source_group": "ci",
           "text": "run: bash scripts/ops/support/skills/check_ai_skills_layout.sh"
         },
@@ -20522,19 +20655,19 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 55,
+          "line": 57,
           "source_group": "ci",
           "text": "- \"scripts/ops/support/skills/check_skills_mirror.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 98,
+          "line": 102,
           "source_group": "ci",
           "text": "- \"scripts/ops/support/skills/check_skills_mirror.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 180,
+          "line": 187,
           "source_group": "ci",
           "text": "run: bash scripts/ops/support/skills/check_skills_mirror.sh --check"
         },
@@ -20585,7 +20718,7 @@
         "new-pipeline",
         "py-config-bot"
       ],
-      "reference_count": 70,
+      "reference_count": 72,
       "references": [
         {
           "path": ".codex/skills/new-pipeline/SKILL.md",
@@ -20646,13 +20779,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 108,
+          "line": 110,
           "source_group": "docs",
           "text": "| `config_gap_analysis.py`       | scripts/schema/                  | Нет     | `uv run python -m scripts.schema analyze-gaps`               | —            | Анализ расхождений конфигов               "
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 153,
+          "line": 155,
           "source_group": "docs",
           "text": "| [03-file-policy.md](governance/03-file-policy.md) (configs) | `config_gap_analysis.py`, `validate_pipeline_configs.py`       |"
         },
@@ -20876,7 +21009,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 8,
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
@@ -20903,12 +21036,6 @@
           "text": "> кодовых контрактов скриптом `scripts/schema/generation/generate_contracts.py`."
         },
         {
-          "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 195,
-          "source_group": "scripts",
-          "text": "\"src/tools/scripts/generate_contracts.py\","
-        },
-        {
           "path": "scripts/schema/README.md",
           "line": 47,
           "source_group": "scripts",
@@ -20925,6 +21052,12 @@
           "line": 151,
           "source_group": "tests",
           "text": "# This method is used by generate_contracts.py"
+        },
+        {
+          "path": "tests/unit/repo_backed/contracts/test_generate_schema_artifacts.py",
+          "line": 70,
+          "source_group": "tests",
+          "text": "/ \"generate_contracts.py\""
         }
       ]
     },
@@ -21230,13 +21363,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 109,
+          "line": 111,
           "source_group": "docs",
           "text": "| `validate_pipeline_configs.py` | scripts/schema/                  | Нет     | `uv run python -m scripts.schema validate-configs`           | —            | Валидация configs vs JSON Schema          "
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 153,
+          "line": 155,
           "source_group": "docs",
           "text": "| [03-file-policy.md](governance/03-file-policy.md) (configs) | `config_gap_analysis.py`, `validate_pipeline_configs.py`       |"
         },
@@ -21254,7 +21387,7 @@
         },
         {
           "path": "pyproject.toml",
-          "line": 141,
+          "line": 153,
           "source_group": "build",
           "text": "# JSON Schema validation (scripts/validate_pipeline_configs.py)"
         },
@@ -21320,7 +21453,7 @@
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 97,
+          "line": 99,
           "source_group": "docs",
           "text": "| `verify_schema_parity.py`      | scripts/schema/validation/        | Да      | `uv run python -m scripts.schema verify-schema-parity`       | —            | Верификация Silver↔Gold schema parity    "
         },
@@ -21467,6 +21600,130 @@
       "lifecycle_decision": "compatibility_wrapper",
       "review_by": "2026-09-30",
       "next_step": "Retain only as the legacy root shell launcher while canonical Docker helper lifecycle management moves to scripts/ops/docker-setup.sh; keep it supporting and do not expand its fixed-delay startup behavior."
+    },
+    {
+      "path": "scripts/temp/report_basedpyright_error_snapshot.py",
+      "type": "py",
+      "status": "temporary_diagnostic",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": ".github/ISSUES/PD3-2026-07-28-PROJECT-DIAGNOSTICS-STRUCTURAL-DEBT-ISSUE-PACK.md",
+          "line": 5,
+          "source_group": "other",
+          "text": "- `scripts/engineering/qa/report_basedpyright_error_snapshot.py`"
+        },
+        {
+          "path": "docs/00-project/governance/makefile-and-temporary-scripts-management.md",
+          "line": 156,
+          "source_group": "docs",
+          "text": "- `report_basedpyright_error_snapshot.py` - Generate shrink-only basedpyright product error snapshot"
+        },
+        {
+          "path": "scripts/temp/README.md",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "- `report_basedpyright_error_snapshot.py` - Generate shrink-only basedpyright product error snapshot"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded basedpyright error-snapshot utility while the typing debt campaign needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
+    },
+    {
+      "path": "scripts/temp/report_basedpyright_suppression_inventory.py",
+      "type": "py",
+      "status": "temporary_diagnostic",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": ".github/ISSUES/PD3-2026-07-28-PROJECT-DIAGNOSTICS-STRUCTURAL-DEBT-ISSUE-PACK.md",
+          "line": 6,
+          "source_group": "other",
+          "text": "- `scripts/engineering/qa/report_basedpyright_suppression_inventory.py`"
+        },
+        {
+          "path": "docs/00-project/governance/makefile-and-temporary-scripts-management.md",
+          "line": 157,
+          "source_group": "docs",
+          "text": "- `report_basedpyright_suppression_inventory.py` - Generate basedpyright suppression inventory"
+        },
+        {
+          "path": "scripts/temp/README.md",
+          "line": 12,
+          "source_group": "scripts",
+          "text": "- `report_basedpyright_suppression_inventory.py` - Generate basedpyright suppression inventory"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded basedpyright suppression-inventory utility while suppression governance needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
+    },
+    {
+      "path": "scripts/temp/report_basedpyright_tests_snapshot.py",
+      "type": "py",
+      "status": "temporary_diagnostic",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": ".github/ISSUES/PD3-2026-07-28-PROJECT-DIAGNOSTICS-STRUCTURAL-DEBT-ISSUE-PACK.md",
+          "line": 7,
+          "source_group": "other",
+          "text": "- `scripts/engineering/qa/report_basedpyright_tests_snapshot.py`"
+        },
+        {
+          "path": "docs/00-project/governance/makefile-and-temporary-scripts-management.md",
+          "line": 158,
+          "source_group": "docs",
+          "text": "- `report_basedpyright_tests_snapshot.py` - Generate basedpyright test-snapshot for scripts/tests advisory"
+        },
+        {
+          "path": "scripts/temp/README.md",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "- `report_basedpyright_tests_snapshot.py` - Generate basedpyright test-snapshot for scripts/tests advisory"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded basedpyright test-snapshot utility while the test typing campaign needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
+    },
+    {
+      "path": "scripts/temp/report_basedpyright_warning_snapshot.py",
+      "type": "py",
+      "status": "temporary_diagnostic",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "docs/00-project/ai/agents/guides/BASEDPRIGHT_PROJECT_DIAGNOSTICS.md",
+          "line": 45,
+          "source_group": "docs",
+          "text": "`scripts/engineering/qa/report_basedpyright_warning_snapshot.py`."
+        },
+        {
+          "path": "docs/00-project/governance/makefile-and-temporary-scripts-management.md",
+          "line": 159,
+          "source_group": "docs",
+          "text": "- `report_basedpyright_warning_snapshot.py` - Generate basedpyright warning snapshot"
+        },
+        {
+          "path": "scripts/temp/README.md",
+          "line": 14,
+          "source_group": "scripts",
+          "text": "- `report_basedpyright_warning_snapshot.py` - Generate basedpyright warning snapshot"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded basedpyright warning-snapshot utility while the typing debt campaign needs reproducible shrink-only evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
     },
     {
       "path": "scripts/test_selection_strategy.py",

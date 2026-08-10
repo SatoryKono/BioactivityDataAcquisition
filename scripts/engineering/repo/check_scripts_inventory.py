@@ -1031,7 +1031,7 @@ def _status_for(
     lifecycle_status = _status_from_lifecycle_decision(
         lifecycle_decisions.get(script_rel)
     )
-    if lifecycle_status == "supporting":
+    if lifecycle_status in {"supporting", "temporary_diagnostic"}:
         return lifecycle_status
 
     groups = {item.source_group for item in refs}
