@@ -354,6 +354,43 @@ def test_listing_filters_entries_sorts_by_mtime_and_honors_limits(
     )
 
 
+def test_listing_skips_report_when_mtime_stat_fails(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    report_path = _write_raw_report(
+        tmp_path,
+        kind="pipeline",
+        owner="owner-a",
+        run_id="run-inaccessible",
+        payload={"identity": {"status": "success"}},
+        mtime=100.0,
+    )
+    original_is_file = Path.is_file
+    original_stat = Path.stat
+    mtime_stat_attempted = False
+
+    def stat_with_inaccessible_mtime(
+        path: Path, *args: object, **kwargs: object
+    ) -> os.stat_result:
+        nonlocal mtime_stat_attempted
+        if path == report_path:
+            mtime_stat_attempted = True
+            raise OSError("report disappeared before mtime could be read")
+        return original_stat(path, *args, **kwargs)
+
+    def is_file_before_report_disappears(path: Path) -> bool:
+        if path == report_path:
+            return True
+        return original_is_file(path)
+
+    monkeypatch.setattr(Path, "is_file", is_file_before_report_disappears)
+    monkeypatch.setattr(Path, "stat", stat_with_inaccessible_mtime)
+
+    assert list_pipeline_reports(root=tmp_path) == []
+    assert mtime_stat_attempted
+
+
 def test_diff_handles_sparse_rows_and_numeric_coercion() -> None:
     left = {
         "funnel": [
