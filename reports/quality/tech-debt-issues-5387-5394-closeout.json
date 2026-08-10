@@ -7,7 +7,11 @@
       "number": 5387,
       "issue": "#5387",
       "theme": "Scorecard coverage evidence matches inventory",
-      "debt_types": ["Coverage debt", "Governance gap", "Test debt"],
+      "debt_types": [
+        "Coverage debt",
+        "Governance gap",
+        "Test debt"
+      ],
       "action": "Ensured architecture quality scorecard coverage metrics match live module coverage inventory with proper hash verification.",
       "risk": "low",
       "evidence": [
@@ -20,7 +24,11 @@
       "number": 5388,
       "issue": "#5388",
       "theme": "Compatibility facade counts stay within ratchets",
-      "debt_types": ["Compatibility debt", "Governance gap", "Public API debt"],
+      "debt_types": [
+        "Compatibility debt",
+        "Governance gap",
+        "Public API debt"
+      ],
       "action": "Validated compatibility importer census metrics against debt scorecard ratchets with zero removed surface conflicts.",
       "risk": "low",
       "evidence": [
@@ -33,7 +41,11 @@
       "number": 5389,
       "issue": "#5389",
       "theme": "Control plane use-case seams remain explicit",
-      "debt_types": ["Hotspot", "Architecture debt", "DDD violation"],
+      "debt_types": [
+        "Hotspot",
+        "Architecture debt",
+        "DDD violation"
+      ],
       "action": "Maintained explicit control plane package structure with zero duplication and bounded hotspot family growth.",
       "risk": "medium",
       "evidence": [
@@ -48,7 +60,11 @@
       "number": 5390,
       "issue": "#5390",
       "theme": "VCR metadata review debt is zero",
-      "debt_types": ["Test debt", "Governance gap", "VCR debt"],
+      "debt_types": [
+        "Test debt",
+        "Governance gap",
+        "VCR debt"
+      ],
       "action": "Achieved zero VCR metadata review debt with all cassettes owned and no duplicate scenario stems.",
       "risk": "low",
       "evidence": [
@@ -60,7 +76,11 @@
       "number": 5391,
       "issue": "#5391",
       "theme": "Config compatibility legacy taxonomy is no-growth",
-      "debt_types": ["Config debt", "Governance gap", "Compatibility debt"],
+      "debt_types": [
+        "Config debt",
+        "Governance gap",
+        "Compatibility debt"
+      ],
       "action": "Enforced no-growth policy for config compatibility legacy taxonomy with explicit review dates and target zero.",
       "risk": "medium",
       "evidence": [
@@ -74,7 +94,11 @@
       "number": 5392,
       "issue": "#5392",
       "theme": "Coverage tail reduction matches live inventory",
-      "debt_types": ["Coverage debt", "Governance gap", "Test debt"],
+      "debt_types": [
+        "Coverage debt",
+        "Governance gap",
+        "Test debt"
+      ],
       "action": "Validated coverage tail reduction against live module coverage inventory with improved module tracking.",
       "risk": "medium",
       "status": "regressed_after_bounded_tail_reduction",
@@ -82,14 +106,14 @@
         "before_below_85_module_count": 13,
         "after_below_85_module_count": 12,
         "below_85_module_count_delta": -1,
-        "improved_module": "bioetl.domain.behavior._dq_rule_evaluators"
+        "improved_module": "src/bioetl/domain/behavior/_dq_rule_evaluators.py"
       },
       "current_live_coverage": {
-        "below_85_module_count": 12,
-        "improved_module_current_coverage_percent": 87,
-        "improved_module_current_status": "above_threshold",
+        "below_85_module_count": 88,
+        "improved_module_current_coverage_percent": 97.0,
+        "improved_module_current_status": "partially_covered",
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 0
+        "unmeasured_module_count": 17
       },
       "evidence": [
         "reports/quality/module-coverage-inventory.json",
@@ -100,7 +124,11 @@
       "number": 5393,
       "issue": "#5393",
       "theme": "Full app duplication baseline covers required scope",
-      "debt_types": ["Duplication", "Governance gap", "Architecture debt"],
+      "debt_types": [
+        "Duplication",
+        "Governance gap",
+        "Architecture debt"
+      ],
       "action": "Established full app duplication baseline covering infrastructure adapters, pipelines, bootstrap, and CLI interfaces.",
       "risk": "low",
       "evidence": [
@@ -112,7 +140,11 @@
       "number": 5394,
       "issue": "#5394",
       "theme": "Legacy checkpoint hydration confined to load seam",
-      "debt_types": ["Architecture debt", "Compatibility debt", "Governance gap"],
+      "debt_types": [
+        "Architecture debt",
+        "Compatibility debt",
+        "Governance gap"
+      ],
       "action": "Confined legacy checkpoint hydration to checkpoint load validation seam with explicit identity anchor documentation.",
       "risk": "medium",
       "evidence": [
