@@ -26,7 +26,7 @@ from bioetl.infrastructure.control_plane import (
     FileControlPlaneArtifactLifecycleStore,
 )
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.integration
 
 _NOW = datetime(2026, 8, 9, tzinfo=UTC)
 
