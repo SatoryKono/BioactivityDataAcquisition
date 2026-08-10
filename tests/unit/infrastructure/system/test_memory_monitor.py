@@ -577,6 +577,23 @@ class TestMemoryMonitorResourceFallback:
                 # Should use estimate
                 assert stats.percent_used == pytest.approx(0.5)
 
+    def test_get_stats_fallback_unix_uses_resource(self, mock_logger) -> None:
+        """Non-Windows fallback delegates to the resource/procfs sampler."""
+        monitor = MemoryMonitor(config=MemoryConfig(), logger=mock_logger)
+        expected = MemoryStats(6.0, 2.0, 8.0, 0.75, 1.0)
+
+        with (
+            patch.object(memory_monitor_module.sys, "platform", "linux"),
+            patch.object(
+                monitor,
+                "_get_stats_resource",
+                return_value=expected,
+            ) as get_resource,
+        ):
+            assert monitor._get_stats_fallback() == expected
+
+        get_resource.assert_called_once_with()
+
     def test_logging_when_psutil_unavailable(self, mock_logger):
         """Test debug log when psutil is not available."""
         config = MemoryConfig()

@@ -74,10 +74,20 @@ def test_manifest_read_error_has_bounded_diagnostic(
     path = _manifest_path(store, "manifest-unreadable")
     original_read_text = Path.read_text
 
-    def _read_text(candidate: Path, *args: object, **kwargs: object) -> str:
+    def _read_text(
+        candidate: Path,
+        encoding: str | None = None,
+        errors: str | None = None,
+        newline: str | None = None,
+    ) -> str:
         if candidate == path:
             raise OSError("read failed")
-        return original_read_text(candidate, *args, **kwargs)
+        return original_read_text(
+            candidate,
+            encoding=encoding,
+            errors=errors,
+            newline=newline,
+        )
 
     monkeypatch.setattr(Path, "read_text", _read_text)
 

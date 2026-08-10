@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from typing import cast
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -124,6 +125,58 @@ async def test_start_and_stop_delegate_to_asyncio_server_without_real_socket(
 
 
 @pytest.mark.asyncio
+async def test_start_and_stop_work_without_optional_collaborators(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The minimal lifecycle needs neither metrics refresh nor a logger."""
+    listener = MagicMock()
+    listener.is_serving.return_value = True
+    listener.wait_closed = AsyncMock()
+    monkeypatch.setattr(
+        health_server_module.asyncio,
+        "start_server",
+        AsyncMock(return_value=listener),
+    )
+    server = HealthServer(host="127.0.0.1", port=8126)
+
+    await server.start()
+    await server.stop()
+
+    listener.close.assert_called_once_with()
+    listener.wait_closed.assert_awaited_once_with()
+    assert server.is_running is False
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("with_logger", [False, True])
+async def test_stop_is_idempotent_and_bounds_listener_shutdown_timeout(
+    *,
+    with_logger: bool,
+) -> None:
+    """Stopping is safe before start and suppresses a bounded listener timeout."""
+    await HealthServer().stop()
+
+    listener = MagicMock()
+    listener.wait_closed = AsyncMock(side_effect=TimeoutError)
+    logger = MagicMock() if with_logger else None
+    server = HealthServer(logger=logger)
+    server._server = listener
+
+    await server.stop()
+
+    listener.close.assert_called_once_with()
+    assert server.is_running is False
+    if logger is not None:
+        logger.warning.assert_called_once_with(
+            "health_server_shutdown_timeout",
+            host="127.0.0.1",
+            port=8000,
+            error="",
+            reason_code="HEALTH_SERVER_SHUTDOWN_TIMEOUT",
+        )
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize("with_logger", [False, True])
 async def test_bind_failure_is_reported_and_propagated(
     monkeypatch: pytest.MonkeyPatch,
@@ -159,7 +212,6 @@ async def test_run_health_server_forwards_dependencies_and_stops_on_cancellation
 ) -> None:
     """The convenience runner always releases its server on cancellation."""
     started = asyncio.Event()
-    instances: list[object] = []
 
     class _FakeHealthServer:
         def __init__(self, **kwargs: object) -> None:
@@ -176,6 +228,8 @@ async def test_run_health_server_forwards_dependencies_and_stops_on_cancellation
 
         async def stop(self) -> None:
             self.stopped = True
+
+    instances: list[_FakeHealthServer] = []
 
     monkeypatch.setattr(health_server_module, "HealthServer", _FakeHealthServer)
     monitor = MagicMock()
@@ -197,6 +251,10 @@ async def test_run_health_server_forwards_dependencies_and_stops_on_cancellation
     instance = instances[0]
     assert instance.kwargs["host"] == "127.0.0.3"
     assert instance.kwargs["port"] == 8125
-    assert instance.kwargs["control_plane"].health_monitor is monitor
+    control_plane = cast(
+        "HealthServerControlPlaneDeps",
+        instance.kwargs["control_plane"],
+    )
+    assert control_plane.health_monitor is monitor
     assert instance.clock is clock
     assert instance.stopped is True
