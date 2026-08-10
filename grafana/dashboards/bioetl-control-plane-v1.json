@@ -1910,7 +1910,16 @@
                 "title": "Open Run Manifest Inspection",
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
               }
-            ]
+            ],
+            "cellHeight": "sm",
+            "footer": {
+              "show": false,
+              "reducer": [
+                "sum"
+              ],
+              "countRows": false,
+              "fields": ""
+            }
           },
           "targets": [
             {
@@ -3071,7 +3080,16 @@
                 "title": "Open Traceability Signal Ownership",
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/traceability-signal-ownership.md"
               }
-            ]
+            ],
+            "cellHeight": "sm",
+            "footer": {
+              "show": false,
+              "reducer": [
+                "sum"
+              ],
+              "countRows": false,
+              "fields": ""
+            }
           },
           "targets": [
             {
@@ -4831,7 +4849,7 @@
   "templating": {
     "list": [
       {
-        "allValue": null,
+        "allValue": "$__all",
         "current": {
           "selected": true,
           "text": "All",
@@ -4894,7 +4912,7 @@
         "description": "Core scope: pipeline selector for pipeline-centric control-plane metrics. Values come from the active control-plane pipeline/run_type universe so stale historical pipelines do not appear as selectable trust scopes. Single-select; no All scope. Default unknown is fail-closed until a source dashboard passes a pipeline or the operator selects one."
       },
       {
-        "allValue": null,
+        "allValue": "$__all",
         "current": {
           "selected": true,
           "text": "backfill",

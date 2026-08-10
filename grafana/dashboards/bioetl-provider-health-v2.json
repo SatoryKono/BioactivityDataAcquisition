@@ -975,7 +975,8 @@
             "showHeader": true,
             "footer": {
               "show": false
-            }
+            },
+            "cellHeight": "sm"
           },
           "targets": [
             {
@@ -1960,7 +1961,8 @@
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md"
               }
             ],
-            "showHeader": true
+            "showHeader": true,
+            "cellHeight": "sm"
           },
           "targets": [
             {
@@ -2832,7 +2834,7 @@
   "templating": {
     "list": [
       {
-        "allValue": null,
+        "allValue": "$__all",
         "current": {
           "selected": true,
           "text": "All",
@@ -2898,7 +2900,7 @@
         "useTags": false
       },
       {
-        "allValue": null,
+        "allValue": "$__all",
         "current": {
           "selected": true,
           "text": "backfill",

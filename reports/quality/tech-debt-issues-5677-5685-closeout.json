@@ -2,6 +2,38 @@
   "snapshot_date": "2026-07-21",
   "status": "implemented_local_closeable",
   "budget_policy": "no_growth_ratchet_only",
+  "ratchets": {
+    "pipeline_contract_explicit_exclusions": {
+      "previous": 9,
+      "current": 0,
+      "direction": "reduced"
+    },
+    "full_app_duplicate_clusters": {
+      "previous": 75,
+      "current": 0,
+      "direction": "reduced"
+    },
+    "adapter_duplicate_clusters": {
+      "previous": 58,
+      "current": 0,
+      "direction": "reduced"
+    },
+    "pipeline_duplicate_clusters": {
+      "previous": 16,
+      "current": 0,
+      "direction": "reduced"
+    },
+    "cli_duplicate_clusters": {
+      "previous": 1,
+      "current": 0,
+      "direction": "reduced"
+    },
+    "compatibility_test_files": {
+      "previous": 25,
+      "current": 0,
+      "direction": "reduced"
+    }
+  },
   "issues": [
     {
       "issue": "#5677",

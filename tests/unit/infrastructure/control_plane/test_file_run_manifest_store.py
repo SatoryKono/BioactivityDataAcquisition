@@ -49,7 +49,13 @@ from bioetl.infrastructure.control_plane import (
     FileRunManifestStore,
     RunManifestStoreCorruptionError,
 )
+from bioetl.infrastructure.control_plane._run_manifest_scope_index import (
+    latest_scope_catalog_path,
+)
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
+from tests.unit.application.services.run_manifest_test_support import (
+    make_run_manifest,
+)
 
 
 pytestmark = pytest.mark.unit
@@ -522,3 +528,61 @@ def test_file_store_assert_saved_checks_materialized_paths(tmp_path) -> None:
     (store.base_path / "_by_run_id" / f"{manifest.run_id}.txt").unlink()
     with pytest.raises(RuntimeError, match="run_id index is not materialized"):
         store.assert_saved(manifest)
+
+
+@pytest.mark.parametrize(
+    ("missing_path", "message"),
+    [
+        ("manifest", "manifest file is not materialized"),
+        ("scope", "latest-scope index is not materialized"),
+        ("catalog", "latest-scope catalog is not materialized"),
+    ],
+)
+def test_file_store_assert_saved_fails_for_each_control_plane_anchor(
+    tmp_path,
+    missing_path: str,
+    message: str,
+) -> None:
+    """Post-save validation checks every materialized identity/index anchor."""
+    store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
+    manifest = make_run_manifest(manifest_id=f"manifest-missing-{missing_path}")
+    store.save(manifest)
+    paths = {
+        "manifest": store.base_path / f"{manifest.manifest_id}.json",
+        "scope": store._latest_scope_index_path(
+            manifest.pipeline_name,
+            manifest.run_type,
+        ),
+        "catalog": latest_scope_catalog_path(store.base_path),
+    }
+    paths[missing_path].unlink()
+
+    with pytest.raises(RuntimeError, match=message):
+        store.assert_saved(manifest)
+
+
+def test_file_store_rejects_run_index_pointing_to_other_run(tmp_path) -> None:
+    """A run-id index cannot reuse a valid manifest belonging to another run."""
+    store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
+    manifest = make_run_manifest(manifest_id="manifest-other-run")
+    requested_run_id = RunID(deterministic_uuid_from_callsite("requested-run"))
+    store.save(manifest)
+    requested_index = store.base_path / "_by_run_id" / f"{requested_run_id}.txt"
+    requested_index.write_text(manifest.manifest_id, encoding="utf-8")
+
+    with pytest.raises(RunManifestStoreCorruptionError, match="not requested run_id"):
+        store.get_by_run_id(requested_run_id)
+
+
+def test_file_store_list_all_reports_empty_and_non_object_catalog_entries(
+    tmp_path,
+) -> None:
+    """Catalog enumeration distinguishes an empty store from corrupt JSON objects."""
+    store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
+    assert store.list_all() == ()
+
+    store.base_path.mkdir(parents=True)
+    (store.base_path / "not-an-object.json").write_text("[]", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="must be a JSON object"):
+        store.list_all()

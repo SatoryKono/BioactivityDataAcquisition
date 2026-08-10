@@ -29,6 +29,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from uuid import UUID
 
 import pytest
@@ -51,3 +52,58 @@ async def test_memory_lock_prevents_duplicate_workflow_key_within_one_process() 
     assert await lock.release("workflow:chembl_core", owner_a, exclusive=True) is True
     third = await lock.acquire("workflow:chembl_core", owner_b, exclusive=True)
     assert third is not None
+    await lock.aclose()
+
+
+@pytest.mark.asyncio
+async def test_memory_lock_missing_and_wrong_owner_operations_fail_closed() -> None:
+    """Release/heartbeat never mutate a missing lock or another owner's lease."""
+    lock = MemoryLock()
+    owner_a = RunID(UUID("00000000-0000-0000-0000-000000000311"))
+    owner_b = RunID(UUID("00000000-0000-0000-0000-000000000322"))
+
+    assert await lock.release("missing", owner_a) is False
+    assert await lock.heartbeat("missing", owner_a) is False
+    token = await lock.acquire("pipeline", owner_a, ttl=30)
+    assert token is not None
+    assert await lock.heartbeat("pipeline", owner_b) is False
+    assert await lock.heartbeat("pipeline", owner_a) is True
+    assert await lock.validate_owner("pipeline", owner_a) is True
+
+    await lock.aclose()
+
+
+@pytest.mark.asyncio
+async def test_memory_lock_zero_wait_timeout_returns_without_polling() -> None:
+    """A bounded waiter returns immediately when its timeout budget is zero."""
+    lock = MemoryLock()
+    owner_a = RunID(UUID("00000000-0000-0000-0000-000000000411"))
+    owner_b = RunID(UUID("00000000-0000-0000-0000-000000000422"))
+    assert await lock.acquire("pipeline", owner_a) is not None
+
+    token = await lock.acquire("pipeline", owner_b, wait=True, wait_timeout=0)
+
+    assert token is None
+    await lock.aclose()
+
+
+@pytest.mark.asyncio
+async def test_memory_lock_ttl_acquire_starts_periodic_sweep(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A TTL lease activates the background expiry sweep."""
+    lock = MemoryLock(ttl_check_interval=0.001)
+    swept = asyncio.Event()
+    original_release_expired = lock._release_expired_locks
+
+    async def _record_sweep() -> None:
+        await original_release_expired()
+        swept.set()
+
+    monkeypatch.setattr(lock, "_release_expired_locks", _record_sweep)
+    owner = RunID(UUID("00000000-0000-0000-0000-000000000511"))
+
+    assert await lock.acquire("pipeline", owner, ttl=30) is not None
+    await asyncio.wait_for(swept.wait(), timeout=1.0)
+
+    await lock.aclose()

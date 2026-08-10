@@ -222,26 +222,31 @@ def test_tests_workflow_has_dedicated_memory_lane_outside_coverage() -> None:
     )
 
 
-def test_tests_workflow_has_dedicated_contract_confidence_lane_outside_coverage() -> (
-    None
-):
-    """Offline contract confidence should block independently from coverage."""
+def test_tests_workflow_has_dual_purpose_contract_confidence_lane() -> None:
+    """Offline contracts should block directly and contribute real coverage."""
     workflow = _read_workflow(".github/workflows/tests.yml")
+    contract_confidence = _workflow_job_block(workflow, "contract-confidence")
+    coverage_verify = _workflow_job_block(workflow, "coverage-verify")
     assert "contract-confidence:" in workflow, (
         "tests workflow should define a blocking offline contract-confidence job"
     )
-    assert "tests/contract/ tests/unit/contracts/" in workflow, (
+    assert "tests/contract/ tests/unit/contracts/" in contract_confidence, (
         "contract-confidence must run the canonical contract surfaces"
     )
-    assert '-m "no_api or not network"' in workflow, (
+    assert '-m "no_api or not network"' in contract_confidence, (
         "contract-confidence must avoid live network contract tests"
     )
     assert (
-        "--junitxml=reports/test-telemetry/junit-contract-confidence.xml" in workflow
+        "--junitxml=reports/test-telemetry/junit-contract-confidence.xml"
+        in contract_confidence
     ), "contract-confidence must emit JUnit telemetry"
-    assert "test-telemetry-contract-confidence" in workflow, (
+    assert "test-telemetry-contract-confidence" in contract_confidence, (
         "contract-confidence telemetry should be uploaded for test-health rollups"
     )
+    assert "--cov=src/bioetl --cov-report=" in contract_confidence
+    assert "coverage-data-contract-confidence" in contract_confidence
+    assert "reports/coverage/.coverage.contract-confidence" in contract_confidence
+    assert "- contract-confidence" in coverage_verify
 
 
 def test_local_confidence_gate_keeps_lanes_separate_and_enforces_85_percent() -> None:
