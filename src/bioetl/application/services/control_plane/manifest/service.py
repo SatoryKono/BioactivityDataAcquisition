@@ -5,15 +5,15 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol, runtime_checkable
 
+from bioetl.application.observability.replay_write_risk import (
+    emit_replay_write_risk_metrics,
+)
 from bioetl.application.services.control_plane.manifest._service_support import (
     RunManifestHydrationMixin,
     RunManifestPayloadMixin,
 )
 from bioetl.application.services.control_plane.manifest.models import (
     RunManifestCreateSpec,
-)
-from bioetl.application.services.control_plane.manifest.replay_write_risk import (
-    emit_replay_write_risk_metrics,
 )
 from bioetl.application.services.control_plane.manifest.service_scaffold import (
     ManifestServiceScaffoldMixin,

@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from bioetl.application.services.control_plane.manifest.integrity_metrics import (
+from bioetl.application.observability.control_plane_integrity_metrics import (
     MANIFEST_LEDGER_INTEGRITY_METRIC,
     ControlPlaneIntegrityMetricsService,
     manifest_expects_ledger,
