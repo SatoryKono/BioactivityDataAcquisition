@@ -29,6 +29,7 @@ class EvidenceCheck:
             "detail": self.detail,
         }
 
+
 _STATUS_PRIORITY: dict[EvidenceStatus, int] = {
     "OK": 0,
     "UNKNOWN": 1,
