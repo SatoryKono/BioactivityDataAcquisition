@@ -146,14 +146,14 @@
       "telemetry_source_run_id": "merge-resolve-8216-20260806"
     },
     "5711": {
-      "no_executable_line_modules": 22,
-      "source_module_count": 2279,
-      "source_tree_sha256": "e2f9394cf167eff3a8795273babc81877ceb19c83a54cf9b56edac89f885545a",
+      "no_executable_line_modules": 2,
+      "source_module_count": 2413,
+      "source_tree_sha256": "d0ebd1299bc119046a3e9395c3fe88077d0b6f714b50d5acd5b596f9a624d236",
       "uncovered_module_count": 0,
-      "under70_module_count_after": 9,
+      "under70_module_count_after": 10,
       "under70_module_count_before": 18,
-      "under85_module_count_after": 80,
-      "unmeasured_module_count": 17
+      "under85_module_count_after": 68,
+      "unmeasured_module_count": 0
     },
     "5712": {
       "retained_entrypoint_count": 12,
