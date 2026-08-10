@@ -102,9 +102,19 @@ fi
 # plugins volume was wiped. Run Explorer / Ops HTTP panels depend on it.
 INFINITY_PLUGIN_ID="yesoreyeram-infinity-datasource"
 INFINITY_PLUGIN_DIR="/var/lib/grafana/plugins/${INFINITY_PLUGIN_ID}"
-if [ ! -d "${INFINITY_PLUGIN_DIR}" ]; then
-  echo "[bioetl-grafana] installing ${INFINITY_PLUGIN_ID} (required for BioETL Ops HTTP)"
-  if ! grafana cli --pluginsDir /var/lib/grafana/plugins plugins install "${INFINITY_PLUGIN_ID}"; then
+INFINITY_PLUGIN_VERSION="${BIOETL_INFINITY_PLUGIN_VERSION:-3.8.0}"
+INFINITY_INSTALLED_VERSION=""
+if [ -f "${INFINITY_PLUGIN_DIR}/plugin.json" ]; then
+  INFINITY_INSTALLED_VERSION="$(
+    sed -n 's/^[[:space:]]*"version":[[:space:]]*"\([^"]*\)".*/\1/p' \
+      "${INFINITY_PLUGIN_DIR}/plugin.json" | head -n 1
+  )"
+fi
+if [ "${INFINITY_INSTALLED_VERSION}" != "${INFINITY_PLUGIN_VERSION}" ]; then
+  echo "[bioetl-grafana] installing ${INFINITY_PLUGIN_ID} ${INFINITY_PLUGIN_VERSION} (found ${INFINITY_INSTALLED_VERSION:-missing})"
+  rm -rf -- "${INFINITY_PLUGIN_DIR}"
+  if ! grafana cli --pluginsDir /var/lib/grafana/plugins plugins install \
+    "${INFINITY_PLUGIN_ID}" "${INFINITY_PLUGIN_VERSION}"; then
     echo "[bioetl-grafana] ERROR: failed to install ${INFINITY_PLUGIN_ID}" >&2
     exit 1
   fi

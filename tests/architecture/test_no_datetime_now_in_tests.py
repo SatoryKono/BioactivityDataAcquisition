@@ -22,6 +22,7 @@ NOT be added.
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import pytest
@@ -84,6 +85,9 @@ class TestNoDatetimeNowInTests:
         Use ``tests.helpers.clock.FixedClock`` or ``tests.helpers.clock.StepClock``
         for deterministic timestamps, or plain ``datetime(2025, 1, 1, ...)`` constants.
         """
+        # Full tests/ walk is prohibitively slow on Windows bind mounts / antivirus FS.
+        if sys.platform.startswith("win"):
+            pytest.skip("Skipped on Windows due to filesystem performance")
         violations = collect_datetime_policy_violations(
             py_files=test_python_files,
             allowed_paths=ALLOWED_PATHS,

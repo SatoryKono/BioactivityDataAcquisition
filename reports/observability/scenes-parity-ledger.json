@@ -25,7 +25,7 @@
     "bioetl-incident-v1": "72e4389833c5a450298fc84ac8a085a7729b88f2d7b70f937166abd4ed6d49f9",
     "bioetl-overview-v2": "b42828de8acdfc4f7a869601634729a58a077e2dd8fae341953eac489e444e1d",
     "bioetl-provider-health-v2": "23d47a89a8e134d038a7064c227e29694026fab1b7ac8a937a4a3b9881d4f0ad",
-    "bioetl-run-explorer-v1": "993d881982afa7f65746b475ea56d3f7f8307877b6156406bbc9c3906922f42d",
+    "bioetl-run-explorer-v1": "36a3b4da8e740f6f732ead1025983cc6a1458103dfaa2b9962c371ae9f9795cc",
     "bioetl-runtime": "929b6491ddca44310fd8b54b1805ea2172ea3ccae320948366fa6b317c6f63ca"
   },
   "panels": [
@@ -2877,8 +2877,8 @@
       "panel_title": "Browse Recent Runs",
       "route": "run-explorer",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=20"
         ],
@@ -2896,8 +2896,8 @@
       "panel_title": "Inspect Run Identity",
       "route": "run-explorer",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
         ],
@@ -2915,8 +2915,8 @@
       "panel_title": "Inspect Processed Records",
       "route": "run-explorer",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
         ],
@@ -2934,8 +2934,8 @@
       "panel_title": "Inspect Stage Funnel",
       "route": "run-explorer",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}"
         ],
@@ -2953,8 +2953,8 @@
       "panel_title": "Inspect Top Run Reasons",
       "route": "run-explorer",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}"
         ],
@@ -2972,8 +2972,8 @@
       "panel_title": "Inspect Reconciliation",
       "route": "run-explorer",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}"
         ],
@@ -3008,8 +3008,8 @@
       "panel_title": "Inspect Run Artifacts",
       "route": "run-explorer",
       "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
+        "datasource_type": "yesoreyeram-infinity-datasource",
+        "datasource_uid": "bioetl-ops-http",
         "expressions": [
           "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}"
         ],
