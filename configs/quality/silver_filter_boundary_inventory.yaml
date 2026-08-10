@@ -695,6 +695,46 @@ pipelines:
       - composite_pipeline: composite_assay
         check_type: gold_projection_delta
         fields: *id021
+  composite_activity:
+    downstream_role: composite_output
+    downstream_pipelines: []
+    filters:
+      required_fields:
+        structural:
+        - entity_id
+        - activity_id
+  composite_assay:
+    downstream_role: composite_output
+    downstream_pipelines: []
+    filters:
+      required_fields:
+        structural:
+        - entity_id
+        - assay_id
+  composite_molecule:
+    downstream_role: composite_output
+    downstream_pipelines: []
+    filters:
+      required_fields:
+        structural:
+        - entity_id
+        - molecule_id
+  composite_publication:
+    downstream_role: composite_output
+    downstream_pipelines: []
+    filters:
+      required_fields:
+        structural:
+        - entity_id
+        - publication_id
+  composite_target:
+    downstream_role: composite_output
+    downstream_pipelines: []
+    filters:
+      required_fields:
+        structural:
+        - entity_id
+        - target_id
   crossref_publication:
     downstream_role: composite_enricher
     downstream_pipelines: &id022

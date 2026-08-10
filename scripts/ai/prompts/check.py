@@ -72,7 +72,7 @@ def check_registry(*, registry_path: Path | None = None) -> CheckReport:
     report = CheckReport()
     try:
         entries = load_registry(registry_path)
-    except Exception as exc:  # noqa: BLE001 — surface parse errors as check failures
+    except Exception as exc:
         report.add_error("registry_parse", str(exc))
         return report
 
@@ -91,7 +91,9 @@ def check_registry(*, registry_path: Path | None = None) -> CheckReport:
             seen_ids[entry.id] = entry.path
 
         if not ID_PATTERN.match(entry.id):
-            report.add_error("id_pattern", f"id does not match pattern: {entry.id}", entry.path)
+            report.add_error(
+                "id_pattern", f"id does not match pattern: {entry.id}", entry.path
+            )
 
         if entry.status not in STATUS_ENUM:
             report.add_error(
@@ -109,12 +111,14 @@ def check_registry(*, registry_path: Path | None = None) -> CheckReport:
 
         abs_path = entry.absolute_path
         if not abs_path.is_file():
-            report.add_error("path_missing", f"path missing for {entry.id}: {entry.path}", entry.path)
+            report.add_error(
+                "path_missing", f"path missing for {entry.id}: {entry.path}", entry.path
+            )
             continue
 
         try:
             card = load_card(abs_path)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             report.add_error("card_parse", f"{entry.id}: {exc}", entry.path)
             continue
 
@@ -152,7 +156,7 @@ def check_hygiene(*, registry_path: Path | None = None) -> CheckReport:
     report = CheckReport()
     try:
         entries = load_registry(registry_path)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         report.add_error("registry_parse", str(exc))
         return report
 

@@ -170,6 +170,12 @@ nav:
           - "Root Local Clutter Cleanup": 00-project/governance/root-local-clutter-cleanup.md
           - "Governance Sync Audit 2026-06-25": 00-project/governance/governance-sync-audit-2026-06-25.md
           - "Qodo Governance Mirror": 00-project/governance/qodo/README.md
+      - "AI Operations":
+          - "AI Audit Hub": 00-project/ai/audit/README.md
+          - "Memory Architecture": 00-project/ai/memory/MEMORY_ARCHITECTURE.md
+          - "Grok Operator Runbook": 00-project/ai/agents/guides/grok-operator-runbook.md
+          - "Grok LSP Status": 00-project/ai/agents/guides/grok-lsp-status.md
+          - "Grok TUI Checklist": 00-project/ai/agents/guides/grok-tui-config-checklist.md
   - Architecture:
       - "Overview": 02-architecture/00-overview.md
       - "Sequence Diagrams": 02-architecture/diagrams/sequence/README.md
@@ -260,6 +266,7 @@ nav:
           - "ADR-053 Optional Grafana Scenes App Shell": 02-architecture/decisions/ADR-053-optional-grafana-scenes-app-shell.md
           - "ADR-054 Passport Documentation Projections": 02-architecture/decisions/ADR-054-passport-documentation-projections.md
           - "ADR-055 Workflow Reconciliation Ownership": 02-architecture/decisions/ADR-055-workflow-reconciliation-data-step-ownership.md
+          - "ADR-056 Proof-or-Stop Lifecycle Control": 02-architecture/decisions/ADR-056-proof-or-stop-lifecycle-control.md
           - "Infrastructure Config Package Root Sunset": 02-architecture/compatibility/infrastructure-config-package-root-sunset.md
           - "Public API Freeze": 00-project/ai/agents/guides/PUBLIC_API_FREEZE.md
   - Guides:
@@ -273,6 +280,8 @@ nav:
       - "Workflows": 03-guides/workflows.md
       - "GitHub Local Workflow": 03-guides/github-local-workflow.md
       - "Pipeline Configuration": 03-guides/pipeline-configuration.md
+      - "Config Merge Strategy": 03-guides/config-merge-strategy.md
+      - "Pipeline Dataflow Documentation": 03-guides/pipeline-dataflow-documentation.md
       - "Pipeline Lifecycle": 03-guides/pipeline-lifecycle.md
       - "DQ Configuration": 03-guides/dq-configuration.md
       - "DQ Framework": 03-guides/dq-framework.md
@@ -312,6 +321,7 @@ nav:
           - "Config Schema Guidelines": 03-guides/development/config-schema-guidelines.md
           - "Codex Launcher Paths": 03-guides/development/codex-paths.md
           - "Codex WSL2 Setup": 03-guides/development/codex-wsl2-setup.md
+          - "Platform Tooling": 03-guides/development/platform-tooling.md
           - "PyCharm Setup": 03-guides/development/pycharm-setup.md
       - Dashboards:
           - "Overview": 03-guides/dashboards/README.md
@@ -321,6 +331,8 @@ nav:
               - "Human": 03-guides/dashboards/dashboard-extension-human.md
               - "LLM": 03-guides/dashboards/dashboard-extension-llm.md
           - "Dashboard Inventory": 03-guides/dashboards/dashboard-inventory.md
+          - "Metrics Readiness Matrix": 03-guides/dashboards/metrics-readiness-matrix.md
+          - "Migration Map v2": 03-guides/dashboards/migration-map-v2.md
           - "Monitoring Index": 03-guides/dashboards/monitoring-index.md
           - "Variables Guide": 03-guides/dashboards/variables-guide.md
           - "Operator UX v2": 03-guides/dashboards/operator-ux-v2.md
@@ -348,6 +360,7 @@ nav:
       - "GitHub Actions Workflows": 04-reference/github-actions-workflows.md
       - "Pipeline Catalog": 04-reference/pipeline-catalog.md
       - "Pipeline and Workflow Passports": 04-reference/passports/index.md
+      - "Proof-or-Stop Evidence Contract": 04-reference/contracts/proof-or-stop-evidence.md
       - "Pipeline Passport Projection Guide": 04-reference/passports/pipeline-passport-guide.md
       - "Composite Pipelines": 04-reference/pipelines/composites.md
       - "ChEMBL Normalization Deep Dive": 04-reference/normalization/chembl-normalization-deep-dive.md

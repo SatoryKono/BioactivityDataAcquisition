@@ -58,9 +58,9 @@
     }
   },
   "dead_code": {
-    "repo_wide_zero_import_candidate_count": 6,
+    "repo_wide_zero_import_candidate_count": 5,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
-    "repo_wide_classified_zero_import_candidate_count": 6,
+    "repo_wide_classified_zero_import_candidate_count": 5,
     "repo_wide_candidates_without_owner_tests_count": 0
   },
   "config_surface": {
@@ -77,6 +77,6 @@
     "closeout_files_using_live_residual_helpers": 8,
     "fold_into_generic_inventory_count": 60,
     "retained_public_entrypoint_count": 12,
-    "zero_reference_supporting_script_count": 8
+    "zero_reference_supporting_script_count": 5
   }
 }

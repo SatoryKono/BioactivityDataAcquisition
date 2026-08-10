@@ -48,7 +48,7 @@ Historical migration prose was archived on 2026-08-04 (docs audit cycle 2 /
 ## How to regenerate the inventory
 
 ```powershell
-python scripts/data_quality/inventory_silver_filters_migration.py
+python -m scripts.data_quality inventory-silver-filters-migration
 ```
 
 Routed outputs (do not rename without updating
