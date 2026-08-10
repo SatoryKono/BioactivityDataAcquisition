@@ -79,6 +79,7 @@ class TestCiCoverageSurfaceMatrix:
             "unit-scripts-tooling",
             "test-matrix",
             "coverage-verify",
+            "coverage-inventory-currentness",
             "duration-telemetry",
         }
 
@@ -109,6 +110,12 @@ class TestCiCoverageSurfaceMatrix:
         assert coverage_verify["downloads_coverage_artifacts"] is True
         assert coverage_verify["threshold_enforced_in_job"] is True
         assert coverage_verify["participates_in_hard_threshold"] is True
+
+        currentness = entries["coverage-inventory-currentness"]
+        assert currentness["lane_type"] == "artifact_currentness_gate"
+        assert currentness["downloads_coverage_artifacts"] is True
+        assert currentness["threshold_enforced_in_job"] is False
+        assert currentness["participates_in_hard_threshold"] is False
 
         execution_only_jobs = {
             "control-plane-e2e",
@@ -193,6 +200,33 @@ class TestCiCoverageSurfaceMatrix:
             assert shard in coverage_block, (
                 f"coverage-verify must fail closed when {shard} is unavailable"
             )
+
+        matrix_entry = entries["test-matrix"]
+        matrix_block = _job_block(workflow, "test-matrix")
+        matrix_shards = {
+            "reports/coverage/.coverage.unit-domain",
+            "reports/coverage/.coverage.unit-application",
+            "reports/coverage/.coverage.unit-infrastructure",
+            "reports/coverage/.coverage.unit-other",
+            "reports/coverage/.coverage.integration",
+            "reports/coverage/.coverage.security",
+        }
+        assert set(matrix_entry["coverage_files"]) == matrix_shards
+        assert matrix_shards <= set(aggregation["required_blocking_lane_shards"])
+        assert "if-no-files-found: error" in matrix_block
+
+    def test_candidate_producer_and_currentness_gate_are_separate(self) -> None:
+        """A green SHA-bound producer must remain usable for first refresh."""
+        matrix = _load_yaml(MATRIX_PATH)
+        workflow = _read_workflow(ROOT / matrix["workflow_path"])
+        producer = _job_block(workflow, "coverage-verify")
+        currentness = _job_block(workflow, "coverage-inventory-currentness")
+
+        assert "module-coverage-inventory.candidate.json" in producer
+        assert "cmp --silent" not in producer
+        assert "needs: coverage-verify" in currentness
+        assert "name: coverage-report" in currentness
+        assert "cmp --silent" in currentness
 
     def test_blocking_confidence_lanes_have_required_assertions(self) -> None:
         matrix = _load_yaml(MATRIX_PATH)

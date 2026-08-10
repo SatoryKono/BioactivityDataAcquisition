@@ -905,6 +905,13 @@ module_coverage_inventory:
   canonical_lane: coverage-verify
   authoritative_status_source: live_ci_coverage_verify
   committed_artifact_refresh_policy: green_coverage_verify_run_only
+  trusted_candidate_producer_job: coverage-verify
+  required_currentness_gate_job: coverage-inventory-currentness
+  trusted_candidate_semantics: >-
+    The coverage-verify producer job must succeed on the exact source SHA after
+    line, branch, and per-module regression gates. Its immutable artifact is
+    authoritative even when the separate required currentness gate fails only
+    because the committed inventory has not consumed that candidate yet.
   local_semantic_check: >-
     pytest tests/architecture/test_module_coverage_inventory.py -q --tb=short
   source_tree_freshness_check: >-

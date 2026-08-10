@@ -62,10 +62,8 @@ def test_module_coverage_gates_branch_policy_matches_matrix() -> None:
 
 
 @pytest.mark.architecture
-def test_typing_stub_partial_branch_policy_is_narrow() -> None:
-    """Typing stubs may suppress only their impossible alternate branch."""
+def test_branch_policy_does_not_hide_partial_branches_globally() -> None:
+    """Branch debt must be closed by execution, not a global partial regex."""
     pyproject = tomllib.loads((_REPO / "pyproject.toml").read_text(encoding="utf-8"))
 
-    assert pyproject["tool"]["coverage"]["report"]["partial_also"] == [
-        r"^\s*(?:async\s+)?def .*:\s*\.\.\.$"
-    ]
+    assert "partial_also" not in pyproject["tool"]["coverage"]["report"]

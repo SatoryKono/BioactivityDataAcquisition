@@ -74,9 +74,7 @@ def test_issue_5564_debt_governance_gates_remain_passing() -> None:
     # assert all(gate["status"] != "fail" for gate in gates["gates"])
     # assert summary["warning_gates"] == []
     # assert summary["release_gate_status"] == "passing"
-    # Floor tracks the committed scorecard integral (currently 7.41). Do not raise
-    # this assertion above the live scorecard without regenerating the scorecard.
-    assert summary["architecture_quality_scorecard_integral_score"] >= 7.41
+    assert summary["architecture_quality_scorecard_integral_score"] >= 7.98
 
 
 @pytest.mark.architecture

@@ -1008,7 +1008,7 @@ jobs:
           name: coverage-data-${{ matrix.test-group.name }}
           path: reports/coverage/.coverage.${{ matrix.test-group.name }}
           include-hidden-files: true
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 7
 
       - name: Upload test telemetry (${{ matrix.test-group.name }} on Python 3.12)
@@ -1173,6 +1173,12 @@ jobs:
             reports/coverage/.coverage.contract-confidence
             reports/coverage/.coverage.repo-backed-unit
             reports/coverage/.coverage.unit-scripts-tooling
+            reports/coverage/.coverage.unit-domain
+            reports/coverage/.coverage.unit-application
+            reports/coverage/.coverage.unit-infrastructure
+            reports/coverage/.coverage.unit-other
+            reports/coverage/.coverage.integration
+            reports/coverage/.coverage.security
           )
           for shard in "${required_shards[@]}"; do
             if [ ! -s "$shard" ]; then
@@ -1209,16 +1215,6 @@ jobs:
             --enforce-module-thresholds block-regression \
             --fail-on-regression
 
-      - name: Verify committed module coverage inventory is current
-        run: |
-          if ! cmp --silent \
-            reports/quality/module-coverage-inventory.json \
-            reports/quality/module-coverage-inventory.candidate.json; then
-            echo "Committed module coverage inventory is stale."
-            echo "Download module-coverage-inventory.candidate.json from this trusted green coverage run."
-            exit 1
-          fi
-
       - name: Upload Coverage Report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         if: always()
@@ -1229,6 +1225,37 @@ jobs:
             reports/quality/module-coverage-inventory.json
             reports/quality/module-coverage-inventory.candidate.json
           retention-days: 30
+
+  # Keep candidate production independently green and SHA-bound. This required
+  # gate fails closed when the committed inventory has not consumed it yet.
+  coverage-inventory-currentness:
+    runs-on: ubuntu-latest
+    needs: coverage-verify
+    timeout-minutes: 5
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Download trusted coverage report
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: coverage-report
+          path: reports
+
+      - name: Verify committed module coverage inventory is current
+        run: |
+          set -euo pipefail
+          test -s reports/quality/module-coverage-inventory.candidate.json
+          if ! cmp --silent \
+            reports/quality/module-coverage-inventory.json \
+            reports/quality/module-coverage-inventory.candidate.json; then
+            echo "Committed module coverage inventory is stale."
+            echo "Download module-coverage-inventory.candidate.json from the successful SHA-bound coverage-verify producer."
+            exit 1
+          fi
 
   duration-telemetry:
     if: always()
