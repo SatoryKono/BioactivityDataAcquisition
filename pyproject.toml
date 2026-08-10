@@ -293,6 +293,10 @@ exclude_lines = [
     "^\\s*pass\\s*$",
     "^\\s*\\.\\.\\.\\s*$",
 ]
+partial_also = [
+    # One-line typing stubs have no executable alternative exit branch.
+    "^\\s*(?:async\\s+)?def .*:\\s*\\.\\.\\.$",
+]
 # Note: fail_under is NOT set here because:
 # 1. CI test-matrix runs parallel test groups that cover partial codebase
 # 2. CI coverage-verify step explicitly uses --cov-fail-under=85
