@@ -16,11 +16,22 @@ from bioetl.domain.control_plane.run_ledger import (
 from bioetl.domain.types import RunID
 
 ALL_SCOPE = "All"
-_ALL_SCOPE_TOKENS = frozenset({ALL_SCOPE, "$__all", "__all", "*"})
+_ALL_SCOPE_TOKENS = frozenset({ALL_SCOPE, "$__all", "__all", "*", "all"})
 _TERMINAL_EVENT_TYPES = frozenset(
     {RUN_FINISHED_EVENT, RUN_FAILED_EVENT, RUN_SHUTDOWN_EVENT}
 )
 WorkflowAliasMap = dict[tuple[str, str | None], tuple[str, ...]]
+
+
+def _is_all_scope_token(value: str | None) -> bool:
+    """Return True for Grafana All-scope tokens (case-insensitive for ``all``)."""
+    if value is None:
+        return False
+    normalized = value.strip()
+    if not normalized:
+        return False
+    lowered = normalized.casefold()
+    return lowered in {"all", "*"} or normalized in {"$__all", "__all", ALL_SCOPE}
 
 
 class RunLedgerLookup(Protocol):
@@ -63,7 +74,7 @@ def selected_pipeline_scope(
 ) -> tuple[str, ...]:
     if selected_pipelines:
         return selected_pipelines
-    if requested_pipeline is None or requested_pipeline.strip() in _ALL_SCOPE_TOKENS:
+    if requested_pipeline is None or _is_all_scope_token(requested_pipeline):
         return ()
     return (requested_pipeline,)
 
@@ -107,15 +118,21 @@ def _manifest_matches_scope(
 ) -> bool:
     if selected_run_id is not None:
         return str(manifest.run_id) == selected_run_id
-    if selected_pipelines and manifest.pipeline_name not in selected_pipelines:
+    pipelines = _without_all_scope_tokens(selected_pipelines)
+    run_types = _without_all_scope_tokens(selected_run_types)
+    workflows = _without_all_scope_tokens(selected_workflows)
+    if pipelines and manifest.pipeline_name not in pipelines:
         return False
-    if selected_run_types and manifest.run_type.value not in selected_run_types:
+    if run_types and manifest.run_type.value not in run_types:
         return False
-    if not selected_workflows:
+    if not workflows:
         return True
-    return bool(
-        set(selected_workflows) & set(_workflow_candidates(manifest, workflow_aliases))
-    )
+    return bool(set(workflows) & set(_workflow_candidates(manifest, workflow_aliases)))
+
+
+def _without_all_scope_tokens(values: tuple[str, ...]) -> tuple[str, ...]:
+    """Drop Grafana All-scope tokens so they never filter as literal labels."""
+    return tuple(value for value in values if not _is_all_scope_token(value))
 
 
 def build_workflow_aliases(

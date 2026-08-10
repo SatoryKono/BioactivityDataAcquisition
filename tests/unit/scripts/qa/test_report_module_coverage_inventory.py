@@ -17,7 +17,7 @@ import pytest
 
 from scripts.engineering.qa.report_module_coverage_inventory import (
     _SourceModuleSnapshot,
-    _coverage_filename_to_repo_path,
+    _parse_coverage_xml,
     _module_is_declaration_only,
     _read_source_module_snapshots,
     _read_stable_source_module_snapshots,
@@ -25,25 +25,6 @@ from scripts.engineering.qa.report_module_coverage_inventory import (
 )
 
 pytestmark = pytest.mark.unit
-
-
-def test_coverage_filename_prefers_bioetl_for_ambiguous_source_roots(
-    tmp_path: Path,
-) -> None:
-    scripts_root = tmp_path / "scripts"
-    bioetl_root = tmp_path / "src" / "bioetl"
-    scripts_root.mkdir()
-    bioetl_root.mkdir(parents=True)
-    (scripts_root / "__init__.py").write_text("", encoding="utf-8")
-    (bioetl_root / "__init__.py").write_text("", encoding="utf-8")
-
-    repo_path = _coverage_filename_to_repo_path(
-        "__init__.py",
-        repo_root=tmp_path,
-        source_roots=(scripts_root, bioetl_root),
-    )
-
-    assert repo_path == "src/bioetl/__init__.py"
 
 
 def test_read_source_module_snapshots_skips_vanished_path(
@@ -170,3 +151,49 @@ def test_module_is_declaration_only_rejects_runtime_behavior() -> None:
     source = "def build() -> int:\n    return 1\n"
 
     assert _module_is_declaration_only(source) is False
+
+
+def test_coverage_xml_prefers_bioetl_source_for_ambiguous_root_module(
+    tmp_path: Path,
+) -> None:
+    scripts_init = tmp_path / "scripts" / "__init__.py"
+    bioetl_init = tmp_path / "src" / "bioetl" / "__init__.py"
+    coverage_xml = tmp_path / "reports" / "coverage" / "coverage.xml"
+    scripts_init.parent.mkdir(parents=True)
+    bioetl_init.parent.mkdir(parents=True)
+    coverage_xml.parent.mkdir(parents=True)
+    scripts_init.write_text("# package\n", encoding="utf-8")
+    bioetl_init.write_text(
+        '"""BioETL."""\n\n__version__ = "1.0"\n',
+        encoding="utf-8",
+    )
+    coverage_xml.write_text(
+        """<?xml version="1.0" ?>
+<coverage>
+  <sources>
+    <source>scripts</source>
+    <source>src/bioetl</source>
+  </sources>
+  <packages>
+    <package name=".">
+      <classes>
+        <class name="__init__.py" filename="__init__.py">
+          <lines><line number="3" hits="1"/></lines>
+        </class>
+      </classes>
+    </package>
+  </packages>
+</coverage>
+""",
+        encoding="utf-8",
+    )
+
+    coverage_by_path = _parse_coverage_xml(coverage_xml, repo_root=tmp_path)
+
+    assert coverage_by_path == {
+        "src/bioetl/__init__.py": {
+            "executable_lines": 1,
+            "covered_lines": 1,
+            "missing_lines": 0,
+        }
+    }

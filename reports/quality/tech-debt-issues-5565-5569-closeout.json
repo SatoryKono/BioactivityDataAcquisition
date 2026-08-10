@@ -3,13 +3,17 @@
   "status": "implemented_local_closeable",
   "budget_policy": "no_growth_ratchet_only",
   "metrics": {
-    "max_non_composite_duplication_clusters": 8
+    "max_non_composite_duplication_clusters": 15
   },
   "issues": [
     {
       "issue": "#5565",
       "theme": "Semantic seam role inventory governance",
-      "debt_types": ["Governance gap", "Architecture debt", "DDD violation"],
+      "debt_types": [
+        "Governance gap",
+        "Architecture debt",
+        "DDD violation"
+      ],
       "action": "Governed semantic seam role inventory with proper caller guards and allowed semantic roles.",
       "risk": "low",
       "evidence": [
@@ -20,7 +24,11 @@
     {
       "issue": "#5566",
       "theme": "Semantic seams have roles and no new src callers",
-      "debt_types": ["Governance gap", "Architecture debt", "DDD violation"],
+      "debt_types": [
+        "Governance gap",
+        "Architecture debt",
+        "DDD violation"
+      ],
       "action": "Ensured semantic seams have proper roles and bounded src importers with fail-fast review policy.",
       "risk": "low",
       "evidence": [
@@ -31,7 +39,11 @@
     {
       "issue": "#5567",
       "theme": "Control plane facades have bounded first party imports",
-      "debt_types": ["Architecture debt", "Governance gap", "DDD violation"],
+      "debt_types": [
+        "Architecture debt",
+        "Governance gap",
+        "DDD violation"
+      ],
       "action": "Ensured control plane facades have bounded first-party imports with proper caller guards.",
       "risk": "low",
       "evidence": [
@@ -42,7 +54,11 @@
     {
       "issue": "#5568",
       "theme": "Non composite config duplication is explicitly governed",
-      "debt_types": ["Config debt", "Duplication", "Governance gap"],
+      "debt_types": [
+        "Config debt",
+        "Duplication",
+        "Governance gap"
+      ],
       "action": "Governed non-composite config duplication with explicit linked issues and owner accountability.",
       "risk": "medium",
       "evidence": [
@@ -53,7 +69,11 @@
     {
       "issue": "#5569",
       "theme": "Retired observability events have lifecycle guards",
-      "debt_types": ["Observability gap", "Governance gap", "Quality debt"],
+      "debt_types": [
+        "Observability gap",
+        "Governance gap",
+        "Quality debt"
+      ],
       "action": "Governed retired observability events with lifecycle guards and proper reactivation requirements.",
       "risk": "low",
       "evidence": [

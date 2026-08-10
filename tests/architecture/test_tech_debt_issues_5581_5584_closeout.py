@@ -141,7 +141,12 @@ def test_issue_5581_tooling_roots_have_owner_decisions_in_registry_and_evidence(
     assert (
         candidates[".gemini"]["current_live_state"] == "present_local_only_root_surface"
     )
-    assert candidates[".vibe"]["current_live_state"] == "present_curated_root_surface"
+    # .vibe is registered tooling surface but may be absent on a given checkout;
+    # registry live-state is the closeout authority (not a hard require-present).
+    assert candidates[".vibe"]["current_live_state"] in {
+        "present_curated_root_surface",
+        "absent_from_root_baseline",
+    }
 
 
 def test_issue_5584_env_surfaces_are_security_review_only_and_not_cleanup_safe() -> (

@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from bioetl.interfaces.http._control_plane_selector_records import SelectorRecord
+from bioetl.interfaces.http._control_plane_selector_records import (
+    SelectorRecord,
+    _without_all_scope_tokens,
+)
 
 
 def filter_records(
@@ -16,13 +19,17 @@ def filter_records(
 ) -> tuple[SelectorRecord, ...]:
     if selected_run_id:
         return tuple(record for record in records if record.run_id == selected_run_id)
+    workflows = _without_all_scope_tokens(selected_workflows)
+    pipelines = _without_all_scope_tokens(selected_pipelines)
+    run_types = _without_all_scope_tokens(selected_run_types)
+    run_statuses = _without_all_scope_tokens(selected_run_statuses)
     return tuple(
         record
         for record in records
-        if _matches_any(selected_workflows, record.workflow_candidates)
-        and _matches_one(selected_pipelines, record.pipeline)
-        and _matches_one(selected_run_types, record.run_type)
-        and _matches_one(selected_run_statuses, record.run_status)
+        if _matches_any(workflows, record.workflow_candidates)
+        and _matches_one(pipelines, record.pipeline)
+        and _matches_one(run_types, record.run_type)
+        and _matches_one(run_statuses, record.run_status)
     )
 
 

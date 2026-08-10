@@ -52,6 +52,51 @@ def test_malformed_json_has_bounded_parse_diagnostic(tmp_path: Path) -> None:
     assert inspection.schema_errors == ("manifest_parse_error",)
 
 
+def test_non_object_json_has_bounded_schema_diagnostic(tmp_path: Path) -> None:
+    """Syntactically valid arrays are distinguished from parse failures."""
+    store = FileRunManifestStore(tmp_path / "run_manifest")
+    path = _manifest_path(store, "manifest-array")
+    path.parent.mkdir(parents=True)
+    path.write_text("[]", encoding="utf-8")
+
+    inspection = store.inspect_raw_manifest("manifest-array")
+
+    assert inspection.parse_ok is True
+    assert inspection.schema_errors == ("manifest_payload_not_object",)
+
+
+def test_manifest_read_error_has_bounded_diagnostic(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Filesystem read failures remain distinct from malformed JSON."""
+    store = _saved_store(tmp_path, manifest_id="manifest-unreadable")
+    path = _manifest_path(store, "manifest-unreadable")
+    original_read_text = Path.read_text
+
+    def _read_text(
+        candidate: Path,
+        encoding: str | None = None,
+        errors: str | None = None,
+        newline: str | None = None,
+    ) -> str:
+        if candidate == path:
+            raise OSError("read failed")
+        return original_read_text(
+            candidate,
+            encoding=encoding,
+            errors=errors,
+            newline=newline,
+        )
+
+    monkeypatch.setattr(Path, "read_text", _read_text)
+
+    inspection = store.inspect_raw_manifest("manifest-unreadable")
+
+    assert inspection.parse_ok is False
+    assert inspection.schema_errors == ("manifest_read_error",)
+
+
 def test_raw_inspection_detects_string_coercion_before_typed_load(
     tmp_path: Path,
 ) -> None:
@@ -94,6 +139,41 @@ def test_raw_inspection_detects_structured_field_type_errors(tmp_path: Path) -> 
         "manifest_provider_not_string",
         "manifest_schema_version_not_string",
         "manifest_source_refs_not_array",
+    )
+
+
+def test_raw_inspection_reports_missing_empty_optional_and_identity_shapes(
+    tmp_path: Path,
+) -> None:
+    """Pre-coercion diagnostics retain precise reasons across schema families."""
+    store = _saved_store(tmp_path)
+    path = _manifest_path(store, "manifest-raw")
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload.pop("launch_context")
+    payload.pop("source_refs")
+    payload.update(
+        {
+            "pipeline_name": " ",
+            "run_id": 123,
+            "run_type": "not-a-run-type",
+            "runtime_config": [],
+            "planned_artifacts": {},
+            "workflow_name": 7,
+        }
+    )
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    inspection = store.inspect_raw_manifest("manifest-raw")
+
+    assert inspection.schema_errors == (
+        "manifest_launch_context_missing",
+        "manifest_pipeline_name_empty",
+        "manifest_planned_artifacts_not_array",
+        "manifest_run_id_not_string",
+        "manifest_run_type_invalid",
+        "manifest_runtime_config_not_object",
+        "manifest_source_refs_missing",
+        "manifest_workflow_name_not_string",
     )
 
 

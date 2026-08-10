@@ -1188,7 +1188,8 @@
             "targetBlank": false,
             "includeVars": false
           }
-        ]
+        ],
+        "cellHeight": "sm"
       },
       "transformations": [
         {
@@ -1527,314 +1528,323 @@
       "description": "Contains selected-range run, terminal-state, and reject evidence. Empty history is not proof of current health, and these panels do not determine current Fleet Health.",
       "panels": [
         {
-      "id": 9010,
-      "type": "table",
-      "title": "Review Failed Runs",
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 0,
-        "y": 24
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
+          "id": 9010,
+          "type": "table",
+          "title": "Review Failed Runs",
+          "gridPos": {
+            "h": 6,
+            "w": 8,
+            "x": 0,
+            "y": 24
           },
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": false
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
           },
-          "unit": "none"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "unit": "none"
             },
-            "properties": [
+            "overrides": [
               {
-                "id": "displayName",
-                "value": "Count"
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
               }
             ]
-          }
-        ]
-      },
-      "targets": [
-        {
-          "expr": "sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status=\"failed\",pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"}[$__range]))",
-          "refId": "A",
-          "format": "table",
-          "instant": true
-        }
-      ],
-      "options": {
-        "dataLinks": [
-          {
-            "title": "Open Runtime",
-            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
-            "targetBlank": false,
-            "includeVars": false
-          }
-        ]
-      },
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "__name__": true
-            },
-            "indexByName": {
-              "pipeline": 0,
-              "run_type": 1,
-              "Value": 2
-            },
-            "renameByName": {
-              "pipeline": "Pipeline",
-              "run_type": "Run Type",
-              "Value": "Failures",
-              "Value #A": "Series A",
-              "Value #B": "Series B",
-              "Value #C": "Series C"
-            }
-          }
-        }
-      ],
-      "description": "Lists failed-run samples in the selected range for Pipeline and Run Type. No rows means no matching failures were observed, not proof that current Fleet Health is OK; missing telemetry remains UNKNOWN. Open Pipeline Diagnostics to localize failures."
-    },
-    {
-      "id": 9011,
-      "type": "table",
-      "title": "Review Recent Terminal Runs",
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 8,
-        "y": 24
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
           },
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": false
-          },
-          "unit": "none"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Count"
-              }
-            ]
-          }
-        ]
-      },
-      "targets": [
-        {
-          "expr": "sum by (pipeline, status) (increase(bioetl_pipeline_runs_total{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",status!=\"success\"}[$__range]))",
-          "refId": "A",
-          "format": "table",
-          "instant": true
-        }
-      ],
-      "options": {
-        "dataLinks": [
-          {
-            "title": "Open Control Plane",
-            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
-            "targetBlank": false,
-            "includeVars": false
-          },
-          {
-            "title": "Open Runtime",
-            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
-            "targetBlank": false,
-            "includeVars": false
-          }
-        ],
-        "cellHeight": "sm"
-      },
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "__name__": true,
-              "json_path": true,
-              "markdown_path": true,
-              "path": true,
-              "report_path": true,
-              "artifact_path": true
-            },
-            "indexByName": {
-              "pipeline": 0,
-              "status": 1,
-              "Value": 2
-            },
-            "renameByName": {
-              "pipeline": "Pipeline",
-              "status": "Status",
-              "Value": "Runs",
-              "Value #A": "Series A",
-              "Value #B": "Series B",
-              "Value #C": "Series C",
-              "completed_at": "Completed",
-              "run_id": "Run",
-              "kind": "Artifact",
-              "name": "Artifact"
-            }
-          }
-        }
-      ],
-      "description": "Lists recent non-success terminal runs in the selected range, grouped by Pipeline. No rows means no matching terminal evidence, not proof that current Fleet Health is OK. Continue in Trust for persisted run evidence or Pipeline Diagnostics for execution detail."
-    },
-    {
-      "id": 9015,
-      "type": "stat",
-      "title": "Track Silver Rejects",
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 16,
-        "y": 24
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 0,
-          "mappings": [
+          "targets": [
             {
-              "type": "special",
+              "expr": "sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status=\"failed\",pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"}[$__range]))",
+              "refId": "A",
+              "format": "table",
+              "instant": true
+            }
+          ],
+          "options": {
+            "dataLinks": [
+              {
+                "title": "Open Runtime",
+                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+                "targetBlank": false,
+                "includeVars": false
+              }
+            ],
+            "cellHeight": "sm",
+            "footer": {
+              "show": false,
+              "reducer": [
+                "sum"
+              ],
+              "countRows": false,
+              "fields": ""
+            }
+          },
+          "transformations": [
+            {
+              "id": "organize",
               "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "pipeline": 0,
+                  "run_type": 1,
+                  "Value": 2
+                },
+                "renameByName": {
+                  "pipeline": "Pipeline",
+                  "run_type": "Run Type",
+                  "Value": "Failures",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
                 }
               }
             }
           ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
+          "description": "Lists failed-run samples in the selected range for Pipeline and Run Type. No rows means no matching failures were observed, not proof that current Fleet Health is OK; missing telemetry remains UNKNOWN. Open Pipeline Diagnostics to localize failures."
+        },
+        {
+          "id": 9011,
+          "type": "table",
+          "title": "Review Recent Terminal Runs",
+          "gridPos": {
+            "h": 6,
+            "w": 8,
+            "x": 8,
+            "y": 24
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
               },
-              {
-                "color": "orange",
-                "value": 0.05
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
               },
+              "unit": "none"
+            },
+            "overrides": [
               {
-                "color": "red",
-                "value": 0.2
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
               }
             ]
           },
-          "unit": "percentunit",
-          "noValue": "None observed"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Reject Count"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "short"
-              },
-              {
-                "id": "decimals",
-                "value": 0
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Reject Count"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "gray"
-                }
-              },
-              {
-                "id": "decimals",
-                "value": 0
-              }
-            ]
-          }
-        ]
-      },
-      "targets": [
-        {
-          "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range])))",
-          "refId": "A",
-          "legendFormat": "Reject Count",
-          "instant": true
-        },
-        {
-          "expr": "(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range]))) / clamp_min((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[$__range]))), 1)",
-          "refId": "B",
-          "legendFormat": "Reject Rate",
-          "instant": true
-        }
-      ],
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
+          "targets": [
+            {
+              "expr": "sum by (pipeline, status) (increase(bioetl_pipeline_runs_total{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",status!=\"success\"}[$__range]))",
+              "refId": "A",
+              "format": "table",
+              "instant": true
+            }
           ],
-          "fields": "",
-          "values": false
+          "options": {
+            "dataLinks": [
+              {
+                "title": "Open Control Plane",
+                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+                "targetBlank": false,
+                "includeVars": false
+              },
+              {
+                "title": "Open Runtime",
+                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+                "targetBlank": false,
+                "includeVars": false
+              }
+            ],
+            "cellHeight": "sm"
+          },
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "json_path": true,
+                  "markdown_path": true,
+                  "path": true,
+                  "report_path": true,
+                  "artifact_path": true
+                },
+                "indexByName": {
+                  "pipeline": 0,
+                  "status": 1,
+                  "Value": 2
+                },
+                "renameByName": {
+                  "pipeline": "Pipeline",
+                  "status": "Status",
+                  "Value": "Runs",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C",
+                  "completed_at": "Completed",
+                  "run_id": "Run",
+                  "kind": "Artifact",
+                  "name": "Artifact"
+                }
+              }
+            }
+          ],
+          "description": "Lists recent non-success terminal runs in the selected range, grouped by Pipeline. No rows means no matching terminal evidence, not proof that current Fleet Health is OK. Continue in Trust for persisted run evidence or Pipeline Diagnostics for execution detail."
         },
-        "textMode": "auto"
-      },
-      "description": "Shows Silver reject count and rate for the selected range and scope. Zero can mean no rejects only when a run started and matching telemetry is present; no matching scope, a run not started, or missing evidence remains UNKNOWN. This panel does not determine current Fleet Health; use Data Quality or Run Explorer."
+        {
+          "id": 9015,
+          "type": "stat",
+          "title": "Track Silver Rejects",
+          "gridPos": {
+            "h": 6,
+            "w": 8,
+            "x": 16,
+            "y": 24
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0,
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0.05
+                  },
+                  {
+                    "color": "red",
+                    "value": 0.2
+                  }
+                ]
+              },
+              "unit": "percentunit",
+              "noValue": "None observed"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Reject Count"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "short"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Reject Count"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "gray"
+                    }
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 0
+                  }
+                ]
+              }
+            ]
+          },
+          "targets": [
+            {
+              "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range])))",
+              "refId": "A",
+              "legendFormat": "Reject Count",
+              "instant": true
+            },
+            {
+              "expr": "(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range]))) / clamp_min((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[$__range]))), 1)",
+              "refId": "B",
+              "legendFormat": "Reject Rate",
+              "instant": true
+            }
+          ],
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "description": "Shows Silver reject count and rate for the selected range and scope. Zero can mean no rejects only when a run started and matching telemetry is present; no matching scope, a run not started, or missing evidence remains UNKNOWN. This panel does not determine current Fleet Health; use Data Quality or Run Explorer."
         }
       ]
     },
@@ -1852,1156 +1862,1161 @@
       "description": "Contains current domain summaries and diagnostic routing. It supports the first-screen verdict and stays collapsed until Domain Status or First Action identifies an affected area.",
       "panels": [
         {
-      "id": 9006,
-      "type": "table",
-      "title": "Review Control Plane Status",
-      "gridPos": {
-        "h": 5,
-        "w": 5,
-        "x": 0,
-        "y": 31
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
+          "id": 9006,
+          "type": "table",
+          "title": "Review Control Plane Status",
+          "gridPos": {
+            "h": 5,
+            "w": 5,
+            "x": 0,
+            "y": 31
           },
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": false
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
           },
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "OK",
-                  "color": "green"
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
                 },
-                "1": {
-                  "text": "WARN",
-                  "color": "orange"
+                "inspect": false
+              },
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "OK",
+                      "color": "green"
+                    },
+                    "1": {
+                      "text": "WARN",
+                      "color": "orange"
+                    },
+                    "2": {
+                      "text": "CRIT",
+                      "color": "red"
+                    },
+                    "3": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
                 },
-                "2": {
-                  "text": "CRIT",
-                  "color": "red"
-                },
-                "3": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
                 }
-              }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "none"
             },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "pipeline"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Pipeline"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Status"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "bioetl_l1_control_plane_current_status"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Status"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
+              }
+            ]
+          },
+          "targets": [
             {
-              "type": "special",
+              "expr": "max by (pipeline) (bioetl_l1_control_plane_current_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_control_plane_current_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
+              "refId": "A",
+              "format": "table",
+              "instant": true
+            }
+          ],
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false
+            },
+            "dataLinks": [
+              {
+                "title": "Open Control Plane",
+                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+                "targetBlank": false,
+                "includeVars": false
+              }
+            ],
+            "cellHeight": "sm"
+          },
+          "transformations": [
+            {
+              "id": "organize",
               "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "pipeline": 0,
+                  "Value": 1,
+                  "bioetl_l1_control_plane_current_status": 1
+                },
+                "renameByName": {
+                  "pipeline": "Pipeline",
+                  "Value": "Status",
+                  "bioetl_l1_control_plane_current_status": "Status",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
                 }
               }
             }
           ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "none"
+          "description": "Shows current Control Plane status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN is incomplete evidence. Open Trust for the failing manifest, ledger, checkpoint, or lineage contract."
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "pipeline"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Pipeline"
-              }
-            ]
+        {
+          "id": 9003,
+          "type": "table",
+          "title": "Review Runtime Status",
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 5,
+            "y": 31
           },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Value"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "OK",
+                      "color": "green"
+                    },
+                    "1": {
+                      "text": "WARN",
+                      "color": "orange"
+                    },
+                    "2": {
+                      "text": "CRIT",
+                      "color": "red"
+                    },
+                    "3": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                },
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "none"
             },
-            "properties": [
+            "overrides": [
               {
-                "id": "displayName",
-                "value": "Status"
+                "matcher": {
+                  "id": "byName",
+                  "options": "pipeline"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Pipeline"
+                  }
+                ]
               },
               {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "bioetl_l1_control_plane_current_status"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Status"
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Status"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  }
+                ]
               },
               {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
+                "matcher": {
+                  "id": "byName",
+                  "options": "bioetl_l1_runtime_blocker_status"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Status"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
               }
             ]
           },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Count"
-              }
-            ]
-          }
-        ]
-      },
-      "targets": [
-        {
-          "expr": "max by (pipeline) (bioetl_l1_control_plane_current_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_control_plane_current_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
-          "refId": "A",
-          "format": "table",
-          "instant": true
-        }
-      ],
-      "options": {
-        "showHeader": true,
-        "footer": {
-          "show": false
-        },
-        "dataLinks": [
-          {
-            "title": "Open Control Plane",
-            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
-            "targetBlank": false,
-            "includeVars": false
-          }
-        ]
-      },
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "__name__": true
-            },
-            "indexByName": {
-              "pipeline": 0,
-              "Value": 1,
-              "bioetl_l1_control_plane_current_status": 1
-            },
-            "renameByName": {
-              "pipeline": "Pipeline",
-              "Value": "Status",
-              "bioetl_l1_control_plane_current_status": "Status",
-              "Value #A": "Series A",
-              "Value #B": "Series B",
-              "Value #C": "Series C"
+          "targets": [
+            {
+              "expr": "max by (pipeline) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_runtime_blocker_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
+              "refId": "A",
+              "format": "table",
+              "instant": true
             }
-          }
-        }
-      ],
-      "description": "Shows current Control Plane status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN is incomplete evidence. Open Trust for the failing manifest, ledger, checkpoint, or lineage contract."
-    },
-    {
-      "id": 9003,
-      "type": "table",
-      "title": "Review Runtime Status",
-      "gridPos": {
-        "h": 5,
-        "w": 4,
-        "x": 5,
-        "y": 31
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto"
+          ],
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false
             },
-            "inspect": false
-          },
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "OK",
-                  "color": "green"
-                },
-                "1": {
-                  "text": "WARN",
-                  "color": "orange"
-                },
-                "2": {
-                  "text": "CRIT",
-                  "color": "red"
-                },
-                "3": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
+            "dataLinks": [
+              {
+                "title": "Open Runtime",
+                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+                "targetBlank": false,
+                "includeVars": false
               }
-            },
+            ],
+            "cellHeight": "sm"
+          },
+          "transformations": [
             {
-              "type": "special",
+              "id": "organize",
               "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "pipeline": 0,
+                  "Value": 1,
+                  "bioetl_l1_runtime_blocker_status": 1
+                },
+                "renameByName": {
+                  "pipeline": "Pipeline",
+                  "Value": "Status",
+                  "bioetl_l1_runtime_blocker_status": "Status",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
                 }
               }
             }
           ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "none"
+          "description": "Shows current Runtime status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN is incomplete evidence. Open Pipeline Diagnostics for blocker detail."
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "pipeline"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Pipeline"
-              }
-            ]
+        {
+          "id": 9004,
+          "type": "table",
+          "title": "Review Data Quality Status",
+          "gridPos": {
+            "h": 5,
+            "w": 5,
+            "x": 9,
+            "y": 31
           },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Value"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "OK",
+                      "color": "green"
+                    },
+                    "1": {
+                      "text": "WARN",
+                      "color": "orange"
+                    },
+                    "2": {
+                      "text": "CRIT",
+                      "color": "red"
+                    },
+                    "3": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                },
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "none"
             },
-            "properties": [
+            "overrides": [
               {
-                "id": "displayName",
-                "value": "Status"
+                "matcher": {
+                  "id": "byName",
+                  "options": "pipeline"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Pipeline"
+                  }
+                ]
               },
               {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "bioetl_l1_runtime_blocker_status"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Status"
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Status"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  }
+                ]
               },
               {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
+                "matcher": {
+                  "id": "byName",
+                  "options": "bioetl_l1_dq_status"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Status"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
               }
             ]
           },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Count"
-              }
-            ]
-          }
-        ]
-      },
-      "targets": [
-        {
-          "expr": "max by (pipeline) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_runtime_blocker_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
-          "refId": "A",
-          "format": "table",
-          "instant": true
-        }
-      ],
-      "options": {
-        "showHeader": true,
-        "footer": {
-          "show": false
-        },
-        "dataLinks": [
-          {
-            "title": "Open Runtime",
-            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
-            "targetBlank": false,
-            "includeVars": false
-          }
-        ]
-      },
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "__name__": true
-            },
-            "indexByName": {
-              "pipeline": 0,
-              "Value": 1,
-              "bioetl_l1_runtime_blocker_status": 1
-            },
-            "renameByName": {
-              "pipeline": "Pipeline",
-              "Value": "Status",
-              "bioetl_l1_runtime_blocker_status": "Status",
-              "Value #A": "Series A",
-              "Value #B": "Series B",
-              "Value #C": "Series C"
+          "targets": [
+            {
+              "expr": "max by (pipeline) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_dq_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
+              "refId": "A",
+              "format": "table",
+              "instant": true
             }
-          }
-        }
-      ],
-      "description": "Shows current Runtime status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN is incomplete evidence. Open Pipeline Diagnostics for blocker detail."
-    },
-    {
-      "id": 9004,
-      "type": "table",
-      "title": "Review Data Quality Status",
-      "gridPos": {
-        "h": 5,
-        "w": 5,
-        "x": 9,
-        "y": 31
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto"
+          ],
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false
             },
-            "inspect": false
-          },
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "OK",
-                  "color": "green"
-                },
-                "1": {
-                  "text": "WARN",
-                  "color": "orange"
-                },
-                "2": {
-                  "text": "CRIT",
-                  "color": "red"
-                },
-                "3": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
+            "dataLinks": [
+              {
+                "title": "Open Data Quality",
+                "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+                "targetBlank": false,
+                "includeVars": false
               }
-            },
+            ],
+            "cellHeight": "sm"
+          },
+          "transformations": [
             {
-              "type": "special",
+              "id": "organize",
               "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "pipeline": 0,
+                  "Value": 1,
+                  "bioetl_l1_dq_status": 1
+                },
+                "renameByName": {
+                  "pipeline": "Pipeline",
+                  "Value": "Status",
+                  "bioetl_l1_dq_status": "Status",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
                 }
               }
             }
           ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "none"
+          "description": "Shows current Data Quality status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN is incomplete evidence. Open Data Quality for rule and accounting detail."
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "pipeline"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Pipeline"
-              }
-            ]
+        {
+          "id": 9007,
+          "type": "table",
+          "title": "Review Global Provider Status",
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 14,
+            "y": 31
           },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Value"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "OK",
+                      "color": "green"
+                    },
+                    "1": {
+                      "text": "WARN",
+                      "color": "orange"
+                    },
+                    "2": {
+                      "text": "CRIT",
+                      "color": "red"
+                    },
+                    "3": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                },
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "none"
             },
-            "properties": [
+            "overrides": [
               {
-                "id": "displayName",
-                "value": "Status"
+                "matcher": {
+                  "id": "byName",
+                  "options": "provider"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Provider"
+                  }
+                ]
               },
               {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "bioetl_l1_dq_status"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Status"
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Status"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  }
+                ]
               },
               {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
+                "matcher": {
+                  "id": "byName",
+                  "options": "bioetl_l1_provider_global_status"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Status"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
               }
             ]
           },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Count"
-              }
-            ]
-          }
-        ]
-      },
-      "targets": [
-        {
-          "expr": "max by (pipeline) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_dq_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
-          "refId": "A",
-          "format": "table",
-          "instant": true
-        }
-      ],
-      "options": {
-        "showHeader": true,
-        "footer": {
-          "show": false
-        },
-        "dataLinks": [
-          {
-            "title": "Open Data Quality",
-            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
-            "targetBlank": false,
-            "includeVars": false
-          }
-        ]
-      },
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "__name__": true
-            },
-            "indexByName": {
-              "pipeline": 0,
-              "Value": 1,
-              "bioetl_l1_dq_status": 1
-            },
-            "renameByName": {
-              "pipeline": "Pipeline",
-              "Value": "Status",
-              "bioetl_l1_dq_status": "Status",
-              "Value #A": "Series A",
-              "Value #B": "Series B",
-              "Value #C": "Series C"
+          "targets": [
+            {
+              "expr": "bioetl_l1_provider_global_status",
+              "refId": "A",
+              "format": "table",
+              "instant": true
             }
-          }
-        }
-      ],
-      "description": "Shows current Data Quality status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN is incomplete evidence. Open Data Quality for rule and accounting detail."
-    },
-    {
-      "id": 9007,
-      "type": "table",
-      "title": "Review Global Provider Status",
-      "gridPos": {
-        "h": 5,
-        "w": 4,
-        "x": 14,
-        "y": 31
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto"
+          ],
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false
             },
-            "inspect": false
-          },
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "OK",
-                  "color": "green"
-                },
-                "1": {
-                  "text": "WARN",
-                  "color": "orange"
-                },
-                "2": {
-                  "text": "CRIT",
-                  "color": "red"
-                },
-                "3": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
+            "dataLinks": [
+              {
+                "title": "Open Provider Health",
+                "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id",
+                "targetBlank": false,
+                "includeVars": false
               }
-            },
+            ],
+            "cellHeight": "sm"
+          },
+          "transformations": [
             {
-              "type": "special",
+              "id": "organize",
               "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "provider": 0,
+                  "Value": 1,
+                  "bioetl_l1_provider_global_status": 1
+                },
+                "renameByName": {
+                  "provider": "Provider",
+                  "Value": "Status",
+                  "bioetl_l1_provider_global_status": "Status",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
                 }
               }
             }
           ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "none"
+          "description": "Shows current Provider status across all pipelines. Pipeline and Run Type filters do not affect this panel. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; open Provider Health for provider-scoped evidence."
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "provider"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Provider"
-              }
-            ]
+        {
+          "id": 9005,
+          "type": "table",
+          "title": "Review Data Validation Status",
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 18,
+            "y": 31
           },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Value"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "OK",
+                      "color": "green"
+                    },
+                    "1": {
+                      "text": "WARN",
+                      "color": "orange"
+                    },
+                    "2": {
+                      "text": "CRIT",
+                      "color": "red"
+                    },
+                    "3": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                },
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "none"
             },
-            "properties": [
+            "overrides": [
               {
-                "id": "displayName",
-                "value": "Status"
+                "matcher": {
+                  "id": "byName",
+                  "options": "pipeline"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Pipeline"
+                  }
+                ]
               },
               {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "bioetl_l1_provider_global_status"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Status"
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Status"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  }
+                ]
               },
               {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
+                "matcher": {
+                  "id": "byName",
+                  "options": "bioetl_l1_gold_lifecycle_status"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Status"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
               }
             ]
           },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Count"
-              }
-            ]
-          }
-        ]
-      },
-      "targets": [
-        {
-          "expr": "bioetl_l1_provider_global_status",
-          "refId": "A",
-          "format": "table",
-          "instant": true
-        }
-      ],
-      "options": {
-        "showHeader": true,
-        "footer": {
-          "show": false
-        },
-        "dataLinks": [
-          {
-            "title": "Open Provider Health",
-            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id",
-            "targetBlank": false,
-            "includeVars": false
-          }
-        ]
-      },
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "__name__": true
-            },
-            "indexByName": {
-              "provider": 0,
-              "Value": 1,
-              "bioetl_l1_provider_global_status": 1
-            },
-            "renameByName": {
-              "provider": "Provider",
-              "Value": "Status",
-              "bioetl_l1_provider_global_status": "Status",
-              "Value #A": "Series A",
-              "Value #B": "Series B",
-              "Value #C": "Series C"
+          "targets": [
+            {
+              "expr": "max by (pipeline) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_gold_lifecycle_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
+              "refId": "A",
+              "format": "table",
+              "instant": true
             }
-          }
-        }
-      ],
-      "description": "Shows current Provider status across all pipelines. Pipeline and Run Type filters do not affect this panel. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; open Provider Health for provider-scoped evidence."
-    },
-    {
-      "id": 9005,
-      "type": "table",
-      "title": "Review Data Validation Status",
-      "gridPos": {
-        "h": 5,
-        "w": 6,
-        "x": 18,
-        "y": 31
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto"
+          ],
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false
             },
-            "inspect": false
-          },
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "OK",
-                  "color": "green"
-                },
-                "1": {
-                  "text": "WARN",
-                  "color": "orange"
-                },
-                "2": {
-                  "text": "CRIT",
-                  "color": "red"
-                },
-                "3": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
+            "dataLinks": [
+              {
+                "title": "Open Runtime",
+                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+                "targetBlank": false,
+                "includeVars": false
               }
-            },
+            ],
+            "cellHeight": "sm"
+          },
+          "transformations": [
             {
-              "type": "special",
+              "id": "organize",
               "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "pipeline": 0,
+                  "Value": 1,
+                  "bioetl_l1_gold_lifecycle_status": 1
+                },
+                "renameByName": {
+                  "pipeline": "Pipeline",
+                  "Value": "Status",
+                  "bioetl_l1_gold_lifecycle_status": "Status",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
                 }
               }
             }
           ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "none"
+          "description": "Shows current Data Validation lifecycle status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN is incomplete evidence. Open Pipeline Diagnostics for lifecycle detail."
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "pipeline"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Pipeline"
-              }
-            ]
+        {
+          "id": 9013,
+          "type": "table",
+          "title": "Review Workflow Status",
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 36
           },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Value"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "OK",
+                      "color": "green"
+                    },
+                    "1": {
+                      "text": "WARN",
+                      "color": "orange"
+                    },
+                    "2": {
+                      "text": "CRIT",
+                      "color": "red"
+                    },
+                    "3": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                },
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "none"
             },
-            "properties": [
+            "overrides": [
               {
-                "id": "displayName",
-                "value": "Status"
+                "matcher": {
+                  "id": "byName",
+                  "options": "pipeline"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Pipeline"
+                  }
+                ]
               },
               {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "bioetl_l1_gold_lifecycle_status"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Status"
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Status"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  }
+                ]
               },
               {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
+                "matcher": {
+                  "id": "byName",
+                  "options": "bioetl_l1_workflow_global_status"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Status"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
               }
             ]
           },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Count"
-              }
-            ]
-          }
-        ]
-      },
-      "targets": [
-        {
-          "expr": "max by (pipeline) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l1_gold_lifecycle_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
-          "refId": "A",
-          "format": "table",
-          "instant": true
-        }
-      ],
-      "options": {
-        "showHeader": true,
-        "footer": {
-          "show": false
-        },
-        "dataLinks": [
-          {
-            "title": "Open Runtime",
-            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
-            "targetBlank": false,
-            "includeVars": false
-          }
-        ]
-      },
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "__name__": true
-            },
-            "indexByName": {
-              "pipeline": 0,
-              "Value": 1,
-              "bioetl_l1_gold_lifecycle_status": 1
-            },
-            "renameByName": {
-              "pipeline": "Pipeline",
-              "Value": "Status",
-              "bioetl_l1_gold_lifecycle_status": "Status",
-              "Value #A": "Series A",
-              "Value #B": "Series B",
-              "Value #C": "Series C"
+          "targets": [
+            {
+              "expr": "max by (pipeline) (bioetl_l1_workflow_global_status{pipeline=~\"$pipeline\",pipeline!=\"test_pipe\"} or ((bioetl_l1_workflow_global_status{pipeline!=\"test_pipe\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
+              "refId": "A",
+              "format": "table",
+              "instant": true
             }
-          }
-        }
-      ],
-      "description": "Shows current Data Validation lifecycle status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN is incomplete evidence. Open Pipeline Diagnostics for lifecycle detail."
-    },
-    {
-      "id": 9013,
-      "type": "table",
-      "title": "Review Workflow Status",
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 36
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto"
+          ],
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false
             },
-            "inspect": false
-          },
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "OK",
-                  "color": "green"
-                },
-                "1": {
-                  "text": "WARN",
-                  "color": "orange"
-                },
-                "2": {
-                  "text": "CRIT",
-                  "color": "red"
-                },
-                "3": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
+            "dataLinks": [
+              {
+                "title": "Open Pipeline Diagnostics",
+                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+                "targetBlank": false,
+                "includeVars": false
               }
-            },
+            ]
+          },
+          "transformations": [
             {
-              "type": "special",
+              "id": "organize",
               "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "pipeline": 0,
+                  "Value": 1,
+                  "bioetl_l1_workflow_global_status": 1
+                },
+                "renameByName": {
+                  "pipeline": "Pipeline",
+                  "Value": "Status",
+                  "bioetl_l1_workflow_global_status": "Status",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
                 }
               }
             }
           ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "none"
+          "description": "Shows current Workflow status for the selected Workflow and Pipeline. Run Type and Run ID are navigation context only and do not affect this panel. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; use workflow evidence in Pipeline Diagnostics."
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "pipeline"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Pipeline"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Value"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Status"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "bioetl_l1_workflow_global_status"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Status"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Count"
-              }
-            ]
-          }
-        ]
-      },
-      "targets": [
         {
-          "expr": "max by (pipeline) (bioetl_l1_workflow_global_status{pipeline=~\"$pipeline\",pipeline!=\"test_pipe\"} or ((bioetl_l1_workflow_global_status{pipeline!=\"test_pipe\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\")",
-          "refId": "A",
-          "format": "table",
-          "instant": true
-        }
-      ],
-      "options": {
-        "showHeader": true,
-        "footer": {
-          "show": false
-        },
-        "dataLinks": [
-          {
-            "title": "Open Pipeline Diagnostics",
-            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
-            "targetBlank": false,
-            "includeVars": false
-          }
-        ]
-      },
-      "transformations": [
-        {
-          "id": "organize",
+          "description": "Compact operator navigation after workflow and domain status review; links preserve only bounded selectors.",
+          "id": 9021,
+          "type": "text",
+          "title": "Navigate Diagnostics",
+          "gridPos": {
+            "h": 3,
+            "w": 24,
+            "x": 0,
+            "y": 44
+          },
           "options": {
-            "excludeByName": {
-              "Time": true,
-              "__name__": true
-            },
-            "indexByName": {
-              "pipeline": 0,
-              "Value": 1,
-              "bioetl_l1_workflow_global_status": 1
-            },
-            "renameByName": {
-              "pipeline": "Pipeline",
-              "Value": "Status",
-              "bioetl_l1_workflow_global_status": "Status",
-              "Value #A": "Series A",
-              "Value #B": "Series B",
-              "Value #C": "Series C"
-            }
-          }
-        }
-      ],
-      "description": "Shows current Workflow status for the selected Workflow and Pipeline. Run Type and Run ID are navigation context only and do not affect this panel. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; use workflow evidence in Pipeline Diagnostics."
-    },
-    {
-      "description": "Compact operator navigation after workflow and domain status review; links preserve only bounded selectors.",
-      "id": 9021,
-      "type": "text",
-      "title": "Navigate Diagnostics",
-      "gridPos": {
-        "h": 3,
-        "w": 24,
-        "x": 0,
-        "y": 44
-      },
-      "options": {
-        "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:12px;white-space:normal\"><strong>Next dashboard:</strong> Trust for evidence confidence · Pipeline Diagnostics for runtime blockers · Data Quality for DQ reasons · Provider Health for provider causes. Scope and time range are preserved.</div>",
-        "mode": "html"
-      },
-      "links": [],
-      "transparent": true
+            "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:12px;white-space:normal\"><strong>Next dashboard:</strong> Trust for evidence confidence · Pipeline Diagnostics for runtime blockers · Data Quality for DQ reasons · Provider Health for provider causes. Scope and time range are preserved.</div>",
+            "mode": "html"
+          },
+          "links": [],
+          "transparent": true
         }
       ]
     },
@@ -3490,7 +3505,7 @@
   "templating": {
     "list": [
       {
-        "allValue": null,
+        "allValue": "$__all",
         "current": {
           "selected": true,
           "text": "All",
@@ -3523,7 +3538,7 @@
         "useTags": false
       },
       {
-        "allValue": null,
+        "allValue": "$__all",
         "current": {
           "selected": true,
           "text": "All",
@@ -3556,7 +3571,7 @@
         "description": "Core scope: pipeline selector for pipeline-centric dashboards; default is All pipelines on overview so the landing page renders meaningful L0 state instead of a fail-closed empty scope."
       },
       {
-        "allValue": null,
+        "allValue": "$__all",
         "current": {
           "selected": true,
           "text": "All",

@@ -3,14 +3,18 @@
   "status": "implemented_local_closeable",
   "budget_policy": "no_growth_ratchet_only",
   "metrics": {
-    "config_duplicate_cluster_count": 15,
-    "config_duplicate_occurrence_count": 45
+    "config_duplicate_cluster_count": 16,
+    "config_duplicate_occurrence_count": 38
   },
   "issues": [
     {
       "issue": "#5559",
       "theme": "Module coverage gate current values match zero residuals",
-      "debt_types": ["Coverage debt", "Governance gap", "Budget debt"],
+      "debt_types": [
+        "Coverage debt",
+        "Governance gap",
+        "Budget debt"
+      ],
       "action": "Aligned module coverage gate current values to zero residuals with fail-fast current inventory mode.",
       "risk": "medium",
       "evidence": [
@@ -22,7 +26,11 @@
     {
       "issue": "#5560",
       "theme": "Public merge entrypoint has zero first party importers",
-      "debt_types": ["Architecture debt", "Governance gap", "DDD violation"],
+      "debt_types": [
+        "Architecture debt",
+        "Governance gap",
+        "DDD violation"
+      ],
       "action": "Maintained zero first-party importers for public merge entrypoint with proper census tracking.",
       "risk": "low",
       "evidence": [
@@ -34,7 +42,11 @@
     {
       "issue": "#5561",
       "theme": "Config duplication clusters are owner addressable",
-      "debt_types": ["Config debt", "Duplication", "Governance gap"],
+      "debt_types": [
+        "Config debt",
+        "Duplication",
+        "Governance gap"
+      ],
       "action": "Ensured config duplication clusters are owner addressable with proper governance and linked issues.",
       "risk": "medium",
       "evidence": [
@@ -45,7 +57,11 @@
     {
       "issue": "#5562",
       "theme": "Skip inventory entries are individually accountable",
-      "debt_types": ["Test debt", "Governance gap", "Process debt"],
+      "debt_types": [
+        "Test debt",
+        "Governance gap",
+        "Process debt"
+      ],
       "action": "Ensured skip inventory entries are individually accountable with proper owners, linked issues, and lifecycle tracking.",
       "risk": "low",
       "evidence": [
@@ -56,7 +72,11 @@
     {
       "issue": "#5563",
       "theme": "Excluded non gold rows are burned down to zero",
-      "debt_types": ["Coverage debt", "Governance gap", "Test debt"],
+      "debt_types": [
+        "Coverage debt",
+        "Governance gap",
+        "Test debt"
+      ],
       "action": "Burned down excluded non-gold rows to zero with empty explicit exclusions and proper contract ownership.",
       "risk": "low",
       "evidence": [

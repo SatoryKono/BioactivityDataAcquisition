@@ -11,6 +11,7 @@ from bioetl.domain.serialization import serialize_to_json
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.checkpoint._local_checkpoint_integrity import (
     compute_checkpoint_payload_sha256,
+    inject_checkpoint_checksum_verdict,
 )
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
@@ -123,6 +124,51 @@ async def test_malformed_persisted_digest_reports_invalid(tmp_path: Path) -> Non
     loaded = await adapter.load("pipeline")
     assert loaded is not None
     assert loaded[1]["checkpoint_checksum_valid"] is False
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("field", "replacement"),
+    [
+        ("pipeline", None),
+        ("version", 2),
+    ],
+)
+async def test_checksum_fails_closed_for_incomplete_or_wrongly_typed_envelope(
+    tmp_path: Path,
+    field: str,
+    replacement: object,
+) -> None:
+    """Persisted envelope corruption cannot retain a valid checksum verdict."""
+    adapter = LocalCheckpointAdapter(tmp_path)
+    await adapter.save("pipeline", _run_id(), {"offset": 4})
+    path = _checkpoint_path(tmp_path)
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    if replacement is None:
+        raw.pop(field)
+    else:
+        raw[field] = replacement
+    path.write_text(json.dumps(raw), encoding="utf-8")
+
+    loaded = await adapter.load("pipeline")
+
+    assert loaded is not None
+    assert loaded[1]["checkpoint_checksum_valid"] is False
+
+
+def test_checksum_fails_closed_for_noncanonical_runtime_metadata() -> None:
+    """A non-JSON runtime value cannot accidentally validate a stored digest."""
+    envelope = {
+        "pipeline": "pipeline",
+        "run_id": str(_run_id()),
+        "metadata": {"unsupported": object()},
+        "version": "2.0",
+        "payload_sha256": "0" * 64,
+    }
+
+    metadata = inject_checkpoint_checksum_verdict(envelope, {})
+
+    assert metadata["checkpoint_checksum_valid"] is False
 
 
 @pytest.mark.asyncio

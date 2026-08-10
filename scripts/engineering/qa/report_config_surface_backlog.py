@@ -291,6 +291,33 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
             ),
         },
     ),
+    (
+        "composite.merge.column_groups",
+        {
+            "owner": OWNER_BIOETL_COMPOSITE,
+            "decision": "retain_shared_composite_policy",
+            "linked_issue": LINKED_ISSUE_5568,
+            "review_date": "2026-09-30",
+            "rationale": (
+                "Composite column_groups are intentionally mirrored between "
+                "runtime composite configs and entity contract surfaces so "
+                "merge field sets stay deterministic across providers."
+            ),
+        },
+    ),
+    (
+        "schema.gold.include_groups",
+        {
+            "owner": OWNER_BIOETL_COMPOSITE,
+            "decision": "retain_entity_specific",
+            "linked_issue": LINKED_ISSUE_5568,
+            "review_date": "2026-09-30",
+            "rationale": (
+                "Gold include_groups blocks are entity-local contract copies "
+                "retained until a shared gold projection schema object exists."
+            ),
+        },
+    ),
 )
 
 DEFAULT_DUPLICATION_CLUSTER_GOVERNANCE: dict[str, str] = {
