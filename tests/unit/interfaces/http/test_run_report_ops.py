@@ -44,7 +44,10 @@ from bioetl.interfaces.http._health_server_observability_routing import (
     _unresolved_pipeline_run_report_shell,
 )
 from bioetl.interfaces.http.run_report_ops import (
+    _normalize_list_owner,
+    _safe_segment,
     list_pipeline_run_report_payloads,
+    list_workflow_run_report_payloads,
     load_pipeline_run_report_payload,
     load_workflow_run_report_payload,
 )
@@ -74,6 +77,60 @@ def test_load_missing_returns_none(tmp_path: Path) -> None:
         load_workflow_run_report_payload(workflow_run_id="missing", root=tmp_path)
         is None
     )
+
+
+def test_load_explicit_workflow_report_missing_file_returns_none(
+    tmp_path: Path,
+) -> None:
+    """An explicit but absent workflow artifact is a normal cache miss."""
+    assert (
+        load_workflow_run_report_payload(
+            workflow_run_id="missing",
+            workflow_name="chembl_core",
+            root=tmp_path,
+        )
+        is None
+    )
+
+
+def test_load_workflow_report_rejects_blank_run_id(tmp_path: Path) -> None:
+    """Blank selectors must fail closed before any filesystem lookup."""
+    assert (
+        load_workflow_run_report_payload(
+            workflow_run_id=" \t ",
+            workflow_name="chembl_core",
+            root=tmp_path,
+        )
+        is None
+    )
+
+
+def test_safe_segment_sanitizes_and_bounds_operator_input() -> None:
+    """Operator selectors remain one bounded filesystem segment."""
+    assert _safe_segment(" chembl activity ") == "chembl_activity"
+    assert _safe_segment("x" * 121) == "x" * 120
+    with pytest.raises(ValueError, match="invalid path segment"):
+        _safe_segment("   ")
+
+
+@pytest.mark.parametrize(
+    ("raw_name", "expected"),
+    [
+        (None, None),
+        (" \t ", None),
+        ("ALL", None),
+        ("*", None),
+        ("$__all", None),
+        ("__all", None),
+        (" chembl_activity ", "chembl_activity"),
+    ],
+)
+def test_normalize_list_owner_handles_grafana_all_scope_tokens(
+    raw_name: str | None,
+    expected: str | None,
+) -> None:
+    """Grafana all/blank selectors intentionally expand to every owner."""
+    assert _normalize_list_owner(raw_name) == expected
 
 
 def test_list_pipeline_payloads_includes_report_root_diagnostics(
@@ -106,6 +163,50 @@ def test_list_pipeline_payloads_includes_report_root_diagnostics(
     assert payload["report_root"] == str(tmp_path.as_posix())
     assert payload["marker_status"] in {"healthy", "unhealthy"}
     assert payload["items"][0]["run_id"] == "run1"
+
+
+def test_list_workflow_payloads_includes_identity_and_artifact_paths(
+    tmp_path: Path,
+) -> None:
+    target = tmp_path / "workflow" / "chembl_core" / "wf1" / "workflow-run-report.json"
+    target.parent.mkdir(parents=True)
+    target.write_text(
+        json.dumps(
+            {
+                "schema_version": "workflow_run_report_v1",
+                "identity": {
+                    "workflow_run_id": "wf1",
+                    "workflow_name": "chembl_core",
+                    "status": "success",
+                    "completed_at": "2026-08-10T00:00:00Z",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    markdown = target.parent / "workflow-run-report.md"
+    markdown.write_text("# workflow report\n", encoding="utf-8")
+
+    payload = list_workflow_run_report_payloads(
+        workflow_name="chembl_core",
+        limit=5,
+        root=tmp_path,
+    )
+
+    assert payload["status"] == "ok"
+    assert payload["count"] == 1
+    assert payload["report_root"] == str(tmp_path.as_posix())
+    assert payload["marker_status"] in {"healthy", "unhealthy"}
+    assert payload["items"] == [
+        {
+            "workflow": "chembl_core",
+            "workflow_run_id": "wf1",
+            "status": "success",
+            "completed_at": "2026-08-10T00:00:00Z",
+            "json_path": str(target.as_posix()),
+            "markdown_path": str(markdown.as_posix()),
+        }
+    ]
 
 
 def test_unresolved_run_id_sentinel_shell_for_grafana() -> None:

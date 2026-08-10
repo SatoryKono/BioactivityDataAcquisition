@@ -129,7 +129,7 @@
             "align": "left",
             "inspect": true
           },
-          "noValue": "No pipeline-run-report artifacts for this pipeline (reports/run-reports/pipeline/<name>/). Not Prometheus — run the pipeline, pick a pipeline with reports, or if host has reports but this stays empty: bind mismatch — check /health/ready report_root and run scripts/ops/runtime/docker/verify_report_bind.py"
+          "noValue": "No pipeline-run-report artifacts for this pipeline under reports/run-reports/pipeline/<name>/. Has reports: chembl_assay, chembl_target, chembl_publication. chembl_activity may appear in run_id (control-plane) but has no report artifacts yet. If host has reports and this is empty: bind mismatch — python -m scripts.ops.runtime.docker.verify_report_bind"
         },
         "overrides": [
           {
@@ -1125,7 +1125,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Core scope: pipeline selector for pipeline-centric dashboards; default is All pipelines on overview so the landing page renders meaningful L0 state instead of a fail-closed empty scope."
+        "description": "Core scope: pipeline selector from the shared overview pipeline/run_type universe. Single-select; no All scope. Unknown is the explicit fail-closed default until a source dashboard passes a pipeline or the operator selects one."
       },
       {
         "allValue": "$__all",
