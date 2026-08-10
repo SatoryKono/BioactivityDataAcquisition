@@ -55,8 +55,9 @@ docs/00-project/ai/prompts/
 
 | Id | Card | Summary |
 | --- | --- | --- |
-| `prompt.closeout.grok` | [library/closeout/grok-closeout.md](library/closeout/grok-closeout.md) | Short issue/PR closeout |
-| `prompt.audit.grok-cycle` | [library/audit/grok-audit-cycle.md](library/audit/grok-audit-cycle.md) | One audit cycle (default) |
+| `prompt.session.grok-bootstrap` | [library/session/grok-bootstrap.md](library/session/grok-bootstrap.md) | Daily-work session bootstrap |
+| `prompt.closeout.grok` | [library/closeout/grok-closeout.md](library/closeout/grok-closeout.md) | Issue/PR closeout (v2.2) |
+| `prompt.audit.grok-cycle` | [library/audit/grok-audit-cycle.md](library/audit/grok-audit-cycle.md) | One audit cycle (v2.2) |
 | `prompt.tests.speed-optimization` | [library/tests/speed-optimization-loop.md](library/tests/speed-optimization-loop.md) | Test speed loop |
 | `prompt.tests.fix-retest` | [library/tests/fix-retest-loop.md](library/tests/fix-retest-loop.md) | Run → fix → retest |
 | `prompt.docs.ai-audit-planning` | [library/docs/ai-audit-planning.md](library/docs/ai-audit-planning.md) | Docs/AI surface audit plan |
@@ -71,15 +72,25 @@ bookmarks from #8279.
 ```bash
 python -m scripts.ai.prompts list
 python -m scripts.ai.prompts show prompt.audit.grok-cycle
+python -m scripts.ai.prompts render prompt.session.grok-bootstrap \
+  --param TASK="..." --param MODE=implement --param SCOPE="src/bioetl/domain"
 python -m scripts.ai.prompts render prompt.audit.grok-cycle --param SCOPE="src/bioetl/domain"
+python -m scripts.ai.prompts render prompt.closeout.grok --param SCOPE="issues: #NNNN"
 python -m scripts.ai.prompts render prompt.observability.dashboard-panel-audit \
   --param SCOPE="grafana/dashboards" --param AUDIT_MODE=full
 python -m scripts.ai.prompts check-registry
 python -m scripts.ai.prompts check
+python -m scripts.ai.prompts catalog
 python -m scripts.ai.prompts new --id prompt.example --class operator-paste
 ```
 
 Windows: use `.\.venv-win\Scripts\python.exe -m scripts.ai.prompts ...`.
+
+Grok project skills (machine-local install from tracked sources):
+
+```powershell
+.\scripts\ai\grok\install_skills.ps1
+```
 
 ## Surface types
 
