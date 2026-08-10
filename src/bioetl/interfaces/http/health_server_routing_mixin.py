@@ -89,13 +89,11 @@ class HealthServerRoutingMixin:
     def uptime_seconds(self) -> float:
         """Get server uptime in seconds."""
         raise NotImplementedError
-
     def _response_timestamp(self) -> str:
         """Return the sanctioned timestamp source for health responses."""
         if self._clock is not None:
             return self._clock.now().isoformat()
         return current_utc_time().isoformat()
-
     async def _route_request(self, writer: asyncio.StreamWriter, path: str) -> None:
         """Route request to appropriate handler."""
         parsed_path = urlsplit(path)
@@ -146,12 +144,10 @@ class HealthServerRoutingMixin:
             )
             return
         await self._send_response(writer, 404, _NOT_FOUND_MESSAGE)
-
     def _parse_query_params(self, raw_query: str) -> dict[str, str]:
         """Parse query string into a single-value key/value mapping."""
         parsed = parse_qs(raw_query, keep_blank_values=False)
         return {key: values[-1] for key, values in parsed.items() if values}
-
     def _read_required_param(
         self,
         query: dict[str, str],
@@ -188,7 +184,6 @@ class HealthServerRoutingMixin:
         # Case-insensitive match for All/all; keep exact forms for $__all tokens.
         lowered = normalized.casefold()
         return lowered in {"all", "*"} or normalized in {"$__all", "__all"}
-
     def _read_optional_scope_param(
         self,
         query: dict[str, str],
@@ -295,8 +290,7 @@ class HealthServerRoutingMixin:
         ):
             status = "unhealthy"
         if not self._health_monitor:
-            if "message" not in checks:
-                checks["message"] = "No health monitor configured"
+            checks["message"] = "No health monitor configured"
             return HealthResponse(
                 status=status,
                 timestamp=self._response_timestamp(),
