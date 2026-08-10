@@ -9,7 +9,7 @@ pipeline:
   entity_type: assay
   description: Composite assay entity merging data from multiple providers
   business_primary_keys:
-    - entity_id
+  - entity_id
   sink:
     silver:
       mode: merge
@@ -21,141 +21,141 @@ schema:
     include: []
     exclude: []
   column_groups:
-    - name: system
-      fields:
-        - entity_id
-        - content_hash
-        - _source
-        - _index
-        - _lookup_method
-        - _original_id
-      pattern: ^_composite_|^_source_providers|^_enrichment_|^_lineage_|^_dq_
-      provider_order:
-        - chembl
-    - name: identifiers
-      fields:
-        - assay_id
-        - cell_id
-        - tissue_id
-        - target_id
-        - publication_id
-        - src_id
-        - src_assay_id
-        - aidx
-      provider_order:
-        - chembl
-    - name: classification
-      fields:
-        - assay_type
-        - assay_category
-        - assay_test_type
-        - assay_group
-        - assay_pref_name
-        - relationship_type
-        - relationship_description
-        - confidence_score
-        - confidence_description
-      provider_order:
-        - chembl
-    - name: biological_context
-      fields:
-        - assay_organism
-        - assay_taxonomy_id
-        - assay_strain
-        - assay_tissue
-        - assay_cell_type
-        - assay_subcellular_fraction
-      provider_order:
-        - chembl
-    - name: description
-      fields:
-        - assay_description
-        - confidence_score
-      provider_order:
-        - chembl
-    - name: ontology
-      fields:
-        - bao_format
-        - bao_label
-      provider_order:
-        - chembl
-    - name: cell_line
-      fields:
-        - cell_name
-        - cell_description
-        - cell_type
-        - cell_source_tissue
-        - cell_source_organism
-        - cell_source_taxonomy_id
-        - cellosaurus_id
-        - clo_id
-        - cl_lincs_id
-        - cell_efo_id
-      provider_order:
-        - chembl
-    - name: tissue
-      fields:
-        - tissue_pref_name
-        - tissue_uberon_id
-        - tissue_bto_id
-        - tissue_caloha_id
-        - tissue_efo_id
-      provider_order:
-        - chembl
-    - name: variant
-      fields:
-        - variant_accession
-        - variant_isoform
-        - variant_mutation
-        - variant_organism
-        - variant_sequence
-        - variant_taxonomy_id
-        - variant_sequence_json
-      provider_order:
-        - chembl
-    - name: complex
-      fields:
-        - assay_classifications
-        - assay_parameters
-      provider_order:
-        - chembl
+  - name: system
+    fields:
+    - entity_id
+    - content_hash
+    - _source
+    - _index
+    - _lookup_method
+    - _original_id
+    pattern: ^_composite_|^_source_providers|^_enrichment_|^_lineage_|^_dq_
+    provider_order:
+    - chembl
+  - name: identifiers
+    fields:
+    - assay_id
+    - cell_id
+    - tissue_id
+    - target_id
+    - publication_id
+    - src_id
+    - src_assay_id
+    - aidx
+    provider_order:
+    - chembl
+  - name: classification
+    fields:
+    - assay_type
+    - assay_category
+    - assay_test_type
+    - assay_group
+    - assay_pref_name
+    - relationship_type
+    - relationship_description
+    - confidence_score
+    - confidence_description
+    provider_order:
+    - chembl
+  - name: biological_context
+    fields:
+    - assay_organism
+    - assay_taxonomy_id
+    - assay_strain
+    - assay_tissue
+    - assay_cell_type
+    - assay_subcellular_fraction
+    provider_order:
+    - chembl
+  - name: description
+    fields:
+    - assay_description
+    - confidence_score
+    provider_order:
+    - chembl
+  - name: ontology
+    fields:
+    - bao_format
+    - bao_label
+    provider_order:
+    - chembl
+  - name: cell_line
+    fields:
+    - cell_name
+    - cell_description
+    - cell_type
+    - cell_source_tissue
+    - cell_source_organism
+    - cell_source_taxonomy_id
+    - cellosaurus_id
+    - clo_id
+    - cl_lincs_id
+    - cell_efo_id
+    provider_order:
+    - chembl
+  - name: tissue
+    fields:
+    - tissue_pref_name
+    - tissue_uberon_id
+    - tissue_bto_id
+    - tissue_caloha_id
+    - tissue_efo_id
+    provider_order:
+    - chembl
+  - name: variant
+    fields:
+    - variant_accession
+    - variant_isoform
+    - variant_mutation
+    - variant_organism
+    - variant_sequence
+    - variant_taxonomy_id
+    - variant_sequence_json
+    provider_order:
+    - chembl
+  - name: complex
+    fields:
+    - assay_classifications
+    - assay_parameters
+    provider_order:
+    - chembl
   silver:
     include_groups:
-      - system
-      - identifiers
-      - classification
-      - biological_context
-      - description
-      - ontology
-      - cell_line
-      - tissue
-      - variant
-      - complex
+    - system
+    - identifiers
+    - classification
+    - biological_context
+    - description
+    - ontology
+    - cell_line
+    - tissue
+    - variant
+    - complex
     exclude_fields: []
   gold:
     include_groups:
-      - system
-      - identifiers
-      - classification
-      - biological_context
-      - description
-      - ontology
-      - cell_line
-      - tissue
-      - variant
-      - complex
+    - system
+    - identifiers
+    - classification
+    - biological_context
+    - description
+    - ontology
+    - cell_line
+    - tissue
+    - variant
+    - complex
     exclude_fields:
-      - _dq_*
-      - _index
-      - _lookup_method
-      - _original_id
+    - _dq_*
+    - _index
+    - _lookup_method
+    - _original_id
 quality:
   version: 1.0.0
   provider: composite
   entity: assay
   thresholds:
     soft_fail: 0.05
-    hard_fail: 0.50
+    hard_fail: 0.5
   entity_field_validations: []
   entity_cross_field_validations: []
 filters:
@@ -171,19 +171,58 @@ filters:
     checkpoint_interval: 1000
   silver_filters:
     required_fields:
-      - entity_id
-      - assay_id
+    - entity_id
+    - assay_id
   gold_filters:
     required_fields:
-      - entity_id
-      - assay_id
+    - entity_id
+    - assay_id
 contracts:
   primary_key:
-    - entity_id
+  - entity_id
   merge_keys:
-    - entity_id
+  - entity_id
   hash_include: []
   hash_exclude: []
   contract_ref: composite.assay
   active_version: 1.0.0
+  rollout:
+    mode: single
+    read_order:
+    - 1.0.0
+    write_versions:
+    - 1.0.0
+    affects_hash: false
 status: active
+hash_policy:
+  provider: composite
+  entity: assay
+  contract:
+    version: 1.0.0
+    migration_note: 'Composite entity contract identity explicit for issue #5509.'
+  hash_policy:
+    algorithm: sha256
+    canonicalization: provider + canonical_json_dumps(normalized_record)
+    include_fields:
+    - entity_id
+    exclude_fields:
+    - _ingestion_ts
+    - _run_id
+    - _run_type
+    - _dq_warn
+    - _dq_error
+    - _source_batch_id
+    - _index
+    exclude_patterns:
+    - ^_dq_
+    normalization:
+      trim_strings: true
+      round_floats:
+        enabled: true
+        precision: 10
+      dates:
+        enabled: true
+        format: YYYY-MM-DD
+      null_handling:
+        nan_to_null: true
+        inf_to_null: true
