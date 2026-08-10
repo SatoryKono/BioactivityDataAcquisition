@@ -6,7 +6,7 @@ from dataclasses import replace
 
 import pytest
 
-from bioetl.application.services.control_plane.manifest.replay_write_risk import (
+from bioetl.application.observability.replay_write_risk import (
     REPLAY_WRITE_RISK_METRIC,
     ReplayWriteRiskClassification,
     assess_replay_write_risks,

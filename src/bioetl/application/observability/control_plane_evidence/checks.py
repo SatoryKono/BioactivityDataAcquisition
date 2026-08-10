@@ -1,4 +1,4 @@
-"""Shared result types for bounded control-plane validation evidence."""
+"""Shared result types for bounded operator-facing control-plane evidence."""
 
 from __future__ import annotations
 

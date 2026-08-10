@@ -68,10 +68,10 @@ def test_critical_observability_metric_families_have_runtime_emitters() -> None:
             "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py"
         ),
         "bioetl_replay_duplicate_overwrite_risk_total": (
-            "src/bioetl/application/services/control_plane/manifest/replay_write_risk.py"
+            "src/bioetl/application/observability/replay_write_risk.py"
         ),
         "bioetl_manifest_ledger_integrity_ratio": (
-            "src/bioetl/application/services/control_plane/manifest/integrity_metrics.py"
+            "src/bioetl/application/observability/control_plane_integrity_metrics.py"
         ),
         "bioetl_replay_lag_seconds": (
             "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py"

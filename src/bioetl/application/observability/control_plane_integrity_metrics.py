@@ -1,4 +1,4 @@
-"""Bounded manifest-to-ledger referential-integrity reconciliation."""
+"""Bounded manifest-to-ledger referential-integrity observability."""
 
 from __future__ import annotations
 

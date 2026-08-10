@@ -6,11 +6,11 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
+from bioetl.application.observability.control_plane_integrity_metrics import (
+    ControlPlaneIntegrityMetricsService,
+)
 from bioetl.application.services.control_plane.evidence import (
     ControlPlaneEvidenceService,
-)
-from bioetl.application.services.control_plane.manifest.integrity_metrics import (
-    ControlPlaneIntegrityMetricsService,
 )
 from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.domain.ports import (
