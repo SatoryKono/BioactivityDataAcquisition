@@ -32,6 +32,30 @@
       "review_by": "2026-11-30",
       "next_step": "Retain only as a deprecated read-only canonical skill validator for direct legacy invocations; it must never generate discovery adapters and may be removed after callers use setup_skills.sh --check."
     },
+    "scripts/ai/prompts/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-11-30",
+      "next_step": "Retain direct python -m scripts.ai.prompts invocation as a compatibility surface; keep the canonical operator route at python -m scripts.ai prompts."
+    },
+    "scripts/ai/prompts/check.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the registry and hygiene implementation behind the canonical scripts.ai prompts command surface."
+    },
+    "scripts/ai/prompts/registry.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the typed Prompt Library registry loader behind the canonical scripts.ai prompts command surface."
+    },
+    "scripts/ai/prompts/render.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the bounded renderer behind the canonical scripts.ai prompts command surface."
+    },
     "scripts/ai/junie/check_junie_mirror.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
