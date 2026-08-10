@@ -603,7 +603,7 @@ test_audit_closeout_2026_07_08:
     test_file_count_definition: tests/**/test_*.py from pyproject python_files
     repo_backed_unit_lane: repo-backed-unit
     repo_backed_unit_subtree: tests/unit/repo_backed/
-    repo_backed_unit_test_files: 54
+    repo_backed_unit_test_files: 53
     performance_baseline_reports:
       - reports/test-telemetry/slowest-tests.json
       - reports/test-telemetry/slowest-tests.md
@@ -1006,7 +1006,7 @@ repo_backed_unit_test_exceptions:
   entries:
     - path: tests/unit/repo_backed/scripts/ai/agent_tools/test_install_contracts.py
       target_lane: repo-backed-unit
-      protected_surface: pyproject.toml + uv.lock + scripts/engineering/dev/setup_env_{wsl.sh,windows.ps1}
+      protected_surface: pyproject.toml + uv.lock + scripts/engineering/dev/setup_env_{wsl.sh,windows.ps1} optional AgentDebugX/ProofAgent installer contracts
     - path: tests/unit/repo_backed/scripts/ai/mcp/test_wrappers.py
       target_lane: repo-backed-unit
       protected_surface: scripts/ops/runtime/mcp/shared-servers.json + generated platform wrapper contract

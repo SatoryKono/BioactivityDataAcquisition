@@ -1210,8 +1210,8 @@
         "tests/architecture/test_test_governance_audit.py:220",
         "tests/architecture/test_test_governance_audit.py:283",
         "tests/architecture/test_test_governance_audit.py:377",
-        "tests/architecture/test_test_governance_audit.py:406",
-        "tests/architecture/test_test_governance_audit.py:446"
+        "tests/architecture/test_test_governance_audit.py:405",
+        "tests/architecture/test_test_governance_audit.py:445"
       ],
       "assertless_tests": [],
       "intentional_no_exception_tests": 0,
@@ -2173,8 +2173,8 @@
           "tests/architecture/test_test_governance_audit.py:220",
           "tests/architecture/test_test_governance_audit.py:283",
           "tests/architecture/test_test_governance_audit.py:377",
-          "tests/architecture/test_test_governance_audit.py:406",
-          "tests/architecture/test_test_governance_audit.py:446"
+          "tests/architecture/test_test_governance_audit.py:405",
+          "tests/architecture/test_test_governance_audit.py:445"
         ],
         "assertless_tests": [],
         "intentional_no_exception_tests": 0,
@@ -2279,7 +2279,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "fca8ca7aed29dd05488c2cef47fc347de101ebdfb03495f0c3bcef4b6560793a",
+  "source_tree_sha256": "2a63ecb4a5d5733419dd49ac838c9163139f046e92b8c1d93fed91d8cc53565f",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 101,

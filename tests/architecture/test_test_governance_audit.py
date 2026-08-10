@@ -395,8 +395,7 @@ def test_test_governance_report_defines_test_file_and_repo_backed_counts() -> No
     assert repo_backed_inventory["lane"] == "repo-backed-unit"
     assert repo_backed_inventory["subtree"] == "tests/unit/repo_backed/"
     assert int(repo_backed_inventory["test_files"]) > 0
-    # marked_test_files may be less than test_files due to unmarked files
-    assert int(repo_backed_inventory["marked_test_files"]) <= int(
+    assert int(repo_backed_inventory["marked_test_files"]) == int(
         repo_backed_inventory["test_files"]
     )
     assert repo_backed_inventory["unmarked_test_files"] == []

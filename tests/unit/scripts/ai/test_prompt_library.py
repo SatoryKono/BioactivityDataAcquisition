@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-
 import pytest
 
 from scripts.ai.prompts.check import check_hygiene, check_registry

@@ -457,7 +457,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 190
-      total_loc: 23077
+      total_loc: 23076
       files_ge_250_loc: 0
       helper_function_ratio: 0.363
       max_internal_fan_in: 8
@@ -487,7 +487,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 51
-      total_loc: 6310
+      total_loc: 6306
       files_ge_250_loc: 0
       helper_function_ratio: 0.325
       max_internal_fan_in: 2
@@ -541,7 +541,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 140
-      total_loc: 15981
+      total_loc: 15980
       files_ge_250_loc: 0
       helper_function_ratio: 0.421
       max_internal_fan_in: 3
@@ -567,7 +567,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 56
-      total_loc: 7177
+      total_loc: 7176
       files_ge_250_loc: 0
       helper_function_ratio: 0.358
       max_internal_fan_in: 3
@@ -687,7 +687,7 @@ oversized_source_module_inventory:
   - issue: '#4679'
     source: src/bioetl/domain/ports/__init__.py
     extracted_surface: src/bioetl/domain/ports/__init__.pyi
-    source_lines_after_split: 203
+    source_lines_after_split: 205
     extracted_surface_lines: 402
     rationale: Runtime lazy export resolution remains in the Python module while static re-export type
       declarations live in the adjacent stub, preserving the public API and reducing the governed source
@@ -904,21 +904,21 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed triage recalibration updates the tracked
         debt budget intentionally.
     repo_wide_zero_import_candidate_count:
-      current_count: 6
-      max_count: 6
+      current_count: 5
+      max_count: 5
       linked_issue: '#6791'
       owner: '@bioetl-architecture'
-      rationale: 'Reviewed 2026-07-28 (#6786/#6791): six fully classified zero-import surfaces (__main__,
-        stage_accounting, three diagnostics dynamic loaders, maintenance.py external re-export). Not actionable
-        dead-code debt.'
+      rationale: 'Reviewed 2026-08-10 after RF-005: five fully classified zero-import surfaces (stage_accounting,
+        three diagnostics dynamic loaders, maintenance.py external re-export). Not actionable dead-code
+        debt.'
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh updates the classified
         candidate set intentionally.
     repo_wide_classified_zero_import_candidate_count:
-      current_count: 6
-      max_count: 6
+      current_count: 5
+      max_count: 5
       linked_issue: '#6791'
       owner: '@bioetl-architecture'
-      rationale: All six repo-wide zero-import candidates remain covered by explicit disposition ledger
+      rationale: All five repo-wide zero-import candidates remain covered by explicit disposition ledger
         entries.
       ratchet_policy: Non-growth fail-fast unless the repo-wide classification ledger is intentionally
         rebaselined during review.
@@ -930,12 +930,12 @@ retirement_governance_metrics:
       rationale: All repo-wide zero-import candidates are now classified.
       ratchet_policy: Zero-budget fail-fast metric.
     repo_wide_owner_test_anchored_candidate_count:
-      current_count: 6
-      max_count: 6
+      current_count: 5
+      max_count: 5
       linked_issue: '#6353'
       owner: '@bioetl-architecture'
-      rationale: Two repo-wide zero-import candidates are anchored by owner-test evidence (__main__ entrypoint
-        suites and stage-accounting/port runtime checks).
+      rationale: All five repo-wide zero-import candidates are anchored by explicit owner-test or runtime-reachability
+        evidence.
       ratchet_policy: Non-growth fail-fast unless the reviewed candidate set intentionally shrinks and
         the owner-test evidence is regenerated in lockstep.
     repo_wide_candidates_without_owner_tests_count:
@@ -943,18 +943,17 @@ retirement_governance_metrics:
       max_count: 0
       linked_issue: '#6791'
       owner: '@bioetl-architecture'
-      rationale: Four classified non-static surfaces (three diagnostics dynamic loaders + maintenance
-        public re-export) are ledger-anchored without separate owner-test suites; residual is reviewed
-        and must not grow.
+      rationale: No classified zero-import surface remains without explicit owner-test or runtime-reachability
+        evidence.
       ratchet_policy: Non-growth fail-fast unless the reviewed candidate set intentionally shrinks and
         owner-test evidence is added.
     repo_wide_non_static_reachability_candidate_count:
-      current_count: 5
-      max_count: 5
+      current_count: 4
+      max_count: 4
       linked_issue: '#6786'
       owner: '@bioetl-architecture'
-      rationale: Non-static reachability residue is the package entrypoint plus dynamic diagnostics loaders
-        and the maintenance public re-export; must not grow silently.
+      rationale: Non-static reachability residue is the three dynamic diagnostics loaders and the maintenance
+        public re-export; must not grow silently.
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh intentionally
         expands the classified non-static residue.
     triaged_retained_owner_test_anchored_count:

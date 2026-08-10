@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-10T09:19:35.676413+00:00",
+  "generated_at": "2026-08-10T09:49:44.359635+00:00",
   "summary": {
     "total_scripts": 580,
     "status_counts": {
@@ -12,9 +12,9 @@
       "agents": 4,
       "build": 16,
       "ci": 81,
-      "docs": 246,
+      "docs": 247,
       "other": 76,
-      "scripts": 480,
+      "scripts": 482,
       "skills": 11,
       "tests": 370
     }
@@ -4920,7 +4920,7 @@
         },
         {
           "path": "tests/unit/scripts/ai/test_prompt_library.py",
-          "line": 8,
+          "line": 7,
           "source_group": "tests",
           "text": "from scripts.ai.prompts.check import check_hygiene, check_registry"
         }
@@ -4928,7 +4928,7 @@
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-11-30",
-      "next_step": "Retain as the registry and hygiene implementation behind the canonical scripts.ai prompts command surface."
+      "next_step": "Retain as the validation helper behind the canonical python -m scripts.ai.prompts command surface; keep direct operator use routed through that package entrypoint."
     },
     {
       "path": "scripts/ai/prompts/registry.py",
@@ -4989,7 +4989,7 @@
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-11-30",
-      "next_step": "Retain as the typed Prompt Library registry loader behind the canonical scripts.ai prompts command surface."
+      "next_step": "Retain as the Prompt Library registry-loading helper behind the canonical python -m scripts.ai.prompts command surface; do not expose it as a second standalone entrypoint."
     },
     {
       "path": "scripts/ai/prompts/render.py",
@@ -5006,7 +5006,7 @@
         },
         {
           "path": "tests/unit/scripts/ai/test_prompt_library.py",
-          "line": 16,
+          "line": 15,
           "source_group": "tests",
           "text": "from scripts.ai.prompts.render import render_by_id, substitute_params"
         }
@@ -5014,7 +5014,7 @@
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-11-30",
-      "next_step": "Retain as the bounded renderer behind the canonical scripts.ai prompts command surface."
+      "next_step": "Retain as the Prompt Library rendering helper behind the canonical python -m scripts.ai.prompts command surface; do not promote this implementation module into a duplicate active CLI."
     },
     {
       "path": "scripts/ai/sync/cursor.py",
@@ -5429,8 +5429,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/filters/README.md",
+          "line": 51,
+          "source_group": "docs",
+          "text": "python -m scripts.data_quality inventory-silver-filters-migration"
+        }
+      ],
       "owner": "@bioetl-dq",
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-11-30",
@@ -5556,19 +5563,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 7,
       "references": [
         {
           "path": "docs/docs-folder-analysis.md",
           "line": 66,
           "source_group": "docs",
           "text": "- Регенерируется через `python scripts/data_quality/inventory_silver_filters_migration.py`"
-        },
-        {
-          "path": "docs/filters/README.md",
-          "line": 51,
-          "source_group": "docs",
-          "text": "python scripts/data_quality/inventory_silver_filters_migration.py"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
@@ -8530,19 +8531,19 @@
         },
         {
           "path": "docs/filters/inventory-baseline.csv",
-          "line": 169,
+          "line": 177,
           "source_group": "docs",
           "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/docs/matrix/generate_pipeline_normalization_matrix.py,5,1694,Source-profile extraction policy,extraction_"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
-          "line": 2174,
+          "line": 2276,
           "source_group": "docs",
           "text": "\"path\": \"scripts/docs/matrix/generate_pipeline_normalization_matrix.py\","
         },
         {
           "path": "docs/filters/inventory-baseline.md",
-          "line": 127,
+          "line": 124,
           "source_group": "docs",
           "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | 5 | 1694 | Source-profile extraction policy |"
         }
@@ -11850,7 +11851,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 315,
+      "reference_count": 317,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -12690,13 +12691,13 @@
         },
         {
           "path": "tests/architecture/test_test_governance_audit.py",
-          "line": 473,
+          "line": 472,
           "source_group": "tests",
           "text": "command = \"scripts/engineering/qa/check_test_audit_preflight.py --strict\""
         },
         {
           "path": "tests/architecture/test_test_governance_audit.py",
-          "line": 499,
+          "line": 498,
           "source_group": "tests",
           "text": "assert \"check_test_audit_preflight.py --strict\" in body"
         }
@@ -12754,19 +12755,19 @@
       "references": [
         {
           "path": "docs/filters/inventory-baseline.csv",
-          "line": 170,
+          "line": 178,
           "source_group": "docs",
           "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/engineering/qa/config_surface_governance.py,2,8,Source-profile extraction policy,extraction_params are pr"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
-          "line": 2185,
+          "line": 2287,
           "source_group": "docs",
           "text": "\"path\": \"scripts/engineering/qa/config_surface_governance.py\","
         },
         {
           "path": "docs/filters/inventory-baseline.md",
-          "line": 128,
+          "line": 125,
           "source_group": "docs",
           "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/engineering/qa/config_surface_governance.py` | 2 | 8 | Source-profile extraction policy |"
         },
@@ -12811,8 +12812,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/README.md",
+          "line": 40,
+          "source_group": "scripts",
+          "text": "`scripts/engineering/qa/count_source_lines.py` and"
+        }
+      ],
       "owner": "@bioetl-architecture",
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
@@ -13558,8 +13566,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/README.md",
+          "line": 41,
+          "source_group": "scripts",
+          "text": "`scripts/engineering/qa/get_large_modules.py` remain available. Their output is"
+        }
+      ],
       "owner": "@bioetl-architecture",
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
@@ -13610,7 +13625,7 @@
         },
         {
           "path": "tests/architecture/test_live_residual_snapshot.py",
-          "line": 47,
+          "line": 50,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.hotspot_family_metrics import ("
         },
@@ -14708,7 +14723,7 @@
       "references": [
         {
           "path": "tests/architecture/test_live_residual_snapshot.py",
-          "line": 117,
+          "line": 120,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_live_residual_snapshot import ("
         }

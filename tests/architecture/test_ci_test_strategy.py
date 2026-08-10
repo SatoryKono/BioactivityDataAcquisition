@@ -64,7 +64,7 @@ def test_coverage_job_combines_shard_coverage_and_runs_serial_pass() -> None:
         '--parallel-marker "serial and not e2e and not benchmark and not memory"'
         in workflow
     ), "coverage-verify job must run only serial-marker tests directly"
-    assert "coverage combine reports/coverage" in workflow, (
+    assert "coverage combine --keep reports/coverage" in workflow, (
         "coverage-verify job must combine shard coverage instead of rerunning the full suite"
     )
     assert "coverage report --show-missing --fail-under=85" in workflow, (
