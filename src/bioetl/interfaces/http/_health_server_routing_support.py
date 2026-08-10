@@ -148,24 +148,19 @@ async def dispatch_control_plane_request(
         )
         return
 
+    handlers = {
+        "/ops/control-plane/ready": lambda h, w, q: handle_control_plane_ready(h, w),
+        "/ops/control-plane/filter-options": handle_control_plane_filter_options,
+        "/ops/control-plane/selector-context": handle_control_plane_selector_context,
+        "/ops/control-plane/identity-table": handle_control_plane_identity_table,
+        "/ops/control-plane/identity-evidence": handle_control_plane_identity_evidence,
+        "/ops/control-plane/checkpoint-freshness": handle_control_plane_checkpoint_freshness,
+    }
+
     try:
-        if path == "/ops/control-plane/ready":
-            await handle_control_plane_ready(host, writer)
-            return
-        if path == "/ops/control-plane/filter-options":
-            await handle_control_plane_filter_options(host, writer, query)
-            return
-        if path == "/ops/control-plane/selector-context":
-            await handle_control_plane_selector_context(host, writer, query)
-            return
-        if path == "/ops/control-plane/identity-table":
-            await handle_control_plane_identity_table(host, writer, query)
-            return
-        if path == "/ops/control-plane/identity-evidence":
-            await handle_control_plane_identity_evidence(host, writer, query)
-            return
-        if path == "/ops/control-plane/checkpoint-freshness":
-            await handle_control_plane_checkpoint_freshness(host, writer, query)
+        handler = handlers.get(path)
+        if handler:
+            await handler(host, writer, query)
             return
         await host._send_response(writer, 404, _NOT_FOUND_MESSAGE)
     except ValueError as exc:
