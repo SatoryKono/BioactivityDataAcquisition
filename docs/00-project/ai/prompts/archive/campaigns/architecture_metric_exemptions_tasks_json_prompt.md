@@ -1,3 +1,9 @@
+---
+status: archived
+class: campaign
+note: Opt-in historical megaprompt. Not default operator paste. Prefer library/** cards and REGISTRY.yaml. Epic #8513 / #8517.
+---
+
 # Architecture Metric Exemptions Tasks JSON — Improved Version
 
 ## Evaluation Metadata
