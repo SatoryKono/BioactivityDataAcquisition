@@ -68,7 +68,9 @@ def test_bioetl_not_on_monitoring_is_hard_fail(monkeypatch: pytest.MonkeyPatch) 
     assert results[0].code == "BIOETL_NOT_ON_MONITORING_NETWORK"
 
 
-def test_bioetl_not_running_is_warning_not_hard(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_bioetl_not_running_is_warning_not_hard(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     def fake_run(args: list[str], *, timeout: float = 15.0) -> tuple[int, str, str]:
         del timeout
         if args[:2] == ["docker", "inspect"] and "bioetl" in args:

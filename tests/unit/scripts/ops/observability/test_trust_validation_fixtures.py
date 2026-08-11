@@ -55,7 +55,9 @@ def test_populated_is_not_error_and_unknown_is_not_ok() -> None:
             (ROOT / endpoint / "populated.json").read_text(encoding="utf-8")
         )
         unknown = json.loads(
-            (ROOT / endpoint / "valid_empty_or_unknown.json").read_text(encoding="utf-8")
+            (ROOT / endpoint / "valid_empty_or_unknown.json").read_text(
+                encoding="utf-8"
+            )
         )
         error = json.loads(
             (ROOT / endpoint / "backend_error.json").read_text(encoding="utf-8")
