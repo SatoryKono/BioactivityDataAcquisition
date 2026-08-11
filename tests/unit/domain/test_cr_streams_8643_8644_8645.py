@@ -19,7 +19,11 @@ from bioetl.domain.behavior._dq_serializer_html._renderers import (
 )
 from bioetl.domain.composite.result_enrichment import EnrichmentResult, EnrichmentStatus
 from bioetl.domain.composite.result_merge import MergeResult
-from bioetl.domain.composite.result_seed_dependency import DependencyResult, SeedResult
+from bioetl.domain.composite.result_seed_dependency import (
+    DependencyResult,
+    DependencyStatus,
+    SeedResult,
+)
 from bioetl.domain.config.base_provider import BaseProviderConfig
 from bioetl.domain.composite.aggregation import (
     AggregationConfig,
@@ -268,3 +272,34 @@ def test_conditional_required_incomplete_raises_validation_error() -> None:
     rule = SimpleNamespace(trigger_field=None, required_field="x")
     with pytest.raises(ValidationError, match="conditional_required"):
         _conditional_required_rule_violated({"x": 1}, rule, present_count=1)
+
+
+def test_dependency_result_factories_and_success() -> None:
+    ok = DependencyResult.success(
+        pipeline_name="dep",
+        records_extracted=2,
+        records_silver=2,
+        duration_seconds=1.5,
+    )
+    assert ok.is_success is True
+    assert ok.status is DependencyStatus.SUCCESS
+    failed = DependencyResult.failed(pipeline_name="dep", error_message="boom")
+    assert failed.is_success is False
+    skipped = DependencyResult.skipped(pipeline_name="dep", reason="done")
+    assert skipped.is_success is True
+    timed = DependencyResult.timeout(pipeline_name="dep", timeout_seconds=3.0)
+    assert timed.status is DependencyStatus.TIMEOUT
+    assert timed.duration_seconds == 3.0
+    with pytest.raises(ValueError, match="duration_seconds"):
+        DependencyResult.timeout(
+            pipeline_name="dep",
+            timeout_seconds=1.0,
+            duration_seconds=math.nan,
+        )
+
+
+def test_seed_result_success_and_duration_bounds() -> None:
+    seed = SeedResult(pipeline_name="seed", records_silver=0, resumed=True)
+    assert seed.is_success is True
+    with pytest.raises(ValueError, match="duration_seconds"):
+        SeedResult(pipeline_name="seed", duration_seconds=-0.1)
