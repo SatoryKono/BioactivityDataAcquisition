@@ -52,3 +52,6 @@ None from static JSON.
 
 `scripts/temp/panels_static_audit_cycle2.py` prepared for local re-run when Python available:
 `.\.venv-win\Scripts\python.exe scripts\temp\panels_static_audit_cycle2.py reports\audit\dashboard-cycle\20260811T180000Z-c205349-dash\cycle-2`
+
+`scripts/temp/layout_contour_audit_cycle2.py` is the companion layout-contour
+audit used to reproduce the same cycle evidence.

@@ -547,6 +547,15 @@ groups:
               # does not drop the left-hand metrics-absence signal when healthy.
               (bioetl_prometheus_rule_partial_error_active_10m == 1)
               or (
+                sum(
+                  increase(
+                    prometheus_rule_evaluation_failures_total{
+                      rule_group=~".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$"
+                    }[10m]
+                  )
+                ) > 0
+              )
+              or (
                 (
                   time()
                   - max(

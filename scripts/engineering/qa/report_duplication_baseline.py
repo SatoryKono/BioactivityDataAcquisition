@@ -19,6 +19,7 @@ import re
 import subprocess
 import sys
 from collections import Counter
+from collections.abc import Sequence
 from dataclasses import asdict, dataclass
 from datetime import date
 from pathlib import Path
@@ -958,7 +959,7 @@ def _append_history_jsonl(
         handle.write(json.dumps(record, ensure_ascii=True) + "\n")
 
 
-def _parse_args() -> argparse.Namespace:
+def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--targets",
@@ -1019,13 +1020,13 @@ def _parse_args() -> argparse.Namespace:
             "budget. Omit for report-only artifact generation."
         ),
     )
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
-def main() -> int:
+def main(argv: Sequence[str] | None = None) -> int:
     from scripts.engineering.common.repo_paths import REPO_ROOT
 
-    args = _parse_args()
+    args = _parse_args(argv)
     root = REPO_ROOT
     snapshot_date = args.snapshot_date or date.today().isoformat()
     exclude_module_patterns = _compile_patterns(args.exclude_module_pattern)

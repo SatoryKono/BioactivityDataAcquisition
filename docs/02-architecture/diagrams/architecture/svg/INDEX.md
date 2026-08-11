@@ -1,6 +1,6 @@
 # BioETL Diagrams — SVG Index
 
-_Generated: 2026-07-08T19:23:31+03:00_
+_Generated: 2026-08-11T13:16:25+00:00_
 
 ## High Level Hexagonal Simple
 
@@ -497,6 +497,42 @@ _Generated: 2026-07-08T19:23:31+03:00_
 ## Effective Config Artifact Domain Model
 
 ![48-effective-config-artifact-domain-model](./48-effective-config-artifact-domain-model.svg)
+
+---
+
+## Chembl Pipeline Activity Dataflow
+
+![49-chembl-pipeline-activity-dataflow](./49-chembl-pipeline-activity-dataflow.svg)
+
+---
+
+## Chembl Pipeline Activity Filter Criteria
+
+![50-chembl-pipeline-activity-filter-criteria](./50-chembl-pipeline-activity-filter-criteria.svg)
+
+---
+
+## 51achembl Pipeline Activity Silver Fields 1
+
+![51a-chembl-pipeline-activity-silver-fields-1](./51a-chembl-pipeline-activity-silver-fields-1.svg)
+
+---
+
+## 51bchembl Pipeline Activity Silver Fields 2
+
+![51b-chembl-pipeline-activity-silver-fields-2](./51b-chembl-pipeline-activity-silver-fields-2.svg)
+
+---
+
+## 52achembl Pipeline Activity Gold Fields 1
+
+![52a-chembl-pipeline-activity-gold-fields-1](./52a-chembl-pipeline-activity-gold-fields-1.svg)
+
+---
+
+## 52bchembl Pipeline Activity Gold Fields 2
+
+![52b-chembl-pipeline-activity-gold-fields-2](./52b-chembl-pipeline-activity-gold-fields-2.svg)
 
 ---
 
