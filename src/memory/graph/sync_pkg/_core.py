@@ -2597,6 +2597,10 @@ def _is_excluded_file_structure_path(
     }
     if any(part in excluded_dir_names for part in path.parts):
         return True
+    # Keep generated diagram raster/vector trees out of file-structure surfaces.
+    # Aligns with snapshot_invariant_issues path-leak checks for /svg and /png.
+    if any(part in {"svg", "png"} for part in path.parts):
+        return True
 
     excluded_prefixes = [
         prefix.strip("/")
