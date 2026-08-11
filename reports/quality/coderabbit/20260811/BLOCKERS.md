@@ -563,3 +563,11 @@ Each entry requires GitHub reconciliation before closeout.
 - Detail: CodeRabbit exit code 1
 - GitHub issue: pending reconciliation
 
+## S01-domain-transformations — error
+
+- UTC: `2026-08-11T10:40:19.687610+00:00`
+- Wave: `A`
+- Files: `5`
+- Detail: CodeRabbit exit code 1
+- GitHub issue: pending reconciliation
+
