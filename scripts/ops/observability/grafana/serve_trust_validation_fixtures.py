@@ -58,9 +58,14 @@ class FixtureHandler(BaseHTTPRequestHandler):
             self._send(404, {"error": "unknown_endpoint", "endpoint": endpoint})
             return
         qs = parse_qs(parsed.query)
+        active_file = self.fixture_root / ".active_state"
+        active_from_file = ""
+        if active_file.is_file():
+            active_from_file = active_file.read_text(encoding="utf-8").strip()
         state = (
             (qs.get("fixture_state") or [None])[0]
             or os.environ.get("BIOETL_TRUST_FIXTURE_STATE")
+            or active_from_file
             or self.default_state
         )
         fixture_path = self.fixture_root / endpoint / f"{state}.json"
