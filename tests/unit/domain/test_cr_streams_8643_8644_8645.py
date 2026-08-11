@@ -27,6 +27,7 @@ from bioetl.domain.composite.aggregation import (
     AggregationFunction,
 )
 from bioetl.domain.config.runtime import RuntimeConfig
+from bioetl.domain.config.validation_config import ValidationConfig
 from bioetl.domain.types import RunType
 from bioetl.domain.value_objects import ActivityType
 
@@ -145,3 +146,84 @@ def test_aggregation_rejects_rhs_operators_and_bad_fields_type() -> None:
 def test_runtime_lock_ttl_positive() -> None:
     with pytest.raises(ValueError, match="lock_ttl"):
         RuntimeConfig(run_type=RunType.REBUILD, lock_ttl=0)
+
+
+def test_merge_result_duration_and_enriched_bounds() -> None:
+    with pytest.raises(ValueError, match="duration_seconds"):
+        MergeResult(records_merged=1, duration_seconds=-1.0)
+    with pytest.raises(ValueError, match="records_enriched cannot exceed"):
+        MergeResult(records_merged=1, records_enriched=2, records_fully_enriched=0)
+
+
+def test_validation_config_positive_identifiers() -> None:
+    with pytest.raises(ValueError, match="publication year"):
+        ValidationConfig(min_publication_year=0, max_publication_year=2020)
+    with pytest.raises(ValueError, match="max_pmid"):
+        ValidationConfig(max_pmid=0)
+    with pytest.raises(ValueError, match="max_taxonomy_id"):
+        ValidationConfig(max_taxonomy_id=-5)
+
+
+def test_enforcement_policy_rejects_out_of_range_thresholds() -> None:
+    with pytest.raises(ValueError, match="warning_threshold"):
+        EnforcementPolicy(
+            check_name="x",
+            current_stage=EnforcementStage.SOFT_FAIL,
+            warning_threshold=-0.1,
+            failure_threshold=0.8,
+        )
+    with pytest.raises(ValueError, match="failure_threshold"):
+        EnforcementPolicy(
+            check_name="x",
+            current_stage=EnforcementStage.SOFT_FAIL,
+            warning_threshold=0.5,
+            failure_threshold=1.1,
+        )
+
+
+def test_field_group_registry_rejects_duplicate_base_and_column() -> None:
+    from bioetl.domain.composite.field_groups_models import (
+        FieldGroupDefinition,
+        FieldGroupId,
+        FieldMapping,
+    )
+    from bioetl.domain.composite.field_groups_registry import FieldGroupRegistry
+
+    g0, g1 = list(FieldGroupId)[0], list(FieldGroupId)[1]
+    fm_a = FieldMapping(base_name="title", provider_columns=("p_title",), group=g0)
+    fm_b = FieldMapping(base_name="title", provider_columns=("q_title",), group=g1)
+    with pytest.raises(ValueError, match="Duplicate field-group base_name"):
+        FieldGroupRegistry(
+            groups=(
+                FieldGroupDefinition(
+                    group_id=g0, display_name="A", include_in_gold=True, fields=(fm_a,)
+                ),
+                FieldGroupDefinition(
+                    group_id=g1, display_name="B", include_in_gold=True, fields=(fm_b,)
+                ),
+            )
+        )
+    fm_c = FieldMapping(
+        base_name="abstract", provider_columns=("shared_col",), group=g0
+    )
+    fm_d = FieldMapping(
+        base_name="keywords", provider_columns=("shared_col",), group=g1
+    )
+    with pytest.raises(ValueError, match="Duplicate provider column"):
+        FieldGroupRegistry(
+            groups=(
+                FieldGroupDefinition(
+                    group_id=g0, display_name="A", include_in_gold=True, fields=(fm_c,)
+                ),
+                FieldGroupDefinition(
+                    group_id=g1, display_name="B", include_in_gold=True, fields=(fm_d,)
+                ),
+            )
+        )
+
+
+def test_optional_column_groups_decoder_helper() -> None:
+    from bioetl.domain.composite.config_composite_decoder import _optional_column_groups
+
+    assert _optional_column_groups(None) == ()
+    assert _optional_column_groups(()) == ()
