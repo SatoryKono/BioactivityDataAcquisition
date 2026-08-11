@@ -1,9 +1,9 @@
 {
-  "source_branch": "fix/cr-streams-8645-8643-8644",
-  "source_commit": "97a98d9a050670d0efc636d02006da83dc0c259a",
-  "source_run_id": "31540525369",
-  "source_tree_sha256": "2ab4ab8a98e410128d672e8964802f5e42aafcb84cead93191e4c5cce4d0305c",
-  "refreshed_at_utc": "2026-08-11T22:13:31.230840+00:00",
+  "source_branch": "main",
+  "source_commit": "5d48967d2268eebc4ebd2f4f77a5fda031305638",
+  "source_run_id": "local-pr8647-refresh",
+  "source_tree_sha256": "d9e0593fc543ef2a5b574f89966a78cb8f938347650b9bec689ff8578952f06f",
+  "refreshed_at_utc": "2026-08-11T23:51:40.476838+00:00",
   "refresh_status": "captured",
   "coverage_percent": 96.41,
   "coverage": {
