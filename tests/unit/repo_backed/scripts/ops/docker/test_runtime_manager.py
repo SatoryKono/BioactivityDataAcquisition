@@ -1059,3 +1059,128 @@ def test_shared_network_bootstrap_rejects_unlabeled_existing_network(
             "observed_owner": "",
         }
     ]
+
+
+def test_ensure_shared_networks_all_networks_ignores_consumer_filter(
+    tmp_path: Path,
+) -> None:
+    """Full reinstall path must create every contracted shared net, not stack-only."""
+    contract = tmp_path / "contract.yml"
+    contract.write_text(
+        yaml.safe_dump(
+            {
+                "shared_networks": {
+                    "monitoring": {
+                        "name": "bioetl-monitoring",
+                        "owner": "runtime-manager",
+                        "consumers": ["monitoring"],
+                    },
+                    "runtime": {
+                        "name": "bioetl-runtime",
+                        "owner": "runtime-manager",
+                        "consumers": ["neo4j"],
+                    },
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    created: list[str] = []
+
+    def runner(
+        command: Sequence[str], cwd: Path, timeout: float
+    ) -> runtime_manager.CommandResult:
+        current = list(command)
+        if "inspect" in current:
+            return runtime_manager.CommandResult(current, 1, stderr="not found")
+        if "create" in current:
+            created.append(current[-1])
+            return runtime_manager.CommandResult(current, 0, stdout="id")
+        raise AssertionError(current)
+
+    # Stack is main, but neither net lists main as consumer — all_networks still ensures both.
+    ok, findings = runtime_manager.ensure_shared_networks(
+        _spec(),
+        contract,
+        tmp_path / "networks.json",
+        runner=runner,
+        all_networks=True,
+    )
+
+    assert ok is True
+    assert findings == []
+    assert set(created) == {"bioetl-monitoring", "bioetl-runtime"}
+    report = json.loads((tmp_path / "networks.json").read_text(encoding="utf-8"))
+    assert report["stack"] == "all"
+    assert report["all_networks"] is True
+
+
+def test_ensure_networks_action_creates_all_shared_nets(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    contract = tmp_path / "contract.yml"
+    contract.write_text(
+        yaml.safe_dump(
+            {
+                "stacks": {
+                    "main": {
+                        "project": "bioetl-main",
+                        "compose_file": "docker-compose.yml",
+                        "required_services": ["bioetl"],
+                        "expected_images": {"bioetl": "bioetl:local"},
+                    }
+                },
+                "shared_networks": {
+                    "monitoring": {
+                        "name": "bioetl-monitoring",
+                        "owner": "runtime-manager",
+                        "consumers": ["main", "monitoring"],
+                    },
+                    "runtime": {
+                        "name": "bioetl-runtime",
+                        "owner": "runtime-manager",
+                        "consumers": ["main", "neo4j"],
+                    },
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    report_dir = tmp_path / "reports"
+    report_dir.mkdir()
+    created: list[str] = []
+
+    def runner(
+        command: Sequence[str], cwd: Path, timeout: float
+    ) -> runtime_manager.CommandResult:
+        current = list(command)
+        if "inspect" in current:
+            return runtime_manager.CommandResult(current, 1, stderr="missing")
+        if "create" in current:
+            created.append(current[-1])
+            return runtime_manager.CommandResult(current, 0, stdout="id")
+        return runtime_manager.CommandResult(current, 0)
+
+    monkeypatch.setattr(
+        runtime_manager,
+        "_dashboard_runtime_environment",
+        lambda _path: __import__("contextlib").nullcontext({}),
+    )
+    # resolve_stack needs compose file present only as path string — no read here.
+    code = runtime_manager.main(
+        [
+            "ensure-networks",
+            "--stack",
+            "main",
+            "--contract",
+            str(contract),
+            "--report-dir",
+            str(report_dir),
+            "--timeout",
+            "10",
+        ],
+        runner=runner,
+    )
+    assert code == 0
+    assert set(created) == {"bioetl-monitoring", "bioetl-runtime"}
+    assert (report_dir / "docker-runtime-all-networks.json").is_file()
