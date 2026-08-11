@@ -114,7 +114,7 @@ inventory scan.
 ```bash
 uv run python -m scripts.docs check-drift --ports --classes
 uv run python -m scripts.docs check-drift --runtime-mirrors --freshness
-uv run python -m scripts.docs report-docs-kpi
+uv run python -m scripts.docs check-kpi
 ```
 
 Use this when docs mention code structures or high-value runtime narratives
