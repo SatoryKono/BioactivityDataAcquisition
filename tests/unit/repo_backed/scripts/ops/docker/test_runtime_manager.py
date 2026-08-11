@@ -139,10 +139,14 @@ def test_preflight_errors_are_recoverable_for_dashboard_and_cross_stack(
 
 
 def test_compose_up_force_recreates_main_stack_on_first_attempt() -> None:
-    args = runtime_manager._compose_up_wait_args(
+    start = runtime_manager._compose_up_start_args(
+        _spec(), attempts=1, force_recreate=True
+    )
+    assert "--force-recreate" in start
+    wait = runtime_manager._compose_up_wait_args(
         _spec(), attempts=1, remaining=30.0, force_recreate=True
     )
-    assert "--force-recreate" in args
+    assert "--force-recreate" in wait
 
 
 def test_status_origin_findings_exposes_dashboard_source_drift(
@@ -397,13 +401,38 @@ def test_collect_snapshots_parses_ndjson_even_when_full_json_would_truncate() ->
         name="monitoring",
         project="bioetl-monitoring",
         compose_file=Path("docker-compose.monitoring.yml"),
-        required_services=("prometheus", "pushgateway", "grafana", "renderer"),
+        required_services=("prometheus", "pushgateway", "grafana"),
         expected_images={},
+        optional_services=("renderer",),
     )
     snapshots, _ = runtime_manager.collect_snapshots(mon, runner=runner)
     names = {snap.service for snap in snapshots}
     assert names == {"prometheus", "pushgateway", "grafana", "renderer"}
+    # Readiness ignores optional renderer even if present/unhealthy in ps output.
     assert runtime_manager.readiness_findings(mon, snapshots, baseline={}) == []
+
+
+def test_compose_up_start_includes_optional_but_wait_is_required_only() -> None:
+    mon = runtime_manager.StackSpec(
+        name="monitoring",
+        project="bioetl-monitoring",
+        compose_file=Path("docker-compose.monitoring.yml"),
+        required_services=("prometheus", "pushgateway", "grafana"),
+        expected_images={},
+        optional_services=("renderer",),
+    )
+    start = runtime_manager._compose_up_start_args(mon, attempts=1, force_recreate=False)
+    assert "renderer" in start
+    assert "prometheus" in start
+    assert "--wait" not in start
+
+    wait = runtime_manager._compose_up_wait_args(
+        mon, attempts=1, remaining=30.0, force_recreate=False
+    )
+    assert "--wait" in wait
+    assert "prometheus" in wait
+    assert "grafana" in wait
+    assert "renderer" not in wait
 
 
 def test_running_without_health_is_not_ready() -> None:
@@ -675,6 +704,8 @@ def test_recovery_is_bounded_to_three_attempts_and_writes_one_incident(
     )
 
     assert result == 1
+    # Each attempt: start phase + wait phase when start succeeds; here start
+    # fails so only one "up" per attempt (3 attempts).
     assert sum("up" in call for call in calls) == 3
     assert len(list(tmp_path.glob("docker-incident-*.json"))) == 1
     incident = json.loads(
@@ -682,7 +713,8 @@ def test_recovery_is_bounded_to_three_attempts_and_writes_one_incident(
     )
     assert incident["config_origin"] == "docker-compose.yml"
     assert incident["recent_logs"]["captured"] is True
-    assert len(incident["recovery_history"]) == 3
+    # recovery_history records start (and wait when reached) rows
+    assert len(incident["recovery_history"]) >= 3
 
 
 def test_clean_requires_confirmation_and_never_deletes_data(tmp_path: Path) -> None:

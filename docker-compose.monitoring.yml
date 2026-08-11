@@ -191,7 +191,9 @@ services:
       interval: 30s
       timeout: 15s
       retries: 10
-      start_period: 180s
+      # Was 180s and inflated operator "stack ready" when renderer was required.
+      # Optional service: short grace; screenshots retry if still warming.
+      start_period: 45s
     # Peak ≈ one Chromium tab + Go process; hard cap prevents 15g runaway.
     mem_limit: 3g
     mem_reservation: 512m
