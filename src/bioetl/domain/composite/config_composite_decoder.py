@@ -119,6 +119,12 @@ def _parse_field_priorities(raw: object) -> dict[str, tuple[str, ...]]:
     }
 
 
+def _optional_column_groups(raw: object) -> object:
+    if raw in (None, ()):
+        return ()
+    return require_object_dict_sequence(raw or (), "merge.column_groups")
+
+
 def _build_merge_config[ConfigT](
     merge_data: dict[str, object],
     merge_cls: Callable[..., ConfigT],
@@ -154,12 +160,7 @@ def _build_merge_config[ConfigT](
         field_mappings=require_str_mapping(
             merge_data.get("field_mappings"), "merge.field_mappings"
         ),
-        column_groups=require_object_dict_sequence(
-            merge_data.get("column_groups") or (),
-            "merge.column_groups",
-        )
-        if merge_data.get("column_groups") not in (None, ())
-        else (),
+        column_groups=_optional_column_groups(merge_data.get("column_groups")),
         exclude_fields=optional_str_tuple(
             merge_data.get("exclude_fields"), "merge.exclude_fields"
         )
