@@ -102,6 +102,9 @@ frontmatter; compose shared guardrails via `fragments/`.
 - `project-audit-orchestrator-kit-2026-08-11.md` (+ `…-SOURCES.md`) — kit #2
   with orchestrator; active: `library/audit/orchestrator.md`
   (`prompt.audit.orchestrator`); domain cards v1.1+ (`findings.json`)
+- `bi-dashboard-audit-kit-2026-08-11.md` (+ `…-SOURCES.md`) — BI acceptance;
+  active: `library/observability/bi-dashboard-acceptance.md`; panel loop v1.1
+  cross-link
 
 ### External archive (already)
 

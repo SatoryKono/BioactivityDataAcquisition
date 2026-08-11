@@ -1,10 +1,10 @@
 ---
 id: prompt.fragment.audit-scale
-version: 1.1.0
+version: 1.2.0
 status: active
 class: fragment
 owner: BioETL Team
-summary: Unified surface quality score 0-3, optional 0-5 dimensions, priority P0-P3
+summary: Unified surface quality score 0-3, optional 0-5/1-5 maps, priority P0-P3
 ---
 
 ## Audit scale
@@ -36,6 +36,21 @@ If you use that scorecard, also emit `surface_score` via:
 
 Or map a single dimension: `surface_score = min(3, floor(dim * 3 / 5))`.
 Always state which mapping you used.
+
+### BI check score_1_5 (1–5, higher = better)
+
+Used by BI dashboard acceptance checks (`fragments/bi-check-schema.md`):
+
+| score_1_5 | surface_score (typical) |
+| ---: | ---: |
+| 5 | 3 |
+| 4 | 3 or 2 |
+| 3 | 2 |
+| 2 | 1 |
+| 1 | 0 |
+
+Kit priorities `high|medium|low` map to P0–P3 per bi-check-schema (not 1:1 with
+score). A wrong KPI can be score 1 + priority high even if the layout looks fine.
 
 ### Priority (lower number = worse)
 

@@ -58,9 +58,12 @@ if (-not $env:NEO4J_PASSWORD) {
     Write-Error 'NEO4J_PASSWORD is not set in the process environment or local .env'
 }
 
+# Same owner label as runtime_manager / compose (avoid NETWORK_OWNER_DRIFT).
+$owner = 'scripts/ops/runtime/docker/runtime_manager.py'
 docker network inspect bioetl-runtime 2>$null | Out-Null
 if ($LASTEXITCODE -ne 0) {
-    docker network create --label bioetl.owner=neo4j-helper bioetl-runtime | Out-Null
+    docker network create --label "com.bioetl.owner=$owner" bioetl-runtime | Out-Null
+    Write-Host "created network bioetl-runtime (owner=$owner)"
 }
 
 Write-Host 'Stopping neo4j (data volume kept)...'

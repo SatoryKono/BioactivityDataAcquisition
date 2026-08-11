@@ -1,6 +1,6 @@
 ---
 id: prompt.fragment.reports-output
-version: 1.1.0
+version: 1.2.0
 status: active
 class: fragment
 owner: BioETL Team
@@ -23,6 +23,9 @@ summary: Audit artifacts under reports/ only; no root audit/ or .audit-runs/
   - `reports/audit/diagrams/`
   - `reports/audit/docs-pipeline/`
   - `reports/audit/architecture/`
+  - `reports/audit/bi-dashboard/` — acceptance: `report.md`, `checks.json`,
+    `findings.json` (optional subdirs `visual/`, `layout/`, `data/`)
+  - `reports/audit/grafana-panels/` — engineering panel loop outputs when used
 
 ### Orchestrated multi-iteration runs
 

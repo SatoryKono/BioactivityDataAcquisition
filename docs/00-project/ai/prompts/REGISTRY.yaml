@@ -92,6 +92,13 @@ entries:
     tags: [guardrail, audit, orchestrator]
     summary: Fail-closed guards for multi-iteration audit/implement orchestrator
 
+  - id: prompt.fragment.bi-check-schema
+    path: fragments/bi-check-schema.md
+    status: active
+    class: fragment
+    tags: [guardrail, observability, bi, dashboard]
+    summary: BI dashboard check result schema and priority mapping
+
   # --- active operator-paste cards ---
   - id: prompt.session.grok-bootstrap
     path: library/session/grok-bootstrap.md
@@ -154,7 +161,14 @@ entries:
     status: active
     class: operator-paste
     tags: [observability, dashboard, grafana, audit, operator]
-    summary: Five-phase Grafana panel audit — render, GH issues, fix, closeout
+    summary: Five-phase Grafana panel audit — render, GH issues, fix, closeout (v1.1)
+
+  - id: prompt.observability.bi-dashboard-acceptance
+    path: library/observability/bi-dashboard-acceptance.md
+    status: active
+    class: operator-paste
+    tags: [observability, dashboard, bi, accessibility, acceptance, operator]
+    summary: BI dashboard acceptance — visual, layout, data contours with measurable checks
 
   # --- domain audit cards (generic nine-kit intake 2026-08) ---
   - id: prompt.audit.docs-content
@@ -227,3 +241,10 @@ entries:
     class: campaign
     tags: [audit, campaign, archive, orchestrator, generic-kit]
     summary: Nine audits + N-iteration orchestrator (2026-08-11); prefer prompt.audit.orchestrator
+
+  - id: prompt.campaign.bi-dashboard-audit-kit
+    path: archive/campaigns/bi-dashboard-audit-kit-2026-08-11.md
+    status: archived
+    class: campaign
+    tags: [observability, dashboard, bi, campaign, archive]
+    summary: BI dashboard acceptance kit (visual/layout/data); prefer bi-dashboard-acceptance card

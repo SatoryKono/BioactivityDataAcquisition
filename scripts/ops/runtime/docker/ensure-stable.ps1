@@ -175,11 +175,28 @@ if (-not $ready) {
 }
 
 Ensure-Env
-foreach ($net in @('bioetl-runtime', 'bioetl-monitoring')) {
-    docker network inspect $net 2>$null | Out-Null
+# Canonical network ensure (owner label matches runtime_manager / compose labels).
+# Guarantees bioetl-monitoring + bioetl-runtime exist after full reinstall / wipe.
+Write-Host 'Ensuring contracted Docker networks (bioetl-monitoring, bioetl-runtime)...'
+$py = $null
+if (Test-Path '.\.venv-win\Scripts\python.exe') {
+    $py = (Resolve-Path '.\.venv-win\Scripts\python.exe').Path
+} elseif (Get-Command python -ErrorAction SilentlyContinue) {
+    $py = (Get-Command python).Source
+}
+if ($py) {
+    & $py scripts/ops/runtime/docker/check_network_preconditions.py --stack all --ensure
     if ($LASTEXITCODE -ne 0) {
-        docker network create --label bioetl.owner=ensure-stable $net | Out-Null
-        Write-Host "created network $net"
+        Write-Warning "network ensure reported issues (exit=$LASTEXITCODE); continuing best-effort"
+    }
+} else {
+    $owner = 'scripts/ops/runtime/docker/runtime_manager.py'
+    foreach ($net in @('bioetl-runtime', 'bioetl-monitoring')) {
+        docker network inspect $net 2>$null | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            docker network create --label "com.bioetl.owner=$owner" $net | Out-Null
+            Write-Host "created network $net (owner=$owner)"
+        }
     }
 }
 

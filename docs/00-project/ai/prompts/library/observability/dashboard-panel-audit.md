@@ -1,6 +1,6 @@
 ---
 id: prompt.observability.dashboard-panel-audit
-version: 1.0.0
+version: 1.1.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -24,6 +24,8 @@ includes:
   - fragments/env-guardrail.md
   - fragments/evidence-contract.md
   - fragments/language-ru.md
+  - fragments/finding-schema.md
+  - fragments/reports-output.md
 related_ssot:
   - AGENTS.md
   - docs/00-project/NORMATIVE_SOURCES.md
@@ -35,6 +37,7 @@ anti_patterns:
   - Starting monitoring stack without operator approval
   - Full RULES/ADR dump in the paste
   - One GitHub issue per cosmetic nit when same root cause
+  - Replacing this card with full WCAG/BI acceptance matrix
 tags: [observability, dashboard, grafana, audit, operator]
 summary: Five-phase Grafana panel audit — render, GH issues, fix, closeout
 max_body_lines: 160
@@ -47,6 +50,11 @@ re-cycles: `CYCLE_COUNT` stays `1`.
 
 Skill: **observability-dashboard** (`.codex/skills/observability-dashboard/`).
 Use real metric names from the repo. Do not invent panels missing from shipped JSON.
+
+**Acceptance (WCAG / layout story / data DQ):** use  
+`prompt.observability.bi-dashboard-acceptance` — do not expand this card into a
+full BI matrix. Outputs for this loop: `reports/audit/grafana-panels/` when writing
+reports.
 
 ## Params
 
@@ -87,7 +95,8 @@ No finding without proof. If monitoring unavailable → `Not Verifiable` + exact
 
 Also note browser/UX defects when UI is available: `bad data`, `query error`,
 `panel error`, unexpected empty, clipped text, broken grid/height, unnecessary
-scroll inside panels.
+scroll inside panels. For systematic contrast/layout/data acceptance checks,
+run or hand off to `bi-dashboard-acceptance`.
 
 ## Phase 3 — GitHub tracking
 
