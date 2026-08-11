@@ -1,0 +1,199 @@
+{
+  "contract": "control_plane_validation_evidence_v1",
+  "endpoints": {
+    "checkpoint-validation": {
+      "aggregate_scope_unknown": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/checkpoint-validation/aggregate_scope_unknown.json",
+        "row_count": 1,
+        "status": "UNKNOWN"
+      },
+      "backend_error": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/checkpoint-validation/backend_error.json",
+        "row_count": 1,
+        "status": "ERROR"
+      },
+      "empty_rows": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/checkpoint-validation/empty_rows.json",
+        "row_count": 0,
+        "status": "UNKNOWN"
+      },
+      "populated": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/checkpoint-validation/populated.json",
+        "row_count": 4,
+        "status": "OK"
+      },
+      "service_unavailable": {
+        "http_status": 503,
+        "path": "tests/fixtures/grafana/control_plane_validation/checkpoint-validation/service_unavailable.json",
+        "row_count": 1,
+        "status": "ERROR"
+      },
+      "valid_empty_or_unknown": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/checkpoint-validation/valid_empty_or_unknown.json",
+        "row_count": 1,
+        "status": "UNKNOWN"
+      }
+    },
+    "failure-reasons": {
+      "backend_error": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/failure-reasons/backend_error.json",
+        "row_count": 1,
+        "status": "ERROR"
+      },
+      "empty_rows": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/failure-reasons/empty_rows.json",
+        "row_count": 0,
+        "status": "UNKNOWN"
+      },
+      "populated": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/failure-reasons/populated.json",
+        "row_count": 7,
+        "status": "OK"
+      },
+      "service_unavailable": {
+        "http_status": 503,
+        "path": "tests/fixtures/grafana/control_plane_validation/failure-reasons/service_unavailable.json",
+        "row_count": 1,
+        "status": "ERROR"
+      },
+      "valid_empty_or_unknown": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/failure-reasons/valid_empty_or_unknown.json",
+        "row_count": 7,
+        "status": "UNKNOWN"
+      },
+      "zero_failures": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/failure-reasons/zero_failures.json",
+        "row_count": 7,
+        "status": "OK"
+      }
+    },
+    "lineage-validation": {
+      "backend_error": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/lineage-validation/backend_error.json",
+        "row_count": 1,
+        "status": "ERROR"
+      },
+      "empty_rows": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/lineage-validation/empty_rows.json",
+        "row_count": 0,
+        "status": "UNKNOWN"
+      },
+      "populated": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/lineage-validation/populated.json",
+        "row_count": 4,
+        "status": "OK"
+      },
+      "service_unavailable": {
+        "http_status": 503,
+        "path": "tests/fixtures/grafana/control_plane_validation/lineage-validation/service_unavailable.json",
+        "row_count": 1,
+        "status": "ERROR"
+      },
+      "valid_empty_or_unknown": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/lineage-validation/valid_empty_or_unknown.json",
+        "row_count": 1,
+        "status": "UNKNOWN"
+      }
+    },
+    "manifest-validation": {
+      "backend_error": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/manifest-validation/backend_error.json",
+        "row_count": 1,
+        "status": "ERROR"
+      },
+      "empty_rows": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/manifest-validation/empty_rows.json",
+        "row_count": 0,
+        "status": "UNKNOWN"
+      },
+      "populated": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/manifest-validation/populated.json",
+        "row_count": 5,
+        "status": "OK"
+      },
+      "service_unavailable": {
+        "http_status": 503,
+        "path": "tests/fixtures/grafana/control_plane_validation/manifest-validation/service_unavailable.json",
+        "row_count": 1,
+        "status": "ERROR"
+      },
+      "valid_empty_or_unknown": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/manifest-validation/valid_empty_or_unknown.json",
+        "row_count": 1,
+        "status": "UNKNOWN"
+      }
+    },
+    "retention-compliance": {
+      "backend_error": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/retention-compliance/backend_error.json",
+        "row_count": 1,
+        "status": "ERROR"
+      },
+      "empty_rows": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/retention-compliance/empty_rows.json",
+        "row_count": 0,
+        "status": "UNKNOWN"
+      },
+      "populated": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/retention-compliance/populated.json",
+        "row_count": 3,
+        "status": "OK"
+      },
+      "service_unavailable": {
+        "http_status": 503,
+        "path": "tests/fixtures/grafana/control_plane_validation/retention-compliance/service_unavailable.json",
+        "row_count": 1,
+        "status": "ERROR"
+      },
+      "valid_empty_or_unknown": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/retention-compliance/valid_empty_or_unknown.json",
+        "row_count": 1,
+        "status": "UNKNOWN"
+      }
+    }
+  },
+  "fixture_pipeline": "chembl_activity",
+  "fixture_run_id": "00000000-0000-0000-0000-000000008576",
+  "fixture_run_type": "incremental",
+  "issue": "#8576",
+  "panel_map": {
+    "9413": "checkpoint-validation",
+    "9414": "manifest-validation",
+    "9415": "lineage-validation",
+    "9416": "retention-compliance",
+    "9417": "failure-reasons"
+  },
+  "related_issue": "#8578",
+  "schema_version": 1,
+  "states": {
+    "aggregate_scope_unknown": "checkpoint only: aggregate scope needs exact pipeline.",
+    "backend_error": "Source read/parse failure as ERROR row (HTTP 200 body).",
+    "empty_rows": "Synthetic rows=[] for Infinity noValue visual path.",
+    "populated": "OK check rows for selected exact run (operator-readable).",
+    "service_unavailable": "Service missing; HTTP 503 body for QUERY_ERROR path.",
+    "valid_empty_or_unknown": "Scope unresolved / evidence absent; UNKNOWN, not green.",
+    "zero_failures": "failure-reasons only: exact run, zero failed events (counts=0)."
+  }
+}

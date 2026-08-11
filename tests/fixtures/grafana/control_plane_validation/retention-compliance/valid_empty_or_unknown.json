@@ -1,0 +1,25 @@
+{
+  "contract": "control_plane_validation_evidence_v1",
+  "endpoint": "retention-compliance",
+  "manifest_id": null,
+  "pipeline": "chembl_activity",
+  "resolved_via": "selected_run_id_not_found",
+  "rows": [
+    {
+      "check": "scope_resolution",
+      "detail": "No persisted run manifest resolved for the requested scope.",
+      "reason": "selected_run_id_not_found",
+      "status": "UNKNOWN"
+    }
+  ],
+  "run_id": "00000000-0000-0000-0000-000000008576",
+  "run_type": "incremental",
+  "status": "UNKNOWN",
+  "summary": {
+    "check_count": 1,
+    "error_count": 0,
+    "ok_count": 0,
+    "unknown_count": 1,
+    "warning_count": 0
+  }
+}

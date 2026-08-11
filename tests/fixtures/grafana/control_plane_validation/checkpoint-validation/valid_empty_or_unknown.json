@@ -1,0 +1,26 @@
+{
+  "contract": "control_plane_validation_evidence_v1",
+  "endpoint": "checkpoint-validation",
+  "evidence_source": "immutable_manifest_history",
+  "manifest_id": "manifest-8576-fixture",
+  "pipeline": "chembl_activity",
+  "resolved_via": "selected_run_id",
+  "rows": [
+    {
+      "check": "parse",
+      "detail": "No persisted checkpoint was found for the requested scope.",
+      "reason": "checkpoint_not_found",
+      "status": "UNKNOWN"
+    }
+  ],
+  "run_id": "00000000-0000-0000-0000-000000008576",
+  "run_type": "incremental",
+  "status": "UNKNOWN",
+  "summary": {
+    "check_count": 1,
+    "error_count": 0,
+    "ok_count": 0,
+    "unknown_count": 1,
+    "warning_count": 0
+  }
+}

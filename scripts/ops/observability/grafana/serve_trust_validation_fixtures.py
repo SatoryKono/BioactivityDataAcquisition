@@ -1,0 +1,130 @@
+"""Serve Trust validation fixtures over HTTP for Grafana Infinity close-ups.
+
+Maps:
+  GET /ops/control-plane/{endpoint}?pipeline=...&run_type=...&run_id=...
+to fixtures under tests/fixtures/grafana/control_plane_validation/{endpoint}/{state}.json
+
+State selection (first match):
+  1. query param ``fixture_state``
+  2. env BIOETL_TRUST_FIXTURE_STATE
+  3. default ``populated``
+
+HTTP status:
+  - service_unavailable → 503
+  - others → 200 (backend_error is ERROR in body, not transport failure)
+
+Example:
+  python scripts/ops/observability/grafana/serve_trust_validation_fixtures.py --port 18080
+  # Point temporary Infinity URL override or local proxy at http://127.0.0.1:18080
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+from urllib.parse import parse_qs, urlparse
+
+DEFAULT_ROOT = Path("tests/fixtures/grafana/control_plane_validation")
+ENDPOINTS = {
+    "checkpoint-validation",
+    "manifest-validation",
+    "lineage-validation",
+    "retention-compliance",
+    "failure-reasons",
+}
+
+
+class FixtureHandler(BaseHTTPRequestHandler):
+    fixture_root: Path = DEFAULT_ROOT
+    default_state: str = "populated"
+
+    def log_message(self, fmt: str, *args: object) -> None:
+        # Keep stdout free of secrets; only method + path.
+        import sys
+
+        print(f"[fixture] {self.command} {self.path}", file=sys.stderr)
+
+    def do_GET(self) -> None:  # noqa: N802
+        parsed = urlparse(self.path)
+        path = parsed.path.rstrip("/")
+        prefix = "/ops/control-plane/"
+        if not path.startswith(prefix):
+            self._send(404, {"error": "not_found", "path": path})
+            return
+        endpoint = path[len(prefix) :]
+        if endpoint not in ENDPOINTS:
+            self._send(404, {"error": "unknown_endpoint", "endpoint": endpoint})
+            return
+        qs = parse_qs(parsed.query)
+        state = (
+            (qs.get("fixture_state") or [None])[0]
+            or os.environ.get("BIOETL_TRUST_FIXTURE_STATE")
+            or self.default_state
+        )
+        fixture_path = self.fixture_root / endpoint / f"{state}.json"
+        if not fixture_path.is_file():
+            self._send(
+                404,
+                {
+                    "error": "fixture_missing",
+                    "endpoint": endpoint,
+                    "state": state,
+                    "path": fixture_path.as_posix(),
+                },
+            )
+            return
+        payload = json.loads(fixture_path.read_text(encoding="utf-8"))
+        http_status = 503 if state == "service_unavailable" else 200
+        if isinstance(payload.get("http_status"), int):
+            http_status = int(payload["http_status"])
+        self._send(http_status, payload)
+
+    def _send(self, status: int, payload: dict[str, object]) -> None:
+        body = json.dumps(payload, sort_keys=True).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(body)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--host", default="127.0.0.1")
+    parser.add_argument("--port", type=int, default=18080)
+    parser.add_argument("--fixture-root", type=Path, default=DEFAULT_ROOT)
+    parser.add_argument(
+        "--default-state",
+        default=os.environ.get("BIOETL_TRUST_FIXTURE_STATE", "populated"),
+        help="Default fixture state when fixture_state query is omitted",
+    )
+    args = parser.parse_args()
+    if not args.fixture_root.is_dir():
+        raise SystemExit(f"fixture root missing: {args.fixture_root}")
+    FixtureHandler.fixture_root = args.fixture_root
+    FixtureHandler.default_state = args.default_state
+    server = ThreadingHTTPServer((args.host, args.port), FixtureHandler)
+    print(
+        f"serving {args.fixture_root} on http://{args.host}:{args.port} "
+        f"(default_state={args.default_state})",
+        flush=True,
+    )
+    print(
+        "example: "
+        f"http://{args.host}:{args.port}/ops/control-plane/checkpoint-validation"
+        f"?pipeline=chembl_activity&run_type=incremental"
+        f"&run_id=00000000-0000-0000-0000-000000008576&fixture_state=backend_error",
+        flush=True,
+    )
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("stopped", flush=True)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

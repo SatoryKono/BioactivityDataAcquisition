@@ -1,0 +1,46 @@
+{
+  "contract": "control_plane_validation_evidence_v1",
+  "edge_count": 3,
+  "endpoint": "lineage-validation",
+  "fragment_count": 2,
+  "manifest_id": "manifest-8576-fixture",
+  "node_count": 4,
+  "pipeline": "chembl_activity",
+  "resolved_via": "selected_run_id",
+  "rows": [
+    {
+      "check": "closure",
+      "detail": "All lineage references resolve within the fragment set.",
+      "reason": "lineage_closure_ok",
+      "status": "OK"
+    },
+    {
+      "check": "identity",
+      "detail": "Node identities match the selected run anchors.",
+      "reason": "lineage_identity_consistent",
+      "status": "OK"
+    },
+    {
+      "check": "cycles",
+      "detail": "No cycles were detected.",
+      "reason": "lineage_acyclic",
+      "status": "OK"
+    },
+    {
+      "check": "persistence",
+      "detail": "Required persistence profile is satisfied.",
+      "reason": "lineage_persistence_profile_met",
+      "status": "OK"
+    }
+  ],
+  "run_id": "00000000-0000-0000-0000-000000008576",
+  "run_type": "incremental",
+  "status": "OK",
+  "summary": {
+    "check_count": 4,
+    "error_count": 0,
+    "ok_count": 4,
+    "unknown_count": 0,
+    "warning_count": 0
+  }
+}

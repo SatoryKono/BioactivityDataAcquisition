@@ -1,0 +1,71 @@
+{
+  "categories": [
+    "api",
+    "dq",
+    "schema",
+    "storage",
+    "network",
+    "validation",
+    "unknown"
+  ],
+  "contract": "control_plane_validation_evidence_v1",
+  "endpoint": "failure-reasons",
+  "manifest_id": "manifest-8576-fixture",
+  "pipeline": "chembl_activity",
+  "resolved_via": "selected_run_id",
+  "rows": [
+    {
+      "category": "api",
+      "count": 0,
+      "reason": "failure_reasons_bounded",
+      "status": "OK"
+    },
+    {
+      "category": "dq",
+      "count": 0,
+      "reason": "failure_reasons_bounded",
+      "status": "OK"
+    },
+    {
+      "category": "schema",
+      "count": 0,
+      "reason": "failure_reasons_bounded",
+      "status": "OK"
+    },
+    {
+      "category": "storage",
+      "count": 0,
+      "reason": "failure_reasons_bounded",
+      "status": "OK"
+    },
+    {
+      "category": "network",
+      "count": 0,
+      "reason": "failure_reasons_bounded",
+      "status": "OK"
+    },
+    {
+      "category": "validation",
+      "count": 0,
+      "reason": "failure_reasons_bounded",
+      "status": "OK"
+    },
+    {
+      "category": "unknown",
+      "count": 0,
+      "reason": "failure_reasons_bounded",
+      "status": "OK"
+    }
+  ],
+  "run_id": "00000000-0000-0000-0000-000000008576",
+  "run_type": "incremental",
+  "status": "OK",
+  "summary": {
+    "check_count": 1,
+    "error_count": 0,
+    "ok_count": 1,
+    "unknown_count": 0,
+    "warning_count": 0
+  },
+  "total_failure_count": 0
+}

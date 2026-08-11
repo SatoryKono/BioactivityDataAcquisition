@@ -1,0 +1,44 @@
+{
+  "contract": "control_plane_validation_evidence_v1",
+  "endpoint": "checkpoint-validation",
+  "evidence_source": "immutable_manifest_history",
+  "manifest_id": "manifest-8576-fixture",
+  "pipeline": "chembl_activity",
+  "resolved_via": "selected_run_id",
+  "rows": [
+    {
+      "check": "parse",
+      "detail": "The checkpoint adapter parsed the persisted envelope.",
+      "reason": "checkpoint_parse_ok",
+      "status": "OK"
+    },
+    {
+      "check": "schema",
+      "detail": "The parsed checkpoint metadata satisfies the supported read schema.",
+      "reason": "checkpoint_schema_valid",
+      "status": "OK"
+    },
+    {
+      "check": "checksum",
+      "detail": "Persisted checkpoint evidence records a successful checksum verification.",
+      "reason": "checkpoint_checksum_verified",
+      "status": "OK"
+    },
+    {
+      "check": "anchors",
+      "detail": "Checkpoint run, manifest, pipeline, mode, and execution anchors match.",
+      "reason": "checkpoint_anchors_match_manifest",
+      "status": "OK"
+    }
+  ],
+  "run_id": "00000000-0000-0000-0000-000000008576",
+  "run_type": "incremental",
+  "status": "OK",
+  "summary": {
+    "check_count": 4,
+    "error_count": 0,
+    "ok_count": 4,
+    "unknown_count": 0,
+    "warning_count": 0
+  }
+}
