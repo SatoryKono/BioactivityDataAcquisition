@@ -273,6 +273,23 @@ def test_composite_config_codec_roundtrips_all_business_sections() -> None:
 
 
 def test_composite_section_decoders_filter_invalid_nested_shapes() -> None:
+    # DQ enricher_overrides fail closed on non-object entries (CR stream #8644).
+    with pytest.raises(
+        ValueError, match=r"enricher_overrides\[ignored\] must be a dictionary"
+    ):
+        build_dq_config(
+            {
+                "required_fields": ["doi"],
+                "enricher_overrides": {
+                    "openalex": {
+                        "soft_fail_threshold": 0.2,
+                        "hard_fail_threshold": 0.7,
+                    },
+                    "ignored": "not-an-object",
+                },
+            }
+        )
+
     dq = build_dq_config(
         {
             "required_fields": ["doi"],
@@ -281,7 +298,6 @@ def test_composite_section_decoders_filter_invalid_nested_shapes() -> None:
                     "soft_fail_threshold": 0.2,
                     "hard_fail_threshold": 0.7,
                 },
-                "ignored": "not-an-object",
             },
         }
     )

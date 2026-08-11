@@ -22,6 +22,9 @@ from bioetl.application.services.control_plane.replay.historical_identity_models
 pytestmark = pytest.mark.unit
 
 
+pytestmark = pytest.mark.unit
+
+
 def _identity() -> HistoricalReplayRunIdentity:
     return HistoricalReplayRunIdentity(
         manifest_id="m-1",

@@ -5,6 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 
+def _nonpositive_optional(value: object) -> bool:
+    return value is not None and isinstance(value, int | float) and value <= 0
+
+
 @dataclass(frozen=True, slots=True)
 class ValidationConfig:
     """Centralized configuration for validation ranges.
@@ -55,6 +59,7 @@ class ValidationConfig:
     def __post_init__(self) -> None:
         """Validate configuration invariants."""
         self._validate_ranges()
+        self._validate_positive_identifiers()
 
     def _validate_ranges(self) -> None:
         """Validate that min/max ranges are valid."""
@@ -103,3 +108,11 @@ class ValidationConfig:
         for condition, message in validations:
             if condition:
                 raise ValueError(message)
+
+    def _validate_positive_identifiers(self) -> None:
+        if self.min_publication_year <= 0 or self.max_publication_year <= 0:
+            raise ValueError("publication year bounds must be positive")
+        if _nonpositive_optional(getattr(self, "max_pmid", 1)):
+            raise ValueError("max_pmid must be positive")
+        if _nonpositive_optional(getattr(self, "max_taxonomy_id", 1)):
+            raise ValueError("max_taxonomy_id must be positive")

@@ -17,6 +17,9 @@ from bioetl.composition.runtime_builders._run_manifest_attr_support import read_
 pytestmark = pytest.mark.unit
 
 
+pytestmark = pytest.mark.unit
+
+
 def test_read_attr_without_default_returns_existing_value() -> None:
     host = SimpleNamespace(pipeline="activity")
     assert read_attr(host, "pipeline") == "activity"
