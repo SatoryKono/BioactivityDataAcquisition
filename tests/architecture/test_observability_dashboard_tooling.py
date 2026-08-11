@@ -90,6 +90,35 @@ def test_observability_dashboard_scripts_do_not_write_dashboard_json() -> None:
     )
 
 
+def test_trust_fixture_materialization_is_outside_grafana_boundary() -> None:
+    """#8598: fixture write_text must not live under grafana/ validation boundary."""
+    materialization = Path(
+        "scripts/ops/observability/trust_validation_fixture_materialization.py"
+    )
+    generate = Path(
+        "scripts/ops/observability/grafana/generate_trust_validation_fixtures.py"
+    )
+    assert materialization.is_file()
+    assert materialization.parent.name == "observability"
+    assert materialization.parent.name != "grafana"
+    generate_src = generate.read_text(encoding="utf-8")
+    assert "trust_validation_fixture_materialization" in generate_src
+    tree = ast.parse(generate_src)
+    offenders = [
+        f"line {node.lineno}"
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "write_text"
+    ]
+    assert not offenders, (
+        "generate_trust_validation_fixtures.py must not call write_text "
+        f"(#8598): {offenders}"
+    )
+    mat_src = materialization.read_text(encoding="utf-8")
+    assert ".write_text(" in mat_src
+
+
 def test_audit_cycle_gate_output_rejects_shipped_dashboard_path() -> None:
     """Gate evidence must not be writable over a shipped dashboard."""
     dashboard_path = audit_cycle.SHIPPED_DASHBOARD_DIR / "blocked.json"

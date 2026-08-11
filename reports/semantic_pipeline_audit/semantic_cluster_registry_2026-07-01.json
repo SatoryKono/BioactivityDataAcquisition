@@ -11662,7 +11662,7 @@
           "field_type": "int64",
           "gold_path": "docs/04-reference/contracts/gold/semanticscholar_publication_v1.0.json",
           "gold_required": false,
-          "gold_type": "[\"number\", \"null\"]",
+          "gold_type": "[\"string\", \"null\"]",
           "group": "identifiers",
           "normalization_source": "profile",
           "normalizer": "normalize_profile_int",

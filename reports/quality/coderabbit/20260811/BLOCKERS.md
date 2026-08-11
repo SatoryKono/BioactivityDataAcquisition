@@ -580,3 +580,11 @@ Each entry requires GitHub reconciliation before closeout.
 - Files: `41`
 - Detail: CodeRabbit exit code 1
 - GitHub issue: pending reconciliation
+## S01-domain-control_plane — error
+
+- UTC: `2026-08-11T13:22:00.842450+00:00`
+- Wave: `A`
+- Files: `32`
+- Detail: CodeRabbit exit code 1
+- GitHub issue: pending reconciliation
+

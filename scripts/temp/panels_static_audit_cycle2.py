@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Static panels-contour audit for shipped Grafana dashboards (MONITORING=false)."""
+
 from __future__ import annotations
 
 import csv
@@ -229,9 +230,7 @@ def analyze(out_dir: Path) -> dict:
             if ptype in NON_QUERY_TYPES:
                 if ptype == "row":
                     verdict = "OK"
-                    evidence_bits.append(
-                        f"type=row collapsed={panel.get('collapsed')}"
-                    )
+                    evidence_bits.append(f"type=row collapsed={panel.get('collapsed')}")
                 elif ptype == "text":
                     content = ""
                     opts = panel.get("options") or {}
@@ -301,8 +300,9 @@ def analyze(out_dir: Path) -> dict:
                         unknown: list[str] = []
                         for e in exprs:
                             for metric in _extract_metrics(e):
-                                if metric not in valid_metrics and not metric.startswith(
-                                    "$"
+                                if (
+                                    metric not in valid_metrics
+                                    and not metric.startswith("$")
                                 ):
                                     if metric in {
                                         "up",
@@ -338,8 +338,7 @@ def analyze(out_dir: Path) -> dict:
                         )
 
                 if any(
-                    k in ptitle
-                    for k in ("Status", "Current Cause", "Current Status")
+                    k in ptitle for k in ("Status", "Current Cause", "Current Status")
                 ):
                     for e in exprs:
                         if "or vector(0)" in e:
