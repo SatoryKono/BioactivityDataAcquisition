@@ -43,3 +43,11 @@ Each entry requires GitHub reconciliation before closeout.
 - Detail: CodeRabbit exit code 1
 - GitHub issue: pending reconciliation
 
+## S01-domain-filtering — error
+
+- UTC: `2026-08-11T09:52:24.539011+00:00`
+- Wave: `A`
+- Files: `13`
+- Detail: CodeRabbit exit code 1
+- GitHub issue: pending reconciliation
+
