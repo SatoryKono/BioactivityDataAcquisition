@@ -18,8 +18,8 @@ tracked coverage measurements.
 Current-baseline note (2026-08-11): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current source baseline is
-`source_module_count=2413` with
-`source_tree_sha256=fee85c5774dd6135d1c5cba9b7df091abb6681913ea498b200d79ea342c69895`.
+`source_module_count=2414` with
+`source_tree_sha256=1be00390a2437a69e9101180fec2c9710685c5ab224e03ab13a06574bd1ed13b`.
 Raw files dated before `2026-07-19` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence. Refresh (2026-08-05) followed the #4343 composite facade narrowing
@@ -82,4 +82,4 @@ Collected: `6`
 
 - source_tree_sha256: `0a05e2a816601ae5e0d9dfcb80bc5b22f2f9359e466418d20733285ca41288a1`
 
-`source_module_count=2413`
+`source_module_count=2414`

@@ -1884,8 +1884,10 @@ def _check_artifacts(
     summary = payload["summary"]
     assert isinstance(summary, dict)
     if int(summary["fail_count"]) > 0:
+        failing = summary.get("failing_gates") or []
+        detail = ", ".join(str(name) for name in failing) if failing else "unknown"
         errors.append(
-            f"Debt governance gates have {summary['fail_count']} failing gate(s)"
+            f"Debt governance gates have {summary['fail_count']} failing gate(s): {detail}"
         )
     return errors
 
