@@ -193,7 +193,7 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     report = inventory.collect_typed_observability_inventory(ROOT)
 
     # Includes bioetl_l0_next_action_no_route (#6574 First Action diet fallback).
-    assert len(report["recording_rule_outputs"]) == 105
+    assert len(report["recording_rule_outputs"]) == 108
     assert len(report["policy_alias_metrics"]) == 15
     assert report["recording_outputs_without_declaration"] == []
     assert report["recording_declarations_without_output"] == []

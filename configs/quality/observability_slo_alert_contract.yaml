@@ -34,6 +34,8 @@ slo_contracts:
     metrics:
       - up
       - bioetl_pipeline_runs_total
+      - bioetl_prometheus_rule_evaluation_failures_10m
+      - bioetl_prometheus_rule_iterations_missed_10m
     alerts:
       - name: BioETLMetricsEndpointUnavailable
         severity: critical
@@ -62,6 +64,14 @@ slo_contracts:
       - name: BioETLGrafanaRendererUnavailable
         severity: warning
         for: 2m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
+      - name: BioETLPrometheusRuleEvaluationFailures
+        severity: warning
+        for: 5m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
+      - name: BioETLPrometheusRuleIterationsMissed
+        severity: warning
+        for: 10m
         runbook: docs/05-operations/runbooks/observability-checklist.md
   optional_docker_runtime_stability:
     owner: "@bioetl-observability"

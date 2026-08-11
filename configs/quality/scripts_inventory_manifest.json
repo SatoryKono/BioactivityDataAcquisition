@@ -12473,7 +12473,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/docker_runtime_preflight.py",
-          "line": 806,
+          "line": 805,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa import check_prometheus_rules as cpr"
         },
@@ -19823,10 +19823,10 @@
           "text": "PREFLIGHT_PATH = ROOT / \"scripts/ops/runtime/docker/docker_runtime_preflight.py\""
         },
         {
-          "path": "tests/unit/repo_backed/scripts/ops/docker/test_preflight_promql_gate.py",
-          "line": 9,
+          "path": "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
+          "line": 522,
           "source_group": "tests",
-          "text": "from scripts.ops.runtime.docker import docker_runtime_preflight as preflight"
+          "text": "if \"docker_runtime_preflight.py\" in joined:"
         }
       ]
     },

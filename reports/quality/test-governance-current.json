@@ -1258,10 +1258,10 @@
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
-    "marked_test_files": 56,
+    "marked_test_files": 55,
     "marker": "pytest.mark.repo_backed",
     "subtree": "tests/unit/repo_backed/",
-    "test_files": 56,
+    "test_files": 55,
     "unmarked_test_files": []
   },
   "report": {
@@ -2220,10 +2220,10 @@
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
-      "marked_test_files": 56,
+      "marked_test_files": 55,
       "marker": "pytest.mark.repo_backed",
       "subtree": "tests/unit/repo_backed/",
-      "test_files": 56,
+      "test_files": 55,
       "unmarked_test_files": []
     },
     "root": ".",
