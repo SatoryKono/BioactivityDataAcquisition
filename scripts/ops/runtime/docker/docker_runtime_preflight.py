@@ -785,6 +785,98 @@ def _findings_required_environment(
     return findings
 
 
+
+_MONITORING_RULES_DIR = Path("grafana/prometheus-rules")
+
+
+def _findings_prometheus_rules_promql(root: Path) -> list[Finding]:
+    """Built-in PromQL/rule syntax gate before Prometheus loads rules.
+
+    1. Structural: every alert/record has non-empty ``expr`` (no external tool).
+    2. ``promtool check rules`` via local binary or pinned Docker image (auto).
+    3. If neither promtool nor Docker is available: warning with remediation
+       (set BIOETL_REQUIRE_PROMTOOL=1 to fail closed).
+    """
+    findings: list[Finding] = []
+    rules_dir = root / _MONITORING_RULES_DIR
+    if not rules_dir.is_dir():
+        return findings
+
+    try:
+        from scripts.engineering.qa import check_prometheus_rules as cpr
+    except ImportError as exc:
+        findings.append(
+            Finding(
+                "MONITORING_PROMQL_HELPER_IMPORT",
+                "warning",
+                "Cannot import check_prometheus_rules for PromQL syntax gate",
+                {"error": str(exc)},
+            )
+        )
+        return findings
+
+    rule_files = cpr.list_shipped_rule_files(rules_dir)
+    if not rule_files:
+        return findings
+
+    for violation in cpr.validate_rule_expr_presence(rule_files):
+        findings.append(
+            Finding(
+                "MONITORING_RULE_EXPR_MISSING",
+                "error",
+                "Rule missing non-empty PromQL expr",
+                {"detail": violation},
+            )
+        )
+
+    require_tool = os.environ.get("BIOETL_REQUIRE_PROMTOOL", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+    }
+    syntax = cpr.check_rules_syntax(
+        rule_files, root=root, prefer="auto", timeout=120.0
+    )
+    if syntax["ok"]:
+        return findings
+
+    tool_missing = syntax["returncode"] == 127
+    if tool_missing:
+        findings.append(
+            Finding(
+                "MONITORING_PROMQL_TOOL_MISSING",
+                "error" if require_tool else "warning",
+                "promtool unavailable; PromQL syntax not verified before rule load",
+                {
+                    "stderr": syntax["stderr"][:500],
+                    "remediation": (
+                        "python -m scripts.engineering.qa check-prometheus-rules "
+                        "--runner docker"
+                    ),
+                    "require_env": "BIOETL_REQUIRE_PROMTOOL=1",
+                },
+            )
+        )
+        return findings
+
+    findings.append(
+        Finding(
+            "MONITORING_PROMQL_SYNTAX",
+            "error",
+            "promtool check rules failed (PromQL or rule schema invalid)",
+            {
+                "runner": syntax["runner"],
+                "returncode": syntax["returncode"],
+                "rules_files": syntax["rules_files"],
+                "stderr": syntax["stderr"][:1500],
+                "stdout": syntax["stdout"][:800],
+                "command": syntax["command"][:20],
+            },
+        )
+    )
+    return findings
+
+
 def _findings_shared_networks(root: Path, contract: Mapping[str, Any]) -> list[Finding]:
     findings: list[Finding] = []
     for logical_name, network_contract in contract.get("shared_networks", {}).items():
@@ -1022,6 +1114,9 @@ def _static_observations(
     findings.extend(_findings_shared_networks(root, contract))
     findings.extend(_findings_codex_filesystem(root, contract, compose_observations))
     findings.extend(_findings_warp_dockerfile(root, contract))
+    # Built-in PromQL syntax gate for shipped rule files (before compose up).
+    if selected_stack in {None, "monitoring", "main"}:
+        findings.extend(_findings_prometheus_rules_promql(root))
     return findings, compose_observations
 
 
