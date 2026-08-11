@@ -113,8 +113,7 @@ def test_grafana_compose_pins_compatible_infinity_plugin() -> None:
     grafana_environment = monitoring["services"]["grafana"]["environment"]
     assert (
         "BIOETL_INFINITY_PLUGIN_VERSION="
-        "${BIOETL_INFINITY_PLUGIN_VERSION:-3.8.0}"
-        in grafana_environment
+        "${BIOETL_INFINITY_PLUGIN_VERSION:-3.8.0}" in grafana_environment
     )
     assert not any(
         str(item).startswith("GF_INSTALL_PLUGINS=") for item in grafana_environment
