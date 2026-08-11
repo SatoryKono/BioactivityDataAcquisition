@@ -32,7 +32,7 @@ trend evidence only.
 - Source run id: `github-31515014563-1`
 - Source tree sha256: `0482fe154dc7e56389bed6f63d357b952ce469bbf5fe2a9cf03e584c1ea2abe2`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-08-11T20:24:16.998332+00:00`
+- Refreshed at (UTC): `2026-08-11T19:54:54.910082+00:00`
 
 ## Branch-accurate provenance (#5729)
 
