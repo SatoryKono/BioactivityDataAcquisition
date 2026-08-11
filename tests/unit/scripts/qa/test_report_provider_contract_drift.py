@@ -23,7 +23,7 @@ from scripts.engineering.qa import report_provider_contract_drift as report
 pytestmark = pytest.mark.unit
 
 
-def test_main_accepts_dispatcher_argv(
+def test_report_provider_contract_drift_main_accepts_dispatcher_argv(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:

@@ -552,9 +552,12 @@ test_lanes:
     e2e-smoke:
       suite_name: e2e-smoke
       description: >
-        PR-blocking E2E smoke subset (bootstrap + representative entity path).
-        Canonical CI owner: .github/workflows/e2e-matrix-health.yml matrix-smoke-blocking
-        and tests.yml control-plane-e2e.
+        PR-blocking E2E smoke subset (pipeline matrix smoke + chembl activity
+        representative entity path). Canonical CI owner:
+        .github/workflows/e2e-matrix-health.yml job matrix-smoke-blocking
+        (matrix 3x rerun + chembl e2e_smoke cassette playback).
+        Note: tests.yml control-plane-e2e is a separate PubChem-only confidence
+        slice and is not an owner of this lane (#8612/#8613).
       runner_backend: run_pytest
       runner: scripts/engineering/dev/run_pytest.sh
       paths:
