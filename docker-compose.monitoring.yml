@@ -3,8 +3,14 @@ name: bioetl-monitoring
 # OPTIONAL operator stack (ADR-010). Not part of the default release bundle.
 # Default local workflow: Python/venv only, or main stack alone.
 # Removed from this surface: Loki, Promtail, Tempo, Quarantine Explorer.
+#
+# Local resource budget (32 GiB Windows hosts):
+#   prometheus 3g + grafana 2g + renderer 3g + pushgateway 512m ≈ 8.5g cgroup caps
+#   (was ~10g + 7.5g + 15g + 2.5g ≈ 35g — host thrash / OOM).
 
 services:
+  # Cap cgroup + TSDB retention so rule/dashboard peaks stay in-budget
+  # (was mem_limit 10g with 8–10g peaks under recording-rule load).
   prometheus:
     image: prom/prometheus:v3.13.1@sha256:3c42b892cf723fa54d2f262c37a0e1f80aa8c8ddb1da7b9b0df9455a35a7f893
     container_name: bioetl-prometheus
@@ -18,6 +24,11 @@ services:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
       - "--web.enable-admin-api"
+      - "--storage.tsdb.retention.time=7d"
+      - "--storage.tsdb.retention.size=2GB"
+      - "--query.max-concurrency=4"
+      - "--query.timeout=60s"
+      - "--query.max-samples=10000000"
     healthcheck:
       test:
         [
@@ -37,8 +48,8 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
-    mem_limit: 10g
-    mem_reservation: 512m
+    mem_limit: 3g
+    mem_reservation: 768m
     cpus: 2.0
     pids_limit: 2560
     init: true
@@ -68,10 +79,10 @@ services:
       timeout: 15s
       retries: 10
       start_period: 60s
-    mem_limit: 2560m
-    mem_reservation: 128m
-    cpus: 1.0
-    pids_limit: 1280
+    mem_limit: 512m
+    mem_reservation: 64m
+    cpus: 0.5
+    pids_limit: 512
     init: true
     stop_grace_period: 120s
     logging:
@@ -145,28 +156,33 @@ services:
     networks:
       - monitoring
     restart: unless-stopped
-    mem_limit: 7680m
+    # Local dashboards + Infinity; 7.5g was over-budget on 32 GiB hosts.
+    mem_limit: 2g
     mem_reservation: 384m
-    cpus: 2.0
-    pids_limit: 2560
+    cpus: 1.0
+    pids_limit: 1280
     init: true
     stop_grace_period: 120s
     logging:
       { driver: json-file, options: { max-size: "200m", max-file: "10" } }
 
+  # Chromium renders are memory-heavy. Previous defaults (mem 15g + concurrency 2)
+  # allowed ~15–30g peaks with Grafana on 32 GiB hosts. Local budget: 1 browser
+  # at a time, cgroup 3g, small shm (dev-shm disabled in BROWSER_FLAGS).
   renderer:
     image: grafana/grafana-image-renderer@sha256:c0c920e6974b0d30ae25313051344afcd2054362529968ebd9545a4b2bc8119b
-    shm_size: "2gb"
+    shm_size: "256mb"
     environment:
       - ENABLE_METRICS=true
       - HTTP_HOST=0.0.0.0
       - AUTH_TOKEN=${GF_RENDERING_RENDERER_TOKEN:?GF_RENDERING_RENDERER_TOKEN is required}
-      - BROWSER_FLAGS=--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--disable-software-rasterizer
+      - BROWSER_FLAGS=--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--disable-software-rasterizer,--js-flags=--max-old-space-size=512
       - BROWSER_READINESS_TIMEOUT=${GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT:-120s}
       - RENDERING_MODE=${GRAFANA_IMAGE_RENDERER_MODE:-default}
       - RENDERING_CLUSTERING_MODE=${GRAFANA_IMAGE_RENDERER_CLUSTERING_MODE:-browser}
-      - RENDERING_CLUSTERING_MAX_CONCURRENCY=${GRAFANA_IMAGE_RENDERER_MAX_CONCURRENCY:-2}
-      - GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-2GiB}
+      # Serial renders by default (was 2). Override only on high-RAM audit hosts.
+      - RENDERING_CLUSTERING_MAX_CONCURRENCY=${GRAFANA_IMAGE_RENDERER_MAX_CONCURRENCY:-1}
+      - GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-1GiB}
     networks:
       - monitoring
     restart: unless-stopped
@@ -176,14 +192,15 @@ services:
       timeout: 15s
       retries: 10
       start_period: 180s
-    mem_limit: 15360m
-    mem_reservation: 768m
-    cpus: 2.0
-    pids_limit: 5120
+    # Peak ≈ one Chromium tab + Go process; hard cap prevents 15g runaway.
+    mem_limit: 3g
+    mem_reservation: 512m
+    cpus: 1.0
+    pids_limit: 1024
     init: true
     stop_grace_period: 120s
     logging:
-      { driver: json-file, options: { max-size: "200m", max-file: "10" } }
+      { driver: json-file, options: { max-size: "100m", max-file: "10" } }
 
 volumes:
   prometheus-data:

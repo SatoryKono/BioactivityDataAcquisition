@@ -705,7 +705,8 @@ curl -sS 'http://localhost:9090/api/v1/targets' | python -c "import sys,json; ts
 | `GRAFANA_PASSWORD`                             | runtime               | Live audit/render password for the running Grafana instance (may differ from the first-boot env once the volume exists) |
 | `GRAFANA_SERVICE_ACCOUNT_TOKEN`                | optional              | Preferred machine auth for render/audit when basic auth is undesirable |
 | `GF_RENDERING_RENDERER_TOKEN`                  | обязательная          | Общий secret для Grafana и renderer `AUTH_TOKEN`; задаётся локально до запуска |
-| `GRAFANA_IMAGE_RENDERER_GOMEMLIMIT`            | `2GiB`                | Go memory soft limit for the remote image renderer      |
+| `GRAFANA_IMAGE_RENDERER_GOMEMLIMIT`            | `1GiB`                | Go memory soft limit for the remote image renderer (local budget) |
+| `GRAFANA_IMAGE_RENDERER_MAX_CONCURRENCY`       | `1`                   | Parallel Chromium renders; keep `1` on ≤32 GiB hosts (was `2`) |
 | `GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT`     | `120s`                | Maximum wait for heavy dashboard pages before the remote renderer returns a timeout |
 | `BIOETL_ENABLE_TRACING_DATASOURCES`            | `auto`                | Авто-подключать Loki/Tempo datasource в Grafana provisioning по live reachability (`true`/`false` override доступны) |
 | `BIOETL_OBSERVABILITY__TRACING_ENABLED`        | `false`               | Включить OpenTelemetry spans и log-trace correlation    |

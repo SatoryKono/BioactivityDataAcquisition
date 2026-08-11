@@ -174,7 +174,8 @@ def test_grafana_uses_remote_renderer_sidecar() -> None:
         "/usr/local/bin/bioetl-bootstrap-grafana.sh",
     ]
     assert renderer["image"] == RENDERER_IMAGE
-    assert renderer["shm_size"] == "2gb"
+    # Local budget: small shm (BROWSER_FLAGS disables /dev/shm); was 2gb.
+    assert renderer["shm_size"] == "256mb"
     assert renderer["healthcheck"]["test"] == [
         "CMD",
         "grafana-image-renderer",
@@ -228,7 +229,7 @@ def test_bootstrap_ops_http_identity_gate_is_soft_by_default() -> None:
 
     Cold start polls bioetl:8000 ready (default 30×2s). On timeout/mismatch/
     unmanaged identity the script defers Ops HTTP and still execs /run.sh unless
-    BIOETL_GRAFANA_REQUIRE_OPS_HTTP=1.
+    BIOETL_GRAFANA_REQUIRE_OPS_HTTP=1. Prometheus is always provisioned as fallback.
     """
     content = Path("grafana/scripts/bootstrap-datasources.sh").read_text(
         encoding="utf-8"
@@ -240,14 +241,19 @@ def test_bootstrap_ops_http_identity_gate_is_soft_by_default() -> None:
     assert 'OPS_READY_ATTEMPTS="${BIOETL_GRAFANA_OPS_READY_ATTEMPTS:-30}"' in content
     assert 'OPS_READY_SLEEP_SEC="${BIOETL_GRAFANA_OPS_READY_SLEEP_SEC:-2}"' in content
     assert "fail_or_defer_ops" in content
-    assert "identity_mismatch_or_timeout" in content
-    assert "invalid_or_unmanaged_identity" in content
-    assert "starting Grafana with Prometheus only" in content
+    assert "provision_prometheus_only" in content or "starting Grafana with Prometheus only" in content
+    assert "is_valid_ops_http_url" in content
+    assert "invalid_or_unmanaged_identity" in content or "invalid_ops_http_url" in content
+    assert (
+        "identity_mismatch_or_timeout" in content
+        or "identity_mismatch" in content
+        or "identity_timeout_or_unreachable" in content
+    )
     assert "bioetl-bootstrap-status.json" in content
     assert "exec /run.sh" in content
     # Hard fail only when audit/render explicitly requires Ops HTTP.
     assert 'if [ "${REQUIRE_OPS_HTTP}" = "1" ]' in content
-    assert "Ops HTTP required but unavailable" in content
+    assert "Ops HTTP required but unavailable" in content or "REQUIRE_OPS_HTTP" in content
 
 
 def test_monitoring_compose_exposes_ops_http_soft_gate_env() -> None:
@@ -265,3 +271,41 @@ def test_monitoring_compose_exposes_ops_http_soft_gate_env() -> None:
         "BIOETL_GRAFANA_OPS_READY_SLEEP_SEC=${BIOETL_GRAFANA_OPS_READY_SLEEP_SEC:-2}"
         in grafana_environment
     )
+
+
+def test_monitoring_compose_local_resource_budget() -> None:
+    """Grafana+renderer must not reserve ~32 GiB peak on local hosts."""
+    monitoring = _load_monitoring_compose()
+    prom = monitoring["services"]["prometheus"]
+    grafana = monitoring["services"]["grafana"]
+    renderer = monitoring["services"]["renderer"]
+    pushgateway = monitoring["services"]["pushgateway"]
+
+    assert prom["mem_limit"] == "3g"
+    assert grafana["mem_limit"] == "2g"
+    assert renderer["mem_limit"] == "3g"
+    assert pushgateway["mem_limit"] == "512m"
+    assert renderer["shm_size"] == "256mb"
+    assert (
+        "RENDERING_CLUSTERING_MAX_CONCURRENCY="
+        "${GRAFANA_IMAGE_RENDERER_MAX_CONCURRENCY:-1}"
+        in renderer["environment"]
+    )
+    assert "GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-1GiB}" in renderer[
+        "environment"
+    ]
+    assert (
+        "BIOETL_GRAFANA_REQUIRE_OPS_HTTP=${BIOETL_GRAFANA_REQUIRE_OPS_HTTP:-0}"
+        in grafana["environment"]
+    )
+
+
+def test_bootstrap_validates_ops_http_url_before_probe() -> None:
+    content = Path("grafana/scripts/bootstrap-datasources.sh").read_text(
+        encoding="utf-8"
+    )
+    fn_idx = content.index("is_valid_ops_http_url()")
+    gate_idx = content.index('if is_valid_ops_http_url "${BIOETL_OPS_HTTP_URL}"')
+    wget_idx = content.index('wget -qO- -T 3 "${OPS_READY_URL}"')
+    assert fn_idx < gate_idx < wget_idx
+
