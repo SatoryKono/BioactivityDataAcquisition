@@ -139,6 +139,30 @@ def _validate_null_filter(text: str, upper: str, token: str) -> bool:
     return True
 
 
+def _is_quoted_literal(value: str) -> bool:
+    return (value.startswith("'") and value.endswith("'")) or (
+        value.startswith('"') and value.endswith('"')
+    )
+
+
+def _rhs_contains_nested_operators(rhs: str) -> bool:
+    upper_rhs = f" {rhs.upper()} "
+    if any(token in upper_rhs for token in (" == ", " != ", " AND ", " OR ")):
+        return True
+    return any(token in rhs.upper() for token in (" IS NULL", " IS NOT NULL"))
+
+
+def _reject_nested_rhs_operators(rhs: str) -> None:
+    """Reject unquoted RHS values that embed extra operators/keywords."""
+    if _is_quoted_literal(rhs):
+        return
+    if _rhs_contains_nested_operators(rhs):
+        raise ValueError(
+            "aggregation filter_condition comparison value must not "
+            "contain additional operators or boolean keywords"
+        )
+
+
 def _try_comparison_operator(text: str, operator: str) -> bool:
     if operator not in text:
         return False
@@ -147,19 +171,7 @@ def _try_comparison_operator(text: str, operator: str) -> bool:
     rhs = right.strip()
     if not rhs:
         raise ValueError("aggregation filter_condition comparison requires a value")
-    # Reject chained comparisons / boolean keywords on the RHS unless quoted.
-    quoted = (rhs.startswith("'") and rhs.endswith("'")) or (
-        rhs.startswith('"') and rhs.endswith('"')
-    )
-    if not quoted:
-        upper_rhs = f" {rhs.upper()} "
-        if any(
-            token in upper_rhs for token in (" == ", " != ", " AND ", " OR ")
-        ) or any(token in rhs.upper() for token in (" IS NULL", " IS NOT NULL")):
-            raise ValueError(
-                "aggregation filter_condition comparison value must not "
-                "contain additional operators or boolean keywords"
-            )
+    _reject_nested_rhs_operators(rhs)
     return True
 
 
