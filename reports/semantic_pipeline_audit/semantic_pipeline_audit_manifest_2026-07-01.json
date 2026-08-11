@@ -401,7 +401,7 @@
     "pairs": 3245,
     "pipelines": 26,
     "residual_backlog": {
-      "blocking_task_count": 1,
+      "blocking_task_count": 0,
       "clusters": 290,
       "normalization_counts": {
         "COMPATIBLE": 887,
@@ -409,8 +409,7 @@
       },
       "pair_rows": 3245,
       "risk_counts": {
-        "HIGH": 1,
-        "LOW": 3244
+        "LOW": 3245
       },
       "semantic_status_counts": {
         "EXACT": 2742,
@@ -418,8 +417,7 @@
         "WEAK": 435
       },
       "typing_counts": {
-        "COMPATIBLE": 663,
-        "CONFLICTING": 1,
+        "COMPATIBLE": 664,
         "IDENTICAL": 2581
       },
       "validation_counts": {
@@ -428,12 +426,10 @@
       }
     },
     "risk": {
-      "HIGH": 1,
-      "LOW": 3244
+      "LOW": 3245
     },
     "typing": {
-      "COMPATIBLE": 663,
-      "CONFLICTING": 1,
+      "COMPATIBLE": 664,
       "IDENTICAL": 2581
     },
     "validation": {

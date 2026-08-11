@@ -9,10 +9,10 @@ Generated: `2026-07-01`
 - Base config files covered: `5`
 - Base config semantic surfaces: `340`
 - CRITICAL drift risks: `0`
-- HIGH drift risks: `1`
+- HIGH drift risks: `0`
 - Normalization mismatches: `0`
 - Validation strictness mismatches: `0`
-- Typing conflicts: `1`
+- Typing conflicts: `0`
 - Reviewed PARTIAL rows: `68`
 - Reviewed WEAK inventory rows: `435`
 - Role-governed WEAK clusters: `7`
@@ -20,8 +20,8 @@ Generated: `2026-07-01`
 - Reviewed generic collision rows: `0`
 - Compatible normalization rows: `887`
 - Compatible validation rows: `1042`
-- Compatible typing rows: `663`
-- Residual blocking tasks: `1`
+- Compatible typing rows: `664`
+- Residual blocking tasks: `0`
 
 ## Artifact Index
 
