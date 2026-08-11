@@ -59,8 +59,8 @@ def check_null_rates_stats(df: pl.DataFrame) -> tuple[list[NullRateResult], floa
     total_cells = 0
     row_count = len(df)
 
-    for col in df.columns:
-        null_count = df[col].null_count()
+    null_counts = df.null_count().row(0, named=True) if df.columns else {}
+    for col, null_count in null_counts.items():
         null_rate = null_count / row_count if row_count > 0 else 0.0
         total_nulls += null_count
         total_cells += row_count
