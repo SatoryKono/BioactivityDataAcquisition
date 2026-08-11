@@ -93,7 +93,7 @@
       "coverage_actual_percent": 95.69,
       "coverage_percent_fallback_used": false,
       "coverage_xml_present": true,
-      "refreshed_at_utc": "2026-08-11T17:14:19.960361+00:00",
+      "refreshed_at_utc": "2026-08-11T19:54:54.910082+00:00",
       "slowest_total_cases": 47389,
       "source_commit": "a4a95fd6396fc2f00319d2ddc10de4dab09be825",
       "source_run_id": "github-31515014563-1",
@@ -189,8 +189,8 @@
         }
       ],
       "under_70_count": 15,
-      "under_85_count": 68,
-      "unmeasured_count": 17,
+      "under_85_count": 65,
+      "unmeasured_count": 0,
       "zero_coverage_count": 0
     }
   },

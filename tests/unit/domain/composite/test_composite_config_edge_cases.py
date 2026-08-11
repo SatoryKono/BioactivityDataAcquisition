@@ -44,7 +44,7 @@ from bioetl.domain.composite.config import (
     SeedConfig,
 )
 from bioetl.domain.config import CrossFieldValidation, FieldValidation
-from bioetl.domain.composite.config_validators import (
+from tests.unit.domain.composite._config_internal_test_support import (
     _validate_optional_threshold,
     _validate_positive,
     _validate_threshold_order,

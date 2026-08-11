@@ -27,6 +27,7 @@ from scripts.schema.analysis.generate_config_matrix import (
 BACKLOG_PATH = ROOT / "reports/quality/config-surface-backlog.json"
 DUPLICATION_SURFACE_ROOT = ROOT / "configs"
 DUPLICATION_FILE_SUFFIXES = (".yaml", ".yml", ".json")
+DUPLICATION_EXCLUDED_PREFIXES = ("configs/_schema/",)
 JSCPD_IGNORED_PATTERNS = ("**/configs/**", "**/*.yaml", "**/*.yml", "**/*.json")
 MIN_DUPLICATE_BLOCK_BYTES = 200
 MAX_DUPLICATION_BLOCK_DEPTH = 2
@@ -370,7 +371,11 @@ def _iter_duplication_surface_files() -> list[Path]:
     files = [
         path
         for path in DUPLICATION_SURFACE_ROOT.rglob("*")
-        if path.is_file() and path.suffix in DUPLICATION_FILE_SUFFIXES
+        if path.is_file()
+        and path.suffix in DUPLICATION_FILE_SUFFIXES
+        and not path.relative_to(ROOT)
+        .as_posix()
+        .startswith(DUPLICATION_EXCLUDED_PREFIXES)
     ]
     return sorted(files)
 
@@ -493,20 +498,9 @@ def _record_block_occurrence(
     )
 
 
-def _is_ignored_single_file_cluster(
-    cluster: dict[str, Any],
-    *,
-    unique_paths: set[str],
-) -> bool:
-    """True for intentional same-file mirrors that are not multi-surface debt."""
-    if len(unique_paths) != 1:
-        return False
-    block_path = str(cluster["block_path"])
-    if block_path.startswith("contracts.hash_"):
-        return True
-    if block_path.startswith("entries.scripts/"):
-        return True
-    return False
+def _is_ignored_single_file_cluster(*, unique_paths: set[str]) -> bool:
+    """True for same-file mirrors that are not cross-surface config debt."""
+    return len(unique_paths) == 1
 
 
 def _duplicate_cluster_payload(cluster: dict[str, Any]) -> dict[str, Any]:
@@ -545,7 +539,7 @@ def _select_duplicate_clusters(
         }
         if len(unique_locations) < 2:
             continue
-        if _is_ignored_single_file_cluster(cluster, unique_paths=unique_paths):
+        if _is_ignored_single_file_cluster(unique_paths=unique_paths):
             continue
         affected_files.update(entry["path"] for entry in occurrences)
         duplicate_clusters.append(_duplicate_cluster_payload(cluster))
@@ -587,6 +581,7 @@ def _build_duplication_audit() -> dict[str, Any]:
         "scope": {
             "root": DUPLICATION_SURFACE_ROOT.relative_to(ROOT).as_posix(),
             "file_suffixes": list(DUPLICATION_FILE_SUFFIXES),
+            "excluded_generated_prefixes": list(DUPLICATION_EXCLUDED_PREFIXES),
             "files_scanned": len(surface_files),
             "ignored_by_jscpd_patterns": list(JSCPD_IGNORED_PATTERNS),
             "structured_block_min_bytes": MIN_DUPLICATE_BLOCK_BYTES,
@@ -604,7 +599,9 @@ def _build_duplication_audit() -> dict[str, Any]:
         "notes": [
             (
                 "This audit covers structured config/contract/registry surfaces "
-                "under configs/** that JSCPD intentionally ignores."
+                "under configs/** that JSCPD intentionally ignores. Generated "
+                "JSON Schema mirrors stay governed by schema drift checks and are "
+                "excluded from the authored-config duplication debt ratchet."
             ),
             (
                 "Clusters report exact canonical JSON subtree duplicates only; "

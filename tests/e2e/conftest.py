@@ -1056,7 +1056,7 @@ def _is_transient_retry_exhausted_error(exc: Exception) -> bool:
 
 def is_external_healthcheck_playback_failure(exc: Exception) -> bool:
     """Return True when playback fails due to external health-check mismatch."""
-    from bioetl.domain.exceptions.infrastructure import InfrastructureError
+    from bioetl.domain.exceptions.storage import InfrastructureError
 
     if not isinstance(exc, InfrastructureError):
         return False

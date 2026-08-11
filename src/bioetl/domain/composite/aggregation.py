@@ -12,7 +12,7 @@ import re
 from dataclasses import dataclass
 from enum import StrEnum
 
-from bioetl.domain.composite.config_validators import require_non_empty
+from .config_validators import require_non_empty
 
 
 class AggregationFunction(StrEnum):

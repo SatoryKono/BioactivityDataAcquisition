@@ -49,17 +49,6 @@
     {
       "decision": "retain",
       "importer_proof": {
-        "active_callers": [],
-        "method": "git_grep_basename",
-        "notes": "Manual QA census utility retained for VCR inventory campaigns; delete only after replacement generator is registered."
-      },
-      "path": "scripts/engineering/qa/report_vcr_cassette_census.py",
-      "reference_count": 0,
-      "status": "supporting"
-    },
-    {
-      "decision": "retain",
-      "importer_proof": {
         "active_callers": [
           "tests/unit/scripts/ops/test_memory_alias_contracts.py"
         ],
@@ -76,15 +65,14 @@
     "promote_candidates": [
       "scripts/engineering/qa/report_live_residual_snapshot.py"
     ],
-    "retain_count": 5,
-    "script_count": 6,
-    "zero_reference_supporting_script_count": 5
+    "retain_count": 4,
+    "script_count": 5,
+    "zero_reference_supporting_script_count": 4
   },
   "wave_schedule": {
     "2026-09-30": [
       "scripts/engineering/dev/setup_bioetl_wsl_fixed.ps1",
       "scripts/engineering/qa/report_live_residual_snapshot.py",
-      "scripts/engineering/qa/report_vcr_cassette_census.py",
       "scripts/ops/neo4j_memory_sync.py"
     ],
     "2026-10-15": [
