@@ -38,6 +38,8 @@ def main() -> int:
 
     steps: list[tuple[str, list[str]]] = []
     if not args.skip_links:
+        # Full check-links suite (unflagged = all runners). Partial
+        # --links/--specs/--configs alone is insufficient for docs governance.
         steps.append(
             (
                 "check-links",
@@ -45,9 +47,6 @@ def main() -> int:
                     sys.executable,
                     "-m",
                     "scripts.docs.checks.check_links",
-                    "--links",
-                    "--specs",
-                    "--configs",
                 ],
             )
         )

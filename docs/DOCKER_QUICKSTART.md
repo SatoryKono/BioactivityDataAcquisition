@@ -36,17 +36,19 @@ only the **operator Explorer UI + Loki/Tempo stacks** were deleted.
 
 ## Network preconditions (MEDIUM)
 
-Which compose file uses which **shared** network (fixed `name:`, `external: true`;
-create via `ensure-networks` before compose up):
+Shared Docker networks use a **fixed `name:`** and owner label
+(`com.bioetl.owner`). They are **not** declared as `external: true` in compose:
+`docker compose up` **creates** missing nets (or reuses existing ones). Prefer
+`ensure-networks` / `ensure-stable` after a wipe so labels are correct before
+first up.
+
+Which compose file attaches to which shared network:
 
 | Compose file | Networks |
 | --- | --- |
 | `docker-compose.monitoring.yml` | **`bioetl-monitoring` only** |
 | `docker-compose.yml` (main) | **`bioetl-monitoring` + `bioetl-runtime`** |
 | `docker-compose.neo4j.yml` | **`bioetl-runtime`** |
-
-Networks are **not** `external: true` anymore: `docker compose up` **creates** them
-if missing (with owner label). If they already exist, Compose reuses them.
 
 | Precondition | Why | How to satisfy |
 | --- | --- | --- |

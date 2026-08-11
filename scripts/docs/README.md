@@ -23,18 +23,21 @@ Canonical implementations now live under focused package subdirectories:
 - `scripts/docs/passports/markdown_renderer.py`: reviewed internal passport-renderer
   extraction retained behind the canonical projector pending integration or removal
 
-Top-level `scripts/docs/*.py` files now exist primarily as compatibility shims so
-existing CI jobs, docs, tests, and direct script invocations keep working while
-the canonical source of truth lives under `checks/`, `build/`, `fixers/`, and
-`matrix/`.
+Canonical source of truth lives under `checks/`, `build/`, `fixers/`,
+`matrix/`, and `passports/`. Prefer the unified entrypoint
+`python -m scripts.docs <command>` for all CI and operator use.
+
+Top-level `scripts/docs/*.py` compatibility shims were **retired** (#8043).
+Only package entrypoints remain (`__init__.py`, `__main__.py`). Do not reintroduce
+ad-hoc top-level script modules without an explicit compatibility ADR.
 
 ## Compatibility Layer
 
-Compatibility wrappers are intentionally kept for:
+Remaining compatibility surfaces (not top-level Python shims):
 
-- historical direct-file callers during the bounded compatibility window
-- tests that import or monkeypatch historical top-level modules
-- shell-oriented transport needs such as `bash scripts/docs/build_docs_site.sh`, though the preferred public entrypoint is `python -m scripts.docs build-site`
+- shell transport: `bash scripts/docs/build_docs_site.sh` (preferred:
+  `python -m scripts.docs build-site`)
+- historical docs/CI that already call `python -m scripts.docs …` (no change)
 
 ## Commands
 
@@ -91,13 +94,14 @@ Compatibility wrappers are intentionally kept for:
 
 The single canonical ChEMBL workbook artifact is:
 
-- [chembl_pipeline_silver_matrices_v12.xlsx](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/chembl_pipeline_silver_matrices_v12.xlsx)
+- [chembl_pipeline_silver_matrices_v12.xlsx](../../docs/reports/chembl_pipeline_silver_matrices_v12.xlsx)
 
 Older `v2`-`v11` files are historical snapshots only and should not be edited.
+Use **repo-relative** paths only (no machine-local absolute mounts).
 
 ## Canonical Workbook Update Workflow
 
-1. Edit only [chembl_pipeline_silver_matrices_v12.xlsx](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/chembl_pipeline_silver_matrices_v12.xlsx).
+1. Edit only [chembl_pipeline_silver_matrices_v12.xlsx](../../docs/reports/chembl_pipeline_silver_matrices_v12.xlsx).
 1. Export the canonical runtime structural contract:
 
 ```bash
@@ -132,8 +136,8 @@ uv run python -m scripts.docs filter-matrix-rows
 
 7. Review the runtime contract export and regenerated YAML artifacts:
 
-- [docs/reports/generated/chembl_matrix_structural_contract_v1.json](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/generated/chembl_matrix_structural_contract_v1.json)
-- [docs/reports/dictionaries](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/dictionaries)
+- [docs/reports/generated/chembl_matrix_structural_contract_v1.json](../../docs/reports/generated/chembl_matrix_structural_contract_v1.json)
+- [docs/reports/dictionaries](../../docs/reports/dictionaries)
 
 The exported contract now includes runtime-resolved `field_policy` overlays such as:
 
