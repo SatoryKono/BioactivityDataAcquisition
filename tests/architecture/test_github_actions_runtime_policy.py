@@ -29,6 +29,10 @@ NIGHTLY_REPLAY_WORKFLOW = ROOT / ".github" / "workflows" / "nightly-replay-parit
 TESTS_WORKFLOW = ROOT / ".github" / "workflows" / "tests.yml"
 RELEASE_WORKFLOW = ROOT / ".github" / "workflows" / "release.yml"
 GITHUB_POLICY = ROOT / "docs" / "00-project" / "governance" / "05-github-policy.md"
+ALWAYS_ON_REQUIRED_CHECKS = {
+    "checks-complete": ROOT / ".github" / "workflows" / "import-linter.yml",
+    "root-hygiene": ROOT / ".github" / "workflows" / "root-hygiene.yml",
+}
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -75,6 +79,35 @@ def test_github_policy_python_version_claims_match_workflows() -> None:
     assert "full test matrix (Python 3.12, 6 groups)" in policy_doc
     assert "Build and test on Python 3.13" in policy_doc
     assert "2. Test Install  → Python 3.13" in policy_doc
+
+
+def test_ruleset_required_checks_materialize_on_every_pr() -> None:
+    policy_doc = GITHUB_POLICY.read_text(encoding="utf-8")
+    required_section = policy_doc.split(
+        "### Final always-on required-check set", maxsplit=1
+    )[1].split("### Path-scoped core checks", maxsplit=1)[0]
+
+    for check_name, workflow_path in ALWAYS_ON_REQUIRED_CHECKS.items():
+        workflow = _load_yaml(workflow_path)
+        triggers = workflow.get("on", workflow.get(True))
+        assert isinstance(triggers, dict)
+        assert "pull_request" in triggers
+        pull_request = triggers["pull_request"]
+        assert pull_request is None or not {
+            "paths",
+            "paths-ignore",
+        }.intersection(pull_request)
+        assert check_name in workflow["jobs"]
+        assert f"`{check_name}`" in required_section
+
+    for path_scoped_check in (
+        "coverage-verify",
+        "schema-governance-status",
+        "detect-secrets",
+        "commit-lint",
+        "type-check",
+    ):
+        assert f"`{path_scoped_check}`" not in required_section
 
 
 def test_runtime_policy_rejects_mutable_docker_image_tags() -> None:
