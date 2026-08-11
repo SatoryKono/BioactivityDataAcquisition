@@ -88,7 +88,11 @@ ______________________________________________________________________
 
 BioETL uses **39 GitHub Actions workflows** (including reusable helper workflows). For the canonical file-level inventory, see [GitHub Actions Workflows](../../04-reference/github-actions-workflows.md).
 
-### 2.1 Core Quality Gates (run on every PR)
+### 2.1 Core Quality Workflows
+
+These workflows form the core quality surface, but their `pull_request`
+filters differ. Section 3 distinguishes checks that materialize on every PR
+from checks that run only for matching paths.
 
 | Workflow                        | File                | Key Jobs                                                                                                                              | What It Checks                                                                                                                                                                                                                                      |
 | ------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -134,23 +138,42 @@ BioETL uses **39 GitHub Actions workflows** (including reusable helper workflows
 
 ______________________________________________________________________
 
-## 3. Recommended Status Checks
+## 3. Status Checks and Ruleset Contract
 
 Direct merges to `main` are currently allowed. When a PR is used, the following
 checks remain the recommended quality gate even though GitHub does not
 currently enforce them as a blocking repository rule.
 
-### Core recommended checks
+### Final always-on required-check set
+
+The final activation set for repository ruleset
+`root-hygiene-required-check` is exactly the following two contexts:
+
+| Check Name | Workflow | Why it is safe to require globally |
+| --- | --- | --- |
+| `checks-complete` | import-linter.yml | Unfiltered `pull_request` trigger; aggregates lint, C901 governance, architecture, and import-linter gates |
+| `root-hygiene` | root-hygiene.yml | Unfiltered `pull_request` trigger; enforces repository-root governance |
+
+Both checks materialize on every PR targeting `main`. Enabling or changing the
+repository ruleset is an external mutation and requires explicit maintainer
+confirmation. Until that confirmation is given and the API result is verified,
+the ruleset remains documented as disabled below.
+
+### Path-scoped core checks
+
+The following checks remain required by policy whenever their workflow matches
+the changed paths. They MUST NOT be configured as unconditional repository
+required-status contexts until a separate decision makes their workflows
+materialize on every PR; otherwise GitHub can leave a skipped required check
+pending and block an unrelated PR.
 
 | Check Name                 | Workflow              | Purpose                                                       |
 | -------------------------- | --------------------- | ------------------------------------------------------------- |
-| `checks-complete`          | import-linter.yml     | Aggregates lint + C901 governance + architecture gates        |
 | `coverage-verify`          | tests.yml             | Combined 85% coverage threshold (matrix shards + serial pass) |
 | `schema-governance-status` | schema-governance.yml | Schema parity and contracts                                   |
 | `detect-secrets`           | security.yml          | No credential leaks                                           |
 | `commit-lint`              | commit-lint.yml       | Conventional Commits                                          |
 | `type-check`               | type-checking.yml     | mypy strict compliance                                        |
-| `root-hygiene`             | root-hygiene.yml      | Clean repository root, cataloged plan/docs placement, and generated artifact bans |
 
 Docs-only PRs should still go through documentation governance via `docs.yml`:
 the lightweight `docs-governance` job runs architecture doc-sync / drift tests
@@ -207,16 +230,18 @@ Repository settings currently allow direct merge to `main`.
 Repo-side evidence remains the `root-hygiene` workflow plus the repository
 ruleset state below.
 
-Verified on `2026-04-29` with repository admin credentials via the GitHub REST
-API.
+Re-verified read-only on `2026-08-11` with repository admin credentials via the
+GitHub REST API.
 
 Live GitHub enforcement state:
 
 - Repository ruleset `root-hygiene-required-check` targets
   `refs/heads/main`.
 - Enforcement: `disabled`.
-- Rule payload still references status check `root-hygiene`, but it is not
-  active.
+- Current rule payload references only status check `root-hygiene`, with
+  `strict_required_status_checks_policy: false`; it is not active.
+- The final activation payload adds `checks-complete` and retains
+  `root-hygiene`, matching the always-on set above.
 - Tracking reference: `#3380`.
 - Evidence: `https://github.com/SatoryKono/BioactivityDataAcquisition/rules/15730586`
 
