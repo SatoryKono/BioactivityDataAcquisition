@@ -757,7 +757,7 @@
     },
     "reviewed": {
       "type": [
-        "object",
+        "boolean",
         "null"
       ],
       "nullable": true,

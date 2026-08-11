@@ -2029,8 +2029,7 @@
       "decision_path": "docs/02-architecture/decisions/ADR-056-proof-or-stop-lifecycle-control.md",
       "enforcement_owner_paths": [
         "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/architecture/test_proof_or_stop_contract.py",
-        "tests/unit/scripts/test_documentation_governance_check.py"
+        "tests/architecture/test_proof_or_stop_contract.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
@@ -2038,13 +2037,36 @@
         "docs/01-requirements/REQUIREMENTS.md",
         "docs/04-reference/contracts/README.md",
         "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/architecture/test_proof_or_stop_contract.py",
-        "tests/unit/scripts/test_documentation_governance_check.py"
+        "tests/architecture/test_proof_or_stop_contract.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",
       "status": "enforced",
       "title": "Proof-or-Stop Lifecycle Control"
+    },
+    {
+      "adr_id": "ADR-057",
+      "category": "Configuration",
+      "decision_date": "2026-08-10",
+      "decision_path": "docs/02-architecture/decisions/ADR-057-deterministic-runtime-config-authority-and-identity.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_source_config_usage.py",
+        "tests/unit/scripts/test_documentation_governance_check.py"
+      ],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/RULES.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "src/bioetl/infrastructure/config/_base.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_source_config_usage.py",
+        "tests/unit/scripts/test_documentation_governance_check.py"
+      ],
+      "manual_exception": null,
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Deterministic Runtime Config Authority and Identity"
     }
   ],
   "schema_version": 1,
@@ -2054,9 +2076,9 @@
     "tracked_file_discovery": "git grep --untracked with python fallback"
   },
   "summary": {
-    "accepted_adr_count": 54,
+    "accepted_adr_count": 55,
     "blocking_gap_count": 0,
-    "enforced_adr_count": 54,
+    "enforced_adr_count": 55,
     "manual_exception_count": 0,
     "missing_enforcement_owner_count": 0,
     "missing_implementation_owner_count": 0

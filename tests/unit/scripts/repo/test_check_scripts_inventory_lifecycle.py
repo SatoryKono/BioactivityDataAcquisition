@@ -10,11 +10,42 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 from __future__ import annotations
 
+import json
+
 import pytest
 
 from scripts.engineering.repo import check_scripts_inventory as inventory
 
 pytestmark = pytest.mark.unit
+
+
+def test_load_json_rejects_duplicate_object_keys(tmp_path) -> None:
+    registry_path = tmp_path / "registry.json"
+    registry_path.write_text(
+        """{
+  "entries": {
+    "scripts/example.py": {},
+    "scripts/example.py": {}
+  }
+}
+""",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="line 3, column 5.*line 4, column 5"):
+        inventory._load_json(registry_path)
+
+
+def test_load_json_accepts_unique_object_keys(tmp_path) -> None:
+    registry_path = tmp_path / "registry.json"
+    registry_path.write_text(
+        json.dumps({"entries": {"scripts/example.py": {"owner": "team"}}}),
+        encoding="utf-8",
+    )
+
+    assert inventory._load_json(registry_path) == {
+        "entries": {"scripts/example.py": {"owner": "team"}}
+    }
 
 
 def test_temporary_diagnostic_decision_overrides_strong_reference_groups() -> None:

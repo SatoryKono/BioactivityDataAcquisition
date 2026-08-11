@@ -85,7 +85,7 @@
     },
     "src_id": {
       "type": [
-        "integer",
+        "number",
         "null"
       ],
       "nullable": true,

@@ -127,14 +127,14 @@ def _write_if_changed(path: Path, content: str, check: bool) -> bool:
     return False
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--check",
         action="store_true",
         help="fail if generated protein-class mapping artifacts are stale",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     rows = _load_rows(CSV_PATH)
     asset_version = _load_asset_version()

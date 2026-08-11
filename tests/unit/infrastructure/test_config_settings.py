@@ -48,6 +48,7 @@ from bioetl.infrastructure.config._base import (
     get_settings,
     yaml_config_to_domain,
 )
+from bioetl.infrastructure.config.config_root import get_default_repo_root
 
 
 @pytest.mark.unit
@@ -330,6 +331,22 @@ class TestSettings:
         get_settings.cache_clear()
         settings = Settings()
         assert settings.env == "prod"
+
+    def test_settings_precedence_and_cwd_yaml_isolation(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Init wins over ENV and arbitrary CWD YAML is never a Settings source."""
+        assert Path(str(Settings.model_config["env_file"])) == (
+            get_default_repo_root() / ".env"
+        )
+        (tmp_path / "config.yaml").write_text("metrics_port: 1111\n", encoding="utf-8")
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setenv("BIOETL_METRICS_PORT", "2222")
+
+        assert Settings(metrics_port=3333, _env_file=None).metrics_port == 3333
+        assert Settings(_env_file=None).metrics_port == 2222
 
 
 @pytest.mark.unit

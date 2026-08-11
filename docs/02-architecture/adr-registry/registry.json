@@ -1,6 +1,6 @@
 {
-  "generated": "2026-08-09T12:11:59.759689",
-  "total_adrs": 56,
+  "generated": "2026-08-10T19:46:37.619512",
+  "total_adrs": 57,
   "adrs": [
     {
       "adr_number": "001",
@@ -1081,11 +1081,34 @@
       "superseded_by": [],
       "related": [],
       "tags": []
+    },
+    {
+      "adr_number": "057",
+      "title": "Deterministic Runtime Config Authority and Identity",
+      "file_path": "ADR-057-deterministic-runtime-config-authority-and-identity.md",
+      "status": "accepted",
+      "source_status": "Accepted",
+      "category": "Configuration",
+      "owner": "BioETL Team",
+      "decision_date": "2026-08-10",
+      "last_reviewed": "2026-08-10",
+      "context": "Runtime Settings previously accepted an implicit `config.yaml` from the current\nworking directory before explicit initialization and process environment values.\nProvider YAML also accepted unknown ...",
+      "decision": "1. Application Settings precedence is:\n   ```text\n   explicit init/CLI > process ENV > repository-root .env > typed defaults\n   ```\n   `.env` is resolved from the canonical repository root. Arbitra...",
+      "consequences": "- Settings and domain config loading are independent of current working directory.\n- Unknown provider leaves and split-brain entity transport overrides fail closed.\n- Formatting-only YAML changes p...",
+      "supersedes": [],
+      "superseded_by": [],
+      "related": [
+        "ADR-032",
+        "ADR-044",
+        "ADR-046",
+        "ADR-052"
+      ],
+      "tags": []
     }
   ],
   "stats": {
     "by_status": {
-      "accepted": 54,
+      "accepted": 55,
       "superseded": 2
     },
     "by_category": {
@@ -1102,7 +1125,7 @@
       "Reproducibility": 4,
       "Data Quality": 6,
       "Domain Model": 1,
-      "Configuration": 4,
+      "Configuration": 5,
       "HTTP/Networking": 1,
       "Data Contracts": 1,
       "Documentation": 3,

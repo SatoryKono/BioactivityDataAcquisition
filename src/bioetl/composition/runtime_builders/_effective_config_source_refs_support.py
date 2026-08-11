@@ -26,15 +26,27 @@ def _compute_file_hashes(
     *,
     relative_path: str,
     path: Path,
-) -> tuple[str | None, str | None, ConfigSourceHashStrategy | None]:
+) -> tuple[
+    str | None,
+    str | None,
+    ConfigSourceHashStrategy | None,
+    str | None,
+    str | None,
+]:
     """Return semantic and raw hashes for one config source file when available."""
     if not path.exists() or not path.is_file():
-        return None, None, None
+        return None, None, None, None, None
     hashes = compute_config_source_hashes(
         source_path=relative_path,
         raw_bytes=path.read_bytes(),
     )
-    return hashes.semantic_hash, hashes.raw_hash, hashes.hash_strategy
+    return (
+        hashes.semantic_hash,
+        hashes.raw_hash,
+        hashes.hash_strategy,
+        hashes.semantic_hash_version,
+        hashes.raw_hash_version,
+    )
 
 
 def _build_config_source_ref(
@@ -45,16 +57,21 @@ def _build_config_source_ref(
 ) -> ConfigSourceRef:
     """Build one canonical file-backed source ref with provenance hash."""
     source_path = repo_root / relative_path
-    source_hash, raw_source_hash, source_hash_strategy = _compute_file_hashes(
-        relative_path=relative_path,
-        path=source_path,
-    )
+    (
+        source_hash,
+        raw_source_hash,
+        source_hash_strategy,
+        source_hash_version,
+        raw_source_hash_version,
+    ) = _compute_file_hashes(relative_path=relative_path, path=source_path)
     return ConfigSourceRef(
         source_type="file",
         source_path=relative_path,
         source_hash=source_hash,
         raw_source_hash=raw_source_hash,
         source_hash_strategy=source_hash_strategy,
+        source_hash_version=source_hash_version,
+        raw_source_hash_version=raw_source_hash_version,
         priority=priority,
     )
 

@@ -282,12 +282,12 @@ def _expected_generated_contracts_snapshot() -> dict[str, str]:
     return snapshot
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Generate schema artifacts")
     parser.add_argument(
         "--check", action="store_true", help="Fail if artifacts are stale"
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     entries = [_load_entry(path) for path in _iter_canonical_schema_files()]
     registry_content = _ruff_format(_build_registry(entries))

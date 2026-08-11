@@ -300,7 +300,6 @@ def _build_bio_http_provider_specs(
             adapter_class=UniProtAdapter,
             rate=uniprot.rate,
             capacity=uniprot.capacity,
-            rate_overrides={"uniprot_api_key": 100.0},
             data_source_creator=_create_uniprot_data_source,
         ),
         build_http_provider_config_spec(

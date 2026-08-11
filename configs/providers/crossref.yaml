@@ -5,9 +5,6 @@ source:
         provider: crossref
         base_url: https://api.crossref.org
         auth_type: email
-        # Documentation-only polite-pool contact. Runtime operators set the
-        # real technical contact through BIOETL_DEFAULT_EMAIL.
-        mailto: "your-email@example.com"
         client:
             timeout_sec: 30.0
             max_retries: 3
@@ -31,14 +28,6 @@ source:
     rate_limit:
         requests_per_second: 50
         burst: 100
-        polite_pool: true
-    health_check:
-        endpoint: /works
-        params:
-            rows: 1
-        timeout: 5
-    retry:
-        use_retry_after: true
 entities:
     - publication
 entity_notes:

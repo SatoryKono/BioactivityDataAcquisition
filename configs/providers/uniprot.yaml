@@ -32,11 +32,6 @@ source:
         with_api_key:
             requests_per_second: 100
             burst: 200
-    health_check:
-        method: Search probe query
-        timeout: 10
-    retry:
-        use_retry_after: true
 entities:
     - protein
     - idmapping

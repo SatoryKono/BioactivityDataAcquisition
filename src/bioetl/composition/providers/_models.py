@@ -104,7 +104,6 @@ class HttpConfig:
 
     rate: float = 5.0
     capacity: int = 10
-    rate_overrides: dict[str, float] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)

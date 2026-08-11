@@ -58,14 +58,14 @@ def write_schema(path: Path, schema: dict[str, Any]) -> None:
         f.write("\n")
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Generate pipeline JSON schemas")
     parser.add_argument(
         "--check",
         action="store_true",
         help="Check if schemas are up-to-date (exit 1 if stale)",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     stale = False
 
