@@ -13,6 +13,8 @@ ______________________________________________________________________
 
 # BioETL Dashboards v2: Usage
 
+> **Current stable shipped operator guide** for the seven-board portfolio (`grafana/dashboards/*.json`). Draft v3 specs live under `v3.0/` and are non-shipping.
+
 > **Removed 2026-07-23:** Silver Reject Explorer dashboard, Loki/Tempo Explore adjuncts, Quarantine Explorer datasource (replaced by BioETL Ops HTTP on :8000).
 > Use CLI ioetl quarantine inspect for record-level forensics. See [monitoring-surface-reduction](../../05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md).
 

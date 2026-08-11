@@ -1,3 +1,5 @@
+> **ARCHIVED** (issue #8632) — historical DUX audit protocol. Not operator guidance. See [archive index](../README.md).
+
 # DUX5 screenshot & accessibility regression protocol
 
 **Issue:** #7133 (DUX5-31)  

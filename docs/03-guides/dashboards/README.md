@@ -21,20 +21,31 @@ ADR-053 also permits an optional, read-only six-route Scenes adapter during
 shadow review. The seven JSON UIDs remain authoritative and reachable. See
 [Optional Scenes dual path](scenes-dual-path.md) for ownership and rollback.
 
+
+## Versioning strategy (issue #8632)
+
+| Track | Status | Where |
+| --- | --- | --- |
+| **Dashboard System 2.0 (stable shipped)** | `Status: active` / published | This index, `dashboard-v2-usage.md`, panel docs, `design-system.md`, `contracts/` |
+| **v3.0 execution-aware draft** | `Status: draft` / non-shipping | [`v3.0/`](v3.0/README.md) |
+| **DUX audit protocols** | archived | [`archive/`](archive/README.md) |
+
+**Current stable version:** seven shipped JSON dashboards (bus `0..6`) under
+`grafana/dashboards/*.json`. Operator docs for that surface are the **v2 / System 2.0**
+guides. Do not treat `v3.0/` as a shipping contract.
+
 ## Актуальные документы
 
-### Dashboard System 2.0
+### Dashboard System 2.0 (current stable shipped)
 
 - **Phase-1 (done):** epic #6800 — first-screen surgery, full nav bus, thin Incident/Run.
 - **Phase-2 residual (active):** epic #6828 — see
   `dashboard-system-2.0-phase2-residual.md` (execution SSOT). Greenfield
   «Unified Plan v2.0» is **not** executable (ADR-010 / ≤7 boards / no invent metrics).
 - **DUX3 residual (2026-07-29, epic #7053):** post-DSA screenshot-audit enforcement —
-  `dux3-residual-contracts.md`, inventory
-  `docs/03-guides/dashboards/dux3-first-screen-inventory.json`.
+  [archive/audit-protocols/dux3-residual-contracts.md](archive/audit-protocols/dux3-residual-contracts.md), inventory [archive/audit-protocols/dux3-first-screen-inventory.json](archive/audit-protocols/dux3-first-screen-inventory.json).
 - **DUX4 visual enforcement (2026-07-29, epic #7088):**
-  `dux4-title-scope-harness.md`, `dux4-field-override-inventory.json`,
-  `dux4-panel-redesign-matrix.json`.
+  [archive/audit-protocols/dux4-title-scope-harness.md](archive/audit-protocols/dux4-title-scope-harness.md), [archive/audit-protocols/dux4-field-override-inventory.json](archive/audit-protocols/dux4-field-override-inventory.json), [archive/audit-protocols/dux4-panel-redesign-matrix.json](archive/audit-protocols/dux4-panel-redesign-matrix.json).
 - Residual gap table: `reports/observability/dashboard-ux-residual-gap-2026-07-28.md`.
 - `operator-ux-v2.md` — first-screen zones, prose budget, empty-state taxonomy, link standard, KPI targets.
 - `verdict-ontology.md` — state×confidence×basis×next_action for all workspaces.

@@ -1,6 +1,6 @@
 # DUX6 residual readability (post-DUX5 re-audit)
 
-**Status:** active  
+**Status:** archived
 **Epic:** #7139  
 **Predecessor:** DUX5 #7116 (closed)
 
@@ -27,7 +27,7 @@ re-submitted screenshot audit (SG-01..SG-07):
 
 - [dux5-copy-dictionary.md](dux5-copy-dictionary.md)
 - [dux5-screenshot-regression-protocol.md](dux5-screenshot-regression-protocol.md)
-- [verdict-ontology.md](verdict-ontology.md)
+- [verdict-ontology.md](../../verdict-ontology.md)
 
 ## Title policy
 

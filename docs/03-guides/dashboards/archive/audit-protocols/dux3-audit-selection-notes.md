@@ -1,3 +1,5 @@
+> **ARCHIVED** (issue #8632) — historical DUX audit protocol. Not operator guidance. See [archive index](../README.md).
+
 # DUX3 audit selection notes (#7054)
 
 **Issue:** #7054 (DUX3-01)  
