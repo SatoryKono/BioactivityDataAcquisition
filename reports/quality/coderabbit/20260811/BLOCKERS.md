@@ -585,6 +585,6 @@ Each entry requires GitHub reconciliation before closeout.
 - UTC: `2026-08-11T13:22:00.842450+00:00`
 - Wave: `A`
 - Files: `32`
-- Detail: CodeRabbit exit code 1
-- GitHub issue: pending reconciliation
-
+- Detail: CodeRabbit exit code 1; recoverable connection error
+  `WebSocket closed`
+- GitHub issue: [#8603](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8603)
