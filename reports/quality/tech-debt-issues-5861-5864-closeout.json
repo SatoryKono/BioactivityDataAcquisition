@@ -53,7 +53,7 @@
   ],
   "metrics": {
     "dq_rule_evaluator_coverage_percent": {
-      "current": 98.39,
+      "current": 100.0,
       "opening": 98.39,
       "source": "reports/quality/module-coverage-inventory.json"
     },

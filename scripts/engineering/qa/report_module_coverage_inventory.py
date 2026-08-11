@@ -1204,6 +1204,11 @@ def _refresh_existing_inventory_source_tree(
     # field is immutable. In particular, do not invent rows or statuses for paths
     # that are absent from the last authoritative coverage XML.
     refreshed["source_tree_sha256"] = source_tree_sha256
+    modules = refreshed.get("modules")
+    if isinstance(modules, list):
+        # ``rows`` is the backwards-compatible alias for the authoritative
+        # modules list. Repair alias drift without changing coverage facts.
+        refreshed["rows"] = modules
     return refreshed
 
 
