@@ -1144,6 +1144,9 @@ repo_backed_unit_test_exceptions:
     - path: tests/unit/repo_backed/scripts/test_zed_helper_entrypoints.py
       target_lane: repo-backed-unit
       protected_surface: scripts/engineering/dev/zed_{lint_imports,mypy,pytest_lane,run,vulture,xenon}.py direct-entrypoint import bootstrap contract
+    - path: tests/unit/repo_backed/scripts/ops/docker/test_check_network_preconditions.py
+      target_lane: repo-backed-unit
+      protected_surface: scripts/ops/runtime/docker/check_network_preconditions.py
     - path: tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py
       target_lane: repo-backed-unit
       protected_surface: scripts/ops/runtime/docker/runtime_manager.py

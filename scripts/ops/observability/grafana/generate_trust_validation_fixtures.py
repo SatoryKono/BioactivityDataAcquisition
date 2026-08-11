@@ -3,6 +3,7 @@
 Outputs contract-shaped JSON under tests/fixtures/grafana/control_plane_validation/
 for panels 9413–9417 (#8576 / #8578). Does not invent Prometheus metrics.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -180,7 +181,10 @@ def build_matrix() -> dict[str, dict[str, dict[str, object]]]:
         "manifest-validation",
         (
             EvidenceCheckResult(
-                "parse", "OK", "manifest_parse_ok", "The raw manifest envelope was parsed."
+                "parse",
+                "OK",
+                "manifest_parse_ok",
+                "The raw manifest envelope was parsed.",
             ),
             EvidenceCheckResult(
                 "schema", "OK", "manifest_schema_valid", "Manifest schema is supported."

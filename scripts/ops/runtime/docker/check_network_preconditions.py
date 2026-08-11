@@ -266,9 +266,7 @@ def check_bioetl_on_monitoring() -> list[CheckResult]:
     ]
 
 
-def _networks_for_stack(
-    contract: dict[str, Any], stack: str
-) -> list[tuple[str, str]]:
+def _networks_for_stack(contract: dict[str, Any], stack: str) -> list[tuple[str, str]]:
     """Return (name, owner) pairs contracted for stack."""
     shared = contract.get("shared_networks") or {}
     out: list[tuple[str, str]] = []
@@ -382,8 +380,10 @@ def main(argv: list[str] | None = None) -> int:
         mode = "ensure+check" if args.ensure else "check"
         print(f"=== Network preconditions (stack={args.stack}, mode={mode}) ===")
         if args.stack == "monitoring":
-            print("Note: monitoring compose requires bioetl-monitoring only "
-                  "(not bioetl-runtime).")
+            print(
+                "Note: monitoring compose requires bioetl-monitoring only "
+                "(not bioetl-runtime)."
+            )
         elif args.stack == "main":
             print("Note: main compose requires bioetl-monitoring + bioetl-runtime.")
         for r in results:
