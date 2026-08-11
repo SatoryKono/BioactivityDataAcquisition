@@ -579,10 +579,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 0,
-            "y": 35
+            "y": 20,
+            "w": 12,
+            "h": 6
           },
           "id": 238,
           "options": {
@@ -653,10 +653,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 12,
-            "y": 35
+            "y": 20,
+            "w": 12,
+            "h": 6
           },
           "id": 240,
           "options": {
@@ -737,10 +737,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 24,
             "x": 0,
-            "y": 41
+            "y": 26,
+            "w": 24,
+            "h": 6
           },
           "id": 242,
           "options": {
@@ -896,10 +896,10 @@
           "title": "Track Stage Lag",
           "description": "Shows selected-range stage lag in seconds for Pipeline, Run Type, and Stage. No data means no emitted lag samples or unavailable telemetry, never zero lag. Use Worst Stage Lag and current blockers for severity",
           "gridPos": {
-            "h": 5,
-            "w": 24,
             "x": 0,
-            "y": 47
+            "y": 32,
+            "w": 24,
+            "h": 5
           },
           "datasource": {
             "type": "prometheus",
@@ -1106,10 +1106,10 @@
             ]
           },
           "gridPos": {
-            "h": 5,
-            "w": 24,
             "x": 0,
-            "y": 52
+            "y": 37,
+            "w": 24,
+            "h": 5
           },
           "id": 243,
           "options": {
@@ -1218,10 +1218,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 24,
             "x": 0,
-            "y": 57
+            "y": 42,
+            "w": 24,
+            "h": 5
           },
           "id": 220,
           "options": {
@@ -1306,10 +1306,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 0,
-            "y": 31
+            "y": 48,
+            "w": 12,
+            "h": 6
           },
           "id": 207,
           "options": {
@@ -1390,10 +1390,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 12,
-            "y": 31
+            "y": 48,
+            "w": 12,
+            "h": 6
           },
           "id": 239,
           "options": {
@@ -1554,10 +1554,10 @@
             ]
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 0,
-            "y": 37
+            "y": 54,
+            "w": 12,
+            "h": 6
           },
           "id": 256,
           "options": {
@@ -1703,10 +1703,10 @@
             ]
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 12,
-            "y": 37
+            "y": 54,
+            "w": 12,
+            "h": 6
           },
           "id": 241,
           "options": {
@@ -1769,10 +1769,10 @@
           "type": "text",
           "title": "Review Runtime Escalation",
           "gridPos": {
-            "h": 3,
-            "w": 24,
             "x": 0,
-            "y": 32
+            "y": 61,
+            "w": 24,
+            "h": 3
           },
           "options": {
             "mode": "html",
@@ -1827,10 +1827,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 24,
             "x": 0,
-            "y": 35
+            "y": 64,
+            "w": 24,
+            "h": 5
           },
           "id": 230,
           "options": {
@@ -1914,10 +1914,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 24,
             "x": 0,
-            "y": 40
+            "y": 69,
+            "w": 24,
+            "h": 5
           },
           "id": 236,
           "options": {
@@ -2017,10 +2017,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 24,
             "x": 0,
-            "y": 45
+            "y": 74,
+            "w": 24,
+            "h": 5
           },
           "id": 21,
           "options": {
@@ -2058,10 +2058,10 @@
           "type": "text",
           "title": "Review Cross-Domain Handoffs",
           "gridPos": {
-            "h": 2,
-            "w": 24,
             "x": 0,
-            "y": 50
+            "y": 79,
+            "w": 24,
+            "h": 2
           },
           "options": {
             "mode": "html",
@@ -2116,10 +2116,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 24,
             "x": 0,
-            "y": 52
+            "y": 81,
+            "w": 24,
+            "h": 5
           },
           "id": 4,
           "options": {
@@ -2203,10 +2203,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 24,
             "x": 0,
-            "y": 57
+            "y": 86,
+            "w": 24,
+            "h": 5
           },
           "id": 5,
           "options": {
@@ -2284,10 +2284,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 24,
             "x": 0,
-            "y": 62
+            "y": 91,
+            "w": 24,
+            "h": 5
           },
           "id": 6,
           "options": {
@@ -2372,10 +2372,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 24,
             "x": 0,
-            "y": 67
+            "y": 96,
+            "w": 24,
+            "h": 5
           },
           "id": 259,
           "options": {
@@ -2460,10 +2460,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 24,
             "x": 0,
-            "y": 72
+            "y": 101,
+            "w": 24,
+            "h": 5
           },
           "id": 7,
           "options": {
@@ -2506,10 +2506,10 @@
           "type": "text",
           "title": "Review Global Process Signals",
           "gridPos": {
-            "h": 2,
-            "w": 24,
             "x": 0,
-            "y": 77
+            "y": 106,
+            "w": 24,
+            "h": 2
           },
           "options": {
             "mode": "html",
@@ -2561,10 +2561,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 0,
-            "y": 79
+            "y": 108,
+            "w": 12,
+            "h": 6
           },
           "id": 209,
           "options": {
@@ -2640,10 +2640,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 12,
-            "y": 79
+            "y": 108,
+            "w": 12,
+            "h": 6
           },
           "id": 210,
           "options": {
@@ -2738,7 +2738,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 86,
+            "y": 115,
             "w": 12,
             "h": 6
           },
@@ -2818,7 +2818,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 86,
+            "y": 115,
             "w": 12,
             "h": 6
           },
@@ -2899,7 +2899,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 92,
+            "y": 121,
             "w": 8,
             "h": 5
           },
@@ -2954,7 +2954,7 @@
           "title": "Inspect Pipeline Identity",
           "gridPos": {
             "x": 0,
-            "y": 98,
+            "y": 127,
             "w": 12,
             "h": 6
           },
@@ -3110,7 +3110,7 @@
           "title": "Inspect Processed Records",
           "gridPos": {
             "x": 12,
-            "y": 98,
+            "y": 127,
             "w": 12,
             "h": 6
           },
@@ -3432,7 +3432,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 105,
+            "y": 134,
             "w": 12,
             "h": 5
           },
@@ -3507,7 +3507,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 105,
+            "y": 134,
             "w": 12,
             "h": 5
           },
