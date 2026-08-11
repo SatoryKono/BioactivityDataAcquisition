@@ -450,7 +450,7 @@
     "architecture_quality_scorecard": false,
     "config_surface_backlog": false,
     "dq_contract_registry_diagnostics": false,
-    "hotspot_family_baseline": false,
+    "hotspot_family_baseline": true,
     "module_coverage_inventory": false,
     "remote_main_baseline": true
   },
