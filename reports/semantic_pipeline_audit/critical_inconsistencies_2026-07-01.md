@@ -5,12 +5,11 @@ Generated: `2026-07-01`
 ## Summary
 
 - CRITICAL: `0`
-- HIGH: `1`
+- HIGH: `0`
 - MEDIUM: `0`
-- LOW: `3244`
+- LOW: `3245`
 
 ## CRITICAL And HIGH Rows
 
 | Risk | Cluster | Pipeline A | Field A | Pipeline B | Field B | Normalization | Validation | Typing | Row Key |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| HIGH | shared_corpus_id | composite_publication | corpus_id | semanticscholar_publication | corpus_id | COMPATIBLE | COMPATIBLE | CONFLICTING | 5273e9414bfd0017 |
