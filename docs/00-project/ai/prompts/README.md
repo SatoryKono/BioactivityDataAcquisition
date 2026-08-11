@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 3.4.0
+Version: 3.5.0
 Status: active
 Class: internal (repo-only entrypoint; excluded from MkDocs)
 Owner: BioETL Team
@@ -61,6 +61,7 @@ docs/00-project/ai/prompts/
 | `prompt.audit.orchestrator` | [library/audit/orchestrator.md](library/audit/orchestrator.md) | N-iteration fail-closed loop (v1.0) |
 | `prompt.tests.speed-optimization` | [library/tests/speed-optimization-loop.md](library/tests/speed-optimization-loop.md) | Test speed loop |
 | `prompt.tests.fix-retest` | [library/tests/fix-retest-loop.md](library/tests/fix-retest-loop.md) | Run → fix → retest |
+| `prompt.tests.cycle` | [library/tests/test-cycle.md](library/tests/test-cycle.md) | Cyclic testing (N cycles, lanes) |
 | `prompt.docs.ai-audit-planning` | [library/docs/ai-audit-planning.md](library/docs/ai-audit-planning.md) | Docs/AI surface audit plan |
 | `prompt.architecture.review` | [library/architecture/review-assessment.md](library/architecture/review-assessment.md) | Architecture review (v2.2) |
 | `prompt.observability.dashboard-panel-audit` | [library/observability/dashboard-panel-audit.md](library/observability/dashboard-panel-audit.md) | Grafana panel audit (5 phases, v1.1) |
@@ -131,6 +132,11 @@ python -m scripts.ai.prompts render prompt.observability.bi-dashboard-acceptance
 python -m scripts.ai.prompts render prompt.observability.dashboard-audit-cycle \
   --param SCOPE="grafana/dashboards" --param CYCLE_COUNT=1 --param MODE=audit \
   --param DEPTH=quick --param CONTOURS="panels,visual,layout,data"
+python -m scripts.ai.prompts render prompt.tests.cycle \
+  --param SCOPE="tests/unit/domain" --param LANE=unit-fast \
+  --param CYCLE_COUNT=1 --param MODE=run+fix
+python -m scripts.ai.prompts render prompt.tests.cycle \
+  --param SCOPE=all --param LANE=full --param CYCLE_COUNT=1 --param MODE=run
 python -m scripts.ai.prompts render prompt.audit.docs-content \
   --param SCOPE="README.md docs/00-project" --param MODE=audit
 python -m scripts.ai.prompts render prompt.audit.github-actions \

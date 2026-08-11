@@ -12,3 +12,10 @@ Each entry requires GitHub reconciliation before closeout.
 - Resolution: retain the empty commit as local branch `main`, persist
   `coderabbit.baseBranch=main`, and invoke `--base main`.
 - GitHub issue: N/A — resolved launcher setup error; no product scope was reviewed.
+## S01-domain-control_plane — rate_limit
+
+- UTC: `2026-08-11T09:40:42.031056+00:00`
+- Wave: `A`
+- Files: `32`
+- Detail: CodeRabbit rate limit
+- GitHub issue: [#8603](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8603)

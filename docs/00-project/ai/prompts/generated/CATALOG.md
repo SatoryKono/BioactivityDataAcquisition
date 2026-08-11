@@ -16,6 +16,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.audit.orchestrator` | `library/audit/orchestrator.md` | Fail-closed N-iteration audit → issues → fix → CI → post-audit loop |
 | `prompt.tests.speed-optimization` | `library/tests/speed-optimization-loop.md` | Accelerate test runs without weakening coverage |
 | `prompt.tests.fix-retest` | `library/tests/fix-retest-loop.md` | Run → fix → retest until green or blocked |
+| `prompt.tests.cycle` | `library/tests/test-cycle.md` | Cyclic testing — baseline run, triage, fix, retest, delta per cycle |
 | `prompt.docs.ai-audit-planning` | `library/docs/ai-audit-planning.md` | Plan an audit of docs/00-project/ai surfaces |
 | `prompt.architecture.review` | `library/architecture/review-assessment.md` | Architecture review v2.3 (hexagonal/C4/arc42) with findings.json outputs |
 | `prompt.observability.dashboard-panel-audit` | `library/observability/dashboard-panel-audit.md` | Five-phase Grafana panel audit — render, GH issues, fix, closeout (v1.1) |
@@ -71,6 +72,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.audit.orchestrator` | operator-paste | active | `library/audit/orchestrator.md` |
 | `prompt.tests.speed-optimization` | operator-paste | active | `library/tests/speed-optimization-loop.md` |
 | `prompt.tests.fix-retest` | operator-paste | active | `library/tests/fix-retest-loop.md` |
+| `prompt.tests.cycle` | operator-paste | active | `library/tests/test-cycle.md` |
 | `prompt.docs.ai-audit-planning` | operator-paste | active | `library/docs/ai-audit-planning.md` |
 | `prompt.architecture.review` | operator-paste | active | `library/architecture/review-assessment.md` |
 | `prompt.observability.dashboard-panel-audit` | operator-paste | active | `library/observability/dashboard-panel-audit.md` |
