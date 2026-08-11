@@ -21,7 +21,7 @@
     "ctrl-h": "project_replace::Toggle",
     "ctrl-g": "go_to_line::Toggle",
     "ctrl-shift-g": "go_to_line::Toggle",
-    "ctrl-d": "editor::DuplicateLine",
+    "ctrl-alt-d": "editor::DuplicateLine",
     "ctrl-x": "editor::Cut",
     "ctrl-c": "editor::Copy",
     "ctrl-v": "editor::Paste",

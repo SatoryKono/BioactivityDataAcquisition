@@ -441,9 +441,6 @@ def _validate_provider_cross_file_references(
         )
 
     normalized_payload: dict[str, Any] = {"source": payload.get("source", {})}
-    for key in ("entities", "entity_notes"):
-        if key in payload:
-            normalized_payload[key] = payload[key]
 
     try:
         validated = validate_source_config_payload(
@@ -929,7 +926,7 @@ def validate_config_tree(
     return errors, warnings, total
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=(
             "Validate unified pipeline configs. The tracked YAML config tree is "
@@ -957,7 +954,7 @@ def main() -> int:
             "configs/ directory used by registry/config validation."
         ),
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     configs_root = resolve_configs_root(args.configs_root)
     errors, warnings, total = validate_config_tree(

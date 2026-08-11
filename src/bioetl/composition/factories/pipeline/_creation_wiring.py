@@ -50,6 +50,7 @@ from bioetl.infrastructure.config.domain_config_resolver import (
     DomainConfigMapper,
     resolve_domain_pipeline_config,
 )
+from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
@@ -233,6 +234,7 @@ def _create_pipeline_with_services_impl(
     )
     domain_config = resolve_domain_pipeline_config(
         yaml_config,
+        configs_root=resolve_configs_root(),
         relaxed_dq=request.settings.pipeline.relaxed_dq,
         domain_mapper=deps.yaml_config_to_domain,
     )

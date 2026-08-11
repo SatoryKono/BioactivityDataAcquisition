@@ -73,7 +73,7 @@ class TestGetBiblioProviderConfigs:
         }
 
     @patch("bioetl.composition.providers._config_helpers._get_rate_limits_from_config")
-    def test_pubmed_provider_config_has_pubmed_api_key_rate_override(
+    def test_pubmed_provider_config_has_anonymous_registry_fallback(
         self,
         mock_get_rate_limits: MagicMock,
     ) -> None:
@@ -88,7 +88,7 @@ class TestGetBiblioProviderConfigs:
         pubmed = configs["pubmed"]
 
         assert pubmed.http_config is not None
-        assert pubmed.http_config.rate_overrides == {"pubmed_api_key": 10.0}
+        assert pubmed.http_config.rate == pytest.approx(3.0)
 
     @patch("bioetl.composition.providers._config_helpers._get_rate_limits_from_config")
     def test_crossref_provider_config_uses_crossref_adapter_factory(

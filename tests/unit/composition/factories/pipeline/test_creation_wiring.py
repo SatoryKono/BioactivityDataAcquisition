@@ -35,13 +35,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.domain.config import DQConfig
 from bioetl.composition.factories.pipeline._creation_wiring import (
     _PipelineCreationInputs,
     _PipelineCreationRequest,
     _create_pipeline_with_services_impl,
     _create_silver_validator,
 )
+from bioetl.domain.config import DQConfig
+from bioetl.infrastructure.config.config_root import resolve_configs_root
 
 _STARTED_AT = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
 
@@ -297,6 +298,7 @@ class TestCreatePipelineWithServicesImpl:
         )
         mock_resolve_domain_pipeline_config.assert_called_once_with(
             explicit_config,
+            configs_root=resolve_configs_root(),
             relaxed_dq=True,
             domain_mapper=deps.yaml_config_to_domain,
         )
@@ -372,6 +374,7 @@ class TestCreatePipelineWithServicesImpl:
         assert build_services_fn.call_args.kwargs["config"] is loaded_config
         mock_resolve_domain_pipeline_config.assert_called_once_with(
             loaded_config,
+            configs_root=resolve_configs_root(),
             relaxed_dq=False,
             domain_mapper=deps.yaml_config_to_domain,
         )

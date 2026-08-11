@@ -131,12 +131,14 @@ stacks:
     project_name: bioetl-monitoring
     owner: observability-helper
     default_release_bundle: false
+    # UI path: prom + grafana (+ pushgateway). Renderer is screenshot-only and
+    # must not block stack readiness (Chromium start_period / OOM).
     required_services:
       - prometheus
       - pushgateway
       - grafana
+    optional_services:
       - renderer
-    optional_services: []
     required_environment_names:
       - GF_SECURITY_ADMIN_PASSWORD
       - GF_RENDERING_RENDERER_TOKEN

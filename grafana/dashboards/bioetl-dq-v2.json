@@ -380,10 +380,10 @@
           "type": "table",
           "title": "Inspect Run Identity",
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 0,
-            "y": 92
+            "y": 100,
+            "w": 12,
+            "h": 6
           },
           "datasource": "BioETL Ops HTTP",
           "description": "Selected run: Compact identity table showing Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, Replay [Capability.Mode], Checkpoint [Anchors], and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity. No data/datasource errors mean the BioETL Ops HTTP backend may be unavailable; verify /health/live before interpreting as expected empty. Fail-closed: timeout, empty, or unresolved identity must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero.",
@@ -536,10 +536,10 @@
           "type": "table",
           "title": "Inspect Processed Records",
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 12,
-            "y": 92
+            "y": 100,
+            "w": 12,
+            "h": 6
           },
           "datasource": "BioETL Ops HTTP",
           "description": "Selected run: Bronze/Silver/Gold stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors mean the BioETL Ops HTTP backend may be unavailable; verify /health/live before interpreting as expected empty. Fail-closed: timeout, empty, or unresolved identity must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero.",
@@ -1496,10 +1496,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 24,
             "x": 0,
-            "y": 30
+            "y": 38,
+            "w": 24,
+            "h": 5
           },
           "id": 152,
           "options": {
@@ -1595,10 +1595,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 0,
-            "y": 35
+            "y": 43,
+            "w": 12,
+            "h": 6
           },
           "id": 121,
           "options": {
@@ -1703,10 +1703,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 12,
-            "y": 35
+            "y": 43,
+            "w": 12,
+            "h": 6
           },
           "id": 122,
           "options": {
@@ -1812,10 +1812,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 0,
-            "y": 41
+            "y": 49,
+            "w": 12,
+            "h": 6
           },
           "id": 118,
           "options": {
@@ -1920,10 +1920,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 12,
-            "y": 41
+            "y": 49,
+            "w": 12,
+            "h": 6
           },
           "id": 156,
           "options": {
@@ -2047,10 +2047,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 24,
             "x": 0,
-            "y": 48
+            "y": 56,
+            "w": 24,
+            "h": 5
           },
           "id": 1,
           "options": {
@@ -2124,10 +2124,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 12,
-            "y": 53
+            "y": 61,
+            "w": 12,
+            "h": 6
           },
           "id": 3,
           "options": {
@@ -2194,10 +2194,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 0,
-            "y": 53
+            "y": 61,
+            "w": 12,
+            "h": 6
           },
           "id": 4,
           "options": {
@@ -2270,10 +2270,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 0,
-            "y": 59
+            "y": 67,
+            "w": 12,
+            "h": 6
           },
           "id": 101,
           "options": {
@@ -2352,10 +2352,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 12,
-            "y": 59
+            "y": 67,
+            "w": 12,
+            "h": 6
           },
           "id": 9,
           "options": {
@@ -2419,10 +2419,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 0,
-            "y": 65
+            "y": 73,
+            "w": 12,
+            "h": 6
           },
           "id": 12,
           "options": {
@@ -2503,10 +2503,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 12,
-            "y": 65
+            "y": 73,
+            "w": 12,
+            "h": 6
           },
           "id": 151,
           "options": {
@@ -2585,10 +2585,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 0,
-            "y": 71
+            "y": 79,
+            "w": 12,
+            "h": 6
           },
           "id": 10,
           "options": {
@@ -2664,10 +2664,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 12,
-            "y": 71
+            "y": 79,
+            "w": 12,
+            "h": 6
           },
           "id": 11,
           "options": {
@@ -2735,10 +2735,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 0,
-            "y": 77
+            "y": 85,
+            "w": 12,
+            "h": 6
           },
           "id": 155,
           "options": {
@@ -2818,10 +2818,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 4,
-            "w": 12,
             "x": 12,
-            "y": 77
+            "y": 85,
+            "w": 12,
+            "h": 4
           },
           "id": 153,
           "options": {
@@ -2863,10 +2863,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 4,
-            "w": 24,
             "x": 0,
-            "y": 83
+            "y": 91,
+            "w": 24,
+            "h": 4
           },
           "id": 116,
           "links": [
@@ -2907,10 +2907,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 4,
-            "w": 24,
             "x": 0,
-            "y": 87
+            "y": 95,
+            "w": 24,
+            "h": 4
           },
           "id": 150,
           "description": "Compact handoff note for aggregate control-plane symptoms. Keep this as footer guidance only; operational evidence still lives in `0. Control Plane` and its runbook surfaces",

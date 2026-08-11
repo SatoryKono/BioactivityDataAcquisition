@@ -35,7 +35,6 @@ from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.source_normalizers.source import (
     _copy_keys,
     _get_dict_or_empty,
-    _normalize_health_check,
     _normalize_rate_limit,
     _reject_retired_source_pagination_aliases,
     _sync_timeout_aliases,
@@ -49,22 +48,21 @@ class TestSyncTimeoutAliases:
     """Tests for _sync_timeout_aliases."""
 
     def test_timeout_to_timeout_sec(self) -> None:
-        """Should copy timeout to timeout_sec."""
+        """Should replace timeout with timeout_sec."""
         result = _sync_timeout_aliases({"timeout": 30})
-        assert result["timeout"] == 30
+        assert "timeout" not in result
         assert result["timeout_sec"] == 30
 
     def test_timeout_sec_to_timeout(self) -> None:
         """Should copy timeout_sec to timeout."""
         result = _sync_timeout_aliases({"timeout_sec": 60})
-        assert result["timeout"] == 60
+        assert "timeout" not in result
         assert result["timeout_sec"] == 60
 
-    def test_both_present_unchanged(self) -> None:
-        """Should not overwrite when both are present."""
-        result = _sync_timeout_aliases({"timeout": 30, "timeout_sec": 60})
-        assert result["timeout"] == 30
-        assert result["timeout_sec"] == 60
+    def test_both_present_conflicting(self) -> None:
+        """Should reject conflicting aliases."""
+        with pytest.raises(ValueError, match="Conflicting timeout"):
+            _sync_timeout_aliases({"timeout": 30, "timeout_sec": 60})
 
     def test_neither_present(self) -> None:
         """Should not add keys when neither is present."""
@@ -76,17 +74,18 @@ class TestSyncTimeoutAliases:
 class TestNormalizeRateLimit:
     """Tests for _normalize_rate_limit."""
 
-    def test_with_api_key_to_authenticated(self) -> None:
-        """Should copy with_api_key to authenticated."""
+    def test_with_api_key_remains_canonical(self) -> None:
+        """Should retain only canonical with_api_key."""
         source: JsonDict = {"rate_limit": {"with_api_key": {"rate": 10}}}
         _normalize_rate_limit(source)
-        assert source["rate_limit"]["authenticated"] == {"rate": 10}
+        assert source["rate_limit"] == {"with_api_key": {"rate": 10}}
 
     def test_authenticated_to_with_api_key(self) -> None:
         """Should copy authenticated to with_api_key."""
         source: JsonDict = {"rate_limit": {"authenticated": {"rate": 5}}}
         _normalize_rate_limit(source)
         assert source["rate_limit"]["with_api_key"] == {"rate": 5}
+        assert "authenticated" not in source["rate_limit"]
 
     def test_no_rate_limit_key(self) -> None:
         """Should be a no-op when rate_limit is absent."""
@@ -99,28 +98,6 @@ class TestNormalizeRateLimit:
         source: JsonDict = {"rate_limit": "invalid"}
         _normalize_rate_limit(source)
         assert source["rate_limit"] == "invalid"
-
-
-class TestNormalizeHealthCheck:
-    """Tests for _normalize_health_check."""
-
-    def test_syncs_timeout_in_health_check(self) -> None:
-        """Should sync timeout aliases in health_check."""
-        source: JsonDict = {"health_check": {"timeout": 10}}
-        _normalize_health_check(source)
-        assert source["health_check"]["timeout_sec"] == 10
-
-    def test_normalize_health_check_leaves_absent_key_unchanged(self) -> None:
-        """Should be a no-op when health_check is absent."""
-        source: JsonDict = {"other": "val"}
-        _normalize_health_check(source)
-        assert source == {"other": "val"}
-
-    def test_health_check_not_dict(self) -> None:
-        """Should be a no-op when health_check is not a dict."""
-        source: JsonDict = {"health_check": "invalid"}
-        _normalize_health_check(source)
-        assert source["health_check"] == "invalid"
 
 
 class TestGetDictOrEmpty:
@@ -217,20 +194,18 @@ class TestNormalizeSourceConfig:
         """Should normalize a canonical source config."""
         raw = {
             "source": {
-                "type": "api",
                 "provider_config": {
                     "base_url": "https://api.example.com",
                     "client": {"timeout": 30},
                     "pagination": {"id_batch_size": 100},
                 },
-                "rate_limit": {"with_api_key": {"rate": 10}},
-                "health_check": {"timeout": 5},
+                "rate_limit": {"authenticated": {"rate": 10}},
             }
         }
         result = normalize_source_config(raw)
         source = result["source"]
         assert "rate_limit" in source
-        assert source["rate_limit"].get("authenticated") == {"rate": 10}
+        assert source["rate_limit"].get("with_api_key") == {"rate": 10}
 
     def test_rejects_retired_source_transport_alias_sections(self) -> None:
         """Retired source.api/source.client/source.batch aliases should fail fast."""

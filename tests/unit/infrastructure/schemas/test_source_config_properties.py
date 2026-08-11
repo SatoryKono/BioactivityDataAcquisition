@@ -321,3 +321,19 @@ class TestRetiredLegacyAliases:
             SourceYamlConfig.model_validate(payload)
 
         assert expected_fragment in str(exc.value)
+
+
+@pytest.mark.unit
+def test_api_key_env_rejects_untyped_or_malformed_secret_source() -> None:
+    """Credential source identity is constrained without reading a secret value."""
+    with pytest.raises(ValueError, match="api_key_env"):
+        SourceYamlConfig.model_validate(
+            {
+                "source": {
+                    "provider_config": {
+                        "provider": "test",
+                        "api_key_env": "API_KEY",
+                    }
+                }
+            }
+        )

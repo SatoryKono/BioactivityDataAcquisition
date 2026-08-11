@@ -197,6 +197,9 @@ Hardening defaults on this host class:
 | monitoring `renderer` mem_limit | **3 g** (was 15 g); concurrency **1** (was 2) |
 | monitoring `pushgateway` mem_limit | **512 m** (was 2.5 g) |
 | monitoring peak cgroup budget | **~8.5 g** (not ~32 g) |
+| grafana ↔ renderer | no hard `depends_on` health gate |
+| runtime_manager wait | **prom+pgw+grafana** only; renderer optional |
+| renderer health `start_period` | **45s** (was 180s) |
 | default surface | main (+ optional neo4j); monitoring opt-in |
 
 Rules:
@@ -207,6 +210,7 @@ Rules:
 - Stop foreign/non-`bioetl-*` containers (ensure-stable does this unless
   `-KeepForeignContainers`).
 - Do not thrash `--force-recreate` / multi-stack rebuild under low free RAM.
+- Grafana UI does **not** wait for renderer (screenshots are best-effort).
 
 Agent memory anchors:
 

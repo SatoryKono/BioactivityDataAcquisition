@@ -594,7 +594,6 @@ def test_build_http_provider_config_uses_canonical_http_provider_shape() -> None
         adapter_class=MagicMock(name="adapter_class"),
         rate=7.5,
         capacity=15,
-        rate_overrides={"api_key": 30.0},
         adapter_creator=adapter_creator,
         data_source_creator=_creator,
         assembly_support=support,
@@ -603,7 +602,6 @@ def test_build_http_provider_config_uses_canonical_http_provider_shape() -> None
     assert config.http_config is not None
     assert config.http_config.rate == pytest.approx(7.5)
     assert config.http_config.capacity == 15
-    assert config.http_config.rate_overrides == {"api_key": 30.0}
     assert config.requires_http_client is True
     assert config.requires_logger is True
     assert config.adapter_creator is adapter_creator
@@ -656,7 +654,6 @@ def test_build_http_provider_config_map_builds_multiple_entries_from_manifest() 
                 adapter_class=MagicMock(name="beta_adapter"),
                 rate=7.5,
                 capacity=15,
-                rate_overrides={"api_key": 30.0},
                 adapter_creator=adapter_creator,
                 data_source_creator=_creator,
             ),
@@ -669,7 +666,6 @@ def test_build_http_provider_config_map_builds_multiple_entries_from_manifest() 
     assert configs["alpha"].http_config.rate == pytest.approx(1.5)
     assert configs["beta"].http_config is not None
     assert configs["beta"].http_config.capacity == 15
-    assert configs["beta"].http_config.rate_overrides == {"api_key": 30.0}
     assert configs["beta"].adapter_creator is adapter_creator
     assert configs["alpha"].data_source_creator is not None
     assert (

@@ -1896,10 +1896,10 @@
             ]
           },
           "gridPos": {
-            "h": 6,
-            "w": 24,
             "x": 0,
-            "y": 70
+            "y": 75,
+            "w": 24,
+            "h": 6
           },
           "id": 908,
           "options": {
@@ -1985,10 +1985,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 0,
-            "y": 76
+            "y": 81,
+            "w": 12,
+            "h": 6
           },
           "id": 2,
           "options": {
@@ -2076,10 +2076,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 12,
-            "y": 76
+            "y": 81,
+            "w": 12,
+            "h": 6
           },
           "id": 1,
           "options": {
@@ -2138,10 +2138,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 7,
-            "w": 24,
             "x": 0,
-            "y": 82
+            "y": 87,
+            "w": 24,
+            "h": 7
           },
           "id": 131,
           "options": {
@@ -2191,10 +2191,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 7,
-            "w": 24,
             "x": 0,
-            "y": 89
+            "y": 94,
+            "w": 24,
+            "h": 7
           },
           "id": 7,
           "options": {
@@ -2273,10 +2273,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 24,
             "x": 0,
-            "y": 96
+            "y": 101,
+            "w": 24,
+            "h": 6
           },
           "id": 132,
           "options": {
@@ -2364,10 +2364,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 24,
             "x": 0,
-            "y": 102
+            "y": 107,
+            "w": 24,
+            "h": 6
           },
           "id": 133,
           "options": {
@@ -2433,10 +2433,10 @@
             ]
           },
           "gridPos": {
-            "h": 6,
-            "w": 24,
             "x": 0,
-            "y": 108
+            "y": 113,
+            "w": 24,
+            "h": 6
           },
           "id": 9414,
           "options": {
@@ -2533,10 +2533,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 0,
-            "y": 109
+            "y": 120,
+            "w": 12,
+            "h": 6
           },
           "id": 4,
           "options": {
@@ -2624,10 +2624,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 12,
-            "y": 109
+            "y": 120,
+            "w": 12,
+            "h": 6
           },
           "id": 136,
           "options": {
@@ -2686,10 +2686,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 24,
             "x": 0,
-            "y": 115
+            "y": 126,
+            "w": 24,
+            "h": 6
           },
           "id": 6,
           "options": {
@@ -2757,10 +2757,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 7,
-            "w": 24,
             "x": 0,
-            "y": 121
+            "y": 132,
+            "w": 24,
+            "h": 7
           },
           "id": 111,
           "options": {
@@ -2866,10 +2866,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 24,
             "x": 0,
-            "y": 129
+            "y": 140,
+            "w": 24,
+            "h": 6
           },
           "id": 122,
           "options": {
@@ -2957,10 +2957,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 12,
-            "y": 135
+            "y": 146,
+            "w": 12,
+            "h": 6
           },
           "id": 137,
           "options": {
@@ -3066,10 +3066,10 @@
             ]
           },
           "gridPos": {
-            "h": 6,
-            "w": 24,
             "x": 0,
-            "y": 141
+            "y": 152,
+            "w": 24,
+            "h": 6
           },
           "id": 138,
           "options": {
@@ -3126,10 +3126,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 7,
-            "w": 24,
             "x": 0,
-            "y": 147
+            "y": 158,
+            "w": 24,
+            "h": 7
           },
           "id": 107,
           "options": {
@@ -3179,10 +3179,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 7,
-            "w": 24,
             "x": 0,
-            "y": 154
+            "y": 165,
+            "w": 24,
+            "h": 7
           },
           "id": 108,
           "options": {
@@ -3250,10 +3250,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 7,
-            "w": 24,
             "x": 0,
-            "y": 161
+            "y": 172,
+            "w": 24,
+            "h": 7
           },
           "id": 109,
           "options": {
@@ -3331,10 +3331,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 7,
-            "w": 24,
             "x": 0,
-            "y": 168
+            "y": 179,
+            "w": 24,
+            "h": 7
           },
           "id": 110,
           "options": {
@@ -3394,10 +3394,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 12,
-            "y": 175
+            "y": 186,
+            "w": 12,
+            "h": 6
           },
           "id": 112,
           "options": {
@@ -3454,10 +3454,10 @@
             ]
           },
           "gridPos": {
-            "h": 6,
-            "w": 24,
             "x": 0,
-            "y": 181
+            "y": 192,
+            "w": 24,
+            "h": 6
           },
           "id": 9415,
           "options": {
@@ -3517,10 +3517,10 @@
             ]
           },
           "gridPos": {
-            "h": 6,
-            "w": 24,
             "x": 0,
-            "y": 187
+            "y": 198,
+            "w": 24,
+            "h": 6
           },
           "id": 9416,
           "options": {
@@ -3621,10 +3621,10 @@
             ]
           },
           "gridPos": {
-            "h": 4,
-            "w": 24,
             "x": 0,
-            "y": 182
+            "y": 205,
+            "w": 24,
+            "h": 4
           },
           "id": 9404,
           "options": {
@@ -3800,10 +3800,10 @@
             ]
           },
           "gridPos": {
-            "h": 4,
-            "w": 24,
             "x": 0,
-            "y": 186
+            "y": 209,
+            "w": 24,
+            "h": 4
           },
           "id": 9407,
           "options": {
@@ -3843,10 +3843,10 @@
           "type": "text",
           "description": "Shown when no identity rows are returned. This can mean no matching run, unresolved scope, or an unavailable backend; it is not a critical verdict by itself.",
           "gridPos": {
-            "h": 4,
-            "w": 12,
             "x": 0,
-            "y": 190
+            "y": 213,
+            "w": 12,
+            "h": 4
           },
           "id": 9410,
           "options": {
@@ -3872,10 +3872,10 @@
           "type": "text",
           "description": "Shown when no processed-record rows are returned. This can mean no activity, a run that has not started, unresolved scope, or an unavailable backend.",
           "gridPos": {
-            "h": 4,
-            "w": 12,
             "x": 12,
-            "y": 190
+            "y": 213,
+            "w": 12,
+            "h": 4
           },
           "id": 9411,
           "options": {
@@ -3947,10 +3947,10 @@
             ]
           },
           "gridPos": {
-            "h": 4,
-            "w": 12,
             "x": 0,
-            "y": 194
+            "y": 217,
+            "w": 12,
+            "h": 4
           },
           "id": 9405,
           "options": {
@@ -4036,10 +4036,10 @@
             ]
           },
           "gridPos": {
-            "h": 4,
-            "w": 12,
             "x": 12,
-            "y": 194
+            "y": 217,
+            "w": 12,
+            "h": 4
           },
           "id": 9406,
           "options": {
@@ -4125,10 +4125,10 @@
             ]
           },
           "gridPos": {
-            "h": 4,
-            "w": 12,
             "x": 0,
-            "y": 198
+            "y": 221,
+            "w": 12,
+            "h": 4
           },
           "id": 9408,
           "options": {
@@ -4214,10 +4214,10 @@
             ]
           },
           "gridPos": {
-            "h": 4,
-            "w": 12,
             "x": 12,
-            "y": 198
+            "y": 221,
+            "w": 12,
+            "h": 4
           },
           "id": 9409,
           "options": {
@@ -4248,10 +4248,10 @@
         },
         {
           "gridPos": {
-            "h": 4,
-            "w": 24,
             "x": 0,
-            "y": 202
+            "y": 225,
+            "w": 24,
+            "h": 4
           },
           "id": 139,
           "options": {
@@ -4283,10 +4283,10 @@
           "type": "table",
           "title": "Review Run Summary",
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 0,
-            "y": 207
+            "y": 230,
+            "w": 12,
+            "h": 6
           },
           "datasource": "BioETL Ops HTTP",
           "description": "Shows identity details for the selected run. An exact Run ID resolves one run; an aggregate pipeline scope does not guess a manifest. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
@@ -4439,10 +4439,10 @@
           "type": "table",
           "title": "Review Processed Records",
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 12,
-            "y": 207
+            "y": 230,
+            "w": 12,
+            "h": 6
           },
           "datasource": "BioETL Ops HTTP",
           "description": "Shows Bronze, Silver, and Gold record counts and outcomes for the selected scope. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Use Run Explorer for full run details.",
@@ -4798,10 +4798,10 @@
             ]
           },
           "gridPos": {
-            "h": 6,
-            "w": 24,
             "x": 0,
-            "y": 213
+            "y": 236,
+            "w": 24,
+            "h": 6
           },
           "id": 9417,
           "options": {

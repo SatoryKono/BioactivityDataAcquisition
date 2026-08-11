@@ -10,6 +10,7 @@ from bioetl.application.services.control_plane.effective_config.serialization im
     to_jsonable,
 )
 from bioetl.domain.control_plane.effective_config_artifact import (
+    EFFECTIVE_CONFIG_IDENTITY_VERSION,
     EffectiveExecutionConfig,
     ExecutionEnvironmentSnapshot,
     RuntimeOverrideSnapshot,
@@ -214,5 +215,10 @@ def build_effective_execution_config(
     effective_config_data = apply_runtime_overrides(resolved_config, runtime_overrides)
     return EffectiveExecutionConfig(
         config_data=effective_config_data,
-        effective_hash=stable_hash(effective_config_data),
+        effective_hash=stable_hash(
+            {
+                "identity_version": EFFECTIVE_CONFIG_IDENTITY_VERSION,
+                "config_data": effective_config_data,
+            }
+        ),
     )

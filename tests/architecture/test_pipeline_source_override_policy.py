@@ -30,6 +30,10 @@ _FORBIDDEN_PROVIDER_KEYS: tuple[str, ...] = (
     "max_url_length",
     "cursor_pagination",
 )
+_FORBIDDEN_SOURCE_TRANSPORT_KEYS: tuple[str, ...] = (
+    "rate_limit",
+    "circuit_breaker",
+)
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -50,8 +54,13 @@ def _collect_forbidden_paths(path: Path) -> list[str]:
     forbidden: list[str] = []
     if "batch_size" in source:
         forbidden.append("pipeline.source.batch_size")
+    for key in _FORBIDDEN_SOURCE_TRANSPORT_KEYS:
+        if key in source:
+            forbidden.append(f"pipeline.source.{key}")
     provider_config = source.get("provider_config")
     if isinstance(provider_config, dict):
+        if provider_config:
+            forbidden.append("pipeline.source.provider_config")
         pagination = provider_config.get("pagination")
         if isinstance(pagination, dict) and pagination:
             forbidden.append("pipeline.source.provider_config.pagination")
@@ -66,8 +75,8 @@ def _collect_forbidden_paths(path: Path) -> list[str]:
     return forbidden
 
 
-def test_pipeline_configs_do_not_override_source_pagination_directly() -> None:
-    """Unified entity configs must use page_size_override instead of source pagination."""
+def test_pipeline_configs_do_not_override_provider_transport_directly() -> None:
+    """Unified entity configs cannot create a second transport authority."""
     violations: list[str] = []
     for path in sorted(ENTITIES_DIR.rglob("*.yaml")):
         forbidden = _collect_forbidden_paths(path)
@@ -76,6 +85,6 @@ def test_pipeline_configs_do_not_override_source_pagination_directly() -> None:
             violations.append(f"{rel}: {', '.join(forbidden)}")
 
     assert not violations, (
-        "Pipeline configs must not override provider source pagination directly. "
-        "Use pipeline.page_size_override instead.\n" + "\n".join(violations)
+        "Pipeline configs must not override provider transport directly. "
+        "Use configs/providers or page_size_override.\n" + "\n".join(violations)
     )

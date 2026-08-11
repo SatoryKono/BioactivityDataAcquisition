@@ -16,6 +16,9 @@ import yaml
 
 ConfigSourceHashStrategy = Literal["canonical_yaml", "raw_bytes"]
 
+CANONICAL_YAML_HASH_VERSION = "canonical-yaml-sha256-v1"
+RAW_BYTES_HASH_VERSION = "raw-bytes-sha256-v1"
+
 _YAML_SUFFIXES = frozenset({".yaml", ".yml"})
 
 
@@ -57,6 +60,8 @@ class ConfigSourceHashes:
     semantic_hash: str
     raw_hash: str
     hash_strategy: ConfigSourceHashStrategy
+    semantic_hash_version: str
+    raw_hash_version: str = RAW_BYTES_HASH_VERSION
 
 
 def compute_raw_sha256(raw_bytes: bytes) -> str:
@@ -90,11 +95,13 @@ def compute_config_source_hashes(
             semantic_hash=compute_canonical_yaml_sha256(raw_bytes),
             raw_hash=raw_hash,
             hash_strategy="canonical_yaml",
+            semantic_hash_version=CANONICAL_YAML_HASH_VERSION,
         )
     return ConfigSourceHashes(
         semantic_hash=raw_hash,
         raw_hash=raw_hash,
         hash_strategy="raw_bytes",
+        semantic_hash_version=RAW_BYTES_HASH_VERSION,
     )
 
 
