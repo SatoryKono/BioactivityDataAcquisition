@@ -1743,15 +1743,20 @@ def build_payload(
         remote_main_baseline_gate=remote_main_baseline_gate,
     )
     stale_count = sum(1 for stale in stale_artifacts.values() if stale)
+    stale_names = sorted(
+        name for name, is_stale in stale_artifacts.items() if is_stale
+    )
     gates.append(
-        _hard_limit_gate(
+        Gate(
             name="generated_artifact_drift",
+            status="pass" if stale_count == 0 else "fail",
             metric="stale_artifact_count",
-            current=stale_count,
+            current={"count": stale_count, "artifacts": stale_names},
             limit=0,
             source_artifact="reports/quality/*.json",
             remediation=(
-                "Regenerate stale quality artifacts with their canonical QA commands."
+                "Regenerate stale quality artifacts with their canonical QA commands: "
+                + (", ".join(stale_names) if stale_names else "none")
             ),
         )
     )
@@ -1889,6 +1894,15 @@ def _check_artifacts(
         errors.append(
             f"Debt governance gates have {summary['fail_count']} failing gate(s): {detail}"
         )
+        gates = payload.get("gates")
+        if isinstance(gates, list):
+            for gate in gates:
+                if not isinstance(gate, dict) or gate.get("status") != "fail":
+                    continue
+                name = gate.get("name")
+                current = gate.get("current")
+                remediation = gate.get("remediation")
+                errors.append(f"  - {name}: current={current!r}; {remediation}")
     return errors
 
 
