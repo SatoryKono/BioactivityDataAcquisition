@@ -1824,7 +1824,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "grafana/README.md",
       "occurrence_count": 6,
-      "first_line": 866,
+      "first_line": 867,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1901,7 +1901,7 @@
       "symbol": "bioetl_silver_filter_reject_total_mismatch_15m",
       "path": "grafana/README.md",
       "occurrence_count": 2,
-      "first_line": 1265,
+      "first_line": 1266,
       "role": "Silver reject accounting reconciliation",
       "migration_relevance": "Recording rule reconciles stage totals with bounded Silver reject breakdowns.",
       "notes": ""
@@ -2154,7 +2154,7 @@
       "symbol": "source_profile",
       "path": "configs/_schema/pipeline.json",
       "occurrence_count": 1,
-      "first_line": 2146,
+      "first_line": 2388,
       "role": "Versioned source-profile metadata",
       "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
       "notes": ""
@@ -2165,7 +2165,7 @@
       "symbol": "source_profile",
       "path": "src/bioetl/infrastructure/config/config_ci_contract.py",
       "occurrence_count": 2,
-      "first_line": 62,
+      "first_line": 61,
       "role": "Versioned source-profile metadata",
       "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
       "notes": ""
@@ -2264,7 +2264,7 @@
       "symbol": "extraction_params",
       "path": "configs/_schema/pipeline.json",
       "occurrence_count": 4,
-      "first_line": 1796,
+      "first_line": 2038,
       "role": "Source-profile extraction policy",
       "migration_relevance": "extraction_params are provider request policy and must not be treated as Silver filters.",
       "notes": ""
@@ -2297,7 +2297,7 @@
       "symbol": "extraction_params",
       "path": "src/bioetl/infrastructure/config/config_ci_contract.py",
       "occurrence_count": 2,
-      "first_line": 61,
+      "first_line": 60,
       "role": "Source-profile extraction policy",
       "migration_relevance": "extraction_params are provider request policy and must not be treated as Silver filters.",
       "notes": ""

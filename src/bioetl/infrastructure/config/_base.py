@@ -54,9 +54,7 @@ def get_pipeline_config(
 
     root = _get_pipeline_config_root(config_root)
     return load_domain_pipeline_config(
-        pipeline_name,
-        configs_root=root,
-        relaxed_dq=False,
+        pipeline_name, configs_root=root, relaxed_dq=False
     )
 
 

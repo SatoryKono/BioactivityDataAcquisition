@@ -30,6 +30,17 @@ JSON_SCHEMA_DRAFT7_URI = urlunsplit(
     ("http", "json-schema.org", "/draft-07/schema", "", "")
 )
 CONTRACTS_DIR = PROJECT_ROOT / "docs" / "04-reference" / "contracts" / "gold"
+
+SEMANTIC_INTEGER_TYPE_OVERRIDES: frozenset[tuple[str, str]] = frozenset(
+    {
+        ("composite_activity", "record_id"),
+        ("composite_activity", "src_id"),
+        ("composite_activity", "taxonomy_id"),
+        ("composite_assay", "src_id"),
+        ("composite_publication", "src_id"),
+        ("composite_target", "taxonomy_id"),
+    }
+)
 ENTITY_NAME_OVERRIDES: dict[str, str] = {
     "chembl_document": "chembl_publication",
     "chembl_document_similarity": "chembl_publication_similarity",
@@ -88,9 +99,12 @@ def _map_dtype_to_json_type(dtype_value: Any) -> str:
 
 
 def _build_property_schema(
-    column: Any, json_schema_property: dict[str, Any]
+    column: Any,
+    json_schema_property: dict[str, Any],
+    *,
+    semantic_integer: bool = False,
 ) -> dict[str, Any]:
-    base_type = _map_dtype_to_json_type(column.dtype)
+    base_type = "integer" if semantic_integer else _map_dtype_to_json_type(column.dtype)
     json_type: str | list[str]
     if column.nullable:
         json_type = [base_type, "null"]
@@ -123,7 +137,9 @@ def _build_contract(
         )
         export_name = _normalize_export_field_name(column_name)
         properties[export_name] = _build_property_schema(
-            column, property_from_json_schema
+            column,
+            property_from_json_schema,
+            semantic_integer=(entity, export_name) in SEMANTIC_INTEGER_TYPE_OVERRIDES,
         )
         if not column.nullable:
             required.append(export_name)

@@ -14,7 +14,7 @@ Ensures structural integrity of all YAML configuration files:
   INV-CFG-001: No legacy naming (document→publication, dq/→quality/, filter/→filters/)
   INV-CFG-002: Unified entity sections (schema/quality/filters/contracts) and provider config exist
   INV-CFG-003: loading_strategy is null or a valid LoadingStrategy enum value
-  INV-CFG-004: Providers requiring auth declare API key / mailto env vars
+  INV-CFG-004: Providers with config-bound auth declare named environment references
   INV-CFG-005: No unknown keys in unified entity/composite/provider configs
   INV-CFG-006: pipeline_name matches {provider}_{entity_type} convention
 
@@ -933,10 +933,10 @@ class TestValidLoadingStrategy:
 
 
 # ---------------------------------------------------------------------------
-# INV-CFG-004: API key / mailto requirements
+# INV-CFG-004: Config-bound authentication requirements
 # ---------------------------------------------------------------------------
 class TestProviderAuthRequirements:
-    """INV-CFG-004: providers needing auth must declare env-var references."""
+    """INV-CFG-004: config-bound auth must declare env-var references."""
 
     @pytest.mark.parametrize(
         "provider,required_keys",

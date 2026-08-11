@@ -98,17 +98,14 @@ def load_domain_pipeline_config(
     domain_mapper: DomainConfigMapper = yaml_config_to_domain,
 ) -> PipelineConfig:
     """Load domain config through the canonical function-based config flow."""
-    resolved_configs_root = resolve_configs_root(configs_root)
+    root = resolve_configs_root(configs_root)
     if yaml_loader is load_pipeline_config:
-        yaml_config = load_pipeline_config_from_root(
-            pipeline_name,
-            configs_root=resolved_configs_root,
-        )
+        yaml_config = load_pipeline_config_from_root(pipeline_name, configs_root=root)
     else:
         yaml_config = yaml_loader(pipeline_name)
     return resolve_domain_pipeline_config(
         yaml_config,
-        configs_root=resolved_configs_root,
+        configs_root=root,
         relaxed_dq=relaxed_dq,
         dq_resolver_provider=dq_resolver_provider,
         domain_mapper=domain_mapper,
