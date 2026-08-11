@@ -31,6 +31,10 @@ MMD_COLLECTIONS = {
     "architecture": DIAGRAM_ROOT / "architecture",
     "class-diagrams": DIAGRAM_ROOT / "class-diagrams",
     "foundation": DIAGRAM_ROOT / "foundation",
+    # Secondary families (SVG sibling contract; #8622)
+    "sequence": DIAGRAM_ROOT / "sequence",
+    "state-machines": DIAGRAM_ROOT / "state-machines",
+    "providers": DIAGRAM_ROOT / "providers",
 }
 VIEW_COLLECTION = DIAGRAM_ROOT / "views"
 
@@ -208,6 +212,9 @@ def test_governance_docs_match_active_diagram_counts() -> None:
         ("architecture", ".mmd"),
         ("class-diagrams", ".mmd"),
         ("foundation", ".mmd"),
+        ("sequence", ".mmd"),
+        ("state-machines", ".mmd"),
+        ("providers", ".mmd"),
         ("views", ".mermaid"),
     ],
 )
@@ -248,6 +255,9 @@ def test_legacy_mmd_diagrams_tree_has_no_canonical_sources() -> None:
         ("architecture", ".mmd"),
         ("class-diagrams", ".mmd"),
         ("foundation", ".mmd"),
+        ("sequence", ".mmd"),
+        ("state-machines", ".mmd"),
+        ("providers", ".mmd"),
         ("views", ".mermaid"),
     ],
 )

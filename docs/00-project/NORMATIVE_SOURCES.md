@@ -92,7 +92,7 @@ sources — equal peers `.codex/agents/CODEX-RUNTIME.md` и
 | `docs/02-architecture/diagrams/**/*.mmd` | diagram governance | source | ADR-040 lint |
 | Diagram `**/png/**` | diagram governance | render artifact | CI/local only (DOC-GOV-02) |
 
-**KPI / gates:** `python -m scripts.docs report-docs-kpi` (weekly workflow
+**KPI / gates:** `python -m scripts.docs check-kpi` (weekly workflow
 `docs-kpi-weekly.yml`); `python -m scripts.docs check-drift --runtime-mirrors --freshness`.
 New docs PRs SHOULD declare owner + type + retirement criterion (see
 `docs/03-guides/docs-verification.md`).

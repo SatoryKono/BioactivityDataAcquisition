@@ -137,6 +137,7 @@ jobs:
             tests/architecture/test_diagram_corpus_regression_guards.py \
             tests/architecture/test_diagram_issues_6205_6211_closeout.py \
             tests/architecture/test_documentation_audit_remediation.py \
+            tests/architecture/test_check_doc_links_guardrails.py \
             tests/architecture/test_docs_governance_workflow.py \
             tests/architecture/test_docs_version_sync.py::TestDocsVersionSync::test_rules_version_extractable \
             tests/architecture/test_docs_version_sync.py::TestDocsVersionSync::test_claude_md_synced \
@@ -196,7 +197,7 @@ jobs:
         run: uv run --frozen --no-build python -m scripts.engineering.repo check-versions
 
       - name: Run documentation integrity guardrails
-        run: uv run --frozen --no-build python -m scripts.docs check-links --links --specs --configs --report-json reports/docs-link-check-report.json
+        run: uv run --frozen --no-build python -m scripts.docs check-links --report-json reports/docs-link-check-report.json
 
       - name: Upload docs link-check report artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
