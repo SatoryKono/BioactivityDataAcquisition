@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from urllib.parse import parse_qs, urlsplit
 
 import pytest
 
@@ -95,6 +96,33 @@ def test_check_rules_health_ok(monkeypatch: pytest.MonkeyPatch) -> None:
     assert report.ok is True
     assert report.bioetl_rules == 1
     assert report.issues == []
+
+
+def test_check_rules_health_uses_promql_safe_rule_group_regex(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    queries: list[str] = []
+
+    def fake_fetch(url: str, *, timeout: float) -> dict[str, object]:
+        del timeout
+        if url.endswith("/api/v1/rules"):
+            return {"status": "success", "data": {"groups": []}}
+
+        query = parse_qs(urlsplit(url).query)["query"][0]
+        queries.append(query)
+        return {
+            "status": "success",
+            "data": {"resultType": "vector", "result": []},
+        }
+
+    monkeypatch.setattr(mod, "_fetch_json", fake_fetch)
+
+    report = mod.check_rules_health(prometheus_url="http://127.0.0.1:9090")
+
+    assert report.ok is True
+    assert len(queries) == 2
+    assert all("[.]yml" in query for query in queries)
+    assert all(r"\.yml" not in query for query in queries)
 
 
 def test_check_rules_health_fails_on_metric_signal(

@@ -23,6 +23,18 @@ DEFAULT_GRAFANA_PASSWORD = "changeme"
 DEFAULT_OUTPUT_DIR = Path("reports/observability/live-validation")
 DEFAULT_TIMEOUT = 5.0
 
+EXPECTED_BIOETL_DASHBOARD_UIDS = frozenset(
+    {
+        "bioetl-control-plane-v1",
+        "bioetl-dq-v2",
+        "bioetl-incident-v1",
+        "bioetl-overview-v2",
+        "bioetl-provider-health-v2",
+        "bioetl-run-explorer-v1",
+        "bioetl-runtime",
+    }
+)
+
 
 @dataclass
 class ValidationResult:
@@ -342,18 +354,32 @@ def check_grafana_dashboards(
                 details={"response_type": type(data).__name__},
             )
 
-        dashboard_uids = [ds.get("uid", "unknown") for ds in data]
+        dashboard_uids = [str(ds.get("uid") or "unknown") for ds in data]
         bioetl_dashboards = [uid for uid in dashboard_uids if "bioetl" in uid.lower()]
+        missing_bioetl_dashboard_uids = sorted(
+            EXPECTED_BIOETL_DASHBOARD_UIDS.difference(dashboard_uids)
+        )
+        expected_count = len(EXPECTED_BIOETL_DASHBOARD_UIDS)
 
         return ValidationResult(
             check_name="grafana_dashboards",
-            status="pass" if len(bioetl_dashboards) >= 8 else "partial",
-            message=f"Grafana has {len(dashboard_uids)} dashboards, {len(bioetl_dashboards)} BioETL dashboards (expected 8)",
+            status="pass" if not missing_bioetl_dashboard_uids else "partial",
+            message=(
+                f"Grafana has {len(dashboard_uids)} dashboards, "
+                f"{len(bioetl_dashboards)} BioETL dashboards "
+                f"({expected_count} shipped UIDs expected; "
+                f"{len(missing_bioetl_dashboard_uids)} missing)"
+            ),
             details={
                 "total_dashboards": len(dashboard_uids),
                 "bioetl_dashboards": len(bioetl_dashboards),
                 "dashboard_uids": dashboard_uids,
                 "bioetl_dashboard_uids": bioetl_dashboards,
+                "expected_bioetl_dashboards": expected_count,
+                "expected_bioetl_dashboard_uids": sorted(
+                    EXPECTED_BIOETL_DASHBOARD_UIDS
+                ),
+                "missing_bioetl_dashboard_uids": missing_bioetl_dashboard_uids,
             },
         )
     except HTTPError as e:
