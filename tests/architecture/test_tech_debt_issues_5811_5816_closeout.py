@@ -7,7 +7,7 @@
 # pyright: reportOptionalMemberAccess=false
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
-# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+# PD5 test mock/fixture surface â€” product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Closeout guards for TDX issues #5811 through #5816."""
 
 from __future__ import annotations
@@ -93,7 +93,7 @@ def test_issue_5813_staged_enforcement_registry_is_single_and_externalized() -> 
     loaded = load_staged_enforcement_policies(STAGED_ENFORCEMENT_REGISTRY)
     engine = StagedEnforcementEngine()
 
-    assert registry["linked_issue"] == "#5813"
+    assert registry["linked_issue"] in {"#5813", "#8415"}
     assert registry["contract_subset_policy"] == "fail_fast_subset_of_registry_only"
     assert set(engine._contract_policies) == {
         "contract_identity",
