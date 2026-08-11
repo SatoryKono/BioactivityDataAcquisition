@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-11T17:11:42.426701+00:00",
+  "generated_at": "2026-08-11T19:53:41.069765+00:00",
   "summary": {
     "total_scripts": 598,
     "status_counts": {
@@ -16,7 +16,7 @@
       "other": 78,
       "scripts": 495,
       "skills": 11,
-      "tests": 380
+      "tests": 381
     }
   },
   "scripts": [
@@ -348,7 +348,7 @@
         },
         {
           "path": "docs/00-project/ai/prompts/archive/mirrors/runtime-agentry-1-CODEX-RUNTIME.md",
-          "line": 77,
+          "line": 83,
           "source_group": "docs",
           "text": "`python3 scripts/ai/codex/doctor.py static --no-write`."
         },
@@ -2574,7 +2574,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 179,
+          "line": 180,
           "source_group": "docs",
           "text": ".\\.venv-win\\Scripts\\python.exe scripts\\ai\\generate_project_domain_audit_workflow.py"
         }
@@ -2635,7 +2635,7 @@
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 157,
+          "line": 158,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\grok\\install_skills.ps1"
         }
@@ -2669,7 +2669,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -2694,6 +2694,12 @@
           "line": 43,
           "source_group": "scripts",
           "text": "exec \"$PYTHON_BIN\" \"$SCRIPT_DIR/check_junie_mirror.py\" \"$MODE\""
+        },
+        {
+          "path": "tests/architecture/test_junie_runtime_ci_contract.py",
+          "line": 36,
+          "source_group": "tests",
+          "text": "\"scripts/ai/junie/check_junie_mirror.py\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -4948,7 +4954,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 35,
+      "reference_count": 36,
       "references": [
         {
           "path": "docs/00-project/ai/README.md",
@@ -4957,46 +4963,46 @@
           "text": "- CLI: `python -m scripts.ai.prompts list|render|check`"
         },
         {
-          "path": "docs/00-project/ai/prompts/README.md",
-          "line": 122,
+          "path": "docs/00-project/ai/prompts/INVENTORY.md",
+          "line": 97,
           "source_group": "docs",
-          "text": "python -m scripts.ai.prompts list"
+          "text": "- `generated/CATALOG.md` from `REGISTRY.yaml` (`python -m scripts.ai.prompts catalog`)"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
           "line": 123,
           "source_group": "docs",
-          "text": "python -m scripts.ai.prompts show prompt.audit.grok-cycle"
+          "text": "python -m scripts.ai.prompts list"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
           "line": 124,
           "source_group": "docs",
-          "text": "python -m scripts.ai.prompts render prompt.session.grok-bootstrap \\"
+          "text": "python -m scripts.ai.prompts show prompt.audit.grok-cycle"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 126,
+          "line": 125,
           "source_group": "docs",
-          "text": "python -m scripts.ai.prompts render prompt.audit.grok-cycle --param SCOPE=\"src/bioetl/domain\""
+          "text": "python -m scripts.ai.prompts render prompt.session.grok-bootstrap \\"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
           "line": 127,
           "source_group": "docs",
-          "text": "python -m scripts.ai.prompts render prompt.closeout.grok --param SCOPE=\"issues: #NNNN\""
+          "text": "python -m scripts.ai.prompts render prompt.audit.grok-cycle --param SCOPE=\"src/bioetl/domain\""
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
           "line": 128,
           "source_group": "docs",
-          "text": "python -m scripts.ai.prompts render prompt.observability.dashboard-panel-audit \\"
+          "text": "python -m scripts.ai.prompts render prompt.closeout.grok --param SCOPE=\"issues: #NNNN\""
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 130,
+          "line": 129,
           "source_group": "docs",
-          "text": "python -m scripts.ai.prompts render prompt.observability.bi-dashboard-acceptance \\"
+          "text": "python -m scripts.ai.prompts render prompt.observability.dashboard-panel-audit \\"
         }
       ],
       "owner": "@bioetl-platform",
@@ -5532,7 +5538,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 209,
+          "line": 210,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.data_quality"
         },
@@ -5886,13 +5892,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 298,
+          "line": 299,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 379,
+          "line": 380,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
@@ -5943,7 +5949,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 401,
+          "line": 402,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_quality_gates.py \\"
         },
@@ -6020,7 +6026,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 390,
+          "line": 391,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_visual_smoke.py \\"
         },
@@ -6098,13 +6104,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 301,
+          "line": 302,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 384,
+          "line": 385,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
@@ -6345,13 +6351,13 @@
         },
         {
           "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
-          "line": 39,
+          "line": 43,
           "source_group": "tests",
           "text": "module_path = REPO_ROOT / \"scripts\" / \"diagrams\" / \"fix\" / \"apply_elk_layout.py\""
         },
         {
           "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
-          "line": 128,
+          "line": 148,
           "source_group": "tests",
           "text": "\"apply_elk_layout.py\","
         },
@@ -6384,13 +6390,13 @@
         },
         {
           "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
-          "line": 129,
+          "line": 149,
           "source_group": "tests",
           "text": "\"convert_provider_diagrams.py\","
         },
         {
           "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
-          "line": 137,
+          "line": 157,
           "source_group": "tests",
           "text": "assert not (REPO_ROOT / \"scripts\" / \"convert_provider_diagrams.py\").exists()"
         },
@@ -6441,7 +6447,7 @@
         },
         {
           "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
-          "line": 130,
+          "line": 150,
           "source_group": "tests",
           "text": "\"differentiate_linkstyle.py\","
         },
@@ -6528,7 +6534,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 396,
+          "line": 397,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/fix/harmonize_link_styles.py --dry-run --fail-on-errors"
         },
@@ -6812,7 +6818,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 336,
+          "line": 337,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json"
         },
@@ -6857,7 +6863,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 339,
+          "line": 340,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -6914,7 +6920,7 @@
         },
         {
           "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
-          "line": 84,
+          "line": 104,
           "source_group": "tests",
           "text": "wrapper_path = REPO_ROOT / \"scripts\" / \"diagrams\" / \"mmdc_wrapper.sh\""
         },
@@ -7605,7 +7611,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 329,
+          "line": 330,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -7710,7 +7716,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 160,
+      "reference_count": 163,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -7792,7 +7798,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 44,
+          "line": 47,
           "source_group": "scripts",
           "text": "| `build-site`                             | `scripts/docs/build/mkdocs_build.py`                            | Build the MkDocs site through the packaged Python entrypoint                             "
         },
@@ -7813,13 +7819,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 37,
+          "line": 38,
           "source_group": "scripts",
-          "text": "- shell-oriented transport needs such as `bash scripts/docs/build_docs_site.sh`, though the preferred public entrypoint is `python -m scripts.docs build-site`"
+          "text": "- shell transport: `bash scripts/docs/build_docs_site.sh` (preferred:"
         },
         {
           "path": "scripts/docs/README.md",
-          "line": 149,
+          "line": 153,
           "source_group": "scripts",
           "text": "| `scripts/docs/build_docs_site.sh`  | Shell transport adapter that chooses an appropriate Python runtime and then dispatches to `python -m scripts.docs build-site` |"
         },
@@ -7858,7 +7864,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 47,
+          "line": 50,
           "source_group": "scripts",
           "text": "| `check-docstrings`                       | `scripts/docs/checks/check_docstrings.py`                       | Check docstring coverage                                                                 "
         },
@@ -7895,7 +7901,7 @@
         },
         {
           "path": "scripts/docs/README.md",
-          "line": 46,
+          "line": 49,
           "source_group": "scripts",
           "text": "| `check-drift`                            | `scripts/docs/checks/check_drift.py`                            | Check documentation drift (ports, classes, bounded narrative parity, runtime mirrors, fre"
         },
@@ -7964,9 +7970,9 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 199,
+          "line": 200,
           "source_group": "ci",
-          "text": "run: uv run --frozen --no-build python -m scripts.docs check-links --links --specs --configs --report-json reports/docs-link-check-report.json"
+          "text": "run: uv run --frozen --no-build python -m scripts.docs check-links --report-json reports/docs-link-check-report.json"
         },
         {
           "path": ".pre-commit-config.yaml",
@@ -7997,7 +8003,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 49,
+          "line": 52,
           "source_group": "scripts",
           "text": "| `generate-cleanup-inventory`             | `scripts/docs/checks/documentation_cleanup_inventory.py`        | Generate/check the per-file documentation cleanup inventory and generated-artifact route "
         },
@@ -8036,7 +8042,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 48,
+          "line": 51,
           "source_group": "scripts",
           "text": "| `check-kpi`                              | `scripts/docs/checks/report_docs_kpi.py`                        | Report documentation KPI metrics                                                         "
         },
@@ -8079,7 +8085,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 43,
+          "line": 46,
           "source_group": "scripts",
           "text": "| `verify`                                 | `scripts/docs/checks/verify.py`                                 | Run the canonical docs verification chain (links, drift, docstrings, strict build)       "
         },
@@ -8296,7 +8302,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 59,
+          "line": 62,
           "source_group": "scripts",
           "text": "| `fix-links-auto`                         | `scripts/docs/fixers/fix_links_auto.py`                         | Auto-fix broken documentation links                                                      "
         },
@@ -8321,7 +8327,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 60,
+          "line": 63,
           "source_group": "scripts",
           "text": "| `fix-links-explicit`                     | `scripts/docs/fixers/fix_links_explicit.py`                     | Fix documentation links with explicit rules                                              "
         },
@@ -8346,7 +8352,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 61,
+          "line": 64,
           "source_group": "scripts",
           "text": "| `fix-link-warnings`                      | `scripts/docs/fixers/link_warnings.py`                          | Fix link warnings in specified files                                                     "
         },
@@ -8371,7 +8377,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 63,
+          "line": 66,
           "source_group": "scripts",
           "text": "| `sync-repo-identity`                     | `scripts/docs/fixers/repo_identity.py`                          | Normalize active docs and workflow references to the canonical repo identity             "
         },
@@ -8396,7 +8402,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 62,
+          "line": 65,
           "source_group": "scripts",
           "text": "| `audit-sentence`                         | `scripts/docs/fixers/sentence_audit.py`                         | Sentence-level documentation audit                                                       "
         },
@@ -8421,7 +8427,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 54,
+          "line": 57,
           "source_group": "scripts",
           "text": "| `build-matrix-dicts`                     | `scripts/docs/matrix/build_matrix_dicts.py`                     | Build inventory and dictionary artifacts for the canonical ChEMBL matrix workbook        "
         },
@@ -8452,7 +8458,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 55,
+          "line": 58,
           "source_group": "scripts",
           "text": "| `enrich-matrix-normalization-details`    | `scripts/docs/matrix/enrich_normalization_details.py`           | Populate exact per-row normalization details in the canonical ChEMBL matrix workbook     "
         },
@@ -8489,7 +8495,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 51,
+          "line": 54,
           "source_group": "scripts",
           "text": "| `export-matrix-structural-contract`      | `scripts/docs/matrix/export_structural_contract.py`             | Export the canonical runtime structural contract for ChEMBL workbook sync                "
         },
@@ -8526,7 +8532,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 56,
+          "line": 59,
           "source_group": "scripts",
           "text": "| `filter-matrix-rows`                     | `scripts/docs/matrix/filter_rows.py`                            | Remove rows from the canonical ChEMBL matrix workbook by column value                    "
         },
@@ -8563,7 +8569,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 52,
+          "line": 55,
           "source_group": "scripts",
           "text": "| `generate-field-matrix`                  | `scripts/docs/matrix/generate_field_matrix.py`                  | Generate deterministic ChemBL Activity field-matrix artifacts directly from code         "
         },
@@ -8667,7 +8673,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 57,
+          "line": 60,
           "source_group": "scripts",
           "text": "| `normalize-matrix-values`                | `scripts/docs/matrix/normalize_values.py`                       | Normalize controlled vocabulary values in the canonical ChEMBL matrix workbook           "
         },
@@ -8741,7 +8747,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 58,
+          "line": 61,
           "source_group": "scripts",
           "text": "| `sync-matrix-structural-policy`          | `scripts/docs/matrix/sync_structural_policy.py`                 | Reconcile workbook policy columns with the current structural Silver policy semantics    "
         },
@@ -8975,7 +8981,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 50,
+          "line": 53,
           "source_group": "scripts",
           "text": "| `rename-passport-paths`                  | `scripts/docs/passports/rename_underscore_to_hyphen.py`         | Preview/apply/check underscore-to-hyphen passport Markdown path migration                "
         },
@@ -9500,13 +9506,13 @@
       "references": [
         {
           "path": ".github/workflows/e2e-matrix-health.yml",
-          "line": 74,
+          "line": 86,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \\"
         },
         {
           "path": ".github/workflows/e2e-matrix-health.yml",
-          "line": 152,
+          "line": 165,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \\"
         },
@@ -9545,7 +9551,7 @@
       "references": [
         {
           "path": ".github/workflows/e2e-matrix-health.yml",
-          "line": 84,
+          "line": 96,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/check_e2e_rerun_stability.py \\"
         },
@@ -9710,7 +9716,7 @@
         },
         {
           "path": "docs/00-project/ai/prompts/archive/campaigns/pre-library-test_speed_optimization_loop.md",
-          "line": 101,
+          "line": 107,
           "source_group": "docs",
           "text": "- `scripts/engineering/dev/run_pytest.sh`, `scripts/engineering/dev/run_pytest.ps1`, `scripts/engineering/ci/run_pytest_resilient.py`"
         },
@@ -10823,13 +10829,13 @@
         },
         {
           "path": "docs/00-project/ai/prompts/archive/campaigns/pre-library-test_fix_retest_loop.md",
-          "line": 89,
+          "line": 95,
           "source_group": "docs",
           "text": "- Linux/WSL: `bash scripts/engineering/dev/run_pytest.sh <scope> --maxfail=1 -q`"
         },
         {
           "path": "docs/00-project/ai/prompts/archive/campaigns/pre-library-test_speed_optimization_loop.md",
-          "line": 91,
+          "line": 97,
           "source_group": "docs",
           "text": "- ╨ö╨╗╤Å mixed Windows + WSL checkout ╨▓ WSL ╨╕╤ü╨┐╨╛╨╗╤î╨╖╤â╨╣ `bash scripts/engineering/dev/run_pytest.sh`, ╨┤╨╗╤Å CI/single-OS ╨┤╨╛╨┐╤â╤ü╨║╨░╨╡╤é╤ü╤Å `uv run python -m pytest`."
         }
@@ -11071,7 +11077,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 44,
+      "reference_count": 43,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -11104,12 +11110,6 @@
           "text": "- Windows PowerShell: `setup_env_windows.ps1`, `run_pytest.ps1`, `run_mypy.ps1`"
         },
         {
-          "path": "docs/00-project/ai/prompts/archive/mirrors/agent-memory.md",
-          "line": 100,
-          "source_group": "docs",
-          "text": "environment with `.\\scripts\\engineering\\dev\\setup_env_windows.ps1`."
-        },
-        {
           "path": "docs/00-project/index.md",
           "line": 82,
           "source_group": "docs",
@@ -11120,6 +11120,12 @@
           "line": 152,
           "source_group": "docs",
           "text": ".\\scripts\\engineering\\dev\\setup_env_windows.ps1"
+        },
+        {
+          "path": "docs/03-guides/cheatsheets/cli-commands.md",
+          "line": 636,
+          "source_group": "docs",
+          "text": ".\\setup_env_windows.ps1"
         }
       ]
     },
@@ -11956,7 +11962,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 320,
+      "reference_count": 318,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -12002,7 +12008,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 168,
+          "line": 169,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-xwalk-missing-backlog \\"
         }
@@ -12550,13 +12556,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/prompts/archive/campaigns/architecture_metric_exemptions_tasks_json_prompt.md",
-          "line": 165,
+          "line": 171,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off`"
         },
         {
           "path": "docs/00-project/ai/prompts/archive/campaigns/architecture_metric_exemptions_tasks_json_prompt.md",
-          "line": 511,
+          "line": 517,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off`"
         },
@@ -13482,13 +13488,13 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 216,
+          "line": 217,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 220,
+          "line": 221,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --update"
         },
@@ -16021,7 +16027,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 196,
+          "line": 197,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo check-versions"
         },
@@ -16289,7 +16295,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 293,
+          "line": 318,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -17042,7 +17048,7 @@
         },
         {
           "path": "docs/00-project/ai/prompts/archive/mirrors/setup-prompts-1-devin-setup-prompt.md",
-          "line": 48,
+          "line": 54,
           "source_group": "docs",
           "text": "bash scripts/memory/run_workflow.sh pre-task \\"
         },
@@ -18475,19 +18481,19 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 154,
+          "line": 156,
           "source_group": "docs",
           "text": "python scripts/ops/observability/check_prometheus_rules_health.py --json"
         },
         {
           "path": "scripts/ops/observability/validate_live_observability.py",
-          "line": 154,
+          "line": 166,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.check_prometheus_rules_health import ("
         },
         {
           "path": "tests/unit/scripts/ops/test_check_prometheus_rules_health.py",
-          "line": 9,
+          "line": 10,
           "source_group": "tests",
           "text": "from scripts.ops.observability import check_prometheus_rules_health as mod"
         }
@@ -18576,7 +18582,7 @@
           "text": "- No-scroll helper: `scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py`"
         },
         {
-          "path": "docs/03-guides/dashboards/dux6-residual-readability.md",
+          "path": "docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md",
           "line": 22,
           "source_group": "docs",
           "text": "1. `scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py`"
@@ -18647,7 +18653,7 @@
           "path": "docs/03-guides/dashboards/operator-ux-v2.md",
           "line": 135,
           "source_group": "docs",
-          "text": "- DUX3 closeout is evidence-only (`dux3-first-screen-inventory.json`); no `apply_dux3_residual.py` in tree — later residuals use `apply_dux4_enforcement.py` / `apply_dux5_residual.py` / `apply_dux6_re"
+          "text": "- DUX3 closeout is evidence-only (`archive/audit-protocols/dux3-first-screen-inventory.json`); no `apply_dux3_residual.py` in tree — later residuals use `apply_dux4_enforcement.py` / `apply_dux5_resid"
         },
         {
           "path": "docs/03-guides/dashboards/operator-ux-v2.md",
@@ -18681,7 +18687,7 @@
           "text": "- Applicator: `scripts/ops/observability/grafana/apply_dux5_residual.py`"
         },
         {
-          "path": "docs/03-guides/dashboards/dux6-residual-readability.md",
+          "path": "docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md",
           "line": 21,
           "source_group": "docs",
           "text": "1. `scripts/ops/observability/grafana/apply_dux5_residual.py`"
@@ -18690,7 +18696,7 @@
           "path": "docs/03-guides/dashboards/operator-ux-v2.md",
           "line": 135,
           "source_group": "docs",
-          "text": "- DUX3 closeout is evidence-only (`dux3-first-screen-inventory.json`); no `apply_dux3_residual.py` in tree — later residuals use `apply_dux4_enforcement.py` / `apply_dux5_residual.py` / `apply_dux6_re"
+          "text": "- DUX3 closeout is evidence-only (`archive/audit-protocols/dux3-first-screen-inventory.json`); no `apply_dux3_residual.py` in tree — later residuals use `apply_dux4_enforcement.py` / `apply_dux5_resid"
         },
         {
           "path": "scripts/ops/observability/grafana/apply_dux6_residual.py",
@@ -18730,7 +18736,7 @@
       "reference_count": 3,
       "references": [
         {
-          "path": "docs/03-guides/dashboards/dux6-residual-readability.md",
+          "path": "docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md",
           "line": 23,
           "source_group": "docs",
           "text": "1. `scripts/ops/observability/grafana/apply_dux6_residual.py`"
@@ -18739,7 +18745,7 @@
           "path": "docs/03-guides/dashboards/operator-ux-v2.md",
           "line": 135,
           "source_group": "docs",
-          "text": "- DUX3 closeout is evidence-only (`dux3-first-screen-inventory.json`); no `apply_dux3_residual.py` in tree — later residuals use `apply_dux4_enforcement.py` / `apply_dux5_residual.py` / `apply_dux6_re"
+          "text": "- DUX3 closeout is evidence-only (`archive/audit-protocols/dux3-first-screen-inventory.json`); no `apply_dux3_residual.py` in tree — later residuals use `apply_dux4_enforcement.py` / `apply_dux5_resid"
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
@@ -18761,8 +18767,8 @@
       "reference_count": 3,
       "references": [
         {
-          "path": "docs/03-guides/dashboards/dux7-live-residual-protocol.md",
-          "line": 22,
+          "path": "docs/03-guides/dashboards/archive/audit-protocols/dux7-live-residual-protocol.md",
+          "line": 24,
           "source_group": "docs",
           "text": "python scripts/ops/observability/grafana/apply_dux7_live_residual.py"
         },
@@ -18770,7 +18776,7 @@
           "path": "docs/03-guides/dashboards/operator-ux-v2.md",
           "line": 135,
           "source_group": "docs",
-          "text": "- DUX3 closeout is evidence-only (`dux3-first-screen-inventory.json`); no `apply_dux3_residual.py` in tree — later residuals use `apply_dux4_enforcement.py` / `apply_dux5_residual.py` / `apply_dux6_re"
+          "text": "- DUX3 closeout is evidence-only (`archive/audit-protocols/dux3-first-screen-inventory.json`); no `apply_dux3_residual.py` in tree — later residuals use `apply_dux4_enforcement.py` / `apply_dux5_resid"
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
@@ -18868,8 +18874,8 @@
       "reference_count": 9,
       "references": [
         {
-          "path": "docs/03-guides/dashboards/dux5-screenshot-regression-protocol.md",
-          "line": 35,
+          "path": "docs/03-guides/dashboards/archive/audit-protocols/dux5-screenshot-regression-protocol.md",
+          "line": 37,
           "source_group": "docs",
           "text": "python scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py"
         },
@@ -19045,7 +19051,7 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 351,
+          "line": 353,
           "source_group": "docs",
           "text": "# .\\scripts\\ops\\observability\\grafana\\recover_renderer.ps1"
         },
@@ -19070,13 +19076,13 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 347,
+          "line": 349,
           "source_group": "docs",
           "text": "python scripts/ops/observability/grafana/recover_renderer.py"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 353,
+          "line": 355,
           "source_group": "docs",
           "text": "3. Check only: `python scripts/ops/observability/grafana/recover_renderer.py --check-only`"
         },
@@ -19175,21 +19181,21 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 162,
+          "line": 173,
           "source_group": "docs",
           "text": "`scripts/ops/observability/grafana/render_nav_bus.py`). The current dashboard"
+        },
+        {
+          "path": "docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md",
+          "line": 24,
+          "source_group": "docs",
+          "text": "1. `scripts/ops/observability/grafana/render_nav_bus.py`"
         },
         {
           "path": "docs/03-guides/dashboards/dashboard-system-2.0-phase2-residual.md",
           "line": 47,
           "source_group": "docs",
           "text": "5. Nav readability polish via `render_nav_bus.py`."
-        },
-        {
-          "path": "docs/03-guides/dashboards/dux6-residual-readability.md",
-          "line": 24,
-          "source_group": "docs",
-          "text": "1. `scripts/ops/observability/grafana/render_nav_bus.py`"
         },
         {
           "path": "docs/03-guides/dashboards/library-panels-inventory.md",
@@ -19217,8 +19223,8 @@
       "reference_count": 13,
       "references": [
         {
-          "path": "docs/03-guides/dashboards/dux5-screenshot-regression-protocol.md",
-          "line": 37,
+          "path": "docs/03-guides/dashboards/archive/audit-protocols/dux5-screenshot-regression-protocol.md",
+          "line": 39,
           "source_group": "docs",
           "text": "# python scripts/ops/observability/grafana/rerender_grafana_screenshots.py"
         },
@@ -19274,8 +19280,8 @@
       "reference_count": 3,
       "references": [
         {
-          "path": "docs/03-guides/dashboards/dux7-live-residual-protocol.md",
-          "line": 25,
+          "path": "docs/03-guides/dashboards/archive/audit-protocols/dux7-live-residual-protocol.md",
+          "line": 27,
           "source_group": "docs",
           "text": "python scripts/ops/observability/grafana/run_dux7_live_residual.py --output-dir reports/quality/dux7-live-evidence"
         },
@@ -19457,7 +19463,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 152,
+          "line": 163,
           "source_group": "docs",
           "text": "- On Linux, `setup_grafana_screenshot_runtime.sh` is the canonical bootstrap"
         },
@@ -19633,7 +19639,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 156,
+          "line": 158,
           "source_group": "docs",
           "text": "python scripts/ops/observability/validate_live_observability.py"
         },
@@ -19710,7 +19716,7 @@
         },
         {
           "path": "docs/00-project/ai/prompts/archive/campaigns/specialized-prompts-2-coderabbit-audit.md",
-          "line": 69,
+          "line": 75,
           "source_group": "docs",
           "text": "- `scripts/ops/run-coderabbit-reviews.sh`"
         },
@@ -19817,13 +19823,13 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 282,
+          "line": 284,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\apply-docker-stable-mcp.ps1 -Profile stable -WithNeo4j"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 291,
+          "line": 293,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\apply-docker-stable-mcp.ps1 -Profile shared -TransportMode shared -WithSharedMcp -SkipEnsureStable"
         }
@@ -19842,7 +19848,7 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 68,
+          "line": 70,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/check_network_preconditions.py --stack all --ensure"
         },
@@ -19897,7 +19903,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 283,
+          "line": 285,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\cleanup-mcp-orphans.ps1 -IncludeGatewayHint"
         },
@@ -20036,19 +20042,19 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 74,
+          "line": 76,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\ensure-stable.ps1 -WithNeo4j"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 273,
+          "line": 275,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\ensure-stable.ps1 -WithNeo4j"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 276,
+          "line": 278,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\ensure-stable.ps1 -RestartWsl -WithNeo4j"
         },
@@ -20081,13 +20087,13 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 279,
+          "line": 281,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\harden-desktop-host.ps1 -RegisterWatchdog"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 298,
+          "line": 300,
           "source_group": "docs",
           "text": "`harden-desktop-host.ps1` sets Resource Saver effectively off"
         },
@@ -20176,7 +20182,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 286,
+          "line": 288,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\reset-mcp-host-sessions.ps1"
         }
@@ -20225,7 +20231,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 256,
+          "line": 258,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\restart-docker.ps1 -TimeoutSeconds 180"
         },
@@ -20312,7 +20318,7 @@
       "reference_count": 8,
       "references": [
         {
-          "path": "docs/03-guides/dashboards/dux4-field-override-inventory.json",
+          "path": "docs/03-guides/dashboards/archive/audit-protocols/dux4-field-override-inventory.json",
           "line": 4082,
           "source_group": "docs",
           "text": "\"noValue\": \"No pipeline-run-report artifacts for this pipeline (reports/run-reports/pipeline/<name>/). Not Prometheus — run the pipeline, pick a pipeline with reports, or if host has reports but this "
@@ -20343,7 +20349,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 177,
+          "line": 179,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay"
         },
@@ -20469,7 +20475,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 293,
+          "line": 295,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\apply-shared-to-grok.ps1 -DisableDockerGateways"
         },
@@ -20524,7 +20530,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 292,
+          "line": 294,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\health-shared.ps1"
         },
@@ -20624,7 +20630,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 290,
+          "line": 292,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\start-shared.ps1"
         },
