@@ -644,8 +644,14 @@ def ensure_shared_networks(
     *,
     runner: Runner = _run,
     timeout: float = 15.0,
+    all_networks: bool = False,
 ) -> tuple[bool, list[dict[str, Any]]]:
-    """Create missing contracted external networks and reject conflicting owners."""
+    """Create missing contracted shared networks and reject conflicting owners.
+
+    When ``all_networks`` is True (reinstall / ensure-networks action), every
+    entry under ``shared_networks`` is ensured regardless of stack consumers.
+    Otherwise only networks that list ``spec.name`` as a consumer are touched.
+    """
     try:
         contract = _load_contract(contract_path)
     except OSError:
@@ -659,6 +665,9 @@ def ensure_shared_networks(
     networks = []
     for raw in network_values:
         if not isinstance(raw, Mapping):
+            continue
+        if all_networks:
+            networks.append(raw)
             continue
         consumers = raw.get("consumers", [])
         if isinstance(consumers, list) and spec.name in consumers:
@@ -677,7 +686,8 @@ def ensure_shared_networks(
         {
             "schema_version": "bioetl-docker-shared-networks-v1",
             "generated_at": datetime.now(UTC).isoformat(),
-            "stack": spec.name,
+            "stack": "all" if all_networks else spec.name,
+            "all_networks": all_networks,
             "ok": not findings,
             "findings": findings,
             "networks": observations,
@@ -1597,6 +1607,9 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
             "diagnose",
             "recover",
             "clean",
+            # Create missing contracted shared nets (owner label); no compose up.
+            # Full reinstall SSOT before bare compose or multi-stack bring-up.
+            "ensure-networks",
         ),
     )
     parser.add_argument("--stack", default="main")
@@ -1665,6 +1678,31 @@ def _dispatch_action(
             timeout=min(args.timeout, 60.0),
         )
         return result.returncode
+    if args.action == "ensure-networks":
+        # Full reinstall guarantee: ensure every contracted shared network
+        # (bioetl-monitoring + bioetl-runtime), not only the selected stack.
+        report_path = report_dir / "docker-runtime-all-networks.json"
+        ok, findings = ensure_shared_networks(
+            spec,
+            contract_path,
+            report_path,
+            runner=runner,
+            timeout=min(args.timeout, 30.0),
+            all_networks=True,
+        )
+        print(
+            json.dumps(
+                {
+                    "ok": ok,
+                    "action": "ensure-networks",
+                    "stack": "all",
+                    "report": str(report_path),
+                    "findings": findings,
+                },
+                sort_keys=True,
+            )
+        )
+        return 0 if ok else 3
     if args.action in {"start", "recover"}:
         return start_or_recover(
             spec,

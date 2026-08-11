@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 3.3.0
+Version: 3.4.0
 Status: active
 Class: internal (repo-only entrypoint; excluded from MkDocs)
 Owner: BioETL Team
@@ -65,6 +65,7 @@ docs/00-project/ai/prompts/
 | `prompt.architecture.review` | [library/architecture/review-assessment.md](library/architecture/review-assessment.md) | Architecture review (v2.2) |
 | `prompt.observability.dashboard-panel-audit` | [library/observability/dashboard-panel-audit.md](library/observability/dashboard-panel-audit.md) | Grafana panel audit (5 phases, v1.1) |
 | `prompt.observability.bi-dashboard-acceptance` | [library/observability/bi-dashboard-acceptance.md](library/observability/bi-dashboard-acceptance.md) | BI acceptance: visual / layout / data |
+| `prompt.observability.dashboard-audit-cycle` | [library/observability/dashboard-audit-cycle.md](library/observability/dashboard-audit-cycle.md) | Cyclic dashboard audit (N cycles, fail-closed) |
 
 ### Domain audit cards (nine-kit intake)
 
@@ -106,8 +107,9 @@ Artifacts → `reports/audit/<domain>/` or `reports/audit-runs/<run_id>/`.
 
 | Need | Card |
 | --- | --- |
-| Per-panel render/query → issues → fix | `prompt.observability.dashboard-panel-audit` |
-| Acceptance: a11y, layout story, data DQ | `prompt.observability.bi-dashboard-acceptance` |
+| **Cyclic** audit → issues → fix → re-verify | `prompt.observability.dashboard-audit-cycle` |
+| Per-panel render/query → issues → fix (one shot) | `prompt.observability.dashboard-panel-audit` |
+| Acceptance only: a11y, layout, data DQ | `prompt.observability.bi-dashboard-acceptance` |
 | Full BI matrices / multi-tool notes | archive `bi-dashboard-audit-kit-2026-08-11.md` |
 
 Root-level `grok-*.md` / `test_*.md` paths remain as **redirect stubs** for
@@ -126,6 +128,9 @@ python -m scripts.ai.prompts render prompt.observability.dashboard-panel-audit \
   --param SCOPE="grafana/dashboards" --param AUDIT_MODE=full
 python -m scripts.ai.prompts render prompt.observability.bi-dashboard-acceptance \
   --param SCOPE="grafana/dashboards" --param DEPTH=quick --param PLATFORM=grafana
+python -m scripts.ai.prompts render prompt.observability.dashboard-audit-cycle \
+  --param SCOPE="grafana/dashboards" --param CYCLE_COUNT=1 --param MODE=audit \
+  --param DEPTH=quick --param CONTOURS="panels,visual,layout,data"
 python -m scripts.ai.prompts render prompt.audit.docs-content \
   --param SCOPE="README.md docs/00-project" --param MODE=audit
 python -m scripts.ai.prompts render prompt.audit.github-actions \
