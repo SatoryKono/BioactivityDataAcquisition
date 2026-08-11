@@ -1253,16 +1253,7 @@
   "intentional_no_exception_contract": 85,
   "markerless_examples": [],
   "markerless_test_functions": 0,
-  "parse_errors": [
-    {
-      "error": "invalid decimal literal (tests/unit/scripts/test_pretest_guardrails_runtime.py, line 37)",
-      "path": "tests/unit/scripts/test_pretest_guardrails_runtime.py"
-    },
-    {
-      "error": "invalid decimal literal (tests/unit/scripts/qa/test_refresh_test_governance_baseline.py, line 107)",
-      "path": "tests/unit/scripts/qa/test_refresh_test_governance_baseline.py"
-    }
-  ],
+  "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
@@ -2224,16 +2215,7 @@
     },
     "markerless_examples": [],
     "markerless_test_functions": 0,
-    "parse_errors": [
-      {
-        "error": "invalid decimal literal (tests/unit/scripts/test_pretest_guardrails_runtime.py, line 37)",
-        "path": "tests/unit/scripts/test_pretest_guardrails_runtime.py"
-      },
-      {
-        "error": "invalid decimal literal (tests/unit/scripts/qa/test_refresh_test_governance_baseline.py, line 107)",
-        "path": "tests/unit/scripts/qa/test_refresh_test_governance_baseline.py"
-      }
-    ],
+    "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
@@ -2291,12 +2273,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2270,
-    "total_test_functions": 23962,
+    "total_test_functions": 23968,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "d06e30de1c85fe93205d14ac1dc10d40f2131d09fc223f5c7a55b7640361c037",
+  "source_tree_sha256": "43e584b633167b4556e775727fa5d1f50d9bc9f9c9eb9f640ffe3d3e465a5a8b",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 101,
@@ -2357,7 +2339,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2270,
-  "total_test_functions": 23962,
+  "total_test_functions": 23968,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
