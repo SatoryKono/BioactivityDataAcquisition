@@ -2,10 +2,10 @@
 
 # `chembl_activity` Pipeline Dataflow Passport
 
-Generated: **2026-08-10**
+Generated: **2026-08-11**
 Generator: **1.0.0**  
 IR schema: **1.0.0**  
-Effective config SHA256: `90b2b848882ce0d0681dd613c91724859a19ad23d2d82e43686e2054919a4204`  
+Effective config SHA256: `b3c38397a5f85b8858d8ddb2bb1cfa1f2f4e393c4ad583c24fca56638c2a81f1`  
 Effective loader: `scripts.docs.passports.source_facts.load_effective_pipeline_facts`
 
 This passport is generated from the resolved effective configuration and live schema contracts. It describes the current runtime projection; it does not widen or repair the pipeline contract.

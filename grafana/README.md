@@ -56,6 +56,9 @@ with
 `python scripts/ops/observability/grafana/generate_trust_validation_fixtures.py`
 and run the documented Windows capture matrix with
 `scripts/ops/observability/grafana/run_trust_fixture_closeup_matrix.ps1`.
+When an approved visual-baseline refresh is required, regenerate only the
+gitignored JSON-source evidence with
+`python scripts/ops/observability/refresh_visual_json_baseline.py`.
 The fixtures are validation inputs only; neither command changes the shipped
 dashboard or starts the optional monitoring stack. Exact states and selectors
 are documented in

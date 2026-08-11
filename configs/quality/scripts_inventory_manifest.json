@@ -1,22 +1,22 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-11T09:45:38.080752+00:00",
+  "generated_at": "2026-08-11T14:11:43.238497+00:00",
   "summary": {
-    "total_scripts": 590,
+    "total_scripts": 596,
     "status_counts": {
-      "active": 341,
-      "supporting": 245,
-      "temporary_diagnostic": 4
+      "active": 338,
+      "supporting": 251,
+      "temporary_diagnostic": 7
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 16,
       "ci": 81,
-      "docs": 254,
-      "other": 77,
-      "scripts": 489,
+      "docs": 255,
+      "other": 78,
+      "scripts": 493,
       "skills": 11,
-      "tests": 377
+      "tests": 380
     }
   },
   "scripts": [
@@ -2566,6 +2566,25 @@
       ]
     },
     {
+      "path": "scripts/ai/generate_project_domain_audit_workflow.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/00-project/ai/prompts/README.md",
+          "line": 179,
+          "source_group": "docs",
+          "text": ".\\.venv-win\\Scripts\\python.exe scripts\\ai\\generate_project_domain_audit_workflow.py"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the documented generator for the bounded Grok project-domain audit workflow; keep the tracked prompt library authoritative and remove the generator if the workflow is retired."
+    },
+    {
       "path": "scripts/ai/grok/install_skills.ps1",
       "type": "ps1",
       "status": "supporting",
@@ -2574,7 +2593,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/README.md",
-          "line": 99,
+          "line": 100,
           "source_group": "docs",
           "text": "- Install skills: `.\\scripts\\ai\\grok\\install_skills.ps1`"
         },
@@ -2616,7 +2635,7 @@
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 151,
+          "line": 157,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\grok\\install_skills.ps1"
         }
@@ -4910,53 +4929,53 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 33,
+      "reference_count": 35,
       "references": [
         {
           "path": "docs/00-project/ai/README.md",
-          "line": 100,
+          "line": 101,
           "source_group": "docs",
           "text": "- CLI: `python -m scripts.ai.prompts list|render|check`"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 121,
+          "line": 122,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts list"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 122,
+          "line": 123,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts show prompt.audit.grok-cycle"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 123,
+          "line": 124,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.session.grok-bootstrap \\"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 125,
+          "line": 126,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.audit.grok-cycle --param SCOPE=\"src/bioetl/domain\""
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 126,
+          "line": 127,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.closeout.grok --param SCOPE=\"issues: #NNNN\""
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 127,
+          "line": 128,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.observability.dashboard-panel-audit \\"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 129,
+          "line": 130,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.observability.bi-dashboard-acceptance \\"
         }
@@ -10686,7 +10705,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 43,
+      "reference_count": 45,
       "references": [
         {
           "path": ".github/ISSUES/DOC-AUDIT-003-Align-Windows-Pytest-Docs-With-Xdist-Policy.md",
@@ -10745,7 +10764,7 @@
       "agent_usage": [
         "py-test-bot"
       ],
-      "reference_count": 52,
+      "reference_count": 54,
       "references": [
         {
           "path": ".codex/skills/py-test-bot/SKILL.md",
@@ -14351,7 +14370,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -14364,6 +14383,18 @@
           "line": 184,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_dashboard_panel_audit_matrix\""
+        },
+        {
+          "path": "scripts/temp/panels_static_audit_cycle2.py",
+          "line": 16,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa import report_dashboard_panel_audit_matrix as matrix"
+        },
+        {
+          "path": "scripts/temp/panels_static_audit_cycle2.py",
+          "line": 409,
+          "source_group": "scripts",
+          "text": "\"scripts/engineering/qa/report_dashboard_panel_audit_matrix.py:EXPECTED_PANEL_COUNT\","
         },
         {
           "path": "tests/integration/test_dashboard_panel_audit_matrix_contract.py",
@@ -14631,7 +14662,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 20,
+      "reference_count": 21,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -15126,7 +15157,7 @@
         },
         {
           "path": "tests/unit/scripts/qa/test_report_provider_contract_drift.py",
-          "line": 18,
+          "line": 20,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import report_provider_contract_drift as report"
         }
@@ -15510,7 +15541,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 296,
+          "line": 325,
           "source_group": "tests",
           "text": "Path(\"scripts/engineering/qa/run_observability_closure_campaign.py\"),"
         },
@@ -17182,6 +17213,25 @@
       "next_step": "Retain only as the documented matrix builder for the bounded 2026-08 CodeRabbit campaign; remove it after campaign closeout or consolidate it into a canonical quality command if the workflow becomes recurring."
     },
     {
+      "path": "scripts/ops/coderabbit/normalize_findings.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/coderabbit/README.md",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "| `normalize_findings.py` | Normalize bounded campaign logs into reproducible finding and de-duplication ledgers |"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the documented normalizer for the bounded 2026-08 CodeRabbit campaign; remove it after campaign closeout or consolidate it into a canonical quality command if the workflow becomes recurring."
+    },
+    {
       "path": "scripts/ops/coderabbit/run_leaves.py",
       "type": "py",
       "status": "supporting",
@@ -18400,13 +18450,13 @@
     {
       "path": "scripts/ops/observability/check_prometheus_rules_health.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 3,
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 153,
+          "line": 154,
           "source_group": "docs",
           "text": "python scripts/ops/observability/check_prometheus_rules_health.py --json"
         },
@@ -18422,7 +18472,11 @@
           "source_group": "tests",
           "text": "from scripts.ops.observability import check_prometheus_rules_health as mod"
         }
-      ]
+      ],
+      "owner": "@bioetl-observability",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Prometheus rule-health implementation used by validate_live_observability.py; keep the canonical operator workflow routed through the aggregate live validator."
     },
     {
       "path": "scripts/ops/observability/check_published_observability_endpoints.py",
@@ -18756,7 +18810,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 294,
+          "line": 323,
           "source_group": "tests",
           "text": "Path(\"scripts/ops/observability/grafana/audit_live_grafana_panels.py\"),"
         },
@@ -18777,7 +18831,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 162,
+          "line": 165,
           "source_group": "other",
           "text": "> `bash scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh`."
         }
@@ -18820,7 +18874,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 398,
+          "line": 427,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py\""
         },
@@ -18925,13 +18979,37 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 5,
       "references": [
         {
           "path": "grafana/README.md",
           "line": 56,
           "source_group": "other",
           "text": "`python scripts/ops/observability/grafana/generate_trust_validation_fixtures.py`"
+        },
+        {
+          "path": "tests/architecture/test_observability_dashboard_tooling.py",
+          "line": 99,
+          "source_group": "tests",
+          "text": "\"scripts/ops/observability/grafana/generate_trust_validation_fixtures.py\""
+        },
+        {
+          "path": "tests/architecture/test_observability_dashboard_tooling.py",
+          "line": 115,
+          "source_group": "tests",
+          "text": "\"generate_trust_validation_fixtures.py must not call write_text \""
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
+          "line": 176,
+          "source_group": "tests",
+          "text": "\"scripts/ops/observability/grafana/generate_trust_validation_fixtures.py\""
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
+          "line": 191,
+          "source_group": "tests",
+          "text": "\"generate_trust_validation_fixtures.py must not call write_text; \""
         }
       ],
       "owner": "@bioetl-platform",
@@ -18948,7 +19026,7 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 350,
+          "line": 351,
           "source_group": "docs",
           "text": "# .\\scripts\\ops\\observability\\grafana\\recover_renderer.ps1"
         },
@@ -18967,19 +19045,19 @@
     {
       "path": "scripts/ops/observability/grafana/recover_renderer.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 6,
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 346,
+          "line": 347,
           "source_group": "docs",
           "text": "python scripts/ops/observability/grafana/recover_renderer.py"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 352,
+          "line": 353,
           "source_group": "docs",
           "text": "3. Check only: `python scripts/ops/observability/grafana/recover_renderer.py --check-only`"
         },
@@ -19007,7 +19085,11 @@
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana import recover_renderer as rr"
         }
-      ]
+      ],
+      "owner": "@bioetl-observability",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the renderer-recovery implementation behind the platform wrappers and runtime manager; keep it supporting unless promoted to a governed standalone operator command."
     },
     {
       "path": "scripts/ops/observability/grafana/recover_renderer.sh",
@@ -19037,7 +19119,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 164,
+          "line": 167,
           "source_group": "other",
           "text": "> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1`."
         }
@@ -19159,7 +19241,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 295,
+          "line": 324,
           "source_group": "tests",
           "text": "Path(\"scripts/ops/observability/grafana/rerender_grafana_screenshots.py\"),"
         }
@@ -19217,7 +19299,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 293,
+          "line": 322,
           "source_group": "tests",
           "text": "Path(\"scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py\"),"
         },
@@ -19284,7 +19366,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/_capture_trust_closeups.cjs",
@@ -19297,6 +19379,12 @@
           "line": 68,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/serve_trust_validation_fixtures.py\","
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
+          "line": 14,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana.serve_trust_validation_fixtures import ("
         }
       ],
       "owner": "@bioetl-platform",
@@ -19313,7 +19401,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 148,
+          "line": 151,
           "source_group": "other",
           "text": "> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1`."
         },
@@ -19356,7 +19444,7 @@
         },
         {
           "path": "grafana/README.md",
-          "line": 139,
+          "line": 142,
           "source_group": "other",
           "text": "> `bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh`."
         },
@@ -19374,7 +19462,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 395,
+          "line": 424,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh\""
         },
@@ -19416,6 +19504,25 @@
       "next_step": "Retain as the Windows-side compatibility launcher for the canonical scripts.ops ensure-quarantine-explorer command while Grafana local audit flows may still need a direct PowerShell entrypoint; retire it once Windows-specific observability launch wrappers are fully consolidated."
     },
     {
+      "path": "scripts/ops/observability/refresh_visual_json_baseline.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "grafana/README.md",
+          "line": 61,
+          "source_group": "other",
+          "text": "`python scripts/ops/observability/refresh_visual_json_baseline.py`."
+        }
+      ],
+      "owner": "@bioetl-observability",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the bounded #8576 JSON-source evidence refresher; remove it after visual-baseline closeout or consolidate it into the canonical dashboard audit command."
+    },
+    {
       "path": "scripts/ops/observability/start_read_only_audit_stack.py",
       "type": "py",
       "status": "active",
@@ -19433,17 +19540,39 @@
     {
       "path": "scripts/ops/observability/trust_validation_fixture_materialization.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/generate_trust_validation_fixtures.py",
           "line": 33,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.trust_validation_fixture_materialization import ("
+        },
+        {
+          "path": "tests/architecture/test_observability_dashboard_tooling.py",
+          "line": 96,
+          "source_group": "tests",
+          "text": "\"scripts/ops/observability/trust_validation_fixture_materialization.py\""
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
+          "line": 17,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.trust_validation_fixture_materialization import ("
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
+          "line": 173,
+          "source_group": "tests",
+          "text": "\"scripts/ops/observability/trust_validation_fixture_materialization.py\""
         }
-      ]
+      ],
+      "owner": "@bioetl-observability",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the fixture-materialization implementation imported by the bounded Trust validation generator; keep it supporting and route operator execution through generate_trust_validation_fixtures.py."
     },
     {
       "path": "scripts/ops/observability/validate_emitter_contracts.py",
@@ -19485,7 +19614,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 155,
+          "line": 156,
           "source_group": "docs",
           "text": "python scripts/ops/observability/validate_live_observability.py"
         },
@@ -19669,13 +19798,13 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 281,
+          "line": 282,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\apply-docker-stable-mcp.ps1 -Profile stable -WithNeo4j"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 290,
+          "line": 291,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\apply-docker-stable-mcp.ps1 -Profile shared -TransportMode shared -WithSharedMcp -SkipEnsureStable"
         }
@@ -19694,7 +19823,7 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 67,
+          "line": 68,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/check_network_preconditions.py --stack all --ensure"
         },
@@ -19749,7 +19878,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 282,
+          "line": 283,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\cleanup-mcp-orphans.ps1 -IncludeGatewayHint"
         },
@@ -19823,10 +19952,10 @@
           "text": "PREFLIGHT_PATH = ROOT / \"scripts/ops/runtime/docker/docker_runtime_preflight.py\""
         },
         {
-          "path": "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
-          "line": 522,
+          "path": "tests/unit/repo_backed/scripts/ops/docker/test_preflight_promql_gate.py",
+          "line": 9,
           "source_group": "tests",
-          "text": "if \"docker_runtime_preflight.py\" in joined:"
+          "text": "from scripts.ops.runtime.docker import docker_runtime_preflight as preflight"
         }
       ]
     },
@@ -19888,19 +20017,19 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 73,
+          "line": 74,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\ensure-stable.ps1 -WithNeo4j"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 272,
+          "line": 273,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\ensure-stable.ps1 -WithNeo4j"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 275,
+          "line": 276,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\ensure-stable.ps1 -RestartWsl -WithNeo4j"
         },
@@ -19933,13 +20062,13 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 278,
+          "line": 279,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\harden-desktop-host.ps1 -RegisterWatchdog"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 297,
+          "line": 298,
           "source_group": "docs",
           "text": "`harden-desktop-host.ps1` sets Resource Saver effectively off"
         },
@@ -20028,7 +20157,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 285,
+          "line": 286,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\reset-mcp-host-sessions.ps1"
         }
@@ -20077,7 +20206,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 255,
+          "line": 256,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\restart-docker.ps1 -TimeoutSeconds 180"
         },
@@ -20195,7 +20324,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 176,
+          "line": 177,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay"
         },
@@ -20321,7 +20450,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 292,
+          "line": 293,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\apply-shared-to-grok.ps1 -DisableDockerGateways"
         },
@@ -20376,7 +20505,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 291,
+          "line": 292,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\health-shared.ps1"
         },
@@ -20476,7 +20605,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 289,
+          "line": 290,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\start-shared.ps1"
         },
@@ -22097,6 +22226,50 @@
       "next_step": "Retain only as the legacy root shell launcher while canonical Docker helper lifecycle management moves to scripts/ops/docker-setup.sh; keep it supporting and do not expand its fixed-delay startup behavior."
     },
     {
+      "path": "scripts/temp/layout_contour_audit_cycle2.py",
+      "type": "py",
+      "status": "temporary_diagnostic",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/temp/panels_contour_cycle2_notes.md",
+          "line": 56,
+          "source_group": "scripts",
+          "text": "`scripts/temp/layout_contour_audit_cycle2.py` is the companion layout-contour"
+        }
+      ],
+      "owner": "@bioetl-observability",
+      "lifecycle_decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the cycle-2 dashboard layout diagnostic while its audit evidence is reviewed; remove it after the campaign closes or promote reusable checks into canonical dashboard tooling."
+    },
+    {
+      "path": "scripts/temp/panels_static_audit_cycle2.py",
+      "type": "py",
+      "status": "temporary_diagnostic",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/temp/panels_contour_cycle2_notes.md",
+          "line": 53,
+          "source_group": "scripts",
+          "text": "`scripts/temp/panels_static_audit_cycle2.py` prepared for local re-run when Python available:"
+        },
+        {
+          "path": "scripts/temp/panels_contour_cycle2_notes.md",
+          "line": 54,
+          "source_group": "scripts",
+          "text": "`.\\.venv-win\\Scripts\\python.exe scripts\\temp\\panels_static_audit_cycle2.py reports\\audit\\dashboard-cycle\\20260811T180000Z-c205349-dash\\cycle-2`"
+        }
+      ],
+      "owner": "@bioetl-observability",
+      "lifecycle_decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the documented cycle-2 static panel diagnostic; remove it after the campaign closes or promote reusable checks into canonical dashboard audit tooling."
+    },
+    {
       "path": "scripts/temp/report_basedpyright_error_snapshot.py",
       "type": "py",
       "status": "temporary_diagnostic",
@@ -22219,6 +22392,25 @@
       "lifecycle_decision": "temporary_diagnostic",
       "review_by": "2026-09-30",
       "next_step": "Retain as a bounded basedpyright warning-snapshot utility while the typing debt campaign needs reproducible shrink-only evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
+    },
+    {
+      "path": "scripts/temp/resolve_coderabbit_merge_conflicts.py",
+      "type": "py",
+      "status": "temporary_diagnostic",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/coderabbit/README.md",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "| `scripts/temp/resolve_coderabbit_merge_conflicts.py` | Bounded merge-recovery helper for campaign artifacts |"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as evidence of the bounded 2026-08 CodeRabbit report merge recovery; remove it after the campaign closeout because it is not a reusable merge policy."
     },
     {
       "path": "scripts/test_selection_strategy.py",

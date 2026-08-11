@@ -768,7 +768,7 @@
     "strict_validation": false
   },
   "effective_config_loader": "scripts.docs.passports.source_facts.load_effective_pipeline_facts",
-  "effective_config_sha256": "90b2b848882ce0d0681dd613c91724859a19ad23d2d82e43686e2054919a4204",
+  "effective_config_sha256": "b3c38397a5f85b8858d8ddb2bb1cfa1f2f4e393c4ad583c24fca56638c2a81f1",
   "entity": "activity",
   "extraction_criteria": [
     {
@@ -853,7 +853,7 @@
       "value": false
     }
   ],
-  "generated_date": "2026-08-10",
+  "generated_date": "2026-08-11",
   "generator_version": "1.0.0",
   "gold": {
     "contract_field_count": 72,
