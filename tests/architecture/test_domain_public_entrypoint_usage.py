@@ -51,6 +51,12 @@ ALLOWED_CONFIG_TEST_FILES = frozenset(
         / "domain"
         / "composite"
         / "test_composite_config_edge_cases.py",
+        ROOT
+        / "tests"
+        / "unit"
+        / "domain"
+        / "composite"
+        / "_config_internal_test_support.py",
     }
 )
 ALLOWED_VALUE_OBJECT_TEST_FILES = frozenset(
@@ -126,7 +132,7 @@ def test_split_composite_config_modules_are_confined_to_domain_composite(
 
 
 @pytest.mark.architecture
-def test_split_composite_config_modules_are_only_used_by_facade_test(
+def test_split_composite_config_modules_are_only_used_by_dedicated_tests(
     test_ast_cache: dict[Path, ast.Module],
 ) -> None:
     """Split config internals must stay confined to dedicated composite-config tests."""
