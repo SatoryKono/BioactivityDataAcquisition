@@ -421,7 +421,9 @@ def test_compose_up_start_includes_optional_but_wait_is_required_only() -> None:
         expected_images={},
         optional_services=("renderer",),
     )
-    start = runtime_manager._compose_up_start_args(mon, attempts=1, force_recreate=False)
+    start = runtime_manager._compose_up_start_args(
+        mon, attempts=1, force_recreate=False
+    )
     assert "renderer" in start
     assert "prometheus" in start
     assert "--wait" not in start
@@ -833,7 +835,8 @@ def test_recovery_waits_for_daemon_after_transient_socket_failure(
     )
 
     assert result == 0
-    assert up_attempts == 2
+    # One failed start, then the recovered two-phase start + required-service wait.
+    assert up_attempts == 3
     assert info_probes >= 1
     assert not list(tmp_path.glob("docker-incident-*.json"))
 
