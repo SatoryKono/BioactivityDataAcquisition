@@ -1,6 +1,6 @@
 ---
 id: prompt.fragment.reports-output
-version: 1.3.0
+version: 1.4.0
 status: active
 class: fragment
 owner: BioETL Team
@@ -28,6 +28,8 @@ summary: Audit artifacts under reports/ only; no root audit/ or .audit-runs/
   - `reports/audit/grafana-panels/` — engineering panel loop outputs when used
   - `reports/audit/dashboard-cycle/<run_id>/` — cyclic dashboard audit
     (`prompt.observability.dashboard-audit-cycle`)
+  - `reports/audit/test-cycle/<run_id>/` — cyclic testing
+    (`prompt.tests.cycle`)
 
 ### Orchestrated multi-iteration runs
 

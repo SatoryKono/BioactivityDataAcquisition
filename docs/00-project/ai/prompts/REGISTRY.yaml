@@ -142,6 +142,13 @@ entries:
     tags: [tests, debug, operator]
     summary: Run → fix → retest until green or blocked
 
+  - id: prompt.tests.cycle
+    path: library/tests/test-cycle.md
+    status: active
+    class: operator-paste
+    tags: [tests, cycle, pytest, quality, operator]
+    summary: Cyclic testing — baseline run, triage, fix, retest, delta per cycle
+
   - id: prompt.docs.ai-audit-planning
     path: library/docs/ai-audit-planning.md
     status: active
