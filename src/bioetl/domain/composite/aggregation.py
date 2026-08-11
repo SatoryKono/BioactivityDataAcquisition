@@ -144,8 +144,22 @@ def _try_comparison_operator(text: str, operator: str) -> bool:
         return False
     left, right = text.split(operator, 1)
     _require_filter_field(left.strip())
-    if not right.strip():
+    rhs = right.strip()
+    if not rhs:
         raise ValueError("aggregation filter_condition comparison requires a value")
+    # Reject chained comparisons / boolean keywords on the RHS unless quoted.
+    quoted = (rhs.startswith("'") and rhs.endswith("'")) or (
+        rhs.startswith('"') and rhs.endswith('"')
+    )
+    if not quoted:
+        upper_rhs = f" {rhs.upper()} "
+        if any(
+            token in upper_rhs for token in (" == ", " != ", " AND ", " OR ")
+        ) or any(token in rhs.upper() for token in (" IS NULL", " IS NOT NULL")):
+            raise ValueError(
+                "aggregation filter_condition comparison value must not "
+                "contain additional operators or boolean keywords"
+            )
     return True
 
 
@@ -243,12 +257,15 @@ class AggregationConfig:
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
-        if isinstance(self.fields, list | tuple):
-            converted = tuple(
-                AggregationFieldSpec(**f) if isinstance(f, dict) else f
-                for f in self.fields
+        if isinstance(self.fields, str) or not isinstance(self.fields, list | tuple):
+            raise ValueError(
+                "aggregation.fields must be a sequence of AggregationFieldSpec "
+                f"entries, got {type(self.fields).__name__}"
             )
-            object.__setattr__(self, "fields", converted)
+        converted = tuple(
+            AggregationFieldSpec(**f) if isinstance(f, dict) else f for f in self.fields
+        )
+        object.__setattr__(self, "fields", converted)
         object.__setattr__(
             self,
             "order_by",
@@ -261,6 +278,12 @@ class AggregationConfig:
         require_non_empty(self.group_by, "aggregation group_by")
         if not self.fields:
             raise ValueError("aggregation.fields cannot be empty")
+        for index, entry in enumerate(self.fields):
+            if not isinstance(entry, AggregationFieldSpec):
+                raise ValueError(
+                    "aggregation.fields entries must be AggregationFieldSpec, "
+                    f"got {type(entry).__name__} at index {index}"
+                )
 
 
 __all__ = [

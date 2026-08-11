@@ -359,6 +359,29 @@ class TestPipelineRunLifecycleMixin:
         assert started_run.status == PipelineRunState.FAILED
         assert started_run.ended_at == _ts(5)
 
+    def test_record_stage_failure_replaces_running_stage_entry(
+        self, started_run: PipelineRun
+    ) -> None:
+        """record_stage_failure must replace RUNNING, not append (#8645)."""
+        started_run.record_stage_start("silver", started_at=_ts(0))
+        assert len(started_run.stages) == 1
+        assert started_run.stages[0].status == StageStatus.RUNNING
+
+        started_run.record_stage_failure(
+            "silver",
+            "boom",
+            "RuntimeError",
+            started_at=_ts(0),
+            completed_at=_ts(5),
+        )
+
+        assert len(started_run.stages) == 1
+        stage = started_run.stages[0]
+        assert stage.stage == "silver"
+        assert stage.status == StageStatus.FAILED
+        assert stage.error == "boom"
+        assert started_run.status == PipelineRunState.FAILED
+
     def test_record_stage_failure_with_exception_instance(
         self, started_run: PipelineRun
     ):
