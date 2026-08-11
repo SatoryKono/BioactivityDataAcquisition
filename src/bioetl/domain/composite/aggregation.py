@@ -147,27 +147,22 @@ def _try_comparison_operator(text: str, operator: str) -> bool:
     rhs = right.strip()
     if not rhs:
         raise ValueError("aggregation filter_condition comparison requires a value")
-    # Reject chained comparisons / boolean keywords on the RHS.
-    upper_rhs = f" {rhs.upper()} "
-    for banned in (" == ", " != ", " AND ", " OR ", " IS NULL", " IS NOT NULL"):
-        if banned in upper_rhs or banned.strip() in upper_rhs:
-            # Allow the token only if it is the whole RHS literal string content
-            # wrapped in quotes; otherwise reject nested operators.
-            if not (
-                (rhs.startswith("'") and rhs.endswith("'"))
-                or (rhs.startswith('"') and rhs.endswith('"'))
-            ):
-                if any(
-                    token in upper_rhs
-                    for token in (" == ", " != ", " AND ", " OR ")
-                ) or any(
-                    token in rhs.upper()
-                    for token in (" IS NULL", " IS NOT NULL")
-                ):
-                    raise ValueError(
-                        "aggregation filter_condition comparison value must not "
-                        "contain additional operators or boolean keywords"
-                    )
+    # Reject chained comparisons / boolean keywords on the RHS unless quoted.
+    quoted = (rhs.startswith("'") and rhs.endswith("'")) or (
+        rhs.startswith('"') and rhs.endswith('"')
+    )
+    if not quoted:
+        upper_rhs = f" {rhs.upper()} "
+        if any(
+            token in upper_rhs
+            for token in (" == ", " != ", " AND ", " OR ")
+        ) or any(
+            token in rhs.upper() for token in (" IS NULL", " IS NOT NULL")
+        ):
+            raise ValueError(
+                "aggregation filter_condition comparison value must not "
+                "contain additional operators or boolean keywords"
+            )
     return True
 
 
