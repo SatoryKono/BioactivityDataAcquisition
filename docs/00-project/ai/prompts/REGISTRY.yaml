@@ -170,6 +170,13 @@ entries:
     tags: [observability, dashboard, bi, accessibility, acceptance, operator]
     summary: BI dashboard acceptance — visual, layout, data contours with measurable checks
 
+  - id: prompt.observability.dashboard-audit-cycle
+    path: library/observability/dashboard-audit-cycle.md
+    status: active
+    class: operator-paste
+    tags: [observability, dashboard, grafana, audit, cycle, operator]
+    summary: Cyclic Grafana/BI dashboard audit — inventory, acceptance, panels, fix, re-verify
+
   # --- domain audit cards (generic nine-kit intake 2026-08) ---
   - id: prompt.audit.docs-content
     path: library/audit/docs-content.md

@@ -1,6 +1,6 @@
 ---
 id: prompt.fragment.reports-output
-version: 1.2.0
+version: 1.3.0
 status: active
 class: fragment
 owner: BioETL Team
@@ -26,6 +26,8 @@ summary: Audit artifacts under reports/ only; no root audit/ or .audit-runs/
   - `reports/audit/bi-dashboard/` — acceptance: `report.md`, `checks.json`,
     `findings.json` (optional subdirs `visual/`, `layout/`, `data/`)
   - `reports/audit/grafana-panels/` — engineering panel loop outputs when used
+  - `reports/audit/dashboard-cycle/<run_id>/` — cyclic dashboard audit
+    (`prompt.observability.dashboard-audit-cycle`)
 
 ### Orchestrated multi-iteration runs
 

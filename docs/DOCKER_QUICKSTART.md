@@ -52,16 +52,42 @@ if missing (with owner label). If they already exist, Compose reuses them.
 | Owner label on shared nets | reject foreign networks | compose labels / `runtime_manager` / `--ensure` |
 | Container `bioetl` on `bioetl-monitoring` | scrape + Ops HTTP | start **main** so bioetl joins monitoring |
 
-```bash
-# Optional explicit ensure + check:
-python scripts/ops/runtime/docker/check_network_preconditions.py --stack all --ensure
+### Full reinstall / network wipe guarantee
 
-# Prefer full lifecycle:
-python scripts/ops/runtime/docker/runtime_manager.py start --stack monitoring
+After Docker Desktop reinstall, `docker network prune`, or a clean engine, shared
+nets may be **absent**. Do **not** rely on “they already exist on this machine”.
+
+**SSOT ensure (creates missing nets with `com.bioetl.owner`, never deletes):**
+
+```bash
+# Preferred — all contracted shared networks (monitoring + runtime):
+python scripts/ops/runtime/docker/runtime_manager.py ensure-networks --stack main
+
+# Equivalent checker (read-only without --ensure):
+python scripts/ops/runtime/docker/check_network_preconditions.py --stack all --ensure
 ```
 
-Raw `docker compose -f docker-compose.monitoring.yml up` now **starts services**
-even when `bioetl-monitoring` was absent (network is created on up).
+**Windows one-shot after wipe** (engine harden + ensure nets + main):
+
+```powershell
+.\scripts\ops\runtime\docker\ensure-stable.ps1 -WithNeo4j
+```
+
+`ensure-stable` calls `runtime_manager ensure-networks` first; if Python is
+unavailable it falls back to `docker network create` with the same owner label
+and **exits non-zero** if create fails.
+
+Then start stacks as usual:
+
+```bash
+python scripts/ops/runtime/docker/runtime_manager.py start --stack main --timeout 180
+# optional:
+python scripts/ops/runtime/docker/runtime_manager.py start --stack monitoring --timeout 180
+```
+
+Raw `docker compose -f docker-compose.monitoring.yml up` also **creates**
+`bioetl-monitoring` if missing (named network, not external). Prefer
+`ensure-networks` or `runtime_manager start` so owner labels stay contracted.
 
 ## Main stack (default)
 

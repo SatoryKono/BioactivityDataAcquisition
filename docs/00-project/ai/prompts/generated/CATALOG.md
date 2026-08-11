@@ -20,6 +20,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.architecture.review` | `library/architecture/review-assessment.md` | Architecture review v2.3 (hexagonal/C4/arc42) with findings.json outputs |
 | `prompt.observability.dashboard-panel-audit` | `library/observability/dashboard-panel-audit.md` | Five-phase Grafana panel audit — render, GH issues, fix, closeout (v1.1) |
 | `prompt.observability.bi-dashboard-acceptance` | `library/observability/bi-dashboard-acceptance.md` | BI dashboard acceptance — visual, layout, data contours with measurable checks |
+| `prompt.observability.dashboard-audit-cycle` | `library/observability/dashboard-audit-cycle.md` | Cyclic Grafana/BI dashboard audit — inventory, acceptance, panels, fix, re-verify |
 | `prompt.audit.docs-content` | `library/audit/docs-content.md` | Evidence-based audit of project documentation content and drift |
 | `prompt.audit.tests-system` | `library/audit/tests-system.md` | Audit test system as regression detection, not coverage vanity |
 | `prompt.audit.tech-debt` | `library/audit/tech-debt.md` | Evidence-based technical debt register with risk-ordered paydown |
@@ -74,6 +75,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.architecture.review` | operator-paste | active | `library/architecture/review-assessment.md` |
 | `prompt.observability.dashboard-panel-audit` | operator-paste | active | `library/observability/dashboard-panel-audit.md` |
 | `prompt.observability.bi-dashboard-acceptance` | operator-paste | active | `library/observability/bi-dashboard-acceptance.md` |
+| `prompt.observability.dashboard-audit-cycle` | operator-paste | active | `library/observability/dashboard-audit-cycle.md` |
 | `prompt.audit.docs-content` | operator-paste | active | `library/audit/docs-content.md` |
 | `prompt.audit.tests-system` | operator-paste | active | `library/audit/tests-system.md` |
 | `prompt.audit.tech-debt` | operator-paste | active | `library/audit/tech-debt.md` |

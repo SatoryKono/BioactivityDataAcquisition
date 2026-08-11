@@ -12,7 +12,8 @@
     1) soft-fails / warns when free RAM is critically low
     2) optional WSL restart to reclaim vmmem
     3) starts Docker Desktop and requires dual docker info stability
-    4) ensures external networks
+    4) ensures shared networks (bioetl-monitoring + bioetl-runtime) with owner label
+       — required after full Docker reinstall / network wipe
     5) stops non-BioETL leftover containers (unless -KeepForeignContainers)
     6) starts ONLY main with --no-build; optional neo4j with retry
     7) never starts monitoring unless -WithMonitoring
@@ -176,7 +177,9 @@ if (-not $ready) {
 
 Ensure-Env
 # Canonical network ensure (owner label matches runtime_manager / compose labels).
-# Guarantees bioetl-monitoring + bioetl-runtime exist after full reinstall / wipe.
+# Full reinstall SSOT: create missing bioetl-monitoring + bioetl-runtime before
+# any compose up. Prefer runtime_manager ensure-networks; fall back to checker
+# then raw docker network create with the same owner label.
 Write-Host 'Ensuring contracted Docker networks (bioetl-monitoring, bioetl-runtime)...'
 $py = $null
 if (Test-Path '.\.venv-win\Scripts\python.exe') {
@@ -184,20 +187,39 @@ if (Test-Path '.\.venv-win\Scripts\python.exe') {
 } elseif (Get-Command python -ErrorAction SilentlyContinue) {
     $py = (Get-Command python).Source
 }
+$networkEnsureOk = $false
 if ($py) {
-    & $py scripts/ops/runtime/docker/check_network_preconditions.py --stack all --ensure
-    if ($LASTEXITCODE -ne 0) {
-        Write-Warning "network ensure reported issues (exit=$LASTEXITCODE); continuing best-effort"
+    & $py scripts/ops/runtime/docker/runtime_manager.py ensure-networks --stack main --timeout 30
+    if ($LASTEXITCODE -eq 0) {
+        $networkEnsureOk = $true
+    } else {
+        Write-Warning "runtime_manager ensure-networks exit=$LASTEXITCODE; trying check_network_preconditions --ensure"
+        & $py scripts/ops/runtime/docker/check_network_preconditions.py --stack all --ensure
+        if ($LASTEXITCODE -eq 0) {
+            $networkEnsureOk = $true
+        }
     }
-} else {
+}
+if (-not $networkEnsureOk) {
     $owner = 'scripts/ops/runtime/docker/runtime_manager.py'
+    $createFailed = $false
     foreach ($net in @('bioetl-runtime', 'bioetl-monitoring')) {
         docker network inspect $net 2>$null | Out-Null
         if ($LASTEXITCODE -ne 0) {
             docker network create --label "com.bioetl.owner=$owner" $net | Out-Null
-            Write-Host "created network $net (owner=$owner)"
+            if ($LASTEXITCODE -ne 0) {
+                Write-Error "failed to create network $net (owner=$owner)"
+                $createFailed = $true
+            } else {
+                Write-Host "created network $net (owner=$owner)"
+            }
         }
     }
+    if ($createFailed) {
+        Write-Error 'Network ensure failed after full reinstall path. Fix Docker engine, then re-run ensure-stable or: python scripts/ops/runtime/docker/runtime_manager.py ensure-networks --stack main'
+        exit 1
+    }
+    $networkEnsureOk = $true
 }
 
 if (-not $KeepForeignContainers) {
