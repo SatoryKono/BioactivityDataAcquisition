@@ -149,10 +149,6 @@ class RuntimeConfig:
                 self.start_offset is not None and self.start_offset < 0,
                 f"start_offset must be non-negative or None, got {self.start_offset}",
             ),
-            (
-                self.lock_ttl is not None and self.lock_ttl <= 0,
-                f"lock_ttl must be positive or None, got {self.lock_ttl}",
-            ),
         ]
         for condition, message in validations:
             if condition:

@@ -144,6 +144,10 @@ class DQConfig:
                 "key_nullability_rules",
             ),
         )
+        self._normalize_disposition_overrides()
+
+    def _normalize_disposition_overrides(self) -> None:
+        """Normalize disposition overrides to immutable item tuples."""
         # Normalize disposition_overrides to an immutable tuple of items.
         raw_overrides = self.disposition_overrides
         if isinstance(raw_overrides, dict):

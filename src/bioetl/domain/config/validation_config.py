@@ -75,10 +75,6 @@ class ValidationConfig:
                 raise ValueError(f"{name} must be finite")
         validations = [
             (
-                self.min_publication_year <= 0 or self.max_publication_year <= 0,
-                "publication year bounds must be positive",
-            ),
-            (
                 self.min_publication_year >= self.max_publication_year,
                 "min_publication_year must be less than max_publication_year",
             ),
@@ -93,16 +89,6 @@ class ValidationConfig:
             (
                 self.molecular_weight_precision < 0,
                 "molecular_weight_precision must be non-negative",
-            ),
-            (
-                getattr(self, "max_pmid", 1) is not None
-                and getattr(self, "max_pmid", 1) <= 0,
-                "max_pmid must be positive",
-            ),
-            (
-                getattr(self, "max_taxonomy_id", 1) is not None
-                and getattr(self, "max_taxonomy_id", 1) <= 0,
-                "max_taxonomy_id must be positive",
             ),
         ]
         for condition, message in validations:
