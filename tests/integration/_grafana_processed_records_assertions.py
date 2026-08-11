@@ -25,6 +25,7 @@ def assert_processed_records_field_overrides(
     }
     assert value_properties["custom.align"] == "right"
     assert value_properties["custom.width"] == 70
+    assert value_properties["noValue"] == "UNKNOWN"
     assert value_properties["custom.cellOptions"] == {"type": "color-text"}
     assert value_properties.get("mappings", []) == []
     assert "color" not in value_properties
@@ -42,6 +43,7 @@ def assert_processed_records_field_overrides(
         for prop in percentage_overrides[0].get("properties", [])
     }
     assert percentage_properties["custom.align"] == "right"
+    assert percentage_properties["noValue"] == "UNKNOWN"
     assert percentage_properties["custom.cellOptions"] == {"type": "color-text"}
     assert percentage_properties.get("mappings", []) == []
     assert "color" not in percentage_properties
