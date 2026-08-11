@@ -300,7 +300,7 @@
       "exit_code": 1,
       "log": "reports/quality/coderabbit/20260811/review_A_S01-domain-normalization.log",
       "bytes": 433,
-      "elapsed_s": 7.1,
+      "elapsed_s": 7.7,
       "command": [
         "/home/fedor/.local/bin/coderabbit",
         "review",
@@ -324,7 +324,7 @@
       "exit_code": 1,
       "log": "reports/quality/coderabbit/20260811/review_A_S01-domain-ports.log",
       "bytes": 425,
-      "elapsed_s": 7.9,
+      "elapsed_s": 5.5,
       "command": [
         "/home/fedor/.local/bin/coderabbit",
         "review",
@@ -348,7 +348,7 @@
       "exit_code": 1,
       "log": "reports/quality/coderabbit/20260811/review_A_S01-domain-registry.log",
       "bytes": 428,
-      "elapsed_s": 5.8,
+      "elapsed_s": 5.2,
       "command": [
         "/home/fedor/.local/bin/coderabbit",
         "review",
@@ -372,7 +372,7 @@
       "exit_code": 1,
       "log": "reports/quality/coderabbit/20260811/review_A_S01-domain-residual-root.log",
       "bytes": 433,
-      "elapsed_s": 5.2,
+      "elapsed_s": 4.8,
       "command": [
         "/home/fedor/.local/bin/coderabbit",
         "review",
@@ -396,7 +396,7 @@
       "exit_code": 1,
       "log": "reports/quality/coderabbit/20260811/review_A_S01-domain-run_reports.log",
       "bytes": 431,
-      "elapsed_s": 6.0,
+      "elapsed_s": 4.6,
       "command": [
         "/home/fedor/.local/bin/coderabbit",
         "review",
@@ -420,7 +420,7 @@
       "exit_code": 1,
       "log": "reports/quality/coderabbit/20260811/review_A_S01-domain-schemas.log",
       "bytes": 427,
-      "elapsed_s": 7.3,
+      "elapsed_s": 5.4,
       "command": [
         "/home/fedor/.local/bin/coderabbit",
         "review",
@@ -444,7 +444,7 @@
       "exit_code": 1,
       "log": "reports/quality/coderabbit/20260811/review_A_S01-domain-transformations.log",
       "bytes": 435,
-      "elapsed_s": 8.4,
+      "elapsed_s": 5.3,
       "command": [
         "/home/fedor/.local/bin/coderabbit",
         "review",
@@ -1588,5 +1588,5 @@
       ]
     }
   },
-  "updated_utc": "2026-08-11T10:39:05.961207+00:00"
+  "updated_utc": "2026-08-11T10:40:19.679455+00:00"
 }
