@@ -102,6 +102,7 @@ def test_load_source_section_rejects_forbidden_transport_overrides(
     )
 
     # parents[2] of configs/entities/chembl/activity.yaml → configs/
+
     config_path = tmp_path / "configs" / "entities" / "chembl" / "activity.yaml"
     config_path.parent.mkdir(parents=True)
     config_path.write_text("pipeline: {}\n", encoding="utf-8")
