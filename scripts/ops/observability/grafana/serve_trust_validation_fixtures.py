@@ -17,6 +17,7 @@ Example:
   python scripts/ops/observability/grafana/serve_trust_validation_fixtures.py --port 18080
   # Point temporary Infinity URL override or local proxy at http://127.0.0.1:18080
 """
+
 from __future__ import annotations
 
 import argparse
@@ -40,13 +41,13 @@ class FixtureHandler(BaseHTTPRequestHandler):
     fixture_root: Path = DEFAULT_ROOT
     default_state: str = "populated"
 
-    def log_message(self, fmt: str, *args: object) -> None:
+    def log_message(self, _fmt: str, *_args: object) -> None:
         # Keep stdout free of secrets; only method + path.
         import sys
 
         print(f"[fixture] {self.command} {self.path}", file=sys.stderr)
 
-    def do_GET(self) -> None:  # noqa: N802
+    def do_GET(self) -> None:
         parsed = urlparse(self.path)
         path = parsed.path.rstrip("/")
         prefix = "/ops/control-plane/"

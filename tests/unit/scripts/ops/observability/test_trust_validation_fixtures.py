@@ -70,7 +70,7 @@ def test_populated_is_not_error_and_unknown_is_not_ok() -> None:
 
 def test_service_unavailable_marks_http_503() -> None:
     index = json.loads((ROOT / "INDEX.json").read_text(encoding="utf-8"))
-    for endpoint, states in index["endpoints"].items():
+    for _endpoint, states in index["endpoints"].items():
         meta = states["service_unavailable"]
         assert meta["http_status"] == 503
         payload = json.loads(Path(meta["path"]).read_text(encoding="utf-8"))
