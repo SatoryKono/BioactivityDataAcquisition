@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `1cb1e6e5741dcd0efec8408d3b3d4b6c45cdeece`
 
-Evidence surface SHA-256: `ea701132038d813d79d5695fd5ee9cb29a6fe7f7dad7a503207b2690ccb45935`
+Evidence surface SHA-256: `e2cf7f3dd11a84d2e6dcb5b66dd484d514fa6e2b1a859ab1062d39508570094c`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,7 +18,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-07-27-r1",
   "audited_commit_sha": "1cb1e6e5741dcd0efec8408d3b3d4b6c45cdeece",
-  "evidence_surface_sha256": "ea701132038d813d79d5695fd5ee9cb29a6fe7f7dad7a503207b2690ccb45935",
+  "evidence_surface_sha256": "e2cf7f3dd11a84d2e6dcb5b66dd484d514fa6e2b1a859ab1062d39508570094c",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
@@ -47,7 +47,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 
 
 
-Refresh reason: Closeout wave #8584/#8583/#7515/#7517/#7410 — re-pin evidence; no budget growth.
+Refresh reason: Closeout wave #8584/#8583/#7515/#7517/#7410 â€” re-pin evidence; no budget growth.
 
 ## Executive summary
 
@@ -91,12 +91,12 @@ python -m scripts.engineering.qa validate-technical-debt-audit --json
 
 | module | src importers | test importers |
 | --- | ---: | ---: |
-| `bioetl.domain.composite.config` | 0 | 42 |
+| `bioetl.domain.composite.config` | 0 | 43 |
 | `bioetl.application.composite.merger` | 0 | 5 |
 
 ## TD2 residual closeout (2026-07-29)
 
-- Epic #7033 / children #7034–#7041: artifact drift cleared, hotspot re-export trim, shim review, scripts ratchet 17→15, public API interim review.
+- Epic #7033 / children #7034â€“#7041: artifact drift cleared, hotspot re-export trim, shim review, scripts ratchet 17â†’15, public API interim review.
 
 ## Related closeouts
 

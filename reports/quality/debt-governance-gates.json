@@ -370,7 +370,7 @@
       "status": "pass"
     },
     {
-      "current": 15,
+      "current": 0,
       "limit": 21,
       "metric": "generated_at_age_days",
       "name": "observability_release_review_freshness",
@@ -379,16 +379,16 @@
       "status": "pass"
     },
     {
-      "current": 0,
-      "limit": 0,
-      "metric": "changed_metric_surface_count",
+      "current": true,
+      "limit": true,
+      "metric": "inventory_matches_current_static_report",
       "name": "observability_touched_metric_inventory_freshness",
-      "remediation": "Refresh runtime cardinality inventory evidence before merging metric, dashboard, or alert-rule changes.",
+      "remediation": "Regenerate reports/observability/runtime_cardinality_inventory.json before merging metric, dashboard, or alert-rule changes.",
       "source_artifact": "reports/observability/runtime_cardinality_inventory.json",
       "status": "pass"
     },
     {
-      "current": 0,
+      "current": 1,
       "limit": 0,
       "metric": "changed_metric_surface_count",
       "name": "observability_touched_metric_review_freshness",
