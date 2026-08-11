@@ -13,9 +13,12 @@ Notable campaigns:
   kit #1
 - `campaigns/project-audit-orchestrator-kit-2026-08-11.md` (+ `…-SOURCES.md`) —
   nine domains + full N-iteration GitHub orchestrator (kit #2)
+- `campaigns/bi-dashboard-audit-kit-2026-08-11.md` (+ `…-SOURCES.md`) — BI
+  acceptance (visual/layout/data); prefer
+  `../library/observability/bi-dashboard-acceptance.md`
 
-Prefer short cards under `../library/audit/` (including `orchestrator.md`) and
-`../library/architecture/review-assessment.md`.
+Prefer short cards under `../library/audit/` (including `orchestrator.md`),
+`../library/observability/`, and `../library/architecture/review-assessment.md`.
 
 Active short cards live under `../library/`. Discover via `../REGISTRY.yaml` or
 `python -m scripts.ai.prompts list`.

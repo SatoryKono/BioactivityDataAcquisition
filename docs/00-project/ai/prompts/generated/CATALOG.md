@@ -18,7 +18,8 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.tests.fix-retest` | `library/tests/fix-retest-loop.md` | Run → fix → retest until green or blocked |
 | `prompt.docs.ai-audit-planning` | `library/docs/ai-audit-planning.md` | Plan an audit of docs/00-project/ai surfaces |
 | `prompt.architecture.review` | `library/architecture/review-assessment.md` | Architecture review v2.3 (hexagonal/C4/arc42) with findings.json outputs |
-| `prompt.observability.dashboard-panel-audit` | `library/observability/dashboard-panel-audit.md` | Five-phase Grafana panel audit — render, GH issues, fix, closeout |
+| `prompt.observability.dashboard-panel-audit` | `library/observability/dashboard-panel-audit.md` | Five-phase Grafana panel audit — render, GH issues, fix, closeout (v1.1) |
+| `prompt.observability.bi-dashboard-acceptance` | `library/observability/bi-dashboard-acceptance.md` | BI dashboard acceptance — visual, layout, data contours with measurable checks |
 | `prompt.audit.docs-content` | `library/audit/docs-content.md` | Evidence-based audit of project documentation content and drift |
 | `prompt.audit.tests-system` | `library/audit/tests-system.md` | Audit test system as regression detection, not coverage vanity |
 | `prompt.audit.tech-debt` | `library/audit/tech-debt.md` | Evidence-based technical debt register with risk-ordered paydown |
@@ -44,6 +45,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.fragment.reports-output` | `fragments/reports-output.md` | Audit artifacts must land under reports/, not repo root |
 | `prompt.fragment.shell-portability` | `fragments/shell-portability.md` | Portable shell notes for BioETL Windows-first operators |
 | `prompt.fragment.orchestrator-guards` | `fragments/orchestrator-guards.md` | Fail-closed guards for multi-iteration audit/implement orchestrator |
+| `prompt.fragment.bi-check-schema` | `fragments/bi-check-schema.md` | BI dashboard check result schema and priority mapping |
 
 ## All registry entries
 
@@ -61,6 +63,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.fragment.reports-output` | fragment | active | `fragments/reports-output.md` |
 | `prompt.fragment.shell-portability` | fragment | active | `fragments/shell-portability.md` |
 | `prompt.fragment.orchestrator-guards` | fragment | active | `fragments/orchestrator-guards.md` |
+| `prompt.fragment.bi-check-schema` | fragment | active | `fragments/bi-check-schema.md` |
 | `prompt.session.grok-bootstrap` | operator-paste | active | `library/session/grok-bootstrap.md` |
 | `prompt.closeout.grok` | operator-paste | active | `library/closeout/grok-closeout.md` |
 | `prompt.audit.grok-cycle` | operator-paste | active | `library/audit/grok-audit-cycle.md` |
@@ -70,6 +73,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.docs.ai-audit-planning` | operator-paste | active | `library/docs/ai-audit-planning.md` |
 | `prompt.architecture.review` | operator-paste | active | `library/architecture/review-assessment.md` |
 | `prompt.observability.dashboard-panel-audit` | operator-paste | active | `library/observability/dashboard-panel-audit.md` |
+| `prompt.observability.bi-dashboard-acceptance` | operator-paste | active | `library/observability/bi-dashboard-acceptance.md` |
 | `prompt.audit.docs-content` | operator-paste | active | `library/audit/docs-content.md` |
 | `prompt.audit.tests-system` | operator-paste | active | `library/audit/tests-system.md` |
 | `prompt.audit.tech-debt` | operator-paste | active | `library/audit/tech-debt.md` |
@@ -80,3 +84,4 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.audit.docs-pipeline` | operator-paste | active | `library/audit/docs-pipeline.md` |
 | `prompt.campaign.generic-nine-audit-kit` | campaign | archived | `archive/campaigns/generic-nine-audit-kit-2026-08.md` |
 | `prompt.campaign.project-audit-orchestrator-kit` | campaign | archived | `archive/campaigns/project-audit-orchestrator-kit-2026-08-11.md` |
+| `prompt.campaign.bi-dashboard-audit-kit` | campaign | archived | `archive/campaigns/bi-dashboard-audit-kit-2026-08-11.md` |

@@ -110,7 +110,7 @@
       "title": "Inspect Scope & Evidence",
       "gridPos": {
         "h": 4,
-        "w": 16,
+        "w": 18,
         "x": 0,
         "y": 3
       },
@@ -126,8 +126,8 @@
       "title": "Monitor Replay Readiness",
       "gridPos": {
         "h": 4,
-        "w": 8,
-        "x": 16,
+        "w": 6,
+        "x": 18,
         "y": 3
       },
       "datasource": {
@@ -319,7 +319,7 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 5,
+        "w": 6,
         "x": 0,
         "y": 7
       },
@@ -411,8 +411,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 5,
-        "x": 5,
+        "w": 6,
+        "x": 6,
         "y": 7
       },
       "id": 892,
@@ -529,8 +529,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 5,
-        "x": 10,
+        "w": 6,
+        "x": 12,
         "y": 7
       },
       "id": 893,
@@ -630,8 +630,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 8,
-        "x": 16,
+        "w": 6,
+        "x": 18,
         "y": 7
       },
       "id": 907,
@@ -4285,7 +4285,7 @@
           "gridPos": {
             "x": 0,
             "y": 230,
-            "w": 16,
+            "w": 18,
             "h": 6
           },
           "datasource": "BioETL Ops HTTP",
@@ -4439,9 +4439,9 @@
           "type": "table",
           "title": "Review Processed Records",
           "gridPos": {
-            "x": 16,
+            "x": 18,
             "y": 230,
-            "w": 8,
+            "w": 6,
             "h": 6
           },
           "datasource": "BioETL Ops HTTP",

@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 3.2.0
+Version: 3.3.0
 Status: active
 Class: internal (repo-only entrypoint; excluded from MkDocs)
 Owner: BioETL Team
@@ -63,7 +63,8 @@ docs/00-project/ai/prompts/
 | `prompt.tests.fix-retest` | [library/tests/fix-retest-loop.md](library/tests/fix-retest-loop.md) | Run → fix → retest |
 | `prompt.docs.ai-audit-planning` | [library/docs/ai-audit-planning.md](library/docs/ai-audit-planning.md) | Docs/AI surface audit plan |
 | `prompt.architecture.review` | [library/architecture/review-assessment.md](library/architecture/review-assessment.md) | Architecture review (v2.2) |
-| `prompt.observability.dashboard-panel-audit` | [library/observability/dashboard-panel-audit.md](library/observability/dashboard-panel-audit.md) | Grafana panel audit (5 phases) |
+| `prompt.observability.dashboard-panel-audit` | [library/observability/dashboard-panel-audit.md](library/observability/dashboard-panel-audit.md) | Grafana panel audit (5 phases, v1.1) |
+| `prompt.observability.bi-dashboard-acceptance` | [library/observability/bi-dashboard-acceptance.md](library/observability/bi-dashboard-acceptance.md) | BI acceptance: visual / layout / data |
 
 ### Domain audit cards (nine-kit intake)
 
@@ -95,10 +96,19 @@ Archive megaprompts (opt-in only):
 | N-iteration audit→issues→fix→CI | `prompt.audit.orchestrator` (`N=1` default; ALLOW_* false) |
 | Issue/PR closeout | `prompt.closeout.grok` |
 
-Shared: `fragments/audit-scale.md` (0–3 + optional 0–5 map),
+Shared: `fragments/audit-scale.md` (0–3 + optional 0–5 / score_1_5 maps),
 `fragments/finding-schema.md` (JSON contract),
+`fragments/bi-check-schema.md` (BI checks),
 `fragments/orchestrator-guards.md`, `fragments/reports-output.md`.
 Artifacts → `reports/audit/<domain>/` or `reports/audit-runs/<run_id>/`.
+
+### Observability routing
+
+| Need | Card |
+| --- | --- |
+| Per-panel render/query → issues → fix | `prompt.observability.dashboard-panel-audit` |
+| Acceptance: a11y, layout story, data DQ | `prompt.observability.bi-dashboard-acceptance` |
+| Full BI matrices / multi-tool notes | archive `bi-dashboard-audit-kit-2026-08-11.md` |
 
 Root-level `grok-*.md` / `test_*.md` paths remain as **redirect stubs** for
 bookmarks from #8279.
@@ -114,6 +124,8 @@ python -m scripts.ai.prompts render prompt.audit.grok-cycle --param SCOPE="src/b
 python -m scripts.ai.prompts render prompt.closeout.grok --param SCOPE="issues: #NNNN"
 python -m scripts.ai.prompts render prompt.observability.dashboard-panel-audit \
   --param SCOPE="grafana/dashboards" --param AUDIT_MODE=full
+python -m scripts.ai.prompts render prompt.observability.bi-dashboard-acceptance \
+  --param SCOPE="grafana/dashboards" --param DEPTH=quick --param PLATFORM=grafana
 python -m scripts.ai.prompts render prompt.audit.docs-content \
   --param SCOPE="README.md docs/00-project" --param MODE=audit
 python -m scripts.ai.prompts render prompt.audit.github-actions \

@@ -210,10 +210,22 @@ def wait_healthy(containers: list[str], *, timeout_seconds: float = 300.0) -> No
 
 
 def _ensure_shared_networks() -> None:
+    """Create contracted nets with the same owner label as runtime_manager/compose."""
+    owner = "scripts/ops/runtime/docker/runtime_manager.py"
     for network in ("bioetl-monitoring", "bioetl-runtime"):
         exists = _run(["docker", "network", "inspect", network], timeout=30.0)
         if exists.returncode != 0:
-            created = _run(["docker", "network", "create", network], timeout=30.0)
+            created = _run(
+                [
+                    "docker",
+                    "network",
+                    "create",
+                    "--label",
+                    f"com.bioetl.owner={owner}",
+                    network,
+                ],
+                timeout=30.0,
+            )
             if created.returncode != 0:
                 raise RuntimeError(
                     f"failed to create network {network}: {created.stderr}"

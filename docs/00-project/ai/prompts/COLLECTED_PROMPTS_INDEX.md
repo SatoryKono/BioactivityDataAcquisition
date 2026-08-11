@@ -56,6 +56,16 @@ Nine domain audits + N-iteration GitHub orchestrator (`findings.json`, ALLOW_*
 fail-closed, post-audit). **Archived campaign** — active paste:
 `prompt.audit.orchestrator` and domain cards v1.1+.
 
+### BI dashboard audit kit (2026-08-11)
+
+- `docs/00-project/ai/prompts/archive/campaigns/bi-dashboard-audit-kit-2026-08-11.md`
+- `docs/00-project/ai/prompts/archive/campaigns/bi-dashboard-audit-kit-2026-08-11-SOURCES.md`
+
+Three contours (visual / layout / data) × quick/detailed/auto, WCAG-oriented
+checks, multi-BI notes. **Archived campaign** — active paste:
+`prompt.observability.bi-dashboard-acceptance`; engineering loop:
+`prompt.observability.dashboard-panel-audit`.
+
 ### Diagram Expansion Archive
 
 - `docs/00-project/ai/prompts/collected/docs/02-architecture/mmd-diagrams/docs/PROMPT-diagram-expansion.md`

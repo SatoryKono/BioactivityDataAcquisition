@@ -312,7 +312,7 @@ def test_control_plane_long_first_screen_titles_keep_extra_width() -> None:
 
 
 def test_control_plane_trust_panels_follow_reference_widths() -> None:
-    """Trust panels should align with the 16/8 scope and readiness columns."""
+    """Trust panels should align with the 18/6 scope and readiness columns."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     panels = {
         panel.get("title"): panel
@@ -326,10 +326,10 @@ def test_control_plane_trust_panels_follow_reference_widths() -> None:
     processed = panels["Review Processed Records"]["gridPos"]
     telemetry = panels["Monitor Telemetry Coverage"]["gridPos"]
 
-    assert run_summary["w"] == scope["w"] == 16
-    assert processed["w"] == telemetry["w"] == readiness["w"] == 8
+    assert run_summary["w"] == scope["w"] == 18
+    assert processed["w"] == telemetry["w"] == readiness["w"] == 6
     assert run_summary["x"] == 0
-    assert processed["x"] == telemetry["x"] == 16
+    assert processed["x"] == telemetry["x"] == readiness["x"] == 18
 
     third_width = scope["w"] // 3
     third_panels = [
