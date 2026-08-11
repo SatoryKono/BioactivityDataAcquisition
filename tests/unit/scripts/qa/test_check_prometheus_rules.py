@@ -145,10 +145,13 @@ def test_check_prometheus_rules_runs_check_and_test_vectors_locally(
         lambda name: "/usr/bin/promtool" if name == "promtool" else None,
     )
 
-    def fake_run(command: list[str], check: bool) -> SimpleNamespace:
+    def fake_run(
+        command: list[str], check: bool = False, **kwargs: object
+    ) -> SimpleNamespace:
+        del kwargs
         commands.append(command)
         assert check is False
-        return SimpleNamespace(returncode=0)
+        return SimpleNamespace(returncode=0, stdout="", stderr="")
 
     monkeypatch.setattr(check_prometheus_rules.subprocess, "run", fake_run)
 
@@ -182,10 +185,13 @@ def test_check_prometheus_rules_docker_runner_uses_promtool_entrypoint(
         lambda name: "/usr/bin/docker" if name == "docker" else None,
     )
 
-    def fake_run(command: list[str], check: bool) -> SimpleNamespace:
+    def fake_run(
+        command: list[str], check: bool = False, **kwargs: object
+    ) -> SimpleNamespace:
+        del kwargs
         commands.append(command)
         assert check is False
-        return SimpleNamespace(returncode=0)
+        return SimpleNamespace(returncode=0, stdout="", stderr="")
 
     monkeypatch.setattr(check_prometheus_rules.subprocess, "run", fake_run)
 
@@ -216,10 +222,13 @@ def test_check_prometheus_rules_rules_file_override_checks_selected_file(
         lambda name: "/usr/bin/promtool" if name == "promtool" else None,
     )
 
-    def fake_run(command: list[str], check: bool) -> SimpleNamespace:
+    def fake_run(
+        command: list[str], check: bool = False, **kwargs: object
+    ) -> SimpleNamespace:
+        del kwargs
         commands.append(command)
         assert check is False
-        return SimpleNamespace(returncode=0)
+        return SimpleNamespace(returncode=0, stdout="", stderr="")
 
     monkeypatch.setattr(check_prometheus_rules.subprocess, "run", fake_run)
 
