@@ -1532,10 +1532,10 @@
           "type": "table",
           "title": "Review Failed Runs",
           "gridPos": {
-            "h": 6,
-            "w": 8,
             "x": 0,
-            "y": 24
+            "y": 48,
+            "w": 8,
+            "h": 6
           },
           "datasource": {
             "type": "prometheus",
@@ -1628,10 +1628,10 @@
           "type": "table",
           "title": "Review Recent Terminal Runs",
           "gridPos": {
-            "h": 6,
-            "w": 8,
             "x": 8,
-            "y": 24
+            "y": 48,
+            "w": 8,
+            "h": 6
           },
           "datasource": {
             "type": "prometheus",
@@ -1731,10 +1731,10 @@
           "type": "stat",
           "title": "Track Silver Rejects",
           "gridPos": {
-            "h": 6,
-            "w": 8,
             "x": 16,
-            "y": 24
+            "y": 48,
+            "w": 8,
+            "h": 6
           },
           "datasource": {
             "type": "prometheus",
@@ -3037,10 +3037,10 @@
           "type": "table",
           "title": "Review Run Identity",
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 0,
-            "y": 54
+            "y": 55,
+            "w": 12,
+            "h": 6
           },
           "description": "Shows HTTP-backed identity for an exact Run ID. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live before treating the result as expected. Open Run Explorer for complete run evidence.",
           "datasource": "BioETL Ops HTTP",
@@ -3193,10 +3193,10 @@
           "type": "table",
           "title": "Review Processed Records",
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 12,
-            "y": 54
+            "y": 55,
+            "w": 12,
+            "h": 6
           },
           "description": "Shows HTTP-backed Bronze, Silver, and Gold record counts and outcomes. Zero is a recorded count. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live. Open Run Explorer for complete accounting.",
           "datasource": "BioETL Ops HTTP",
