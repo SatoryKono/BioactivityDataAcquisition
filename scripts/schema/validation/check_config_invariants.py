@@ -6,7 +6,7 @@ Checks:
   INV-CFG-001  No legacy naming (document->publication, dq/->quality/, filter/->filters/)
   INV-CFG-002  Unified entity sections exist and provider/entity declarations are consistent
   INV-CFG-003  loading_strategy is null or 'full_scan_only'
-  INV-CFG-004  Providers requiring auth declare API key / mailto env vars
+  INV-CFG-004  Providers with config-bound auth declare named environment references
   INV-CFG-005  No unknown keys in unified entity/composite/provider configs
   INV-CFG-006  pipeline_name == {provider}_{entity_type}
   INV-CFG-008  Provider/entity/section config versions use explicit SemVer scopes
@@ -290,7 +290,7 @@ def check_inv_003(verbose: bool) -> list[str]:
 
 
 def check_inv_004(verbose: bool) -> list[str]:
-    """INV-CFG-004: Provider auth requirements."""
+    """INV-CFG-004: Config-bound provider auth requirements."""
     errors: list[str] = []
     for provider, keys in PROVIDER_AUTH_REQUIREMENTS.items():
         src_path = PROVIDERS_DIR / f"{provider}.yaml"

@@ -1838,7 +1838,6 @@
         "tests/unit/infrastructure/adapters/test_http_base.py",
         "tests/unit/infrastructure/adapters/test_sync_base.py",
         "tests/unit/infrastructure/adapters/uniprot/test_adapter.py",
-        "tests/unit/infrastructure/config/test_source_normalizers.py",
         "tests/unit/infrastructure/factories/test_storage_adapter.py",
         "tests/unit/infrastructure/test_storage_factory.py",
         "tests/unit/interfaces/cli/commands/test_health.py"

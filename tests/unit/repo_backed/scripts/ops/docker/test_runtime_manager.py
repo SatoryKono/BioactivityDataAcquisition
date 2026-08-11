@@ -421,7 +421,9 @@ def test_compose_up_start_includes_optional_but_wait_is_required_only() -> None:
         expected_images={},
         optional_services=("renderer",),
     )
-    start = runtime_manager._compose_up_start_args(mon, attempts=1, force_recreate=False)
+    start = runtime_manager._compose_up_start_args(
+        mon, attempts=1, force_recreate=False
+    )
     assert "renderer" in start
     assert "prometheus" in start
     assert "--wait" not in start
