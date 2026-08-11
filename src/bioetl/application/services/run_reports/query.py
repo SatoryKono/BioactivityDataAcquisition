@@ -25,8 +25,10 @@ class ReportIndexEntry:
     completed_at: str | None
     mtime: float
 
+
 def _root(root: Path | None) -> Path:
     return resolve_report_root(root=root)
+
 
 def load_latest_pointer(
     *,
@@ -39,6 +41,7 @@ def load_latest_pointer(
         return None
     payload = json.loads(base.read_text(encoding="utf-8"))
     return payload if isinstance(payload, dict) else None
+
 
 def load_pipeline_report(
     *,
@@ -59,6 +62,7 @@ def load_pipeline_report(
     )
     return _load_json_dict(path)
 
+
 def load_workflow_report(
     *,
     workflow_name: str,
@@ -78,6 +82,7 @@ def load_workflow_report(
     )
     return _load_json_dict(path)
 
+
 def _load_latest_report(
     *,
     kind: str,
@@ -89,6 +94,7 @@ def _load_latest_report(
         return None
     return _load_json_dict(Path(str(pointer.get("json_path") or "")))
 
+
 def _load_json_dict(
     path: Path,
 ) -> dict[str, Any] | None:  # Any: decoded JSON object
@@ -96,6 +102,7 @@ def _load_json_dict(
         return None
     payload = json.loads(path.read_text(encoding="utf-8"))
     return payload if isinstance(payload, dict) else None
+
 
 def list_pipeline_reports(
     *,
@@ -105,6 +112,7 @@ def list_pipeline_reports(
 ) -> list[ReportIndexEntry]:
     return _list_reports(kind="pipeline", owner=pipeline_name, limit=limit, root=root)
 
+
 def list_workflow_reports(
     *,
     workflow_name: str | None = None,
@@ -112,6 +120,7 @@ def list_workflow_reports(
     root: Path | None = None,
 ) -> list[ReportIndexEntry]:
     return _list_reports(kind="workflow", owner=workflow_name, limit=limit, root=root)
+
 
 def _list_reports(
     *,
@@ -140,6 +149,7 @@ def _list_reports(
         for mtime, owner_name, run_dir, json_path in candidates[:capped]
     ]
 
+
 def _collect_report_candidates(
     *,
     base: Path,
@@ -165,6 +175,7 @@ def _collect_report_candidates(
             candidates.append((mtime, owner_dir.name, run_dir, json_path))
     return candidates
 
+
 def _build_report_index_entry(
     *,
     kind: str,
@@ -187,10 +198,12 @@ def _build_report_index_entry(
         mtime=mtime,
     )
 
+
 def _owner_directories(base: Path, owner: str | None) -> list[Path]:
     if owner:
         return [base / _safe_segment(owner)]
     return [path for path in base.iterdir() if path.is_dir()]
+
 
 def diff_pipeline_reports(
     left: MappingLike,
@@ -206,6 +219,7 @@ def diff_pipeline_reports(
         "reasons_delta": _reasons_delta(left_payload, right_payload),
     }
 
+
 def _funnel_rows(
     payload: dict[str, Any],  # Any: decoded report payload
 ) -> dict[str, dict[str, Any]]:  # Any: dynamic funnel rows
@@ -214,6 +228,7 @@ def _funnel_rows(
         for row in payload.get("funnel") or []
         if isinstance(row, dict)
     }
+
 
 def _funnel_delta(
     left: dict[str, Any],  # Any: decoded report payload
@@ -226,6 +241,7 @@ def _funnel_delta(
         _stage_delta(stage, left_rows.get(stage, {}), right_rows.get(stage, {}))
         for stage in stages
     ]
+
 
 def _stage_delta(
     stage: str,
@@ -242,6 +258,7 @@ def _stage_delta(
         - _int(left.get("removed_total")),
     }
 
+
 def _reason_counts(
     payload: dict[str, Any],  # Any: decoded report payload
 ) -> dict[str, int]:
@@ -250,6 +267,7 @@ def _reason_counts(
         for item in payload.get("reasons_top_n") or []
         if isinstance(item, dict)
     }
+
 
 def _reasons_delta(
     left: dict[str, Any],  # Any: decoded report payload
@@ -264,6 +282,7 @@ def _reasons_delta(
         }
         for code in sorted(set(left_counts) | set(right_counts))
     ]
+
 
 def prune_reports(
     *,
@@ -281,6 +300,7 @@ def prune_reports(
     victims = _prune_candidates(entries, max_count, max_age_days, now)
     return _remove_report_directories(victims, dry_run=dry_run)
 
+
 def _validate_prune_options(
     kind: str,
     max_count: int | None,
@@ -294,6 +314,7 @@ def _validate_prune_options(
     if max_age_days is not None and now is None:
         raise ValueError("now is required when max_age_days is provided")
 
+
 def _reports_for_prune(
     kind: str,
     owner: str | None,
@@ -302,6 +323,7 @@ def _reports_for_prune(
     if kind == "pipeline":
         return list_pipeline_reports(pipeline_name=owner, limit=10_000, root=root)
     return list_workflow_reports(workflow_name=owner, limit=10_000, root=root)
+
 
 def _prune_candidates(
     entries: list[ReportIndexEntry],
@@ -316,6 +338,7 @@ def _prune_candidates(
     if max_count is not None:
         victims.extend(entries[max_count:])
     return victims
+
 
 def _remove_report_directories(
     victims: list[ReportIndexEntry],
@@ -334,6 +357,7 @@ def _remove_report_directories(
             _rm_tree(directory)
     return removed
 
+
 def _read_identity_meta(path: Path) -> tuple[str | None, str | None]:
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
@@ -349,6 +373,7 @@ def _read_identity_meta(path: Path) -> tuple[str | None, str | None]:
         str(completed) if completed is not None else None,
     )
 
+
 def _int(value: object) -> int:
     if value is None:
         return 0
@@ -359,7 +384,9 @@ def _int(value: object) -> int:
     except (TypeError, ValueError, OverflowError):
         return 0
 
+
 MappingLike = dict[str, Any] | Any  # Any: decoded external JSON payload
+
 
 def _as_mapping(
     value: MappingLike,  # Any: decoded external JSON payload
@@ -367,6 +394,7 @@ def _as_mapping(
     if isinstance(value, dict):
         return value
     raise TypeError("report payload must be a mapping")
+
 
 def _rm_tree(path: Path) -> None:
     if path.is_file():
