@@ -79,7 +79,7 @@ def test_check_rules_syntax_local_success(
     def fake_which(name: str) -> str | None:
         return "/usr/bin/promtool" if name == "promtool" else None
 
-    def fake_run(command, **kwargs):  # noqa: ANN001, ANN003
+    def fake_run(command, **kwargs):
         del kwargs
         assert command[0] == "/usr/bin/promtool"
         assert command[1:3] == ["check", "rules"]
