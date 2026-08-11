@@ -48,8 +48,13 @@ def test_staged_registry_promotes_proof_gate_to_soft_fail() -> None:
     assert proof_policy["current_stage"] == "soft_fail"
     assert proof_policy["rollback_stage"] == "observe"
     assert proof_policy["domain_engine"] is False
-    assert "adversarial_pilot_zero_false_admit" in proof_policy["promotion_requirements"]
-    assert "adversarial_pilot_zero_tamper_accepts" in proof_policy["promotion_requirements"]
+    assert (
+        "adversarial_pilot_zero_false_admit" in proof_policy["promotion_requirements"]
+    )
+    assert (
+        "adversarial_pilot_zero_tamper_accepts"
+        in proof_policy["promotion_requirements"]
+    )
     assert "two_clean_ci_observation_runs" in proof_policy["promotion_requirements"]
     assert proof_policy.get("next_stage") == "hard_fail"
     assert registry["linked_issue"] == "#8415"
