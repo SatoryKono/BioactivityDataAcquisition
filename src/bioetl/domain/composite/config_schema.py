@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from types import MappingProxyType
 
 from bioetl.domain.composite.config_merge import ColumnGroupConfig
 from bioetl.domain.composite.config_validators import (
     coerce_to_tuple,
     coerce_to_typed_tuple,
 )
+
+_SUPPORTED_LAYERS = frozenset({"silver", "gold"})
 
 __all__ = ["DataSchemaConfig", "LayerColumnConfig"]
 
@@ -33,8 +36,12 @@ class LayerColumnConfig:
         coerce_to_tuple(self, "include_groups")
         coerce_to_tuple(self, "exclude_fields")
         coerce_to_typed_tuple(self, "column_groups", ColumnGroupConfig)
-        if not isinstance(self.rename_fields, dict):
-            object.__setattr__(self, "rename_fields", dict(self.rename_fields))
+        # Always detach caller-owned mapping into an immutable proxy.
+        object.__setattr__(
+            self,
+            "rename_fields",
+            MappingProxyType(dict(self.rename_fields)),
+        )
         self._validate()
 
     def _validate(self) -> None:
@@ -70,6 +77,16 @@ class DataSchemaConfig:
         if isinstance(self.gold, dict):
             object.__setattr__(self, "gold", LayerColumnConfig(**self.gold))
 
+    def _resolve_layer(self, layer: str) -> LayerColumnConfig | None:
+        """Resolve a supported Medallion layer config or raise."""
+        normalized = str(layer).strip().lower()
+        if normalized not in _SUPPORTED_LAYERS:
+            raise ValueError(
+                f"unsupported layer {layer!r}; expected one of "
+                f"{sorted(_SUPPORTED_LAYERS)}"
+            )
+        return getattr(self, normalized, None)
+
     def get_layer_groups(self, layer: str) -> tuple[ColumnGroupConfig, ...]:
         """Return layer-specific column groups, falling back to top-level groups.
 
@@ -79,7 +96,7 @@ class DataSchemaConfig:
         Returns:
             Layer-specific column groups if configured, otherwise the top-level groups.
         """
-        layer_config: LayerColumnConfig | None = getattr(self, layer, None)
+        layer_config = self._resolve_layer(layer)
         # ``None`` means fall back to top-level groups; empty tuple means select none.
         if layer_config is not None and layer_config.column_groups is not None:
             return layer_config.column_groups
@@ -97,7 +114,7 @@ class DataSchemaConfig:
             restricts inclusion and the group name is absent.
             ``include_groups is None`` means unrestricted; empty tuple excludes all.
         """
-        layer_config = getattr(self, layer, None)
+        layer_config = self._resolve_layer(layer)
         if layer_config is None or layer_config.include_groups is None:
             return True
         return group_name in layer_config.include_groups
