@@ -306,7 +306,7 @@ pip install -e ".[dev,tests,tracing,docs]"
    ```bash
    uv run ruff check .
    uv run ruff format --check .
-   uv run mypy src tests
+   uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
    uv run python -m scripts.engineering.dev run-tests cov
    ```
 
@@ -616,7 +616,7 @@ Strict quality standards are enforced using `ruff`, `mypy`, and other tools.
   ```bash
   uv run ruff check .
   uv run ruff format --check .
-  uv run mypy src tests
+  uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
   ```
 
 - **Debt and complexity guardrails**:
@@ -749,7 +749,7 @@ Please review our **[Security Policy](.github/SECURITY.md)** for:
 Please read **[RULES.md](docs/00-project/RULES.md)** and **[REQUIREMENTS.md](docs/01-requirements/REQUIREMENTS.md)** before contributing.
 
 1. Ensure tests pass: `uv run python -m scripts.engineering.dev run-tests cov`
-1. Check types and linting: `uv run ruff check . && uv run ruff format --check . && uv run mypy src tests`
+1. Check types and linting: `uv run ruff check . && uv run ruff format --check . && uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl`
 1. Follow the **RFC 2119** keywords in requirements.
 
 ## License
