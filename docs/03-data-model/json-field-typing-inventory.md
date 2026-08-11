@@ -191,9 +191,9 @@ Related:
 | `isoform_names` | `integer|null|string` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `isoform_synonyms` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `isomeric_smiles` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
-| `issn` | `unknown` (nullable) | `str` (nullable) | — | `str` (nullable) |
+| `issn` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `issn_electronic` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
-| `issn_list` | `unknown` (nullable) | `str` (nullable) | — | `str` (nullable) |
+| `issn_list` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `issn_print` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `issue` | `unknown` (nullable) | — | `string` (nullable) | `str` (nullable) |
 | `iupac_name` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |

@@ -83,7 +83,7 @@ class ProviderCatalogSummary:
     metadata_coverage_percent: float = 0.0
 
 
-def _parse_args() -> argparse.Namespace:
+def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Generate or check the canonical VCR metadata catalog artifact."
     )
@@ -107,7 +107,7 @@ def _parse_args() -> argparse.Namespace:
         action="store_true",
         help="Write the generated artifact to disk.",
     )
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def _metadata_path_for(cassette_path: Path) -> Path:
@@ -527,8 +527,8 @@ def render_catalog_json(vcr_root: Path) -> str:
     return json.dumps(build_catalog(vcr_root), ensure_ascii=False, indent=2) + "\n"
 
 
-def main() -> int:
-    args = _parse_args()
+def main(argv: list[str] | None = None) -> int:
+    args = _parse_args(argv)
     vcr_root = Path(args.vcr_root)
     output_path = Path(args.output)
     rendered = render_catalog_json(vcr_root)

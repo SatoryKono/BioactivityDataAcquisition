@@ -212,6 +212,7 @@ class TestRegisterProviderClass:
         config = ProviderRegistry.get("adapter_creator_provider")
         assert config.adapter_creator is custom
 
+
 # ---------------------------------------------------------------------------
 # Tests for register_provider decorator
 # ---------------------------------------------------------------------------

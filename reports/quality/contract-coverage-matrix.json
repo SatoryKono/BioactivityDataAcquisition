@@ -704,15 +704,16 @@
         "../../docs/04-reference/contracts/gold/chembl_publication_v1.0.json"
       ],
       "published_contract_check_constraint_count": 0,
-      "published_contract_non_nullable_count": 7,
-      "published_contract_nullable_count": 23,
+      "published_contract_non_nullable_count": 8,
+      "published_contract_nullable_count": 22,
       "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 30,
-      "published_contract_required_count": 7,
+      "published_contract_required_count": 8,
       "published_contract_required_fields": [
         "_dq_error",
         "_dq_warn",
         "_index",
+        "_lookup_method",
         "content_hash",
         "entity_id",
         "publication_id",
@@ -2567,5 +2568,5 @@
     "gold_enabled": "Effective runtime state of pipeline.sink.gold.enabled after hierarchical config resolution; omitted enabled defaults to true. Never infer this from contract/Pandera availability or from unrelated flags such as filters.input_filter.enabled.",
     "missing_gold_enabled_count": "Runtime-enabled Gold rows whose contract parity_status is not covered."
   },
-  "snapshot_date": "2026-08-09"
+  "snapshot_date": "2026-08-11"
 }

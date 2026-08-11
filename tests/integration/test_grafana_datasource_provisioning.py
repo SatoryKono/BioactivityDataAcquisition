@@ -284,9 +284,14 @@ def test_bootstrap_ops_http_identity_gate_is_soft_by_default() -> None:
     assert 'OPS_READY_ATTEMPTS="${BIOETL_GRAFANA_OPS_READY_ATTEMPTS:-30}"' in content
     assert 'OPS_READY_SLEEP_SEC="${BIOETL_GRAFANA_OPS_READY_SLEEP_SEC:-2}"' in content
     assert "fail_or_defer_ops" in content
-    assert "provision_prometheus_only" in content or "starting Grafana with Prometheus only" in content
+    assert (
+        "provision_prometheus_only" in content
+        or "starting Grafana with Prometheus only" in content
+    )
     assert "is_valid_ops_http_url" in content
-    assert "invalid_or_unmanaged_identity" in content or "invalid_ops_http_url" in content
+    assert (
+        "invalid_or_unmanaged_identity" in content or "invalid_ops_http_url" in content
+    )
     assert (
         "identity_mismatch_or_timeout" in content
         or "identity_mismatch" in content
@@ -296,7 +301,9 @@ def test_bootstrap_ops_http_identity_gate_is_soft_by_default() -> None:
     assert "exec /run.sh" in content
     # Hard fail only when audit/render explicitly requires Ops HTTP.
     assert 'if [ "${REQUIRE_OPS_HTTP}" = "1" ]' in content
-    assert "Ops HTTP required but unavailable" in content or "REQUIRE_OPS_HTTP" in content
+    assert (
+        "Ops HTTP required but unavailable" in content or "REQUIRE_OPS_HTTP" in content
+    )
 
 
 def test_monitoring_compose_exposes_ops_http_soft_gate_env() -> None:
@@ -331,12 +338,12 @@ def test_monitoring_compose_local_resource_budget() -> None:
     assert renderer["shm_size"] == "512mb"
     assert (
         "RENDERING_CLUSTERING_MAX_CONCURRENCY="
-        "${GRAFANA_IMAGE_RENDERER_MAX_CONCURRENCY:-1}"
+        "${GRAFANA_IMAGE_RENDERER_MAX_CONCURRENCY:-1}" in renderer["environment"]
+    )
+    assert (
+        "GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-1GiB}"
         in renderer["environment"]
     )
-    assert "GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-1GiB}" in renderer[
-        "environment"
-    ]
     assert (
         "BIOETL_GRAFANA_REQUIRE_OPS_HTTP=${BIOETL_GRAFANA_REQUIRE_OPS_HTTP:-0}"
         in grafana["environment"]
@@ -351,4 +358,3 @@ def test_bootstrap_validates_ops_http_url_before_probe() -> None:
     gate_idx = content.index('if is_valid_ops_http_url "${BIOETL_OPS_HTTP_URL}"')
     wget_idx = content.index('wget -qO- -T 3 "${OPS_READY_URL}"')
     assert fn_idx < gate_idx < wget_idx
-
