@@ -148,17 +148,21 @@ class MergeConfig:
             )
 
     def _convert_field_priorities(self) -> None:
-        """Convert list values in field_priorities to tuples."""
-        if not self.field_priorities:
-            return
-        converted = {
-            k: tuple(v) if isinstance(v, list) else v
-            for k, v in self.field_priorities.items()
-        }
-        object.__setattr__(self, "field_priorities", converted)
+        """Convert list values in field_priorities to tuples and freeze mapping."""
+        from bioetl.domain.immutability import freeze_fields
+
+        if self.field_priorities:
+            converted = {
+                k: tuple(v) if isinstance(v, list) else v
+                for k, v in self.field_priorities.items()
+            }
+            object.__setattr__(self, "field_priorities", converted)
+        freeze_fields(self, ("field_priorities", "field_mappings"))
 
     def _convert_normalization_compatibility_overrides(self) -> None:
         """Convert normalization compatibility override keys and values to strings."""
+        from bioetl.domain.immutability import freeze_fields
+
         if self.normalization_compatibility_overrides:
             object.__setattr__(
                 self,
@@ -168,6 +172,7 @@ class MergeConfig:
                     for key, value in self.normalization_compatibility_overrides.items()
                 },
             )
+        freeze_fields(self, ("normalization_compatibility_overrides",))
 
     def _convert_sort_policies(self) -> None:
         """Normalize and freeze sort policy columns."""

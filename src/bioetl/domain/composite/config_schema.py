@@ -29,12 +29,16 @@ class LayerColumnConfig:
     rename_fields: dict[str, str] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
+        from bioetl.domain.immutability import freeze_fields
+
         coerce_to_tuple(self, "columns")
         coerce_to_tuple(self, "include_groups")
         coerce_to_tuple(self, "exclude_fields")
         coerce_to_typed_tuple(self, "column_groups", ColumnGroupConfig)
         if not isinstance(self.rename_fields, dict):
             object.__setattr__(self, "rename_fields", dict(self.rename_fields))
+        # Always detach/freeze rename_fields so frozen configs cannot mutate.
+        freeze_fields(self, ("rename_fields",))
         self._validate()
 
     def _validate(self) -> None:
@@ -70,6 +74,17 @@ class DataSchemaConfig:
         if isinstance(self.gold, dict):
             object.__setattr__(self, "gold", LayerColumnConfig(**self.gold))
 
+    def _resolve_layer_config(self, layer: str) -> LayerColumnConfig | None:
+        """Resolve a supported Medallion layer config (silver/gold only)."""
+        normalized = layer.strip().lower()
+        if normalized == "silver":
+            return self.silver
+        if normalized == "gold":
+            return self.gold
+        raise ValueError(
+            f"layer must be 'silver' or 'gold', got {layer!r}"
+        )
+
     def get_layer_groups(self, layer: str) -> tuple[ColumnGroupConfig, ...]:
         """Return layer-specific column groups, falling back to top-level groups.
 
@@ -79,7 +94,7 @@ class DataSchemaConfig:
         Returns:
             Layer-specific column groups if configured, otherwise the top-level groups.
         """
-        layer_config: LayerColumnConfig | None = getattr(self, layer, None)
+        layer_config = self._resolve_layer_config(layer)
         # ``None`` means fall back to top-level groups; empty tuple means select none.
         if layer_config is not None and layer_config.column_groups is not None:
             return layer_config.column_groups
@@ -97,7 +112,7 @@ class DataSchemaConfig:
             restricts inclusion and the group name is absent.
             ``include_groups is None`` means unrestricted; empty tuple excludes all.
         """
-        layer_config = getattr(self, layer, None)
+        layer_config = self._resolve_layer_config(layer)
         if layer_config is None or layer_config.include_groups is None:
             return True
         return group_name in layer_config.include_groups
