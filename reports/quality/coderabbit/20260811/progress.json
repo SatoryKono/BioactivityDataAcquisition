@@ -127,12 +127,36 @@
       "id": "S01-domain-control_plane",
       "wave": "A",
       "files": 32,
-      "status": "rate_limit",
-      "reason": "CodeRabbit rate limit",
+      "status": "error",
+      "reason": "CodeRabbit exit code 1",
       "exit_code": 1,
       "log": "reports/quality/coderabbit/20260811/review_A_S01-domain-control_plane.log",
-      "bytes": 822,
-      "elapsed_s": 10.7,
+      "bytes": 433,
+      "elapsed_s": 7.1,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260811/02-review-prompt.md"
+      ]
+    },
+    "S01-domain-entities": {
+      "id": "S01-domain-entities",
+      "wave": "A",
+      "files": 28,
+      "status": "error",
+      "reason": "CodeRabbit exit code 1",
+      "exit_code": 1,
+      "log": "reports/quality/coderabbit/20260811/review_A_S01-domain-entities.log",
+      "bytes": 428,
+      "elapsed_s": 7.8,
       "command": [
         "/home/fedor/.local/bin/coderabbit",
         "review",
@@ -148,5 +172,5 @@
       ]
     }
   },
-  "updated_utc": "2026-08-11T09:42:35.416596+00:00"
+  "updated_utc": "2026-08-11T09:52:00.856379+00:00"
 }
