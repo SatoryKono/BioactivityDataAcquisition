@@ -55,7 +55,7 @@ from vcr.errors import (
 )
 
 from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
-from bioetl.domain.exceptions.infrastructure import InfrastructureError
+from bioetl.domain.exceptions.storage import InfrastructureError
 from bioetl.domain.exceptions.network import ExternalServiceError
 
 from .conftest import (

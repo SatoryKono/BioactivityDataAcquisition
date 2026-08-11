@@ -1313,7 +1313,7 @@
     "bioetl_data_freshness_seconds": [
       "docs/02-architecture/decisions/ADR-017-observability-architecture.md",
       "docs/02-architecture/observability-layers.md",
-      "docs/03-guides/dashboards/dux4-field-override-inventory.json",
+      "docs/03-guides/dashboards/archive/audit-protocols/dux4-field-override-inventory.json",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md",
       "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",

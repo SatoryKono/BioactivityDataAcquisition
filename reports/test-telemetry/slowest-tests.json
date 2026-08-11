@@ -2,8 +2,8 @@
   "source_branch": "main",
   "source_commit": "a4a95fd6396fc2f00319d2ddc10de4dab09be825",
   "source_run_id": "github-31515014563-1",
-  "source_tree_sha256": "0c161e0594be0095e96ec7e6f923973629045895d68553f4ae840ef054390b0f",
-  "refreshed_at_utc": "2026-08-11T17:14:19.960361+00:00",
+  "source_tree_sha256": "07e8443d8eb14541b51dc37d5239f23e0a11598642dd0bb2b0c39053c13054c2",
+  "refreshed_at_utc": "2026-08-11T19:54:54.910082+00:00",
   "refresh_status": "captured",
   "total_cases": 47389,
   "top_slowest": [
@@ -366,6 +366,20 @@
       "junit.unit-domain.xml": 122.983,
       "junit.unit-infrastructure.xml": 38.341,
       "junit.unit-other.xml": 64.231
+    },
+    "lane_wall_time_s": {
+      "junit-contract-confidence.xml": 78.29,
+      "junit-fast.xml": 146.47,
+      "junit-memory.xml": 0.399,
+      "junit-repo-backed-unit.xml": 169.271,
+      "junit-track-d.xml": 9.607,
+      "junit-unit-scripts-tooling.xml": 133.691,
+      "junit.integration.xml": 87.498,
+      "junit.security.xml": 9.354,
+      "junit.unit-application.xml": 64.537,
+      "junit.unit-domain.xml": 99.889,
+      "junit.unit-infrastructure.xml": 53.988,
+      "junit.unit-other.xml": 65.1
     },
     "worker_mode": "mixed: xdist unit/integration; serial contracts/repo-backed/memory"
   }
