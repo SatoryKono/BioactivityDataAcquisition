@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from types import MappingProxyType
 
 from bioetl.domain.composite.config_validators import require_non_empty
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
+from bioetl.domain.immutability import freeze_fields
 
 __all__ = [
     "ColumnGroupConfig",
@@ -151,8 +151,6 @@ class MergeConfig:
 
     def _convert_field_priorities(self) -> None:
         """Convert list values in field_priorities to tuples and freeze mapping."""
-        from bioetl.domain.immutability import freeze_fields
-
         if self.field_priorities:
             converted = {
                 k: tuple(v) if isinstance(v, list) else v
@@ -163,8 +161,6 @@ class MergeConfig:
 
     def _convert_normalization_compatibility_overrides(self) -> None:
         """Convert normalization compatibility override keys and values to strings."""
-        from bioetl.domain.immutability import freeze_fields
-
         if self.normalization_compatibility_overrides:
             object.__setattr__(
                 self,

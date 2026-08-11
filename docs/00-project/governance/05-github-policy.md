@@ -230,7 +230,7 @@ PR merges to `main` require the always-on status checks below. Repo-side
 evidence is the active repository ruleset plus the workflows that materialize
 those checks.
 
-Re-verified and activated on `2026-08-11` with repository admin credentials via
+Activated and re-verified on `2026-08-11` with repository admin credentials via
 the GitHub REST API (closeout for #8619 / parent #8607).
 
 Live GitHub enforcement state:
