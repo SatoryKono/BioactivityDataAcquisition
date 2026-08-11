@@ -54,7 +54,7 @@ ALLOWED_DOCKER_IMAGES: dict[str, set[str]] = {
     },
 }
 
-USES_PATTERN = re.compile(r"^\s*uses:\s*([^\s#]+)")
+USES_PATTERN = re.compile(r"^\s*(?:-\s*)?uses:\s*([^\s#]+)")
 FULL_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 FULL_SHA256_DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 
