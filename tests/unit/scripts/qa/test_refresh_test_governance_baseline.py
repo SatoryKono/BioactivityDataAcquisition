@@ -135,3 +135,41 @@ def test_main_check_mode_rejects_stale_optional_duplicate_name_inventory(
         patch.object(refresh, "DEFAULT_CONFIG", tmp_path / "missing-config.yaml"),
     ):
         assert refresh.main() == 1
+
+
+def test_main_write_mode_refreshes_all_requested_artifacts(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    payload = _sample_payload()
+    output = tmp_path / "test-governance-current.json"
+    fixture = tmp_path / "test-fixture-asset-duplication.json"
+    duplicate_names = tmp_path / "duplicate-test-name-inventory.json"
+
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "refresh_test_governance_baseline.py",
+            "--output",
+            str(output),
+            "--fixture-duplication",
+            str(fixture),
+            "--duplicate-name-inventory",
+            str(duplicate_names),
+        ],
+    )
+    with (
+        patch.object(refresh, "collect_test_governance_report", return_value=payload),
+        patch.object(refresh, "DEFAULT_CONFIG", tmp_path / "missing-config.yaml"),
+    ):
+        assert refresh.main() == 0
+
+    assert json.loads(output.read_text(encoding="utf-8")) == payload
+    assert (
+        json.loads(fixture.read_text(encoding="utf-8"))
+        == payload["report"]["fixture_asset_duplication"]
+    )
+    assert json.loads(duplicate_names.read_text(encoding="utf-8")) == {
+        "summary": payload["report"]["duplicate_test_name_inventory_summary"],
+        "inventory": payload["report"]["duplicate_test_name_inventory"],
+    }
