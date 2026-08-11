@@ -13,6 +13,8 @@ ______________________________________________________________________
 
 # Dashboards v3.0 Draft Spec
 
+> **Non-shipping draft.** Current stable shipped docs: [Dashboard System 2.0](../README.md).
+>
 > **Historical draft** — not a shipping contract. Canonical shipped portfolio is
 > **7 dashboards** `0..6` (Trust → Run Explorer). See
 > [dashboard-inventory.md](../dashboard-inventory.md).

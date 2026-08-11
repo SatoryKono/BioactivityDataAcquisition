@@ -1,3 +1,5 @@
+> **ARCHIVED** (issue #8632) — historical DUX audit protocol. Not operator guidance. See [archive index](../README.md).
+
 # DUX7 live residual protocol (a11y / contrast / theme / copy / screenshots)
 
 **Status:** closed (2026-07-29)  
