@@ -6,8 +6,6 @@
 
 from __future__ import annotations
 
-pytestmark = pytest.mark.unit
-
 from dataclasses import dataclass
 
 import pytest
@@ -15,6 +13,8 @@ import pytest
 from bioetl.composition.runtime_builders._context_field_binding import (
     bind_context_fields,
 )
+
+pytestmark = pytest.mark.unit
 
 
 @dataclass(frozen=True, slots=True)
