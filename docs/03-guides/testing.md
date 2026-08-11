@@ -1139,7 +1139,7 @@ uv run python -m scripts.engineering.dev run-tests smoke
 ```bash
 uv run ruff check .
 uv run ruff format --check .
-uv run mypy src tests
+uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
 ```
 
 Проверяет доступность repo-supported lint/type toolchain (`ruff`, `mypy`) и
@@ -1152,7 +1152,7 @@ uv run mypy src tests
 
 1. Выполните `uv sync --extra dev --extra tests --extra tracing`, затем `uv run python -m scripts.ops setup-plugins`.
 1. В mixed Windows + WSL checkout пересоберите правильное OS-specific окружение через `setup_env_windows.ps1` или `setup_env_wsl.sh`, а затем запускайте `run_pytest.ps1|.sh` / `run_mypy.ps1|.sh`.
-1. Проверьте статус инструментов через `uv run ruff check . && uv run ruff format --check . && uv run mypy src tests`.
+1. Проверьте статус инструментов через `uv run ruff check . && uv run ruff format --check . && uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl`.
 
 В CI для этого используется не legacy `make` wrapper, а отдельный набор шагов в
 `.github/workflows/tests.yml`: короткий `smoke-check`, затем независимые

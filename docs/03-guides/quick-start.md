@@ -135,7 +135,7 @@ bash scripts/engineering/dev/run_mypy.sh
 # Check linting / typing
 uv run ruff check .
 uv run ruff format --check .
-uv run mypy src tests
+uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
 ```
 
 ```powershell
@@ -154,7 +154,7 @@ uv run mypy src tests
 | Verify dependencies      | `uv run python -m scripts.engineering.dev run-tests smoke`            |
 | Run tests via wrappers   | `run_pytest.ps1` / `run_pytest.sh`                                    |
 | Run all tests            | `uv run python -m scripts.engineering.dev run-tests cov`              |
-| Run linting              | `uv run ruff check . && uv run ruff format --check . && uv run mypy src tests` |
+| Run linting              | `uv run ruff check . && uv run ruff format --check . && uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl` |
 | Verify docs surface      | `uv run python -m scripts.docs check-links --links --specs --configs` |
 | Run sample pipeline      | `uv run python -m bioetl run --pipeline chembl_activity --limit 10 --no-cached-bronze` |
 | List pipelines           | `bioetl config list-pipelines`                                        |

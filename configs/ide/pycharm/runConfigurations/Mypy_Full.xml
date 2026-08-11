@@ -10,7 +10,7 @@
     <option name="ADD_SOURCE_ROOTS" value="false" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="mypy" />
-    <option name="PARAMETERS" value="src tests" />
+    <option name="PARAMETERS" value="--config-file pyproject.toml --strict --no-incremental src/bioetl" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="true" />
