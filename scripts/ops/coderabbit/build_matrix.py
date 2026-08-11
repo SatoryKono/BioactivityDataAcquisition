@@ -1,384 +1,293 @@
-"""Build CR-FULL scope matrix for 20260806-full campaign."""
+"""Build an exact-cover leaf matrix for a CodeRabbit residual campaign."""
 
 from __future__ import annotations
 
 import json
+import os
+import re
 import subprocess
 from collections import Counter
-from datetime import datetime, timezone, UTC
+from datetime import UTC, datetime
 from pathlib import Path
 
-ROOT = Path(".").resolve()
-OUT = ROOT / "reports/quality/coderabbit/20260806-full"
-OUT.mkdir(parents=True, exist_ok=True)
-CAP = 300
+ROOT = Path(__file__).resolve().parents[3]
+CAMPAIGN_DATE = os.environ.get(
+    "CODERABBIT_CAMPAIGN_DATE", datetime.now(UTC).strftime("%Y%m%d")
+)
+OUT = ROOT / "reports" / "quality" / "coderabbit" / CAMPAIGN_DATE
+CAP = int(os.environ.get("CODERABBIT_LEAF_CAP", "300"))
+BASE_REF = os.environ.get("CODERABBIT_BASE_REF", "origin/main")
 
 
-def git_ls(*paths: str) -> list[str]:
-    r = subprocess.run(
-        ["git", "ls-files", "-z", "--", *paths],
-        capture_output=True,
-        check=False,
-    )
-    if r.returncode != 0:
-        return []
-    return [x.decode("utf-8", "replace") for x in r.stdout.split(b"\0") if x]
+def _git(*args: str) -> bytes:
+    return subprocess.check_output(["git", "-C", str(ROOT), *args])
 
 
-def write_list(name: str, files: list[str]) -> Path:
-    p = OUT / name
-    p.write_text("\n".join(files) + ("\n" if files else ""), encoding="utf-8")
-    return p
+def tracked_files(base_sha: str) -> list[str]:
+    payload = _git("ls-tree", "-rz", "--name-only", base_sha)
+    return [
+        item.decode("utf-8", "surrogateescape") for item in payload.split(b"\0") if item
+    ]
+
+
+def safe_id(value: str) -> str:
+    return re.sub(r"[^a-zA-Z0-9_.-]+", "-", value).strip("-")
 
 
 def main() -> None:
+    OUT.mkdir(parents=True, exist_ok=True)
+    base_sha = _git("rev-parse", BASE_REF).decode().strip()
+    files = tracked_files(base_sha)
+    universe = set(files)
+    assigned: set[str] = set()
     leaves: list[dict[str, object]] = []
 
-    def add_dir(leaf_id: str, wave: str, rel: str, note: str = "") -> None:
-        files = git_ls(rel)
-        n = len(files)
-        if n == 0:
+    def add_files(leaf_id: str, wave: str, selected: list[str], note: str) -> None:
+        available = sorted(set(selected) - assigned)
+        if not available:
             return
-        if n <= CAP:
+        total_parts = (len(available) + CAP - 1) // CAP
+        for index, start in enumerate(range(0, len(available), CAP), 1):
+            chunk = available[start : start + CAP]
+            part_id = leaf_id if total_parts == 1 else f"{leaf_id}-{index:02d}"
+            manifest = OUT / f"_{safe_id(part_id)}.txt"
+            manifest.write_text("\n".join(chunk) + "\n", encoding="utf-8")
             leaves.append(
                 {
-                    "id": leaf_id,
+                    "id": part_id,
                     "wave": wave,
-                    "globs": [rel],
-                    "files": n,
-                    "under_cap": True,
-                    "dir": rel,
-                    "note": note,
-                }
-            )
-            return
-        # split by subdir
-        d = Path(rel)
-        subdirs = sorted([p for p in d.iterdir() if p.is_dir()]) if d.is_dir() else []
-        if subdirs:
-            child_files: set[str] = set()
-            for sd in subdirs:
-                srel = sd.as_posix()
-                sfiles = git_ls(srel)
-                child_files |= set(sfiles)
-                if not sfiles:
-                    continue
-                if len(sfiles) <= CAP:
-                    leaves.append(
-                        {
-                            "id": f"{leaf_id}-{sd.name}",
-                            "wave": wave,
-                            "globs": [srel],
-                            "files": len(sfiles),
-                            "under_cap": True,
-                            "dir": srel,
-                            "note": f"split from {leaf_id}",
-                        }
-                    )
-                else:
-                    mid = len(sfiles) // 2
-                    for i, chunk in enumerate([sfiles[:mid], sfiles[mid:]]):
-                        lp = write_list(f"_{leaf_id}_{sd.name}_{i + 1}.txt", chunk)
-                        leaves.append(
-                            {
-                                "id": f"{leaf_id}-{sd.name}-{i + 1}",
-                                "wave": wave,
-                                "globs": [f"{srel} half{i + 1}"],
-                                "files": len(chunk),
-                                "under_cap": True,
-                                "dir": None,
-                                "use_file_list": str(lp),
-                                "note": f"half split {srel}",
-                            }
-                        )
-            parent = sorted(set(git_ls(rel)) - child_files)
-            if parent:
-                for i in range(0, len(parent), CAP):
-                    chunk = parent[i : i + CAP]
-                    idx = i // CAP + 1
-                    lid = (
-                        f"{leaf_id}-root"
-                        if len(parent) <= CAP
-                        else f"{leaf_id}-root-{idx}"
-                    )
-                    lp = write_list(f"_{lid}.txt", chunk)
-                    leaves.append(
-                        {
-                            "id": lid,
-                            "wave": wave,
-                            "globs": [f"{rel} root"],
-                            "files": len(chunk),
-                            "under_cap": True,
-                            "dir": None,
-                            "use_file_list": str(lp),
-                            "note": f"root files of {rel}",
-                        }
-                    )
-            return
-        # half file list
-        mid = n // 2
-        for i, chunk in enumerate([files[:mid], files[mid:]]):
-            lp = write_list(f"_{leaf_id}_{i + 1}.txt", chunk)
-            leaves.append(
-                {
-                    "id": f"{leaf_id}-{i + 1}",
-                    "wave": wave,
-                    "globs": [f"{rel} half{i + 1}"],
                     "files": len(chunk),
-                    "under_cap": True,
-                    "dir": None,
-                    "use_file_list": str(lp),
-                    "note": f"half split {rel}",
+                    "under_cap": len(chunk) <= CAP,
+                    "selection": note,
+                    "file_list": str(manifest.relative_to(ROOT)),
                 }
             )
+            assigned.update(chunk)
 
-    def add_file_list(
-        leaf_id: str, wave: str, files: list[str], note: str = ""
-    ) -> None:
-        files = sorted(files)
-        if not files:
-            return
-        for i in range(0, len(files), CAP):
-            chunk = files[i : i + CAP]
-            idx = i // CAP + 1
-            lid = leaf_id if len(files) <= CAP else f"{leaf_id}-{idx}"
-            lp = write_list(f"_{lid}.txt", chunk)
-            leaves.append(
-                {
-                    "id": lid,
-                    "wave": wave,
-                    "globs": [note or leaf_id],
-                    "files": len(chunk),
-                    "under_cap": True,
-                    "dir": None,
-                    "use_file_list": str(lp),
-                    "note": note,
-                }
-            )
+    def prefix(leaf_id: str, wave: str, *roots: str, note: str = "") -> None:
+        selected = [
+            path
+            for path in files
+            if any(path == root or path.startswith(f"{root}/") for root in roots)
+        ]
+        add_files(leaf_id, wave, selected, note or ", ".join(roots))
 
-    # Wave A — domain packages
-    domain = Path("src/bioetl/domain")
-    domain_pkgs = (
-        sorted(
-            [p.name for p in domain.iterdir() if p.is_dir() and p.name != "__pycache__"]
+    # Wave D is carved out first so security-sensitive paths are reviewed once,
+    # not duplicated in their architecture/data-plane leaves.
+    security_name = re.compile(
+        r"(?:secret|credential|auth|token|redact|ssrf|pickle|subprocess|path_safety|salt)",
+        re.IGNORECASE,
+    )
+    security_roots = (
+        "src/bioetl/interfaces",
+        "src/bioetl/composition/bootstrap",
+        "src/bioetl/infrastructure/http",
+        "src/bioetl/infrastructure/storage",
+        "scripts",
+    )
+    security_files = [
+        path
+        for path in files
+        if path.startswith("tests/security/")
+        or (
+            any(path == root or path.startswith(f"{root}/") for root in security_roots)
+            and security_name.search(path) is not None
         )
-        if domain.exists()
-        else []
-    )
-    all_domain = set(git_ls("src/bioetl/domain"))
-    pkg_files: set[str] = set()
-    for pkg in domain_pkgs:
-        rel = f"src/bioetl/domain/{pkg}"
-        add_dir(f"S01-domain-{pkg}", "A", rel)
-        pkg_files |= set(git_ls(rel))
-    add_file_list(
-        "S01-domain-residual-root",
-        "A",
-        sorted(all_domain - pkg_files),
-        "domain residual root",
+    ]
+    add_files(
+        "S-D-security-residual",
+        "D",
+        security_files,
+        "security-relevant interfaces/composition/infra/scripts plus tests/security",
     )
 
-    add_dir("S02-app-core", "A", "src/bioetl/application/core")
-    add_dir(
+    # Wave A — architecture and core code.
+    domain_roots = sorted(
+        {
+            "/".join(path.split("/")[:4])
+            for path in files
+            if path.startswith("src/bioetl/domain/") and len(path.split("/")) >= 5
+        }
+    )
+    for root in domain_roots:
+        prefix(f"S01-domain-{safe_id(Path(root).name)}", "A", root)
+    prefix("S01-domain-residual-root", "A", "src/bioetl/domain")
+    # Reserve the data-plane pipeline subtree before the application catch-all.
+    prefix("S05-app-pipelines", "B", "src/bioetl/application/pipelines")
+    prefix("S02-app-core", "A", "src/bioetl/application/core")
+    prefix(
         "S03-app-control-plane", "A", "src/bioetl/application/services/control_plane"
     )
-    svc_all = set(git_ls("src/bioetl/application/services"))
-    svc_cp = set(git_ls("src/bioetl/application/services/control_plane"))
-    add_file_list(
-        "S04-app-services-other", "A", sorted(svc_all - svc_cp), "services excl CP"
-    )
+    prefix("S04-app-services-other", "A", "src/bioetl/application/services")
+    prefix("S04b-app-residual", "A", "src/bioetl/application")
+    prefix("S09-composition", "A", "src/bioetl/composition")
+    prefix("S10-interfaces-cli", "A", "src/bioetl/interfaces/cli")
+    prefix("S11-interfaces-http", "A", "src/bioetl/interfaces/http")
+    prefix("S11b-interfaces-residual", "A", "src/bioetl/interfaces")
 
-    app_all = set(git_ls("src/bioetl/application"))
-    app_known = (
-        set(git_ls("src/bioetl/application/core"))
-        | set(git_ls("src/bioetl/application/services"))
-        | set(git_ls("src/bioetl/application/pipelines"))
-    )
-    add_file_list(
-        "S04b-app-residual", "A", sorted(app_all - app_known), "application residual"
-    )
+    # Wave B — data plane and configuration.
+    prefix("S07-infra-http", "B", "src/bioetl/infrastructure/http")
+    prefix("S07-infra-storage", "B", "src/bioetl/infrastructure/storage")
+    prefix("S07-infra-delta", "B", "src/bioetl/infrastructure/delta")
+    prefix("S16-configs-quality", "B", "configs/quality")
+    prefix("S16b-configs-other", "B", "configs")
 
-    add_dir("S09-composition", "A", "src/bioetl/composition")
-    add_dir("S10-interfaces-cli", "A", "src/bioetl/interfaces/cli")
-    add_dir("S11-interfaces-http", "A", "src/bioetl/interfaces/http")
-    iface_all = set(git_ls("src/bioetl/interfaces"))
-    iface_known = set(git_ls("src/bioetl/interfaces/cli")) | set(
-        git_ls("src/bioetl/interfaces/http")
-    )
-    add_file_list(
-        "S11b-interfaces-residual",
-        "A",
-        sorted(iface_all - iface_known),
-        "interfaces residual",
-    )
+    # Wave C — adapters, resilience, observability, infrastructure residual.
+    prefix("S06-infra-adapters", "C", "src/bioetl/infrastructure/adapters")
+    prefix("S08-infra-observability", "C", "src/bioetl/infrastructure/observability")
+    prefix("S08b-infra-residual", "C", "src/bioetl/infrastructure")
 
-    # Wave B
-    add_dir("S05-app-pipelines", "B", "src/bioetl/application/pipelines")
-    add_dir("S07-infra-http", "B", "src/bioetl/infrastructure/http")
-    add_dir("S07-infra-storage", "B", "src/bioetl/infrastructure/storage")
-    add_dir("S07-infra-delta", "B", "src/bioetl/infrastructure/delta")
-    add_dir("S16-configs-quality", "B", "configs/quality")
-    cfg_all = set(git_ls("configs"))
-    cfg_q = set(git_ls("configs/quality"))
-    add_file_list(
-        "S16b-configs-other", "B", sorted(cfg_all - cfg_q), "configs excl quality"
+    # Wave E — normative contracts, dashboards, and CI quality surfaces.
+    prefix("S17-docs-00-project", "E", "docs/00-project")
+    prefix("S17-docs-decisions", "E", "docs/02-architecture/decisions")
+    dashboard_docs = [
+        path
+        for path in files
+        if path.startswith("docs/")
+        and (
+            path.startswith("docs/03-guides/dashboards/")
+            or "grafana" in path.lower()
+            or "dashboard" in path.lower()
+        )
+    ]
+    add_files(
+        "S18-dashboard-docs", "E", dashboard_docs, "dashboard/grafana documentation"
     )
+    prefix("S18-grafana", "E", "grafana")
+    prefix("S19-github-workflows", "E", ".github/workflows")
+    prefix("S19b-github-actions", "E", ".github/actions")
 
-    # Wave C
-    add_dir("S06-infra-adapters", "C", "src/bioetl/infrastructure/adapters")
-    add_dir("S08-infra-observability", "C", "src/bioetl/infrastructure/observability")
-    infra_all = set(git_ls("src/bioetl/infrastructure"))
-    infra_known: set[str] = set()
-    for p in ("adapters", "observability", "http", "storage", "delta"):
-        infra_known |= set(git_ls(f"src/bioetl/infrastructure/{p}"))
-    add_file_list(
-        "S08b-infra-residual",
-        "C",
-        sorted(infra_all - infra_known),
-        "infra residual",
-    )
+    # Wave F — test honesty.
+    prefix("S12-tests-architecture", "F", "tests/architecture")
+    prefix("S13-tests-unit-domain", "F", "tests/unit/domain")
+    prefix("S14-tests-unit-application", "F", "tests/unit/application")
+    prefix("S14b-tests-unit-infrastructure", "F", "tests/unit/infrastructure")
+    prefix("S15-tests-integration", "F", "tests/integration")
+    prefix("S15b-tests-unit-scripts", "F", "tests/unit/scripts")
+    prefix("S15c-tests-residual", "F", "tests")
 
-    # Wave D — security-adjacent scripts (if present)
-    for name, path in (
-        ("S-D-scripts-security", "scripts/security"),
-        ("S-D-scripts-ops", "scripts/ops"),
-        ("S-D-scripts-ci", "scripts/ci"),
+    # Residual scripts are kept as semantic subtrees.
+    for script_root in (
+        "scripts/engineering",
+        "scripts/ai",
+        "scripts/ops",
+        "scripts/docs",
+        "scripts/schema",
+        "scripts/memory",
+        "scripts/diagrams",
     ):
-        add_dir(name, "D", path)
+        prefix(f"S-R-{safe_id(script_root)}", "R", script_root)
+    prefix("S-R-scripts-residual", "R", "scripts")
 
-    # Wave E
-    add_dir("S17-docs-00-project", "E", "docs/00-project")
-    add_dir("S17-docs-decisions", "E", "docs/02-architecture/decisions")
-    add_dir("S18-grafana", "E", "grafana")
-    add_dir("S19-github-workflows", "E", ".github/workflows")
+    # Exact catch-all: group remaining paths by top-level/second-level prefix,
+    # then cap each leaf. This covers src/memory, remaining docs/reports,
+    # agent runtimes, packaging, root files, and any new surface.
+    remaining = sorted(universe - assigned)
+    groups: dict[str, list[str]] = {}
+    for path in remaining:
+        parts = path.split("/")
+        key = "/".join(parts[:2]) if len(parts) > 1 else "root-files"
+        groups.setdefault(key, []).append(path)
+    residual_index = 1
+    packed: list[str] = []
+    packed_groups: list[str] = []
 
-    # Wave F
-    add_dir("S12-tests-architecture", "F", "tests/architecture")
-    add_dir("S13-tests-unit-domain", "F", "tests/unit/domain")
-    add_dir("S14-tests-unit-application", "F", "tests/unit/application")
-    add_dir("S14b-tests-unit-infrastructure", "F", "tests/unit/infrastructure")
-    add_dir("S15-tests-integration", "F", "tests/integration")
-    add_dir("S15b-tests-unit-scripts", "F", "tests/unit/scripts")
-    tests_all = set(git_ls("tests"))
-    tests_known: set[str] = set()
-    for p in (
-        "architecture",
-        "unit/domain",
-        "unit/application",
-        "unit/infrastructure",
-        "integration",
-        "unit/scripts",
-    ):
-        tests_known |= set(git_ls(f"tests/{p}"))
-    add_file_list(
-        "S15c-tests-residual",
-        "F",
-        sorted(tests_all - tests_known),
-        "tests residual",
-    )
+    def flush_packed() -> None:
+        nonlocal residual_index, packed, packed_groups
+        if not packed:
+            return
+        add_files(
+            f"S-R-catchall-{residual_index:02d}",
+            "R",
+            packed,
+            "residual catch-all: " + ", ".join(packed_groups),
+        )
+        residual_index += 1
+        packed = []
+        packed_groups = []
 
-    # Residual R
-    add_dir("S20-scripts", "R", "scripts")
-    src_all = set(git_ls("src/bioetl"))
-    src_known: set[str] = set()
-    for p in ("domain", "application", "composition", "interfaces", "infrastructure"):
-        src_known |= set(git_ls(f"src/bioetl/{p}"))
-    add_file_list(
-        "S00-src-bioetl-residual",
-        "R",
-        sorted(src_all - src_known),
-        "src/bioetl residual",
-    )
+    for group, grouped_files in sorted(groups.items()):
+        if len(grouped_files) > CAP:
+            flush_packed()
+            add_files(
+                f"S-R-{safe_id(group)}",
+                "R",
+                grouped_files,
+                f"residual catch-all: {group}",
+            )
+            continue
+        if packed and len(packed) + len(grouped_files) > CAP:
+            flush_packed()
+        packed.extend(grouped_files)
+        packed_groups.append(group)
+    flush_packed()
 
-    sha = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    duplicates = sum(int(leaf["files"]) for leaf in leaves) - len(assigned)
+    missing = sorted(universe - assigned)
+    extra = sorted(assigned - universe)
+    over_cap = [leaf["id"] for leaf in leaves if not leaf["under_cap"]]
+    coverage_ok = not missing and not extra and duplicates == 0 and not over_cap
+    if not coverage_ok:
+        raise RuntimeError(
+            f"matrix coverage failure missing={len(missing)} extra={len(extra)} "
+            f"duplicates={duplicates} over_cap={over_cap}"
+        )
+
     try:
-        cr_ver = subprocess.check_output(
-            ["coderabbit", "--version"], text=True, stderr=subprocess.STDOUT
+        cr_version = subprocess.check_output(
+            ["/home/fedor/.local/bin/coderabbit", "--version"], text=True
         ).strip()
-    except Exception as exc:
-        cr_ver = f"error: {exc}"
+    except (OSError, subprocess.CalledProcessError) as exc:
+        cr_version = f"unavailable: {exc}"
 
-    over = [leaf for leaf in leaves if not leaf.get("under_cap")]
     matrix = {
-        "campaign": "CR-FULL-20260806-full",
-        "base_sha": sha,
+        "campaign": f"CR-FULL-{CAMPAIGN_DATE}",
+        "base_ref": BASE_REF,
+        "base_sha": base_sha,
         "created_utc": datetime.now(UTC).isoformat(),
-        "coderabbit": cr_ver,
+        "coderabbit": cr_version,
         "cap": CAP,
+        "tracked_files": len(files),
+        "assigned_files": len(assigned),
+        "duplicate_assignments": duplicates,
+        "missing_files": missing,
+        "coverage_ok": coverage_ok,
         "leaf_count": len(leaves),
-        "total_files_assigned": sum(
-            int(leaf["files"]) if isinstance(leaf["files"], int) else 0
-            for leaf in leaves
-        ),
         "leaves": leaves,
     }
     (OUT / "01-scope-matrix.json").write_text(
-        json.dumps(matrix, indent=2, ensure_ascii=False), encoding="utf-8"
+        json.dumps(matrix, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
 
     lines = [
-        "# CodeRabbit full scope matrix — 20260806-full",
+        f"# CodeRabbit full scope matrix — {CAMPAIGN_DATE}",
         "",
-        f"**BASE_SHA:** `{sha}`",
-        f"**CodeRabbit:** {cr_ver}",
-        f"**Cap:** ≤{CAP} files per leaf",
-        f"**Leaves:** {len(leaves)} (non-empty)",
-        f"**Sum file assignments:** {sum(int(leaf['files']) if isinstance(leaf['files'], int) else 0 for leaf in leaves)}",
+        f"- **BASE_SHA:** `{base_sha}`",
+        f"- **CodeRabbit:** `{cr_version}`",
+        f"- **Cap:** ≤{CAP} files per leaf",
+        f"- **Leaves:** {len(leaves)}",
+        f"- **Tracked / assigned:** {len(files)} / {len(assigned)}",
+        f"- **Duplicate assignments:** {duplicates}",
+        f"- **Coverage exact:** `{coverage_ok}`",
         "",
-        "| id | wave | files | under_cap | dir / selection |",
-        "|----|------|------:|-----------|-----------------|",
+        "| leaf_id | wave | files | under_cap | selection |",
+        "|---|---:|---:|---|---|",
     ]
-    for leaf in sorted(leaves, key=lambda x: (x["wave"], x["id"])):
-        globs_raw = leaf.get("globs")
-        globs_list: list[object] = globs_raw if isinstance(globs_raw, list) else []
-        sel = leaf.get("dir") or (
-            Path(str(leaf["use_file_list"])).name
-            if leaf.get("use_file_list")
-            else ",".join(str(g) for g in globs_list[:60])
-        )
+    for leaf in sorted(leaves, key=lambda item: (str(item["wave"]), str(item["id"]))):
+        selection = str(leaf["selection"]).replace("|", "\\|")
         lines.append(
-            f"| `{leaf['id']}` | {leaf['wave']} | {leaf['files']} | {leaf['under_cap']} | `{sel}` |"
+            f"| `{leaf['id']}` | {leaf['wave']} | {leaf['files']} | "
+            f"`{str(leaf['under_cap']).lower()}` | {selection} |"
         )
-    lines.append("")
-    if over:
-        lines.append("## OVER_CAP")
-        for leaf in over:
-            lines.append(f"- {leaf['id']}: {leaf['files']}")
-        lines.append("")
-    (OUT / "01-scope-matrix.md").write_text("\n".join(lines), encoding="utf-8")
+    (OUT / "01-scope-matrix.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
-    pre = f"""# CR-FULL preflight — 20260806-full
-
-- **UTC:** {datetime.now(UTC).isoformat()}
-- **BASE_SHA:** `{sha}`
-- **Branch:** main
-- **CodeRabbit CLI:** {cr_ver}
-- **Auth:** API key (preflight)
-- **Artifacts:** `reports/quality/coderabbit/20260806-full/`
-- **Prior de-dupe ref:** `reports/quality/coderabbit/20260806/`
-- **Config:** `.coderabbit.yaml` assertive
-- **Leaves planned:** {len(leaves)}
-- **Over cap remaining:** {len(over)}
-
-## Constraints
-- ≤{CAP} files/leaf; sequential CLI; no tech-debt budget growth; no .env edits
-- GH issue for every accepted finding (all severities)
-
-## Next
-Phase 1: sequential coderabbit review per leaf
-"""
-    (OUT / "00-preflight.md").write_text(pre, encoding="utf-8")
-
+    max_leaf = max(int(leaf["files"]) for leaf in leaves)
     print(
-        f"leaves={len(leaves)} over_cap={len(over)} "
-        f"sum={sum(int(leaf['files']) if isinstance(leaf['files'], int) else 0 for leaf in leaves)}"
+        f"base={base_sha} tracked={len(files)} assigned={len(assigned)} "
+        f"leaves={len(leaves)} max_leaf={max_leaf} duplicates={duplicates} coverage={coverage_ok}"
     )
-    for w, n in sorted(Counter(str(leaf["wave"]) for leaf in leaves).items()):
-        print(f"  wave {w}: {n}")
-    if over:
-        print("OVER:")
-        for leaf in over:
-            print(f"  {leaf['id']} {leaf['files']}")
+    for wave, count in sorted(Counter(str(leaf["wave"]) for leaf in leaves).items()):
+        print(f"wave {wave}: {count}")
 
 
 if __name__ == "__main__":

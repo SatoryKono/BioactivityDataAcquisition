@@ -1,5 +1,8 @@
 groups:
+  # Large recording monogroup (~140 rules). Evaluate every 30s (not global 15s)
+  # to cut same-timestamp ingest pressure and peak RSS on 32 GiB Desktop hosts.
   - name: bioetl_runtime_dashboard_recording
+    interval: 30s
     rules:
       - record: bioetl_runtime_alert_condition_pipeline_preflight_failed_15m
         expr: (max by (pipeline) (max_over_time(bioetl_pipeline_health_check_passed{component="data_source"}[15m])) == bool 0) or ((sum by (pipeline) (increase(bioetl_pipeline_runs_total[15m])) > bool 0) unless on (pipeline) max by (pipeline) (max_over_time(bioetl_pipeline_health_check_passed{component="data_source"}[15m])))
@@ -497,6 +500,37 @@ groups:
       - record: bioetl_runtime_current_status
         expr: (bioetl_runtime_current_failure_signals_15m * 2) or (bioetl_runtime_current_degraded_signals_15m unless on (pipeline, run_type) bioetl_runtime_current_failure_signals_15m) or (((bioetl_runtime_current_activity_15m * 0) unless on (pipeline, run_type) bioetl_runtime_current_failure_signals_15m) unless on (pipeline, run_type) bioetl_runtime_current_degraded_signals_15m)
 
+      # Partial rule evaluation errors do NOT crash Prometheus, but they skip
+      # recording samples silently (gaps in dashboards/alerts). Surface them.
+      # rule_group label shape: "<file>;<group>" (host or /etc/prometheus/rules/).
+      - record: bioetl_prometheus_rule_evaluation_failures_10m
+        expr: >-
+          sum(
+            increase(
+              prometheus_rule_evaluation_failures_total{
+                rule_group=~".*bioetl.*\\.yml;.*"
+              }[10m]
+            )
+          ) or vector(0)
+
+      - record: bioetl_prometheus_rule_iterations_missed_10m
+        expr: >-
+          sum(
+            increase(
+              prometheus_rule_group_iterations_missed_total{
+                rule_group=~".*bioetl.*\\.yml;.*"
+              }[10m]
+            )
+          ) or vector(0)
+
+      - record: bioetl_prometheus_rule_partial_error_active_10m
+        expr: >-
+          clamp_max(
+            (bioetl_prometheus_rule_evaluation_failures_10m > bool 0)
+            + (bioetl_prometheus_rule_iterations_missed_10m > bool 0),
+            1
+          )
+
       - record: bioetl_runtime_trust_gap_status_10m
         expr: >-
           clamp_max(
@@ -507,9 +541,27 @@ groups:
             )
             + on() group_left()
             (
-              (sum(increase(prometheus_rule_evaluation_failures_total{rule_group=~".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$"}[10m])) > bool 0)
-              or ((time() - max(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$"})) > bool 60)
-              or absent(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$"})
+              # Any BioETL rule group: eval failures, missed iterations, or stale eval.
+              # Filter form (== 1 / > 120) so false does not mask `or absent(...)`.
+              # Terminal `or vector(0)` keeps a 0-sample so the group_left join
+              # does not drop the left-hand metrics-absence signal when healthy.
+              (bioetl_prometheus_rule_partial_error_active_10m == 1)
+              or (
+                (
+                  time()
+                  - max(
+                    prometheus_rule_group_last_evaluation_timestamp_seconds{
+                      rule_group=~".*bioetl.*\\.yml;.*"
+                    }
+                  )
+                ) > 120
+              )
+              or absent(
+                prometheus_rule_group_last_evaluation_timestamp_seconds{
+                  rule_group=~".*bioetl.*\\.yml;.*"
+                }
+              )
+              or vector(0)
             ),
             2
           )
@@ -888,6 +940,7 @@ groups:
           )
 
   - name: bioetl_monitoring_stack_observability
+    interval: 30s
     rules:
       - alert: BioETLMetricsEndpointUnavailable
         expr: absent_over_time(bioetl_pipeline_runs_total[10m])
@@ -976,7 +1029,32 @@ groups:
           description: "Grafana image renderer metrics endpoint is unavailable for instance={{ $labels.instance }}; screenshot evidence and reviewed render workflows are blocked."
           runbook: "docs/05-operations/runbooks/observability-checklist.md"
 
+      # Prometheus keeps serving when individual rules fail; series simply stop
+      # updating. These alerts make partial rule errors operator-visible.
+      - alert: BioETLPrometheusRuleEvaluationFailures
+        expr: bioetl_prometheus_rule_evaluation_failures_10m > 0
+        for: 5m
+        labels:
+          severity: warning
+          owner: bioetl-observability
+        annotations:
+          summary: "Prometheus BioETL rule evaluation failures (silent metric gaps)"
+          description: "One or more BioETL recording/alert rules failed evaluation in the last 10m ({{ $value }} failures). Prometheus stays up but affected series are skipped. Inspect /api/v1/rules lastError and prometheus_rule_evaluation_failures_total{rule_group=~\".*bioetl.*\"}."
+          runbook: "docs/05-operations/runbooks/observability-checklist.md"
+
+      - alert: BioETLPrometheusRuleIterationsMissed
+        expr: bioetl_prometheus_rule_iterations_missed_10m > 0
+        for: 10m
+        labels:
+          severity: warning
+          owner: bioetl-observability
+        annotations:
+          summary: "Prometheus BioETL rule group iterations missed (silent metric gaps)"
+          description: "BioETL rule groups missed evaluation iterations in the last 10m ({{ $value }}). Usually means a group is too slow for its interval; recording samples are skipped until the group catches up."
+          runbook: "docs/05-operations/runbooks/observability-checklist.md"
+
   - name: bioetl_optional_docker_runtime_stability
+    interval: 30s
     rules:
       - alert: BioETLDockerRuntimeIncident
         expr: bioetl_docker_runtime_primary_cause > 0
@@ -1001,6 +1079,7 @@ groups:
           runbook: "docs/05-operations/runbooks/docker-stability.md"
 
   - name: bioetl_pipeline_runtime_observability
+    interval: 30s
     rules:
       - alert: BioETLPipelinePreflightDataSourceFailed
         expr: (max by (pipeline) (max_over_time(bioetl_pipeline_health_check_passed{component="data_source"}[15m])) == 0) or ((sum by (pipeline) (increase(bioetl_pipeline_runs_total[15m])) > 0) unless on (pipeline) max by (pipeline) (max_over_time(bioetl_pipeline_health_check_passed{component="data_source"}[15m])))
@@ -1114,6 +1193,7 @@ groups:
           runbook: "docs/05-operations/runbooks/observability-checklist.md"
 
   - name: bioetl_control_plane_traceability_observability
+    interval: 30s
     rules:
       - alert: BioETLControlPlaneManifestWriteFailed
         expr: sum by (pipeline, run_type) (increase(bioetl_control_plane_manifest_writes_total{status="failed"}[15m])) > 0
@@ -1276,6 +1356,7 @@ groups:
           runbook: "docs/05-operations/runbooks/observability-checklist.md"
 
   - name: bioetl_dq_observability
+    interval: 30s
     rules:
       - alert: BioETLDQSoftThresholdExceeded
         expr: sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded_total[15m])) > 0
@@ -1378,6 +1459,7 @@ groups:
           runbook: "docs/05-operations/runbooks/pipeline-failure-dq.md"
 
   - name: bioetl_provider_health_observability
+    interval: 30s
     rules:
       - alert: BioETLProviderHealthCheckFailuresDetected
         expr: sum by (provider) (increase(bioetl_health_check_failures_total[10m])) > 0

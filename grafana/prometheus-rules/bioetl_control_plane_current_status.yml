@@ -17,7 +17,9 @@
 
 groups:
   - name: bioetl_control_plane_current_status
-    interval: 15s
+    # 30s: avoids racing the dashboard monogroup at the same evaluation tick
+    # (same-timestamp multi-write WARN under load).
+    interval: 30s
     rules:
       # Unique (pipeline, run_type) membership. Value is always 1.
       - record: bioetl_control_plane_run_type_universe

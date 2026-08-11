@@ -1,0 +1,6 @@
+scripts/memory/README.md
+scripts/memory/__init__.py
+scripts/memory/__main__.py
+scripts/memory/prompts/print_seed.sh
+scripts/memory/run_workflow.sh
+scripts/memory/setup/wsl_startup.sh

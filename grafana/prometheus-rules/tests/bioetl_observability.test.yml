@@ -1289,3 +1289,58 @@ tests:
               summary: "DQ current-status recording rule is missing"
               description: "DQ monitoring is enabled but bioetl_dq_current_status is absent for at least one pipeline; first-screen DQ verdict panels may read UNKNOWN without raising threshold alerts."
               runbook: "docs/05-operations/runbooks/pipeline-failure-dq.md"
+
+  - name: prometheus-rule-evaluation-failures-surface-silent-gaps
+    interval: 1m
+    input_series:
+      - series: 'prometheus_rule_evaluation_failures_total{rule_group="grafana/prometheus-rules/bioetl_observability.yml;bioetl_runtime_dashboard_recording"}'
+        values: "0+1x20"
+      - series: 'prometheus_rule_group_iterations_missed_total{rule_group="grafana/prometheus-rules/bioetl_observability.yml;bioetl_runtime_dashboard_recording"}'
+        values: "0+0x20"
+    promql_expr_test:
+      - expr: bioetl_prometheus_rule_evaluation_failures_10m
+        eval_time: 15m
+        exp_samples:
+          - labels: '{__name__="bioetl_prometheus_rule_evaluation_failures_10m"}'
+            value: 10
+      - expr: bioetl_prometheus_rule_partial_error_active_10m
+        eval_time: 15m
+        exp_samples:
+          - labels: '{__name__="bioetl_prometheus_rule_partial_error_active_10m"}'
+            value: 1
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: BioETLPrometheusRuleEvaluationFailures
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              owner: bioetl-observability
+            exp_annotations:
+              summary: Prometheus BioETL rule evaluation failures (silent metric gaps)
+              description: 'One or more BioETL recording/alert rules failed evaluation in the last 10m (10 failures). Prometheus stays up but affected series are skipped. Inspect /api/v1/rules lastError and prometheus_rule_evaluation_failures_total{rule_group=~".*bioetl.*"}.'
+              runbook: docs/05-operations/runbooks/observability-checklist.md
+
+  - name: prometheus-rule-iterations-missed-surface-silent-gaps
+    interval: 1m
+    input_series:
+      - series: 'prometheus_rule_evaluation_failures_total{rule_group="grafana/prometheus-rules/bioetl_observability.yml;bioetl_runtime_dashboard_recording"}'
+        values: "0+0x20"
+      - series: 'prometheus_rule_group_iterations_missed_total{rule_group="grafana/prometheus-rules/bioetl_observability.yml;bioetl_runtime_dashboard_recording"}'
+        values: "0+1x20"
+    promql_expr_test:
+      - expr: bioetl_prometheus_rule_iterations_missed_10m
+        eval_time: 15m
+        exp_samples:
+          - labels: '{__name__="bioetl_prometheus_rule_iterations_missed_10m"}'
+            value: 10
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: BioETLPrometheusRuleIterationsMissed
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              owner: bioetl-observability
+            exp_annotations:
+              summary: Prometheus BioETL rule group iterations missed (silent metric gaps)
+              description: BioETL rule groups missed evaluation iterations in the last 10m (10). Usually means a group is too slow for its interval; recording samples are skipped until the group catches up.
+              runbook: docs/05-operations/runbooks/observability-checklist.md
