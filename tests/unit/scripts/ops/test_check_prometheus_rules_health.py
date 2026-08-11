@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
-from types import SimpleNamespace
 
 import pytest
 
@@ -124,7 +122,9 @@ def test_check_rules_health_fails_on_metric_signal(
     assert report.evaluation_failures_10m == 3.0
 
 
-def test_main_json_exit_code(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
+def test_main_json_exit_code(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
     monkeypatch.setattr(
         mod,
         "check_rules_health",

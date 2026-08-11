@@ -1147,6 +1147,9 @@ repo_backed_unit_test_exceptions:
     - path: tests/unit/repo_backed/scripts/ops/docker/test_check_network_preconditions.py
       target_lane: repo-backed-unit
       protected_surface: scripts/ops/runtime/docker/check_network_preconditions.py
+    - path: tests/unit/repo_backed/scripts/ops/docker/test_preflight_promql_gate.py
+      target_lane: repo-backed-unit
+      protected_surface: scripts/ops/runtime/docker/docker_runtime_preflight.py + grafana/prometheus-rules/*.yml
     - path: tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py
       target_lane: repo-backed-unit
       protected_surface: scripts/ops/runtime/docker/runtime_manager.py

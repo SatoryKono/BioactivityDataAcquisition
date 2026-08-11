@@ -321,12 +321,10 @@ def test_monitoring_compose_exposes_ops_http_soft_gate_env() -> None:
     )
     # Empty compose defaults: bootstrap picks soft 5×1s or fail-closed 30×2s.
     assert any(
-        "BIOETL_GRAFANA_OPS_READY_ATTEMPTS=" in item
-        for item in grafana_environment
+        "BIOETL_GRAFANA_OPS_READY_ATTEMPTS=" in item for item in grafana_environment
     )
     assert any(
-        "BIOETL_GRAFANA_OPS_READY_SLEEP_SEC=" in item
-        for item in grafana_environment
+        "BIOETL_GRAFANA_OPS_READY_SLEEP_SEC=" in item for item in grafana_environment
     )
 
 

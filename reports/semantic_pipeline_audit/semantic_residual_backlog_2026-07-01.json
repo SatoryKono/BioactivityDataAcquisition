@@ -2,7 +2,7 @@
   "generated_at": "2026-07-01T00:00:00Z",
   "source_date": "2026-07-01",
   "summary": {
-    "blocking_task_count": 1,
+    "blocking_task_count": 0,
     "clusters": 290,
     "normalization_counts": {
       "COMPATIBLE": 887,
@@ -10,8 +10,7 @@
     },
     "pair_rows": 3245,
     "risk_counts": {
-      "HIGH": 1,
-      "LOW": 3244
+      "LOW": 3245
     },
     "semantic_status_counts": {
       "EXACT": 2742,
@@ -19,8 +18,7 @@
       "WEAK": 435
     },
     "typing_counts": {
-      "COMPATIBLE": 663,
-      "CONFLICTING": 1,
+      "COMPATIBLE": 664,
       "IDENTICAL": 2581
     },
     "validation_counts": {
@@ -34,7 +32,7 @@
       "gate": "uv run python -m scripts.engineering.qa check-semantic-pair-budget --check --json",
       "id": "semantic_drift_budget",
       "priority": "P0",
-      "row_count": 1,
+      "row_count": 0,
       "status": "closed"
     },
     {
@@ -42,7 +40,7 @@
       "gate": "uv run python -m scripts.engineering.qa check-semantic-pair-budget --check --json",
       "id": "hard_status_mismatch_budget",
       "priority": "P0",
-      "row_count": 1,
+      "row_count": 0,
       "status": "closed"
     },
     {
@@ -266,7 +264,7 @@
       "gate": "uv run python -m scripts.engineering.qa check-semantic-pair-budget --check --json",
       "id": "compatible_typing_ratchet",
       "priority": "P2",
-      "row_count": 663,
+      "row_count": 664,
       "status": "ratcheted",
       "top_clusters": [
         {

@@ -1,42 +1,51 @@
 {
-  "snapshot_date": "2026-07-28",
-  "status": "implemented_local_closeable",
-  "budget_policy": "no_growth_ratchet_only",
+  "schema_version": "tech-debt-issues-6032-6034-6037-closeout-v1",
+  "generated_on": "2026-07-07",
   "issues": [
     {
-      "issue": "#6032",
-      "theme": "Hotspot family baseline governance",
-      "debt_types": ["Hotspot", "Governance gap", "Architecture debt"],
-      "action": "Governed hotspot family baseline with reviewed baselines and bounded growth budgets.",
-      "risk": "medium",
-      "evidence": [
-        "reports/quality/hotspot-family-baseline.json",
-        "configs/quality/debt_scorecard.yaml::hotspot_family_ratchets",
-        "tests/architecture/test_tech_debt_issues_6032_6034_6037_closeout.py"
-      ]
+      "number": 6032,
+      "status": "closeable-local-evidence",
+      "title": "Reduce application_core fan-in saturation before further runtime growth",
+      "evidence": {
+        "hotspot_family_baseline": "reports/quality/hotspot-family-baseline.json",
+        "family": "application_core",
+        "opening_max_internal_fan_in": 10,
+        "current_max_internal_fan_in": 7,
+        "current_max_internal_fan_in_module": "bioetl.application.core.span_helpers",
+        "legacy_hotspot_module": "bioetl.application.core.batch_runtime_failure_policy",
+        "di_guard": "tests/architecture/test_di_runtime_inline_construction.py::test_application_runtime_inline_dependency_construction_is_zero"
+      },
+      "closeout_rationale": "application_core no longer sits at its reviewed max_internal_fan_in budget; operation-only exception consumers now import the narrower batch_operation_errors owner while RF-005 runtime failure-policy users keep their compatibility facade."
     },
     {
-      "issue": "#6034",
-      "theme": "Runtime SCC governance",
-      "debt_types": ["Architecture debt", "Governance gap", "Complexity debt"],
-      "action": "Governed runtime SCC with proper budget tracking and review alignment.",
-      "risk": "medium",
-      "evidence": [
-        "tests/architecture/test_runtime_import_scc.py",
-        "tests/architecture/test_tech_debt_issues_6032_6034_6037_closeout.py"
-      ]
+      "number": 6034,
+      "status": "closeable-local-evidence",
+      "title": "Tighten composition runtime builder seams and preserve DI-only responsibilities",
+      "evidence": {
+        "hotspot_family_baseline": "reports/quality/hotspot-family-baseline.json",
+        "composition_bootstrap_runtime_current_max_internal_fan_in": 2,
+        "composition_bootstrap_runtime_budget": 3,
+        "composition_runtime_builders_current_max_internal_fan_in": 4,
+        "composition_runtime_builders_budget": 5,
+        "run_manifest_support_internal_importers": 3,
+        "di_guard": "tests/architecture/test_di_runtime_inline_construction.py::test_application_runtime_inline_dependency_construction_is_zero"
+      },
+      "closeout_rationale": "composition_bootstrap_runtime gained actual fan-in headroom below budget, and the opening run_manifest_support builder hotspot dropped to three direct internal importers without growing composition_runtime_builders overall fan-in."
     },
     {
-      "issue": "#6037",
-      "theme": "Internal fan-in governance",
-      "debt_types": ["Architecture debt", "Governance gap", "Complexity debt"],
-      "action": "Governed internal fan-in with proper hotspot family tracking and bounded growth.",
-      "risk": "medium",
-      "evidence": [
-        "reports/quality/hotspot-family-baseline.json",
-        "scripts/engineering/qa/hotspot_family_metrics.py",
-        "tests/architecture/test_tech_debt_issues_6032_6034_6037_closeout.py"
-      ]
+      "number": 6037,
+      "status": "closeable-local-evidence",
+      "title": "Enforce freshness and burn down reviewed runtime import SCCs",
+      "evidence": {
+        "runtime_scc_test": "tests/architecture/test_runtime_import_scc.py",
+        "reviewed_runtime_scc_budget_max": 4,
+        "accepted_runtime_scc_count": 3,
+        "freshness_floor": "2026-07-01",
+        "refreshed_scc_owner": "interfaces.http.control_plane_identity",
+        "refreshed_scc_review_date": "2026-07-07",
+        "refreshed_scc_linked_issue": "#6037"
+      },
+      "closeout_rationale": "runtime SCC acceptances now parse and enforce a freshness floor; the stale control-plane identity SCC acceptance is refreshed under #6037 and the accepted SCC inventory did not grow."
     }
   ]
 }
