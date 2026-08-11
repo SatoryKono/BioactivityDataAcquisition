@@ -51,8 +51,14 @@ class CompositeLineageMetadata:
 
     def __post_init__(self) -> None:
         """Convert types for immutability."""
+        from bioetl.domain.immutability import freeze_fields
+
         if isinstance(self.source_providers, list):
             object.__setattr__(self, "source_providers", tuple(self.source_providers))
+        freeze_fields(
+            self,
+            ("enrichment_status", "enrichment_timestamps", "field_sources"),
+        )
 
     def has_enrichment(self, provider: str) -> bool:
         """Check if record has successful enrichment from provider.
@@ -117,10 +123,16 @@ class CompositeLineageMetadata:
         enrichment_timestamps = _parse_timestamps(
             data.get("_enrichment_timestamps", {})
         )
+        composite_run_id = data.get("_composite_run_id")
+        composite_name = data.get("_composite_name")
+        if composite_run_id is None or str(composite_run_id).strip() == "":
+            raise ValueError("_composite_run_id is required and must be non-empty")
+        if composite_name is None or str(composite_name).strip() == "":
+            raise ValueError("_composite_name is required and must be non-empty")
 
         return cls(
-            composite_run_id=str(data.get("_composite_run_id", "")),
-            composite_name=str(data.get("_composite_name", "")),
+            composite_run_id=str(composite_run_id),
+            composite_name=str(composite_name),
             source_providers=_parse_providers(data.get("_source_providers", [])),
             enrichment_status=enrichment_status,
             enrichment_timestamps=enrichment_timestamps,
@@ -234,4 +246,7 @@ def _parse_field_sources(raw: object) -> dict[str, str]:
 
 def _parse_seed_id(raw: object) -> str | None:
     """Parse seed record ID from raw value."""
-    return str(raw) if raw else None
+    # Preserve present numeric zero (truthiness would drop it).
+    if raw is None:
+        return None
+    return str(raw)

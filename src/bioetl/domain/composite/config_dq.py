@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 from bioetl.domain.composite.config_validators import (
@@ -79,6 +80,12 @@ class CompositeDQConfig:
                 "cross_field_validations",
                 tuple(self.cross_field_validations),
             )
+        # Detach caller-owned override mapping into an immutable proxy.
+        object.__setattr__(
+            self,
+            "enricher_overrides",
+            MappingProxyType(dict(self.enricher_overrides)),
+        )
         self._validate()
 
     def _require_unit_interval(self, name: str, value: float) -> None:

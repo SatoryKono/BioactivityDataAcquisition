@@ -71,7 +71,7 @@ class FieldValidation:
     error_message: str | None = None
 
     def __post_init__(self) -> None:
-        """Convert lists to tuples for immutability."""
+        """Convert lists to tuples for immutability and validate variant params."""
         require_literal(
             self.validation_type,
             field_name="validation_type",
@@ -100,6 +100,41 @@ class FieldValidation:
                 allowed=frozenset({"error", "warn"}),
             )
         freeze_sequences(self, ("allowed",))
+        self._validate_variant_parameters()
+
+    def _validate_variant_parameters(self) -> None:
+        """Reject incomplete or contradictory variant-specific parameters."""
+        vtype = self.validation_type
+        if vtype == "range":
+            if self.min_value is None and self.max_value is None:
+                raise ValueError("range validation requires min_value and/or max_value")
+            if (
+                self.min_value is not None
+                and self.max_value is not None
+                and self.min_value > self.max_value
+            ):
+                raise ValueError(
+                    "range validation min_value must be <= max_value, "
+                    f"got min={self.min_value}, max={self.max_value}"
+                )
+            return
+        if vtype == "pattern":
+            if not self.pattern or not str(self.pattern).strip():
+                raise ValueError("pattern validation requires a non-empty pattern")
+            return
+        if vtype == "enum":
+            if not self.allowed:
+                raise ValueError("enum validation requires a non-empty allowed set")
+            return
+        if vtype == "max_length":
+            if self.max_length is None or self.max_length < 0:
+                raise ValueError(
+                    "max_length validation requires a non-negative max_length"
+                )
+            return
+        if vtype == "custom":
+            if not self.validator or not str(self.validator).strip():
+                raise ValueError("custom validation requires a validator name")
 
     def effective_severity(
         self, *, is_enricher: bool = False
