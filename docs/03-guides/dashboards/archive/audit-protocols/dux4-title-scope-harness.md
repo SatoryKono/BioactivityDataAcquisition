@@ -1,3 +1,5 @@
+> **ARCHIVED** (issue #8632) — historical DUX audit protocol. Not operator guidance. See [archive index](../README.md).
+
 # DUX4-01 title/scope harness decision
 
 **Issue:** #7089

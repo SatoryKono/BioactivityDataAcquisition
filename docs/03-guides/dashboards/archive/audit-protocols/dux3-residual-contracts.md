@@ -1,7 +1,7 @@
 ______________________________________________________________________
 
 Version: 1.0.0
-Status: active
+Status: archived
 Class: published
 Owner: BioETL Team
 Last verified: '2026-07-29'
@@ -19,9 +19,9 @@ Related:
 
 - Issue pack: `.github/ISSUES/DUX3-2026-07-29-DASHBOARD-UX-RESIDUAL-ISSUE-PACK.md`
 - Inventory: `docs/03-guides/dashboards/dux3-first-screen-inventory.json`
-- Operator UX: [operator-ux-v2.md](operator-ux-v2.md)
-- Verdict ontology: [verdict-ontology.md](verdict-ontology.md)
-- Synthetic zero policy: [contracts/synthetic-zero-policy.yaml](contracts/synthetic-zero-policy.yaml)
+- Operator UX: [operator-ux-v2.md](../../operator-ux-v2.md)
+- Verdict ontology: [verdict-ontology.md](../../verdict-ontology.md)
+- Synthetic zero policy: [contracts/synthetic-zero-policy.yaml](../../contracts/synthetic-zero-policy.yaml)
 - Audit selection notes: `docs/03-guides/dashboards/dux3-audit-selection-notes.md`
 
 ## 1. Scope enum (DUX3-02)
@@ -117,7 +117,7 @@ Map each to preferred appearance using the table in §3.
 
 ## 6. Data-link contract (DUX3-34)
 
-Reaffirm [navigation-contract.md](navigation-contract.md) and
+Reaffirm [navigation-contract.md](../../navigation-contract.md) and
 `contracts/navigation-links.yaml`:
 
 - preserve `${__url_time_range}` / `from`+`to`
@@ -127,7 +127,7 @@ Reaffirm [navigation-contract.md](navigation-contract.md) and
 
 ## 7. Usability proxies (DUX3-35)
 
-Measure only proxies from [usability-baseline-protocol.md](usability-baseline-protocol.md):
+Measure only proxies from [usability-baseline-protocol.md](../../usability-baseline-protocol.md):
 
 | Proxy | Target |
 | --- | ---: |

@@ -93,4 +93,4 @@ provider is healthy while fleet peers fail. Copy must say **fleet vs selected**.
 
 ## DUX5 expansion
 
-Operator-facing empty-state and applicability classes (None observed / Not started / Not available / Selection required / Telemetry missing) are listed in [dux5-copy-dictionary.md](dux5-copy-dictionary.md). L0 Status enum tokens remain OK/WARN/CRIT/UNKNOWN/INCOMPLETE.
+Operator-facing empty-state and applicability classes (None observed / Not started / Not available / Selection required / Telemetry missing) are listed in [dux5-copy-dictionary.md](archive/audit-protocols/dux5-copy-dictionary.md). L0 Status enum tokens remain OK/WARN/CRIT/UNKNOWN/INCOMPLETE.
