@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-11T08:18:07.009445+00:00",
+  "generated_at": "2026-08-11T08:06:48.537783+00:00",
   "summary": {
     "total_scripts": 587,
     "status_counts": {
-      "active": 342,
-      "supporting": 241,
+      "active": 338,
+      "supporting": 245,
       "temporary_diagnostic": 4
     },
     "reference_group_coverage": {
@@ -8662,7 +8662,7 @@
           "path": "scripts/docs/matrix/export_structural_contract.py",
           "line": 19,
           "source_group": "scripts",
-          "text": "from scripts.docs.matrix.structural_contract import ("
+          "text": "from scripts.docs.matrix.structural_contract import (  # noqa: E402"
         },
         {
           "path": "scripts/docs/matrix/sync_structural_policy.py",
@@ -18871,13 +18871,13 @@
       "references": [],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-11-30",
-      "next_step": "Retain as the Trust/control-plane fixture generator for offline Grafana visual validation; promote to a governed scripts.ops command only after CI ownership and deterministic regression coverage are established."
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the bounded #8576/#8578 Trust-panel fixture generator; consolidate it into the canonical dashboard-audit command or remove it when the reviewed close-up campaign is complete."
     },
     {
       "path": "scripts/ops/observability/grafana/recover_renderer.ps1",
       "type": "ps1",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 3,
       "references": [
@@ -18899,12 +18899,16 @@
           "source_group": "tests",
           "text": "recover_ps1 = Path(\"scripts/ops/observability/grafana/recover_renderer.ps1\")"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows compatibility wrapper for optional renderer-only recovery; keep the canonical recovery behavior in the platform-neutral observability workflow."
     },
     {
       "path": "scripts/ops/observability/grafana/recover_renderer.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -18914,7 +18918,11 @@
           "source_group": "tests",
           "text": "recover_sh = Path(\"scripts/ops/observability/grafana/recover_renderer.sh\")"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded optional renderer-only recovery helper while Grafana monitoring remains local and optional; consolidate it into the canonical observability command surface before promotion."
     },
     {
       "path": "scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1",
@@ -19157,13 +19165,13 @@
       "references": [],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "windows_compatibility_wrapper",
-      "review_by": "2026-11-30",
-      "next_step": "Retain as the Windows-side close-up capture matrix runner for Trust fixture HTML states; retire once capture is folded into a cross-platform governed observability command."
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the Windows capture wrapper for the bounded #8576/#8578 Trust fixture matrix; remove it after the visual audit campaign or route it through the canonical render command."
     },
     {
       "path": "scripts/ops/observability/grafana/serve_trust_validation_fixtures.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -19179,7 +19187,11 @@
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/serve_trust_validation_fixtures.py\","
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the local fixture-server implementation used by the bounded Trust close-up workflow; keep it supporting and do not expose it as a separate operator entrypoint."
     },
     {
       "path": "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1",
@@ -19544,7 +19556,7 @@
     {
       "path": "scripts/ops/runtime/docker/check_network_preconditions.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 3,
       "references": [
@@ -19566,7 +19578,11 @@
           "source_group": "tests",
           "text": "from scripts.ops.runtime.docker import check_network_preconditions as mod"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the network-precondition helper invoked by the governed Docker runtime workflow; keep it supporting so the active inventory counts the canonical runtime entrypoint only."
     },
     {
       "path": "scripts/ops/runtime/docker/cleanup-mcp-orphans.ps1",
