@@ -27,12 +27,12 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `main`
-- Source commit: `a4a95fd6396fc2f00319d2ddc10de4dab09be825`
-- Source run id: `github-31515014563-1`
-- Source tree sha256: `0c161e0594be0095e96ec7e6f923973629045895d68553f4ae840ef054390b0f`
+- Source branch: `fix/cr-streams-8645-8643-8644`
+- Source commit: `97a98d9a050670d0efc636d02006da83dc0c259a`
+- Source run id: `31540525369`
+- Source tree sha256: `2ab4ab8a98e410128d672e8964802f5e42aafcb84cead93191e4c5cce4d0305c`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-08-11T17:14:19.960361+00:00`
+- Refreshed at (UTC): `2026-08-11T22:13:31.230840+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -50,7 +50,7 @@ trend evidence only.
 ## Coverage
 
 - Hard threshold: `85.0%`
-- Actual coverage: `95.69%`
+- Actual coverage: `96.41%`
 - Threshold satisfied: `True`
 
 ## Duration Telemetry
