@@ -16,7 +16,7 @@ else:
 
 ensure_repo_imports(include_src=True)
 
-from scripts.docs.matrix.structural_contract import (  # noqa: E402
+from scripts.docs.matrix.structural_contract import (
     DEFAULT_CONTRACT_EXPORT,
     build_runtime_contract_rows,
     serialize_runtime_contract_rows,
@@ -45,8 +45,8 @@ def _arg_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main() -> int:
-    args = _arg_parser().parse_args()
+def main(argv: list[str] | None = None) -> int:
+    args = _arg_parser().parse_args(argv)
     output_path = args.output.resolve()
     if args.check:
         rows = build_runtime_contract_rows()

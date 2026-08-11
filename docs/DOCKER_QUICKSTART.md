@@ -89,6 +89,29 @@ Raw `docker compose -f docker-compose.monitoring.yml up` also **creates**
 `bioetl-monitoring` if missing (named network, not external). Prefer
 `ensure-networks` or `runtime_manager start` so owner labels stay contracted.
 
+## PromQL rule syntax gate (before load)
+
+Shipped rules under `grafana/prometheus-rules/*.yml` are validated **before**
+Prometheus loads them:
+
+1. **Structural** — every `alert`/`record` has a non-empty `expr`
+2. **`promtool check rules`** — real PromQL + rule schema (local `promtool` or
+   pinned Docker image `prom/prometheus:v3.13.1@…`)
+
+Wired into:
+
+- `runtime_manager check|start --stack monitoring` (preflight finding
+  `MONITORING_PROMQL_SYNTAX` / `MONITORING_RULE_EXPR_MISSING`)
+- CI: `python -m scripts.engineering.qa check-prometheus-rules --runner docker`
+
+```bash
+export PYTHONPATH=.
+python -m scripts.engineering.qa check-prometheus-rules --runner docker
+```
+
+If neither `promtool` nor Docker is available, preflight emits warning
+`MONITORING_PROMQL_TOOL_MISSING`. Fail closed with `BIOETL_REQUIRE_PROMTOOL=1`.
+
 ## Main stack (default)
 
 ```bash

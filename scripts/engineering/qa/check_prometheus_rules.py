@@ -324,25 +324,226 @@ def _resolve_rules_files(raw_rules_files: list[Path] | None) -> tuple[Path, ...]
     return DEFAULT_RULES_FILES
 
 
+def list_shipped_rule_files(rules_dir: Path) -> list[Path]:
+    """Return top-level rule YAML files (exclude tests/ and non-YAML)."""
+    if not rules_dir.is_dir():
+        return []
+    return sorted(
+        p
+        for p in rules_dir.iterdir()
+        if p.is_file() and p.suffix in {".yml", ".yaml"}
+    )
+
+
+def validate_rule_expr_presence(rules_files: Sequence[Path]) -> list[str]:
+    """Structural gate: every alert/record rule must declare a non-empty expr.
+
+    Does not parse PromQL; catches missing/empty expr before promtool.
+    """
+    import yaml
+
+    violations: list[str] = []
+    for rules_file in rules_files:
+        try:
+            payload = yaml.safe_load(rules_file.read_text(encoding="utf-8"))
+        except (OSError, yaml.YAMLError) as exc:
+            violations.append(f"{rules_file.as_posix()}: YAML parse failed: {exc}")
+            continue
+        if not isinstance(payload, dict):
+            violations.append(f"{rules_file.as_posix()}: root must be a mapping")
+            continue
+        for group in payload.get("groups") or []:
+            if not isinstance(group, dict):
+                continue
+            group_name = str(group.get("name") or "?")
+            for index, rule in enumerate(group.get("rules") or []):
+                if not isinstance(rule, dict):
+                    violations.append(
+                        f"{rules_file.as_posix()} group={group_name} "
+                        f"rule[{index}]: not a mapping"
+                    )
+                    continue
+                if "alert" in rule:
+                    kind = f"alert={rule['alert']}"
+                elif "record" in rule:
+                    kind = f"record={rule['record']}"
+                else:
+                    kind = f"rule[{index}]"
+                expr = rule.get("expr")
+                if not isinstance(expr, str) or not expr.strip():
+                    violations.append(
+                        f"{rules_file.as_posix()} group={group_name} "
+                        f"{kind}: missing or empty expr"
+                    )
+    return violations
+
+
+class RulesSyntaxResult(TypedDict):
+    """Result of promtool check rules (syntax only, no unit-test vectors)."""
+
+    ok: bool
+    runner: str
+    returncode: int
+    command: list[str]
+    stdout: str
+    stderr: str
+    rules_files: list[str]
+
+
+def check_rules_syntax(
+    rules_files: Sequence[Path],
+    *,
+    root: Path | None = None,
+    promtool: str = "promtool",
+    image: str = PROMETHEUS_IMAGE,
+    timeout: float = 120.0,
+    prefer: str = "auto",
+) -> RulesSyntaxResult:
+    """Run ``promtool check rules`` (PromQL + rule YAML schema).
+
+    ``prefer``:
+      - ``auto``: local promtool if on PATH, else Docker pinned image
+      - ``local``: promtool only
+      - ``docker``: Docker only
+
+    Returns structured result; does not print or exit.
+    """
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    workspace = (root or Path.cwd()).resolve()
+    rel_files: list[str] = []
+    for path in rules_files:
+        resolved = (
+            path.resolve() if path.is_absolute() else (workspace / path).resolve()
+        )
+        rel_files.append(resolved.relative_to(workspace).as_posix())
+    empty: RulesSyntaxResult = {
+        "ok": False,
+        "runner": "none",
+        "returncode": 127,
+        "command": [],
+        "stdout": "",
+        "stderr": "",
+        "rules_files": rel_files,
+    }
+    if not rel_files:
+        empty["stderr"] = "no rule files provided"
+        return empty
+
+    def _exec(command: list[str], runner: str) -> RulesSyntaxResult:
+        safe = ensure_safe_cli_argv(command)
+        try:
+            completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
+                safe,
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                cwd=str(workspace),
+                check=False,
+            )
+        except FileNotFoundError as exc:
+            return {
+                "ok": False,
+                "runner": runner,
+                "returncode": 127,
+                "command": safe,
+                "stdout": "",
+                "stderr": str(exc),
+                "rules_files": rel_files,
+            }
+        except subprocess.TimeoutExpired:
+            return {
+                "ok": False,
+                "runner": runner,
+                "returncode": 124,
+                "command": safe,
+                "stdout": "",
+                "stderr": f"promtool check rules timed out after {timeout}s",
+                "rules_files": rel_files,
+            }
+        return {
+            "ok": completed.returncode == 0,
+            "runner": runner,
+            "returncode": int(completed.returncode),
+            "command": safe,
+            "stdout": (completed.stdout or "")[-4000:],
+            "stderr": (completed.stderr or "")[-4000:],
+            "rules_files": rel_files,
+        }
+
+    if prefer == "local":
+        runners = ["local"]
+    elif prefer == "docker":
+        runners = ["docker"]
+    else:
+        runners = ["local", "docker"]
+
+    last = empty
+    for runner in runners:
+        if runner == "local":
+            resolved = shutil.which(promtool)
+            if resolved is None:
+                last = {
+                    **empty,
+                    "runner": "local",
+                    "stderr": _missing_promtool_message(promtool),
+                }
+                continue
+            return _exec([resolved, "check", "rules", *rel_files], "local")
+        docker = shutil.which("docker")
+        if docker is None:
+            last = {
+                **empty,
+                "runner": "docker",
+                "stderr": (
+                    "docker executable not found for promtool check rules. "
+                    "Install Docker or promtool."
+                ),
+            }
+            continue
+        return _exec(
+            [
+                docker,
+                "run",
+                "--rm",
+                "-v",
+                f"{workspace.as_posix()}:/workspace",
+                "-w",
+                "/workspace",
+                "--entrypoint",
+                "promtool",
+                image,
+                "check",
+                "rules",
+                *rel_files,
+            ],
+            "docker",
+        )
+    return last
+
+
 def _run_local(
     *,
     promtool: str,
     rules_files: tuple[Path, ...],
     test_file: Path,
 ) -> int:
+    syntax = check_rules_syntax(rules_files, promtool=promtool, prefer="local")
+    if syntax["returncode"] == 127 and not syntax["ok"]:
+        print(syntax["stderr"], file=sys.stderr)
+        return 127
+    if not syntax["ok"]:
+        if syntax["stdout"]:
+            print(syntax["stdout"], end="")
+        if syntax["stderr"]:
+            print(syntax["stderr"], file=sys.stderr, end="")
+        return syntax["returncode"] or 1
+    print("+ " + " ".join(syntax["command"]))
     resolved = shutil.which(promtool)
     if resolved is None:
         print(_missing_promtool_message(promtool), file=sys.stderr)
         return 127
-    checks = [
-        [resolved, "check", "rules", *(path.as_posix() for path in rules_files)],
-        [resolved, "test", "rules", test_file.as_posix()],
-    ]
-    for command in checks:
-        result = _run(command)
-        if result != 0:
-            return result
-    return 0
+    return _run([resolved, "test", "rules", test_file.as_posix()])
 
 
 def _run_docker(
@@ -351,6 +552,17 @@ def _run_docker(
     rules_files: tuple[Path, ...],
     test_file: Path,
 ) -> int:
+    syntax = check_rules_syntax(rules_files, image=image, prefer="docker")
+    if syntax["returncode"] == 127 and not syntax["ok"]:
+        print(syntax["stderr"], file=sys.stderr)
+        return 127
+    if not syntax["ok"]:
+        if syntax["stdout"]:
+            print(syntax["stdout"], end="")
+        if syntax["stderr"]:
+            print(syntax["stderr"], file=sys.stderr, end="")
+        return syntax["returncode"] or 1
+    print("+ " + " ".join(syntax["command"]))
     docker = shutil.which("docker")
     if docker is None:
         print(
@@ -360,12 +572,8 @@ def _run_docker(
         )
         return 127
     workspace = Path.cwd().as_posix()
-    checks = [
-        ["check", "rules", *(path.as_posix() for path in rules_files)],
-        ["test", "rules", test_file.as_posix()],
-    ]
-    for check in checks:
-        command = [
+    return _run(
+        [
             docker,
             "run",
             "--rm",
@@ -376,12 +584,11 @@ def _run_docker(
             "--entrypoint",
             "promtool",
             image,
-            *check,
+            "test",
+            "rules",
+            test_file.as_posix(),
         ]
-        result = _run(command)
-        if result != 0:
-            return result
-    return 0
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
