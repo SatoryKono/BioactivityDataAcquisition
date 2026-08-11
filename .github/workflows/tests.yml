@@ -581,6 +581,9 @@ jobs:
           python-version: "3.12"
 
       - name: Start local Neo4j for live audit
+        env:
+          # Placeholder for compose interpolation; live audit uses local Neo4j only.
+          NEO4J_PASSWORD: ci-neo4j-live-audit
         run: docker compose up -d neo4j
 
       - name: Wait for Neo4j HTTP health
@@ -599,6 +602,8 @@ jobs:
 
       - name: Stop local Neo4j
         if: always()
+        env:
+          NEO4J_PASSWORD: ci-neo4j-live-audit
         run: docker compose down -v neo4j
 
   config-schema-preflight:

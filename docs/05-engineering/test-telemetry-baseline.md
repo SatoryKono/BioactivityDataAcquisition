@@ -27,12 +27,12 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `fix/cr-streams-8645-8643-8644`
-- Source commit: `97a98d9a050670d0efc636d02006da83dc0c259a`
-- Source run id: `31540525369`
-- Source tree sha256: `2ab4ab8a98e410128d672e8964802f5e42aafcb84cead93191e4c5cce4d0305c`
+- Source branch: `main`
+- Source commit: `5d48967d2268eebc4ebd2f4f77a5fda031305638`
+- Source run id: `local-pr8647-refresh`
+- Source tree sha256: `d9e0593fc543ef2a5b574f89966a78cb8f938347650b9bec689ff8578952f06f`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-08-11T22:13:31.230840+00:00`
+- Refreshed at (UTC): `2026-08-11T23:51:40.476838+00:00`
 
 ## Branch-accurate provenance (#5729)
 
