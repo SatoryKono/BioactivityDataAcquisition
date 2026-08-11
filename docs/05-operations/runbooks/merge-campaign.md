@@ -48,7 +48,7 @@ uv sync --frozen --all-extras --dev
 ```bash
 uv run ruff check .
 uv run ruff format --check .
-uv run mypy src tests
+uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
 
 uv run pytest tests/architecture/test_ci_test_strategy.py -q
 uv run pytest tests/architecture/test_config_golden_master.py -q

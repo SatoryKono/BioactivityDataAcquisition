@@ -1789,7 +1789,7 @@ uv run python -m scripts.ops setup-plugins
 uv run python -m scripts.engineering.dev run-tests cov
 uv run ruff check .
 uv run ruff format --check .
-uv run mypy src tests
+uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
 uv run python -m bioetl run --pipeline chembl_activity --limit 10 --no-cached-bronze
 ```
 
