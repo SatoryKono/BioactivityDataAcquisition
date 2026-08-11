@@ -34,9 +34,34 @@ HTTP UI (`quarantine serve` / Infinity datasource / Silver Reject Explorer dashb
 Domain quarantine write-path inside BioETL pipelines remains (Medallion DQ);
 only the **operator Explorer UI + Loki/Tempo stacks** were deleted.
 
-Network `bioetl-monitoring` is created by the runtime manager when starting
-`main` or `monitoring` if missing — not a manual `docker network create`
-prerequisite.
+## Network preconditions (MEDIUM)
+
+Which compose file uses which **shared** network (fixed `name:`, auto-create):
+
+| Compose file | Networks |
+| --- | --- |
+| `docker-compose.monitoring.yml` | **`bioetl-monitoring` only** |
+| `docker-compose.yml` (main) | **`bioetl-monitoring` + `bioetl-runtime`** |
+| `docker-compose.neo4j.yml` | **`bioetl-runtime`** |
+
+Networks are **not** `external: true` anymore: `docker compose up` **creates** them
+if missing (with owner label). If they already exist, Compose reuses them.
+
+| Precondition | Why | How to satisfy |
+| --- | --- | --- |
+| Owner label on shared nets | reject foreign networks | compose labels / `runtime_manager` / `--ensure` |
+| Container `bioetl` on `bioetl-monitoring` | scrape + Ops HTTP | start **main** so bioetl joins monitoring |
+
+```bash
+# Optional explicit ensure + check:
+python scripts/ops/runtime/docker/check_network_preconditions.py --stack all --ensure
+
+# Prefer full lifecycle:
+python scripts/ops/runtime/docker/runtime_manager.py start --stack monitoring
+```
+
+Raw `docker compose -f docker-compose.monitoring.yml up` now **starts services**
+even when `bioetl-monitoring` was absent (network is created on up).
 
 ## Main stack (default)
 
@@ -211,6 +236,12 @@ Rules:
   `-KeepForeignContainers`).
 - Do not thrash `--force-recreate` / multi-stack rebuild under low free RAM.
 - Grafana UI does **not** wait for renderer (screenshots are best-effort).
+- **Renderer failure recovery** (do not restart Grafana):
+  1. Screenshots fail-fast via `GF_RENDERING_RENDERING_TIMEOUT` (default **20s**).
+  2. `.\scripts\ops\observability\grafana\recover_renderer.ps1` (or `.sh`)
+     recreates **only** renderer and waits for health.
+  3. If OOMKilled: free ≥4 GiB RAM, then re-run recover; after 3 failures
+     renderer stays down (`restart: on-failure:3`) by design.
 
 Agent memory anchors:
 

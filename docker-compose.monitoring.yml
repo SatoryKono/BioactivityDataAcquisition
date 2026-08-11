@@ -105,9 +105,16 @@ services:
       # imports react/jsx-runtime, which this Grafana build does not expose and
       # leaves the datasource-backed panels blank. Bootstrap enforces this pin.
       - BIOETL_INFINITY_PLUGIN_VERSION=${BIOETL_INFINITY_PLUGIN_VERSION:-3.8.0}
+      # Remote renderer is optional for UI. When renderer is down/OOM, Grafana must
+      # fail screenshot/PDF calls quickly — not hang worker threads (was unbounded
+      # wait against dead Chromium). Dashboards keep working without renderer.
       - GF_RENDERING_SERVER_URL=http://renderer:8081/render
       - GF_RENDERING_CALLBACK_URL=http://grafana:3000/
       - GF_RENDERING_RENDERER_TOKEN=${GF_RENDERING_RENDERER_TOKEN:?GF_RENDERING_RENDERER_TOKEN is required}
+      # Fail-fast client timeout toward renderer (default 20s). Override for heavy
+      # audit dashboards only when renderer is known healthy.
+      - GF_RENDERING_RENDERING_TIMEOUT=${GF_RENDERING_RENDERING_TIMEOUT:-20s}
+      - GF_RENDERING_CONCURRENT_RENDER_REQUEST_LIMIT=${GF_RENDERING_CONCURRENT_RENDER_REQUEST_LIMIT:-1}
       # Control-plane HTTP helpers on main bioetl health server (not Quarantine Explorer).
       # IMPORTANT: do not export BIOETL_OPS_HTTP_URL= (empty) on the host — an empty
       # value wipes the compose default and provisions Infinity with url="".
@@ -130,13 +137,12 @@ services:
       - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
     entrypoint: ["/bin/sh", "/usr/local/bin/bioetl-bootstrap-grafana.sh"]
+    # Renderer optional: do not health-gate Grafana on Chromium (was 180s wait).
     depends_on:
       prometheus:
         condition: service_healthy
       pushgateway:
-        condition: service_healthy
-      renderer:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
       test:
         [
@@ -168,15 +174,23 @@ services:
 
   # Chromium renders are memory-heavy. Previous defaults (mem 15g + concurrency 2)
   # allowed ~15–30g peaks with Grafana on 32 GiB hosts. Local budget: 1 browser
-  # at a time, cgroup 3g, small shm (dev-shm disabled in BROWSER_FLAGS).
+  # at a time, cgroup 3g.
+  #
+  # /dev/shm policy (do not mix):
+  # - Default: real /dev/shm via shm_size=512mb, NO --disable-dev-shm-usage.
+  #   Pairing disable-dev-shm-usage with a large shm_size (e.g. 2gb) wastes host
+  #   shared memory while Chromium still spills to /tmp under load → thrash.
+  # - Low-shm hosts only: set BROWSER_FLAGS with --disable-dev-shm-usage and
+  #   drop shm_size to Docker default (~64mb); never keep both large shm + disable.
   renderer:
     image: grafana/grafana-image-renderer@sha256:c0c920e6974b0d30ae25313051344afcd2054362529968ebd9545a4b2bc8119b
-    shm_size: "256mb"
+    shm_size: "512mb"
     environment:
       - ENABLE_METRICS=true
       - HTTP_HOST=0.0.0.0
       - AUTH_TOKEN=${GF_RENDERING_RENDERER_TOKEN:?GF_RENDERING_RENDERER_TOKEN is required}
-      - BROWSER_FLAGS=--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--disable-software-rasterizer,--js-flags=--max-old-space-size=512
+      # No --disable-dev-shm-usage: matches shm_size above (single-tab local budget).
+      - BROWSER_FLAGS=${GRAFANA_IMAGE_RENDERER_BROWSER_FLAGS:---no-sandbox,--disable-gpu,--disable-software-rasterizer,--js-flags=--max-old-space-size=512}
       - BROWSER_READINESS_TIMEOUT=${GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT:-120s}
       - RENDERING_MODE=${GRAFANA_IMAGE_RENDERER_MODE:-default}
       - RENDERING_CLUSTERING_MODE=${GRAFANA_IMAGE_RENDERER_CLUSTERING_MODE:-browser}
@@ -185,7 +199,10 @@ services:
       - GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-1GiB}
     networks:
       - monitoring
-    restart: unless-stopped
+    # Recovery: bounded restarts after OOM/crash; stay down after 3 failures so
+    # Grafana is not hammered by a flapping Chromium (operator restarts via
+    # scripts/ops/observability/grafana/recover_renderer.ps1|.sh).
+    restart: on-failure:3
     healthcheck:
       test: ["CMD", "grafana-image-renderer", "healthcheck"]
       interval: 30s
@@ -195,7 +212,10 @@ services:
       # Optional service: short grace; screenshots retry if still warming.
       start_period: 45s
     # Peak ≈ one Chromium tab + Go process; hard cap prevents 15g runaway.
+    # Highest score among monitoring services → kernel prefers this victim first.
+    oom_score_adj: 800
     mem_limit: 3g
+    memswap_limit: 3g
     mem_reservation: 512m
     cpus: 1.0
     pids_limit: 1024
@@ -209,6 +229,13 @@ volumes:
   grafana-data:
 
 networks:
+  # Shared fixed name across main + monitoring projects.
+  # NOT external: compose creates the network on `up` if missing (no silent fail).
+  # If it already exists (e.g. from runtime_manager), Compose reuses it.
+  # bioetl-runtime is NOT required here (main/neo4j only).
+  # Scrape/Ops HTTP still need container `bioetl` attached to this network.
   monitoring:
-    external: true
     name: bioetl-monitoring
+    driver: bridge
+    labels:
+      com.bioetl.owner: scripts/ops/runtime/docker/runtime_manager.py

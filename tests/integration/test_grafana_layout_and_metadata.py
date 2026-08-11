@@ -311,6 +311,36 @@ def test_control_plane_long_first_screen_titles_keep_extra_width() -> None:
         )
 
 
+def test_control_plane_trust_panels_follow_reference_widths() -> None:
+    """Trust panels should align with the 16/8 scope and readiness columns."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+
+    scope = panels["Inspect Scope & Evidence"]["gridPos"]
+    readiness = panels["Monitor Replay Readiness"]["gridPos"]
+    run_summary = panels["Review Run Summary"]["gridPos"]
+    processed = panels["Review Processed Records"]["gridPos"]
+    telemetry = panels["Monitor Telemetry Coverage"]["gridPos"]
+
+    assert run_summary["w"] == scope["w"] == 16
+    assert processed["w"] == telemetry["w"] == readiness["w"] == 8
+    assert run_summary["x"] == 0
+    assert processed["x"] == telemetry["x"] == 16
+
+    third_width = scope["w"] // 3
+    third_panels = [
+        panels["Monitor Replay Safety"]["gridPos"],
+        panels["Monitor Checkpoint Age"]["gridPos"],
+        panels["Monitor Manifest & Ledger Failures"]["gridPos"],
+    ]
+    assert [grid["w"] for grid in third_panels] == [third_width] * 3
+    assert [grid["x"] for grid in third_panels] == [0, third_width, 2 * third_width]
+
+
 def test_control_plane_terminal_events_table_has_readable_width() -> None:
     """Terminal event evidence table should keep enough width for practical status visibility."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))

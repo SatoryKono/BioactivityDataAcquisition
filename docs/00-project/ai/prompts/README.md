@@ -1,10 +1,10 @@
 ______________________________________________________________________
 
-Version: 3.0.0
+Version: 3.2.0
 Status: active
 Class: internal (repo-only entrypoint; excluded from MkDocs)
 Owner: BioETL Team
-Last verified: '2026-08-10'
+Last verified: '2026-08-11'
 Epic: '#8513'
 
 ______________________________________________________________________
@@ -58,11 +58,47 @@ docs/00-project/ai/prompts/
 | `prompt.session.grok-bootstrap` | [library/session/grok-bootstrap.md](library/session/grok-bootstrap.md) | Daily-work session bootstrap |
 | `prompt.closeout.grok` | [library/closeout/grok-closeout.md](library/closeout/grok-closeout.md) | Issue/PR closeout (v2.2) |
 | `prompt.audit.grok-cycle` | [library/audit/grok-audit-cycle.md](library/audit/grok-audit-cycle.md) | One audit cycle (v2.2) |
+| `prompt.audit.orchestrator` | [library/audit/orchestrator.md](library/audit/orchestrator.md) | N-iteration fail-closed loop (v1.0) |
 | `prompt.tests.speed-optimization` | [library/tests/speed-optimization-loop.md](library/tests/speed-optimization-loop.md) | Test speed loop |
 | `prompt.tests.fix-retest` | [library/tests/fix-retest-loop.md](library/tests/fix-retest-loop.md) | Run → fix → retest |
 | `prompt.docs.ai-audit-planning` | [library/docs/ai-audit-planning.md](library/docs/ai-audit-planning.md) | Docs/AI surface audit plan |
-| `prompt.architecture.review` | [library/architecture/review-assessment.md](library/architecture/review-assessment.md) | Read-only architecture review |
+| `prompt.architecture.review` | [library/architecture/review-assessment.md](library/architecture/review-assessment.md) | Architecture review (v2.2) |
 | `prompt.observability.dashboard-panel-audit` | [library/observability/dashboard-panel-audit.md](library/observability/dashboard-panel-audit.md) | Grafana panel audit (5 phases) |
+
+### Domain audit cards (nine-kit intake)
+
+Short operator-paste cards (v1.1+) with `report.md` + `findings.json`.
+Archive megaprompts (opt-in only):
+
+- [generic-nine-audit-kit-2026-08.md](archive/campaigns/generic-nine-audit-kit-2026-08.md)
+- [project-audit-orchestrator-kit-2026-08-11.md](archive/campaigns/project-audit-orchestrator-kit-2026-08-11.md)
+  (nine domains + full N-iteration orchestrator text)
+
+| Id | Card | Domain |
+| --- | --- | --- |
+| `prompt.audit.docs-content` | [library/audit/docs-content.md](library/audit/docs-content.md) | Documentation content / drift |
+| `prompt.audit.tests-system` | [library/audit/tests-system.md](library/audit/tests-system.md) | Test system / CI gates |
+| `prompt.audit.tech-debt` | [library/audit/tech-debt.md](library/audit/tech-debt.md) | Technical debt register |
+| `prompt.audit.repo-tree` | [library/audit/repo-tree.md](library/audit/repo-tree.md) | Root / tree hygiene |
+| `prompt.audit.github-actions` | [library/audit/github-actions.md](library/audit/github-actions.md) | GitHub Actions supply chain |
+| `prompt.audit.agents-runtime` | [library/audit/agents-runtime.md](library/audit/agents-runtime.md) | Agents, skills, agent scripts |
+| `prompt.audit.diagrams` | [library/audit/diagrams.md](library/audit/diagrams.md) | Diagrams + render scripts |
+| `prompt.audit.docs-pipeline` | [library/audit/docs-pipeline.md](library/audit/docs-pipeline.md) | Docs build/publish pipeline |
+| `prompt.architecture.review` | [library/architecture/review-assessment.md](library/architecture/review-assessment.md) | Architecture (v2.3) |
+
+**Routing:**
+
+| Need | Card |
+| --- | --- |
+| Single domain audit | domain card above |
+| One meta cycle | `prompt.audit.grok-cycle` |
+| N-iteration audit→issues→fix→CI | `prompt.audit.orchestrator` (`N=1` default; ALLOW_* false) |
+| Issue/PR closeout | `prompt.closeout.grok` |
+
+Shared: `fragments/audit-scale.md` (0–3 + optional 0–5 map),
+`fragments/finding-schema.md` (JSON contract),
+`fragments/orchestrator-guards.md`, `fragments/reports-output.md`.
+Artifacts → `reports/audit/<domain>/` or `reports/audit-runs/<run_id>/`.
 
 Root-level `grok-*.md` / `test_*.md` paths remain as **redirect stubs** for
 bookmarks from #8279.
@@ -78,6 +114,12 @@ python -m scripts.ai.prompts render prompt.audit.grok-cycle --param SCOPE="src/b
 python -m scripts.ai.prompts render prompt.closeout.grok --param SCOPE="issues: #NNNN"
 python -m scripts.ai.prompts render prompt.observability.dashboard-panel-audit \
   --param SCOPE="grafana/dashboards" --param AUDIT_MODE=full
+python -m scripts.ai.prompts render prompt.audit.docs-content \
+  --param SCOPE="README.md docs/00-project" --param MODE=audit
+python -m scripts.ai.prompts render prompt.audit.github-actions \
+  --param SCOPE=".github/workflows" --param MODE=audit
+python -m scripts.ai.prompts render prompt.audit.orchestrator \
+  --param N=1 --param SCOPE="docs-content,github-actions" --param MODE=plan
 python -m scripts.ai.prompts check-registry
 python -m scripts.ai.prompts check
 python -m scripts.ai.prompts catalog

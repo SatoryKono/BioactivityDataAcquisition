@@ -50,6 +50,48 @@ entries:
     tags: [guardrail, language]
     summary: Default operator response language
 
+  - id: prompt.fragment.audit-scale
+    path: fragments/audit-scale.md
+    status: active
+    class: fragment
+    tags: [guardrail, audit, scale]
+    summary: Unified surface quality score 0-3 and priority P0-P3
+
+  - id: prompt.fragment.finding-schema
+    path: fragments/finding-schema.md
+    status: active
+    class: fragment
+    tags: [guardrail, audit, evidence]
+    summary: Machine-oriented finding fields for domain audits
+
+  - id: prompt.fragment.unknown-params
+    path: fragments/unknown-params.md
+    status: active
+    class: fragment
+    tags: [guardrail, audit]
+    summary: Do not invent repo parameters; prefer known BioETL SSOT
+
+  - id: prompt.fragment.reports-output
+    path: fragments/reports-output.md
+    status: active
+    class: fragment
+    tags: [guardrail, reports, root]
+    summary: Audit artifacts must land under reports/, not repo root
+
+  - id: prompt.fragment.shell-portability
+    path: fragments/shell-portability.md
+    status: active
+    class: fragment
+    tags: [guardrail, shell, windows]
+    summary: Portable shell notes for BioETL Windows-first operators
+
+  - id: prompt.fragment.orchestrator-guards
+    path: fragments/orchestrator-guards.md
+    status: active
+    class: fragment
+    tags: [guardrail, audit, orchestrator]
+    summary: Fail-closed guards for multi-iteration audit/implement orchestrator
+
   # --- active operator-paste cards ---
   - id: prompt.session.grok-bootstrap
     path: library/session/grok-bootstrap.md
@@ -71,6 +113,13 @@ entries:
     class: operator-paste
     tags: [audit, grok, operator]
     summary: One-cycle audit paste with severity, stop conditions, Windows/memory gates
+
+  - id: prompt.audit.orchestrator
+    path: library/audit/orchestrator.md
+    status: active
+    class: operator-paste
+    tags: [audit, orchestrator, github, operator]
+    summary: Fail-closed N-iteration audit → issues → fix → CI → post-audit loop
 
   - id: prompt.tests.speed-optimization
     path: library/tests/speed-optimization-loop.md
@@ -97,8 +146,8 @@ entries:
     path: library/architecture/review-assessment.md
     status: active
     class: operator-paste
-    tags: [architecture, review, operator]
-    summary: Read-only architecture review and refactoring assessment
+    tags: [architecture, review, operator, audit]
+    summary: Architecture review v2.3 (hexagonal/C4/arc42) with findings.json outputs
 
   - id: prompt.observability.dashboard-panel-audit
     path: library/observability/dashboard-panel-audit.md
@@ -106,3 +155,75 @@ entries:
     class: operator-paste
     tags: [observability, dashboard, grafana, audit, operator]
     summary: Five-phase Grafana panel audit — render, GH issues, fix, closeout
+
+  # --- domain audit cards (generic nine-kit intake 2026-08) ---
+  - id: prompt.audit.docs-content
+    path: library/audit/docs-content.md
+    status: active
+    class: operator-paste
+    tags: [audit, docs, content, operator]
+    summary: Evidence-based audit of project documentation content and drift
+
+  - id: prompt.audit.tests-system
+    path: library/audit/tests-system.md
+    status: active
+    class: operator-paste
+    tags: [audit, tests, quality, operator]
+    summary: Audit test system as regression detection, not coverage vanity
+
+  - id: prompt.audit.tech-debt
+    path: library/audit/tech-debt.md
+    status: active
+    class: operator-paste
+    tags: [audit, debt, quality, operator]
+    summary: Evidence-based technical debt register with risk-ordered paydown
+
+  - id: prompt.audit.repo-tree
+    path: library/audit/repo-tree.md
+    status: active
+    class: operator-paste
+    tags: [audit, repo, hygiene, root, operator]
+    summary: Repository tree and root hygiene audit against allowlist
+
+  - id: prompt.audit.github-actions
+    path: library/audit/github-actions.md
+    status: active
+    class: operator-paste
+    tags: [audit, ci, github-actions, security, operator]
+    summary: GitHub Actions supply-chain and correctness audit
+
+  - id: prompt.audit.agents-runtime
+    path: library/audit/agents-runtime.md
+    status: active
+    class: operator-paste
+    tags: [audit, agents, runtime, scripts, operator]
+    summary: Audit AI agent instructions, skills, and agent-related scripts
+
+  - id: prompt.audit.diagrams
+    path: library/audit/diagrams.md
+    status: active
+    class: operator-paste
+    tags: [audit, diagrams, mermaid, architecture, operator]
+    summary: Audit version-controlled diagrams and render scripts
+
+  - id: prompt.audit.docs-pipeline
+    path: library/audit/docs-pipeline.md
+    status: active
+    class: operator-paste
+    tags: [audit, docs, pipeline, scripts, operator]
+    summary: Audit docs generate/validate/publish scripts and pipelines
+
+  # --- archived campaigns (discoverability; not default paste) ---
+  - id: prompt.campaign.generic-nine-audit-kit
+    path: archive/campaigns/generic-nine-audit-kit-2026-08.md
+    status: archived
+    class: campaign
+    tags: [audit, campaign, archive, generic-kit]
+    summary: Cleaned generic nine-domain audit kit (2026-08); prefer library/audit cards
+
+  - id: prompt.campaign.project-audit-orchestrator-kit
+    path: archive/campaigns/project-audit-orchestrator-kit-2026-08-11.md
+    status: archived
+    class: campaign
+    tags: [audit, campaign, archive, orchestrator, generic-kit]
+    summary: Nine audits + N-iteration orchestrator (2026-08-11); prefer prompt.audit.orchestrator

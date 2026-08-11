@@ -90,5 +90,9 @@ See [AI Runtime Mirror Ownership](agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
   (`prompt.closeout.grok`, v2.2)
 - [prompts/library/audit/grok-audit-cycle.md](prompts/library/audit/grok-audit-cycle.md)
   (`prompt.audit.grok-cycle`, v2.2)
+- Domain audits: `prompt.audit.docs-content`, `tests-system`, `tech-debt`,
+  `repo-tree`, `github-actions`, `agents-runtime`, `diagrams`, `docs-pipeline`
+- Orchestrated loop: `prompt.audit.orchestrator` (see
+  [prompts/README.md](prompts/README.md))
 - Install skills: `.\scripts\ai\grok\install_skills.ps1`
 - CLI: `python -m scripts.ai.prompts list|render|check`
