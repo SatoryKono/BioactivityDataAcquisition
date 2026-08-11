@@ -684,6 +684,16 @@ def test_control_plane_bounded_failure_rows_preserve_unknown_evidence() -> None:
         for override in panel.get("fieldConfig", {}).get("overrides", [])
     }
     assert {"count", "status", "reason"}.issubset(visible_columns)
+    count_override = next(
+        override
+        for override in panel.get("fieldConfig", {}).get("overrides", [])
+        if override.get("matcher", {}).get("options") == "count"
+    )
+    count_properties = {
+        property_.get("id"): property_.get("value")
+        for property_ in count_override.get("properties", [])
+    }
+    assert count_properties.get("noValue") == "UNKNOWN"
     no_value = str(
         panel.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
     ).lower()
