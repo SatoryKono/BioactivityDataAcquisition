@@ -24,10 +24,10 @@ PROMETHEUS_IMAGE = (
 )
 PROMETHEUS_COMPATIBILITY_SERIES = "3.13.x"
 PUSHGATEWAY_COMPATIBILITY_SERIES = "1.11.x"
-EXPECTED_ALERT_DEFINITIONS = 55
-EXPECTED_RECORD_DEFINITIONS = 105
-# Floor after 2026-07-23: BioETLQuarantineExplorerUnavailable alert removed.
-MIN_TESTED_ALERTS = 36
+EXPECTED_ALERT_DEFINITIONS = 57
+EXPECTED_RECORD_DEFINITIONS = 108
+# Floor after partial-rule-failure alerts (eval failures + iterations missed).
+MIN_TESTED_ALERTS = 38
 MIN_DIRECTLY_TESTED_RECORDS = 28
 
 
@@ -335,6 +335,57 @@ def list_shipped_rule_files(rules_dir: Path) -> list[Path]:
     )
 
 
+def validate_recording_rule_identity_uniqueness(
+    rules_files: Sequence[Path],
+) -> list[str]:
+    """Fail closed on same-timestamp write conflicts.
+
+    Two recording rules with the same metric name **and** the same static
+    ``labels:`` map will ingest two samples with identical labels at the same
+    evaluation timestamp → Prometheus WARN
+    \"Error on ingesting results from rule evaluation with different value but
+    same timestamp\", dropped samples, and elevated WAL/head memory churn.
+
+    Same metric name with **different** static labels (e.g. reason=…) is OK.
+    """
+    import yaml
+
+    seen: dict[tuple[str, tuple[tuple[str, str], ...]], list[str]] = {}
+    for rules_file in rules_files:
+        try:
+            payload = yaml.safe_load(rules_file.read_text(encoding="utf-8"))
+        except (OSError, yaml.YAMLError) as exc:
+            return [f"{rules_file.as_posix()}: YAML parse failed: {exc}"]
+        if not isinstance(payload, dict):
+            continue
+        for group in payload.get("groups") or []:
+            if not isinstance(group, dict):
+                continue
+            group_name = str(group.get("name") or "?")
+            for index, rule in enumerate(group.get("rules") or []):
+                if not isinstance(rule, dict) or "record" not in rule:
+                    continue
+                record = str(rule["record"])
+                labels_raw = rule.get("labels") or {}
+                if not isinstance(labels_raw, dict):
+                    labels_raw = {}
+                label_key = tuple(
+                    sorted((str(k), str(v)) for k, v in labels_raw.items())
+                )
+                loc = f"{rules_file.as_posix()} group={group_name} rule[{index}]"
+                seen.setdefault((record, label_key), []).append(loc)
+    violations: list[str] = []
+    for (record, label_key), locs in sorted(seen.items()):
+        if len(locs) < 2:
+            continue
+        labels_fmt = ",".join(f"{k}={v}" for k, v in label_key) or "(no static labels)"
+        violations.append(
+            f"duplicate recording identity record={record!r} labels={{{labels_fmt}}} "
+            f"at: {'; '.join(locs)}"
+        )
+    return violations
+
+
 def validate_rule_expr_presence(rules_files: Sequence[Path]) -> list[str]:
     """Structural gate: every alert/record rule must declare a non-empty expr.
 
@@ -622,6 +673,22 @@ def main(argv: list[str] | None = None) -> int:
     if coverage_violations:
         for violation in coverage_violations:
             print(f"Rule coverage violation: {violation}", file=sys.stderr)
+        return 1
+    # Same-timestamp write conflicts (record name + static labels identity).
+    identity_files = (
+        tuple(list_shipped_rule_files(Path("grafana/prometheus-rules")))
+        if rules_files == DEFAULT_RULES_FILES
+        else rules_files
+    )
+    identity_violations = validate_recording_rule_identity_uniqueness(identity_files)
+    if identity_violations:
+        for violation in identity_violations:
+            print(f"Recording identity conflict: {violation}", file=sys.stderr)
+        return 1
+    expr_violations = validate_rule_expr_presence(identity_files)
+    if expr_violations:
+        for violation in expr_violations:
+            print(f"Rule expr violation: {violation}", file=sys.stderr)
         return 1
     if args.runner == "docker":
         return _run_docker(

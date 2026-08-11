@@ -1610,6 +1610,8 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
             # Create missing contracted shared nets (owner label); no compose up.
             # Full reinstall SSOT before bare compose or multi-stack bring-up.
             "ensure-networks",
+            # Optional Chromium renderer only — never restarts Grafana UI.
+            "recover-renderer",
         ),
     )
     parser.add_argument("--stack", default="main")
@@ -1703,6 +1705,45 @@ def _dispatch_action(
             )
         )
         return 0 if ok else 3
+    if args.action == "recover-renderer":
+        # Tertiary failure mode: renderer OOM/flap without Grafana recovery path.
+        if spec.name != "monitoring":
+            print(
+                json.dumps(
+                    {
+                        "ok": False,
+                        "action": "recover-renderer",
+                        "error": "recover-renderer requires --stack monitoring",
+                    },
+                    sort_keys=True,
+                )
+            )
+            return 2
+        try:
+            from scripts.ops.observability.grafana import recover_renderer as rr
+        except ImportError as exc:
+            print(
+                json.dumps(
+                    {
+                        "ok": False,
+                        "action": "recover-renderer",
+                        "error": f"import recover_renderer failed: {exc}",
+                    },
+                    sort_keys=True,
+                )
+            )
+            return 2
+        report = rr.recover_renderer(
+            project=spec.project,
+            compose_file=spec.compose_file,
+            wait_seconds=min(args.timeout, 180.0),
+        )
+        payload = asdict(report)
+        out_path = report_dir / "docker-runtime-recover-renderer.json"
+        write_report(out_path, payload)
+        payload = {**payload, "report": str(out_path), "action": "recover-renderer"}
+        print(json.dumps(payload, sort_keys=True, default=str))
+        return 0 if report.ok else 1
     if args.action in {"start", "recover"}:
         return start_or_recover(
             spec,

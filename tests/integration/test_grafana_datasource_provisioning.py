@@ -267,11 +267,11 @@ def test_bootstrap_script_prunes_stale_local_renderer_plugin_in_remote_mode() ->
 
 
 def test_bootstrap_ops_http_identity_gate_is_soft_by_default() -> None:
-    """Ops HTTP trust is fail-closed; Grafana UI start is not blocked by default.
+    """Ops HTTP trust is optional; Grafana UI start is not blocked by default.
 
-    Cold start polls bioetl:8000 ready (default 30×2s). On timeout/mismatch/
-    unmanaged identity the script defers Ops HTTP and still execs /run.sh unless
-    BIOETL_GRAFANA_REQUIRE_OPS_HTTP=1. Prometheus is always provisioned as fallback.
+    Soft mode: short ready poll (5×1s), Prometheus first, then defer Ops on
+    timeout/mismatch/unmanaged identity and still exec /run.sh.
+    Fail-closed only when BIOETL_GRAFANA_REQUIRE_OPS_HTTP=1 (longer poll + exit 1).
     """
     content = Path("grafana/scripts/bootstrap-datasources.sh").read_text(
         encoding="utf-8"
@@ -280,6 +280,9 @@ def test_bootstrap_ops_http_identity_gate_is_soft_by_default() -> None:
     assert "BIOETL_EXPECTED_RUNTIME_SOURCE_ID" in content
     assert "/ops/control-plane/ready" in content
     assert 'REQUIRE_OPS_HTTP="${BIOETL_GRAFANA_REQUIRE_OPS_HTTP:-0}"' in content
+    # Soft defaults are short; fail-closed uses 30×2s.
+    assert 'OPS_READY_ATTEMPTS="${BIOETL_GRAFANA_OPS_READY_ATTEMPTS:-5}"' in content
+    assert 'OPS_READY_SLEEP_SEC="${BIOETL_GRAFANA_OPS_READY_SLEEP_SEC:-1}"' in content
     assert 'OPS_READY_ATTEMPTS="${BIOETL_GRAFANA_OPS_READY_ATTEMPTS:-30}"' in content
     assert 'OPS_READY_SLEEP_SEC="${BIOETL_GRAFANA_OPS_READY_SLEEP_SEC:-2}"' in content
     assert "fail_or_defer_ops" in content
@@ -287,6 +290,10 @@ def test_bootstrap_ops_http_identity_gate_is_soft_by_default() -> None:
         "provision_prometheus_only" in content
         or "starting Grafana with Prometheus only" in content
     )
+    # Prometheus must be provisioned before the Ops ready poll (no 60s block).
+    prom_idx = content.index("provision_prometheus_only")
+    poll_idx = content.index("Ops HTTP ready poll:")
+    assert prom_idx < poll_idx
     assert "is_valid_ops_http_url" in content
     assert (
         "invalid_or_unmanaged_identity" in content or "invalid_ops_http_url" in content
@@ -312,13 +319,14 @@ def test_monitoring_compose_exposes_ops_http_soft_gate_env() -> None:
         "BIOETL_GRAFANA_REQUIRE_OPS_HTTP=${BIOETL_GRAFANA_REQUIRE_OPS_HTTP:-0}"
         in grafana_environment
     )
-    assert (
-        "BIOETL_GRAFANA_OPS_READY_ATTEMPTS=${BIOETL_GRAFANA_OPS_READY_ATTEMPTS:-30}"
-        in grafana_environment
+    # Empty compose defaults: bootstrap picks soft 5×1s or fail-closed 30×2s.
+    assert any(
+        "BIOETL_GRAFANA_OPS_READY_ATTEMPTS=" in item
+        for item in grafana_environment
     )
-    assert (
-        "BIOETL_GRAFANA_OPS_READY_SLEEP_SEC=${BIOETL_GRAFANA_OPS_READY_SLEEP_SEC:-2}"
-        in grafana_environment
+    assert any(
+        "BIOETL_GRAFANA_OPS_READY_SLEEP_SEC=" in item
+        for item in grafana_environment
     )
 
 
@@ -331,6 +339,13 @@ def test_monitoring_compose_local_resource_budget() -> None:
     pushgateway = monitoring["services"]["pushgateway"]
 
     assert prom["mem_limit"] == "3g"
+    assert prom.get("memswap_limit") == "3g"
+    prom_env = prom.get("environment") or []
+    assert any("GOMEMLIMIT=" in str(item) for item in prom_env)
+    assert any("GOGC=" in str(item) for item in prom_env)
+    prom_cmd = prom.get("command") or []
+    assert "--query.max-concurrency=2" in prom_cmd
+    assert "--storage.tsdb.retention.size=2GB" in prom_cmd
     assert grafana["mem_limit"] == "2g"
     assert renderer["mem_limit"] == "3g"
     assert pushgateway["mem_limit"] == "512m"

@@ -146,6 +146,64 @@ def check_prometheus_targets(prometheus_url: str, timeout: float) -> ValidationR
         )
 
 
+def check_prometheus_rules_health(
+    prometheus_url: str, timeout: float
+) -> ValidationResult:
+    """Fail when BioETL rules have lastError / evaluation failures (silent gaps)."""
+    try:
+        from scripts.ops.observability.check_prometheus_rules_health import (
+            check_rules_health,
+        )
+
+        report = check_rules_health(
+            prometheus_url=prometheus_url,
+            timeout=timeout,
+            fail_on_metric_signals=True,
+        )
+        details = {
+            "bioetl_groups": report.bioetl_groups,
+            "bioetl_rules": report.bioetl_rules,
+            "evaluation_failures_10m": report.evaluation_failures_10m,
+            "iterations_missed_10m": report.iterations_missed_10m,
+            "issues": [
+                {
+                    "group": i.group,
+                    "rule": i.rule,
+                    "health": i.health,
+                    "last_error": i.last_error,
+                }
+                for i in report.issues
+            ],
+            "query_errors": report.query_errors,
+        }
+        if report.ok:
+            return ValidationResult(
+                check_name="prometheus_rules_health",
+                status="pass",
+                message=(
+                    f"BioETL rules healthy "
+                    f"({report.bioetl_groups} groups, {report.bioetl_rules} rules)"
+                ),
+                details=details,
+            )
+        return ValidationResult(
+            check_name="prometheus_rules_health",
+            status="fail",
+            message=(
+                "Partial BioETL rule errors detected "
+                "(Prometheus may still be healthy; metrics are skipped silently)"
+            ),
+            details=details,
+        )
+    except Exception as e:
+        return ValidationResult(
+            check_name="prometheus_rules_health",
+            status="fail",
+            message=f"Prometheus rules health check failed: {e}",
+            details={"error": str(e)},
+        )
+
+
 def check_prometheus_metrics(prometheus_url: str, timeout: float) -> ValidationResult:
     """Check if Prometheus has any metrics."""
     try:
@@ -372,6 +430,7 @@ def run_validation(
     results.append(check_prometheus_targets(prometheus_url, timeout))
     results.append(check_prometheus_metrics(prometheus_url, timeout))
     results.append(check_prometheus_query(prometheus_url, timeout))
+    results.append(check_prometheus_rules_health(prometheus_url, timeout))
 
     # Grafana checks
     results.append(check_grafana_health(grafana_url, timeout))

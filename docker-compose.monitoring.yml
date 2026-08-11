@@ -16,6 +16,10 @@ services:
     container_name: bioetl-prometheus
     ports:
       - "127.0.0.1:9090:9090"
+    environment:
+      # Soft Go heap cap under mem_limit 3g (was unbounded → 8–10g peaks / host thrash).
+      - GOMEMLIMIT=${PROMETHEUS_GOMEMLIMIT:-2500MiB}
+      - GOGC=${PROMETHEUS_GOGC:-50}
     volumes:
       - ./grafana/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./grafana/prometheus-rules:/etc/prometheus/rules:ro
@@ -26,9 +30,10 @@ services:
       - "--web.enable-admin-api"
       - "--storage.tsdb.retention.time=7d"
       - "--storage.tsdb.retention.size=2GB"
-      - "--query.max-concurrency=4"
-      - "--query.timeout=60s"
-      - "--query.max-samples=10000000"
+      # Local Desktop: fewer concurrent queries under rule load (was 4).
+      - "--query.max-concurrency=2"
+      - "--query.timeout=30s"
+      - "--query.max-samples=5000000"
     healthcheck:
       test:
         [
@@ -48,7 +53,10 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
+    # Prefer killing renderer first (oom_score_adj 800); Prom is more valuable.
+    oom_score_adj: 200
     mem_limit: 3g
+    memswap_limit: 3g
     mem_reservation: 768m
     cpus: 2.0
     pids_limit: 2560
@@ -126,10 +134,12 @@ services:
       # BIOETL_GRAFANA_REQUIRE_OPS_HTTP=1 for audit/render fail-closed.
       - BIOETL_EXPECTED_RUNTIME_SOURCE_ID=${BIOETL_RUNTIME_SOURCE_ID:-unmanaged}
       - BIOETL_GRAFANA_REQUIRE_OPS_HTTP=${BIOETL_GRAFANA_REQUIRE_OPS_HTTP:-0}
-      # Ops ready poll budget (default 30×2s ≈ 60s). Does not block Grafana UI
-      # unless REQUIRE_OPS_HTTP=1.
-      - BIOETL_GRAFANA_OPS_READY_ATTEMPTS=${BIOETL_GRAFANA_OPS_READY_ATTEMPTS:-30}
-      - BIOETL_GRAFANA_OPS_READY_SLEEP_SEC=${BIOETL_GRAFANA_OPS_READY_SLEEP_SEC:-2}
+      # Ops ready poll budget. Soft default is short (bootstrap uses 5×1s when
+      # REQUIRE_OPS_HTTP=0) so a late bioetl does not delay Grafana ~60s and
+      # thrash healthchecks. Fail-closed audit sets REQUIRE_OPS_HTTP=1 (30×2s).
+      # Explicit host overrides still win via the same env names.
+      - BIOETL_GRAFANA_OPS_READY_ATTEMPTS=${BIOETL_GRAFANA_OPS_READY_ATTEMPTS:-}
+      - BIOETL_GRAFANA_OPS_READY_SLEEP_SEC=${BIOETL_GRAFANA_OPS_READY_SLEEP_SEC:-}
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning/datasources-core:/etc/bioetl-grafana/datasources-core:ro
