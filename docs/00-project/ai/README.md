@@ -94,7 +94,8 @@ See [AI Runtime Mirror Ownership](agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
   `repo-tree`, `github-actions`, `agents-runtime`, `diagrams`, `docs-pipeline`
 - Orchestrated loop: `prompt.audit.orchestrator`
 - BI acceptance: `prompt.observability.bi-dashboard-acceptance`
-- Cyclic dashboards: `prompt.observability.dashboard-audit-cycle` (see
+- Cyclic dashboards: `prompt.observability.dashboard-audit-cycle`
+- Cyclic testing: `prompt.tests.cycle` (see
   [prompts/README.md](prompts/README.md))
 - Install skills: `.\scripts\ai\grok\install_skills.ps1`
 - CLI: `python -m scripts.ai.prompts list|render|check`

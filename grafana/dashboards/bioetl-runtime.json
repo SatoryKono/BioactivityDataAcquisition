@@ -3407,7 +3407,6 @@
                   }
                 }
               ],
-              "noValue": "0",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -3482,7 +3481,6 @@
                   }
                 }
               ],
-              "noValue": "0",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
