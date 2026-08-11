@@ -36,7 +36,7 @@ from scripts.engineering.qa.report_duplication_baseline import TargetDuplication
 pytestmark = pytest.mark.unit
 
 
-def test_main_accepts_dispatcher_argv(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_report_duplication_baseline_main_accepts_dispatcher_argv(monkeypatch: pytest.MonkeyPatch) -> None:
     scanned_targets: list[str] = []
 
     def _scan_target(
