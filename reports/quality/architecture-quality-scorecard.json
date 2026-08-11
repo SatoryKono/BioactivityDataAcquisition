@@ -165,7 +165,7 @@
   "integral_score": 9.41,
   "interpretation": "good_targeted_improvements",
   "metrics": {
-    "accepted_adr_count": 54,
+    "accepted_adr_count": 55,
     "adr_enforcement_blocking_gap_count": 0,
     "adr_enforcement_manual_exception_count": 0,
     "compatibility_test_file_count": 0,
@@ -200,7 +200,7 @@
   "schema_version": 1,
   "source_artifacts": {
     "adr_enforcement_matrix": {
-      "accepted_adr_count": 54,
+      "accepted_adr_count": 55,
       "blocking_gap_count": 0,
       "generated_artifact": "reports/quality/adr-enforcement-matrix.json",
       "path": "scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload"
@@ -225,7 +225,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "a12ccf2d71c7eedcbb26c13cb9892014a066270d4ff06ad6470a880ba9d93e54"
+      "source_fingerprint": "ebe539a4f57a16ceab5fdc0d162b79aaf5db2f226d984616ea97fa83cd202461"
     },
     "duplication_baseline": {
       "path": "reports/quality/full-app-duplication-baseline.json",
@@ -240,7 +240,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "c5b653e09fc69f0802d6f758b2a23643b32726c4e3a5704b20783bc901b542fb",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "e03e37df556ee259dd2946a307e30314a1a002d0b1f21075ba00da07c4acd90f"
+      "source_tree_sha256": "558369ed2fb71c0b915a03a2a63ae168e6a5211113dc9bbd8791d93b075c4944"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

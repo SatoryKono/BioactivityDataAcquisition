@@ -265,7 +265,7 @@ def _evaluate_policy(
     return 0
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
         description="Enforce Ruff C901 baseline and folder budgets.",
@@ -289,12 +289,12 @@ def parse_args() -> argparse.Namespace:
             "'warn' reports violations but exits 0."
         ),
     )
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     """CLI entry point."""
-    args = parse_args()
+    args = parse_args(argv)
     baseline_path = (PROJECT_ROOT / args.baseline_file).resolve()
 
     baseline_map, folder_budgets = _load_baseline(baseline_path)
