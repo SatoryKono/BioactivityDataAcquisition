@@ -1,4 +1,3 @@
-{"type":"review_context","reviewType":"all","currentBranch":"audit-leaf","baseBranch":"main","workingDirectory":"/tmp/bioetl-cr-S01-domain-control_plane-awnvs6w4"}
+{"type":"review_context","reviewType":"all","currentBranch":"audit-leaf","baseBranch":"main","workingDirectory":"/tmp/bioetl-cr-S01-domain-control_plane-tv2befx9"}
 {"type":"status","phase":"connecting","status":"connecting_to_review_service"}
-{"type":"status","phase":"setup","status":"setting_up"}
-{"type":"error","errorType":"rate_limit","message":"Rate limit exceeded","recoverable":true,"details":{},"metadata":{"isProUser":true,"waitTime":"22 minutes","policyGuidance":"Enable **[usage-based reviews](https://app.coderabbit.ai/settings/billing?tab=usage&orgId=84ef2b43-0fca-452c-8ec8-22f6d0dc500d)** in Billing to review now. Otherwise, wait until the next included review is available.\nYou're only billed for reviews past your plan's rate limits ($0.25/file).","orgAttributed":true,"cliReviewPolicyMode":"normal"}}
+{"type":"error","errorType":"connection","message":"Connection failed: WebSocket closed","recoverable":true,"details":{"cause":{"name":"TRPCWebSocketClosedError"},"name":"TRPCClientError"}}

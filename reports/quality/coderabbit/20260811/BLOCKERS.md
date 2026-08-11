@@ -19,3 +19,19 @@ Each entry requires GitHub reconciliation before closeout.
 - Files: `32`
 - Detail: CodeRabbit rate limit
 - GitHub issue: [#8603](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8603)
+## S01-domain-control_plane — error
+
+- UTC: `2026-08-11T09:51:48.084492+00:00`
+- Wave: `A`
+- Files: `32`
+- Detail: CodeRabbit exit code 1
+- GitHub issue: pending reconciliation
+
+## S01-domain-entities — error
+
+- UTC: `2026-08-11T09:52:00.867947+00:00`
+- Wave: `A`
+- Files: `28`
+- Detail: CodeRabbit exit code 1
+- GitHub issue: pending reconciliation
+
