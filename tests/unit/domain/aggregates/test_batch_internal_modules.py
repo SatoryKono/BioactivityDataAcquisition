@@ -587,9 +587,7 @@ class TestBatchMutationMixin:
         )
 
         with pytest.raises(ValueError, match="does not belong to this batch"):
-            batch.quarantine_record(
-                foreign, "Error", "ERR", quarantined_at=_ts(5)
-            )
+            batch.quarantine_record(foreign, "Error", "ERR", quarantined_at=_ts(5))
 
         assert batch.all_records[0] == owned
         assert batch.all_records[0].data["id"] == "owned"
@@ -603,9 +601,7 @@ class TestBatchMutationMixin:
         record = batch.add_record({"id": "1"})
         batch.collect_events()
 
-        first = batch.quarantine_record(
-            record, "Error", "ERR", quarantined_at=_ts(5)
-        )
+        first = batch.quarantine_record(record, "Error", "ERR", quarantined_at=_ts(5))
         events_after_first = batch.collect_events()
         second = batch.quarantine_record(
             first, "Error-retry", "ERR2", quarantined_at=_ts(6)

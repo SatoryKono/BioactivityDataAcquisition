@@ -139,6 +139,30 @@ def _validate_null_filter(text: str, upper: str, token: str) -> bool:
     return True
 
 
+def _is_quoted_literal(value: str) -> bool:
+    return (value.startswith("'") and value.endswith("'")) or (
+        value.startswith('"') and value.endswith('"')
+    )
+
+
+def _rhs_contains_nested_operators(rhs: str) -> bool:
+    upper_rhs = f" {rhs.upper()} "
+    if any(token in upper_rhs for token in (" == ", " != ", " AND ", " OR ")):
+        return True
+    return any(token in rhs.upper() for token in (" IS NULL", " IS NOT NULL"))
+
+
+def _reject_nested_rhs_operators(rhs: str) -> None:
+    """Reject unquoted RHS values that embed extra operators/keywords."""
+    if _is_quoted_literal(rhs):
+        return
+    if _rhs_contains_nested_operators(rhs):
+        raise ValueError(
+            "aggregation filter_condition comparison value must not "
+            "contain additional operators or boolean keywords"
+        )
+
+
 def _try_comparison_operator(text: str, operator: str) -> bool:
     if operator not in text:
         return False
@@ -147,22 +171,7 @@ def _try_comparison_operator(text: str, operator: str) -> bool:
     rhs = right.strip()
     if not rhs:
         raise ValueError("aggregation filter_condition comparison requires a value")
-    # Reject chained comparisons / boolean keywords on the RHS unless quoted.
-    quoted = (rhs.startswith("'") and rhs.endswith("'")) or (
-        rhs.startswith('"') and rhs.endswith('"')
-    )
-    if not quoted:
-        upper_rhs = f" {rhs.upper()} "
-        if any(
-            token in upper_rhs
-            for token in (" == ", " != ", " AND ", " OR ")
-        ) or any(
-            token in rhs.upper() for token in (" IS NULL", " IS NOT NULL")
-        ):
-            raise ValueError(
-                "aggregation filter_condition comparison value must not "
-                "contain additional operators or boolean keywords"
-            )
+    _reject_nested_rhs_operators(rhs)
     return True
 
 
@@ -241,6 +250,26 @@ class AggregationFieldSpec:
         return self.output_field or self.source_field
 
 
+def _coerce_aggregation_fields(fields: object) -> tuple[AggregationFieldSpec, ...]:
+    if isinstance(fields, str) or not isinstance(fields, list | tuple):
+        raise ValueError(
+            "aggregation.fields must be a sequence of AggregationFieldSpec "
+            f"entries, got {type(fields).__name__}"
+        )
+    return tuple(
+        AggregationFieldSpec(**f) if isinstance(f, dict) else f for f in fields
+    )
+
+
+def _require_field_specs(fields: tuple[AggregationFieldSpec, ...]) -> None:
+    for index, entry in enumerate(fields):
+        if not isinstance(entry, AggregationFieldSpec):
+            raise ValueError(
+                "aggregation.fields entries must be AggregationFieldSpec, "
+                f"got {type(entry).__name__} at index {index}"
+            )
+
+
 @dataclass(frozen=True, slots=True)
 class AggregationConfig:
     """Configuration for 1:M enricher aggregation.
@@ -260,16 +289,7 @@ class AggregationConfig:
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
-        if isinstance(self.fields, str) or not isinstance(self.fields, list | tuple):
-            raise ValueError(
-                "aggregation.fields must be a sequence of AggregationFieldSpec "
-                f"entries, got {type(self.fields).__name__}"
-            )
-        converted = tuple(
-            AggregationFieldSpec(**f) if isinstance(f, dict) else f
-            for f in self.fields
-        )
-        object.__setattr__(self, "fields", converted)
+        object.__setattr__(self, "fields", _coerce_aggregation_fields(self.fields))
         object.__setattr__(
             self,
             "order_by",
@@ -282,12 +302,7 @@ class AggregationConfig:
         require_non_empty(self.group_by, "aggregation group_by")
         if not self.fields:
             raise ValueError("aggregation.fields cannot be empty")
-        for index, entry in enumerate(self.fields):
-            if not isinstance(entry, AggregationFieldSpec):
-                raise ValueError(
-                    "aggregation.fields entries must be AggregationFieldSpec, "
-                    f"got {type(entry).__name__} at index {index}"
-                )
+        _require_field_specs(self.fields)
 
 
 __all__ = [

@@ -19,6 +19,9 @@ from bioetl.composition.runtime_builders._context_field_binding import (
 pytestmark = pytest.mark.unit
 
 
+pytestmark = pytest.mark.unit
+
+
 @dataclass(frozen=True, slots=True)
 class _Ctx:
     pipeline: str

@@ -38,6 +38,17 @@ SILVER_FILTER_COMPATIBILITY_MODES: frozenset[SilverFilterCompatibilityMode] = fr
 )
 
 
+def _normalize_debug_export_formats(formats: tuple[str, ...]) -> tuple[str, ...]:
+    valid_formats = {"csv", "xlsx"}
+    normalized = tuple(str(fmt).strip().lower() for fmt in formats)
+    invalid = [fmt for fmt in normalized if fmt not in valid_formats]
+    if invalid:
+        raise ValueError(
+            f"debug_export_formats must contain only 'csv'/'xlsx', got {invalid!r}"
+        )
+    return normalized
+
+
 @dataclass(frozen=True, slots=True)
 class RuntimeConfig:
     """Runtime execution parameters.
@@ -109,6 +120,7 @@ class RuntimeConfig:
     def __post_init__(self) -> None:
         """Validate runtime config."""
         self._validate_positive_values()
+        self._validate_lock_ttl()
         self._validate_health_check_mode()
         self._validate_replay_anchor_date()
         self._validate_silver_filter_compatibility_mode()
@@ -146,6 +158,10 @@ class RuntimeConfig:
             if condition:
                 raise ValueError(message)
 
+    def _validate_lock_ttl(self) -> None:
+        if self.lock_ttl is not None and self.lock_ttl <= 0:
+            raise ValueError(f"lock_ttl must be positive or None, got {self.lock_ttl}")
+
     def _validate_health_check_mode(self) -> None:
         """Validate health-check mode literal."""
         if self.health_check_mode not in {"strict", "probe"}:
@@ -180,16 +196,8 @@ class RuntimeConfig:
 
     def _validate_debug_export_formats(self) -> None:
         """Validate debug export format tokens."""
-        valid_formats = {"csv", "xlsx"}
-        normalized = tuple(
-            str(fmt).strip().lower() for fmt in self.debug_export_formats
-        )
+        normalized = _normalize_debug_export_formats(self.debug_export_formats)
         object.__setattr__(self, "debug_export_formats", normalized)
-        invalid = [fmt for fmt in normalized if fmt not in valid_formats]
-        if invalid:
-            raise ValueError(
-                f"debug_export_formats must contain only 'csv'/'xlsx', got {invalid!r}"
-            )
 
     @property
     def effective_lock_ttl(self) -> int:
