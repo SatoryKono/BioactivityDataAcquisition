@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any, cast
 
@@ -19,7 +20,7 @@ DEFAULT_OUTPUT = Path("reports/quality/provider-contract-drift-report.json")
 _SEVERITY_RANK = {"benign": 0, "warning": 1, "breaking": 2}
 
 
-def _parse_args() -> argparse.Namespace:
+def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Generate a machine-readable provider contract drift report."
     )
@@ -34,7 +35,7 @@ def _parse_args() -> argparse.Namespace:
         default="breaking",
         help="Exit non-zero when the maximum observed severity reaches this threshold.",
     )
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def build_provider_contract_drift_report() -> dict[str, Any]:
@@ -121,8 +122,8 @@ def build_provider_contract_drift_report() -> dict[str, Any]:
     }
 
 
-def main() -> int:
-    args = _parse_args()
+def main(argv: Sequence[str] | None = None) -> int:
+    args = _parse_args(argv)
     output_path = Path(args.output)
     payload = build_provider_contract_drift_report()
     output_path.parent.mkdir(parents=True, exist_ok=True)
