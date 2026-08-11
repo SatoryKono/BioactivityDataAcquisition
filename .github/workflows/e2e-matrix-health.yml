@@ -63,6 +63,18 @@ jobs:
             echo $? > "reports/e2e/pytest_exit_code_run${run}.txt"
           done
 
+      # e2e-smoke SSOT path (configs/quality/test_matrix.yaml): chembl activity
+      # representative entity cycle. Cassette set is non-LFS (#8612).
+      - name: Run chembl activity e2e_smoke (cassette playback)
+        run: |
+          mkdir -p reports/e2e
+          VCR_RECORD_MODE=none uv run --frozen --no-build pytest \
+            tests/e2e/test_chembl_activity_e2e.py \
+            -m "e2e_smoke and not benchmark and not memory" \
+            --record-mode=none \
+            -q --tb=short \
+            --junitxml=reports/e2e/chembl-activity-smoke.xml
+
       - name: Enforce matrix smoke skip-rate SLO (run3)
         run: |
           # Expected total must match the active smoke matrix (not raw
@@ -97,6 +109,7 @@ jobs:
             reports/e2e/matrix-smoke-run1.xml
             reports/e2e/matrix-smoke-run2.xml
             reports/e2e/matrix-smoke-run3.xml
+            reports/e2e/chembl-activity-smoke.xml
             reports/e2e/matrix-smoke-summary.md
             reports/e2e/matrix-rerun-stability.md
             reports/e2e/pytest_exit_code_run1.txt
