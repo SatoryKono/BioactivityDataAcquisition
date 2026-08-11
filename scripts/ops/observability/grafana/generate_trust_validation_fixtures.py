@@ -7,7 +7,6 @@ for panels 9413–9417 (#8576 / #8578). Does not invent Prometheus metrics.
 from __future__ import annotations
 
 import argparse
-import json
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import UUID
@@ -31,6 +30,9 @@ from bioetl.application.observability.control_plane_evidence.service_support imp
 )
 from bioetl.domain.control_plane import RunCodeProvenance, RunLedgerEntry, RunManifest
 from bioetl.domain.types import RunID, RunType
+from scripts.ops.observability.trust_validation_fixture_materialization import (
+    materialize_trust_validation_fixture_matrix,
+)
 
 NOW = datetime(2026, 8, 11, tzinfo=UTC)
 RUN_ID = RunID(UUID("00000000-0000-0000-0000-000000008576"))
@@ -404,58 +406,12 @@ def build_matrix() -> dict[str, dict[str, dict[str, object]]]:
 
 
 def write_matrix(out: Path) -> dict[str, object]:
-    matrix = build_matrix()
-    out.mkdir(parents=True, exist_ok=True)
-    index: dict[str, object] = {
-        "schema_version": 1,
-        "issue": "#8576",
-        "related_issue": "#8578",
-        "contract": "control_plane_validation_evidence_v1",
-        "panel_map": PANEL_MAP,
-        "fixture_run_id": str(RUN_ID),
-        "fixture_pipeline": "chembl_activity",
-        "fixture_run_type": "incremental",
-        "states": {
-            "populated": "OK check rows for selected exact run (operator-readable).",
-            "valid_empty_or_unknown": "Scope unresolved / evidence absent; UNKNOWN, not green.",
-            "zero_failures": "failure-reasons only: exact run, zero failed events (counts=0).",
-            "backend_error": "Source read/parse failure as ERROR row (HTTP 200 body).",
-            "service_unavailable": "Service missing; HTTP 503 body for QUERY_ERROR path.",
-            "empty_rows": "Synthetic rows=[] for Infinity noValue visual path.",
-            "aggregate_scope_unknown": "checkpoint only: aggregate scope needs exact pipeline.",
-        },
-        "endpoints": {},
-    }
-    endpoints: dict[str, object] = {}
-    for endpoint, states in matrix.items():
-        ep_dir = out / endpoint
-        ep_dir.mkdir(parents=True, exist_ok=True)
-        ep_index: dict[str, object] = {}
-        for state, payload in states.items():
-            path = ep_dir / f"{state}.json"
-            path.write_text(
-                json.dumps(payload, indent=2, default=str, sort_keys=True) + "\n",
-                encoding="utf-8",
-            )
-            http_status = 503 if state == "service_unavailable" else 200
-            if isinstance(payload.get("http_status"), int):
-                http_status = int(payload["http_status"])
-            ep_index[state] = {
-                "path": path.as_posix(),
-                "status": payload.get("status"),
-                "row_count": len(payload.get("rows") or []),
-                "http_status": http_status,
-            }
-            print(
-                f"wrote {path} status={payload.get('status')} "
-                f"rows={len(payload.get('rows') or [])}"
-            )
-        endpoints[endpoint] = ep_index
-    index["endpoints"] = endpoints
-    (out / "INDEX.json").write_text(
-        json.dumps(index, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    return materialize_trust_validation_fixture_matrix(
+        out=out,
+        matrix=build_matrix(),
+        panel_map=PANEL_MAP,
+        fixture_run_id=RUN_ID,
     )
-    return index
 
 
 def main() -> int:

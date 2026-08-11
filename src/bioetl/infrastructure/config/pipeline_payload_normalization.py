@@ -112,30 +112,52 @@ def _collect_forbidden_pipeline_source_overrides(
     entity_source: JsonDict,  # Any: YAML config has heterogeneous values
 ) -> list[str]:
     """Collect entity-level overrides owned by provider transport config."""
-    forbidden: list[str] = []
-
-    if "batch_size" in entity_source:
-        forbidden.append("source.batch_size")
-
-    for key in _FORBIDDEN_PIPELINE_SOURCE_TRANSPORT_KEYS:
-        if key in entity_source:
-            forbidden.append(f"source.{key}")
-
-    provider_config = entity_source.get("provider_config")
-    if isinstance(provider_config, dict):
-        if provider_config:
-            forbidden.append("source.provider_config")
-        pagination = provider_config.get("pagination")
-        if isinstance(pagination, dict) and pagination:
-            forbidden.append("source.provider_config.pagination")
-        for key in _FORBIDDEN_PIPELINE_SOURCE_PROVIDER_PAGINATION_KEYS:
-            if key in provider_config:
-                forbidden.append(f"source.provider_config.{key}")
+    forbidden = _present_override_paths(
+        entity_source,
+        ("batch_size", *_FORBIDDEN_PIPELINE_SOURCE_TRANSPORT_KEYS),
+        prefix="source",
+    )
+    forbidden.extend(
+        _collect_forbidden_provider_config_overrides(
+            entity_source.get("provider_config")
+        )
+    )
 
     batch = entity_source.get("batch")
     if isinstance(batch, dict) and batch:
         forbidden.append("source.batch")
 
+    return forbidden
+
+
+def _present_override_paths(
+    payload: dict[str, object],
+    keys: tuple[str, ...],
+    *,
+    prefix: str,
+) -> list[str]:
+    """Return canonical override paths for keys present in *payload*."""
+    return [f"{prefix}.{key}" for key in keys if key in payload]
+
+
+def _collect_forbidden_provider_config_overrides(
+    provider_config: object,
+) -> list[str]:
+    """Collect forbidden provider transport overrides from entity config."""
+    if not isinstance(provider_config, dict):
+        return []
+
+    forbidden = ["source.provider_config"] if provider_config else []
+    pagination = provider_config.get("pagination")
+    if isinstance(pagination, dict) and pagination:
+        forbidden.append("source.provider_config.pagination")
+    forbidden.extend(
+        _present_override_paths(
+            provider_config,
+            _FORBIDDEN_PIPELINE_SOURCE_PROVIDER_PAGINATION_KEYS,
+            prefix="source.provider_config",
+        )
+    )
     return forbidden
 
 
