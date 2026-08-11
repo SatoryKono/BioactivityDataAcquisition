@@ -103,3 +103,35 @@ def test_main_check_mode_returns_zero_when_artifacts_match(
         patch.object(refresh, "DEFAULT_CONFIG", tmp_path / "missing-config.yaml"),
     ):
         assert refresh.main() == 0
+
+
+def test_main_check_mode_rejects_stale_optional_duplicate_name_inventory(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    payload = _sample_payload()
+    output = tmp_path / "test-governance-current.json"
+    fixture = tmp_path / "test-fixture-asset-duplication.json"
+    duplicate_names = tmp_path / "duplicate-test-name-inventory.json"
+    _write_json(output, payload)
+    _write_json(fixture, payload["report"]["fixture_asset_duplication"])
+    _write_json(duplicate_names, {"stale": True})
+
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "refresh_test_governance_baseline.py",
+            "--check",
+            "--output",
+            str(output),
+            "--fixture-duplication",
+            str(fixture),
+            "--duplicate-name-inventory",
+            str(duplicate_names),
+        ],
+    )
+    with (
+        patch.object(refresh, "collect_test_governance_report", return_value=payload),
+        patch.object(refresh, "DEFAULT_CONFIG", tmp_path / "missing-config.yaml"),
+    ):
+        assert refresh.main() == 1
