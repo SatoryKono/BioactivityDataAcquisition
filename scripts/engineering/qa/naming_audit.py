@@ -1573,7 +1573,7 @@ def format_full_report(
     return format_report(results) + "\n\n" + format_ambiguity_section(ambiguity_groups)
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Naming Convention Audit Tool for BioETL"
     )
@@ -1605,7 +1605,7 @@ def parse_args() -> argparse.Namespace:
         default="configs",
         help="Configs path (default: configs)",
     )
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def _audit_paths(args: argparse.Namespace) -> tuple[Path, Path, Path]:
@@ -1641,9 +1641,9 @@ def _emit_report(report: str, output: str | None) -> None:
     logger.info("%s", report)
 
 
-def main() -> int:
-    """Точка входа."""
-    args = parse_args()
+def main(argv: list[str] | None = None) -> int:
+    """CLI entrypoint."""
+    args = parse_args(argv)
     src_path, docs_path, configs_path = _audit_paths(args)
 
     registry = _load_validated_registry()
