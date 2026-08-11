@@ -296,3 +296,57 @@ def test_seed_result_success_and_duration_bounds() -> None:
     assert seed.is_success is True
     with pytest.raises(ValueError, match="duration_seconds"):
         SeedResult(pipeline_name="seed", duration_seconds=-0.1)
+
+
+def test_composite_merge_column_groups_optional_via_public_decoder() -> None:
+    """Exercise merge.column_groups None/empty/list paths without private imports."""
+    from bioetl.domain.composite.config import (
+        CompositeConfig,
+        DependencyConfig,
+        EnricherConfig,
+        MergeConfig,
+        SeedConfig,
+        composite_from_dict,
+    )
+
+    base: dict[str, object] = {
+        "name": "c",
+        "version": "1",
+        "seed": {"pipeline": "seed", "output_keys": ["id"], "silver_table": "s"},
+        "dependencies": [
+            {"pipeline": "dep", "join_keys": ["id"], "timeout_seconds": 1}
+        ],
+        "enrichers": [],
+        "merge": {
+            "strategy": "left_outer",
+            "conflict_resolution": "seed_priority",
+            "output_silver_path": "silver/c",
+            "output_gold_path": "gold/c",
+        },
+    }
+
+    def _load(payload: dict[str, object]) -> CompositeConfig:
+        return composite_from_dict(
+            payload,
+            composite_cls=CompositeConfig,
+            seed_cls=SeedConfig,
+            dependency_cls=DependencyConfig,
+            enricher_cls=EnricherConfig,
+            merge_cls=MergeConfig,
+        )
+
+    cfg_missing = _load(base)
+    assert cfg_missing.merge.column_groups == ()
+
+    with_empty = dict(base)
+    with_empty["merge"] = {**base["merge"], "column_groups": []}  # type: ignore[index]
+    cfg_empty = _load(with_empty)
+    assert cfg_empty.merge.column_groups == ()
+
+    with_groups = dict(base)
+    with_groups["merge"] = {
+        **base["merge"],  # type: ignore[dict-item]
+        "column_groups": [{"name": "ids", "fields": ["id"]}],
+    }
+    cfg_groups = _load(with_groups)
+    assert len(cfg_groups.merge.column_groups) == 1
