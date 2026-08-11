@@ -382,7 +382,7 @@ def test_composite_merge_column_groups_optional_paths() -> None:
             {
                 "pipeline": "dep",
                 "output_keys": ["id"],
-                "join_keys": {"seed": "id", "dependency": "id"},
+                "join_keys": ["id"],
                 "silver_table": "d",
             }
         ],
