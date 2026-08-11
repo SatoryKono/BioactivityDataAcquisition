@@ -1112,6 +1112,36 @@
       "review_by": "2026-09-30",
       "next_step": "Retain only as the fail-closed compatibility stub for the removed Quarantine Explorer command; keep it supporting while documented legacy invocations must receive the explicit exit-2 retirement message."
     },
+    "scripts/ops/observability/grafana/generate_trust_validation_fixtures.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the bounded #8576/#8578 Trust-panel fixture generator; consolidate it into the canonical dashboard-audit command or remove it when the reviewed close-up campaign is complete."
+    },
+    "scripts/ops/observability/grafana/recover_renderer.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows compatibility wrapper for optional renderer-only recovery; keep the canonical recovery behavior in the platform-neutral observability workflow."
+    },
+    "scripts/ops/observability/grafana/recover_renderer.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded optional renderer-only recovery helper while Grafana monitoring remains local and optional; consolidate it into the canonical observability command surface before promotion."
+    },
+    "scripts/ops/observability/grafana/run_trust_fixture_closeup_matrix.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the Windows capture wrapper for the bounded #8576/#8578 Trust fixture matrix; remove it after the visual audit campaign or route it through the canonical render command."
+    },
+    "scripts/ops/observability/grafana/serve_trust_validation_fixtures.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the local fixture-server implementation used by the bounded Trust close-up workflow; keep it supporting and do not expose it as a separate operator entrypoint."
+    },
     "scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",
@@ -1183,6 +1213,12 @@
       "decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain as an opt-in local host posture utility for MCP profile projection and cleanup; keep it supporting because local-only Docker monitoring and shared MCP remain optional."
+    },
+    "scripts/ops/runtime/docker/check_network_preconditions.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the network-precondition helper invoked by the governed Docker runtime workflow; keep it supporting so the active inventory counts the canonical runtime entrypoint only."
     },
     "scripts/ops/runtime/docker/docker_runtime_probe.py": {
       "owner": "@bioetl-platform",
