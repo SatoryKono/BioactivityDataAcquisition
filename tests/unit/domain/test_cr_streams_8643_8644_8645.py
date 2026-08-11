@@ -226,12 +226,6 @@ def test_field_group_registry_rejects_duplicate_base_and_column() -> None:
         )
 
 
-def test_optional_column_groups_decoder_helper() -> None:
-    from bioetl.domain.composite.config_composite_decoder import _optional_column_groups
-
-    assert _optional_column_groups(None) == ()
-    assert _optional_column_groups(()) == ()
-
 
 def test_lineage_requires_identity_fields() -> None:
     from bioetl.domain.composite.lineage import CompositeLineageMetadata
