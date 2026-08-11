@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import shutil
 import sys
 from collections.abc import Iterable
@@ -30,6 +31,10 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 CONTRACT_PATH = REPO_ROOT / "scripts" / "ai" / "junie" / "junie-mirror-contract.json"
 
 type JsonObject = dict[str, Any]
+
+MAPPED_PROFILE_PATTERN = re.compile(
+    r"^\|\s*`(py-[a-z0-9-]+)`\s*\|", re.MULTILINE
+)
 
 
 def sha256_of(path: Path) -> str:
@@ -182,6 +187,55 @@ def check_runtime_only_files(contract: JsonObject, issues: list[str]) -> None:
             issues.append(f"[runtime_only] missing junie_only file: {path_str}")
 
 
+def check_runtime_semantics(contract: JsonObject, issues: list[str]) -> None:
+    """Validate semantic parity for runtime-specific Junie entry points."""
+    scope = contract.get("runtime_semantics")
+    if not isinstance(scope, dict):
+        issues.append("[runtime_semantics] missing runtime_semantics contract")
+        return
+
+    agents_scope = contract["parity_scope"]["agents"]
+    excluded_profiles = set(agents_scope.get("exclude_filenames", []))
+    expected_profiles = {
+        path.stem
+        for path in (REPO_ROOT / ".codex" / "agents").glob("py-*.md")
+        if path.name not in excluded_profiles
+    }
+
+    runtime_map_rel = scope["junie_runtime_map"]
+    guidelines_rel = scope["junie_guidelines"]
+    runtime_map = REPO_ROOT / runtime_map_rel
+    guidelines = REPO_ROOT / guidelines_rel
+    if not runtime_map.exists() or not guidelines.exists():
+        return
+
+    runtime_text = runtime_map.read_text(encoding="utf-8")
+    guidelines_text = guidelines.read_text(encoding="utf-8")
+    mapped_profiles = set(MAPPED_PROFILE_PATTERN.findall(runtime_text))
+    for profile in sorted(expected_profiles - mapped_profiles):
+        issues.append(f"[runtime_semantics] missing Junie profile mapping: {profile}")
+    for profile in sorted(mapped_profiles - expected_profiles):
+        issues.append(f"[runtime_semantics] phantom Junie profile mapping: {profile}")
+
+    governed_texts = {
+        runtime_map_rel: runtime_text,
+        guidelines_rel: guidelines_text,
+    }
+    for identifier in scope.get("forbidden_identifiers", []):
+        for path_str, content in governed_texts.items():
+            if identifier in content:
+                issues.append(
+                    f"[runtime_semantics] forbidden identifier {identifier!r} in {path_str}"
+                )
+
+    for skill_name in scope.get("required_dashboard_skills", []):
+        skill_ref = f".junie/skills/{skill_name}/"
+        if skill_ref not in guidelines_text:
+            issues.append(
+                f"[runtime_semantics] missing dashboard skill reference: {skill_ref}"
+            )
+
+
 def do_check(contract: JsonObject) -> int:
     issues: list[str] = []
     check_agents(contract, issues)
@@ -190,6 +244,7 @@ def do_check(contract: JsonObject) -> int:
     check_skills(contract, issues)
     check_skill_contents(contract, issues)
     check_runtime_only_files(contract, issues)
+    check_runtime_semantics(contract, issues)
     if issues:
         print("Junie mirror parity FAILED:", file=sys.stderr)
         for line in issues:

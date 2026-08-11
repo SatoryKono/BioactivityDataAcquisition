@@ -93,7 +93,7 @@ BioETL uses **39 GitHub Actions workflows** (including reusable helper workflows
 | Workflow                        | File                | Key Jobs                                                                                                                              | What It Checks                                                                                                                                                                                                                                      |
 | ------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Lint and Architecture Gates** | `import-linter.yml` | `lint`, `c901-governance`, `arch-tests`, `checks-complete`                                                                            | Ruff lint+format, changed-file formatting enforcement, C901 baseline governance, architecture tests, import-linter, dependency boundary checks                                                                                                      |
-| **Tests**                       | `tests.yml`         | `smoke-check`, `governance-preflight`, `config-schema-preflight`, `test-fast`, `test-matrix`, `coverage-verify`, `duration-telemetry` | VCR cassettes, config validation, governance preflight, smoke tests, fast unit feedback, full test matrix (Python 3.11+3.12, 6 groups), scoped pytest/Hypothesis cache fingerprints, final combined 85% coverage gate, slow-test telemetry artifact |
+| **Tests**                       | `tests.yml`         | `smoke-check`, `governance-preflight`, `config-schema-preflight`, `test-fast`, `test-matrix`, `coverage-verify`, `duration-telemetry` | VCR cassettes, config validation, governance preflight, smoke tests, fast unit feedback, full test matrix (Python 3.12, 6 groups), scoped pytest/Hypothesis cache fingerprints, final combined 85% coverage gate, slow-test telemetry artifact |
 | **Type Checking (Strict)**      | `type-checking.yml` | `type-check`                                                                                                                          | mypy strict, NewType/Protocol verification, `Any` usage analysis                                                                                                                                                                                    |
 | **Commit Lint**                 | `commit-lint.yml`   | `commit-lint`                                                                                                                         | Conventional Commits format enforcement                                                                                                                                                                                                             |
 
@@ -129,7 +129,7 @@ BioETL uses **39 GitHub Actions workflows** (including reusable helper workflows
 | **Mutation Testing**   | `mutation-testing.yml`       | Weekly (Sun 00:00 UTC) + PR | mutmut on domain layer, 70% mutation score threshold; application gate staged |
 | **Contract Tests**     | `contract-tests.yml`         | Monthly (1st, 02:00 UTC)    | Live API contract tests, creates GitHub issue on failure                      |
 | **Weekly VACUUM**      | `vacuum.yml`                 | Weekly (Sun 02:00 UTC)      | Delta Lake VACUUM on all layers                                               |
-| **Release**            | `release.yml`                | On release publish          | Build, test on 3 Python versions, publish to TestPyPI+PyPI                    |
+| **Release**            | `release.yml`                | On release publish          | Build and test on Python 3.13, publish to TestPyPI+PyPI                      |
 | `quality-debt-weekly.yml` | Weekly + manual dispatch | Debt scorecard and exemption-registry drift visibility |
 
 ______________________________________________________________________
@@ -361,7 +361,7 @@ Triggered by GitHub Release publication or manual dispatch.
 
 ```
 1. Build         → wheel + sdist + twine verify
-2. Test Install  → Python 3.11, 3.12, 3.13
+2. Test Install  → Python 3.13
 3. TestPyPI      → Publish to test index
 4. PyPI          → Publish to production index (releases only)
 5. Assets        → Upload to GitHub Release

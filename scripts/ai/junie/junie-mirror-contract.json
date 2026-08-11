@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema#",
   "description": "Parity contract between .codex/** (source runtime) and .junie/** (mirror runtime). Enforced by scripts/ai/junie/check_junie_mirror.sh. Both trees are equal-peer canonical runtime sources; --sync copies from .codex/** into .junie/** only, never the reverse.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "source_runtime": ".codex",
   "mirror_runtime": ".junie",
   "parity_scope": {
@@ -52,6 +52,21 @@
       ".codex/agents/py-test-bot.toml"
     ],
     "junie_only": [".junie/agents/JUNIE-RUNTIME.md", ".junie/guidelines.md"]
+  },
+  "runtime_semantics": {
+    "junie_runtime_map": ".junie/agents/JUNIE-RUNTIME.md",
+    "junie_guidelines": ".junie/guidelines.md",
+    "required_dashboard_skills": [
+      "observability-dashboard",
+      "observability-prometheus"
+    ],
+    "forbidden_identifiers": [
+      "py-architecture-debt-bot",
+      "py-review-orchestrator",
+      "py-test-swarm",
+      "grafana-dashboard-render",
+      "grafana-dashboard-extension"
+    ]
   },
   "sync_policy": {
     "direction": "codex_to_junie",

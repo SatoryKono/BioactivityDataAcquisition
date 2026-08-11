@@ -135,15 +135,15 @@
     "5710": {
       "architecture_runner_backend": "run_pytest_sharded",
       "cache_probe": {
-        "name": "collect_test_governance_report",
         "first_duration_s": 28.676,
-        "second_duration_s": 0.001,
-        "improvement_factor": 34900.14
+        "improvement_factor": 34900.14,
+        "name": "collect_test_governance_report",
+        "second_duration_s": 0.001
       },
       "refreshed_at_utc": "2026-08-07T13:33:52.973234+00:00",
       "slow_governance_lane": "S7-architecture-slow-governance",
-      "telemetry_source_commit": "da9712f7ea64a93eea392beea9daaa758236faea",
-      "telemetry_source_run_id": "merge-resolve-8216-20260806"
+      "telemetry_source_commit": "a4a95fd6396fc2f00319d2ddc10de4dab09be825",
+      "telemetry_source_run_id": "github-31515014563-1"
     },
     "5711": {
       "no_executable_line_modules": 2,

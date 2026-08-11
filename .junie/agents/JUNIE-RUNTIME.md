@@ -56,23 +56,21 @@ python -m memory.tooling.workflow <pre-task-or-post-task> ...
 omit it rather than guessing. Generated episodic records bind this actor
 identity to repository, commit, branch, worktree, task, and source references.
 
-## Recommended Mapping
+## Governed Profiles
 
-Junie exposes its own role vocabulary; below is the logical → Junie mapping.
-The `codex_role` column mirrors `.codex/agents/CODEX-RUNTIME.md` so parity is
-inspectable.
+Junie exposes its own role vocabulary, but it routes the same six logical
+profiles governed by `.codex/agents/CODEX-RUNTIME.md`. The logical profile set
+MUST match the tracked `.codex/agents/py-*.md` and `.junie/agents/py-*.md`
+inventories.
 
-| Logical profile           | Junie role | codex_role         |
-| ------------------------- | ---------- | ------------------ |
-| `py-audit-bot`            | default    | default            |
-| `py-architecture-debt-bot`| default    | default            |
-| `py-plan-bot`             | default    | default            |
-| `py-test-bot`             | default    | default or worker  |
-| `py-config-bot`           | worker     | worker             |
-| `py-debug-bot`            | worker     | worker             |
-| `py-doc-bot`              | worker     | worker             |
-| `py-test-swarm`           | default    | default            |
-| `py-review-orchestrator`  | default    | default            |
+| Logical profile | Junie role | Default authority |
+| --- | --- | --- |
+| `py-audit-bot` | default | read-only |
+| `py-config-bot` | worker | workspace write |
+| `py-debug-bot` | worker | read-only |
+| `py-doc-bot` | worker | workspace write |
+| `py-plan-bot` | default | read-only |
+| `py-test-bot` | default or worker | workspace write |
 
 ## Common Task Routing
 
@@ -82,10 +80,11 @@ Use the smallest existing skill that matches the request:
 | --- | --- | --- | --- |
 | Diagnose without fixing | read-only | `py-debug-bot` | reproduction and evidence only |
 | Implement a focused fix | write in requested scope | direct implementation; `py-config-bot` when configs change | targeted lint/tests |
-| Review the current diff | read-only | `py-review-orchestrator` or `code-review` | diff inspection; no external writes |
-| Investigate and fix CI | write only after root cause | GitHub CI workflow / `py-debug-bot` | failed checks plus targeted regression |
-| Prepare a PR | branch/commit/push authorized by request | `create-pr` | repository quality gates for touched scope |
-| Audit architecture debt | read-only | `py-architecture-debt-bot` | architecture/debt gates; budgets MUST NOT increase |
+| Review the current diff | read-only | `py-audit-bot` (`review`) | diff inspection; no external writes |
+| Diagnose CI failure | read-only | `py-debug-bot` | reproduction, root cause, remediation guidance |
+| Implement diagnosed CI remediation | write in requested scope | direct parent implementation | failed check plus targeted regression |
+| Prepare a PR | branch/commit/push authorized by request | direct parent workflow | repository quality gates for touched scope |
+| Audit architecture debt | read-only | `py-audit-bot` (`debt`) | architecture/debt gates; budgets MUST NOT increase |
 
 Templates do not broaden user authority. Diagnosis and review stay read-only
 unless the user also asks for implementation. Load the selected skill and

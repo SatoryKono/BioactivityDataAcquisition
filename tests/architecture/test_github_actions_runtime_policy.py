@@ -26,6 +26,9 @@ ROOT = Path(__file__).resolve().parents[2]
 CONTRACT_TESTS_WORKFLOW = ROOT / ".github" / "workflows" / "contract-tests.yml"
 CODERABBIT_WORKFLOW = ROOT / ".github" / "workflows" / "coderabbit.yml"
 NIGHTLY_REPLAY_WORKFLOW = ROOT / ".github" / "workflows" / "nightly-replay-parity.yml"
+TESTS_WORKFLOW = ROOT / ".github" / "workflows" / "tests.yml"
+RELEASE_WORKFLOW = ROOT / ".github" / "workflows" / "release.yml"
+GITHUB_POLICY = ROOT / "docs" / "00-project" / "governance" / "05-github-policy.md"
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -47,6 +50,31 @@ def test_runtime_policy_rejects_mutable_external_action_refs() -> None:
 
     assert violation is not None
     assert "full 40-character SHA" in violation
+
+
+def test_runtime_policy_parses_standard_step_uses_entries() -> None:
+    parsed = policy._parsed_uses_reference("      - uses: actions/checkout@v4")
+
+    assert parsed == ("actions/checkout@v4", "actions/checkout")
+
+
+def test_repository_actions_refs_satisfy_runtime_policy() -> None:
+    assert not policy._collect_uses_violations()
+
+
+def test_github_policy_python_version_claims_match_workflows() -> None:
+    tests_workflow = _load_yaml(TESTS_WORKFLOW)
+    release_workflow = _load_yaml(RELEASE_WORKFLOW)
+    test_matrix = tests_workflow["jobs"]["test-matrix"]["strategy"]["matrix"]
+    release_matrix = release_workflow["jobs"]["test-install"]["strategy"]["matrix"]
+    policy_doc = GITHUB_POLICY.read_text(encoding="utf-8")
+
+    assert test_matrix["python-version"] == ["3.12"]
+    assert len(test_matrix["test-group"]) == 6
+    assert release_matrix["python-version"] == ["3.13"]
+    assert "full test matrix (Python 3.12, 6 groups)" in policy_doc
+    assert "Build and test on Python 3.13" in policy_doc
+    assert "2. Test Install  → Python 3.13" in policy_doc
 
 
 def test_runtime_policy_rejects_mutable_docker_image_tags() -> None:
