@@ -238,8 +238,9 @@ Live GitHub enforcement state:
 - Repository ruleset `root-hygiene-required-check` targets
   `refs/heads/main`.
 - Enforcement: **`active`**.
-- Required status checks: `checks-complete`, `root-hygiene`
+- Required status checks: exactly `checks-complete` and `root-hygiene`
   (`strict_required_status_checks_policy: false`).
+- The ruleset has no bypass actors.
 - Tracking references: `#3380`, `#8619`.
 - Evidence: `https://github.com/SatoryKono/BioactivityDataAcquisition/rules/15730586`
 - API: `GET /repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586`
