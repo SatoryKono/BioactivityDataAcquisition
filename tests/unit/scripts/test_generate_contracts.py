@@ -13,7 +13,9 @@ def test_check_mode_reports_current_without_writes(tmp_path, monkeypatch) -> Non
     artifact = tmp_path / "contract.json"
     artifact.write_text("expected\n", encoding="utf-8")
     monkeypatch.setattr(generator, "CONTRACTS_DIR", tmp_path)
-    monkeypatch.setattr(generator, "_expected_artifacts", lambda: {artifact: "expected\n"})
+    monkeypatch.setattr(
+        generator, "_expected_artifacts", lambda: {artifact: "expected\n"}
+    )
     before = artifact.stat().st_mtime_ns
 
     assert generator.generate_contracts(check=True) == 0
@@ -25,7 +27,9 @@ def test_check_mode_reports_stale_without_writes(tmp_path, monkeypatch) -> None:
     artifact = tmp_path / "contract.json"
     artifact.write_text("stale\n", encoding="utf-8")
     monkeypatch.setattr(generator, "CONTRACTS_DIR", tmp_path)
-    monkeypatch.setattr(generator, "_expected_artifacts", lambda: {artifact: "expected\n"})
+    monkeypatch.setattr(
+        generator, "_expected_artifacts", lambda: {artifact: "expected\n"}
+    )
 
     assert generator.generate_contracts(check=True) == 1
     assert artifact.read_text(encoding="utf-8") == "stale\n"

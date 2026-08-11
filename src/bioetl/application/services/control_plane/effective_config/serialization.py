@@ -148,9 +148,7 @@ def build_semantic_identity_payload(
         "runtime_overrides": runtime_overrides_payload(request.runtime_overrides),
         "execution_environment": to_jsonable(request.execution_environment),
         "effective_execution_config": {
-            "identity_version": (
-                request.effective_execution_config.identity_version
-            ),
+            "identity_version": (request.effective_execution_config.identity_version),
             "config_data": to_jsonable(request.effective_execution_config.config_data),
             "effective_hash": request.effective_execution_config.effective_hash,
         },
@@ -192,9 +190,7 @@ def semantic_artifact_payload(artifact: EffectiveConfigArtifact) -> JsonDict:
         "runtime_overrides": runtime_overrides_payload(artifact.runtime_overrides),
         "execution_environment": to_jsonable(artifact.execution_environment),
         "effective_execution_config": {
-            "identity_version": (
-                artifact.effective_execution_config.identity_version
-            ),
+            "identity_version": (artifact.effective_execution_config.identity_version),
             "config_data": to_jsonable(artifact.effective_execution_config.config_data),
             "effective_hash": artifact.effective_execution_config.effective_hash,
         },

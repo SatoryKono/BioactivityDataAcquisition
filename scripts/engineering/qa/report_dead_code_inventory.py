@@ -230,7 +230,7 @@ NON_STATIC_REACHABILITY_DISPOSITIONS = frozenset(
 )
 
 
-def _parse_args() -> argparse.Namespace:
+def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", default=str(PROJECT_ROOT))
     parser.add_argument("--json-out", default=str(DEFAULT_JSON_OUTPUT))
@@ -248,7 +248,7 @@ def _parse_args() -> argparse.Namespace:
         action="store_true",
         help="Fail if committed dead-code inventory artifacts differ from generated output.",
     )
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -1077,10 +1077,10 @@ def _check_dead_code_artifacts(
     return 0
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     from scripts.engineering.common.repo_paths import resolve_output_path
 
-    args = _parse_args()
+    args = _parse_args(argv)
     repo_root = resolve_output_path(args.repo_root, root=PROJECT_ROOT)
     json_out = resolve_output_path(args.json_out, root=repo_root)
     md_out = resolve_output_path(args.md_out, root=repo_root)

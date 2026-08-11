@@ -131,12 +131,8 @@ def test_build_effective_config_source_refs_persists_semantic_and_raw_source_has
         compute_canonical_yaml_sha256(entity_quality.read_bytes()),
         compute_canonical_yaml_sha256(contract_registry.read_bytes()),
     ]
-    assert {ref.source_hash_version for ref in refs} == {
-        "canonical-yaml-sha256-v1"
-    }
-    assert {ref.raw_source_hash_version for ref in refs} == {
-        "raw-bytes-sha256-v1"
-    }
+    assert {ref.source_hash_version for ref in refs} == {"canonical-yaml-sha256-v1"}
+    assert {ref.raw_source_hash_version for ref in refs} == {"raw-bytes-sha256-v1"}
 
 
 def test_build_effective_config_source_refs_include_dependency_provenance_files(
