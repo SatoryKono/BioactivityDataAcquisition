@@ -12,8 +12,8 @@
 - Permanent public entrypoints: `12`
 - Measured tracked modules: `12`
 - Measured-only modules outside curated inventory: `0`
-- Discovered docstring-tracked modules: `0`
-- Unexpected docstring-tracked modules: `0`
+- Discovered docstring-tracked modules: `1`
+- Unexpected docstring-tracked modules: `1`
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
 - Curated rows requiring external breaking change process: `12`
@@ -109,11 +109,11 @@
 
 ### Discovered Docstring-Tracked Modules
 
-- None.
+- `src/bioetl/domain/exceptions/infrastructure/__init__.py`
 
 ### Unexpected Docstring-Tracked Modules
 
-- None.
+- `src/bioetl/domain/exceptions/infrastructure/__init__.py`
 
 ### Missing Allowlisted Measured-Only Modules
 
