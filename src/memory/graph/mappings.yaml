@@ -42,6 +42,8 @@ file_structure:
     - "docs/02-architecture/diagrams/foundation/svg"
     - "docs/02-architecture/diagrams/views/png"
     - "docs/02-architecture/diagrams/views/svg"
+    - "docs/02-architecture/diagrams/providers"
+    - "docs/02-architecture/diagrams/descriptions"
     - "scripts/diagrams/svg2png.mjs"
     - "scripts/archive"
   promoted_hubs:
