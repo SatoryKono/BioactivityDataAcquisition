@@ -29,7 +29,7 @@ ______________________________________________________________________
 
 | Branch           | Purpose                         | Protection                                             |
 | ---------------- | ------------------------------- | ------------------------------------------------------ |
-| `main`           | Production-ready code           | Direct merge allowed; no active required-check ruleset |
+| `main`           | Production-ready code           | Active ruleset requires `checks-complete` and `root-hygiene` |
 | `develop`        | Integration branch (optional)   | Commit lint enforced                                   |
 | Feature branches | `feat/*`, `fix/*`, `refactor/*` | None                                                   |
 
@@ -140,9 +140,9 @@ ______________________________________________________________________
 
 ## 3. Status Checks and Ruleset Contract
 
-Direct merges to `main` are currently allowed. When a PR is used, the following
-checks remain the recommended quality gate even though GitHub does not
-currently enforce them as a blocking repository rule.
+Updates to `main` are governed by active required status checks. The following
+checks remain the recommended quality gate, while the repository ruleset
+enforces the final always-on subset documented below.
 
 ### Final always-on required-check set
 
@@ -154,10 +154,9 @@ The final activation set for repository ruleset
 | `checks-complete` | import-linter.yml | Unfiltered `pull_request` trigger; aggregates lint, C901 governance, architecture, and import-linter gates |
 | `root-hygiene` | root-hygiene.yml | Unfiltered `pull_request` trigger; enforces repository-root governance |
 
-Both checks materialize on every PR targeting `main`. Enabling or changing the
-repository ruleset is an external mutation and requires explicit maintainer
-confirmation. Until that confirmation is given and the API result is verified,
-the ruleset remains documented as disabled below.
+Both checks materialize on every PR targeting `main`. The active repository
+ruleset enforces exactly this pair. Any later ruleset change remains an external
+mutation and requires explicit maintainer confirmation plus API verification.
 
 ### Path-scoped core checks
 
@@ -204,7 +203,7 @@ To remove drift between workflow-specific job names and governance language, Bio
 
 ### Escalation policy for fail/warn
 
-- **FAIL**: merge is blocked for PRs; if direct merge is used (ruleset disabled), maintainer MUST either fix or explicitly record a risk acceptance in PR/commit discussion.
+- **FAIL**: merge is blocked for PRs where the gate applies. The active always-on ruleset requires `checks-complete` and `root-hygiene`; failures in path-scoped gates MUST be fixed or explicitly risk-accepted in the PR discussion.
 - **WARN**: merge MAY proceed only with documented justification and a follow-up issue with owner and due date.
 - **WARN→FAIL**: repeated warning in 2 consecutive runs for the same surface, or warning on governance-contract surfaces (`RULES.md`, ADR-linked checks, schema parity, secrets) escalates to FAIL.
 
@@ -226,22 +225,21 @@ To remove drift between workflow-specific job names and governance language, Bio
 
 ### Branch Protection Verification
 
-Repository settings currently allow direct merge to `main`.
-Repo-side evidence remains the `root-hygiene` workflow plus the repository
+Repository settings enforce the final always-on checks for updates to `main`.
+Repo-side evidence consists of the two unfiltered workflows plus the repository
 ruleset state below.
 
-Re-verified read-only on `2026-08-11` with repository admin credentials via the
-GitHub REST API.
+Activated and re-verified on `2026-08-11` with repository admin credentials via
+the GitHub REST API.
 
 Live GitHub enforcement state:
 
 - Repository ruleset `root-hygiene-required-check` targets
   `refs/heads/main`.
-- Enforcement: `disabled`.
-- Current rule payload references only status check `root-hygiene`, with
-  `strict_required_status_checks_policy: false`; it is not active.
-- The final activation payload adds `checks-complete` and retains
-  `root-hygiene`, matching the always-on set above.
+- Enforcement: `active`.
+- The required-status-check payload contains exactly `checks-complete` and
+  `root-hygiene`, with `strict_required_status_checks_policy: false`.
+- The ruleset has no bypass actors.
 - Tracking reference: `#3380`.
 - Evidence: `https://github.com/SatoryKono/BioactivityDataAcquisition/rules/15730586`
 
