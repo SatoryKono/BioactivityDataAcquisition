@@ -52,7 +52,11 @@ def load_enriched(index: dict) -> dict[tuple[str, str], dict]:
         if not fp.is_file():
             continue
         raw = json.loads(fp.read_text(encoding="utf-8"))
-        items = raw if isinstance(raw, list) else raw.get("findings") or raw.get("items") or []
+        items = (
+            raw
+            if isinstance(raw, list)
+            else raw.get("findings") or raw.get("items") or []
+        )
         for item in items:
             if isinstance(item, dict) and item.get("id"):
                 enriched[(ds["domain_id"], str(item["id"]))] = item
@@ -147,18 +151,20 @@ def parent_body(index: dict) -> str:
             f"| {ds['domain_id']} | {ds['surface_score']} | {ds['finding_count']} | {ds['p0_p1_count']} |"
         )
     table = "\n".join(rows)
-    steps = "\n".join(f"{i}. {s}" for i, s in enumerate(index["recommended_next_steps"], 1))
+    steps = "\n".join(
+        f"{i}. {s}" for i, s in enumerate(index["recommended_next_steps"], 1)
+    )
     return f"""## Nine-domain audit rollup (2026-08-11)
 
 | Field | Value |
 | --- | --- |
 | Run | `nine-domain-audit` |
 | Args | domains=all, language=ru, mode=audit |
-| overall_surface_score | **{index['overall_surface_score']}** (acceptable) |
-| gate | **{index['gate']}** |
-| Findings | {index['all_findings_total']} total · {index['proven_findings_total']} PROVEN · {index['not_proven_findings_total']} NOT_PROVEN |
-| P0+P1 | **{index['p0_p1_count']}** |
-| Blocked domains | {index['blocked_domains']} |
+| overall_surface_score | **{index["overall_surface_score"]}** (acceptable) |
+| gate | **{index["gate"]}** |
+| Findings | {index["all_findings_total"]} total · {index["proven_findings_total"]} PROVEN · {index["not_proven_findings_total"]} NOT_PROVEN |
+| P0+P1 | **{index["p0_p1_count"]}** |
+| Blocked domains | {index["blocked_domains"]} |
 
 ### Domain scores
 
@@ -178,7 +184,7 @@ def parent_body(index: dict) -> str:
 
 ### Scope of child issues
 
-This parent tracks **{index['p0_p1_count']} PROVEN P0/P1** findings only. P2/P3 and NOT_PROVEN remain in the rollup unless promoted later.
+This parent tracks **{index["p0_p1_count"]} PROVEN P0/P1** findings only. P2/P3 and NOT_PROVEN remain in the rollup unless promoted later.
 
 ### Guards
 
@@ -234,7 +240,8 @@ def prepare() -> dict:
         "parent_title": parent["title"],
         "child_count": len(children),
         "children": [
-            {"id": c["id"], "title": c["title"], "labels": c["labels"]} for c in children
+            {"id": c["id"], "title": c["title"], "labels": c["labels"]}
+            for c in children
         ],
     }
     (OUT / "MANIFEST.json").write_text(
@@ -265,7 +272,17 @@ def create_issue(title: str, body: str, labels: list[str]) -> dict:
     if proc.returncode != 0:
         # retry without optional labels if label failure
         if "label" in (proc.stderr or "").lower():
-            cmd2 = ["gh", "issue", "create", "--title", title, "--body", body, "--label", "audit"]
+            cmd2 = [
+                "gh",
+                "issue",
+                "create",
+                "--title",
+                title,
+                "--body",
+                body,
+                "--label",
+                "audit",
+            ]
             proc = _run(cmd2)
     if proc.returncode != 0:
         raise RuntimeError(f"gh issue create failed: {proc.stderr or proc.stdout}")
