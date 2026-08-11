@@ -1077,14 +1077,7 @@
     }
   },
   "assertless_total_candidates": 101,
-  "budget_violations": [
-    {
-      "actual": 15,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1258,24 +1251,8 @@
     ]
   },
   "intentional_no_exception_contract": 85,
-  "markerless_examples": [
-    "tests/unit/application/services/control_plane/replay/test_historical_record_payload.py:30",
-    "tests/unit/application/services/control_plane/replay/test_historical_record_payload.py:48",
-    "tests/unit/application/services/control_plane/replay/test_historical_record_payload.py:61",
-    "tests/unit/composition/runtime_builders/test_context_field_binding.py:36",
-    "tests/unit/composition/runtime_builders/test_context_field_binding.py:41",
-    "tests/unit/composition/runtime_builders/test_context_field_binding.py:52",
-    "tests/unit/composition/runtime_builders/test_context_field_binding.py:62",
-    "tests/unit/composition/runtime_builders/test_context_field_binding.py:75",
-    "tests/unit/composition/runtime_builders/test_context_field_binding.py:87",
-    "tests/unit/composition/runtime_builders/test_context_field_binding.py:106",
-    "tests/unit/composition/runtime_builders/test_context_field_binding.py:118",
-    "tests/unit/composition/runtime_builders/test_run_manifest_attr_support.py:16",
-    "tests/unit/composition/runtime_builders/test_run_manifest_attr_support.py:21",
-    "tests/unit/composition/runtime_builders/test_run_manifest_attr_support.py:27",
-    "tests/unit/composition/runtime_builders/test_run_manifest_attr_support.py:32"
-  ],
-  "markerless_test_functions": 15,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -2236,24 +2213,8 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/unit/application/services/control_plane/replay/test_historical_record_payload.py:30",
-      "tests/unit/application/services/control_plane/replay/test_historical_record_payload.py:48",
-      "tests/unit/application/services/control_plane/replay/test_historical_record_payload.py:61",
-      "tests/unit/composition/runtime_builders/test_context_field_binding.py:36",
-      "tests/unit/composition/runtime_builders/test_context_field_binding.py:41",
-      "tests/unit/composition/runtime_builders/test_context_field_binding.py:52",
-      "tests/unit/composition/runtime_builders/test_context_field_binding.py:62",
-      "tests/unit/composition/runtime_builders/test_context_field_binding.py:75",
-      "tests/unit/composition/runtime_builders/test_context_field_binding.py:87",
-      "tests/unit/composition/runtime_builders/test_context_field_binding.py:106",
-      "tests/unit/composition/runtime_builders/test_context_field_binding.py:118",
-      "tests/unit/composition/runtime_builders/test_run_manifest_attr_support.py:16",
-      "tests/unit/composition/runtime_builders/test_run_manifest_attr_support.py:21",
-      "tests/unit/composition/runtime_builders/test_run_manifest_attr_support.py:27",
-      "tests/unit/composition/runtime_builders/test_run_manifest_attr_support.py:32"
-    ],
-    "markerless_test_functions": 15,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2317,7 +2278,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "e1ea46cdbc6fd3d639815b37412bf7d972d57e296824dbeb370e56665a2e38c6",
+  "source_tree_sha256": "8f957360dab21f21ffa84b88d7f119b36076cd045420b85189b19a7bf2bf633b",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 101,
@@ -2326,24 +2287,8 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 85,
-    "markerless_examples": [
-      "tests/unit/application/services/control_plane/replay/test_historical_record_payload.py:30",
-      "tests/unit/application/services/control_plane/replay/test_historical_record_payload.py:48",
-      "tests/unit/application/services/control_plane/replay/test_historical_record_payload.py:61",
-      "tests/unit/composition/runtime_builders/test_context_field_binding.py:36",
-      "tests/unit/composition/runtime_builders/test_context_field_binding.py:41",
-      "tests/unit/composition/runtime_builders/test_context_field_binding.py:52",
-      "tests/unit/composition/runtime_builders/test_context_field_binding.py:62",
-      "tests/unit/composition/runtime_builders/test_context_field_binding.py:75",
-      "tests/unit/composition/runtime_builders/test_context_field_binding.py:87",
-      "tests/unit/composition/runtime_builders/test_context_field_binding.py:106",
-      "tests/unit/composition/runtime_builders/test_context_field_binding.py:118",
-      "tests/unit/composition/runtime_builders/test_run_manifest_attr_support.py:16",
-      "tests/unit/composition/runtime_builders/test_run_manifest_attr_support.py:21",
-      "tests/unit/composition/runtime_builders/test_run_manifest_attr_support.py:27",
-      "tests/unit/composition/runtime_builders/test_run_manifest_attr_support.py:32"
-    ],
-    "markerless_test_functions": 15,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0

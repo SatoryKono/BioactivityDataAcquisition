@@ -6,6 +6,8 @@
 
 from __future__ import annotations
 
+pytestmark = pytest.mark.unit
+
 from types import SimpleNamespace
 
 import pytest
