@@ -986,6 +986,8 @@ nav:
           - "Observability Library":
               - "BI Dashboard Acceptance": 00-project/ai/prompts/library/observability/bi-dashboard-acceptance.md
               - "Dashboard Audit Cycle": 00-project/ai/prompts/library/observability/dashboard-audit-cycle.md
+          - "Test Library":
+              - "Test Cycle": 00-project/ai/prompts/library/tests/test-cycle.md
           - "Prompt Fragments":
               - "Audit Scale": 00-project/ai/prompts/fragments/audit-scale.md
               - "BI Check Schema": 00-project/ai/prompts/fragments/bi-check-schema.md
