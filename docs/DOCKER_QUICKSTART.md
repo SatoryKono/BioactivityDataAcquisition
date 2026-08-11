@@ -36,7 +36,8 @@ only the **operator Explorer UI + Loki/Tempo stacks** were deleted.
 
 ## Network preconditions (MEDIUM)
 
-Which compose file uses which **shared** network (fixed `name:`, auto-create):
+Which compose file uses which **shared** network (fixed `name:`, `external: true`;
+create via `ensure-networks` before compose up):
 
 | Compose file | Networks |
 | --- | --- |

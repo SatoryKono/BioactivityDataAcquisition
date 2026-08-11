@@ -240,12 +240,11 @@ volumes:
 
 networks:
   # Shared fixed name across main + monitoring projects.
-  # NOT external: compose creates the network on `up` if missing (no silent fail).
-  # If it already exists (e.g. from runtime_manager), Compose reuses it.
+  # external:true — created by runtime_manager ensure-networks / check --ensure
+  # (owner label com.bioetl.owner). Avoids Compose label clash when the net
+  # already exists from another project (main) or ensure-networks.
   # bioetl-runtime is NOT required here (main/neo4j only).
   # Scrape/Ops HTTP still need container `bioetl` attached to this network.
   monitoring:
     name: bioetl-monitoring
-    driver: bridge
-    labels:
-      com.bioetl.owner: scripts/ops/runtime/docker/runtime_manager.py
+    external: true
