@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-11T07:50:51.205310+00:00",
+  "generated_at": "2026-08-11T07:56:23.380481+00:00",
   "summary": {
     "total_scripts": 587,
     "status_counts": {
-      "active": 341,
-      "orphan": 3,
+      "active": 342,
+      "orphan": 2,
       "supporting": 239,
       "temporary_diagnostic": 4
     },
@@ -17,7 +17,7 @@
       "other": 75,
       "scripts": 487,
       "skills": 11,
-      "tests": 373
+      "tests": 375
     }
   },
   "scripts": [
@@ -18876,11 +18876,11 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 294,
+          "line": 267,
           "source_group": "docs",
           "text": "2. `.\\scripts\\ops\\observability\\grafana\\recover_renderer.ps1` (or `.sh`)"
         },
@@ -18889,16 +18889,29 @@
           "line": 3,
           "source_group": "scripts",
           "text": "# See recover_renderer.ps1 for the full strategy."
+        },
+        {
+          "path": "tests/integration/test_grafana_datasource_provisioning.py",
+          "line": 219,
+          "source_group": "tests",
+          "text": "recover_ps1 = Path(\"scripts/ops/observability/grafana/recover_renderer.ps1\")"
         }
       ]
     },
     {
       "path": "scripts/ops/observability/grafana/recover_renderer.sh",
       "type": "sh",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/integration/test_grafana_datasource_provisioning.py",
+          "line": 220,
+          "source_group": "tests",
+          "text": "recover_sh = Path(\"scripts/ops/observability/grafana/recover_renderer.sh\")"
+        }
+      ]
     },
     {
       "path": "scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1",
@@ -19505,13 +19518,13 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 233,
+          "line": 206,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\apply-docker-stable-mcp.ps1 -Profile stable -WithNeo4j"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 242,
+          "line": 215,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\apply-docker-stable-mcp.ps1 -Profile shared -TransportMode shared -WithSharedMcp -SkipEnsureStable"
         }
@@ -19581,7 +19594,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 234,
+          "line": 207,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\cleanup-mcp-orphans.ps1 -IncludeGatewayHint"
         },
@@ -19726,13 +19739,13 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 224,
+          "line": 197,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\ensure-stable.ps1 -WithNeo4j"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 227,
+          "line": 200,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\ensure-stable.ps1 -RestartWsl -WithNeo4j"
         },
@@ -19765,13 +19778,13 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 230,
+          "line": 203,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\harden-desktop-host.ps1 -RegisterWatchdog"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 249,
+          "line": 222,
           "source_group": "docs",
           "text": "`harden-desktop-host.ps1` sets Resource Saver effectively off"
         },
@@ -19860,7 +19873,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 237,
+          "line": 210,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\reset-mcp-host-sessions.ps1"
         }
@@ -19909,7 +19922,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 207,
+          "line": 180,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\restart-docker.ps1 -TimeoutSeconds 180"
         },
@@ -20027,7 +20040,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 137,
+          "line": 110,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay"
         },
@@ -20153,7 +20166,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 244,
+          "line": 217,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\apply-shared-to-grok.ps1 -DisableDockerGateways"
         },
@@ -20208,7 +20221,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 243,
+          "line": 216,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\health-shared.ps1"
         },
@@ -20308,7 +20321,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 241,
+          "line": 214,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\start-shared.ps1"
         },
