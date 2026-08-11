@@ -51,23 +51,39 @@ def _load_apply_elk_layout() -> ModuleType:
     return module
 
 
-def _source_files(directory: Path, suffix: str) -> list[Path]:
+def _source_files(
+    directory: Path, suffix: str, *, recursive: bool = False
+) -> list[Path]:
+    pattern = f"**/*{suffix}" if recursive else f"*{suffix}"
     return sorted(
         path
-        for path in directory.glob(f"*{suffix}")
+        for path in directory.glob(pattern)
         if path.is_file() and not path.name.startswith("_")
     )
 
 
-def _rendered_stems(directory: Path, rendered_dir: str, suffix: str) -> set[str]:
+def _rendered_stems(
+    directory: Path, rendered_dir: str, suffix: str, *, recursive: bool = False
+) -> set[str]:
+    if recursive:
+        # Sibling layout: <collection>/<provider>/svg/<stem>.svg
+        if not directory.exists():
+            return set()
+        return {
+            artifact.stem
+            for artifact in directory.glob(f"**/{rendered_dir}/*{suffix}")
+            if artifact.is_file()
+        }
     path = directory / rendered_dir
     if not path.exists():
         return set()
     return {artifact.stem for artifact in path.glob(f"*{suffix}") if artifact.is_file()}
 
 
-def _active_source_stems(directory: Path, suffix: str) -> set[str]:
-    return {path.stem for path in _source_files(directory, suffix)}
+def _active_source_stems(
+    directory: Path, suffix: str, *, recursive: bool = False
+) -> set[str]:
+    return {path.stem for path in _source_files(directory, suffix, recursive=recursive)}
 
 
 def test_precommit_diagram_paths_cover_canonical_tree() -> None:
@@ -224,9 +240,12 @@ def test_source_diagrams_have_sibling_svg_artifacts(
     source_dir = (
         VIEW_COLLECTION if collection == "views" else MMD_COLLECTIONS[collection]
     )
-    source_stems = _active_source_stems(source_dir, suffix)
+    recursive = collection == "providers"
+    source_stems = _active_source_stems(source_dir, suffix, recursive=recursive)
 
-    missing_svg = sorted(source_stems - _rendered_stems(source_dir, "svg", ".svg"))
+    missing_svg = sorted(
+        source_stems - _rendered_stems(source_dir, "svg", ".svg", recursive=recursive)
+    )
 
     assert not missing_svg, (
         f"{collection} is missing rendered SVG artifacts: {missing_svg}"
@@ -267,10 +286,15 @@ def test_no_orphan_sibling_rendered_diagram_artifacts(
     source_dir = (
         VIEW_COLLECTION if collection == "views" else MMD_COLLECTIONS[collection]
     )
-    source_stems = _active_source_stems(source_dir, suffix)
+    recursive = collection == "providers"
+    source_stems = _active_source_stems(source_dir, suffix, recursive=recursive)
 
-    orphan_svg = sorted(_rendered_stems(source_dir, "svg", ".svg") - source_stems)
-    orphan_png = sorted(_rendered_stems(source_dir, "png", ".png") - source_stems)
+    orphan_svg = sorted(
+        _rendered_stems(source_dir, "svg", ".svg", recursive=recursive) - source_stems
+    )
+    orphan_png = sorted(
+        _rendered_stems(source_dir, "png", ".png", recursive=recursive) - source_stems
+    )
 
     assert not orphan_svg, f"{collection} has orphan SVG artifacts: {orphan_svg}"
     assert not orphan_png, f"{collection} has orphan PNG artifacts: {orphan_png}"
