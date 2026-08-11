@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from types import MappingProxyType
 
 from bioetl.domain.composite.config_validators import require_non_empty
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
@@ -127,6 +128,7 @@ class MergeConfig:
         self._convert_sort_policies()
         self._convert_field_priorities()
         self._convert_normalization_compatibility_overrides()
+        self._convert_field_mappings()
         self._convert_column_groups()
         self._convert_exclude_fields()
         self._validate()
@@ -154,7 +156,7 @@ class MergeConfig:
         if self.field_priorities:
             converted = {
                 k: tuple(v) if isinstance(v, list) else v
-                for k, v in self.field_priorities.items()
+                for k, v in dict(self.field_priorities).items()
             }
             object.__setattr__(self, "field_priorities", converted)
         freeze_fields(self, ("field_priorities", "field_mappings"))
@@ -169,10 +171,16 @@ class MergeConfig:
                 "normalization_compatibility_overrides",
                 {
                     str(key): str(value)
-                    for key, value in self.normalization_compatibility_overrides.items()
+                    for key, value in dict(
+                        self.normalization_compatibility_overrides
+                    ).items()
                 },
             )
         freeze_fields(self, ("normalization_compatibility_overrides",))
+
+    def _convert_field_mappings(self) -> None:
+        """Detach and freeze field_mappings mapping."""
+        freeze_fields(self, ("field_mappings",))
 
     def _convert_sort_policies(self) -> None:
         """Normalize and freeze sort policy columns."""
