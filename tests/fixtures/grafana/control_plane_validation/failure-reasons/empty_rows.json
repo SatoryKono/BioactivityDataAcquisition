@@ -1,0 +1,19 @@
+{
+  "contract": "control_plane_validation_evidence_v1",
+  "endpoint": "failure-reasons",
+  "manifest_id": "manifest-8576-fixture",
+  "note": "Synthetic rows=[] for Infinity noValue visual path; not a live service response.",
+  "pipeline": "chembl_activity",
+  "resolved_via": "selected_run_id",
+  "rows": [],
+  "run_id": "00000000-0000-0000-0000-000000008576",
+  "run_type": "incremental",
+  "status": "UNKNOWN",
+  "summary": {
+    "check_count": 0,
+    "error_count": 0,
+    "ok_count": 0,
+    "unknown_count": 0,
+    "warning_count": 0
+  }
+}

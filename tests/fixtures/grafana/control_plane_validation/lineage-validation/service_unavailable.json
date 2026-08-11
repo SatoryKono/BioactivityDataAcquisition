@@ -1,0 +1,26 @@
+{
+  "contract": "control_plane_validation_evidence_v1",
+  "endpoint": "lineage-validation",
+  "http_status": 503,
+  "manifest_id": null,
+  "pipeline": "chembl_activity",
+  "resolved_via": "service_unavailable",
+  "rows": [
+    {
+      "check": "service",
+      "detail": "Control-plane evidence service is not configured on this host.",
+      "reason": "control_plane_evidence_service_unavailable",
+      "status": "ERROR"
+    }
+  ],
+  "run_id": "00000000-0000-0000-0000-000000008576",
+  "run_type": "incremental",
+  "status": "ERROR",
+  "summary": {
+    "check_count": 1,
+    "error_count": 1,
+    "ok_count": 0,
+    "unknown_count": 0,
+    "warning_count": 0
+  }
+}

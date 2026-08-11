@@ -1,0 +1,49 @@
+{
+  "contract": "control_plane_validation_evidence_v1",
+  "endpoint": "manifest-validation",
+  "manifest_id": "manifest-8576-fixture",
+  "pipeline": "chembl_activity",
+  "resolved_via": "selected_run_id",
+  "rows": [
+    {
+      "check": "parse",
+      "detail": "The raw manifest envelope was parsed.",
+      "reason": "manifest_parse_ok",
+      "status": "OK"
+    },
+    {
+      "check": "schema",
+      "detail": "Manifest schema is supported.",
+      "reason": "manifest_schema_valid",
+      "status": "OK"
+    },
+    {
+      "check": "schema_version",
+      "detail": "schema_version 1.0 is supported.",
+      "reason": "manifest_schema_version_supported",
+      "status": "OK"
+    },
+    {
+      "check": "contract",
+      "detail": "Contract ref/version match the run provenance.",
+      "reason": "manifest_contract_compatible",
+      "status": "OK"
+    },
+    {
+      "check": "identity",
+      "detail": "Run/pipeline identity fields are consistent.",
+      "reason": "manifest_identity_consistent",
+      "status": "OK"
+    }
+  ],
+  "run_id": "00000000-0000-0000-0000-000000008576",
+  "run_type": "incremental",
+  "status": "OK",
+  "summary": {
+    "check_count": 5,
+    "error_count": 0,
+    "ok_count": 5,
+    "unknown_count": 0,
+    "warning_count": 0
+  }
+}
