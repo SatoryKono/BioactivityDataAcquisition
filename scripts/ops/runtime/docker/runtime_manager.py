@@ -74,6 +74,8 @@ class StackSpec:
     compose_file: Path
     required_services: tuple[str, ...]
     expected_images: Mapping[str, str]
+    # Started with the stack but not required for readiness / --wait.
+    optional_services: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -165,12 +167,14 @@ def resolve_stack(contract_path: Path, stack_name: str) -> StackSpec:
         for name, service in compose["services"].items()
         if "image" in service
     }
+    optional_raw = stack.get("optional_services") or []
     return StackSpec(
         name=stack_name,
         project=str(stack["project_name"]),
         compose_file=compose_file,
         required_services=tuple(map(str, stack["required_services"])),
         expected_images=expected_images,
+        optional_services=tuple(map(str, optional_raw)),
     )
 
 
@@ -1157,6 +1161,27 @@ def _handle_daemon_error_during_attempt(
     return findings, recovered
 
 
+def _compose_up_start_args(
+    spec: StackSpec,
+    *,
+    attempts: int,
+    force_recreate: bool = False,
+) -> list[str]:
+    """Start required + optional services without waiting on health.
+
+    Optional services (e.g. monitoring renderer) must come up for screenshots
+    but must not block stack readiness when Chromium is slow/OOM.
+    """
+    up_args: list[str] = ["up", "-d"]
+    if force_recreate or attempts >= 2:
+        up_args.append("--force-recreate")
+    # Explicit service list keeps compose from touching unrelated projects.
+    services = list(spec.required_services) + list(spec.optional_services)
+    if services:
+        up_args.extend(services)
+    return up_args
+
+
 def _compose_up_wait_args(
     spec: StackSpec,
     *,
@@ -1164,8 +1189,8 @@ def _compose_up_wait_args(
     remaining: float,
     force_recreate: bool = False,
 ) -> list[str]:
-    # Attempt 1: non-destructive up (covers simple kill).
-    # Later attempts or dashboard bind drift: force-recreate clears sticky empty binds.
+    # Wait only on required services (UI path). Optional services are started
+    # separately via _compose_up_start_args and may still be warming.
     up_args: list[str] = ["up", "-d"]
     if force_recreate or attempts >= 2:
         up_args.append("--force-recreate")
@@ -1271,20 +1296,44 @@ def _run_recovery_attempts(
         if remaining <= 0:
             findings = [{"cause": "readiness_timeout", "attempt": attempts}]
             break
-        up_args = _compose_up_wait_args(
+        # Phase 1: start required + optional (no --wait) so renderer can warm
+        # without gating Grafana. Phase 2: --wait only required services.
+        start_args = _compose_up_start_args(
             spec,
             attempts=attempts,
-            remaining=remaining,
             force_recreate=timing.force_recreate,
         )
-        result = timing.runner(_compose(spec, *up_args), ROOT, remaining)
+        start_result = timing.runner(_compose(spec, *start_args), ROOT, remaining)
         history.append(
             {
                 "attempt": attempts,
-                "returncode": result.returncode,
+                "phase": "start",
+                "returncode": start_result.returncode,
                 "elapsed_seconds": round(timing.clock() - timing.started, 3),
             }
         )
+        if start_result.returncode != 0:
+            result = start_result
+        else:
+            remaining = timing.deadline - timing.clock()
+            if remaining <= 0:
+                findings = [{"cause": "readiness_timeout", "attempt": attempts}]
+                break
+            up_args = _compose_up_wait_args(
+                spec,
+                attempts=attempts,
+                remaining=remaining,
+                force_recreate=timing.force_recreate,
+            )
+            result = timing.runner(_compose(spec, *up_args), ROOT, remaining)
+            history.append(
+                {
+                    "attempt": attempts,
+                    "phase": "wait_required",
+                    "returncode": result.returncode,
+                    "elapsed_seconds": round(timing.clock() - timing.started, 3),
+                }
+            )
         maybe_snapshots, findings, recovered, succeeded = _evaluate_up_attempt(
             result=result,
             attempts=attempts,
