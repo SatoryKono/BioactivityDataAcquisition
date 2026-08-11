@@ -6,6 +6,8 @@
 
 from __future__ import annotations
 
+pytestmark = pytest.mark.unit
+
 from dataclasses import dataclass
 
 import pytest
