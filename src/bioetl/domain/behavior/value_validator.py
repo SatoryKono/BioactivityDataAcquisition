@@ -295,7 +295,9 @@ class ValueValidator:
             ValueError: If bounds are non-finite or min_value >= max_value.
         """
         if not math.isfinite(min_value) or not math.isfinite(max_value):
-            raise ValueError(f"concentration bounds must be finite, got min={min_value}, max={max_value}")
+            raise ValueError(
+                f"concentration bounds must be finite, got min={min_value}, max={max_value}"
+            )
         if min_value >= max_value:
             raise ValueError("min_value must be less than max_value")
 
