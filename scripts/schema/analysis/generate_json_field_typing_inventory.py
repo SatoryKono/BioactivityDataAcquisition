@@ -399,10 +399,10 @@ def build_inventory() -> str:
     return "\n".join(lines)
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     content = build_inventory()
     args.output.write_text(content, encoding="utf-8")

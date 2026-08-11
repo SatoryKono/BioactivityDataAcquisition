@@ -6,7 +6,6 @@ source:
         base_url: https://eutils.ncbi.nlm.nih.gov/entrez/eutils
         auth_type: api_key
         api_key_env: BIOETL_PUBMED_API_KEY
-        email_env: BIOETL_PUBMED_EMAIL
         client:
             timeout_sec: 60.0
             max_retries: 3
@@ -14,7 +13,6 @@ source:
             page_size: 100
             id_batch_size: 100
             strategy: offset
-        default_email: bioetl-bot@example.com
         fallback:
             enabled: true
             supported_filter_field: null
@@ -34,11 +32,6 @@ source:
         with_api_key:
             requests_per_second: 10
             burst: 20
-    health_check:
-        endpoint: /einfo.fcgi
-        timeout: 10
-    retry:
-        use_retry_after: true
 entities:
     - publication
 entity_notes:

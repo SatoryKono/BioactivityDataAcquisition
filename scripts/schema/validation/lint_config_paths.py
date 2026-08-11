@@ -153,7 +153,7 @@ def _print_report(
     return total
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Lint config files for legacy dq/filter path references.",
     )
@@ -168,7 +168,7 @@ def main() -> int:
         ],
         help="Paths to scan (default: configs/ src/ docs/)",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     all_results: dict[Path, list[tuple[int, str, str, str]]] = {}
     for p in args.paths:

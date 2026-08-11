@@ -1,9 +1,9 @@
 # BioETL Requirements
 
-Version: 1.12
+Version: 1.12.3
 Status: active
-Aligned with: RULES.md v6.1.7 ([source](../00-project/RULES.md); architecture stamp re-check 2026-08-05)
-Last verified: 2026-07-27
+Aligned with: RULES.md v6.1.9 ([source](../00-project/RULES.md); architecture stamp re-check 2026-08-10)
+Last verified: 2026-08-10
 
 ## Purpose and authority
 
@@ -89,6 +89,8 @@ including:
 - ADR-050 — Silver structural and Gold semantic filter boundary;
 - ADR-051 — QuarantineEntry wide constructor as intentional aggregate surface;
 - ADR-052 — `bioetl.infrastructure.config` package root as permanent public API.
+- ADR-057 — deterministic Settings/provider authority and versioned raw,
+  resolved, and effective configuration identity.
 
 ADR presence is not proof of implementation. Use the executable evidence in the
 traceability CSV and inspect the cited code, configuration, and tests.
@@ -110,6 +112,8 @@ increased as a documentation remedy.
 
 ## Version history
 
+- v1.12.3 (2026-08-10): normative traceability advanced through `RULES.md`
+  v6.1.9 and ADR-057 (deterministic runtime config authority and identity).
 - v1.12.2 (2026-08-09): normative traceability advanced through `RULES.md`
   v6.1.8 and ADR-056 (Proof-or-Stop lifecycle control).
 - v1.12.1 (2026-07-28): ADR coverage extended through ADR-052 (ARCH-REF-07).

@@ -1,7 +1,7 @@
 ______________________________________________________________________
 
-Version: 6.1.7
-Last verified: 2026-08-05
+Version: 6.1.9
+Last verified: 2026-08-10
 Status: active
 Class: published
 Owner: BioETL Team
@@ -2132,9 +2132,14 @@ fields:
 | [ADR-054](../02-architecture/decisions/ADR-054-passport-documentation-projections.md) | Evidence-backed Passport Documentation Projections | Accepted | 2026-07-29 |
 | [ADR-055](../02-architecture/decisions/ADR-055-workflow-reconciliation-data-step-ownership.md) | Retain Foreign-key Reconciliation as a Governed Workflow Data Step | Accepted | 2026-07-29 |
 | [ADR-056](../02-architecture/decisions/ADR-056-proof-or-stop-lifecycle-control.md) | Proof-or-Stop Lifecycle Control | Accepted | 2026-08-09 |
+| [ADR-057](../02-architecture/decisions/ADR-057-deterministic-runtime-config-authority-and-identity.md) | Deterministic Runtime Config Authority and Identity | Accepted | 2026-08-10 |
 
 ## История Изменений (Changelog)
 
+- **6.1.9** (2026-08-10): ADR Registry Governance Sync. Приложение F
+  синхронизировано через ADR-057 (deterministic runtime config authority and
+  versioned identity); precedence, provider transport SSOT и replay-compatible
+  identity versioning закреплены без увеличения exception budgets.
 - **6.1.8** (2026-08-09): ADR Registry Governance Sync. Приложение F синхронизировано через ADR-056 (Proof-or-Stop lifecycle control).
 - **6.1.7** (2026-07-30): ADR Registry Governance Sync. Приложение F синхронизировано через ADR-055; добавлены ADR-054 (passport documentation projections) и ADR-055 (workflow reconciliation data-step ownership).
 - **6.1.6** (2026-07-28): ADR Registry Governance Sync. Приложение F синхронизировано через ADR-053 (optional Grafana Scenes App Shell as presentation adapter; dual-path with provisioned JSON under ADR-010).

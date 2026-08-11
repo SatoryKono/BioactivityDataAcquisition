@@ -7,9 +7,9 @@ import importlib
 import inspect
 import subprocess
 import sys
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from collections.abc import Mapping
 
 
 @dataclass(frozen=True)
@@ -52,6 +52,12 @@ def _run_module_command_in_process(spec: CommandSpec, argv: list[str]) -> int:
         except (TypeError, ValueError):
             parameter_count = 0
 
+        if parameter_count == 0 and forwarded_argv:
+            print(
+                f"{spec.target}.main() does not accept command arguments",
+                file=sys.stderr,
+            )
+            return 2
         result = main(forwarded_argv) if parameter_count else main()
     except SystemExit as exc:  # NOSONAR - intentional CLI exit-code bridge
         # Intentional in-process CLI dispatch: convert SystemExit to a return

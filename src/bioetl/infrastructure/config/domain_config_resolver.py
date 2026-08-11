@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
 
+from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 from bioetl.infrastructure.config.pipeline_config_api import (
@@ -48,7 +49,7 @@ class PipelineConfigDQResolverProvider(Protocol):
 class DomainConfigResolver:
     """Resolve domain config from validated YAML config plus hierarchical DQ config."""
 
-    configs_root: Path = Path("configs")
+    configs_root: Path = field(default_factory=resolve_configs_root)
     dq_resolver_provider: PipelineConfigDQResolverProvider = DQConfigLoader
     domain_mapper: DomainConfigMapper = yaml_config_to_domain
 
@@ -73,14 +74,14 @@ class DomainConfigResolver:
 def resolve_domain_pipeline_config(
     yaml_config: PipelineYamlConfig,
     *,
-    configs_root: Path = Path("configs"),
+    configs_root: Path | None = None,
     relaxed_dq: bool = False,
     dq_resolver_provider: PipelineConfigDQResolverProvider = DQConfigLoader,
     domain_mapper: DomainConfigMapper = yaml_config_to_domain,
 ) -> PipelineConfig:
     """Resolve domain config from an already validated YAML pipeline config."""
     resolver = DomainConfigResolver(
-        configs_root=configs_root,
+        configs_root=resolve_configs_root(configs_root),
         dq_resolver_provider=dq_resolver_provider,
         domain_mapper=domain_mapper,
     )
@@ -90,23 +91,24 @@ def resolve_domain_pipeline_config(
 def load_domain_pipeline_config(
     pipeline_name: str,
     *,
-    configs_root: Path = Path("configs"),
+    configs_root: Path | None = None,
     relaxed_dq: bool = False,
     yaml_loader: Callable[[str], PipelineYamlConfig] = load_pipeline_config,
     dq_resolver_provider: PipelineConfigDQResolverProvider = DQConfigLoader,
     domain_mapper: DomainConfigMapper = yaml_config_to_domain,
 ) -> PipelineConfig:
     """Load domain config through the canonical function-based config flow."""
+    resolved_configs_root = resolve_configs_root(configs_root)
     if yaml_loader is load_pipeline_config:
         yaml_config = load_pipeline_config_from_root(
             pipeline_name,
-            configs_root=configs_root,
+            configs_root=resolved_configs_root,
         )
     else:
         yaml_config = yaml_loader(pipeline_name)
     return resolve_domain_pipeline_config(
         yaml_config,
-        configs_root=configs_root,
+        configs_root=resolved_configs_root,
         relaxed_dq=relaxed_dq,
         dq_resolver_provider=dq_resolver_provider,
         domain_mapper=domain_mapper,

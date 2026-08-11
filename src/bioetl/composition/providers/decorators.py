@@ -39,7 +39,6 @@ def _register_provider_class[T: "DataSourcePort"](
     http_capacity: int,
     requires_http_client: bool,
     requires_logger: bool,
-    rate_overrides: dict[str, float] | None,
     adapter_creator: AdapterCreatorProtocol | None,
     default_kwargs: dict[str, object],
 ) -> None:
@@ -52,19 +51,13 @@ def _register_provider_class[T: "DataSourcePort"](
         http_capacity: Token bucket capacity for burst handling.
         requires_http_client: If True, http_client is injected at adapter creation.
         requires_logger: If True, logger is injected at adapter creation.
-        rate_overrides: Optional dict mapping settings attribute names to boosted
-            rate limits when API keys are present.
         adapter_creator: Optional callable replacing the standard adapter creation
             logic for complex initialization.
         default_kwargs: Additional kwargs merged into the adapter constructor call.
     """
     http_config: HttpConfig | None = None
     if requires_http_client:
-        http_config = HttpConfig(
-            rate=http_rate,
-            capacity=http_capacity,
-            rate_overrides=rate_overrides or {},
-        )
+        http_config = HttpConfig(rate=http_rate, capacity=http_capacity)
 
     config = ProviderConfig(
         adapter_class=cls,
@@ -87,7 +80,6 @@ def register_provider(
     http_capacity: int = 10,
     requires_http_client: bool = True,
     requires_logger: bool = True,
-    rate_overrides: dict[str, float] | None = None,
     adapter_creator: AdapterCreatorProtocol | None = None,
     **default_kwargs: object,
 ) -> Callable[[type[T]], type[T]]:
@@ -101,8 +93,6 @@ def register_provider(
             defaults to True.
         requires_logger: If True, logger is injected at adapter creation;
             defaults to True.
-        rate_overrides: Optional dict mapping settings attribute names to boosted
-            rate limits when API keys are present; defaults to None.
         adapter_creator: Optional callable replacing standard adapter creation;
             defaults to None.
         **default_kwargs: Additional kwargs merged into the adapter constructor.
@@ -121,7 +111,6 @@ def register_provider(
             http_capacity=http_capacity,
             requires_http_client=requires_http_client,
             requires_logger=requires_logger,
-            rate_overrides=rate_overrides,
             adapter_creator=adapter_creator,
             default_kwargs=dict(resolved_defaults),
         )

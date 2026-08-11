@@ -160,7 +160,9 @@ def test_load_domain_pipeline_config_honors_explicit_configs_root_for_default_ya
 
     assert result == "domain-config"
     assert captured["pipeline_name"] == "chembl_activity"
-    assert captured["configs_root"] == Path("custom-configs")
+    assert captured["configs_root"] == (
+        resolver_module.resolve_configs_root(Path("custom-configs"))
+    )
     assert captured["mapped_config"] is yaml_config
     assert captured["resolved_dq_config"] == "resolved-dq"
 
@@ -186,3 +188,17 @@ def test_resolve_domain_pipeline_config_uses_resolver_builder_and_mapper() -> No
     assert result == "domain-config"
     assert captured["mapped_config"] is yaml_config
     assert captured["resolved_dq_config"] == "resolved-dq"
+
+
+@pytest.mark.unit
+def test_default_domain_load_is_independent_of_current_working_directory(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Canonical public loading must not resolve configs relative to CWD."""
+    baseline = load_domain_pipeline_config("chembl_activity")
+    monkeypatch.chdir(tmp_path)
+
+    from_other_cwd = load_domain_pipeline_config("chembl_activity")
+
+    assert from_other_cwd == baseline

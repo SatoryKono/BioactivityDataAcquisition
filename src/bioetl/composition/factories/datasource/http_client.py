@@ -133,8 +133,22 @@ class HttpClientFactory:
             source_config = None
 
         if source_config is not None:
-            rate = source_config.rate_limit.requests_per_second
-            capacity = source_config.rate_limit.burst
+            rate_config = source_config.rate_limit
+            authenticated_rate = rate_config.with_api_key
+            api_key_setting = cls._api_key_setting_name(
+                source_config.provider_config.api_key_env
+            )
+            if (
+                authenticated_rate is not None
+                and api_key_setting is not None
+                and settings is not None
+                and cls._check_setting(settings, api_key_setting)
+            ):
+                rate = authenticated_rate.requests_per_second
+                capacity = authenticated_rate.burst
+            else:
+                rate = rate_config.requests_per_second
+                capacity = rate_config.burst
             failure_threshold = source_config.circuit_breaker.failure_threshold
             recovery_timeout = source_config.circuit_breaker.recovery_timeout
             timeout = source_config.timeout_sec
@@ -167,14 +181,6 @@ class HttpClientFactory:
             base_delay, max_delay = 1.0, 60.0
             max_connections, max_keepalive = 50, 10
             trust_env = True
-
-        http_config = registry.get_http_config(provider)
-        if settings and http_config and http_config.rate_overrides:
-            for setting_name, override_rate in http_config.rate_overrides.items():
-                if cls._check_setting(settings, setting_name):
-                    rate = override_rate
-                    capacity = int(override_rate * 2)
-                    break
 
         return ResolvedHttpConfig(
             rate=rate,
@@ -238,3 +244,13 @@ class HttpClientFactory:
         """Return ``True`` when the setting exists and is truthy."""
         value = getattr(settings, setting_name, None)
         return value is not None and bool(value)
+
+    @staticmethod
+    def _api_key_setting_name(api_key_env: str | None) -> str | None:
+        """Map a declared BIOETL_* credential source to its typed Settings field."""
+        if api_key_env is None or not api_key_env.startswith("BIOETL_"):
+            return None
+        setting_name = api_key_env.removeprefix("BIOETL_").lower()
+        if not setting_name.endswith("_api_key"):
+            return None
+        return setting_name

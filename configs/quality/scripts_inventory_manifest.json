@@ -16,7 +16,7 @@
       "other": 75,
       "scripts": 484,
       "skills": 11,
-      "tests": 370
+      "tests": 371
     }
   },
   "scripts": [
@@ -7118,25 +7118,25 @@
         },
         {
           "path": "docs/03-guides/pipeline-configuration.md",
-          "line": 968,
+          "line": 969,
           "source_group": "docs",
           "text": "python scripts/diagrams/render/generate_pipeline_dataflows.py"
         },
         {
           "path": "docs/03-guides/pipeline-configuration.md",
-          "line": 971,
+          "line": 972,
           "source_group": "docs",
           "text": "python scripts/diagrams/render/generate_pipeline_dataflows.py --pipeline chembl_activity"
         },
         {
           "path": "docs/03-guides/pipeline-configuration.md",
-          "line": 974,
+          "line": 975,
           "source_group": "docs",
           "text": "python scripts/diagrams/render/generate_pipeline_dataflows.py --check-drift"
         },
         {
           "path": "docs/03-guides/pipeline-configuration.md",
-          "line": 984,
+          "line": 985,
           "source_group": "docs",
           "text": "run: python scripts/diagrams/render/generate_pipeline_dataflows.py --check-drift"
         },
@@ -10062,7 +10062,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 230,
+      "reference_count": 232,
       "references": [
         {
           "path": "docs/00-project/ai/agents/scripts/py-config-bot-1.py",
@@ -21208,7 +21208,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 9,
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
@@ -21636,7 +21636,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
@@ -21661,6 +21661,12 @@
           "line": 39,
           "source_group": "scripts",
           "text": "\"verify-schema-parity\": \"scripts.schema.validation.verify_schema_parity\","
+        },
+        {
+          "path": "tests/unit/scripts/test_verify_schema_parity.py",
+          "line": 11,
+          "source_group": "tests",
+          "text": "from scripts.schema.validation import verify_schema_parity as parity"
         }
       ]
     },

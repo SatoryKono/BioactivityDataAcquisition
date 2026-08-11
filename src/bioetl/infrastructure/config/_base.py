@@ -27,8 +27,10 @@ from bioetl.infrastructure.config._pipeline_settings import (
 from bioetl.infrastructure.config._settings_validation import (
     coerce_silver_dedup_timeout_seconds,
 )
-from bioetl.infrastructure.config._yaml_settings_source import YamlSettingsSource
-from bioetl.infrastructure.config.config_root import resolve_configs_root
+from bioetl.infrastructure.config.config_root import (
+    get_default_repo_root,
+    resolve_configs_root,
+)
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
@@ -59,13 +61,13 @@ def get_pipeline_config(
 
 
 class Settings(StoragePathSettingsMixin, BaseSettings):
-    """Main application settings for local deployment."""
+    """Main application settings with ADR-057 deterministic source precedence."""
 
     model_config = SettingsConfigDict(
         env_prefix="BIOETL_",
         env_nested_delimiter="__",
         extra="ignore",
-        env_file=".env",
+        env_file=get_default_repo_root() / ".env",
         env_file_encoding="utf-8",
     )
 
@@ -193,7 +195,7 @@ class Settings(StoragePathSettingsMixin, BaseSettings):
         dotenv_settings: PydanticBaseSettingsSource,
         file_secret_settings: PydanticBaseSettingsSource,
     ) -> tuple[PydanticBaseSettingsSource, ...]:
-        """Customise Pydantic settings sources to include YAML.
+        """Use deterministic init, environment, and rooted-dotenv precedence.
 
         Args:
             settings_cls: Settings class.
@@ -203,11 +205,11 @@ class Settings(StoragePathSettingsMixin, BaseSettings):
             file_secret_settings: File secret settings source.
 
         Returns:
-            Tuple of settings sources with YamlSettingsSource prepended.
+            Tuple ordered from highest to lowest precedence.
 
         """
+        del settings_cls
         return (
-            YamlSettingsSource(settings_cls),
             init_settings,
             env_settings,
             dotenv_settings,

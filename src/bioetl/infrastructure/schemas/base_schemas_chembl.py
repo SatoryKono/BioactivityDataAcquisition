@@ -61,7 +61,7 @@ class BaseDQConfig(BaseDQThresholds):
 class BaseCircuitBreakerConfig(BaseModel):
     """Base class for Circuit Breaker configuration."""
 
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="forbid")
 
     failure_threshold: int = Field(
         default=5,
@@ -84,10 +84,10 @@ class BaseCircuitBreakerConfig(BaseModel):
         )
 
 
-class BaseRateLimitConfig(BaseModel):
-    """Base class for Rate Limit configuration."""
+class BaseRateLimitValues(BaseModel):
+    """One strict anonymous or authenticated rate-limit value set."""
 
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="forbid")
 
     requests_per_second: float = Field(
         default=5.0,
@@ -103,10 +103,16 @@ class BaseRateLimitConfig(BaseModel):
     )
 
 
+class BaseRateLimitConfig(BaseRateLimitValues):
+    """Authoritative provider rate limit with optional authenticated values."""
+
+    with_api_key: BaseRateLimitValues | None = None
+
+
 class HttpClientConfig(BaseModel):
     """Base HTTP client config for pipeline and source configs."""
 
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="forbid")
 
     timeout_sec: float = Field(default=30.0, ge=1.0, le=300.0)
     max_retries: int = Field(default=3, ge=0, le=10)
@@ -183,5 +189,6 @@ __all__ = [
     "BaseDQThresholds",
     "BaseMaintenanceConfig",
     "BaseRateLimitConfig",
+    "BaseRateLimitValues",
     "HttpClientConfig",
 ]

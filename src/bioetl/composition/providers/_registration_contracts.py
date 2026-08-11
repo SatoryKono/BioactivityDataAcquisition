@@ -90,7 +90,6 @@ class HttpProviderConfigSpec:
     rate: float
     capacity: int
     data_source_creator: SupportAwareDataSourceCreatorProtocol
-    rate_overrides: dict[str, float] | None = None
     adapter_creator: AdapterCreatorProtocol | None = None
 
 
@@ -101,7 +100,6 @@ def build_http_provider_config_spec(
     rate: float,
     capacity: int,
     data_source_creator: SupportAwareDataSourceCreatorProtocol,
-    rate_overrides: dict[str, float] | None = None,
     adapter_creator: AdapterCreatorProtocol | None = None,
 ) -> HttpProviderConfigSpec:
     """Build one declarative HTTP provider spec from compact family inputs."""
@@ -111,7 +109,6 @@ def build_http_provider_config_spec(
         rate=rate,
         capacity=capacity,
         data_source_creator=data_source_creator,
-        rate_overrides=rate_overrides,
         adapter_creator=adapter_creator,
     )
 
@@ -252,17 +249,12 @@ def build_http_provider_config(
     capacity: int,
     data_source_creator: SupportAwareDataSourceCreatorProtocol,
     assembly_support: ProviderAssemblySupport,
-    rate_overrides: dict[str, float] | None = None,
     adapter_creator: AdapterCreatorProtocol | None = None,
 ) -> ProviderConfig:
     """Build the common HTTP-oriented ProviderConfig shape for registration."""
     return build_data_source_provider_config(
         adapter_class=adapter_class,
-        http_config=HttpConfig(
-            rate=rate,
-            capacity=capacity,
-            rate_overrides=rate_overrides or {},
-        ),
+        http_config=HttpConfig(rate=rate, capacity=capacity),
         requires_http_client=True,
         requires_logger=True,
         adapter_creator=adapter_creator,
@@ -284,7 +276,6 @@ def build_http_provider_config_map(
             adapter_class=spec.adapter_class,
             rate=spec.rate,
             capacity=spec.capacity,
-            rate_overrides=spec.rate_overrides,
             adapter_creator=spec.adapter_creator,
             data_source_creator=spec.data_source_creator,
             assembly_support=assembly_support,

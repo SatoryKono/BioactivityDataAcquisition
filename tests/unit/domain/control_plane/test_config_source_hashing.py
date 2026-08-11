@@ -35,6 +35,8 @@ import hashlib
 import pytest
 
 from bioetl.domain.control_plane.config_source_hashing import (
+    CANONICAL_YAML_HASH_VERSION,
+    RAW_BYTES_HASH_VERSION,
     compute_canonical_yaml_sha256,
     compute_config_source_hashes,
 )
@@ -86,6 +88,8 @@ def test_config_source_hashes_preserve_raw_hash_separately() -> None:
     assert hashes.hash_strategy == "canonical_yaml"
     assert hashes.semantic_hash == compute_canonical_yaml_sha256(raw_bytes)
     assert hashes.raw_hash == hashlib.sha256(raw_bytes).hexdigest()
+    assert hashes.semantic_hash_version == CANONICAL_YAML_HASH_VERSION
+    assert hashes.raw_hash_version == RAW_BYTES_HASH_VERSION
 
 
 def test_non_yaml_source_hash_uses_raw_bytes_as_semantic_identity() -> None:
@@ -99,3 +103,4 @@ def test_non_yaml_source_hash_uses_raw_bytes_as_semantic_identity() -> None:
     assert hashes.hash_strategy == "raw_bytes"
     assert hashes.semantic_hash == hashlib.sha256(raw_bytes).hexdigest()
     assert hashes.raw_hash == hashes.semantic_hash
+    assert hashes.semantic_hash_version == RAW_BYTES_HASH_VERSION

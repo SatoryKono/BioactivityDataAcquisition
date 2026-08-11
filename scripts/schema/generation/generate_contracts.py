@@ -7,6 +7,7 @@ Usage:
 
 from __future__ import annotations
 
+import argparse
 import inspect
 import json
 import re
@@ -29,14 +30,6 @@ JSON_SCHEMA_DRAFT7_URI = urlunsplit(
     ("http", "json-schema.org", "/draft-07/schema", "", "")
 )
 CONTRACTS_DIR = PROJECT_ROOT / "docs" / "04-reference" / "contracts" / "gold"
-DIFF_REPORT_PATH = (
-    PROJECT_ROOT
-    / "docs"
-    / "05-operations"
-    / "verification"
-    / "gold-contracts-export-diff-2026-02-17.json"
-)
-
 ENTITY_NAME_OVERRIDES: dict[str, str] = {
     "chembl_document": "chembl_publication",
     "chembl_document_similarity": "chembl_publication_similarity",
@@ -89,7 +82,7 @@ def _map_dtype_to_json_type(dtype_value: Any) -> str:
         return "number"
     if dtype_str == "int64":
         return "integer"
-    if dtype_str == "bool":
+    if dtype_str in {"bool", "boolean"}:
         return "boolean"
     return "object"
 
@@ -158,42 +151,6 @@ def _build_contract(
     return contract_payload
 
 
-def _load_previous_contract(path: Path) -> dict[str, Any]:
-    if not path.exists():
-        return {}
-    with path.open("r", encoding="utf-8") as file_obj:
-        loaded_contract = json.load(file_obj)
-    if isinstance(loaded_contract, dict):
-        return loaded_contract
-    return {}
-
-
-def _compute_diff(previous: dict[str, Any], current: dict[str, Any]) -> dict[str, Any]:
-    prev_props = previous.get("properties", {})
-    curr_props = current.get("properties", {})
-
-    prev_names = set(prev_props)
-    curr_names = set(curr_props)
-
-    changed = []
-    for prop_name in sorted(prev_names & curr_names):
-        if prev_props[prop_name] != curr_props[prop_name]:
-            changed.append(
-                {
-                    "property": prop_name,
-                    "before": prev_props[prop_name],
-                    "after": curr_props[prop_name],
-                }
-            )
-
-    return {
-        "added_properties": sorted(curr_names - prev_names),
-        "removed_properties": sorted(prev_names - curr_names),
-        "changed_properties": changed,
-        "required_changed": previous.get("required", []) != current.get("required", []),
-    }
-
-
 def _remove_stale_contracts(active_filenames: set[str]) -> None:
     retained_filenames = active_filenames | RETAINED_LEGACY_CONTRACT_FILENAMES
     for contract_path in sorted(CONTRACTS_DIR.glob("*.json")):
@@ -213,24 +170,19 @@ def _active_contract_filenames(schema_classes: list[type[Any]]) -> set[str]:
     return filenames
 
 
-def generate_contracts() -> None:
-    CONTRACTS_DIR.mkdir(parents=True, exist_ok=True)
-    DIFF_REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
-
+def _schema_classes() -> list[type[Any]]:
     schema_classes: list[type[Any]] = []
     for export_name in gold_contracts.__all__:
         export_obj = getattr(gold_contracts, export_name)
         if inspect.isclass(export_obj) and export_name.endswith("GoldSchema"):
             schema_classes.append(export_obj)
-
     schema_classes.sort(key=lambda cls: cls.__name__)
-    _remove_stale_contracts(_active_contract_filenames(schema_classes))
+    return schema_classes
 
-    diff_report: dict[str, Any] = {
-        "generated_at": "2026-02-17",
-        "version": DEFAULT_CONTRACT_VERSION,
-        "entities": {},
-    }
+
+def _expected_artifacts() -> dict[Path, str]:
+    schema_classes = _schema_classes()
+    artifacts: dict[Path, str] = {}
 
     for schema_cls in schema_classes:
         entity = _class_to_entity(schema_cls.__name__)
@@ -238,32 +190,61 @@ def generate_contracts() -> None:
         filename = _filename_from_version(entity, contract_version)
         output_path = CONTRACTS_DIR / filename
 
-        previous_contract = _load_previous_contract(output_path)
         current_contract = _build_contract(schema_cls, entity, contract_version)
+        artifacts[output_path] = (
+            json.dumps(current_contract, indent=2, ensure_ascii=False) + "\n"
+        )
 
-        with output_path.open("w", encoding="utf-8") as file_obj:
-            json.dump(current_contract, file_obj, indent=2, ensure_ascii=False)
-            file_obj.write("\n")
+    return artifacts
 
-        diff_report["entities"][entity] = {
-            "file": output_path.relative_to(PROJECT_ROOT).as_posix(),
-            "contract_version": contract_version,
-            "status": "created" if not previous_contract else "updated",
-            "diff": _compute_diff(previous_contract, current_contract),
-        }
+
+def _stale_artifacts(expected: dict[Path, str]) -> list[Path]:
+    stale = [
+        path
+        for path, content in expected.items()
+        if not path.exists() or path.read_text(encoding="utf-8") != content
+    ]
+    active_contracts = {path.name for path in expected if path.parent == CONTRACTS_DIR}
+    stale.extend(
+        path
+        for path in sorted(CONTRACTS_DIR.glob("*.json"))
+        if path.name not in active_contracts
+        and path.name not in RETAINED_LEGACY_CONTRACT_FILENAMES
+    )
+    return sorted(set(stale))
+
+
+def generate_contracts(*, check: bool = False) -> int:
+    expected = _expected_artifacts()
+    stale = _stale_artifacts(expected)
+    if check:
+        if stale:
+            for path in stale:
+                print(f"Stale generated artifact: {path}")
+            return 1
+        print("Gold contract artifacts are current")
+        return 0
+
+    CONTRACTS_DIR.mkdir(parents=True, exist_ok=True)
+    _remove_stale_contracts(
+        {path.name for path in expected if path.parent == CONTRACTS_DIR}
+    )
+    for output_path, content in expected.items():
+        output_path.write_text(content, encoding="utf-8")
         print(f"Generated {output_path}")
-
-    with DIFF_REPORT_PATH.open("w", encoding="utf-8") as file_obj:
-        json.dump(diff_report, file_obj, indent=2, ensure_ascii=False)
-        file_obj.write("\n")
-
-    print(f"Diff report written to {DIFF_REPORT_PATH}")
-
-
-def main() -> int:
-    """CLI entrypoint for schema router compatibility."""
-    generate_contracts()
     return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    """CLI entrypoint for schema router compatibility."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Fail when generated contracts are stale without writing files.",
+    )
+    args = parser.parse_args(argv)
+    return generate_contracts(check=args.check)
 
 
 if __name__ == "__main__":

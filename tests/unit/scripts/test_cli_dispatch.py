@@ -70,9 +70,10 @@ def main(argv: list[str] | None = None) -> int:
     assert exit_code == 7
 
 
-def test_run_command_dispatches_module_main_without_argv_in_process(
+def test_run_command_rejects_argv_for_zero_argument_module_main(
     tmp_path: Path,
     monkeypatch,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     target = _write_module(
         tmp_path,
@@ -85,8 +86,7 @@ import sys
 
 
 def main() -> int:
-    assert sys.argv[1:] == ["--check"]
-    return 0
+    raise AssertionError("zero-argument main must not run with forwarded argv")
 """.strip()
         + "\n",
     )
@@ -102,5 +102,28 @@ def main() -> int:
 
     exit_code = run_command(module_command(target), ["--check"])
 
-    assert exit_code == 0
+    assert exit_code == 2
     assert sys.argv == original_argv
+    assert "does not accept command arguments" in capsys.readouterr().err
+
+
+def test_run_command_dispatches_zero_argument_main_without_forwarded_argv(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    target = _write_module(
+        tmp_path,
+        package_name="dispatch_pkg_zero_argv",
+        module_name="zero_argv_target",
+        source="""
+from __future__ import annotations
+
+
+def main() -> int:
+    return 9
+""".strip()
+        + "\n",
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+
+    assert run_command(module_command(target), []) == 9

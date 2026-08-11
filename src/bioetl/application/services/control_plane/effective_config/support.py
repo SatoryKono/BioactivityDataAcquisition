@@ -24,6 +24,7 @@ from bioetl.application.services.control_plane.effective_config.serialization im
 from bioetl.domain.behavior.dq_policy_resolver import DQPolicyResolver
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.control_plane.effective_config_artifact import (
+    RESOLVED_CONFIG_IDENTITY_VERSION,
     ConfigResolutionPolicy,
     ConfigSourceRef,
     DQPolicySnapshot,
@@ -103,6 +104,7 @@ def compute_source_fingerprint(source_refs: list[ConfigSourceRef]) -> str:
                 "type": src.source_type,
                 "path": src.source_path,
                 "hash": src.source_hash or "no_hash",
+                "hash_version": src.source_hash_version or "unversioned",
                 "priority": src.priority,
             }
             for src in canonical_source_refs(source_refs)
@@ -118,5 +120,10 @@ def build_resolved_config_snapshot(
     return ResolvedConfigSnapshot(
         config_type=pipeline_kind,
         config_data=resolved_config,
-        config_hash=stable_hash(resolved_config),
+        config_hash=stable_hash(
+            {
+                "identity_version": RESOLVED_CONFIG_IDENTITY_VERSION,
+                "config_data": resolved_config,
+            }
+        ),
     )
