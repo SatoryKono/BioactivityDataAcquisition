@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-11T08:22:32.641818+00:00",
+  "generated_at": "2026-08-11T08:46:03.402347+00:00",
   "summary": {
     "total_scripts": 587,
     "status_counts": {
@@ -11918,7 +11918,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 318,
+      "reference_count": 320,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -12457,7 +12457,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -12494,6 +12494,12 @@
           "line": 19,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import check_prometheus_rules"
+        },
+        {
+          "path": "tests/unit/scripts/qa/test_check_prometheus_rules_syntax.py",
+          "line": 11,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import check_prometheus_rules as cpr"
         }
       ]
     },
@@ -13966,7 +13972,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/03-guides/testing.md",
@@ -13989,6 +13995,18 @@
         {
           "path": "tests/unit/scripts/qa/test_refresh_test_governance_baseline.py",
           "line": 93,
+          "source_group": "tests",
+          "text": "\"refresh_test_governance_baseline.py\","
+        },
+        {
+          "path": "tests/unit/scripts/qa/test_refresh_test_governance_baseline.py",
+          "line": 123,
+          "source_group": "tests",
+          "text": "\"refresh_test_governance_baseline.py\","
+        },
+        {
+          "path": "tests/unit/scripts/qa/test_refresh_test_governance_baseline.py",
+          "line": 152,
           "source_group": "tests",
           "text": "\"refresh_test_governance_baseline.py\","
         }
@@ -18889,7 +18907,7 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 267,
+          "line": 290,
           "source_group": "docs",
           "text": "2. `.\\scripts\\ops\\observability\\grafana\\recover_renderer.ps1` (or `.sh`)"
         },
@@ -19543,13 +19561,13 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 206,
+          "line": 229,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\apply-docker-stable-mcp.ps1 -Profile stable -WithNeo4j"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 215,
+          "line": 238,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\apply-docker-stable-mcp.ps1 -Profile shared -TransportMode shared -WithSharedMcp -SkipEnsureStable"
         }
@@ -19623,7 +19641,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 207,
+          "line": 230,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\cleanup-mcp-orphans.ps1 -IncludeGatewayHint"
         },
@@ -19652,7 +19670,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 14,
       "references": [
         {
           "path": "docs/05-operations/runbooks/docker-compose-project-migration.md",
@@ -19697,10 +19715,10 @@
           "text": "PREFLIGHT_PATH = ROOT / \"scripts/ops/runtime/docker/docker_runtime_preflight.py\""
         },
         {
-          "path": "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
-          "line": 522,
+          "path": "tests/unit/repo_backed/scripts/ops/docker/test_preflight_promql_gate.py",
+          "line": 9,
           "source_group": "tests",
-          "text": "if \"docker_runtime_preflight.py\" in joined:"
+          "text": "from scripts.ops.runtime.docker import docker_runtime_preflight as preflight"
         }
       ]
     },
@@ -19768,13 +19786,13 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 197,
+          "line": 220,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\ensure-stable.ps1 -WithNeo4j"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 200,
+          "line": 223,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\ensure-stable.ps1 -RestartWsl -WithNeo4j"
         },
@@ -19807,13 +19825,13 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 203,
+          "line": 226,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\harden-desktop-host.ps1 -RegisterWatchdog"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 222,
+          "line": 245,
           "source_group": "docs",
           "text": "`harden-desktop-host.ps1` sets Resource Saver effectively off"
         },
@@ -19902,7 +19920,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 210,
+          "line": 233,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\reset-mcp-host-sessions.ps1"
         }
@@ -19951,7 +19969,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 180,
+          "line": 203,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\restart-docker.ps1 -TimeoutSeconds 180"
         },
@@ -20069,7 +20087,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 110,
+          "line": 133,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay"
         },
@@ -20195,7 +20213,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 217,
+          "line": 240,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\apply-shared-to-grok.ps1 -DisableDockerGateways"
         },
@@ -20250,7 +20268,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 216,
+          "line": 239,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\health-shared.ps1"
         },
@@ -20350,7 +20368,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 214,
+          "line": 237,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\start-shared.ps1"
         },

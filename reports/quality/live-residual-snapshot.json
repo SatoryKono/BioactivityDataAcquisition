@@ -77,6 +77,6 @@
     "closeout_files_using_live_residual_helpers": 8,
     "fold_into_generic_inventory_count": 60,
     "retained_public_entrypoint_count": 12,
-    "zero_reference_supporting_script_count": 5
+    "zero_reference_supporting_script_count": 7
   }
 }
