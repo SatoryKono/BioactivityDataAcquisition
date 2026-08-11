@@ -15,7 +15,7 @@
   "semantic_identity": {
     "dq_contract_compatibility_hash": "no_dq_policies",
     "effective_config_artifact_id": "eca-golden-001",
-    "effective_config_hash": "d96ea15540795a51ba4ea97c6cda14fae901824d5fbb947cb41709de4aeba54b",
+    "effective_config_hash": "6eabe5858d643f3326daea4a57e1737bf157b82ba0b8dff9efe0ee08ca54ae15",
     "execution_fingerprint": "fp-golden-001",
     "snapshot_ids": [
       "snapshot-golden-001"

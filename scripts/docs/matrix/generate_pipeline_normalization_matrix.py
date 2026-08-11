@@ -1027,7 +1027,9 @@ def _composite_source_field_candidates(
     candidates.extend(
         COMPOSITE_SOURCE_FIELD_TYPE_ALIAS_HINTS.get((pipeline_name, field_name), ())
     )
-    return tuple(dict[str, object].fromkeys(candidate for candidate in candidates if candidate))
+    return tuple(
+        dict[str, object].fromkeys(candidate for candidate in candidates if candidate)
+    )
 
 
 def _first_known_source_field_type(
@@ -3095,7 +3097,9 @@ def _checkpoint_context_covered(
     )
 
 
-def _checkpoint_anchor_merge_covered(merged_checkpoint: CompositeCheckpointState) -> bool:
+def _checkpoint_anchor_merge_covered(
+    merged_checkpoint: CompositeCheckpointState,
+) -> bool:
     """Return whether merged checkpoint anchors preserve canonical values."""
     return (
         merged_checkpoint.effective_config_hash == CANONICAL_EFFECTIVE_CONFIG_HASH
@@ -3496,8 +3500,8 @@ def _arg_parser() -> argparse.ArgumentParser:
     return _build_arg_parser()
 
 
-def main() -> int:
-    args = _arg_parser().parse_args()
+def main(argv: Sequence[str] | None = None) -> int:
+    args = _arg_parser().parse_args(argv)
     out_dir = args.out_dir.resolve()
     if args.check:
         return check_artifacts(out_dir)

@@ -123,10 +123,8 @@ def _collect_forbidden_pipeline_source_overrides(
         )
     )
 
-    batch = entity_source.get("batch")
-    if isinstance(batch, dict) and batch:
+    if _has_mapping_content(entity_source.get("batch")):
         forbidden.append("source.batch")
-
     return forbidden
 
 
@@ -148,8 +146,7 @@ def _collect_forbidden_provider_config_overrides(
         return []
 
     forbidden = ["source.provider_config"] if provider_config else []
-    pagination = provider_config.get("pagination")
-    if isinstance(pagination, dict) and pagination:
+    if _has_mapping_content(provider_config.get("pagination")):
         forbidden.append("source.provider_config.pagination")
     forbidden.extend(
         _present_override_paths(
@@ -159,6 +156,11 @@ def _collect_forbidden_provider_config_overrides(
         )
     )
     return forbidden
+
+
+def _has_mapping_content(value: object) -> bool:
+    """Return whether a compatibility section is a non-empty mapping."""
+    return isinstance(value, dict) and bool(value)
 
 
 def load_source_section(

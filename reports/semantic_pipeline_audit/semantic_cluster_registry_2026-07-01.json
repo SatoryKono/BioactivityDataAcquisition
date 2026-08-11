@@ -11638,7 +11638,7 @@
           "dq_rules": [],
           "entity": "publication",
           "field": "corpus_id",
-          "field_type": "int64",
+          "field_type": "string",
           "gold_path": "",
           "gold_required": false,
           "gold_type": "",
