@@ -1,6 +1,6 @@
 ---
 id: prompt.fragment.reports-output
-version: 1.4.0
+version: 1.5.0
 status: active
 class: fragment
 owner: BioETL Team
@@ -30,7 +30,8 @@ summary: Audit artifacts under reports/ only; no root audit/ or .audit-runs/
     (`prompt.observability.dashboard-audit-cycle`)
   - `reports/audit/test-cycle/<run_id>/` — cyclic testing
     (`prompt.tests.cycle`)
-
+  - `reports/audit/project-domain/<run_id>/` — nine-domain project audit rollup
+    (workflow `project-domain-audit`)
 ### Orchestrated multi-iteration runs
 
 - Use `reports/audit-runs/<run_id>/` (not `.audit-runs/` at repo root).
