@@ -210,8 +210,7 @@ def test_grafana_renderer_fail_fast_and_recovery_contract() -> None:
     )
     assert (
         "GF_RENDERING_CONCURRENT_RENDER_REQUEST_LIMIT="
-        "${GF_RENDERING_CONCURRENT_RENDER_REQUEST_LIMIT:-1}"
-        in grafana_env
+        "${GF_RENDERING_CONCURRENT_RENDER_REQUEST_LIMIT:-1}" in grafana_env
     )
     assert renderer["restart"] == "on-failure:3"
     assert renderer.get("oom_score_adj") == 800
