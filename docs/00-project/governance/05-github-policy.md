@@ -140,9 +140,9 @@ ______________________________________________________________________
 
 ## 3. Status Checks and Ruleset Contract
 
-Pull requests targeting `main` are blocked until the always-on required checks
-pass. Direct pushes to `main` remain possible for repository admins, but PR
-merges are enforced by the active repository ruleset below.
+Updates to `main` are governed by active required status checks. The following
+checks remain the recommended quality gate, while the repository ruleset
+enforces the final always-on subset documented below.
 
 ### Final always-on required-check set
 
@@ -204,7 +204,7 @@ To remove drift between workflow-specific job names and governance language, Bio
 
 ### Escalation policy for fail/warn
 
-- **FAIL**: merge is blocked for PRs by the active ruleset; admin force-merge/direct push MUST either fix or explicitly record a risk acceptance in PR/commit discussion.
+- **FAIL**: merge is blocked for PRs where the gate applies. The active always-on ruleset requires `checks-complete` and `root-hygiene`; failures MUST be fixed or explicitly risk-accepted in the PR discussion.
 - **WARN**: merge MAY proceed only with documented justification and a follow-up issue with owner and due date.
 - **WARN→FAIL**: repeated warning in 2 consecutive runs for the same surface, or warning on governance-contract surfaces (`RULES.md`, ADR-linked checks, schema parity, secrets) escalates to FAIL.
 
