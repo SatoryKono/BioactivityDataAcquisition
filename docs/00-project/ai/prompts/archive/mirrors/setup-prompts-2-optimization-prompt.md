@@ -1,3 +1,9 @@
+---
+status: archived
+class: mirror
+note: Runtime snapshot only — not paste SSOT. Prefer .codex/** / .junie/** / .devin/**. Epic #8513 / #8517.
+---
+
 # Devin Optimization Prompt
 
 ## Evaluation Metadata

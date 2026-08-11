@@ -1,3 +1,9 @@
+---
+status: archived
+class: campaign
+note: Opt-in historical megaprompt. Not default operator paste. Prefer library/** cards and REGISTRY.yaml. Epic #8513 / #8517.
+---
+
 ﻿# Grok Closeout Prompt (short)
 
 *Status: internal working prompt | Class: operator aid | Not governance SSOT*
