@@ -154,7 +154,12 @@ def _build_merge_config[ConfigT](
         field_mappings=require_str_mapping(
             merge_data.get("field_mappings"), "merge.field_mappings"
         ),
-        column_groups=merge_data.get("column_groups") or (),
+        column_groups=require_object_dict_sequence(
+            merge_data.get("column_groups") or (),
+            "merge.column_groups",
+        )
+        if merge_data.get("column_groups") not in (None, ())
+        else (),
         exclude_fields=optional_str_tuple(
             merge_data.get("exclude_fields"), "merge.exclude_fields"
         )

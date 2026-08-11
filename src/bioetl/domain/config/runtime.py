@@ -137,6 +137,10 @@ class RuntimeConfig:
                 self.start_offset is not None and self.start_offset < 0,
                 f"start_offset must be non-negative or None, got {self.start_offset}",
             ),
+            (
+                self.lock_ttl is not None and self.lock_ttl <= 0,
+                f"lock_ttl must be positive or None, got {self.lock_ttl}",
+            ),
         ]
         for condition, message in validations:
             if condition:
@@ -177,7 +181,11 @@ class RuntimeConfig:
     def _validate_debug_export_formats(self) -> None:
         """Validate debug export format tokens."""
         valid_formats = {"csv", "xlsx"}
-        invalid = [fmt for fmt in self.debug_export_formats if fmt not in valid_formats]
+        normalized = tuple(
+            str(fmt).strip().lower() for fmt in self.debug_export_formats
+        )
+        object.__setattr__(self, "debug_export_formats", normalized)
+        invalid = [fmt for fmt in normalized if fmt not in valid_formats]
         if invalid:
             raise ValueError(
                 f"debug_export_formats must contain only 'csv'/'xlsx', got {invalid!r}"
@@ -186,4 +194,8 @@ class RuntimeConfig:
     @property
     def effective_lock_ttl(self) -> int:
         """Derived TTL for lock renewal based on runtime config."""
-        return self.lock_ttl or self.heartbeat_interval * 3
+        # Fall back only when lock_ttl is unset (None), not when zero/negative
+        # (those are rejected in _validate_positive_values).
+        if self.lock_ttl is None:
+            return self.heartbeat_interval * 3
+        return self.lock_ttl

@@ -6,7 +6,6 @@
 
 from __future__ import annotations
 
-pytestmark = pytest.mark.unit
 
 import pytest
 
@@ -18,6 +17,9 @@ from bioetl.application.services.control_plane.replay._historical_record_payload
 from bioetl.application.services.control_plane.replay.historical_identity_models import (
     HistoricalReplayRunIdentity,
 )
+
+
+pytestmark = pytest.mark.unit
 
 
 def _identity() -> HistoricalReplayRunIdentity:

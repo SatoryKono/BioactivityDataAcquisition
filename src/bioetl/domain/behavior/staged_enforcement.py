@@ -51,10 +51,27 @@ class EnforcementPolicy:
 
     check_name: str
     current_stage: EnforcementStage
-    failure_threshold: float = 0.0
+    # warning_threshold must stay strictly below failure_threshold so SOFT_FAIL
+    # is reachable (RULES soft_fail < hard_fail). Defaults: warn at 50%, hard at 80%.
+    failure_threshold: float = 0.8
     warning_threshold: float = 0.5
     observe_until: str | None = None  # "YYYY-MM-DD"
     soft_fail_until: str | None = None  # "YYYY-MM-DD"
+
+    def __post_init__(self) -> None:
+        if not (0.0 <= self.warning_threshold <= 1.0):
+            raise ValueError(
+                f"warning_threshold must be in [0, 1], got {self.warning_threshold}"
+            )
+        if not (0.0 <= self.failure_threshold <= 1.0):
+            raise ValueError(
+                f"failure_threshold must be in [0, 1], got {self.failure_threshold}"
+            )
+        if self.warning_threshold >= self.failure_threshold:
+            raise ValueError(
+                "warning_threshold must be strictly below failure_threshold "
+                f"(got warning={self.warning_threshold}, failure={self.failure_threshold})"
+            )
 
     def get_effective_stage(self, failure_rate: float) -> EnforcementStage:
         """Resolve the effective enforcement stage for the observed failure rate."""

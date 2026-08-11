@@ -42,10 +42,14 @@ class FieldPolicyConfig:
     boolean_false_values: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
-        """Validate normalized field-level policy settings."""
-        true_values = {value.strip().lower() for value in self.boolean_true_values}
-        false_values = {value.strip().lower() for value in self.boolean_false_values}
-        overlap = true_values & false_values
+        """Validate and freeze normalized field-level policy settings."""
+        true_values = tuple(value.strip().lower() for value in self.boolean_true_values)
+        false_values = tuple(
+            value.strip().lower() for value in self.boolean_false_values
+        )
+        object.__setattr__(self, "boolean_true_values", true_values)
+        object.__setattr__(self, "boolean_false_values", false_values)
+        overlap = set(true_values) & set(false_values)
         if overlap:
             overlap_values = ", ".join(sorted(overlap))
             raise ValueError(

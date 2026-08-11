@@ -6,13 +6,15 @@
 
 from __future__ import annotations
 
-pytestmark = pytest.mark.unit
 
 from types import SimpleNamespace
 
 import pytest
 
 from bioetl.composition.runtime_builders._run_manifest_attr_support import read_attr
+
+
+pytestmark = pytest.mark.unit
 
 
 def test_read_attr_without_default_returns_existing_value() -> None:

@@ -33,6 +33,28 @@ class MergeResult:
 
     def __post_init__(self) -> None:
         """Freeze nested mappings/payloads so callers cannot mutate state."""
+        for name, value in (
+            ("records_merged", self.records_merged),
+            ("records_from_seed", self.records_from_seed),
+            ("records_enriched", self.records_enriched),
+            ("records_fully_enriched", self.records_fully_enriched),
+        ):
+            if value < 0:
+                raise ValueError(f"{name} must be >= 0, got {value}")
+        if self.records_fully_enriched > self.records_enriched:
+            raise ValueError(
+                "records_fully_enriched cannot exceed records_enriched: "
+                f"{self.records_fully_enriched} > {self.records_enriched}"
+            )
+        if self.records_enriched > self.records_merged > 0:
+            raise ValueError(
+                "records_enriched cannot exceed records_merged: "
+                f"{self.records_enriched} > {self.records_merged}"
+            )
+        if self.duration_seconds < 0:
+            raise ValueError(
+                f"duration_seconds must be >= 0, got {self.duration_seconds}"
+            )
         if isinstance(self.sources_used, list):
             object.__setattr__(self, "sources_used", tuple(self.sources_used))
         payloads = (
