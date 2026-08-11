@@ -370,3 +370,32 @@ def test_cross_validation_decoder_handles_non_sequence_nested_values() -> None:
                 ]
             }
         )
+
+
+def test_composite_merge_column_groups_optional_paths() -> None:
+    """Cover merge.column_groups None/empty/list decoding (CR #8644)."""
+    base: dict[str, object] = {
+        "name": "c",
+        "version": "1",
+        "seed": {"pipeline": "seed", "output_keys": ["id"], "silver_table": "s"},
+        "dependencies": [],
+        "enrichers": [],
+        "merge": {
+            "strategy": "left_outer",
+            "conflict_resolution": "seed_priority",
+            "output_silver_path": "silver/c",
+            "output_gold_path": "gold/c",
+        },
+    }
+    assert CompositeConfig.from_dict(base).merge.column_groups == ()
+
+    empty = dict(base)
+    empty["merge"] = {**base["merge"], "column_groups": []}  # type: ignore[index]
+    assert CompositeConfig.from_dict(empty).merge.column_groups == ()
+
+    groups = dict(base)
+    groups["merge"] = {
+        **base["merge"],  # type: ignore[dict-item]
+        "column_groups": [{"name": "ids", "fields": ["id"]}],
+    }
+    assert len(CompositeConfig.from_dict(groups).merge.column_groups) == 1
