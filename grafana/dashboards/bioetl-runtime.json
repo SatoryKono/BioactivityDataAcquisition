@@ -2737,10 +2737,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 0,
-            "y": 0
+            "y": 86,
+            "w": 12,
+            "h": 6
           },
           "id": 237,
           "options": {
@@ -2817,10 +2817,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 12,
-            "y": 0
+            "y": 86,
+            "w": 12,
+            "h": 6
           },
           "id": 16,
           "options": {
@@ -2898,10 +2898,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 4,
             "x": 0,
-            "y": 6
+            "y": 92,
+            "w": 8,
+            "h": 5
           },
           "id": 205,
           "options": {
@@ -2953,10 +2953,10 @@
           "type": "table",
           "title": "Inspect Pipeline Identity",
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 0,
-            "y": 0
+            "y": 98,
+            "w": 12,
+            "h": 6
           },
           "datasource": "BioETL Ops HTTP",
           "description": "Shows HTTP-backed identity for an exact Run ID. Aggregate Pipeline scope does not guess a run. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live and continue in Run Explorer",
@@ -3109,10 +3109,10 @@
           "type": "table",
           "title": "Inspect Processed Records",
           "gridPos": {
-            "h": 6,
-            "w": 12,
             "x": 12,
-            "y": 0
+            "y": 98,
+            "w": 12,
+            "h": 6
           },
           "datasource": "BioETL Ops HTTP",
           "description": "Shows HTTP-backed Bronze input, Silver accepted/rejected, and Gold output counts and outcomes. Zero is a recorded count. No matching rows can mean a valid empty result, unresolved scope, or backend failure (backend unavailable); verify /health/live and use Run Explorer before classifying the result.",
@@ -3431,10 +3431,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 12,
             "x": 0,
-            "y": 10
+            "y": 105,
+            "w": 12,
+            "h": 5
           },
           "id": 9996,
           "options": {
@@ -3506,10 +3506,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 12,
             "x": 12,
-            "y": 10
+            "y": 105,
+            "w": 12,
+            "h": 5
           },
           "id": 9997,
           "options": {
