@@ -37,11 +37,11 @@
       "status": "pass"
     },
     {
-      "current": 0,
+      "current": "not_evaluated_without_changed_from_ref",
       "limit": 0,
       "metric": "budget_increase_count",
       "name": "debt_scorecard_budget_no_growth",
-      "remediation": "Lower or revert increased scorecard budgets; debt budgets must be flat or decreasing.",
+      "remediation": "Run with --changed-from-ref in CI so scorecard budgets cannot grow.",
       "source_artifact": "configs/quality/debt_scorecard.yaml",
       "status": "pass"
     },
@@ -379,16 +379,16 @@
       "status": "pass"
     },
     {
-      "current": true,
-      "limit": true,
-      "metric": "inventory_matches_current_static_report",
+      "current": 0,
+      "limit": 0,
+      "metric": "changed_metric_surface_count",
       "name": "observability_touched_metric_inventory_freshness",
-      "remediation": "Regenerate reports/observability/runtime_cardinality_inventory.json before merging metric, dashboard, or alert-rule changes.",
+      "remediation": "Refresh runtime cardinality inventory evidence before merging metric, dashboard, or alert-rule changes.",
       "source_artifact": "reports/observability/runtime_cardinality_inventory.json",
       "status": "pass"
     },
     {
-      "current": 1,
+      "current": 0,
       "limit": 0,
       "metric": "changed_metric_surface_count",
       "name": "observability_touched_metric_review_freshness",
