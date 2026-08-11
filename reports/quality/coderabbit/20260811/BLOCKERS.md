@@ -539,3 +539,11 @@ Each entry requires GitHub reconciliation before closeout.
 - Detail: CodeRabbit exit code 1
 - GitHub issue: pending reconciliation
 
+## S01-domain-lineage — error
+
+- UTC: `2026-08-11T10:38:46.018572+00:00`
+- Wave: `A`
+- Files: `6`
+- Detail: CodeRabbit exit code 1
+- GitHub issue: pending reconciliation
+
