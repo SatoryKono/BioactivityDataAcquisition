@@ -226,7 +226,6 @@ def test_field_group_registry_rejects_duplicate_base_and_column() -> None:
         )
 
 
-
 def test_lineage_requires_identity_fields() -> None:
     from bioetl.domain.composite.lineage import CompositeLineageMetadata
 
