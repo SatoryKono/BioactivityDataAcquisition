@@ -41,7 +41,7 @@ class FieldGroupRegistry:
             for fm in group_def.fields:
                 self._register_field_mapping(group_def.group_id, fm)
 
-    def _register_field_mapping(self, group_id: object, fm: object) -> None:
+    def _register_field_mapping(self, group_id: FieldGroupId, fm: FieldMapping) -> None:
         """Register one field mapping; reject duplicate base/column keys."""
         base_key = fm.base_name.lower()
         if base_key in self._field_to_group:
@@ -56,7 +56,7 @@ class FieldGroupRegistry:
         for col in fm.provider_columns:
             self._register_provider_column(group_id, col)
 
-    def _register_provider_column(self, group_id: object, col: str) -> None:
+    def _register_provider_column(self, group_id: FieldGroupId, col: str) -> None:
         col_key = col.lower()
         if col_key in self._column_to_group:
             existing = self._column_to_group[col_key]
