@@ -6,6 +6,10 @@
 
 from __future__ import annotations
 
+pytestmark = pytest.mark.unit
+
+import pytest
+
 from bioetl.application.services.control_plane.replay._historical_record_payload import (
     build_historical_certification_payload,
     build_historical_certified_identity_payload,

@@ -1,11 +1,12 @@
 ______________________________________________________________________
 
-Version: 3.5.0
+Version: 3.6.0
 Status: active
 Class: internal (repo-only entrypoint; excluded from MkDocs)
 Owner: BioETL Team
 Last verified: '2026-08-11'
 Epic: '#8513'
+Phase3: '#8517'
 
 ______________________________________________________________________
 
@@ -33,7 +34,7 @@ See [AI Runtime Mirror Ownership](../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.m
 | Multi-step procedure | Skill under `.codex/skills/**` |
 | Short operator paste for a task | **Library card** here (`library/**`) |
 | Shared guardrail block | **Fragment** (`fragments/**`) |
-| Historical megaprompt / mirror snapshot | `archive/**` or `COLLECTED_PROMPTS_INDEX.md` |
+| Historical megaprompt / mirror snapshot | **opt-in** [archive/README.md](archive/README.md) or `COLLECTED_PROMPTS_INDEX.md` — not default paste |
 
 ## Layout
 

@@ -1,12 +1,12 @@
 ______________________________________________________________________
 
-Version: 1.1.0
+Version: 1.2.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Last verified: '2026-08-11'
 Epic: '#8513'
-Phase: 0 (#8515) + domain-audit intake 2026-08
+Phase: 0 (#8515) + domain-audit intake + Phase 3 archive (#8517)
 
 ______________________________________________________________________
 
@@ -76,40 +76,33 @@ Target **6** active operator-paste cards:
 Migration rules: strip evaluation scorecards from paste body; add YAML
 frontmatter; compose shared guardrails via `fragments/`.
 
-## Phase 3 archive / demote candidates (#8517)
+## Phase 3 archive / demote (#8517) — **DONE**
 
-### Runtime mirrors → `archive/mirrors/`
+### Runtime mirrors → `archive/mirrors/` (done)
 
-- `role-specific-agents-*.md`
-- `runtime-agentry-*.md`
-- `skills-*.md`
-- `workflows-*.md`
-- `setup-prompts-*.md`
-- `memory-py-audit-bot.md`, `agent-memory.md`
+- `role-specific-agents-*.md`, `runtime-agentry-*.md`, `skills-*.md`,
+  `workflows-*.md`, `setup-prompts-*.md`, `memory-py-audit-bot.md`
+- Root copies removed; archive files carry `status: archived` / `class: mirror`
+  banners. Prefer `.codex/**` / `.junie/**` / `.devin/**`.
 
-### Campaigns / historical megaprompts → `archive/campaigns/`
+### Campaigns / historical megaprompts → `archive/campaigns/` (done)
 
-- `documentation_diagrams_audit.md`
-- `architecture_metric_exemptions_tasks_json_prompt.md`
-- `refactor_orchestration_prompt.md`
-- `scripts_inventory_consolidation_cleanup_prompt.md`
-- `specialized-prompts-1-scripts-inventory.md`
-- `specialized-prompts-2-coderabbit-audit.md`
-- `generic-nine-audit-kit-2026-08.md` (+ `…-SOURCES.md`) — intake 2026-08-11;
-  active short cards: `library/audit/{docs-content,tests-system,tech-debt,
-  repo-tree,github-actions,agents-runtime,diagrams,docs-pipeline}.md` and
-  `library/architecture/review-assessment.md` v2.3
-- `project-audit-orchestrator-kit-2026-08-11.md` (+ `…-SOURCES.md`) — kit #2
-  with orchestrator; active: `library/audit/orchestrator.md`
-  (`prompt.audit.orchestrator`); domain cards v1.1+ (`findings.json`)
-- `bi-dashboard-audit-kit-2026-08-11.md` (+ `…-SOURCES.md`) — BI acceptance;
-  active: `library/observability/bi-dashboard-acceptance.md`; panel loop v1.1
-  cross-link
+- Pre-library megaprompts + nine-kit / orchestrator / BI kits under
+  `archive/campaigns/` with archived banners.
+- Active short cards under `library/**` only; root paths are **redirect stubs**
+  where bookmarks still exist (`grok-*.md`, `test_*.md`, etc.).
+
+### Catalog + discovery (done)
+
+- `generated/CATALOG.md` from `REGISTRY.yaml` (`python -m scripts.ai.prompts catalog`)
+- README lists **active** operator-paste only; archive is opt-in
+  (`archive/README.md`)
+- MkDocs: single **Prompt Archive (opt-in)** nav entry (not raw megaprompt dump)
 
 ### External archive (already)
 
 - `docs/99-archive/guides/stale-ai-prompts/`
-- `collected/` (if present) — archive-only snapshots
+- `COLLECTED_PROMPTS_INDEX.md` — archive-only collected snapshots
 
 ## Fragment candidates (shared blocks)
 
