@@ -132,9 +132,10 @@ class FieldValidation:
                     "max_length validation requires a non-negative max_length"
                 )
             return
-        if vtype == "custom":
-            if not self.validator or not str(self.validator).strip():
-                raise ValueError("custom validation requires a validator name")
+        if vtype == "custom" and (
+            not self.validator or not str(self.validator).strip()
+        ):
+            raise ValueError("custom validation requires a validator name")
 
     def effective_severity(
         self, *, is_enricher: bool = False

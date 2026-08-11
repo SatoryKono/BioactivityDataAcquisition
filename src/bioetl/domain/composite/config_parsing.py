@@ -162,8 +162,6 @@ def _is_float_coercible(value: object) -> bool:
 
 
 def _coerce_float(value: object, field_name: str) -> float:
-    import math
-
     if not _is_float_coercible(value):
         raise ValueError(f"{field_name} must be a number")
     try:

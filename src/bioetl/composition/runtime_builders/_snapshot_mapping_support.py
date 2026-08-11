@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import asdict, is_dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Protocol, cast, runtime_checkable
@@ -18,7 +18,11 @@ __all__ = ["normalize_snapshot", "to_serializable_mapping"]
 @runtime_checkable
 class _ModelDumpHost(Protocol):
     def model_dump(
-        self, *, mode: str = "python", exclude_none: bool = False
+        self,
+        *,
+        mode: str = "python",
+        exclude_none: bool = False,
+        fallback: Callable[[object], object] | None = None,
     ) -> Mapping[str, object]: ...
 
 
@@ -35,9 +39,11 @@ def normalize_snapshot(value: object) -> object:
         return str(value)
     if not isinstance(value, type) and is_dataclass(value):
         return normalize_snapshot(asdict(cast("DataclassInstance", value)))
-    if isinstance(value, dict):
+    if isinstance(value, Mapping):
         return {str(key): normalize_snapshot(item) for key, item in value.items()}
-    if isinstance(value, (list, tuple, set, frozenset)):
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
+        return [normalize_snapshot(item) for item in value]
+    if isinstance(value, (set, frozenset)):
         return [normalize_snapshot(item) for item in value]
     if hasattr(value, "__dict__") and not isinstance(value, type):
         return normalize_snapshot(
@@ -49,7 +55,11 @@ def normalize_snapshot(value: object) -> object:
 def to_serializable_mapping(value: object) -> dict[str, object]:
     """Return a normalized mapping for manifest payload serialization."""
     if isinstance(value, _ModelDumpHost):
-        payload: object = value.model_dump(mode="json", exclude_none=True)
+        payload: object = value.model_dump(
+            mode="json",
+            exclude_none=True,
+            fallback=normalize_snapshot,
+        )
     elif isinstance(value, _DictHost):
         payload = value.dict(exclude_none=True)
     elif hasattr(value, "__dict__") and not isinstance(value, type):
