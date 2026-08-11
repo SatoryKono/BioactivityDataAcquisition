@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `1cb1e6e5741dcd0efec8408d3b3d4b6c45cdeece`
 
-Evidence surface SHA-256: `5ee46baf0f2fb7e4de9b0579b12e1213aa582ffca9aa878c53a3c38c5c96c552`
+Evidence surface SHA-256: `7cd9fd44535b68f12133634795cd7984d4d80d003d2c5f8ecb7272dd64897f54`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,15 +18,15 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-07-27-r1",
   "audited_commit_sha": "1cb1e6e5741dcd0efec8408d3b3d4b6c45cdeece",
-  "evidence_surface_sha256": "5ee46baf0f2fb7e4de9b0579b12e1213aa582ffca9aa878c53a3c38c5c96c552",
+  "evidence_surface_sha256": "7cd9fd44535b68f12133634795cd7984d4d80d003d2c5f8ecb7272dd64897f54",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "debt_gate_count": 45,
-    "debt_gate_fail_count": 0,
-    "debt_gate_pass_count": 45,
+    "debt_gate_fail_count": 1,
+    "debt_gate_pass_count": 44,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
     "fully_covered_module_count": 1520,
@@ -44,11 +44,11 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 }
 -->
 
-Refresh reason: Stream A debt-governance closeout (#6620/#5553/#7517) - re-pin evidence surface after remote-main baseline + gates refresh; no budget growth.
+Refresh reason: Closeout #7517/#7410/#8584 — re-pin evidence after generated-artifact refresh; no budget growth.
 
 ## Executive summary
 
-1. Debt-governance gates: **45 pass / 0 fail** (`45/45` debt-governance gates passing).
+1. Debt-governance gates: **44 pass / 1 fail** (`44/45` debt-governance gates passing).
 1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
 1. Module inventory (from `module-coverage-inventory.json` only):
    - source_module_count: **2413**
