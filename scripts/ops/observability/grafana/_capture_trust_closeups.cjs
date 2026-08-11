@@ -32,6 +32,10 @@ async function main() {
   const width = Number.parseInt(arg("--width", "1920"), 10);
   const height = Number.parseInt(arg("--height", "900"), 10);
   const theme = arg("--theme", "dark");
+  const state = arg("--state", process.env.BIOETL_TRUST_FIXTURE_STATE || "default");
+  const pipeline = arg("--pipeline", "chembl_activity");
+  const runType = arg("--run-type", "incremental");
+  const runId = arg("--run-id", "00000000-0000-0000-0000-000000008576");
   const username = process.env.GRAFANA_USERNAME || "admin";
   const password =
     process.env.GF_SECURITY_ADMIN_PASSWORD ||
@@ -91,7 +95,10 @@ async function main() {
       file,
       bytes: buf.length,
       sha256: sha,
-      state: "default_selector_range_viewPanel",
+      state,
+      pipeline,
+      run_type: runType,
+      run_id: runId,
     });
     console.log(`captured ${file} (${buf.length} bytes)`);
   }
@@ -102,7 +109,7 @@ async function main() {
     issue: "#8576",
     related_issue: "#8578",
     uid: UID,
-    capture_state: "trust-validation-panel-closeups",
+    capture_state: 	rust-validation-panel-closeups:,
     generated_at: new Date().toISOString(),
     viewport: { width, height, theme, kiosk: "full", viewPanel: true },
     screenshots: shots,
