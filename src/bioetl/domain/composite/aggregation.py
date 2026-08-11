@@ -250,6 +250,26 @@ class AggregationFieldSpec:
         return self.output_field or self.source_field
 
 
+def _coerce_aggregation_fields(fields: object) -> tuple[AggregationFieldSpec, ...]:
+    if isinstance(fields, str) or not isinstance(fields, list | tuple):
+        raise ValueError(
+            "aggregation.fields must be a sequence of AggregationFieldSpec "
+            f"entries, got {type(fields).__name__}"
+        )
+    return tuple(
+        AggregationFieldSpec(**f) if isinstance(f, dict) else f for f in fields
+    )
+
+
+def _require_field_specs(fields: tuple[AggregationFieldSpec, ...]) -> None:
+    for index, entry in enumerate(fields):
+        if not isinstance(entry, AggregationFieldSpec):
+            raise ValueError(
+                "aggregation.fields entries must be AggregationFieldSpec, "
+                f"got {type(entry).__name__} at index {index}"
+            )
+
+
 @dataclass(frozen=True, slots=True)
 class AggregationConfig:
     """Configuration for 1:M enricher aggregation.
@@ -269,15 +289,7 @@ class AggregationConfig:
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
-        if isinstance(self.fields, str) or not isinstance(self.fields, list | tuple):
-            raise ValueError(
-                "aggregation.fields must be a sequence of AggregationFieldSpec "
-                f"entries, got {type(self.fields).__name__}"
-            )
-        converted = tuple(
-            AggregationFieldSpec(**f) if isinstance(f, dict) else f for f in self.fields
-        )
-        object.__setattr__(self, "fields", converted)
+        object.__setattr__(self, "fields", _coerce_aggregation_fields(self.fields))
         object.__setattr__(
             self,
             "order_by",
@@ -290,12 +302,7 @@ class AggregationConfig:
         require_non_empty(self.group_by, "aggregation group_by")
         if not self.fields:
             raise ValueError("aggregation.fields cannot be empty")
-        for index, entry in enumerate(self.fields):
-            if not isinstance(entry, AggregationFieldSpec):
-                raise ValueError(
-                    "aggregation.fields entries must be AggregationFieldSpec, "
-                    f"got {type(entry).__name__} at index {index}"
-                )
+        _require_field_specs(self.fields)
 
 
 __all__ = [
