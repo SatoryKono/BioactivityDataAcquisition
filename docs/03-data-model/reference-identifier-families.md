@@ -36,7 +36,7 @@ DQ alignment:
 | `openalex_work` | string | scalar | `W123` | `openalex_publication.openalex_id` |
 | `semantic_scholar_author` | string | set-like | lowercase 40-char hex | `semanticscholar_publication.author_s2_ids` |
 | `semantic_scholar_paper` | string | scalar or set-like | lowercase 40-char hex | `semanticscholar_publication.paper_id` |
-| `semantic_scholar_corpus` | numeric scalar | scalar | numeric corpusId | `semanticscholar_publication.corpus_id` |
+| `semantic_scholar_corpus` | Silver: numeric scalar (`int64`); Gold: decimal string (avoids float precision loss) | scalar | numeric corpusId as exact decimal text at Gold | `semanticscholar_publication.corpus_id` (Silver transport int64; Gold `Series[str]` / JSON `string\|null`) |
 | `ncbi_taxonomy` | numeric scalar | scalar | numeric taxonomy id | `chembl_activity.target_tax_id`, `chembl_assay.tax_id`, `chembl_target.tax_id` |
 | `uniprot_accession` | string | scalar or set-like | uppercase accession | `uniprot_idmapping.uniprot_accession`, `uniprot_idmapping.all_mappings`, `uniprot_protein.secondary_accessions` |
 | `mixed_identifier_set` | string | set-like | varies (ChEMBL, UniProt, DrugBank, or normalized text) | `uniprot_idmapping.all_mappings` |

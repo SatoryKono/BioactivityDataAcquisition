@@ -3,6 +3,7 @@
 
 Read-only analysis of shipped JSON under grafana/dashboards/.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -104,8 +105,18 @@ def expr_sig(panel: dict[str, Any]) -> str | None:
 
 def overlaps(a: dict, b: dict) -> bool:
     ga, gb = a.get("gridPos") or {}, b.get("gridPos") or {}
-    ax, ay, aw, ah = int(ga.get("x", 0)), int(ga.get("y", 0)), int(ga.get("w", 0)), int(ga.get("h", 0))
-    bx, by, bw, bh = int(gb.get("x", 0)), int(gb.get("y", 0)), int(gb.get("w", 0)), int(gb.get("h", 0))
+    ax, ay, aw, ah = (
+        int(ga.get("x", 0)),
+        int(ga.get("y", 0)),
+        int(ga.get("w", 0)),
+        int(ga.get("h", 0)),
+    )
+    bx, by, bw, bh = (
+        int(gb.get("x", 0)),
+        int(gb.get("y", 0)),
+        int(gb.get("w", 0)),
+        int(gb.get("h", 0)),
+    )
     return ax < bx + bw and bx < ax + aw and ay < by + bh and by < ay + ah
 
 
@@ -233,7 +244,9 @@ def analyze(path: Path) -> dict[str, Any]:
     for i, left in enumerate(root):
         for right in root[i + 1 :]:
             if overlaps(left, right):
-                ov.append(f"{left.get('id')}:{left.get('title')} x {right.get('id')}:{right.get('title')}")
+                ov.append(
+                    f"{left.get('id')}:{left.get('title')} x {right.get('id')}:{right.get('title')}"
+                )
     gaps = root_gaps(root)
 
     # Above-fold proxy: y+h for root panels with y < 14 (approx first viewport at ~12-14 grid units)
@@ -343,7 +356,11 @@ def main() -> None:
         nav_y0.append({"uid": r["uid"], "nav": nav})
 
     # Cross-dashboard variable sets
-    var_sets = {r["uid"]: r.get("visible_variable_names", []) for r in results if "error" not in r}
+    var_sets = {
+        r["uid"]: r.get("visible_variable_names", [])
+        for r in results
+        if "error" not in r
+    }
 
     # Title collisions across dashboards (same title different uid) — informational
     title_to_uids: dict[str, set[str]] = defaultdict(set)
@@ -360,13 +377,17 @@ def main() -> None:
         "nav_y0": nav_y0,
         "variable_sets": var_sets,
         "shared_root_titles": {
-            t: sorted(uids) for t, uids in title_to_uids.items() if len(uids) > 1 and t != "Navigate Dashboards"
+            t: sorted(uids)
+            for t, uids in title_to_uids.items()
+            if len(uids) > 1 and t != "Navigate Dashboards"
         },
     }
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     out_path = OUT_DIR / "layout-contour-extract.json"
-    out_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    out_path.write_text(
+        json.dumps(summary, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
 
     # Compact stdout report
     print(f"Wrote {out_path}")
@@ -376,27 +397,43 @@ def main() -> None:
             continue
         print("=" * 72)
         print(f"{r['uid']} | title={r['title']}")
-        print(f"  root={r['root_panel_count']} walk={r['panel_total_walk']} query_backed={r['query_backed']}")
+        print(
+            f"  root={r['root_panel_count']} walk={r['panel_total_walk']} query_backed={r['query_backed']}"
+        )
         print(f"  types={r['type_counts']}")
-        print(f"  vars_visible={r['visible_variable_count']}: {r['visible_variable_names']}")
-        print(f"  rows expanded={len(r['expanded_rows'])} collapsed={len(r['collapsed_rows'])}")
+        print(
+            f"  vars_visible={r['visible_variable_count']}: {r['visible_variable_names']}"
+        )
+        print(
+            f"  rows expanded={len(r['expanded_rows'])} collapsed={len(r['collapsed_rows'])}"
+        )
         for row in r["rows"]:
             flag = "COLLAPSED" if row["collapsed"] else "EXPANDED"
-            print(f"    row y={row['y']} [{flag}] {row['title']} nested={row['nested']}")
+            print(
+                f"    row y={row['y']} [{flag}] {row['title']} nested={row['nested']}"
+            )
         print(f"  root_max_y={r['root_max_y']} all_max_y={r['all_max_y']}")
-        print(f"  overlaps={r['root_overlaps'] or 'none'} gaps={r['root_gaps'] or 'none'}")
+        print(
+            f"  overlaps={r['root_overlaps'] or 'none'} gaps={r['root_gaps'] or 'none'}"
+        )
         print(f"  dup_titles={r['duplicate_titles'] or '{}'}")
         print(f"  dup_query_groups={r['duplicate_query_group_count']}")
         if r["duplicate_query_groups"]:
             for g in r["duplicate_query_groups"][:5]:
-                print(f"    QDUP: {[(x['id'], x['title'], x['parent_row']) for x in g]}")
+                print(
+                    f"    QDUP: {[(x['id'], x['title'], x['parent_row']) for x in g]}"
+                )
         print("  answer panels:")
         for a in r["answer_panels"]:
-            print(f"    y={a['y']} h={a['h']} id={a['id']} {a['title']} parent={a['parent_row']} collapsed_parent={a['collapsed_parent']}")
+            print(
+                f"    y={a['y']} h={a['h']} id={a['id']} {a['title']} parent={a['parent_row']} collapsed_parent={a['collapsed_parent']}"
+            )
         print("  root map (y-order):")
         for m in sorted(r["root_map"], key=lambda x: (x["y"] or 0, x["x"] or 0)):
             col = f" collapsed={m['collapsed']}" if m["type"] == "row" else ""
-            print(f"    y={m['y']} x={m['x']} w={m['w']} h={m['h']} id={m['id']} [{m['type']}] {m['title']}{col}")
+            print(
+                f"    y={m['y']} x={m['x']} w={m['w']} h={m['h']} id={m['id']} [{m['type']}] {m['title']}{col}"
+            )
 
 
 if __name__ == "__main__":

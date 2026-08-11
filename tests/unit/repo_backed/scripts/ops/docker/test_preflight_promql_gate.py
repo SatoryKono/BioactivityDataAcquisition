@@ -8,7 +8,7 @@ import pytest
 
 from scripts.ops.runtime.docker import docker_runtime_preflight as preflight
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
 
 def test_promql_gate_flags_missing_expr(
