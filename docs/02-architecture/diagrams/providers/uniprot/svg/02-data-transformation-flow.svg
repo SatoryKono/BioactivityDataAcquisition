@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="120" role="img">
+  <title>02-data-transformation-flow</title>
+  <rect width="100%" height="100%" fill="#ffffff" stroke="#cccccc"/>
+  <text x="16" y="48" font-family="Segoe UI, sans-serif" font-size="16" fill="#333333">
+    SVG sibling for 02-data-transformation-flow
+  </text>
+  <text x="16" y="76" font-family="Segoe UI, sans-serif" font-size="12" fill="#666666">
+    Placeholder — regenerate with docs/02-architecture/diagrams/tooling/render.sh when mmdc is available
+  </text>
+</svg>

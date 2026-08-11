@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2830 |
-| Tracked doc-like files | 2830 |
-| Ignored local docs/reports files | 0 |
+| Doc-like files | 2829 |
+| Tracked doc-like files | 2824 |
+| Ignored local docs/reports files | 5 |
 | Duplicate groups | 3 |
 | Generated without route or exception | 0 |
 | Generated routes | 70 |
@@ -18,7 +18,8 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 2830 |
+| ignored_local | 5 |
+| tracked | 2824 |
 
 ## Lifecycle Counts
 
@@ -29,7 +30,7 @@
 | active_quality_baseline | 54 |
 | closeout_evidence | 87 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 3 |
+| docs_reports_curated_or_historical_report | 8 |
 | docs_reports_generated_or_route_owned | 7 |
 | docs_reports_retention_sensitive_evidence | 21 |
 | generated_skill_license_mirror | 5 |
@@ -57,40 +58,53 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 745 |
+| Active | 737 |
 | Archived | 169 |
 | Canonical | 70 |
-| Generated | 1018 |
-| Working | 828 |
+| Generated | 1012 |
+| Working | 841 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 745 |
+| active | 737 |
 | archive | 169 |
 | canonical | 70 |
-| generated | 1018 |
-| working | 828 |
+| generated | 1012 |
+| working | 841 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 320 |
-| archive-after-migration | 363 |
-| generate-automatically | 1018 |
-| keep | 1125 |
+| archive-after-migration | 376 |
+| generate-automatically | 1012 |
+| keep | 1117 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
 
 | Path | Status | Inbound | Action |
 | --- | --- | --- | --- |
+| `docs/03-guides/dashboards/archive/audit-protocols/dux3-audit-selection-notes.md` | Working | 0 | archive-after-migration |
+| `docs/03-guides/dashboards/archive/audit-protocols/dux3-residual-contracts.md` | Working | 1 | archive-after-migration |
+| `docs/03-guides/dashboards/archive/audit-protocols/dux3-screenshot-regression-protocol.md` | Working | 0 | archive-after-migration |
+| `docs/03-guides/dashboards/archive/audit-protocols/dux3-semantic-fixtures.md` | Working | 0 | archive-after-migration |
+| `docs/03-guides/dashboards/archive/audit-protocols/dux4-title-scope-harness.md` | Working | 0 | archive-after-migration |
+| `docs/03-guides/dashboards/archive/audit-protocols/dux5-copy-dictionary.md` | Working | 1 | archive-after-migration |
+| `docs/03-guides/dashboards/archive/audit-protocols/dux5-screenshot-regression-protocol.md` | Working | 1 | archive-after-migration |
+| `docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md` | Working | 1 | archive-after-migration |
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-05.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-11.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
+| `docs/reports/gh-issues/ai-consolidation-issue.md` | Working | 0 | archive-after-migration |
+| `docs/reports/gh-issues/diagrams-refactoring-issue.md` | Working | 0 | archive-after-migration |
+| `docs/reports/gh-issues/docs-consolidation-issue.md` | Working | 0 | archive-after-migration |
+| `docs/reports/gh-issues/memory-consolidation-issue.md` | Working | 0 | archive-after-migration |
+| `docs/reports/gh-issues/schema-refactoring-issue.md` | Working | 0 | archive-after-migration |
 | `reports/ai/agent-tools/RF005-CLOSEOUT-2026-08-09.md` | Working | 0 | archive-after-migration |
 | `reports/ai/agent-tools/compatibility/rf005-platform-matrix-2026-08-09.json` | Working | 0 | archive-after-migration |
 | `reports/ai/agent-tools/evaluation/rf005-utility-pilot-2026-08-09.json` | Working | 0 | archive-after-migration |
@@ -154,19 +168,6 @@
 | `reports/quality/coderabbit/20260806-full/_S08b-infra-residual.txt` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260806-full/_S11b-interfaces-residual.txt` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260806-full/_S12-tests-architecture-root-1.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S12-tests-architecture-root-2.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S13-tests-unit-domain-root.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S14-tests-unit-application-root.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S14b-tests-unit-infrastructure-root.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S15c-tests-residual-1.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S15c-tests-residual-2.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S15c-tests-residual-3.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S15c-tests-residual-4.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S16b-configs-other.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S17-docs-00-project-root.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S20-scripts-root.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_diag277_by_file.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_diag_by_file.txt` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -222,7 +223,6 @@
 | `docs/00-project/ai/prompts/README.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/REGISTRY.yaml` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/_schema/prompt.schema.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/architecture_metric_exemptions_tasks_json_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/architecture_review_and_refactoring_assessment.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/archive/README.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/archive/campaigns/architecture_metric_exemptions_tasks_json_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
@@ -243,7 +243,6 @@
 | `docs/00-project/ai/prompts/archive/campaigns/scripts_inventory_consolidation_cleanup_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/archive/campaigns/specialized-prompts-1-scripts-inventory.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/archive/campaigns/specialized-prompts-2-coderabbit-audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/mirrors/agent-memory.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/archive/mirrors/memory-py-audit-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/archive/mirrors/role-specific-agents-1-py-audit-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/archive/mirrors/role-specific-agents-2-py-debug-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
@@ -252,6 +251,8 @@
 | `docs/00-project/ai/prompts/archive/mirrors/setup-prompts-1-devin-setup-prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/archive/mirrors/setup-prompts-2-optimization-prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/archive/mirrors/skills-1-research-workflow.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/mirrors/skills-2-verify-architecture.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/mirrors/workflows-1-master.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 
 ## GitHub Issue Evidence Examples
 
@@ -334,6 +335,11 @@
 | `docs/reports/generated/pipeline_normalization_field_matrix/non_chembl_normalization_field_matrix.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.csv` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
+| `docs/reports/gh-issues/ai-consolidation-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/gh-issues/diagrams-refactoring-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/gh-issues/docs-consolidation-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/gh-issues/memory-consolidation-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/gh-issues/schema-refactoring-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/index.md` | tracked | docs_reports_curated_entrypoint | keep |
 
 ## Generated Route Registry

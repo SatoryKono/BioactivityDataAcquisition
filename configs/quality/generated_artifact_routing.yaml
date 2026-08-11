@@ -40,7 +40,7 @@ allowed_output_roots:
     - docs/02-architecture/policies/reproducibility-support-matrix.md
     - docs/03-guides/dashboards/panel-title-inventory.md
     - docs/03-guides/dashboards/navigation-contract.md
-    - docs/03-guides/dashboards/dux7-live-residual-protocol.md
+    - docs/03-guides/dashboards/archive/audit-protocols/dux7-live-residual-protocol.md
     - docs/03-guides/silver-schema-testing-guide.md
     - docs/04-reference/api/
     - docs/04-reference/config_comparison_matrix.csv
@@ -235,9 +235,10 @@ routes:
     output_kind: curated_generated_docs
     commit_policy: tracked_curated_generated_doc
     outputs:
-      - docs/03-guides/dashboards/dux7-live-residual-protocol.md
+      - docs/03-guides/dashboards/archive/audit-protocols/dux7-live-residual-protocol.md
     notes: DUX7 live residual protocol documents residual panel triage steps for
-      provider-health and related dashboards after DUX residual waves.
+      provider-health and related dashboards after DUX residual waves (archived
+      under audit-protocols).
 
   - id: api-reference-generated-docs
     generator: docs API reference generation workflow
