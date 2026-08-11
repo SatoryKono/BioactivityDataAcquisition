@@ -3225,6 +3225,10 @@
                     "value": "right"
                   },
                   {
+                    "id": "noValue",
+                    "value": "UNKNOWN"
+                  },
+                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text"
@@ -3241,6 +3245,10 @@
                   {
                     "id": "custom.align",
                     "value": "right"
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "UNKNOWN"
                   },
                   {
                     "id": "custom.cellOptions",

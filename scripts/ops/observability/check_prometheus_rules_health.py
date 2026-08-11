@@ -109,14 +109,10 @@ def collect_rule_issues(
                 continue
             rules_n += 1
             name = str(
-                rule.get("name")
-                or rule.get("alert")
-                or rule.get("record")
-                or "?"
+                rule.get("name") or rule.get("alert") or rule.get("record") or "?"
             )
             kind = str(
-                rule.get("type")
-                or ("alerting" if "alert" in rule else "recording")
+                rule.get("type") or ("alerting" if "alert" in rule else "recording")
             )
             health = str(rule.get("health") or "unknown")
             last_error = str(rule.get("lastError") or "").strip()

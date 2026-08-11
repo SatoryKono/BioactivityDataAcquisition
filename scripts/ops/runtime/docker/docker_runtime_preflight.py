@@ -785,7 +785,6 @@ def _findings_required_environment(
     return findings
 
 
-
 _MONITORING_RULES_DIR = Path("grafana/prometheus-rules")
 
 
@@ -834,9 +833,7 @@ def _findings_prometheus_rules_promql(root: Path) -> list[Finding]:
         "true",
         "yes",
     }
-    syntax = cpr.check_rules_syntax(
-        rule_files, root=root, prefer="auto", timeout=120.0
-    )
+    syntax = cpr.check_rules_syntax(rule_files, root=root, prefer="auto", timeout=120.0)
     if syntax["ok"]:
         return findings
 

@@ -46,6 +46,9 @@ recording_rule_metrics:
   - bioetl_processed_records_silver_quarantined_current
   - bioetl_processed_records_silver_skipped_current
   - bioetl_processed_records_silver_valid_current
+  - bioetl_prometheus_rule_evaluation_failures_10m
+  - bioetl_prometheus_rule_iterations_missed_10m
+  - bioetl_prometheus_rule_partial_error_active_10m
   - bioetl_provider_current_cause
   - bioetl_provider_current_status
   - bioetl_provider_health_check_degraded_12h

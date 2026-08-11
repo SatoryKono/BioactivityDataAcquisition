@@ -48270,7 +48270,13 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-10",
+<<<<<<< HEAD
+  "source_tree_sha256": "0a05e2a816601ae5e0d9dfcb80bc5b22f2f9359e466418d20733285ca41288a1",
+||||||| 1351959335
   "source_tree_sha256": "558369ed2fb71c0b915a03a2a63ae168e6a5211113dc9bbd8791d93b075c4944",
+=======
+  "source_tree_sha256": "b61a942bf03937adf6f749cd73885f97f993ac426d544a227d527b214956b43d",
+>>>>>>> fix/config-audit-ci-closeout
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

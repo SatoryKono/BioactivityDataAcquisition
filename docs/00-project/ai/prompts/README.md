@@ -157,6 +157,44 @@ Grok project skills (machine-local install from tracked sources):
 .\scripts\ai\grok\install_skills.ps1
 ```
 
+## Multi-domain audit workflow (Grok)
+
+Nine domain cards can be orchestrated as a Grok Build workflow:
+
+| Domain | Prompt id | Card |
+| --- | --- | --- |
+| 1 Documentation content | `prompt.audit.docs-content` | `library/audit/docs-content.md` |
+| 2 Tests system | `prompt.audit.tests-system` | `library/audit/tests-system.md` |
+| 3 Technical debt | `prompt.audit.tech-debt` | `library/audit/tech-debt.md` |
+| 4 Root / tree hygiene | `prompt.audit.repo-tree` | `library/audit/repo-tree.md` |
+| 5 GitHub Actions | `prompt.audit.github-actions` | `library/audit/github-actions.md` |
+| 6 Agents + scripts | `prompt.audit.agents-runtime` | `library/audit/agents-runtime.md` |
+| 7 Diagrams + scripts | `prompt.audit.diagrams` | `library/audit/diagrams.md` |
+| 8 Docs pipeline + scripts | `prompt.audit.docs-pipeline` | `library/audit/docs-pipeline.md` |
+| 9 Architecture | `prompt.architecture.review` | `library/architecture/review-assessment.md` |
+
+Workflow script (regenerate if missing):
+
+```powershell
+.\.venv-win\Scripts\python.exe scripts\ai\generate_project_domain_audit_workflow.py
+```
+
+Path: `.grok/workflows/project-domain-audit.rhai`
+
+Run (Grok TUI): `/workflow project-domain-audit` or workflow tool with
+`name: project-domain-audit` and args:
+
+| Arg | Default | Meaning |
+| --- | --- | --- |
+| `mode` | `audit` | `audit` \| `propose-patches` (ideas only) |
+| `language` | `ru` | operator language |
+| `domains` | `all` | or CSV: `docs-content,tech-debt,architecture` |
+| `require_gh_tracking` | `false` | issues only if true |
+| `run_id` | `project-domain-audit` | under `reports/audit/project-domain/<run_id>/` |
+
+Artifacts: per-domain `reports/audit/<domain>/` + rollup
+`reports/audit/project-domain/<run_id>/`. Agent budget: ≥10 (9 domains + synth).
+
 ## Surface types
 
 - **operator-paste** — short parameterized templates for paste into an agent session

@@ -329,9 +329,7 @@ def list_shipped_rule_files(rules_dir: Path) -> list[Path]:
     if not rules_dir.is_dir():
         return []
     return sorted(
-        p
-        for p in rules_dir.iterdir()
-        if p.is_file() and p.suffix in {".yml", ".yaml"}
+        p for p in rules_dir.iterdir() if p.is_file() and p.suffix in {".yml", ".yaml"}
     )
 
 

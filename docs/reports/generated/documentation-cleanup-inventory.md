@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2732 |
-| Tracked doc-like files | 2727 |
-| Ignored local docs/reports files | 5 |
+| Doc-like files | 2822 |
+| Tracked doc-like files | 2822 |
+| Ignored local docs/reports files | 0 |
 | Duplicate groups | 3 |
 | Generated without route or exception | 0 |
 | Generated routes | 70 |
@@ -18,8 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 5 |
-| tracked | 2727 |
+| tracked | 2822 |
 
 ## Lifecycle Counts
 
@@ -30,7 +29,7 @@
 | active_quality_baseline | 54 |
 | closeout_evidence | 87 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 8 |
+| docs_reports_curated_or_historical_report | 3 |
 | docs_reports_generated_or_route_owned | 7 |
 | docs_reports_retention_sensitive_evidence | 21 |
 | generated_skill_license_mirror | 5 |
@@ -42,7 +41,7 @@
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 21 |
-| working_report | 267 |
+| working_report | 362 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -62,7 +61,7 @@
 | Archived | 169 |
 | Canonical | 70 |
 | Generated | 1017 |
-| Working | 731 |
+| Working | 821 |
 
 ## Surface Families
 
@@ -72,14 +71,14 @@
 | archive | 169 |
 | canonical | 70 |
 | generated | 1017 |
-| working | 731 |
+| working | 821 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 320 |
-| archive-after-migration | 266 |
+| archive-after-migration | 356 |
 | generate-automatically | 1017 |
 | keep | 1125 |
 | reconcile-with-github-state | 4 |
@@ -92,11 +91,6 @@
 | `docs/reports/dashboard-ux-checks/2026-08-05.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-11.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/ai-consolidation-issue.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/diagrams-refactoring-issue.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/docs-consolidation-issue.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/memory-consolidation-issue.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/schema-refactoring-issue.md` | Working | 0 | archive-after-migration |
 | `reports/ai/agent-tools/RF005-CLOSEOUT-2026-08-09.md` | Working | 0 | archive-after-migration |
 | `reports/ai/agent-tools/compatibility/rf005-platform-matrix-2026-08-09.json` | Working | 0 | archive-after-migration |
 | `reports/ai/agent-tools/evaluation/rf005-utility-pilot-2026-08-09.json` | Working | 0 | archive-after-migration |
@@ -168,6 +162,11 @@
 | `reports/quality/coderabbit/20260806-full/_S15c-tests-residual-2.txt` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260806-full/_S15c-tests-residual-3.txt` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260806-full/_S15c-tests-residual-4.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S16b-configs-other.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S17-docs-00-project-root.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_S20-scripts-root.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_diag277_by_file.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/_diag_by_file.txt` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -335,11 +334,6 @@
 | `docs/reports/generated/pipeline_normalization_field_matrix/non_chembl_normalization_field_matrix.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.csv` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
-| `docs/reports/gh-issues/ai-consolidation-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/gh-issues/diagrams-refactoring-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/gh-issues/docs-consolidation-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/gh-issues/memory-consolidation-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/gh-issues/schema-refactoring-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/index.md` | tracked | docs_reports_curated_entrypoint | keep |
 
 ## Generated Route Registry

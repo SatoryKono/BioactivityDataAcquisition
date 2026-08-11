@@ -43,7 +43,6 @@ class FixtureHandler(BaseHTTPRequestHandler):
 
     def log_message(self, _fmt: str, *_args: object) -> None:
         # Keep stdout free of secrets; only method + path.
-        del fmt, args
         import sys
 
         print(f"[fixture] {self.command} {self.path}", file=sys.stderr)

@@ -3313,6 +3313,10 @@
                     "value": "right"
                   },
                   {
+                    "id": "noValue",
+                    "value": "UNKNOWN"
+                  },
+                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text"
@@ -3333,6 +3337,10 @@
                   {
                     "id": "custom.width",
                     "value": 110
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "UNKNOWN"
                   },
                   {
                     "id": "custom.cellOptions",
@@ -3416,6 +3424,10 @@
                   {
                     "id": "custom.align",
                     "value": "right"
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "UNKNOWN"
                   },
                   {
                     "id": "custom.cellOptions",
