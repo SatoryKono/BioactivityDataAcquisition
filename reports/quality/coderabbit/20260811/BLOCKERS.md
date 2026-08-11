@@ -547,3 +547,19 @@ Each entry requires GitHub reconciliation before closeout.
 - Detail: CodeRabbit exit code 1
 - GitHub issue: pending reconciliation
 
+## S01-domain-mapping — error
+
+- UTC: `2026-08-11T10:38:56.342572+00:00`
+- Wave: `A`
+- Files: `15`
+- Detail: CodeRabbit exit code 1
+- GitHub issue: pending reconciliation
+
+## S01-domain-models — error
+
+- UTC: `2026-08-11T10:39:05.968020+00:00`
+- Wave: `A`
+- Files: `7`
+- Detail: CodeRabbit exit code 1
+- GitHub issue: pending reconciliation
+
