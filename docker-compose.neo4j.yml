@@ -66,9 +66,7 @@ volumes:
   neo4j_logs:
 
 networks:
-  # Shared with main. Not external: compose creates if missing, reuses if present.
+  # Shared with main. external:true — create via ensure-networks before up.
   runtime:
     name: bioetl-runtime
-    driver: bridge
-    labels:
-      com.bioetl.owner: scripts/ops/runtime/docker/runtime_manager.py
+    external: true
