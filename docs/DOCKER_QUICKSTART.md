@@ -192,6 +192,11 @@ Hardening defaults on this host class:
 | `%USERPROFILE%\.wslconfig` `memory` | **6 GiB** (not 16) |
 | main `bioetl` mem_limit | **768 m** (health server only) |
 | neo4j mem_limit / heap max | **768 m** / **384 m** |
+| monitoring `prometheus` mem_limit | **3 g** (was 10 g; TSDB 7d / 2 GB) |
+| monitoring `grafana` mem_limit | **2 g** (was 7.5 g) |
+| monitoring `renderer` mem_limit | **3 g** (was 15 g); concurrency **1** (was 2) |
+| monitoring `pushgateway` mem_limit | **512 m** (was 2.5 g) |
+| monitoring peak cgroup budget | **~8.5 g** (not ~32 g) |
 | default surface | main (+ optional neo4j); monitoring opt-in |
 
 Rules:
