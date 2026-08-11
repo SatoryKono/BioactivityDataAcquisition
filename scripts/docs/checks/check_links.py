@@ -1413,9 +1413,9 @@ def _run_selected_checks(
     return violations, checks_run
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     explicit_checks = (
         args.links
