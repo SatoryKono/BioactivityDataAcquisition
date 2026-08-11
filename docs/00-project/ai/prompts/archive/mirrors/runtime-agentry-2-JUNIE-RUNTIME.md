@@ -1,3 +1,9 @@
+---
+status: archived
+class: mirror
+note: Runtime snapshot only — not paste SSOT. Prefer .codex/** / .junie/** / .devin/**. Epic #8513 / #8517.
+---
+
 # JUNIE-RUNTIME.md — Runtime Map For BioETL Agents (JetBrains Junie)
 
 ## Evaluation Metadata
