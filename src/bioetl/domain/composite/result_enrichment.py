@@ -48,10 +48,15 @@ class EnrichmentResult:
         )
 
     def _validate_rates_and_duration(self) -> None:
-        if 0.0 <= self.dq_error_rate <= 1.0:
-            self._require_non_negative("duration_seconds", self.duration_seconds)
-            return
-        raise ValueError(f"dq_error_rate must be 0.0-1.0, got {self.dq_error_rate}")
+        import math
+
+        if not (0.0 <= self.dq_error_rate <= 1.0):
+            raise ValueError(f"dq_error_rate must be 0.0-1.0, got {self.dq_error_rate}")
+        if not math.isfinite(self.duration_seconds):
+            raise ValueError(
+                f"duration_seconds must be finite, got {self.duration_seconds}"
+            )
+        self._require_non_negative("duration_seconds", self.duration_seconds)
 
     def __post_init__(self) -> None:
         """Validate result invariants."""
@@ -64,6 +69,7 @@ class EnrichmentResult:
             self._require_non_negative(name, value)
         self._require_bounded_by_input("records_enriched", self.records_enriched)
         self._require_bounded_by_input("records_not_found", self.records_not_found)
+        self._require_bounded_by_input("records_errored", self.records_errored)
         self._validate_rates_and_duration()
 
     @property

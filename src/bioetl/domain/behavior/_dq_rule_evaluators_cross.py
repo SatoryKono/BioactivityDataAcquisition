@@ -72,7 +72,12 @@ def _conditional_required_rule_violated(
 ) -> bool:
     del present_count
     if rule.trigger_field is None or rule.required_field is None:
-        return True
+        from bioetl.domain.exceptions import ValidationError
+
+        raise ValidationError(
+            "conditional_required rule requires trigger_field and required_field",
+            field="cross_field_validation",
+        )
     if not _is_present(record.get(rule.trigger_field)):
         return False
     return not _is_present(record.get(rule.required_field))
