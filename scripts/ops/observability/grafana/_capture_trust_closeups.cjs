@@ -5,7 +5,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const { pathToFileURL } = require("node:url");
 
 const UID = "bioetl-control-plane-v1";
 const SLUG = "0-trust";
@@ -27,7 +26,10 @@ function arg(name, fallback = "") {
 async function main() {
   const baseUrl = arg("--base-url", process.env.GRAFANA_BASE_URL || "http://localhost:3000");
   const outputDir = path.resolve(
-    arg("--output-dir", "reports/observability/grafana/visual-baseline-20260811/trust-validation-closeups"),
+    arg(
+      "--output-dir",
+      "reports/observability/grafana/visual-baseline-20260811/trust-validation-closeups",
+    ),
   );
   const width = Number.parseInt(arg("--width", "1920"), 10);
   const height = Number.parseInt(arg("--height", "900"), 10);
@@ -44,7 +46,11 @@ async function main() {
     "";
   const token = process.env.GRAFANA_SERVICE_ACCOUNT_TOKEN || "";
 
-  const localNm = path.join(process.env.LOCALAPPDATA || "", "bioetl-playwright", "node_modules");
+  const localNm = path.join(
+    process.env.LOCALAPPDATA || "",
+    "bioetl-playwright",
+    "node_modules",
+  );
   if (fs.existsSync(path.join(localNm, "playwright", "package.json"))) {
     module.paths.unshift(localNm);
   }
@@ -62,7 +68,9 @@ async function main() {
   const page = await context.newPage();
   page.setDefaultTimeout(120000);
 
-  await page.goto(`${baseUrl.replace(/\/$/, "")}/login`, { waitUntil: "domcontentloaded" });
+  await page.goto(`${baseUrl.replace(/\/$/, "")}/login`, {
+    waitUntil: "domcontentloaded",
+  });
   if (page.url().toLowerCase().includes("login") && password) {
     await page.fill('input[name="user"]', username);
     await page.fill('input[name="password"]', password);
@@ -74,17 +82,21 @@ async function main() {
   for (const panelId of PANEL_IDS) {
     const url =
       `${baseUrl.replace(/\/$/, "")}/d/${UID}/${SLUG}` +
-      `?orgId=1&theme=${theme}&kiosk=1&from=now-12h&to=now&timezone=UTC&refresh=off&viewPanel=${panelId}`;
+      `?orgId=1&theme=${theme}&kiosk=1&from=now-12h&to=now&timezone=UTC&refresh=off` +
+      `&var-pipeline=${encodeURIComponent(pipeline)}` +
+      `&var-run_type=${encodeURIComponent(runType)}` +
+      `&var-run_id=${encodeURIComponent(runId)}` +
+      `&viewPanel=${panelId}`;
     await page.goto(url, { waitUntil: "domcontentloaded" });
-    await page.waitForTimeout(8000);
+    await page.waitForTimeout(10000);
     await page
       .waitForSelector(
         '[data-testid^="data-testid Panel header"], .panel-content, canvas, table',
         { timeout: 30000 },
       )
       .catch(() => {});
-    await page.waitForTimeout(4000);
-    const file = `trust-panel-${panelId}-closeup.png`;
+    await page.waitForTimeout(5000);
+    const file = `trust-panel-${panelId}-${state}-closeup.png`;
     const filePath = path.join(outputDir, file);
     await page.screenshot({ path: filePath, fullPage: false });
     const buf = fs.readFileSync(filePath);
@@ -109,13 +121,15 @@ async function main() {
     issue: "#8576",
     related_issue: "#8578",
     uid: UID,
-    capture_state: 	rust-validation-panel-closeups:,
+    capture_state: `trust-validation-panel-closeups:${state}`,
     generated_at: new Date().toISOString(),
     viewport: { width, height, theme, kiosk: "full", viewPanel: true },
+    fixture_state: state,
+    selector: { pipeline, run_type: runType, run_id: runId },
     screenshots: shots,
     notes: [
       "Close-ups via Grafana viewPanel solo mode.",
-      "Default range selector; populated/empty/QUERY_ERROR variants need controlled data fixtures.",
+      "When Ops HTTP points at serve_trust_validation_fixtures.py, state comes from .active_state.",
     ],
   };
   fs.writeFileSync(
