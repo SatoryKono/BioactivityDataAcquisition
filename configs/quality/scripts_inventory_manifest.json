@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-11T08:46:03.402347+00:00",
+  "generated_at": "2026-08-11T09:45:38.080752+00:00",
   "summary": {
-    "total_scripts": 587,
+    "total_scripts": 590,
     "status_counts": {
-      "active": 338,
+      "active": 341,
       "supporting": 245,
       "temporary_diagnostic": 4
     },
@@ -12,11 +12,11 @@
       "agents": 4,
       "build": 16,
       "ci": 81,
-      "docs": 250,
-      "other": 75,
-      "scripts": 487,
+      "docs": 254,
+      "other": 77,
+      "scripts": 489,
       "skills": 11,
-      "tests": 375
+      "tests": 377
     }
   },
   "scripts": [
@@ -10066,7 +10066,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 233,
+      "reference_count": 234,
       "references": [
         {
           "path": "docs/00-project/ai/agents/scripts/py-config-bot-1.py",
@@ -10824,31 +10824,31 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 825,
+          "line": 830,
           "source_group": "docs",
           "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 844,
+          "line": 849,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh \\"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 935,
+          "line": 940,
           "source_group": "docs",
           "text": "| 5   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream` | Выполнить ускоренный coverage/sharded прогон |"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 936,
+          "line": 941,
           "source_group": "docs",
           "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 973,
+          "line": 978,
           "source_group": "docs",
           "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded"
         }
@@ -12473,7 +12473,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/docker_runtime_preflight.py",
-          "line": 806,
+          "line": 805,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa import check_prometheus_rules as cpr"
         },
@@ -15198,8 +15198,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 608,
+          "source_group": "docs",
+          "text": "`python scripts/engineering/qa/report_vcr_cassette_census.py`; результат в"
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
@@ -15772,7 +15779,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 877,
+          "line": 882,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         },
@@ -15823,7 +15830,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 878,
+          "line": 883,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-naming`"
         },
@@ -15874,7 +15881,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 883,
+          "line": 888,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90`"
         },
@@ -18391,6 +18398,33 @@
       ]
     },
     {
+      "path": "scripts/ops/observability/check_prometheus_rules_health.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "docs/DOCKER_QUICKSTART.md",
+          "line": 153,
+          "source_group": "docs",
+          "text": "python scripts/ops/observability/check_prometheus_rules_health.py --json"
+        },
+        {
+          "path": "scripts/ops/observability/validate_live_observability.py",
+          "line": 154,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.check_prometheus_rules_health import ("
+        },
+        {
+          "path": "tests/unit/scripts/ops/test_check_prometheus_rules_health.py",
+          "line": 9,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability import check_prometheus_rules_health as mod"
+        }
+      ]
+    },
+    {
       "path": "scripts/ops/observability/check_published_observability_endpoints.py",
       "type": "py",
       "status": "active",
@@ -18743,7 +18777,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 152,
+          "line": 162,
           "source_group": "other",
           "text": "> `bash scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh`."
         }
@@ -18891,8 +18925,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "grafana/README.md",
+          "line": 56,
+          "source_group": "other",
+          "text": "`python scripts/ops/observability/grafana/generate_trust_validation_fixtures.py`"
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
@@ -18903,19 +18944,13 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 290,
+          "line": 350,
           "source_group": "docs",
-          "text": "2. `.\\scripts\\ops\\observability\\grafana\\recover_renderer.ps1` (or `.sh`)"
-        },
-        {
-          "path": "scripts/ops/observability/grafana/recover_renderer.sh",
-          "line": 3,
-          "source_group": "scripts",
-          "text": "# See recover_renderer.ps1 for the full strategy."
+          "text": "# .\\scripts\\ops\\observability\\grafana\\recover_renderer.ps1"
         },
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
@@ -18928,6 +18963,51 @@
       "lifecycle_decision": "windows_compatibility_wrapper",
       "review_by": "2026-09-30",
       "next_step": "Retain as the Windows compatibility wrapper for optional renderer-only recovery; keep the canonical recovery behavior in the platform-neutral observability workflow."
+    },
+    {
+      "path": "scripts/ops/observability/grafana/recover_renderer.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": "docs/DOCKER_QUICKSTART.md",
+          "line": 346,
+          "source_group": "docs",
+          "text": "python scripts/ops/observability/grafana/recover_renderer.py"
+        },
+        {
+          "path": "docs/DOCKER_QUICKSTART.md",
+          "line": 352,
+          "source_group": "docs",
+          "text": "3. Check only: `python scripts/ops/observability/grafana/recover_renderer.py --check-only`"
+        },
+        {
+          "path": "scripts/ops/observability/grafana/recover_renderer.ps1",
+          "line": 42,
+          "source_group": "scripts",
+          "text": "& $py scripts/ops/observability/grafana/recover_renderer.py `"
+        },
+        {
+          "path": "scripts/ops/observability/grafana/recover_renderer.sh",
+          "line": 16,
+          "source_group": "scripts",
+          "text": "exec \"${PY}\" scripts/ops/observability/grafana/recover_renderer.py \\"
+        },
+        {
+          "path": "scripts/ops/runtime/docker/runtime_manager.py",
+          "line": 1723,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana import recover_renderer as rr"
+        },
+        {
+          "path": "tests/unit/scripts/ops/test_recover_renderer.py",
+          "line": 11,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana import recover_renderer as rr"
+        }
+      ]
     },
     {
       "path": "scripts/ops/observability/grafana/recover_renderer.sh",
@@ -18957,7 +19037,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 154,
+          "line": 164,
           "source_group": "other",
           "text": "> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1`."
         }
@@ -19185,8 +19265,15 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "grafana/README.md",
+          "line": 58,
+          "source_group": "other",
+          "text": "`scripts/ops/observability/grafana/run_trust_fixture_closeup_matrix.ps1`."
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "windows_compatibility_wrapper",
       "review_by": "2026-09-30",
@@ -19226,7 +19313,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 138,
+          "line": 148,
           "source_group": "other",
           "text": "> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1`."
         },
@@ -19269,7 +19356,7 @@
         },
         {
           "path": "grafana/README.md",
-          "line": 129,
+          "line": 139,
           "source_group": "other",
           "text": "> `bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh`."
         },
@@ -19344,6 +19431,21 @@
       ]
     },
     {
+      "path": "scripts/ops/observability/trust_validation_fixture_materialization.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/observability/grafana/generate_trust_validation_fixtures.py",
+          "line": 33,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.trust_validation_fixture_materialization import ("
+        }
+      ]
+    },
+    {
       "path": "scripts/ops/observability/validate_emitter_contracts.py",
       "type": "py",
       "status": "supporting",
@@ -19367,7 +19469,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/ISSUES/AUD-OBS-20260714-001-Complete-Application-Level-Observability-Validation.md",
@@ -19380,6 +19482,12 @@
           "line": 14,
           "source_group": "other",
           "text": "- `scripts/ops/observability/validate_live_observability.py`"
+        },
+        {
+          "path": "docs/DOCKER_QUICKSTART.md",
+          "line": 155,
+          "source_group": "docs",
+          "text": "python scripts/ops/observability/validate_live_observability.py"
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_validate_live_observability.py",
@@ -19561,13 +19669,13 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 229,
+          "line": 281,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\apply-docker-stable-mcp.ps1 -Profile stable -WithNeo4j"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 238,
+          "line": 290,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\apply-docker-stable-mcp.ps1 -Profile shared -TransportMode shared -WithSharedMcp -SkipEnsureStable"
         }
@@ -19641,7 +19749,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 230,
+          "line": 282,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\cleanup-mcp-orphans.ps1 -IncludeGatewayHint"
         },
@@ -19715,10 +19823,10 @@
           "text": "PREFLIGHT_PATH = ROOT / \"scripts/ops/runtime/docker/docker_runtime_preflight.py\""
         },
         {
-          "path": "tests/unit/repo_backed/scripts/ops/docker/test_preflight_promql_gate.py",
-          "line": 9,
+          "path": "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
+          "line": 522,
           "source_group": "tests",
-          "text": "from scripts.ops.runtime.docker import docker_runtime_preflight as preflight"
+          "text": "if \"docker_runtime_preflight.py\" in joined:"
         }
       ]
     },
@@ -19786,13 +19894,13 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 220,
+          "line": 272,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\ensure-stable.ps1 -WithNeo4j"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 223,
+          "line": 275,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\ensure-stable.ps1 -RestartWsl -WithNeo4j"
         },
@@ -19825,13 +19933,13 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 226,
+          "line": 278,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\harden-desktop-host.ps1 -RegisterWatchdog"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 245,
+          "line": 297,
           "source_group": "docs",
           "text": "`harden-desktop-host.ps1` sets Resource Saver effectively off"
         },
@@ -19920,7 +20028,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 233,
+          "line": 285,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\reset-mcp-host-sessions.ps1"
         }
@@ -19969,7 +20077,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 203,
+          "line": 255,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\restart-docker.ps1 -TimeoutSeconds 180"
         },
@@ -20087,7 +20195,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 133,
+          "line": 176,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay"
         },
@@ -20213,7 +20321,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 240,
+          "line": 292,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\apply-shared-to-grok.ps1 -DisableDockerGateways"
         },
@@ -20268,7 +20376,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 239,
+          "line": 291,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\health-shared.ps1"
         },
@@ -20368,7 +20476,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 237,
+          "line": 289,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\start-shared.ps1"
         },

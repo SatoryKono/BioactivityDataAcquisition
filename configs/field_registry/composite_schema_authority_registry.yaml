@@ -1,5 +1,5 @@
-version: "1.0.0"
-reviewed_on: "2026-05-19"
+version: "1.1.0"
+reviewed_on: "2026-08-11"
 owner: BioETL Team
 
 authorities:
@@ -48,3 +48,19 @@ authorities:
       - composite_activity
     field_types:
       taxonomy_id: int64
+
+  - id: publication_provider_gold_contracts
+    owner: BioETL Team
+    rationale: >
+      Composite publication preserves Semantic Scholar corpus_id as a decimal
+      string at the Gold boundary. This avoids precision loss for provider
+      identifiers while the upstream Silver field remains an int64 transport
+      representation.
+    evidence_paths:
+      - src/bioetl/domain/contracts/gold/publications_semanticscholar.py
+      - docs/04-reference/contracts/gold/semanticscholar_publication_v1.0.json
+      - configs/composites/field_groups/publication.yaml
+    pipelines:
+      - composite_publication
+    field_types:
+      corpus_id: string

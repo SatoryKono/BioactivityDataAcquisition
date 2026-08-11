@@ -603,6 +603,11 @@ bash scripts/engineering/dev/run_pytest.sh tests/architecture/test_domain_unit_t
 - **Compatibility Policy**: `pytest-vcr` должен импортироваться против locked `wrapt` dependency из активного окружения. Repo-root workaround'ы вроде `wrapt/` или `sitecustomize.py` не считаются поддерживаемым fix path; если импорт ломается, нужно чинить environment/lock, а не shadowing dependency.
 - **Fixture Governance**: `_meta.yaml` sidecars и stale-age policy находятся в `enforced` rollout. Managed VCR inventory покрывается repo-wide sidecars, canonical catalog, и CI stale-age checks.
 - **Catalog / Backfill Policy**: canonical VCR metadata catalog и canonical backfill script являются обязательным governance path; drift по missing sidecars, age, или catalog sync теперь считается blocking.
+- **Conservative cassette census**: перед owner-reviewed cleanup сформируйте
+  список кандидатов командой
+  `python scripts/engineering/qa/report_vcr_cassette_census.py`; результат в
+  `reports/quality/vcr-cassette-census.json` не является разрешением на
+  удаление кассет.
 - **Live Contract Baseline**: live-network enforcement обязателен для `chembl`, `pubchem`, `uniprot`, `pubmed`, `crossref`, `openalex`, `semanticscholar`; richer pilot-soak coverage for Semantic Scholar remains opt-in and does not redefine the enforced baseline.
 
 #### 2.2.1. Supported integration families

@@ -1126,7 +1126,7 @@ def test_ensure_networks_action_creates_all_shared_nets(
             {
                 "stacks": {
                     "main": {
-                        "project": "bioetl-main",
+                        "project_name": "bioetl-main",
                         "compose_file": "docker-compose.yml",
                         "required_services": ["bioetl"],
                         "expected_images": {"bioetl": "bioetl:local"},

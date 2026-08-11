@@ -12,6 +12,7 @@ Each entry requires GitHub reconciliation before closeout.
 - Resolution: retain the empty commit as local branch `main`, persist
   `coderabbit.baseBranch=main`, and invoke `--base main`.
 - GitHub issue: N/A — resolved launcher setup error; no product scope was reviewed.
+
 ## S01-domain-control_plane — rate_limit
 
 - UTC: `2026-08-11T09:40:42.031056+00:00`
@@ -19,6 +20,7 @@ Each entry requires GitHub reconciliation before closeout.
 - Files: `32`
 - Detail: CodeRabbit rate limit
 - GitHub issue: [#8603](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8603)
+
 ## S01-domain-control_plane — error
 
 - UTC: `2026-08-11T09:51:48.084492+00:00`
@@ -507,67 +509,74 @@ Each entry requires GitHub reconciliation before closeout.
 - Detail: CodeRabbit exit code 1
 - GitHub issue: pending reconciliation
 
-## S01-domain-control_plane — error
+## S-R-catchall-05 — error
 
-- UTC: `2026-08-11T10:38:04.283289+00:00`
-- Wave: `A`
-- Files: `32`
+- UTC: `2026-08-11T10:48:08.060793+00:00`
+- Wave: `R`
+- Files: `57`
 - Detail: CodeRabbit exit code 1
 - GitHub issue: pending reconciliation
 
-## S01-domain-entities — error
+## S-R-catchall-06 — error
 
-- UTC: `2026-08-11T10:38:15.407976+00:00`
-- Wave: `A`
-- Files: `28`
+- UTC: `2026-08-11T10:48:17.438227+00:00`
+- Wave: `R`
+- Files: `63`
 - Detail: CodeRabbit exit code 1
 - GitHub issue: pending reconciliation
 
-## S01-domain-exceptions — error
+## S-R-docs-02-architecture-01 — error
 
-- UTC: `2026-08-11T10:38:26.247626+00:00`
-- Wave: `A`
-- Files: `24`
+- UTC: `2026-08-11T10:48:30.001231+00:00`
+- Wave: `R`
+- Files: `300`
 - Detail: CodeRabbit exit code 1
 - GitHub issue: pending reconciliation
 
-## S01-domain-filtering — error
+## S-R-docs-02-architecture-02 — error
 
-- UTC: `2026-08-11T10:38:36.033923+00:00`
-- Wave: `A`
-- Files: `13`
+- UTC: `2026-08-11T10:48:40.099403+00:00`
+- Wave: `R`
+- Files: `300`
 - Detail: CodeRabbit exit code 1
 - GitHub issue: pending reconciliation
 
-## S01-domain-lineage — error
+## S-R-docs-02-architecture-03 — error
 
-- UTC: `2026-08-11T10:38:46.018572+00:00`
-- Wave: `A`
-- Files: `6`
+- UTC: `2026-08-11T10:48:50.573484+00:00`
+- Wave: `R`
+- Files: `300`
 - Detail: CodeRabbit exit code 1
 - GitHub issue: pending reconciliation
 
-## S01-domain-mapping — error
+## S-R-docs-02-architecture-04 — error
 
-- UTC: `2026-08-11T10:38:56.342572+00:00`
-- Wave: `A`
-- Files: `15`
+- UTC: `2026-08-11T10:49:01.038511+00:00`
+- Wave: `R`
+- Files: `300`
 - Detail: CodeRabbit exit code 1
 - GitHub issue: pending reconciliation
 
-## S01-domain-models — error
+## S-R-docs-02-architecture-05 — error
 
-- UTC: `2026-08-11T10:39:05.968020+00:00`
-- Wave: `A`
-- Files: `7`
+- UTC: `2026-08-11T10:49:10.530387+00:00`
+- Wave: `R`
+- Files: `93`
 - Detail: CodeRabbit exit code 1
 - GitHub issue: pending reconciliation
 
-## S01-domain-transformations — error
+## S-R-docs-04-reference-01 — error
 
-- UTC: `2026-08-11T10:40:19.687610+00:00`
-- Wave: `A`
-- Files: `5`
+- UTC: `2026-08-11T10:49:20.941380+00:00`
+- Wave: `R`
+- Files: `300`
 - Detail: CodeRabbit exit code 1
 - GitHub issue: pending reconciliation
 
+## S-R-docs-04-reference-02 — error
+
+- UTC: `2026-08-11T10:49:30.278504+00:00`
+- Wave: `R`
+- Files: `41`
+- Detail: CodeRabbit exit code 1
+- GitHub issue: pending reconciliation

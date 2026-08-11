@@ -333,8 +333,6 @@ def test_load_source_config_from_unified_provider_file(tmp_path, monkeypatch):
         "version": "1.0.0",
         "provider": "chembl",
         "source": {
-            "type": "api",
-            "load_strategy": "full",
             "provider_config": {
                 "provider": "chembl",
                 "base_url": "https://example.chembl/api",
@@ -397,8 +395,8 @@ def test_load_source_config_rejects_retired_transport_alias_sections_pubmed(
         load_source_config("pubmed_legacy")
 
 
-def test_normalize_source_config_maps_rate_limit_and_timeout_aliases() -> None:
-    """Normalizer should map old/new aliases for rate-limit and timeout keys."""
+def test_normalize_source_config_canonicalizes_rate_limit_and_timeout_aliases() -> None:
+    """Normalizer should emit canonical rate-limit and timeout keys only."""
     raw = {
         "source": {
             "provider_config": {
@@ -410,15 +408,17 @@ def test_normalize_source_config_maps_rate_limit_and_timeout_aliases() -> None:
                 "requests_per_second": 5.0,
                 "with_api_key": {"requests_per_second": 8.0, "burst": 20},
             },
-            "health_check": {"endpoint": "/health", "timeout": 9},
         }
     }
 
     normalized = normalize_source_config(raw)
     source = normalized["source"]
 
-    assert source["rate_limit"]["authenticated"] == source["rate_limit"]["with_api_key"]
-    assert source["health_check"]["timeout_sec"] == 9
+    assert "authenticated" not in source["rate_limit"]
+    assert source["rate_limit"]["with_api_key"] == {
+        "requests_per_second": 8.0,
+        "burst": 20,
+    }
     assert source["provider_config"]["client"]["timeout_sec"] == pytest.approx(42.0)
     assert source["provider_config"]["pagination"]["id_batch_size"] == 30
 
@@ -743,7 +743,7 @@ def test_load_source_section_reuses_canonical_source_loader(
 
     config = {
         "provider": "chembl",
-        "source": {"rate_limit": {"requests_per_second": 999}},
+        "source": {},
     }
     config_path = tmp_path / "configs" / "entities" / "chembl" / "activity.yaml"
     config_path.parent.mkdir(parents=True, exist_ok=True)
@@ -769,7 +769,6 @@ def test_load_source_section_reuses_canonical_source_loader(
 
     _load_source_section(config, config_path)
 
-    assert config["source"]["rate_limit"]["requests_per_second"] == 999
     assert config["source"]["provider_config"]["provider"] == "chembl"
 
 
@@ -792,15 +791,23 @@ def test_load_source_section_reuses_canonical_source_loader(
             {"batch": {"page_size": 999}},
             "source.batch",
         ),
+        (
+            {"rate_limit": {"requests_per_second": 999}},
+            "source.rate_limit",
+        ),
+        (
+            {"circuit_breaker": {"failure_threshold": 999}},
+            "source.circuit_breaker",
+        ),
     ],
 )
-def test_load_source_section_rejects_pipeline_source_pagination_overrides(
+def test_load_source_section_rejects_pipeline_source_transport_overrides(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path,
     source_override: dict[str, Any],
     expected_fragment: str,
 ) -> None:
-    """Pipeline source merges must reject direct pagination override seams."""
+    """Pipeline source merges must reject provider-owned transport overrides."""
     from bioetl.infrastructure.config.pipeline_payload_normalization import (
         load_source_section as _load_source_section,
     )
