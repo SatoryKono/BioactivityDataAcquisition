@@ -1424,6 +1424,18 @@
       "review_by": "2026-09-30",
       "next_step": "Retain only as a one-off DUX7 live residual dashboard migration helper for auditability; retire it after the live review protocol is complete and the generated evidence becomes the durable record."
     },
+    "scripts/ops/observability/grafana/generate_trust_validation_fixtures.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the Trust/control-plane fixture generator for offline Grafana visual validation; promote to a governed scripts.ops command only after CI ownership and deterministic regression coverage are established."
+    },
+    "scripts/ops/observability/grafana/run_trust_fixture_closeup_matrix.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the Windows-side close-up capture matrix runner for Trust fixture HTML states; retire once capture is folded into a cross-platform governed observability command."
+    },
     "scripts/ops/observability/grafana/generate_dux4_issue_pack.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",

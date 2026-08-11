@@ -42,11 +42,12 @@ class FixtureHandler(BaseHTTPRequestHandler):
 
     def log_message(self, fmt: str, *args: object) -> None:
         # Keep stdout free of secrets; only method + path.
+        del fmt, args
         import sys
 
         print(f"[fixture] {self.command} {self.path}", file=sys.stderr)
 
-    def do_GET(self) -> None:  # noqa: N802
+    def do_GET(self) -> None:
         parsed = urlparse(self.path)
         path = parsed.path.rstrip("/")
         prefix = "/ops/control-plane/"
