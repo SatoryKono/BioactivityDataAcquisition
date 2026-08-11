@@ -415,11 +415,14 @@
       "status": "pass"
     },
     {
-      "current": 0,
+      "current": {
+        "artifacts": [],
+        "count": 0
+      },
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
-      "remediation": "Regenerate stale quality artifacts with their canonical QA commands.",
+      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: none",
       "source_artifact": "reports/quality/*.json",
       "status": "pass"
     }
