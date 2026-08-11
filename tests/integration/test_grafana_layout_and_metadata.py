@@ -839,8 +839,7 @@ def test_short_table_panels_use_compact_cell_height() -> None:
 
     assert short_tables, "expected at least one short table panel in shipped dashboards"
     assert not violations, (
-        "short tables (h≤6) must set options.cellHeight='sm':\n"
-        + "\n".join(violations)
+        "short tables (h≤6) must set options.cellHeight='sm':\n" + "\n".join(violations)
     )
 
 
@@ -851,11 +850,7 @@ def test_dq_ultra_short_timeseries_hides_legend() -> None:
     """
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     panel = next(
-        (
-            item
-            for item in get_dashboard_panels(dashboard)
-            if item.get("id") == 153
-        ),
+        (item for item in get_dashboard_panels(dashboard) if item.get("id") == 153),
         None,
     )
     assert panel is not None, "DQ panel 153 must exist"

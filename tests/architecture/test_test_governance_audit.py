@@ -413,9 +413,10 @@ def test_test_file_inventory_is_independent_of_pycache(tmp_path: Path) -> None:
 
     assert with_cache == without_cache
     assert "tests/__pycache__/" not in with_cache["top_level_directories"]
-    assert "tests/__pycache__/" not in with_cache[
-        "top_level_directories_including_pycache"
-    ]
+    assert (
+        "tests/__pycache__/"
+        not in with_cache["top_level_directories_including_pycache"]
+    )
 
 
 @pytest.mark.architecture
