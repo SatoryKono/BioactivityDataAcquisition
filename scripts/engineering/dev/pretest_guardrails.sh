@@ -62,37 +62,51 @@ EOF
     return 0
 }
 
+python_runtime_usable() {
+    local candidate="$1"
+    "$candidate" -c 'import yaml' >/dev/null 2>&1
+}
+
 require_python() {
     if [[ -n "$PYTHON_BIN" ]]; then
         printf '%s\n' "$PYTHON_BIN"
         return 0
     fi
-    if [[ -n "${BIOETL_PYTEST_RUNTIME_PYTHON:-}" && -x "${BIOETL_PYTEST_RUNTIME_PYTHON:-}" ]]; then
+    if [[ -n "${BIOETL_PYTEST_RUNTIME_PYTHON:-}" ]]; then
+        if [[ ! -x "$BIOETL_PYTEST_RUNTIME_PYTHON" ]]; then
+            echo "[pretest-guardrails][error] BIOETL_PYTEST_RUNTIME_PYTHON is not executable: $BIOETL_PYTEST_RUNTIME_PYTHON" >&2
+            return 1
+        fi
+        if ! python_runtime_usable "$BIOETL_PYTEST_RUNTIME_PYTHON"; then
+            echo "[pretest-guardrails][error] BIOETL_PYTEST_RUNTIME_PYTHON cannot import required module 'yaml': $BIOETL_PYTEST_RUNTIME_PYTHON" >&2
+            return 1
+        fi
         PYTHON_BIN="$BIOETL_PYTEST_RUNTIME_PYTHON"
         printf '%s\n' "$PYTHON_BIN"
         return 0
     fi
-    if [[ -x "${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" ]]; then
-        PYTHON_BIN="${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python"
-        printf '%s\n' "$PYTHON_BIN"
-        return 0
-    fi
-    if [[ -x ".venv/bin/python" ]]; then
+    if [[ -x ".venv/bin/python" ]] && python_runtime_usable ".venv/bin/python"; then
         PYTHON_BIN=".venv/bin/python"
         printf '%s\n' "$PYTHON_BIN"
         return 0
     fi
-    if command -v python3 >/dev/null 2>&1; then
+    local wsl_candidate="${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python"
+    if [[ -x "$wsl_candidate" ]] && python_runtime_usable "$wsl_candidate"; then
+        PYTHON_BIN="$wsl_candidate"
+        printf '%s\n' "$PYTHON_BIN"
+        return 0
+    fi
+    if command -v python3 >/dev/null 2>&1 && python_runtime_usable "$(command -v python3)"; then
         PYTHON_BIN="python3"
         printf '%s\n' "$PYTHON_BIN"
         return 0
     fi
-    if command -v python >/dev/null 2>&1; then
+    if command -v python >/dev/null 2>&1 && python_runtime_usable "$(command -v python)"; then
         PYTHON_BIN="python"
         printf '%s\n' "$PYTHON_BIN"
         return 0
     fi
-    echo "[pretest-guardrails][error] Python runtime is not available." >&2
+    echo "[pretest-guardrails][error] No Python runtime can import required module 'yaml'." >&2
     return 1
 }
 
@@ -196,7 +210,6 @@ if isinstance(value, bool):
 else:
     print(value)
 PY
-    return 0
 }
 
 config_architecture_targets() {
