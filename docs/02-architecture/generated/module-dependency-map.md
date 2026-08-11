@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `2411`
-- Internal import edges (raw): `7512`
+- Internal import edges (raw): `7513`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `320`
@@ -26,7 +26,7 @@ flowchart LR
     composition -->|161 OK| application
     composition -->|671 OK| composition
     composition -->|280 OK| domain
-    composition -->|232 OK| infrastructure
+    composition -->|233 OK| infrastructure
     domain -->|1195 OK| domain
     infrastructure -->|754 OK| domain
     infrastructure -->|1178 OK| infrastructure
@@ -45,7 +45,7 @@ flowchart LR
 | `composition`    | `application`    |     161 | allowed |
 | `composition`    | `composition`    |     671 | allowed |
 | `composition`    | `domain`         |     280 | allowed |
-| `composition`    | `infrastructure` |     232 | allowed |
+| `composition`    | `infrastructure` |     233 | allowed |
 | `domain`         | `domain`         |    1195 | allowed |
 | `infrastructure` | `domain`         |     754 | allowed |
 | `infrastructure` | `infrastructure` |    1178 | allowed |
@@ -80,7 +80,7 @@ flowchart LR
 | `composition.bootstrap`        | `domain.ports`                             |      27 |
 | `composition.factories`        | `infrastructure.adapters`                  |      27 |
 | `composition.runtime_builders` | `domain.control_plane`                     |      27 |
-| `composition.factories`        | `infrastructure.config`                    |      25 |
+| `composition.factories`        | `infrastructure.config`                    |      26 |
 | `infrastructure.config`        | `domain.types`                             |      25 |
 | `infrastructure.control_plane` | `domain.control_plane`                     |      24 |
 | `application.services`         | `domain.value_objects`                     |      23 |
