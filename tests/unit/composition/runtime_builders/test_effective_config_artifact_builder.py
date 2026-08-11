@@ -131,6 +131,12 @@ def test_build_effective_config_source_refs_persists_semantic_and_raw_source_has
         compute_canonical_yaml_sha256(entity_quality.read_bytes()),
         compute_canonical_yaml_sha256(contract_registry.read_bytes()),
     ]
+    assert {ref.source_hash_version for ref in refs} == {
+        "canonical-yaml-sha256-v1"
+    }
+    assert {ref.raw_source_hash_version for ref in refs} == {
+        "raw-bytes-sha256-v1"
+    }
 
 
 def test_build_effective_config_source_refs_include_dependency_provenance_files(
@@ -516,6 +522,14 @@ def test_effective_config_source_refs_ignore_yaml_formatting_for_semantic_identi
 
     assert artifact_left.source_fingerprint == artifact_right.source_fingerprint
     assert artifact_left.artifact_id == artifact_right.artifact_id
+    assert artifact_left.resolved_config_hash == artifact_right.resolved_config_hash
+    assert artifact_left.effective_config_hash == artifact_right.effective_config_hash
+    assert artifact_left.schema_version == "2.0"
+    assert artifact_left.resolved_config.identity_version == "resolved-config-v1"
+    assert (
+        artifact_left.effective_execution_config.identity_version
+        == "effective-config-v1"
+    )
 
 
 def test_effective_config_source_fingerprint_changes_when_provider_config_changes(

@@ -651,10 +651,6 @@ source:
       id_batch_size: 20
       strategy: offset
       max_url_length: 1000
-    # Transitional migration-only aliases may still appear in existing configs:
-    # batch_size: 20
-    # page_size: 1000
-    # max_url_length: 2000
 
   circuit_breaker:
     failure_threshold: 5
@@ -663,10 +659,6 @@ source:
   rate_limit:
     requests_per_second: 3
     burst: 10
-
-  health_check:
-    endpoint: /chembl/api/data/status.json
-    timeout: 5
 
 entities:
   - activity
@@ -692,20 +684,29 @@ Retired source root alias:
 
 - `source.batch_size`
 
+Provider `source.health_check` and `source.retry` are retired and rejected by the
+strict boundary. Health probes and Retry-After behavior are code-owned. Entity
+configs may not override `source.rate_limit`, `source.circuit_breaker`, or
+`source.provider_config`; provider transport has one authority.
+
 ### Runtime contact и secret indirection
 
-Tracked provider YAML не содержит `${ENV_VAR}` interpolation strings. Для
-CrossRef/OpenAlex поле `mailto` хранит безопасный документирующий placeholder
-`your-email@example.com`; реальный технический контакт задаётся локально через
-`BIOETL_DEFAULT_EMAIL`. API keys остаются вне tracked YAML и указываются через
+Tracked provider YAML не содержит `${ENV_VAR}` interpolation strings. API keys
+остаются вне tracked YAML и указываются через
 декларативные поля `*_env`, например
 `api_key_env: BIOETL_SEMANTICSCHOLAR_API_KEY`.
+
+Если для provider задан `rate_limit.with_api_key`, наличие соответствующего
+typed Settings credential выбирает этот rate/burst. Значение секрета не
+сериализуется. Settings precedence:
+`explicit init/CLI > process ENV > repository-root .env > typed defaults`;
+произвольный CWD `config.yaml` не читается.
 
 ### Rate Limits по провайдерам (7 source configs)
 
 | Provider        | Source Config                            | Rate Limit  | Burst | Batch Size |
 | --------------- | ---------------------------------------- | ----------- | ----- | ---------- |
-| ChEMBL          | `configs/providers/chembl.yaml`          | 3 req/sec   | 10    | 20         |
+| ChEMBL          | `configs/providers/chembl.yaml`          | 0.1 req/sec | 1     | 20         |
 | PubChem         | `configs/providers/pubchem.yaml`         | 5 req/sec   | 10    | 50         |
 | UniProt         | `configs/providers/uniprot.yaml`         | 10 req/sec  | 20    | 200        |
 | CrossRef        | `configs/providers/crossref.yaml`        | 50 req/sec  | 100   | 50         |

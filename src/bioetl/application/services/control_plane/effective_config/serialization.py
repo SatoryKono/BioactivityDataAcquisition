@@ -10,6 +10,7 @@ from datetime import datetime
 from typing import cast
 
 from bioetl.domain.control_plane.effective_config_artifact import (
+    EFFECTIVE_CONFIG_ARTIFACT_SCHEMA_VERSION,
     ConfigResolutionPolicy,
     ConfigSourceRef,
     DQPolicySnapshot,
@@ -24,7 +25,7 @@ from bioetl.domain.normalization import serialize_json_canonical
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import DQDisposition, DQPolicyRef
 
-EFFECTIVE_CONFIG_SCHEMA_VERSION = "1.0"
+EFFECTIVE_CONFIG_SCHEMA_VERSION = EFFECTIVE_CONFIG_ARTIFACT_SCHEMA_VERSION
 
 
 def dataclass_to_dict(value: object) -> JsonDict | None:
@@ -77,6 +78,7 @@ def semantic_source_refs_payload(source_refs: list[ConfigSourceRef]) -> list[Jso
             "source_path": src.source_path,
             "source_hash": src.source_hash,
             "source_hash_strategy": src.source_hash_strategy,
+            "source_hash_version": src.source_hash_version,
             "priority": src.priority,
         }
         for src in canonical_source_refs(source_refs)
@@ -138,6 +140,7 @@ def build_semantic_identity_payload(
         ],
         "resolution_policy": to_jsonable(request.resolution_policy),
         "resolved_config": {
+            "identity_version": request.resolved_config.identity_version,
             "config_type": request.resolved_config.config_type,
             "config_data": to_jsonable(request.resolved_config.config_data),
             "config_hash": request.resolved_config.config_hash,
@@ -145,6 +148,9 @@ def build_semantic_identity_payload(
         "runtime_overrides": runtime_overrides_payload(request.runtime_overrides),
         "execution_environment": to_jsonable(request.execution_environment),
         "effective_execution_config": {
+            "identity_version": (
+                request.effective_execution_config.identity_version
+            ),
             "config_data": to_jsonable(request.effective_execution_config.config_data),
             "effective_hash": request.effective_execution_config.effective_hash,
         },
@@ -178,6 +184,7 @@ def semantic_artifact_payload(artifact: EffectiveConfigArtifact) -> JsonDict:
         ],
         "resolution_policy": to_jsonable(artifact.resolution_policy),
         "resolved_config": {
+            "identity_version": artifact.resolved_config.identity_version,
             "config_type": artifact.resolved_config.config_type,
             "config_data": to_jsonable(artifact.resolved_config.config_data),
             "config_hash": artifact.resolved_config.config_hash,
@@ -185,6 +192,9 @@ def semantic_artifact_payload(artifact: EffectiveConfigArtifact) -> JsonDict:
         "runtime_overrides": runtime_overrides_payload(artifact.runtime_overrides),
         "execution_environment": to_jsonable(artifact.execution_environment),
         "effective_execution_config": {
+            "identity_version": (
+                artifact.effective_execution_config.identity_version
+            ),
             "config_data": to_jsonable(artifact.effective_execution_config.config_data),
             "effective_hash": artifact.effective_execution_config.effective_hash,
         },

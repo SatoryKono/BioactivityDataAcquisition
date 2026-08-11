@@ -27,4 +27,4 @@ def test_adr_registry_sync_check_passes_on_current_repository() -> None:
 
     assert passed, results
     assert warnings == []
-    assert results == ["ADR registry mirrors are synchronized through ADR-056"]
+    assert results == ["ADR registry mirrors are synchronized through ADR-057"]

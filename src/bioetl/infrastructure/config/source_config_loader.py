@@ -44,14 +44,7 @@ def read_source_config_payload(
 
     source_section = unified_raw.get("source")
     if isinstance(source_section, dict):
-        payload: JsonDict = {  # Any: dynamic payload or structural mixin boundary
-            "source": source_section
-        }  # Any: heterogeneous YAML values
-        for key in ("entities", "entity_notes"):
-            value = unified_raw.get(key)
-            if value is not None:
-                payload[key] = value
-        return payload
+        return {"source": source_section}
 
     raise ValueError(
         f"Provider configuration requires a top-level 'source' section: {unified_path}"

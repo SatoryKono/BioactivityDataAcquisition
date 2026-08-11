@@ -273,6 +273,12 @@ def test_dict_to_artifact_reconstructs_domain_object() -> None:
     artifact = service_mod._dict_to_artifact(_sample_artifact_dict())
 
     assert artifact.pipeline_name == "crossref_publication"
+    assert artifact.schema_version == "1.0"
+    assert artifact.resolved_config.identity_version == "resolved-config-legacy-v0"
+    assert (
+        artifact.effective_execution_config.identity_version
+        == "effective-config-legacy-v0"
+    )
     assert artifact.source_refs[0].source_path == "configs/base/pipeline.yaml"
     assert artifact.dq_policy_refs[0].contract_ref == "dq.crossref"
     assert artifact.dq_policy_snapshots[0].default_disposition is DQDisposition.WARN

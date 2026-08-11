@@ -1,7 +1,43 @@
 {
   "$defs": {
     "BaseRateLimitConfig": {
+      "additionalProperties": false,
       "description": "Rate limit configuration from YAML.",
+      "properties": {
+        "requests_per_second": {
+          "default": 5.0,
+          "description": "Maximum requests per second",
+          "maximum": 100.0,
+          "minimum": 0.1,
+          "title": "Requests Per Second",
+          "type": "number"
+        },
+        "burst": {
+          "default": 10,
+          "description": "Maximum burst capacity (token bucket)",
+          "maximum": 200,
+          "minimum": 1,
+          "title": "Burst",
+          "type": "integer"
+        },
+        "with_api_key": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BaseRateLimitValues"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "BaseRateLimitConfig",
+      "type": "object"
+    },
+    "BaseRateLimitValues": {
+      "additionalProperties": false,
+      "description": "One strict anonymous or authenticated rate-limit value set.",
       "properties": {
         "requests_per_second": {
           "default": 5.0,
@@ -20,10 +56,11 @@
           "type": "integer"
         }
       },
-      "title": "BaseRateLimitConfig",
+      "title": "BaseRateLimitValues",
       "type": "object"
     },
     "FallbackPolicyYamlConfig": {
+      "additionalProperties": false,
       "description": "Provider fallback orchestration policy from YAML.",
       "properties": {
         "enabled": {
@@ -85,6 +122,7 @@
       "type": "object"
     },
     "HttpClientConfig": {
+      "additionalProperties": false,
       "description": "HTTP client configuration from YAML.",
       "properties": {
         "timeout_sec": {
@@ -140,6 +178,7 @@
       "type": "object"
     },
     "PaginationConfig": {
+      "additionalProperties": false,
       "description": "API pagination configuration.\n\nSingle source of truth for all API pagination parameters.\nDefined per-provider in configs/providers/*.yaml.\n\nPipelines may only override ``page_size`` via ``page_size_override``\nbut cannot redefine the pagination strategy.\n\nAttributes:\n    page_size: Number of records per paginated API page.\n    id_batch_size: Number of IDs per filtered query batch.\n    strategy: Pagination strategy (offset or cursor).\n    max_url_length: Maximum URL length for GET requests.",
       "properties": {
         "page_size": {
@@ -198,7 +237,8 @@
       "type": "object"
     },
     "ProviderConfigYaml": {
-      "description": "Provider-specific configuration from YAML.\n\nAttributes:\n    provider: Provider name (chembl, pubchem, uniprot, pubmed).\n    base_url: Base URL for the API.\n    client: HTTP client settings.\n    pagination: API pagination settings (single source of truth).\n    default_email: Default email for NCBI APIs (PubMed specific).",
+      "additionalProperties": false,
+      "description": "Provider-specific configuration from YAML.\n\nAttributes:\n    provider: Provider name (chembl, pubchem, uniprot, pubmed).\n    base_url: Base URL for the API.\n    client: HTTP client settings.\n    pagination: API pagination settings (single source of truth).\n    api_key_env: Typed Settings credential source name, never a secret value.",
       "properties": {
         "provider": {
           "default": "",
@@ -232,6 +272,7 @@
         "api_key_env": {
           "anyOf": [
             {
+              "pattern": "^BIOETL_[A-Z0-9_]+_API_KEY$",
               "type": "string"
             },
             {
@@ -239,31 +280,8 @@
             }
           ],
           "default": null,
+          "description": "Typed Settings credential environment-variable name",
           "title": "Api Key Env"
-        },
-        "api_key": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Api Key"
-        },
-        "mailto": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Mailto"
         },
         "client": {
           "$ref": "#/$defs/HttpClientConfig"
@@ -283,18 +301,6 @@
           "default": null,
           "title": "Api Version"
         },
-        "default_email": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Default Email"
-        },
         "fallback": {
           "anyOf": [
             {
@@ -311,6 +317,7 @@
       "type": "object"
     },
     "SourceCircuitBreakerYamlConfig": {
+      "additionalProperties": false,
       "description": "Circuit breaker configuration from YAML.\n\nInherits from BaseCircuitBreakerConfig for consistency with other schemas.\n\nAttributes:\n    failure_threshold: Number of consecutive failures before opening circuit.\n    recovery_timeout: Time in seconds before attempting recovery.",
       "properties": {
         "failure_threshold": {
@@ -334,6 +341,7 @@
       "type": "object"
     },
     "SourceSectionConfig": {
+      "additionalProperties": false,
       "description": "Source section configuration from YAML.\n\nThis represents the 'source' section in configs/providers/*.yaml files.\n\nAttributes:\n    provider_config: Provider-specific settings.\n    circuit_breaker: Circuit breaker configuration.\n    rate_limit: Rate limiting configuration.",
       "properties": {
         "provider_config": {
@@ -350,6 +358,7 @@
       "type": "object"
     }
   },
+  "additionalProperties": false,
   "description": "Root schema for source configuration files.\n\nValidates configs/providers/*.yaml files.\n\nExample YAML:\n    source:\n        provider_config:\n            provider: chembl\n            base_url: https://www.ebi.ac.uk/chembl/api/data\n        circuit_breaker:\n            failure_threshold: 5\n            recovery_timeout: 300\n        rate_limit:\n            requests_per_second: 5.0\n            burst: 10",
   "properties": {
     "source": {

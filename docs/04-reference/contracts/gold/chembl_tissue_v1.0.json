@@ -46,7 +46,7 @@
         "null"
       ],
       "nullable": true,
-      "description": "BRENDA Tissue Ontology ID"
+      "description": "BRENDA Tissue Ontology ID (underscore form, e.g. BTO_0000001)"
     },
     "caloha_id": {
       "type": [
@@ -62,7 +62,7 @@
         "null"
       ],
       "nullable": true,
-      "description": "Experimental Factor Ontology ID"
+      "description": "Experimental Factor Ontology ID (underscore form)"
     },
     "uberon_id": {
       "type": [
@@ -70,7 +70,7 @@
         "null"
       ],
       "nullable": true,
-      "description": "Uberon Ontology ID"
+      "description": "Uberon Ontology ID (underscore form)"
     }
   },
   "required": [

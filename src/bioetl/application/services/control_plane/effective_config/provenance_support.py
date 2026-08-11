@@ -18,8 +18,9 @@ def build_source_class_provenance() -> tuple[SourceClassProvenance, ...]:
             anchor_field="source_hash",
             notes=(
                 "File-backed YAML config sources use canonical semantic source_hash "
-                "values for identity; raw_source_hash preserves forensic byte-level "
-                "integrity when available."
+                "values plus source_hash_version for identity; raw_source_hash and "
+                "raw_source_hash_version preserve forensic byte-level integrity "
+                "when available."
             ),
         ),
         SourceClassProvenance(

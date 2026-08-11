@@ -12,6 +12,10 @@ from bioetl.domain.control_plane.config_source_hashing import (
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import DQDisposition, DQPolicyRef
 
+RESOLVED_CONFIG_IDENTITY_VERSION = "resolved-config-v1"
+EFFECTIVE_CONFIG_IDENTITY_VERSION = "effective-config-v1"
+EFFECTIVE_CONFIG_ARTIFACT_SCHEMA_VERSION = "2.0"
+
 
 def _require_non_empty(value: str, field_name: str) -> None:
     if not value:
@@ -48,6 +52,8 @@ class ConfigSourceRef:
     priority: int = 0
     raw_source_hash: str | None = None
     source_hash_strategy: ConfigSourceHashStrategy | None = None
+    source_hash_version: str | None = None
+    raw_source_hash_version: str | None = None
 
 
 @dataclass(frozen=True)
@@ -83,6 +89,7 @@ class ResolvedConfigSnapshot:
     config_type: str  # "standard" | "composite"
     config_data: JsonDict
     config_hash: str
+    identity_version: str = RESOLVED_CONFIG_IDENTITY_VERSION
     timestamp: datetime = field(default=MISSING_EFFECTIVE_CONFIG_TIMESTAMP)
 
     def __post_init__(self) -> None:
@@ -116,6 +123,7 @@ class EffectiveExecutionConfig:
 
     config_data: JsonDict
     effective_hash: str
+    identity_version: str = EFFECTIVE_CONFIG_IDENTITY_VERSION
     timestamp: datetime = field(default=MISSING_EFFECTIVE_CONFIG_TIMESTAMP)
 
     def __post_init__(self) -> None:
@@ -154,7 +162,7 @@ class EffectiveConfigArtifact:
         default_factory=ExecutionEnvironmentSnapshot
     )
     source_class_provenance: tuple[SourceClassProvenance, ...] = ()
-    schema_version: str = "1.0"
+    schema_version: str = EFFECTIVE_CONFIG_ARTIFACT_SCHEMA_VERSION
     created_at: datetime = field(default=MISSING_EFFECTIVE_CONFIG_TIMESTAMP)
     contract_refs: list[str] = field(default_factory=list)
     normalization_profile_ref: str | None = None
