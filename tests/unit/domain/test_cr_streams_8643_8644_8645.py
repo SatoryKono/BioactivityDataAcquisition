@@ -227,3 +227,44 @@ def test_optional_column_groups_decoder_helper() -> None:
 
     assert _optional_column_groups(None) == ()
     assert _optional_column_groups(()) == ()
+
+
+def test_lineage_requires_identity_fields() -> None:
+    from bioetl.domain.composite.lineage import CompositeLineageMetadata
+
+    with pytest.raises(ValueError, match="_composite_run_id"):
+        CompositeLineageMetadata.from_dict({"_composite_name": "c"})
+    with pytest.raises(ValueError, match="_composite_name"):
+        CompositeLineageMetadata.from_dict({"_composite_run_id": "r"})
+    meta = CompositeLineageMetadata.from_dict(
+        {
+            "_composite_run_id": "run-1",
+            "_composite_name": "composite",
+            "_source_providers": ["chembl"],
+            "_field_sources": {"title": "chembl"},
+        }
+    )
+    assert meta.composite_run_id == "run-1"
+    payload = meta.to_dict()
+    assert payload["_field_sources"]["title"] == "chembl"
+
+
+def test_seed_dependency_extra_counter_bounds() -> None:
+    with pytest.raises(ValueError, match="records_silver"):
+        SeedResult(pipeline_name="p", records_silver=-1)
+    with pytest.raises(ValueError, match="keys_generated"):
+        SeedResult(pipeline_name="p", keys_generated=-2)
+    with pytest.raises(ValueError, match="records_silver"):
+        DependencyResult(pipeline_name="p", records_silver=-1)
+
+
+def test_conditional_required_incomplete_raises_validation_error() -> None:
+    from bioetl.domain.behavior._dq_rule_evaluators_cross import (
+        _conditional_required_rule_violated,
+    )
+    from bioetl.domain.exceptions import ValidationError
+    from types import SimpleNamespace
+
+    rule = SimpleNamespace(trigger_field=None, required_field="x")
+    with pytest.raises(ValidationError, match="conditional_required"):
+        _conditional_required_rule_violated({"x": 1}, rule, present_count=1)
