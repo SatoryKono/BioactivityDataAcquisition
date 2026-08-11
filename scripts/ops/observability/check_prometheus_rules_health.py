@@ -156,7 +156,7 @@ def check_rules_health(
         prometheus_url,
         (
             "sum(increase(prometheus_rule_evaluation_failures_total"
-            '{rule_group=~".*bioetl.*\\.yml;.*"}[10m])) or vector(0)'
+            '{rule_group=~".*bioetl.*[.]yml;.*"}[10m])) or vector(0)'
         ),
         timeout=timeout,
     )
@@ -167,7 +167,7 @@ def check_rules_health(
         prometheus_url,
         (
             "sum(increase(prometheus_rule_group_iterations_missed_total"
-            '{rule_group=~".*bioetl.*\\.yml;.*"}[10m])) or vector(0)'
+            '{rule_group=~".*bioetl.*[.]yml;.*"}[10m])) or vector(0)'
         ),
         timeout=timeout,
     )

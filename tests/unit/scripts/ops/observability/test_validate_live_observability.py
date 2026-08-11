@@ -157,6 +157,45 @@ def test_check_grafana_datasources_http_auth_error(
     assert result.details["code"] == 401
 
 
+def test_check_grafana_dashboards_accepts_shipped_portfolio(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    dashboards = [
+        {"uid": uid} for uid in sorted(vlo.EXPECTED_BIOETL_DASHBOARD_UIDS)
+    ]
+    dashboards.append({"uid": "unrelated-dashboard"})
+    monkeypatch.setattr(vlo, "_fetch_json", lambda *args, **kwargs: dashboards)
+
+    result = vlo.check_grafana_dashboards(
+        "http://grafana:3000", "admin", "secret", 1.0
+    )
+
+    assert result.status == "pass"
+    assert result.details is not None
+    assert result.details["expected_bioetl_dashboards"] == 7
+    assert result.details["missing_bioetl_dashboard_uids"] == []
+    assert "7 shipped UIDs expected" in result.message
+
+
+def test_check_grafana_dashboards_reports_missing_shipped_uid(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    missing_uid = "bioetl-run-explorer-v1"
+    dashboards = [
+        {"uid": uid}
+        for uid in sorted(vlo.EXPECTED_BIOETL_DASHBOARD_UIDS - {missing_uid})
+    ]
+    monkeypatch.setattr(vlo, "_fetch_json", lambda *args, **kwargs: dashboards)
+
+    result = vlo.check_grafana_dashboards(
+        "http://grafana:3000", "admin", "secret", 1.0
+    )
+
+    assert result.status == "partial"
+    assert result.details is not None
+    assert result.details["missing_bioetl_dashboard_uids"] == [missing_uid]
+
+
 def test_validation_result_serializes_diagnostic_fields() -> None:
     result = vlo.ValidationResult(
         check_name="prometheus_health",
