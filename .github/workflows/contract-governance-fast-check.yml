@@ -71,7 +71,7 @@ jobs:
         run: |
           uv venv
           # Prefer lockfile-backed project sync (Sonar S8544/S8541).
-          uv sync --frozen --no-build --extra dev
+          uv sync --frozen --extra dev
 
       - name: Run contract identity checks
         id: identity-check
