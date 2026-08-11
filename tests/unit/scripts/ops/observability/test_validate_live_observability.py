@@ -160,15 +160,11 @@ def test_check_grafana_datasources_http_auth_error(
 def test_check_grafana_dashboards_accepts_shipped_portfolio(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    dashboards = [
-        {"uid": uid} for uid in sorted(vlo.EXPECTED_BIOETL_DASHBOARD_UIDS)
-    ]
+    dashboards = [{"uid": uid} for uid in sorted(vlo.EXPECTED_BIOETL_DASHBOARD_UIDS)]
     dashboards.append({"uid": "unrelated-dashboard"})
     monkeypatch.setattr(vlo, "_fetch_json", lambda *args, **kwargs: dashboards)
 
-    result = vlo.check_grafana_dashboards(
-        "http://grafana:3000", "admin", "secret", 1.0
-    )
+    result = vlo.check_grafana_dashboards("http://grafana:3000", "admin", "secret", 1.0)
 
     assert result.status == "pass"
     assert result.details is not None
@@ -187,9 +183,7 @@ def test_check_grafana_dashboards_reports_missing_shipped_uid(
     ]
     monkeypatch.setattr(vlo, "_fetch_json", lambda *args, **kwargs: dashboards)
 
-    result = vlo.check_grafana_dashboards(
-        "http://grafana:3000", "admin", "secret", 1.0
-    )
+    result = vlo.check_grafana_dashboards("http://grafana:3000", "admin", "secret", 1.0)
 
     assert result.status == "partial"
     assert result.details is not None

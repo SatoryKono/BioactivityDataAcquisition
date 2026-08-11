@@ -10,7 +10,9 @@ from dataclasses import dataclass
 
 import pytest
 
-from bioetl.composition.runtime_builders._context_field_binding import bind_context_fields
+from bioetl.composition.runtime_builders._context_field_binding import (
+    bind_context_fields,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -90,6 +92,7 @@ def test_bind_context_fields_unsupported_host_raises() -> None:
             unsupported_message="unsupported context host",
         )
 
+
 class _InitRejectsKwargs:
     """Constructor rejects kwargs so bind falls back to object.__new__ + setattr."""
 
@@ -127,5 +130,3 @@ def test_bind_context_fields_setattr_failure_raises_unsupported() -> None:
             updates={"limit": 9},
             unsupported_message="unsupported context host",
         )
-
-
