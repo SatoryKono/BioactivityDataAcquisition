@@ -336,7 +336,7 @@ def _check_file_sync(path: Path, expected: str, *, root: Path | None = None) -> 
     return False
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Generate/check RF-06 hotspot-family baseline artifacts."
     )
@@ -368,13 +368,13 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Only include active hotspot families.",
     )
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     from scripts.engineering.common.repo_paths import resolve_output_path
 
-    args = parse_args()
+    args = parse_args(argv)
     args.json_output = resolve_output_path(args.json_output, root=PROJECT_ROOT)
     args.md_output = resolve_output_path(args.md_output, root=PROJECT_ROOT)
     if args.active_only:

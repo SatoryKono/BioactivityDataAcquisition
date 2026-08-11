@@ -198,12 +198,12 @@ def test_dq_duplicate_validation_fact_is_removed_and_grid_is_compacted() -> None
     assert "or vector(0)" not in canonical["targets"][0]["expr"]
 
     expected_geometry = {
-        3: {"h": 6, "w": 12, "x": 12, "y": 53},
-        4: {"h": 6, "w": 12, "x": 0, "y": 53},
-        101: {"h": 6, "w": 12, "x": 0, "y": 59},
-        9: {"h": 6, "w": 12, "x": 12, "y": 59},
-        12: {"h": 6, "w": 12, "x": 0, "y": 65},
-        151: {"h": 6, "w": 12, "x": 12, "y": 65},
+        3: {"x": 12, "y": 61, "w": 12, "h": 6},
+        4: {"x": 0, "y": 61, "w": 12, "h": 6},
+        101: {"x": 0, "y": 67, "w": 12, "h": 6},
+        9: {"x": 12, "y": 67, "w": 12, "h": 6},
+        12: {"x": 0, "y": 73, "w": 12, "h": 6},
+        151: {"x": 12, "y": 73, "w": 12, "h": 6},
     }
     for panel_id, geometry in expected_geometry.items():
         assert panels[panel_id]["gridPos"] == geometry
@@ -669,13 +669,14 @@ def test_incident_alert_history_has_readable_full_width_layout() -> None:
     assert current_alerts.get("gridPos", {}).get("w") == 24
     assert history_grid.get("x") == 0
     assert history_grid.get("w") == 24
-    assert history_grid.get("h", 0) >= 14
+    assert history_grid.get("h") == 8
     assert history.get("options", {}).get("legend", {}).get("showLegend") is False
     assert history.get("options", {}).get("showValue") == "always"
     assert history.get("options", {}).get("rowHeight") == 1.0
     assert impact.get("gridPos", {}).get("y", 0) >= (
         history_grid.get("y", 0) + history_grid.get("h", 0)
     )
+    assert impact.get("gridPos", {}).get("y") == 32
     assert "ALERTS" in str(history.get("targets", [{}])[0].get("expr", ""))
     assert str(history.get("targets", [{}])[0].get("legendFormat", "")).startswith(
         "{{alertstate}}"
