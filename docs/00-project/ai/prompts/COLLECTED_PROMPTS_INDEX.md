@@ -38,6 +38,24 @@ maintained root-level twin, not to override current guidance.
 
 ## Grouped Prompt Families
 
+### Generic nine-domain audit kit (2026-08)
+
+- `docs/00-project/ai/prompts/archive/campaigns/generic-nine-audit-kit-2026-08.md`
+- `docs/00-project/ai/prompts/archive/campaigns/generic-nine-audit-kit-2026-08-SOURCES.md`
+
+Operator-supplied multi-domain audit megaprompt (docs, tests, debt, root,
+GHA, agents, diagrams, docs pipeline, architecture). **Archived campaign** —
+use active library cards `prompt.audit.*` and `prompt.architecture.review`.
+
+### Project audit + orchestrator kit (2026-08-11)
+
+- `docs/00-project/ai/prompts/archive/campaigns/project-audit-orchestrator-kit-2026-08-11.md`
+- `docs/00-project/ai/prompts/archive/campaigns/project-audit-orchestrator-kit-2026-08-11-SOURCES.md`
+
+Nine domain audits + N-iteration GitHub orchestrator (`findings.json`, ALLOW_*
+fail-closed, post-audit). **Archived campaign** — active paste:
+`prompt.audit.orchestrator` and domain cards v1.1+.
+
 ### Diagram Expansion Archive
 
 - `docs/00-project/ai/prompts/collected/docs/02-architecture/mmd-diagrams/docs/PROMPT-diagram-expansion.md`

@@ -13,11 +13,20 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.session.grok-bootstrap` | `library/session/grok-bootstrap.md` | Short daily-work bootstrap for Grok sessions on BioETL |
 | `prompt.closeout.grok` | `library/closeout/grok-closeout.md` | Issue/PR closeout paste with verdicts, evidence, ship-profile note |
 | `prompt.audit.grok-cycle` | `library/audit/grok-audit-cycle.md` | One-cycle audit paste with severity, stop conditions, Windows/memory gates |
+| `prompt.audit.orchestrator` | `library/audit/orchestrator.md` | Fail-closed N-iteration audit → issues → fix → CI → post-audit loop |
 | `prompt.tests.speed-optimization` | `library/tests/speed-optimization-loop.md` | Accelerate test runs without weakening coverage |
 | `prompt.tests.fix-retest` | `library/tests/fix-retest-loop.md` | Run → fix → retest until green or blocked |
 | `prompt.docs.ai-audit-planning` | `library/docs/ai-audit-planning.md` | Plan an audit of docs/00-project/ai surfaces |
-| `prompt.architecture.review` | `library/architecture/review-assessment.md` | Read-only architecture review and refactoring assessment |
+| `prompt.architecture.review` | `library/architecture/review-assessment.md` | Architecture review v2.3 (hexagonal/C4/arc42) with findings.json outputs |
 | `prompt.observability.dashboard-panel-audit` | `library/observability/dashboard-panel-audit.md` | Five-phase Grafana panel audit — render, GH issues, fix, closeout |
+| `prompt.audit.docs-content` | `library/audit/docs-content.md` | Evidence-based audit of project documentation content and drift |
+| `prompt.audit.tests-system` | `library/audit/tests-system.md` | Audit test system as regression detection, not coverage vanity |
+| `prompt.audit.tech-debt` | `library/audit/tech-debt.md` | Evidence-based technical debt register with risk-ordered paydown |
+| `prompt.audit.repo-tree` | `library/audit/repo-tree.md` | Repository tree and root hygiene audit against allowlist |
+| `prompt.audit.github-actions` | `library/audit/github-actions.md` | GitHub Actions supply-chain and correctness audit |
+| `prompt.audit.agents-runtime` | `library/audit/agents-runtime.md` | Audit AI agent instructions, skills, and agent-related scripts |
+| `prompt.audit.diagrams` | `library/audit/diagrams.md` | Audit version-controlled diagrams and render scripts |
+| `prompt.audit.docs-pipeline` | `library/audit/docs-pipeline.md` | Audit docs generate/validate/publish scripts and pipelines |
 
 ## Active fragments
 
@@ -29,6 +38,12 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.fragment.env-guardrail` | `fragments/env-guardrail.md` | Secret-bearing .env surface guardrail |
 | `prompt.fragment.evidence-contract` | `fragments/evidence-contract.md` | Minimum evidence format for findings and closeout |
 | `prompt.fragment.language-ru` | `fragments/language-ru.md` | Default operator response language |
+| `prompt.fragment.audit-scale` | `fragments/audit-scale.md` | Unified surface quality score 0-3 and priority P0-P3 |
+| `prompt.fragment.finding-schema` | `fragments/finding-schema.md` | Machine-oriented finding fields for domain audits |
+| `prompt.fragment.unknown-params` | `fragments/unknown-params.md` | Do not invent repo parameters; prefer known BioETL SSOT |
+| `prompt.fragment.reports-output` | `fragments/reports-output.md` | Audit artifacts must land under reports/, not repo root |
+| `prompt.fragment.shell-portability` | `fragments/shell-portability.md` | Portable shell notes for BioETL Windows-first operators |
+| `prompt.fragment.orchestrator-guards` | `fragments/orchestrator-guards.md` | Fail-closed guards for multi-iteration audit/implement orchestrator |
 
 ## All registry entries
 
@@ -40,11 +55,28 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.fragment.env-guardrail` | fragment | active | `fragments/env-guardrail.md` |
 | `prompt.fragment.evidence-contract` | fragment | active | `fragments/evidence-contract.md` |
 | `prompt.fragment.language-ru` | fragment | active | `fragments/language-ru.md` |
+| `prompt.fragment.audit-scale` | fragment | active | `fragments/audit-scale.md` |
+| `prompt.fragment.finding-schema` | fragment | active | `fragments/finding-schema.md` |
+| `prompt.fragment.unknown-params` | fragment | active | `fragments/unknown-params.md` |
+| `prompt.fragment.reports-output` | fragment | active | `fragments/reports-output.md` |
+| `prompt.fragment.shell-portability` | fragment | active | `fragments/shell-portability.md` |
+| `prompt.fragment.orchestrator-guards` | fragment | active | `fragments/orchestrator-guards.md` |
 | `prompt.session.grok-bootstrap` | operator-paste | active | `library/session/grok-bootstrap.md` |
 | `prompt.closeout.grok` | operator-paste | active | `library/closeout/grok-closeout.md` |
 | `prompt.audit.grok-cycle` | operator-paste | active | `library/audit/grok-audit-cycle.md` |
+| `prompt.audit.orchestrator` | operator-paste | active | `library/audit/orchestrator.md` |
 | `prompt.tests.speed-optimization` | operator-paste | active | `library/tests/speed-optimization-loop.md` |
 | `prompt.tests.fix-retest` | operator-paste | active | `library/tests/fix-retest-loop.md` |
 | `prompt.docs.ai-audit-planning` | operator-paste | active | `library/docs/ai-audit-planning.md` |
 | `prompt.architecture.review` | operator-paste | active | `library/architecture/review-assessment.md` |
 | `prompt.observability.dashboard-panel-audit` | operator-paste | active | `library/observability/dashboard-panel-audit.md` |
+| `prompt.audit.docs-content` | operator-paste | active | `library/audit/docs-content.md` |
+| `prompt.audit.tests-system` | operator-paste | active | `library/audit/tests-system.md` |
+| `prompt.audit.tech-debt` | operator-paste | active | `library/audit/tech-debt.md` |
+| `prompt.audit.repo-tree` | operator-paste | active | `library/audit/repo-tree.md` |
+| `prompt.audit.github-actions` | operator-paste | active | `library/audit/github-actions.md` |
+| `prompt.audit.agents-runtime` | operator-paste | active | `library/audit/agents-runtime.md` |
+| `prompt.audit.diagrams` | operator-paste | active | `library/audit/diagrams.md` |
+| `prompt.audit.docs-pipeline` | operator-paste | active | `library/audit/docs-pipeline.md` |
+| `prompt.campaign.generic-nine-audit-kit` | campaign | archived | `archive/campaigns/generic-nine-audit-kit-2026-08.md` |
+| `prompt.campaign.project-audit-orchestrator-kit` | campaign | archived | `archive/campaigns/project-audit-orchestrator-kit-2026-08-11.md` |

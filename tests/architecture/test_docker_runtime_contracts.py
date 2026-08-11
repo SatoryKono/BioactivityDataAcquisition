@@ -265,15 +265,22 @@ def test_required_secret_presence_is_checked_without_reading_values(
     assert "sentinel-must-not-appear" not in repr(missing)
 
 
-def test_shared_networks_use_one_external_literal_name_for_all_consumers() -> None:
+def test_shared_networks_use_one_literal_name_for_all_consumers() -> None:
+    """Shared nets use fixed name; auto-create (labels) or legacy external:true."""
     contract = _load_yaml(CONTRACT_PATH)
+    expected_owner = "scripts/ops/runtime/docker/runtime_manager.py"
 
     for logical_name, expected in contract["shared_networks"].items():
         for stack_name in expected["consumers"]:
             stack = contract["stacks"][stack_name]
             compose = _load_yaml(ROOT / stack["compose_file"])
             actual = compose["networks"][logical_name]
-            assert actual == {"external": True, "name": expected["name"]}
+            assert actual.get("name") == expected["name"]
+            if actual.get("external") is True:
+                continue
+            labels = actual.get("labels") or {}
+            assert labels.get("com.bioetl.owner") == expected_owner
+            assert actual.get("driver", "bridge") == "bridge"
 
 
 def test_live_project_origin_and_foreign_port_are_gate_errors(tmp_path: Path) -> None:
@@ -724,10 +731,8 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     assert "loki" not in monitoring["services"]
     assert "promtail" not in monitoring["services"]
     assert "tempo" not in monitoring["services"]
-    assert (
-        monitoring["services"]["grafana"]["depends_on"]["renderer"]["condition"]
-        == "service_healthy"
-    )
+    # Renderer is optional (screenshots); must not health-gate Grafana UI.
+    assert "renderer" not in monitoring["services"]["grafana"]["depends_on"]
     assert (
         monitoring["services"]["grafana"]["depends_on"]["prometheus"]["condition"]
         == "service_healthy"
@@ -737,6 +742,7 @@ def test_readiness_and_build_tools_fail_closed() -> None:
         "grafana-image-renderer",
         "healthcheck",
     ]
+    assert monitoring["services"]["renderer"]["healthcheck"]["start_period"] == "45s"
 
     dockerfile = (ROOT / "Dockerfile.bioetl").read_text(encoding="utf-8")
     operations_dockerfile = (ROOT / "docs/05-operations/Dockerfile").read_text(

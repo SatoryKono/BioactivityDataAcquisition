@@ -1,12 +1,12 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
-Last verified: '2026-08-10'
+Last verified: '2026-08-11'
 Epic: '#8513'
-Phase: 0 (#8515)
+Phase: 0 (#8515) + domain-audit intake 2026-08
 
 ______________________________________________________________________
 
@@ -95,6 +95,13 @@ frontmatter; compose shared guardrails via `fragments/`.
 - `scripts_inventory_consolidation_cleanup_prompt.md`
 - `specialized-prompts-1-scripts-inventory.md`
 - `specialized-prompts-2-coderabbit-audit.md`
+- `generic-nine-audit-kit-2026-08.md` (+ `…-SOURCES.md`) — intake 2026-08-11;
+  active short cards: `library/audit/{docs-content,tests-system,tech-debt,
+  repo-tree,github-actions,agents-runtime,diagrams,docs-pipeline}.md` and
+  `library/architecture/review-assessment.md` v2.3
+- `project-audit-orchestrator-kit-2026-08-11.md` (+ `…-SOURCES.md`) — kit #2
+  with orchestrator; active: `library/audit/orchestrator.md`
+  (`prompt.audit.orchestrator`); domain cards v1.1+ (`findings.json`)
 
 ### External archive (already)
 

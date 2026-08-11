@@ -66,6 +66,9 @@ volumes:
   neo4j_logs:
 
 networks:
+  # Shared with main. Not external: compose creates if missing, reuses if present.
   runtime:
-    external: true
     name: bioetl-runtime
+    driver: bridge
+    labels:
+      com.bioetl.owner: scripts/ops/runtime/docker/runtime_manager.py

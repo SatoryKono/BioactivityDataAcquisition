@@ -833,7 +833,8 @@ def test_recovery_waits_for_daemon_after_transient_socket_failure(
     )
 
     assert result == 0
-    assert up_attempts == 2
+    # Attempt 1: start fails (daemon). Attempt 2: start ok + wait ok → 3 ups.
+    assert up_attempts == 3
     assert info_probes >= 1
     assert not list(tmp_path.glob("docker-incident-*.json"))
 

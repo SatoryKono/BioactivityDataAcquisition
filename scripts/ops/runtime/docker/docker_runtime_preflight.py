@@ -805,15 +805,22 @@ def _findings_shared_networks(root: Path, contract: Mapping[str, Any]) -> list[F
             actual = (compose.get("networks") or {}).get(logical_name)
             if not isinstance(actual, dict):
                 actual = {}
-            if (
-                actual.get("external") is not True
-                or actual.get("name") != expected_name
-            ):
+            # Accept either legacy external:true or named auto-create networks
+            # (name + owner label) so `compose up` creates missing nets.
+            name_ok = actual.get("name") == expected_name
+            external_ok = actual.get("external") is True and name_ok
+            labels = actual.get("labels") or {}
+            owner = labels.get("com.bioetl.owner") if isinstance(labels, dict) else None
+            managed_ok = name_ok and owner == (
+                "scripts/ops/runtime/docker/runtime_manager.py"
+            )
+            if not (external_ok or managed_ok):
                 findings.append(
                     Finding(
                         "F003",
                         "error",
-                        "Shared network does not resolve to its contracted external name",
+                        "Shared network does not resolve to contracted name "
+                        "(external:true or name+owner label)",
                         {
                             "network": logical_name,
                             "stack": stack_name,
