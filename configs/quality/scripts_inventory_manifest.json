@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-11T14:11:43.238497+00:00",
+  "generated_at": "2026-08-11T17:11:42.426701+00:00",
   "summary": {
-    "total_scripts": 596,
+    "total_scripts": 598,
     "status_counts": {
       "active": 338,
       "supporting": 251,
-      "temporary_diagnostic": 7
+      "temporary_diagnostic": 9
     },
     "reference_group_coverage": {
       "agents": 4,
@@ -14,7 +14,7 @@
       "ci": 81,
       "docs": 255,
       "other": 78,
-      "scripts": 493,
+      "scripts": 495,
       "skills": 11,
       "tests": 380
     }
@@ -2644,6 +2644,25 @@
       "lifecycle_decision": "compatibility_wrapper",
       "review_by": "2026-11-30",
       "next_step": "Retain as an optional personal/project installer for the tracked Grok skill sources; keep the docs tree authoritative and do not treat this machine-local copy helper as an active runtime surface."
+    },
+    {
+      "path": "scripts/ai/grok/prepare_nine_domain_audits.ps1",
+      "type": "ps1",
+      "status": "temporary_diagnostic",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ai/grok/README.md",
+          "line": 6,
+          "source_group": "scripts",
+          "text": "| `prepare_nine_domain_audits.ps1` | Render nine-domain audit operator prompts into `reports/audit-runs/<run_id>/prompts/` (does not run audits; pairs with `.grok/workflows/nine-domain-audit.rhai`) |"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Prep helper for nine-domain audit workflow; retire after campaign or fold into docs."
     },
     {
       "path": "scripts/ai/junie/check_junie_mirror.py",
@@ -8619,7 +8638,7 @@
           "path": "docs/filters/inventory-baseline.csv",
           "line": 177,
           "source_group": "docs",
-          "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/docs/matrix/generate_pipeline_normalization_matrix.py,5,1694,Source-profile extraction policy,extraction_"
+          "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/docs/matrix/generate_pipeline_normalization_matrix.py,5,1696,Source-profile extraction policy,extraction_"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
@@ -8631,7 +8650,7 @@
           "path": "docs/filters/inventory-baseline.md",
           "line": 124,
           "source_group": "docs",
-          "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | 5 | 1694 | Source-profile extraction policy |"
+          "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | 5 | 1696 | Source-profile extraction policy |"
         }
       ],
       "owner": "@bioetl-docs",
@@ -20456,7 +20475,7 @@
         },
         {
           "path": "scripts/ai/grok/README.md",
-          "line": 7,
+          "line": 8,
           "source_group": "scripts",
           "text": "MCP dual-config apply remains under `scripts/ops/runtime/mcp/apply-shared-to-grok.ps1`."
         },
@@ -22226,12 +22245,37 @@
       "next_step": "Retain only as the legacy root shell launcher while canonical Docker helper lifecycle management moves to scripts/ops/docker-setup.sh; keep it supporting and do not expand its fixed-delay startup behavior."
     },
     {
-      "path": "scripts/temp/layout_contour_audit_cycle2.py",
+      "path": "scripts/temp/create_nine_domain_audit_issues.py",
       "type": "py",
       "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
+        {
+          "path": "scripts/temp/README.md",
+          "line": 31,
+          "source_group": "scripts",
+          "text": "- `create_nine_domain_audit_issues.py` — one-shot helper that opened nine-domain audit GitHub issues"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "One-shot helper that opened nine-domain audit GitHub issues; remove after campaign closeout."
+    },
+    {
+      "path": "scripts/temp/layout_contour_audit_cycle2.py",
+      "type": "py",
+      "status": "temporary_diagnostic",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/temp/README.md",
+          "line": 24,
+          "source_group": "scripts",
+          "text": "- `layout_contour_audit_cycle2.py` — layout-contour companion diagnostic"
+        },
         {
           "path": "scripts/temp/panels_contour_cycle2_notes.md",
           "line": 56,
@@ -22249,8 +22293,14 @@
       "type": "py",
       "status": "temporary_diagnostic",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
+        {
+          "path": "scripts/temp/README.md",
+          "line": 25,
+          "source_group": "scripts",
+          "text": "- `panels_static_audit_cycle2.py` — static panel contour diagnostic"
+        },
         {
           "path": "scripts/temp/panels_contour_cycle2_notes.md",
           "line": 53,
@@ -22290,9 +22340,9 @@
         },
         {
           "path": "scripts/temp/README.md",
-          "line": 11,
+          "line": 15,
           "source_group": "scripts",
-          "text": "- `report_basedpyright_error_snapshot.py` - Generate shrink-only basedpyright product error snapshot"
+          "text": "- `report_basedpyright_error_snapshot.py` — shrink-only basedpyright product error snapshot"
         }
       ],
       "owner": "@bioetl-platform",
@@ -22321,9 +22371,9 @@
         },
         {
           "path": "scripts/temp/README.md",
-          "line": 12,
+          "line": 16,
           "source_group": "scripts",
-          "text": "- `report_basedpyright_suppression_inventory.py` - Generate basedpyright suppression inventory"
+          "text": "- `report_basedpyright_suppression_inventory.py` — basedpyright suppression inventory"
         }
       ],
       "owner": "@bioetl-platform",
@@ -22352,9 +22402,9 @@
         },
         {
           "path": "scripts/temp/README.md",
-          "line": 13,
+          "line": 17,
           "source_group": "scripts",
-          "text": "- `report_basedpyright_tests_snapshot.py` - Generate basedpyright test-snapshot for scripts/tests advisory"
+          "text": "- `report_basedpyright_tests_snapshot.py` — basedpyright test-snapshot for scripts/tests advisory"
         }
       ],
       "owner": "@bioetl-platform",
@@ -22383,9 +22433,9 @@
         },
         {
           "path": "scripts/temp/README.md",
-          "line": 14,
+          "line": 18,
           "source_group": "scripts",
-          "text": "- `report_basedpyright_warning_snapshot.py` - Generate basedpyright warning snapshot"
+          "text": "- `report_basedpyright_warning_snapshot.py` — basedpyright warning snapshot"
         }
       ],
       "owner": "@bioetl-platform",
@@ -22398,13 +22448,19 @@
       "type": "py",
       "status": "temporary_diagnostic",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ops/coderabbit/README.md",
           "line": 10,
           "source_group": "scripts",
           "text": "| `scripts/temp/resolve_coderabbit_merge_conflicts.py` | Bounded merge-recovery helper for campaign artifacts |"
+        },
+        {
+          "path": "scripts/temp/README.md",
+          "line": 30,
+          "source_group": "scripts",
+          "text": "- `resolve_coderabbit_merge_conflicts.py` — bounded CodeRabbit report merge recovery helper (not reusable merge policy)"
         }
       ],
       "owner": "@bioetl-platform",
