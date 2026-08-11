@@ -34,7 +34,7 @@ Before opening a PR, run the project checks expected by the repository:
 # CI / single-OS checkout
 uv run ruff check .
 uv run ruff format --check .
-uv run mypy src tests
+uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
 uv run python -m scripts.engineering.dev run-tests cov
 ```
 
@@ -101,7 +101,7 @@ moving CI-scale checks into `pre-commit`:
 ```bash
 uv run ruff check .
 uv run ruff format --check .
-uv run mypy src tests
+uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
 uv run python -m scripts.engineering.dev run-tests quick
 uv run python -m scripts.engineering.dev run-tests arch
 python3 scripts/engineering/dev/run_project_python.py -m pre_commit run smoke-lane --hook-stage manual --all-files

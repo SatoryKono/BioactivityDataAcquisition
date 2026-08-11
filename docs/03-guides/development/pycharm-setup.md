@@ -311,7 +311,7 @@ margin. Универсальный пример `100` из исходного п
 1. Используйте shared configuration `mypy-full`, которая выполняет:
 
 ```powershell
-.\.venv-win\Scripts\python.exe -m mypy src tests
+.\.venv-win\Scripts\python.exe -m mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
 ```
 
 Строгость и Python compatibility level читаются из `pyproject.toml`. Не
@@ -335,7 +335,7 @@ configuration templates:
 | `pytest-architecture-full` | full offline `tests/architecture` sweep (includes slow), `--no-cov -v` | yes |
 | `ruff-check` | `ruff check src tests` | yes |
 | `ruff-format-check` | `ruff format --check src tests` | yes |
-| `mypy-full` | `mypy src tests` | yes |
+| `mypy-full` | `mypy --config-file pyproject.toml --strict --no-incremental src/bioetl` | yes |
 | `quality-gate` | `python -m scripts.engineering.ci quality-gate` | yes |
 | `BioETL smoke (offline fixture)` | offline Bronze fixture, no live API | yes |
 | `Live_*` pipeline runs | real/network API, limit N | **local only** |
@@ -451,7 +451,7 @@ Avoid stale CLAUDE/`make lint`-only prompts as the sole context source.
 2. `pytest-full` — scope `tests`, исключения `network` и `benchmark`, без coverage.
 3. `pytest-coverage` — полный target + `--cov=bioetl` + `--cov-report=term-missing` + `--cov-report=xml` (или проектные эквиваленты), с coverage threshold по CI (по-умолчанию `85`).
 4. `pytest-debug` — текущий test file/local smoke, **без coverage** (`--no-cov`), с `-s`, без `xdist`.
-5. `mypy-full` — полный target проекта (`src tests` или CI-эквивалент), без запуска на Save.
+5. `mypy-full` — полный merge-blocking product target (`src/bioetl`, как в CI), без запуска на Save.
 6. `quality-gate` — repository-level скрипт/CI command, который последовательно вызывает Ruff, mypy и tests.
 
 Не запускайте полный `mypy` и полный `pytest` на каждом `Save`; привяжите их только к ручным конфигурациям.
