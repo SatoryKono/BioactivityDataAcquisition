@@ -70,15 +70,11 @@ services:
         max-file: "5"
 
 networks:
-  # Fixed names shared with monitoring/neo4j. Not external: `compose up` creates
-  # them if absent (avoids "network ... could not be found"). Reuses existing.
+  # Fixed names shared with monitoring/neo4j. external:true — create via
+  # runtime_manager ensure-networks (owner label) before compose up.
   monitoring:
     name: bioetl-monitoring
-    driver: bridge
-    labels:
-      com.bioetl.owner: scripts/ops/runtime/docker/runtime_manager.py
+    external: true
   runtime:
     name: bioetl-runtime
-    driver: bridge
-    labels:
-      com.bioetl.owner: scripts/ops/runtime/docker/runtime_manager.py
+    external: true
