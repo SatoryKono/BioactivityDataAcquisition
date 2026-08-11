@@ -10,7 +10,9 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 from __future__ import annotations
 
+import json
 import sys
+from pathlib import Path
 from types import ModuleType, SimpleNamespace
 
 import pytest
@@ -19,6 +21,23 @@ from scripts.engineering.qa import report_provider_contract_drift as report
 
 
 pytestmark = pytest.mark.unit
+
+
+def test_main_accepts_dispatcher_argv(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "provider-contract-drift.json"
+    payload = {
+        "totals": {"max_severity": "benign"},
+        "reports": [],
+    }
+    monkeypatch.setattr(report, "build_provider_contract_drift_report", lambda: payload)
+
+    result = report.main(["--output", str(output), "--fail-on", "never"])
+
+    assert result == 0
+    assert json.loads(output.read_text(encoding="utf-8")) == payload
 
 
 def test_build_provider_contract_drift_report_records_lfs_pointer_skips(

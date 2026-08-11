@@ -38,6 +38,12 @@
       "review_by": "2026-11-30",
       "next_step": "Retain as an optional personal/project installer for the tracked Grok skill sources; keep the docs tree authoritative and do not treat this machine-local copy helper as an active runtime surface."
     },
+    "scripts/ai/generate_project_domain_audit_workflow.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the documented generator for the bounded Grok project-domain audit workflow; keep the tracked prompt library authoritative and remove the generator if the workflow is retired."
+    },
     "scripts/ai/prompts/__main__.py": {
       "owner": "@bioetl-platform",
       "decision": "compatibility_wrapper",
@@ -926,6 +932,24 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as a bounded basedpyright warning-snapshot utility while the typing debt campaign needs reproducible shrink-only evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
     },
+    "scripts/temp/layout_contour_audit_cycle2.py": {
+      "owner": "@bioetl-observability",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the cycle-2 dashboard layout diagnostic while its audit evidence is reviewed; remove it after the campaign closes or promote reusable checks into canonical dashboard tooling."
+    },
+    "scripts/temp/panels_static_audit_cycle2.py": {
+      "owner": "@bioetl-observability",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the documented cycle-2 static panel diagnostic; remove it after the campaign closes or promote reusable checks into canonical dashboard audit tooling."
+    },
+    "scripts/temp/resolve_coderabbit_merge_conflicts.py": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as evidence of the bounded 2026-08 CodeRabbit report merge recovery; remove it after the campaign closeout because it is not a reusable merge policy."
+    },
     "scripts/engineering/qa/report_config_surface_backlog.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
@@ -1106,6 +1130,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as an optional Docker-based screenshot fallback for hosts where the canonical Grafana render flow cannot launch Chromium; keep it supporting and do not make Docker monitoring mandatory."
     },
+    "scripts/ops/observability/check_prometheus_rules_health.py": {
+      "owner": "@bioetl-observability",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Prometheus rule-health implementation used by validate_live_observability.py; keep the canonical operator workflow routed through the aggregate live validator."
+    },
     "scripts/ops/observability/grafana/ensure_quarantine_explorer.py": {
       "owner": "@bioetl-platform",
       "decision": "compatibility_wrapper",
@@ -1123,6 +1153,12 @@
       "decision": "windows_compatibility_wrapper",
       "review_by": "2026-09-30",
       "next_step": "Retain as the Windows compatibility wrapper for optional renderer-only recovery; keep the canonical recovery behavior in the platform-neutral observability workflow."
+    },
+    "scripts/ops/observability/grafana/recover_renderer.py": {
+      "owner": "@bioetl-observability",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the renderer-recovery implementation behind the platform wrappers and runtime manager; keep it supporting unless promoted to a governed standalone operator command."
     },
     "scripts/ops/observability/grafana/recover_renderer.sh": {
       "owner": "@bioetl-platform",
@@ -1177,6 +1213,18 @@
       "decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side compatibility launcher for the canonical scripts.ops ensure-quarantine-explorer command while Grafana local audit flows may still need a direct PowerShell entrypoint; retire it once Windows-specific observability launch wrappers are fully consolidated."
+    },
+    "scripts/ops/observability/trust_validation_fixture_materialization.py": {
+      "owner": "@bioetl-observability",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the fixture-materialization implementation imported by the bounded Trust validation generator; keep it supporting and route operator execution through generate_trust_validation_fixtures.py."
+    },
+    "scripts/ops/observability/refresh_visual_json_baseline.py": {
+      "owner": "@bioetl-observability",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the bounded #8576 JSON-source evidence refresher; remove it after visual-baseline closeout or consolidate it into the canonical dashboard audit command."
     },
     "scripts/ops/observability/validate_emitter_contracts.py": {
       "owner": "@bioetl-platform",
@@ -1273,6 +1321,12 @@
       "decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain only as the documented matrix builder for the bounded 2026-08 CodeRabbit campaign; remove it after campaign closeout or consolidate it into a canonical quality command if the workflow becomes recurring."
+    },
+    "scripts/ops/coderabbit/normalize_findings.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the documented normalizer for the bounded 2026-08 CodeRabbit campaign; remove it after campaign closeout or consolidate it into a canonical quality command if the workflow becomes recurring."
     },
     "scripts/ops/coderabbit/run_leaves.py": {
       "owner": "@bioetl-platform",

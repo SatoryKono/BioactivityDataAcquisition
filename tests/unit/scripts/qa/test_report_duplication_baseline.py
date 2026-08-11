@@ -14,6 +14,7 @@ import pytest
 
 import re
 
+from scripts.engineering.qa import report_duplication_baseline as report
 from scripts.engineering.qa.report_duplication_baseline import _build_payload
 from scripts.engineering.qa.report_duplication_baseline import (
     _build_reduction_leverage_ranking,
@@ -33,6 +34,51 @@ from scripts.engineering.qa.report_duplication_baseline import TargetDuplication
 
 
 pytestmark = pytest.mark.unit
+
+
+def test_main_accepts_dispatcher_argv(monkeypatch: pytest.MonkeyPatch) -> None:
+    scanned_targets: list[str] = []
+
+    def _scan_target(
+        target: str,
+        **_kwargs: object,
+    ) -> TargetDuplicationReport:
+        scanned_targets.append(target)
+        return TargetDuplicationReport(
+            target=target,
+            returncode=0,
+            duplicate_count=0,
+            clusters=(),
+            raw_duplicate_count=0,
+        )
+
+    written_paths: list[str] = []
+    monkeypatch.setattr(report, "_scan_target", _scan_target)
+    monkeypatch.setattr(
+        report,
+        "_write_text",
+        lambda path, _content, *, root: written_paths.append(str(path)),
+    )
+
+    result = report.main(
+        [
+            "--targets",
+            "src/bioetl/domain",
+            "--json-out",
+            "reports/quality/test-duplication.json",
+            "--md-out",
+            "reports/quality/test-duplication.md",
+            "--max-duplicate-clusters",
+            "0",
+        ]
+    )
+
+    assert result == 0
+    assert scanned_targets == ["src/bioetl/domain"]
+    assert written_paths == [
+        "reports/quality/test-duplication.json",
+        "reports/quality/test-duplication.md",
+    ]
 
 
 def test_parse_pylint_duplicate_output_extracts_clusters() -> None:
