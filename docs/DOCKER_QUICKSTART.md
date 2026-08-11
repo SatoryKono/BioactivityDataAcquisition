@@ -112,6 +112,49 @@ python -m scripts.engineering.qa check-prometheus-rules --runner docker
 If neither `promtool` nor Docker is available, preflight emits warning
 `MONITORING_PROMQL_TOOL_MISSING`. Fail closed with `BIOETL_REQUIRE_PROMTOOL=1`.
 
+### Rule write conflicts + Prometheus memory
+
+Same-timestamp ingest WARNs
+(`Error on ingesting results from rule evaluation with different value but same timestamp`)
+drop samples and inflate WAL/head churn. Prevention:
+
+1. **Identity uniqueness gate** — `check-prometheus-rules` fails if two
+   `record:` rules share the same metric name **and** the same static `labels:`
+   (distinct labels like `reason=` are OK).
+2. **Slower evaluation** — dashboard monogroup + alerts use `interval: 30s`
+   (global `evaluation_interval: 30s`) to cut concurrent write pressure.
+3. **Memory budget** — `mem_limit: 3g`, `GOMEMLIMIT=2500MiB`, `GOGC=50`,
+   TSDB retention **7d / 2GB**, `query.max-concurrency=2`.
+
+```bash
+# After compose change, recreate Prometheus (limits do not hot-reload):
+docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml up -d --force-recreate prometheus
+```
+
+Live container still showing **10 GiB** limit means it was started from an old
+compose — recreate is required.
+
+### Partial rule errors (silent metric gaps)
+
+Prometheus **stays up** when individual rules fail evaluation or groups miss
+iterations — affected recording series simply stop updating. BioETL surfaces this:
+
+| Signal | Purpose |
+| --- | --- |
+| `bioetl_prometheus_rule_evaluation_failures_10m` | count of eval failures |
+| `bioetl_prometheus_rule_iterations_missed_10m` | missed group iterations |
+| `bioetl_prometheus_rule_partial_error_active_10m` | bool any partial error |
+| Alert `BioETLPrometheusRuleEvaluationFailures` | warning after 5m |
+| Alert `BioETLPrometheusRuleIterationsMissed` | warning after 10m |
+| Live `/api/v1/rules` lastError scan | fail closed on health=err |
+
+```bash
+# After monitoring is up — fails if any BioETL rule has lastError or recent failures:
+python scripts/ops/observability/check_prometheus_rules_health.py --json
+# Included in:
+python scripts/ops/observability/validate_live_observability.py
+```
+
 ## Main stack (default)
 
 ```bash
@@ -156,15 +199,24 @@ python scripts/ops/runtime/docker/runtime_manager.py start --stack monitoring --
 python scripts/ops/runtime/docker/runtime_manager.py status --stack monitoring
 ```
 
-Grafana bootstrap (`grafana/scripts/bootstrap-datasources.sh`) always starts the
-UI with Prometheus. Ops HTTP (Infinity / Run Explorer identity panels) is
-provisioned only when `/ops/control-plane/ready` matches the managed
-`BIOETL_RUNTIME_SOURCE_ID` within the poll budget (default 30×2s ≈ 60s). On
-timeout, unmanaged id, or mismatch the default is **Prometheus-only** (deferred
-Ops HTTP), not a crash loop. Status is written to
+Grafana bootstrap (`grafana/scripts/bootstrap-datasources.sh`) **always** starts
+the UI with Prometheus (provisioned *before* any Ops wait). Ops HTTP (Infinity /
+Run Explorer identity panels) is provisioned only when
+`/ops/control-plane/ready` matches the managed `BIOETL_RUNTIME_SOURCE_ID`.
+
+| Mode | Poll budget | On timeout / mismatch |
+| --- | --- | --- |
+| **Soft (default)** `REQUIRE_OPS_HTTP=0` | **5×1s ≈ 5s** | Prometheus-only, `exec /run.sh` (no crash) |
+| **Fail-closed** `REQUIRE_OPS_HTTP=1` | 30×2s ≈ 60s | `exit 1` (audit/render only) |
+
+Unmanaged / non-hex identity skips the wait entirely. Status:
 `/var/lib/grafana/bioetl-bootstrap-status.json` inside the container.
 
-For audit/render fail-closed (require Ops HTTP or refuse to start Grafana):
+A long 60s soft wait was a common restart thrash: bioetl late → bootstrap
+blocks → Grafana healthcheck fails → restart → repeat. Soft mode no longer does
+that.
+
+For audit/render fail-closed:
 
 ```bash
 export BIOETL_GRAFANA_REQUIRE_OPS_HTTP=1
@@ -266,7 +318,8 @@ Hardening defaults on this host class:
 | `%USERPROFILE%\.wslconfig` `memory` | **6 GiB** (not 16) |
 | main `bioetl` mem_limit | **768 m** (health server only) |
 | neo4j mem_limit / heap max | **768 m** / **384 m** |
-| monitoring `prometheus` mem_limit | **3 g** (was 10 g; TSDB 7d / 2 GB) |
+| monitoring `prometheus` mem_limit | **3 g** + `GOMEMLIMIT=2500MiB` (was 10 g unbounded) |
+| monitoring Prom evaluation | **30 s** groups (was 15 s monogroup thrash) |
 | monitoring `grafana` mem_limit | **2 g** (was 7.5 g) |
 | monitoring `renderer` mem_limit | **3 g** (was 15 g); concurrency **1** (was 2) |
 | monitoring `pushgateway` mem_limit | **512 m** (was 2.5 g) |
@@ -285,12 +338,23 @@ Rules:
   `-KeepForeignContainers`).
 - Do not thrash `--force-recreate` / multi-stack rebuild under low free RAM.
 - Grafana UI does **not** wait for renderer (screenshots are best-effort).
-- **Renderer failure recovery** (do not restart Grafana):
+- **Renderer failure recovery** (tertiary cause: dependency without recovery):
   1. Screenshots fail-fast via `GF_RENDERING_RENDERING_TIMEOUT` (default **20s**).
-  2. `.\scripts\ops\observability\grafana\recover_renderer.ps1` (or `.sh`)
-     recreates **only** renderer and waits for health.
-  3. If OOMKilled: free ≥4 GiB RAM, then re-run recover; after 3 failures
-     renderer stays down (`restart: on-failure:3`) by design.
+  2. Explicit recovery SSOT (never restarts Grafana):
+     ```bash
+     export PYTHONPATH=.
+     python scripts/ops/observability/grafana/recover_renderer.py
+     # or lifecycle:
+     python -m scripts.ops.runtime.docker.runtime_manager recover-renderer --stack monitoring
+     # Windows:
+     # .\scripts\ops\observability\grafana\recover_renderer.ps1
+     ```
+  3. Check only: `python scripts/ops/observability/grafana/recover_renderer.py --check-only`
+  4. If OOMKilled: free ≥4 GiB RAM, then re-run recover; after 3 failures
+     renderer stays down (`restart: on-failure:3`) by design — **call recover**,
+     do not restart Grafana.
+  5. Live still on **15 GiB / unless-stopped** means old compose — recreate:
+     `docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml up -d --force-recreate --no-deps renderer`
 
 Agent memory anchors:
 

@@ -1,0 +1,1 @@
+{"type":"error","errorType":"unknown","message":"Failed to get branch information in directory '.': Unable to determine base branch. Pass one explicitly with --base <branch>, or persist it with 'git config coderabbit.baseBranch <branch>'.","recoverable":false,"details":{"stage":"gitService.getBranchInfo"}}

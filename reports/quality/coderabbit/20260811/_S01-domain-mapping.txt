@@ -1,0 +1,15 @@
+src/bioetl/domain/mapping/__init__.py
+src/bioetl/domain/mapping/_publication_type_classification_support.py
+src/bioetl/domain/mapping/activity_fields.py
+src/bioetl/domain/mapping/classification_data.py
+src/bioetl/domain/mapping/molecule_fields.py
+src/bioetl/domain/mapping/organism_classification.py
+src/bioetl/domain/mapping/organism_classification_constants.py
+src/bioetl/domain/mapping/organism_classification_taxonomy.py
+src/bioetl/domain/mapping/protein_class_target_type.py
+src/bioetl/domain/mapping/protein_class_target_type_helpers.py
+src/bioetl/domain/mapping/publication_controlled_vocabulary.py
+src/bioetl/domain/mapping/publication_fields.py
+src/bioetl/domain/mapping/publication_type_classification.py
+src/bioetl/domain/mapping/publication_type_mapping.py
+src/bioetl/domain/mapping/pubmed_publication.py

@@ -1,323 +1,341 @@
-"""Sequential CodeRabbit leaf runner for CR-FULL-20260806-full."""
+"""Run exact-cover CodeRabbit leaves sequentially with bounded backoff."""
 
 from __future__ import annotations
 
+import io
 import json
 import os
-import re
 import subprocess
 import sys
+import tarfile
+import tempfile
 import time
-from datetime import datetime, timezone, UTC
+from collections import Counter
+from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
-OUT = Path("reports/quality/coderabbit/20260806-full")
-MATRIX = OUT / "01-scope-matrix.json"
-PROGRESS = OUT / "progress.json"
-LOG_DIR = OUT / "logs"
-LOG_DIR.mkdir(parents=True, exist_ok=True)
-
-# Prefer WSL path then local
-CODERABBIT = os.environ.get("CODERABBIT_BIN", "coderabbit")
+ROOT = Path(__file__).resolve().parents[3]
+CAMPAIGN_DATE = os.environ.get(
+    "CODERABBIT_CAMPAIGN_DATE", datetime.now(UTC).strftime("%Y%m%d")
+)
+OUT = ROOT / "reports" / "quality" / "coderabbit" / CAMPAIGN_DATE
+MATRIX_PATH = OUT / "01-scope-matrix.json"
+PROGRESS_PATH = OUT / "progress.json"
+BLOCKERS_PATH = OUT / "BLOCKERS.md"
+PROMPT_PATH = OUT / "02-review-prompt.md"
+CODERABBIT = os.environ.get("CODERABBIT_BIN", "/home/fedor/.local/bin/coderabbit")
+REVIEW_TIMEOUT_SECONDS = int(os.environ.get("CODERABBIT_REVIEW_TIMEOUT", "600"))
+SLEEP_SECONDS = float(os.environ.get("CODERABBIT_SLEEP", "5"))
 
 
 def now() -> str:
     return datetime.now(UTC).isoformat()
 
 
-Progress = dict[str, object]
-Leaf = dict[str, object]
-LeafResult = dict[str, object]
-
-
-def load_progress() -> Progress:
-    if PROGRESS.exists():
-        loaded = json.loads(PROGRESS.read_text(encoding="utf-8"))
-        if isinstance(loaded, dict):
-            return loaded
-    return {
-        "started": now(),
-        "results": {},
-        "completed": [],
-        "failed": [],
-        "skipped": [],
-    }
-
-
-def save_progress(p: Progress) -> None:
-    p["updated"] = now()
-    PROGRESS.write_text(json.dumps(p, indent=2, ensure_ascii=False), encoding="utf-8")
-
-
-def _as_str(value: object, *, default: str = "") -> str:
-    return value if isinstance(value, str) else default
-
-
-def _as_str_list(value: object) -> list[str]:
-    if not isinstance(value, list):
-        return []
-    return [item for item in value if isinstance(item, str)]
-
-
-def _as_result_map(value: object) -> dict[str, LeafResult]:
+def load_json(path: Path, default: dict[str, Any]) -> dict[str, Any]:
+    if not path.exists():
+        return default
+    value = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(value, dict):
-        return {}
-    out: dict[str, LeafResult] = {}
-    for key, item in value.items():
-        if isinstance(key, str) and isinstance(item, dict):
-            out[key] = item
-    return out
+        raise TypeError(f"expected JSON object: {path}")
+    return value
 
 
-def run_leaf(leaf: Leaf, base: str = "main") -> LeafResult:
-    lid = _as_str(leaf.get("id"), default="unknown")
-    log_path = LOG_DIR / f"review_{lid}.log"
-    cmd: list[str]
+def save_progress(progress: dict[str, Any]) -> None:
+    progress["updated_utc"] = now()
+    PROGRESS_PATH.write_text(
+        json.dumps(progress, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+
+
+def record_blocker(leaf: dict[str, Any], kind: str, detail: str) -> None:
+    if not BLOCKERS_PATH.exists():
+        BLOCKERS_PATH.write_text(
+            "# CodeRabbit campaign blockers\n\n"
+            "Each entry requires GitHub reconciliation before closeout.\n\n",
+            encoding="utf-8",
+        )
+    with BLOCKERS_PATH.open("a", encoding="utf-8") as stream:
+        stream.write(
+            f"## {leaf['id']} — {kind}\n\n"
+            f"- UTC: `{now()}`\n"
+            f"- Wave: `{leaf['wave']}`\n"
+            f"- Files: `{leaf['files']}`\n"
+            f"- Detail: {detail}\n"
+            f"- GitHub issue: pending reconciliation\n\n"
+        )
+
+
+def manifest_files(leaf: dict[str, Any]) -> list[str]:
+    manifest = ROOT / str(leaf["file_list"])
+    paths = [line for line in manifest.read_text(encoding="utf-8").splitlines() if line]
+    expected = int(leaf["files"])
+    if len(paths) != expected:
+        raise RuntimeError(
+            f"{leaf['id']}: manifest count {len(paths)} != matrix count {expected}"
+        )
+    if len(paths) > 300:
+        raise RuntimeError(f"{leaf['id']}: {len(paths)} files exceeds hard cap 300")
+    return paths
+
+
+def run_checked(cmd: list[str], cwd: Path, env: dict[str, str]) -> None:
+    subprocess.run(
+        cmd,
+        cwd=cwd,
+        env=env,
+        check=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
+    )
+
+
+def materialize_leaf(base_sha: str, paths: list[str], target: Path) -> None:
+    archive_env = os.environ.copy()
+    archive_env["GIT_LFS_SKIP_SMUDGE"] = "1"
+    archive = subprocess.run(
+        ["git", "-C", str(ROOT), "archive", "--format=tar", base_sha, "--", *paths],
+        env=archive_env,
+        check=True,
+        capture_output=True,
+    )
+    with tarfile.open(fileobj=io.BytesIO(archive.stdout), mode="r:") as bundle:
+        bundle.extractall(target, filter="data")
+
+    git_env = os.environ.copy()
+    git_env["GIT_LFS_SKIP_SMUDGE"] = "1"
+    git_env["GIT_AUTHOR_NAME"] = "BioETL CR-FULL Audit"
+    git_env["GIT_AUTHOR_EMAIL"] = "audit@local.invalid"
+    git_env["GIT_COMMITTER_NAME"] = "BioETL CR-FULL Audit"
+    git_env["GIT_COMMITTER_EMAIL"] = "audit@local.invalid"
+    run_checked(["git", "init", "-q"], target, git_env)
+    run_checked(
+        [
+            "git",
+            "remote",
+            "add",
+            "origin",
+            "https://github.com/SatoryKono/BioactivityDataAcquisition.git",
+        ],
+        target,
+        git_env,
+    )
+    run_checked(
+        ["git", "commit", "--allow-empty", "-qm", "audit leaf base"], target, git_env
+    )
+    run_checked(["git", "branch", "main"], target, git_env)
+    run_checked(["git", "config", "coderabbit.baseBranch", "main"], target, git_env)
+    run_checked(["git", "add", "--all"], target, git_env)
+    run_checked(["git", "commit", "-qm", "materialize audit leaf"], target, git_env)
+    run_checked(["git", "branch", "-M", "audit-leaf"], target, git_env)
+
+
+def classify_output(return_code: int, output: str) -> tuple[str, str]:
+    lowered = output.lower()
+    if "rate_limit" in lowered or "rate limit" in lowered or "rate-limit" in lowered:
+        return "rate_limit", "CodeRabbit rate limit"
+    if "all files are ignored" in lowered or "all_files_ignored" in lowered:
+        return "all_files_ignored", "CodeRabbit reported all files ignored"
+    if "not_authenticated" in lowered or "not authenticated" in lowered:
+        return "auth_error", "CodeRabbit authentication failed"
+    if return_code != 0:
+        return "error", f"CodeRabbit exit code {return_code}"
+    return "ok", ""
+
+
+def run_leaf(leaf: dict[str, Any], base_sha: str) -> dict[str, Any]:
+    leaf_id = str(leaf["id"])
+    wave = str(leaf["wave"])
+    log_path = OUT / f"review_{wave}_{leaf_id}.log"
+    paths = manifest_files(leaf)
+    started = time.monotonic()
     env = os.environ.copy()
     env["PATH"] = f"/home/fedor/.local/bin:{env.get('PATH', '')}"
     env["NO_COLOR"] = "1"
     env["TERM"] = "dumb"
+    env["GIT_LFS_SKIP_SMUDGE"] = "1"
 
-    leaf_dir = leaf.get("dir")
-    use_file_list = leaf.get("use_file_list")
-    if isinstance(leaf_dir, str) and leaf_dir:
-        cmd = [
+    with tempfile.TemporaryDirectory(prefix=f"bioetl-cr-{leaf_id[:32]}-") as tmp:
+        target = Path(tmp)
+        try:
+            materialize_leaf(base_sha, paths, target)
+        except (OSError, subprocess.CalledProcessError, tarfile.TarError) as exc:
+            output = f"LEAF_MATERIALIZATION_FAILED: {exc}\n"
+            log_path.write_text(output, encoding="utf-8")
+            return {
+                "id": leaf_id,
+                "wave": wave,
+                "files": len(paths),
+                "status": "materialization_error",
+                "reason": str(exc),
+                "log": str(log_path.relative_to(ROOT)),
+                "elapsed_s": round(time.monotonic() - started, 1),
+            }
+
+        command = [
             CODERABBIT,
             "review",
             "--base",
-            base,
+            "main",
             "--dir",
-            leaf_dir,
-            "--plain",
+            ".",
+            "--agent",
+            "-c",
+            str(ROOT / "AGENTS.md"),
+            str(ROOT / ".coderabbit.yaml"),
+            str(PROMPT_PATH),
         ]
-    elif isinstance(use_file_list, str) and use_file_list:
-        # CodeRabbit CLI may not accept arbitrary file lists; try --dir parent if single root
-        # Fallback: use first common directory prefix
-        files = Path(use_file_list).read_text(encoding="utf-8").splitlines()
-        files = [f for f in files if f.strip()]
-        if not files:
+        try:
+            process = subprocess.run(
+                command,
+                cwd=target,
+                env=env,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=REVIEW_TIMEOUT_SECONDS,
+                check=False,
+            )
+            output = process.stdout or ""
+            if process.stderr:
+                output += "\n" + process.stderr
+            log_path.write_text(output, encoding="utf-8")
+            status, reason = classify_output(process.returncode, output)
             return {
-                "id": lid,
-                "status": "skipped",
-                "reason": "empty file list",
-                "log": str(log_path),
+                "id": leaf_id,
+                "wave": wave,
+                "files": len(paths),
+                "status": status,
+                "reason": reason,
+                "exit_code": process.returncode,
+                "log": str(log_path.relative_to(ROOT)),
+                "bytes": len(output.encode("utf-8")),
+                "elapsed_s": round(time.monotonic() - started, 1),
+                "command": command,
             }
-        # Use smallest common directory that still has under-cap... actually use first path's parent chain
-        # Preferred: temporary approach --dir on longest common prefix
-        parts = [Path(f).parts for f in files]
-        common: list[str] = []
-        for segs in zip(*parts, strict=True):
-            if len(set(segs)) == 1:
-                common.append(segs[0])
-            else:
-                break
-        if not common:
+        except subprocess.TimeoutExpired as exc:
+            partial = (exc.stdout or "") if isinstance(exc.stdout, str) else ""
+            log_path.write_text(
+                partial + f"\nTIMEOUT after {REVIEW_TIMEOUT_SECONDS}s\n",
+                encoding="utf-8",
+            )
             return {
-                "id": lid,
-                "status": "skipped",
-                "reason": "no common dir prefix for file list",
-                "log": str(log_path),
+                "id": leaf_id,
+                "wave": wave,
+                "files": len(paths),
+                "status": "timeout",
+                "reason": f"timeout after {REVIEW_TIMEOUT_SECONDS}s",
+                "log": str(log_path.relative_to(ROOT)),
+                "elapsed_s": round(time.monotonic() - started, 1),
             }
-        common_dir = "/".join(common)
-        # If common dir is too broad, still run — file count already capped at leaf level
-        # but --dir will review ALL files under dir which may exceed 300!
-        # For safety: skip if git ls-files under common_dir > 300 and note residual
-        r = subprocess.run(
-            ["git", "ls-files", "--", common_dir],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        n = len([x for x in r.stdout.splitlines() if x.strip()])
-        if n > 300:
-            return {
-                "id": lid,
-                "status": "skipped",
-                "reason": f"common_dir {common_dir} expands to {n}>300; need sparse checkout",
-                "log": str(log_path),
-                "common_dir": common_dir,
-                "expanded_files": n,
-            }
-        cmd = [
-            CODERABBIT,
-            "review",
-            "--base",
-            base,
-            "--dir",
-            common_dir,
-            "--plain",
-        ]
-    else:
-        return {
-            "id": lid,
-            "status": "skipped",
-            "reason": "no dir or file list",
-            "log": str(log_path),
-        }
-
-    t0 = time.time()
-    try:
-        proc = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            env=env,
-            timeout=900,
-            check=False,
-        )
-        out = (proc.stdout or "") + ("\n" + proc.stderr if proc.stderr else "")
-        log_path.write_text(out, encoding="utf-8")
-        elapsed = round(time.time() - t0, 1)
-        low = out.lower()
-        status = "ok"
-        reason = ""
-        if proc.returncode != 0:
-            status = "error"
-            reason = f"exit {proc.returncode}"
-        if "rate limit" in low or "rate_limit" in low:
-            status = "rate_limit"
-            reason = "rate_limit"
-        if "all files ignored" in low:
-            status = "ignored"
-            reason = "all_files_ignored"
-        if "not authenticated" in low or ("auth" in low and "fail" in low):
-            status = "auth_error"
-            reason = "auth"
-        return {
-            "id": lid,
-            "status": status,
-            "reason": reason,
-            "exit_code": proc.returncode,
-            "elapsed_s": elapsed,
-            "log": str(log_path),
-            "bytes": len(out),
-            "cmd": cmd,
-        }
-    except subprocess.TimeoutExpired:
-        log_path.write_text("TIMEOUT after 900s\n", encoding="utf-8")
-        return {
-            "id": lid,
-            "status": "timeout",
-            "reason": "timeout 900s",
-            "log": str(log_path),
-            "cmd": cmd,
-        }
 
 
-def _progress_results(progress: Progress) -> dict[str, LeafResult]:
-    return _as_result_map(progress.get("results"))
-
-
-def _progress_str_list(progress: Progress, key: str) -> list[str]:
-    return _as_str_list(progress.get(key))
-
-
-def _set_progress_result(progress: Progress, lid: str, result: LeafResult) -> None:
-    results = _progress_results(progress)
-    results[lid] = result
-    progress["results"] = results
-
-
-def _append_progress_list(progress: Progress, key: str, lid: str) -> None:
-    items = _progress_str_list(progress, key)
-    items.append(lid)
-    progress[key] = items
+def selected_leaves(matrix: dict[str, Any]) -> list[dict[str, Any]]:
+    raw_leaves = matrix.get("leaves", [])
+    leaves = [leaf for leaf in raw_leaves if isinstance(leaf, dict)]
+    wave = os.environ.get("CR_WAVE")
+    ids = {item for item in os.environ.get("CR_LEAVES", "").split(",") if item}
+    if wave:
+        leaves = [leaf for leaf in leaves if leaf.get("wave") == wave]
+    if ids:
+        leaves = [leaf for leaf in leaves if leaf.get("id") in ids]
+    return sorted(leaves, key=lambda leaf: (str(leaf["wave"]), str(leaf["id"])))
 
 
 def main() -> int:
-    matrix = json.loads(MATRIX.read_text(encoding="utf-8"))
-    raw_leaves = matrix.get("leaves", [])
-    leaves: list[Leaf] = [leaf for leaf in raw_leaves if isinstance(leaf, dict)]
-    # optional filters
-    only_wave = os.environ.get("CR_WAVE")  # e.g. A
-    only_ids = os.environ.get("CR_LEAVES")  # comma ids
-    max_leaves = int(os.environ.get("CR_MAX_LEAVES", "0") or "0")
-    sleep_s = float(os.environ.get("CR_SLEEP", "5"))
-
-    if only_wave:
-        leaves = [leaf for leaf in leaves if leaf.get("wave") == only_wave]
-    if only_ids:
-        want = set(only_ids.split(","))
-        leaves = [leaf for leaf in leaves if _as_str(leaf.get("id")) in want]
-    # stable order: wave then id
-    wave_order = {"A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 5, "R": 6}
-    leaves = sorted(
-        leaves,
-        key=lambda item: (
-            wave_order.get(_as_str(item.get("wave")), 9),
-            _as_str(item.get("id")),
-        ),
+    matrix = load_json(MATRIX_PATH, {})
+    if matrix.get("coverage_ok") is not True:
+        raise RuntimeError("refusing to run a non-exact scope matrix")
+    base_sha = str(matrix["base_sha"])
+    leaves = selected_leaves(matrix)
+    progress = load_json(
+        PROGRESS_PATH,
+        {
+            "campaign": matrix["campaign"],
+            "base_sha": base_sha,
+            "started_utc": now(),
+            "results": {},
+        },
     )
-    if max_leaves > 0:
-        leaves = leaves[:max_leaves]
+    results = progress.setdefault("results", {})
+    if not isinstance(results, dict):
+        raise TypeError("progress.results must be an object")
 
-    progress = load_progress()
-    done = set(_progress_str_list(progress, "completed")) | set(
-        _progress_results(progress).keys()
+    print(
+        f"campaign={matrix['campaign']} base={base_sha} planned={len(leaves)} sequential=true"
     )
-
-    print(f"planned={len(leaves)} already={len(done)} sleep={sleep_s}")
-    rate_limit_hits = 0
-
-    for i, leaf in enumerate(leaves, 1):
-        lid = _as_str(leaf.get("id"), default="unknown")
-        prior = _progress_results(progress).get(lid, {})
-        if lid in done and prior.get("status") in {"ok", "ignored", "skipped"}:
-            print(f"[{i}/{len(leaves)}] SKIP done {lid}")
+    for index, leaf in enumerate(leaves, 1):
+        leaf_id = str(leaf["id"])
+        prior = results.get(leaf_id)
+        if isinstance(prior, dict) and prior.get("status") == "ok":
+            print(f"[{index}/{len(leaves)}] SKIP completed {leaf_id}", flush=True)
             continue
         print(
-            f"[{i}/{len(leaves)}] RUN {lid} wave={leaf.get('wave')} "
-            f"files={leaf.get('files')} dir={leaf.get('dir')}"
+            f"[{index}/{len(leaves)}] RUN wave={leaf['wave']} leaf={leaf_id} files={leaf['files']}",
+            flush=True,
         )
-        result = run_leaf(leaf)
-        _set_progress_result(progress, lid, result)
-        st = _as_str(result.get("status"))
-        if st == "ok":
-            _append_progress_list(progress, "completed", lid)
-        elif st in {"skipped", "ignored"}:
-            _append_progress_list(progress, "skipped", lid)
-        else:
-            _append_progress_list(progress, "failed", lid)
+        result = run_leaf(leaf, base_sha)
+        results[leaf_id] = result
         save_progress(progress)
         print(
-            f"  -> {st} {result.get('reason', '')} "
-            f"log={result.get('log')} bytes={result.get('bytes')}"
+            f"[{index}/{len(leaves)}] RESULT leaf={leaf_id} status={result['status']} "
+            f"elapsed={result['elapsed_s']}s bytes={result.get('bytes', 0)}",
+            flush=True,
         )
 
-        if st == "rate_limit":
-            rate_limit_hits += 1
-            wait = min(300, 30 * rate_limit_hits)
-            print(f"  rate_limit backoff {wait}s")
-            time.sleep(wait)
-            # retry once
-            print(f"  RETRY {lid}")
-            result = run_leaf(leaf)
-            _set_progress_result(progress, lid, result)
-            if result.get("status") == "ok":
-                _append_progress_list(progress, "completed", lid)
-            save_progress(progress)
-            print(f"  -> retry {result.get('status')}")
-            if result.get("status") == "rate_limit":
-                print("  hard rate_limit — stop batch; resume later")
+        if result["status"] == "rate_limit":
+            record_blocker(leaf, "rate_limit", str(result["reason"]))
+            for wait_seconds in (30, 60):
+                time.sleep(wait_seconds)
+                print(
+                    f"[{index}/{len(leaves)}] RETRY leaf={leaf_id} after={wait_seconds}s",
+                    flush=True,
+                )
+                retry = run_leaf(leaf, base_sha)
+                results[leaf_id] = retry
+                save_progress(progress)
+                print(
+                    f"[{index}/{len(leaves)}] RETRY_RESULT leaf={leaf_id} status={retry['status']}",
+                    flush=True,
+                )
+                if retry["status"] != "rate_limit":
+                    break
+            if results[leaf_id]["status"] == "rate_limit":
+                print(
+                    "RATE_LIMIT_PERSISTS: stopping this wave for bounded backoff",
+                    flush=True,
+                )
                 break
-        elif st == "auth_error":
-            print("  auth error — abort")
-            break
-        else:
-            time.sleep(sleep_s)
+        elif result["status"] == "all_files_ignored":
+            record_blocker(leaf, "all_files_ignored", str(result["reason"]))
+        elif result["status"] in {
+            "auth_error",
+            "error",
+            "timeout",
+            "materialization_error",
+        }:
+            record_blocker(leaf, str(result["status"]), str(result["reason"]))
 
-    # summary
-    results = _progress_results(progress)
-    counts: dict[str, int] = {}
-    for item in results.values():
-        status = _as_str(item.get("status"), default="unknown")
-        counts[status] = counts.get(status, 0) + 1
-    print("SUMMARY", counts)
-    (OUT / "run_summary.json").write_text(
-        json.dumps({"counts": counts, "results": results}, indent=2), encoding="utf-8"
+        time.sleep(SLEEP_SECONDS)
+
+    counts = Counter(
+        str(item.get("status", "unknown"))
+        for item in results.values()
+        if isinstance(item, dict)
     )
+    summary = {
+        "campaign": matrix["campaign"],
+        "base_sha": base_sha,
+        "updated_utc": now(),
+        "counts": dict(sorted(counts.items())),
+        "results": results,
+    }
+    (OUT / "run_summary.json").write_text(
+        json.dumps(summary, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+    print(f"SUMMARY {dict(sorted(counts.items()))}", flush=True)
     return 0
 
 
