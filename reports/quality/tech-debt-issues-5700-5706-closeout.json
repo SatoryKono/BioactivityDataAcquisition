@@ -93,15 +93,15 @@
       "coverage_actual_percent": 95.69,
       "coverage_percent_fallback_used": false,
       "coverage_xml_present": true,
-      "refreshed_at_utc": "2026-08-11T17:14:19.960361+00:00",
-      "slowest_total_cases": 47389,
-      "source_commit": "a4a95fd6396fc2f00319d2ddc10de4dab09be825",
-      "source_run_id": "github-31515014563-1",
+      "refreshed_at_utc": "2026-08-11T20:14:55.115980+00:00",
+      "slowest_total_cases": 47415,
+      "source_commit": "41acba4f8791939ec4c8682d895477540e78e263",
+      "source_run_id": "github-31522322879-1",
       "top_slow_zone": {
-        "max_duration_s": 19.466,
-        "test_count": 4,
-        "total_duration_s": 43.432,
-        "zone": "tests.unit.scripts.docs.passports.test_passport_projector"
+        "zone": "tests.unit.scripts.docs.passports.test_passport_projector",
+        "test_count": 3,
+        "total_duration_s": 43.499,
+        "max_duration_s": 21.344
       }
     },
     "5702": {
@@ -188,9 +188,9 @@
           "path": "src/bioetl/domain/immutability.py"
         }
       ],
-      "under_70_count": 15,
-      "under_85_count": 68,
-      "unmeasured_count": 17,
+      "under_70_count": 8,
+      "under_85_count": 65,
+      "unmeasured_count": 0,
       "zero_coverage_count": 0
     }
   },

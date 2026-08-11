@@ -27,8 +27,9 @@ def _dashboards() -> list[Path]:
 
 
 def test_dux5_governance_docs_exist() -> None:
-    assert (DOCS / "dux5-copy-dictionary.md").is_file()
-    assert (DOCS / "dux5-screenshot-regression-protocol.md").is_file()
+    archive = DOCS / "archive" / "audit-protocols"
+    assert (archive / "dux5-copy-dictionary.md").is_file()
+    assert (archive / "dux5-screenshot-regression-protocol.md").is_file()
     design = (DOCS / "design-system.md").read_text(encoding="utf-8")
     assert "dux5-copy-dictionary.md" in design
 
