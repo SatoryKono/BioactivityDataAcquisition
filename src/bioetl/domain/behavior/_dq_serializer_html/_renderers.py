@@ -21,7 +21,8 @@ def status_color_class(status: str) -> str:
     if status_lower in ("pass", "passed"):
         return "pass"
     if status_lower in ("warn", "warning"):
-        return "warning"
+        # Stylesheet uses .check-item.warn (not .warning).
+        return "warn"
     return "fail"
 
 
@@ -209,10 +210,20 @@ def _render_check_results_card(checks_html: str) -> str:
 
 
 def _render_raw_data_card(data: JsonDict) -> str:
-    payload = orjson.dumps(
-        data,
-        option=orjson.OPT_INDENT_2 | orjson.OPT_SORT_KEYS,
-    ).decode()
+    try:
+        payload = orjson.dumps(
+            data,
+            option=orjson.OPT_INDENT_2 | orjson.OPT_SORT_KEYS | orjson.OPT_NON_STR_KEYS,
+        ).decode()
+    except (TypeError, orjson.JSONEncodeError):
+        # Fail-soft: keep report rendering alive for Decimal/set/non-str keys.
+        payload = orjson.dumps(
+            {
+                "error": "raw_data_not_serializable",
+                "keys": sorted(map(str, data.keys())),
+            },
+            option=orjson.OPT_INDENT_2 | orjson.OPT_SORT_KEYS,
+        ).decode()
     return f"""
     <div class="card">
         <h2>Raw Report Data</h2>
