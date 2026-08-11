@@ -32,9 +32,7 @@ CONTRACT_PATH = REPO_ROOT / "scripts" / "ai" / "junie" / "junie-mirror-contract.
 
 type JsonObject = dict[str, Any]
 
-MAPPED_PROFILE_PATTERN = re.compile(
-    r"^\|\s*`(py-[a-z0-9-]+)`\s*\|", re.MULTILINE
-)
+MAPPED_PROFILE_PATTERN = re.compile(r"^\|\s*`(py-[a-z0-9-]+)`\s*\|", re.MULTILINE)
 
 
 def sha256_of(path: Path) -> str:
