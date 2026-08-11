@@ -1,0 +1,3 @@
+{"type":"review_context","reviewType":"all","currentBranch":"audit-leaf","baseBranch":"main","workingDirectory":"/tmp/bioetl-cr-S17-docs-00-project-01-vzj14lgk"}
+{"type":"status","phase":"connecting","status":"connecting_to_review_service"}
+{"type":"error","errorType":"connection","message":"Connection failed: WebSocket closed","recoverable":true,"details":{"cause":{"name":"TRPCWebSocketClosedError"},"name":"TRPCClientError"}}
