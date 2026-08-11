@@ -8,6 +8,7 @@ import json
 import shutil
 import subprocess
 import sys
+from collections.abc import Sequence
 from pathlib import Path
 from typing import TypedDict
 
