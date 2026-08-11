@@ -704,7 +704,7 @@ ______________________________________________________________________
 | `doi`                        | str   | Yes      | DOI публикации (валидируется regex)         |
 | `pmid`                       | str   | Yes      | PubMed ID                                   |
 | `pmc_id`                     | str   | Yes      | PubMed Central ID                           |
-| `corpus_id`                  | float | Yes      | Semantic Scholar Corpus ID                  |
+| `corpus_id`                  | str   | Yes      | Semantic Scholar Corpus ID (decimal string; avoids float precision loss) |
 | `dblp_id`                    | str   | Yes      | DBLP идентификатор                          |
 | `title`                      | str   | Yes      | Заголовок публикации                        |
 | `abstract`                   | str   | Yes      | Аннотация                                   |
