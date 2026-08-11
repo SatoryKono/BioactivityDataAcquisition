@@ -76,11 +76,11 @@ def test_collect_forbidden_pipeline_source_overrides_composes_helpers() -> None:
     assert "source.provider_config.max_url_length" in forbidden
 
 
-def test_collect_forbidden_pipeline_source_overrides_allows_clean_entity_source() -> None:
+def test_collect_forbidden_pipeline_source_overrides_allows_clean_entity_source() -> (
+    None
+):
     assert (
-        mod._collect_forbidden_pipeline_source_overrides(
-            {"parameters": {"limit": 10}}
-        )
+        mod._collect_forbidden_pipeline_source_overrides({"parameters": {"limit": 10}})
         == []
     )
 
