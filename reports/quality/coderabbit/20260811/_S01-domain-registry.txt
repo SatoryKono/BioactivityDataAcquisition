@@ -1,0 +1,6 @@
+src/bioetl/domain/registry/__init__.py
+src/bioetl/domain/registry/field_aliases.py
+src/bioetl/domain/registry/publication.py
+src/bioetl/domain/registry/publication_data.py
+src/bioetl/domain/registry/publication_models.py
+src/bioetl/domain/registry/semantic_fields.py

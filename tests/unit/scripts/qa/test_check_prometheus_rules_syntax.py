@@ -92,6 +92,72 @@ def test_check_rules_syntax_local_success(
     assert result["runner"] == "local"
 
 
+def test_recording_identity_uniqueness_flags_same_labels(tmp_path: Path) -> None:
+    path = tmp_path / "dup.yml"
+    path.write_text(
+        yaml.safe_dump(
+            {
+                "groups": [
+                    {
+                        "name": "g",
+                        "rules": [
+                            {
+                                "record": "bioetl_x",
+                                "labels": {"reason": "a"},
+                                "expr": "vector(1)",
+                            },
+                            {
+                                "record": "bioetl_x",
+                                "labels": {"reason": "a"},
+                                "expr": "vector(2)",
+                            },
+                        ],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    violations = cpr.validate_recording_rule_identity_uniqueness([path])
+    assert len(violations) == 1
+    assert "bioetl_x" in violations[0]
+    assert "reason=a" in violations[0]
+
+
+def test_recording_identity_uniqueness_allows_distinct_labels(tmp_path: Path) -> None:
+    path = tmp_path / "ok.yml"
+    path.write_text(
+        yaml.safe_dump(
+            {
+                "groups": [
+                    {
+                        "name": "g",
+                        "rules": [
+                            {
+                                "record": "bioetl_x",
+                                "labels": {"reason": "a"},
+                                "expr": "vector(1)",
+                            },
+                            {
+                                "record": "bioetl_x",
+                                "labels": {"reason": "b"},
+                                "expr": "vector(2)",
+                            },
+                        ],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    assert cpr.validate_recording_rule_identity_uniqueness([path]) == []
+
+
+def test_recording_identity_uniqueness_ok_for_shipped_rules() -> None:
+    files = cpr.list_shipped_rule_files(Path("grafana/prometheus-rules"))
+    assert cpr.validate_recording_rule_identity_uniqueness(files) == []
+
+
 def test_check_rules_syntax_reports_failure(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

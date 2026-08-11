@@ -7,8 +7,12 @@
 #   steps fail. Those failures only defer trust datasources.
 # - Hard exit 1 only when BIOETL_GRAFANA_REQUIRE_OPS_HTTP=1 and Ops trust cannot
 #   be proven (audit/render fail-closed).
-# - Ops ready poll default 30×2s (~60s). Override via
-#   BIOETL_GRAFANA_OPS_READY_ATTEMPTS / BIOETL_GRAFANA_OPS_READY_SLEEP_SEC.
+# - Ops ready poll (soft default): 5×1s (~5s) — do NOT block Grafana for ~60s
+#   when bioetl is late (that caused restart thrash / "stack fell").
+# - Ops ready poll (REQUIRE_OPS_HTTP=1): 30×2s (~60s) unless overridden.
+# - Override: BIOETL_GRAFANA_OPS_READY_ATTEMPTS / BIOETL_GRAFANA_OPS_READY_SLEEP_SEC.
+# - Prometheus is provisioned BEFORE the Ops poll so a slow bioetl never blocks
+#   the core datasource path.
 # - BIOETL_OPS_HTTP_URL is validated before any HTTP probe.
 #
 # shellcheck disable=SC2039,SC3043
@@ -21,8 +25,15 @@ RENDERING_SERVER_URL="${GF_RENDERING_SERVER_URL:-}"
 STALE_RENDERER_PLUGIN_DIR="/var/lib/grafana/plugins/grafana-image-renderer"
 EXPECTED_RUNTIME_SOURCE_ID="${BIOETL_EXPECTED_RUNTIME_SOURCE_ID:-unmanaged}"
 REQUIRE_OPS_HTTP="${BIOETL_GRAFANA_REQUIRE_OPS_HTTP:-0}"
-OPS_READY_ATTEMPTS="${BIOETL_GRAFANA_OPS_READY_ATTEMPTS:-30}"
-OPS_READY_SLEEP_SEC="${BIOETL_GRAFANA_OPS_READY_SLEEP_SEC:-2}"
+
+# Soft vs fail-closed poll budgets (host/compose may still override explicitly).
+if [ "${REQUIRE_OPS_HTTP}" = "1" ]; then
+  OPS_READY_ATTEMPTS="${BIOETL_GRAFANA_OPS_READY_ATTEMPTS:-30}"
+  OPS_READY_SLEEP_SEC="${BIOETL_GRAFANA_OPS_READY_SLEEP_SEC:-2}"
+else
+  OPS_READY_ATTEMPTS="${BIOETL_GRAFANA_OPS_READY_ATTEMPTS:-5}"
+  OPS_READY_SLEEP_SEC="${BIOETL_GRAFANA_OPS_READY_SLEEP_SEC:-1}"
+fi
 
 if [ -z "${BIOETL_OPS_HTTP_URL:-}" ]; then
   # Docker-internal compose service name on the monitoring network (ADR-010 local-only).
@@ -176,6 +187,11 @@ ensure_infinity_plugin() {
   return 1
 }
 
+# --- Always provision Prometheus first (never blocked by Ops wait) ---
+if ! provision_prometheus_only; then
+  note_error "Prometheus provisioning incomplete; Grafana will still start"
+fi
+
 # --- URL gate: never issue HTTP without a validated base URL ---
 if is_valid_ops_http_url "${BIOETL_OPS_HTTP_URL}"; then
   OPS_HTTP_URL_VALID=1
@@ -186,6 +202,8 @@ else
 fi
 
 # --- identity / Ops ready gate (soft by default; skipped if URL invalid) ---
+# Soft mode: short poll then Prometheus-only. Do not exit 1 on timeout.
+# Fail-closed (REQUIRE_OPS_HTTP=1): longer poll, then exit 1 via fail_or_defer_ops.
 if [ "${OPS_HTTP_URL_VALID}" -eq 1 ]; then
   if [ "${#EXPECTED_RUNTIME_SOURCE_ID}" -eq 64 ] && \
     ! printf '%s' "${EXPECTED_RUNTIME_SOURCE_ID}" | grep -Eq '[^0-9a-f]'; then
@@ -195,6 +213,7 @@ if [ "${OPS_HTTP_URL_VALID}" -eq 1 ]; then
   fi
 
   if [ "${IDENTITY_VALID}" -ne 1 ]; then
+    # Default "unmanaged" / non-hex id: skip wait entirely (no 60s hang).
     fail_or_defer_ops "invalid_or_unmanaged_identity"
   else
     OPS_READY_URL="${BIOETL_OPS_HTTP_URL%/}/ops/control-plane/ready"
@@ -203,6 +222,7 @@ if [ "${OPS_HTTP_URL_VALID}" -eq 1 ]; then
       note_error "refusing HTTP probe: derived ready URL failed validation"
       fail_or_defer_ops "invalid_ops_ready_url"
     else
+      log "Ops HTTP ready poll: attempts=${OPS_READY_ATTEMPTS} sleep=${OPS_READY_SLEEP_SEC}s require=${REQUIRE_OPS_HTTP}"
       SOURCE_ID_ATTEMPT=1
       SEEN_FOREIGN_IDENTITY=0
       while [ "${SOURCE_ID_ATTEMPT}" -le "${OPS_READY_ATTEMPTS}" ]; do
@@ -231,14 +251,11 @@ if [ "${OPS_HTTP_URL_VALID}" -eq 1 ]; then
       elif [ "${SEEN_FOREIGN_IDENTITY}" -eq 1 ]; then
         fail_or_defer_ops "identity_mismatch"
       else
+        # Soft: defer + continue to /run.sh. Hard: exit 1 inside fail_or_defer_ops.
         fail_or_defer_ops "identity_timeout_or_unreachable"
       fi
     fi
   fi
-fi
-
-if ! provision_prometheus_only; then
-  note_error "Prometheus provisioning incomplete; Grafana will still start"
 fi
 
 if [ "${OPS_HTTP_STATE}" = "ready" ]; then
