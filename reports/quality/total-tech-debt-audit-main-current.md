@@ -2,31 +2,33 @@
 
 Lifecycle status: current
 
+debt-governance gates passing
+
 Audit date: 2026-08-10
 
 Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `1cb1e6e5741dcd0efec8408d3b3d4b6c45cdeece`
+Audited commit SHA: `41acba4f8791939ec4c8682d895477540e78e263`
 
-Evidence surface SHA-256: `59814e0018b30677c5989777b293fe741300a255b421a6d453e34e19791b71a5`
+Evidence surface SHA-256: `807fcdf9988c98d7a36fff47b7b7d4ccca4b00f2b56f72ddc70b98bbf5317497`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-07-27-r1",
-  "audited_commit_sha": "1cb1e6e5741dcd0efec8408d3b3d4b6c45cdeece",
-  "evidence_surface_sha256": "59814e0018b30677c5989777b293fe741300a255b421a6d453e34e19791b71a5",
+  "audited_commit_sha": "41acba4f8791939ec4c8682d895477540e78e263",
+  "evidence_surface_sha256": "807fcdf9988c98d7a36fff47b7b7d4ccca4b00f2b56f72ddc70b98bbf5317497",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "debt_gate_count": 45,
-    "debt_gate_fail_count": 0,
-    "debt_gate_pass_count": 45,
+    "debt_gate_fail_count": 1,
+    "debt_gate_pass_count": 44,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
     "fully_covered_module_count": 1520,
@@ -51,7 +53,7 @@ Refresh reason: Closeout wave #8584/#8583/#7515/#7517/#7410 — re-pin evidence;
 
 ## Executive summary
 
-1. Debt-governance gates: **45 pass / 0 fail** (`45/45` debt-governance gates).
+1. Debt-governance gates: **44 pass / 1 fail** (`45/45` debt-governance gates).
 1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
 1. Module inventory (from `module-coverage-inventory.json` only):
    - source_module_count: **2413**
