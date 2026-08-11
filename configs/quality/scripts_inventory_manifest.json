@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-11T07:56:23.380481+00:00",
+  "generated_at": "2026-08-11T07:57:15.559433+00:00",
   "summary": {
     "total_scripts": 587,
     "status_counts": {
@@ -17,7 +17,7 @@
       "other": 75,
       "scripts": 487,
       "skills": 11,
-      "tests": 375
+      "tests": 374
     }
   },
   "scripts": [
@@ -10390,7 +10390,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 19,
+      "reference_count": 18,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -13961,31 +13961,13 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 1,
       "references": [
         {
           "path": "docs/03-guides/testing.md",
           "line": 241,
           "source_group": "docs",
           "text": "`scripts/engineering/qa/refresh_test_governance_baseline.py`."
-        },
-        {
-          "path": "tests/unit/scripts/qa/test_refresh_test_governance_baseline.py",
-          "line": 10,
-          "source_group": "tests",
-          "text": "from scripts.engineering.qa import refresh_test_governance_baseline as refresh"
-        },
-        {
-          "path": "tests/unit/scripts/qa/test_refresh_test_governance_baseline.py",
-          "line": 65,
-          "source_group": "tests",
-          "text": "\"refresh_test_governance_baseline.py\","
-        },
-        {
-          "path": "tests/unit/scripts/qa/test_refresh_test_governance_baseline.py",
-          "line": 93,
-          "source_group": "tests",
-          "text": "\"refresh_test_governance_baseline.py\","
         }
       ],
       "owner": "@bioetl-platform",
