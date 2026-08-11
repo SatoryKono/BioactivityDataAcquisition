@@ -21,6 +21,15 @@ from scripts.engineering.qa import generate_semantic_pipeline_audit as audit
 pytestmark = pytest.mark.unit
 
 
+def test_types_compatible_accepts_boolean_object_alias_without_hashing_sets() -> None:
+    """Boolean/object compatibility must be total for set-backed type tokens."""
+    boolean_member = {"gold_type": "boolean", "field_type": ""}
+    object_member = {"gold_type": "object", "field_type": ""}
+
+    assert audit._types_compatible(boolean_member, object_member)
+    assert audit._types_compatible(object_member, boolean_member)
+
+
 def test_resolve_seed_artifact_prefers_existing_dated_candidate(tmp_path: Path) -> None:
     dated = tmp_path / "semantic_pair_matrix_2026-05-16.csv"
     dated.write_text("header\n", encoding="utf-8")

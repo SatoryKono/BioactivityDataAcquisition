@@ -32,6 +32,12 @@
       "review_by": "2026-11-30",
       "next_step": "Retain only as a deprecated read-only canonical skill validator for direct legacy invocations; it must never generate discovery adapters and may be removed after callers use setup_skills.sh --check."
     },
+    "scripts/ai/grok/install_skills.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as an optional personal/project installer for the tracked Grok skill sources; keep the docs tree authoritative and do not treat this machine-local copy helper as an active runtime surface."
+    },
     "scripts/ai/prompts/__main__.py": {
       "owner": "@bioetl-platform",
       "decision": "compatibility_wrapper",

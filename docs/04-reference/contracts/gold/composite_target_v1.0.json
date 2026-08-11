@@ -77,7 +77,7 @@
     },
     "taxonomy_id": {
       "type": [
-        "number",
+        "integer",
         "null"
       ],
       "nullable": true,

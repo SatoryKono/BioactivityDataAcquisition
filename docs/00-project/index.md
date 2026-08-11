@@ -129,7 +129,7 @@ See [Composite Pipeline Diagram](../02-architecture/diagrams/foundation/29-compo
 
 ## Current Version
 
-**v6.1.7** (governance baseline per [RULES.md](RULES.md)) — See [CHANGELOG](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/CHANGELOG.md) for release history.
+**v6.1.9** (governance baseline per [RULES.md](RULES.md)) — See [CHANGELOG](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/CHANGELOG.md) for release history.
 
 ## Getting Started
 

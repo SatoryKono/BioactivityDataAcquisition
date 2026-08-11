@@ -12,9 +12,7 @@ from bioetl.application.services.control_plane.effective_config.service import (
 )
 from bioetl.domain.behavior.dq_policy_resolver import DQPolicyResolver
 from bioetl.domain.config.dq import DQConfig
-from bioetl.domain.control_plane.config_source_hashing import (
-    ConfigSourceHashStrategy,
-)
+from bioetl.domain.control_plane.config_source_hashing import ConfigSourceHashStrategy
 from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigResolutionPolicy,
     ConfigSourceRef,
@@ -163,25 +161,16 @@ def _build_source_refs(artifact_dict: JsonDict) -> list[ConfigSourceRef]:
             source_hash_strategy=_parse_source_hash_strategy(
                 src.get("source_hash_strategy")
             ),
-            source_hash_version=(
-                str(src["source_hash_version"])
-                if src.get("source_hash_version")
-                else None
-            ),
-            raw_source_hash_version=(
-                str(src["raw_source_hash_version"])
-                if src.get("raw_source_hash_version")
-                else None
-            ),
+            source_hash_version=str(src.get("source_hash_version") or "") or None,
+            raw_source_hash_version=str(src.get("raw_source_hash_version") or "")
+            or None,
             priority=int(src["priority"]),
         )
         for src in artifact_dict["source_refs"]
     ]
 
 
-def _build_resolved_config_snapshot(
-    artifact_dict: JsonDict,
-) -> ResolvedConfigSnapshot:
+def _build_resolved_config_snapshot(artifact_dict: JsonDict) -> ResolvedConfigSnapshot:
     """Reconstruct the resolved config snapshot from serialized state."""
     resolved = artifact_dict["resolved_config"]
     return ResolvedConfigSnapshot(
