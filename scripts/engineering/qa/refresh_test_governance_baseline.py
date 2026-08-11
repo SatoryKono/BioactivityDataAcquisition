@@ -31,6 +31,25 @@ from scripts.engineering.qa.report_test_governance_audit import (
 )
 
 
+def _canonical_json(payload: dict[str, object]) -> str:
+    return json.dumps(payload, indent=2, sort_keys=True) + "\n"
+
+
+def _check_json_artifact(path: Path, payload: dict[str, object]) -> bool:
+    if not path.exists():
+        print(f"[drift] missing: {path}")
+        return False
+    try:
+        actual = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        print(f"[drift] unreadable: {path}: {exc}")
+        return False
+    if actual == _canonical_json(payload):
+        return True
+    print(f"[drift] mismatch: {path}")
+    return False
+
+
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Refresh test-governance baseline with caching."
@@ -101,12 +120,10 @@ def main() -> int:
             load_config(config_path),
         )
 
-    # Write the main artifact
+    # Write or verify the main artifact.
     if not args.check:
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_text(
-            json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-        )
+        output_path.write_text(_canonical_json(payload), encoding="utf-8")
 
     # Write duplicate name inventory
     duplicate_inventory_payload = {
@@ -122,11 +139,27 @@ def main() -> int:
 
     # Write fixture duplication inventory
     fixture_duplication_payload = payload["report"]["fixture_asset_duplication"]
+    if args.check:
+        checks = [
+            _check_json_artifact(output_path, payload),
+            _check_json_artifact(
+                fixture_duplication_path,
+                fixture_duplication_payload,
+            ),
+        ]
+        if duplicate_name_path is not None:
+            checks.append(
+                _check_json_artifact(
+                    duplicate_name_path,
+                    duplicate_inventory_payload,
+                )
+            )
+        return 0 if all(checks) else 1
+
     if not args.check:
         fixture_duplication_path.parent.mkdir(parents=True, exist_ok=True)
         fixture_duplication_path.write_text(
-            json.dumps(fixture_duplication_payload, indent=2, sort_keys=True) + "\n",
-            encoding="utf-8",
+            _canonical_json(fixture_duplication_payload), encoding="utf-8"
         )
 
     if args.verbose:
