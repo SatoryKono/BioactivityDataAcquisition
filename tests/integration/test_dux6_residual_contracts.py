@@ -23,9 +23,10 @@ def _walk(panels: list[dict[str, Any]] | None):
 
 
 def test_dux6_docs_exist() -> None:
-    assert (DOCS / "dux6-residual-readability.md").is_file()
+    archive = DOCS / "archive" / "audit-protocols"
+    assert (archive / "dux6-residual-readability.md").is_file()
     assert "dux6-residual-readability.md" in (
-        DOCS / "dux5-copy-dictionary.md"
+        archive / "dux5-copy-dictionary.md"
     ).read_text(encoding="utf-8")
 
 

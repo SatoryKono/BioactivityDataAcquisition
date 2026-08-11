@@ -7,10 +7,10 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2829 |
-| Tracked doc-like files | 2824 |
+| Doc-like files | 2832 |
+| Tracked doc-like files | 2827 |
 | Ignored local docs/reports files | 5 |
-| Duplicate groups | 3 |
+| Duplicate groups | 2 |
 | Generated without route or exception | 0 |
 | Generated routes | 70 |
 
@@ -19,7 +19,7 @@
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 5 |
-| tracked | 2824 |
+| tracked | 2827 |
 
 ## Lifecycle Counts
 
@@ -58,44 +58,47 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 737 |
+| Active | 735 |
 | Archived | 169 |
 | Canonical | 70 |
-| Generated | 1012 |
-| Working | 841 |
+| Generated | 1014 |
+| Working | 844 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 737 |
+| active | 735 |
 | archive | 169 |
 | canonical | 70 |
-| generated | 1012 |
-| working | 841 |
+| generated | 1014 |
+| working | 844 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 320 |
-| archive-after-migration | 376 |
-| generate-automatically | 1012 |
-| keep | 1117 |
+| archive-after-migration | 379 |
+| generate-automatically | 1014 |
+| keep | 1115 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
 
 | Path | Status | Inbound | Action |
 | --- | --- | --- | --- |
-| `docs/03-guides/dashboards/archive/audit-protocols/dux3-audit-selection-notes.md` | Working | 0 | archive-after-migration |
-| `docs/03-guides/dashboards/archive/audit-protocols/dux3-residual-contracts.md` | Working | 1 | archive-after-migration |
-| `docs/03-guides/dashboards/archive/audit-protocols/dux3-screenshot-regression-protocol.md` | Working | 0 | archive-after-migration |
-| `docs/03-guides/dashboards/archive/audit-protocols/dux3-semantic-fixtures.md` | Working | 0 | archive-after-migration |
-| `docs/03-guides/dashboards/archive/audit-protocols/dux4-title-scope-harness.md` | Working | 0 | archive-after-migration |
-| `docs/03-guides/dashboards/archive/audit-protocols/dux5-copy-dictionary.md` | Working | 1 | archive-after-migration |
-| `docs/03-guides/dashboards/archive/audit-protocols/dux5-screenshot-regression-protocol.md` | Working | 1 | archive-after-migration |
-| `docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md` | Working | 1 | archive-after-migration |
+| `docs/03-guides/dashboards/archive/audit-protocols/dux3-audit-selection-notes.md` | Working | 1 | archive-after-migration |
+| `docs/03-guides/dashboards/archive/audit-protocols/dux3-first-screen-inventory.json` | Working | 2 | archive-after-migration |
+| `docs/03-guides/dashboards/archive/audit-protocols/dux3-residual-contracts.md` | Working | 5 | archive-after-migration |
+| `docs/03-guides/dashboards/archive/audit-protocols/dux3-screenshot-regression-protocol.md` | Working | 1 | archive-after-migration |
+| `docs/03-guides/dashboards/archive/audit-protocols/dux3-semantic-fixtures.md` | Working | 1 | archive-after-migration |
+| `docs/03-guides/dashboards/archive/audit-protocols/dux4-field-override-inventory.json` | Working | 3 | archive-after-migration |
+| `docs/03-guides/dashboards/archive/audit-protocols/dux4-panel-redesign-matrix.json` | Working | 3 | archive-after-migration |
+| `docs/03-guides/dashboards/archive/audit-protocols/dux4-title-scope-harness.md` | Working | 3 | archive-after-migration |
+| `docs/03-guides/dashboards/archive/audit-protocols/dux5-copy-dictionary.md` | Working | 4 | archive-after-migration |
+| `docs/03-guides/dashboards/archive/audit-protocols/dux5-screenshot-regression-protocol.md` | Working | 3 | archive-after-migration |
+| `docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md` | Working | 2 | archive-after-migration |
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-05.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-11.md` | Working | 0 | archive-after-migration |
@@ -165,9 +168,6 @@
 | `reports/quality/coderabbit/20260806-full/_S01-domain-residual-root.txt` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260806-full/_S04-app-services-other.txt` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260806-full/_S04b-app-residual.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S08b-infra-residual.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S11b-interfaces-residual.txt` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S12-tests-architecture-root-1.txt` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
