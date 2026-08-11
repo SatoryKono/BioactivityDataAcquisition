@@ -2,7 +2,7 @@
   "generated_at": "2026-07-01T00:00:00Z",
   "source_date": "2026-07-01",
   "summary": {
-    "blocking_task_count": 0,
+    "blocking_task_count": 1,
     "clusters": 290,
     "normalization_counts": {
       "COMPATIBLE": 887,
@@ -10,7 +10,8 @@
     },
     "pair_rows": 3245,
     "risk_counts": {
-      "LOW": 3245
+      "HIGH": 1,
+      "LOW": 3244
     },
     "semantic_status_counts": {
       "EXACT": 2742,
@@ -18,12 +19,13 @@
       "WEAK": 435
     },
     "typing_counts": {
-      "COMPATIBLE": 664,
+      "COMPATIBLE": 663,
+      "CONFLICTING": 1,
       "IDENTICAL": 2581
     },
     "validation_counts": {
-      "COMPATIBLE": 1046,
-      "IDENTICAL": 2199
+      "COMPATIBLE": 1042,
+      "IDENTICAL": 2203
     }
   },
   "tasks": [
@@ -32,7 +34,7 @@
       "gate": "uv run python -m scripts.engineering.qa check-semantic-pair-budget --check --json",
       "id": "semantic_drift_budget",
       "priority": "P0",
-      "row_count": 0,
+      "row_count": 1,
       "status": "closed"
     },
     {
@@ -40,7 +42,7 @@
       "gate": "uv run python -m scripts.engineering.qa check-semantic-pair-budget --check --json",
       "id": "hard_status_mismatch_budget",
       "priority": "P0",
-      "row_count": 0,
+      "row_count": 1,
       "status": "closed"
     },
     {
@@ -206,7 +208,7 @@
       "gate": "uv run python -m scripts.engineering.qa check-semantic-pair-budget --check --json",
       "id": "compatible_validation_ratchet",
       "priority": "P2",
-      "row_count": 1046,
+      "row_count": 1042,
       "status": "ratcheted",
       "top_clusters": [
         {
@@ -226,16 +228,16 @@
           "row_count": 29
         },
         {
-          "cluster_id": "shared_lookup_method",
-          "row_count": 24
-        },
-        {
           "cluster_id": "pmc_identifier",
           "row_count": 22
         },
         {
           "cluster_id": "shared_publication_id",
           "row_count": 21
+        },
+        {
+          "cluster_id": "shared_lookup_method",
+          "row_count": 20
         },
         {
           "cluster_id": "shared_original_id",
@@ -264,7 +266,7 @@
       "gate": "uv run python -m scripts.engineering.qa check-semantic-pair-budget --check --json",
       "id": "compatible_typing_ratchet",
       "priority": "P2",
-      "row_count": 664,
+      "row_count": 663,
       "status": "ratcheted",
       "top_clusters": [
         {

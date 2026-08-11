@@ -981,8 +981,9 @@ def _types_compatible(member_a: dict[str, Any], member_b: dict[str, Any]) -> boo
     numeric = {"integer", "number"}
     if tokens_a <= numeric and tokens_b <= numeric:
         return True
-    bool_object = ({"boolean"}, {"object"})
-    if (tokens_a, tokens_b) in {bool_object, (bool_object[1], bool_object[0])}:
+    if (tokens_a == {"boolean"} and tokens_b == {"object"}) or (
+        tokens_a == {"object"} and tokens_b == {"boolean"}
+    ):
         return True
     if tokens_a == {"boolean"} and tokens_b <= numeric:
         return True

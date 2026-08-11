@@ -1,19 +1,19 @@
 {
-  "artifact_id": "effective-config-508b6892f3d839a5",
+  "artifact_id": "effective-config-27f58c3bd406afd3",
   "occurrence_envelope": {
     "created_at": "2025-01-01T12:00:00+00:00",
     "effective_execution_timestamp": "2025-01-01T12:00:00+00:00",
     "resolved_config_timestamp": "2025-01-01T12:00:00+00:00"
   },
-  "schema_version": "1.0",
+  "schema_version": "2.0",
   "semantic_artifact": {
-    "artifact_id": "effective-config-508b6892f3d839a5",
+    "artifact_id": "effective-config-27f58c3bd406afd3",
     "contract_refs": [],
     "dq_contract_compatibility_hash": "no_dq_policies",
     "dq_policy_refs": [],
     "dq_policy_snapshots": [],
     "dq_rule_bundle_versions": {},
-    "effective_config_hash": "d96ea15540795a51ba4ea97c6cda14fae901824d5fbb947cb41709de4aeba54b",
+    "effective_config_hash": "6eabe5858d643f3326daea4a57e1737bf157b82ba0b8dff9efe0ee08ca54ae15",
     "effective_execution_config": {
       "config_data": {
         "exact_replay": true,
@@ -37,7 +37,8 @@
           "limit": 25
         }
       },
-      "effective_hash": "d96ea15540795a51ba4ea97c6cda14fae901824d5fbb947cb41709de4aeba54b"
+      "effective_hash": "6eabe5858d643f3326daea4a57e1737bf157b82ba0b8dff9efe0ee08ca54ae15",
+      "identity_version": "effective-config-v1"
     },
     "execution_environment": {
       "ambient_environment_policy": "materialized_via_execution_environment",
@@ -81,10 +82,11 @@
           "limit": 25
         }
       },
-      "config_hash": "e491b5950698ab05bba65cc706e6cd3cf3309cce1c4538394bd81089ff92a877",
-      "config_type": "standard"
+      "config_hash": "fcdd5f38540a7856aa9994430bea0ad8a68db8f30ccf44f539615353d4f091e4",
+      "config_type": "standard",
+      "identity_version": "resolved-config-v1"
     },
-    "resolved_config_hash": "e491b5950698ab05bba65cc706e6cd3cf3309cce1c4538394bd81089ff92a877",
+    "resolved_config_hash": "fcdd5f38540a7856aa9994430bea0ad8a68db8f30ccf44f539615353d4f091e4",
     "runtime_overrides": {
       "cli_overrides": {
         "limit": 25
@@ -106,12 +108,12 @@
         "exact_replay": true
       }
     },
-    "schema_version": "1.0",
+    "schema_version": "2.0",
     "source_class_provenance": [
       {
         "anchor_field": "source_hash",
         "artifact_surface": "semantic_artifact.source_refs[*]",
-        "notes": "File-backed YAML config sources use canonical semantic source_hash values for identity; raw_source_hash preserves forensic byte-level integrity when available.",
+        "notes": "File-backed YAML config sources use canonical semantic source_hash values plus source_hash_version for identity; raw_source_hash and raw_source_hash_version preserve forensic byte-level integrity when available.",
         "provenance_status": "identity_anchored",
         "source_class": "config_file"
       },
@@ -158,13 +160,15 @@
         "source_class": "implicit_process_environment"
       }
     ],
-    "source_fingerprint": "1750d384e3efab89c50eff0b4808a22adc1f4023c3f023e011cc50d41a2431a9",
+    "source_fingerprint": "b0486c8b798de23c2653c2cde246e32fe88b09c56d823fd6f651739e8f203914",
     "source_refs": [
       {
         "priority": 10,
         "raw_source_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+        "raw_source_hash_version": null,
         "source_hash": "1111111111111111111111111111111111111111111111111111111111111111",
         "source_hash_strategy": null,
+        "source_hash_version": null,
         "source_path": "configs/entities/chembl/activity.yaml",
         "source_type": "file"
       }

@@ -393,7 +393,7 @@
       "semantic_surface_count": 340
     },
     "clusters": 290,
-    "fields": 1266,
+    "fields": 1270,
     "normalization": {
       "COMPATIBLE": 887,
       "IDENTICAL": 2358
@@ -401,7 +401,7 @@
     "pairs": 3245,
     "pipelines": 26,
     "residual_backlog": {
-      "blocking_task_count": 0,
+      "blocking_task_count": 1,
       "clusters": 290,
       "normalization_counts": {
         "COMPATIBLE": 887,
@@ -409,7 +409,8 @@
       },
       "pair_rows": 3245,
       "risk_counts": {
-        "LOW": 3245
+        "HIGH": 1,
+        "LOW": 3244
       },
       "semantic_status_counts": {
         "EXACT": 2742,
@@ -417,24 +418,27 @@
         "WEAK": 435
       },
       "typing_counts": {
-        "COMPATIBLE": 664,
+        "COMPATIBLE": 663,
+        "CONFLICTING": 1,
         "IDENTICAL": 2581
       },
       "validation_counts": {
-        "COMPATIBLE": 1046,
-        "IDENTICAL": 2199
+        "COMPATIBLE": 1042,
+        "IDENTICAL": 2203
       }
     },
     "risk": {
-      "LOW": 3245
+      "HIGH": 1,
+      "LOW": 3244
     },
     "typing": {
-      "COMPATIBLE": 664,
+      "COMPATIBLE": 663,
+      "CONFLICTING": 1,
       "IDENTICAL": 2581
     },
     "validation": {
-      "COMPATIBLE": 1046,
-      "IDENTICAL": 2199
+      "COMPATIBLE": 1042,
+      "IDENTICAL": 2203
     }
   },
   "generated_at": "2026-07-01T00:00:00Z",

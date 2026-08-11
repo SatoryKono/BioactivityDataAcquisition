@@ -49,10 +49,8 @@ def test_pipeline_contract_sets_keep_expected_governance_keys() -> None:
 
 def test_provider_and_filter_contracts_expose_required_policy_fields() -> None:
     """Provider/auth/filter governance constants should stay importable and typed."""
-    assert config_ci_contract.PROVIDER_AUTH_REQUIREMENTS["openalex"] == [
-        "api_key_env",
-        "mailto",
-    ]
+    assert config_ci_contract.PROVIDER_AUTH_REQUIREMENTS["openalex"] == ["api_key_env"]
+    assert "crossref" not in config_ci_contract.PROVIDER_AUTH_REQUIREMENTS
     assert config_ci_contract.PROVIDER_AUTH_REQUIREMENTS["pubmed"] == [
         "api_key_env",
         "email_env",

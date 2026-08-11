@@ -1126,8 +1126,6 @@ fixture_governance:
         expectations:
           - auth_type
           - api_key_env
-          - credit_model
-          - rate_limit_headers
           - primary_lookup_method
       chembl_activity_publication_identifiers:
         evidence:

@@ -174,12 +174,55 @@ def test_grafana_uses_remote_renderer_sidecar() -> None:
     ]
     assert renderer["image"] == RENDERER_IMAGE
     # Local budget: small shm (BROWSER_FLAGS disables /dev/shm); was 2gb.
-    assert renderer["shm_size"] == "256mb"
+    assert renderer["shm_size"] == "512mb"
+    flags = next(
+        item
+        for item in renderer["environment"]
+        if str(item).startswith("BROWSER_FLAGS=")
+    )
+    assert "--disable-dev-shm-usage" not in flags
     assert renderer["healthcheck"]["test"] == [
         "CMD",
         "grafana-image-renderer",
         "healthcheck",
     ]
+    assert renderer["healthcheck"]["start_period"] == "45s"
+
+
+def test_grafana_does_not_hard_depend_on_renderer_health() -> None:
+    """UI must start without waiting for Chromium renderer (optional screenshots)."""
+    monitoring = _load_monitoring_compose()
+    depends = monitoring["services"]["grafana"].get("depends_on") or {}
+    assert "renderer" not in depends
+    assert depends.get("prometheus", {}).get("condition") == "service_healthy"
+    assert depends.get("pushgateway", {}).get("condition") == "service_started"
+
+
+def test_grafana_renderer_fail_fast_and_recovery_contract() -> None:
+    """Dead renderer must not hang Grafana; recovery is renderer-only."""
+    monitoring = _load_monitoring_compose()
+    grafana_env = monitoring["services"]["grafana"]["environment"]
+    renderer = monitoring["services"]["renderer"]
+
+    assert (
+        "GF_RENDERING_RENDERING_TIMEOUT=${GF_RENDERING_RENDERING_TIMEOUT:-20s}"
+        in grafana_env
+    )
+    assert (
+        "GF_RENDERING_CONCURRENT_RENDER_REQUEST_LIMIT="
+        "${GF_RENDERING_CONCURRENT_RENDER_REQUEST_LIMIT:-1}" in grafana_env
+    )
+    assert renderer["restart"] == "on-failure:3"
+    assert renderer.get("oom_score_adj") == 800
+
+    recover_ps1 = Path("scripts/ops/observability/grafana/recover_renderer.ps1")
+    recover_sh = Path("scripts/ops/observability/grafana/recover_renderer.sh")
+    assert recover_ps1.is_file()
+    assert recover_sh.is_file()
+    ps1 = recover_ps1.read_text(encoding="utf-8")
+    assert "force-recreate" in ps1
+    assert "renderer" in ps1
+    assert "UI stays up" in ps1
 
 
 def test_prometheus_scrapes_remote_renderer_and_bioetl_only() -> None:
@@ -240,9 +283,14 @@ def test_bootstrap_ops_http_identity_gate_is_soft_by_default() -> None:
     assert 'OPS_READY_ATTEMPTS="${BIOETL_GRAFANA_OPS_READY_ATTEMPTS:-30}"' in content
     assert 'OPS_READY_SLEEP_SEC="${BIOETL_GRAFANA_OPS_READY_SLEEP_SEC:-2}"' in content
     assert "fail_or_defer_ops" in content
-    assert "provision_prometheus_only" in content or "starting Grafana with Prometheus only" in content
+    assert (
+        "provision_prometheus_only" in content
+        or "starting Grafana with Prometheus only" in content
+    )
     assert "is_valid_ops_http_url" in content
-    assert "invalid_or_unmanaged_identity" in content or "invalid_ops_http_url" in content
+    assert (
+        "invalid_or_unmanaged_identity" in content or "invalid_ops_http_url" in content
+    )
     assert (
         "identity_mismatch_or_timeout" in content
         or "identity_mismatch" in content
@@ -252,7 +300,9 @@ def test_bootstrap_ops_http_identity_gate_is_soft_by_default() -> None:
     assert "exec /run.sh" in content
     # Hard fail only when audit/render explicitly requires Ops HTTP.
     assert 'if [ "${REQUIRE_OPS_HTTP}" = "1" ]' in content
-    assert "Ops HTTP required but unavailable" in content or "REQUIRE_OPS_HTTP" in content
+    assert (
+        "Ops HTTP required but unavailable" in content or "REQUIRE_OPS_HTTP" in content
+    )
 
 
 def test_monitoring_compose_exposes_ops_http_soft_gate_env() -> None:
@@ -284,15 +334,15 @@ def test_monitoring_compose_local_resource_budget() -> None:
     assert grafana["mem_limit"] == "2g"
     assert renderer["mem_limit"] == "3g"
     assert pushgateway["mem_limit"] == "512m"
-    assert renderer["shm_size"] == "256mb"
+    assert renderer["shm_size"] == "512mb"
     assert (
         "RENDERING_CLUSTERING_MAX_CONCURRENCY="
-        "${GRAFANA_IMAGE_RENDERER_MAX_CONCURRENCY:-1}"
+        "${GRAFANA_IMAGE_RENDERER_MAX_CONCURRENCY:-1}" in renderer["environment"]
+    )
+    assert (
+        "GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-1GiB}"
         in renderer["environment"]
     )
-    assert "GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-1GiB}" in renderer[
-        "environment"
-    ]
     assert (
         "BIOETL_GRAFANA_REQUIRE_OPS_HTTP=${BIOETL_GRAFANA_REQUIRE_OPS_HTTP:-0}"
         in grafana["environment"]
@@ -307,4 +357,3 @@ def test_bootstrap_validates_ops_http_url_before_probe() -> None:
     gate_idx = content.index('if is_valid_ops_http_url "${BIOETL_OPS_HTTP_URL}"')
     wget_idx = content.index('wget -qO- -T 3 "${OPS_READY_URL}"')
     assert fn_idx < gate_idx < wget_idx
-

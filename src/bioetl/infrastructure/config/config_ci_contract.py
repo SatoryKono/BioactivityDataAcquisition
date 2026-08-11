@@ -23,8 +23,7 @@ LEGACY_PATH_FRAGMENTS: Final[tuple[tuple[str, str], ...]] = (
 )
 
 PROVIDER_AUTH_REQUIREMENTS: Final[dict[str, list[str]]] = {
-    "openalex": ["api_key_env", "mailto"],
-    "crossref": ["mailto"],
+    "openalex": ["api_key_env"],
     "pubmed": ["api_key_env", "email_env"],
 }
 

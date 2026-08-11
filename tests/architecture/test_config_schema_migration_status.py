@@ -77,21 +77,21 @@ def test_pipeline_source_schema_does_not_advertise_source_pagination_aliases() -
     defs = schema.get("$defs")
     assert isinstance(defs, dict), "pipeline.json must contain $defs section"
 
-    provider_source = defs.get("ProviderSourceConfig")
+    provider_source = defs.get("ProviderConfigYaml")
     assert isinstance(provider_source, dict), (
-        "pipeline.json missing ProviderSourceConfig definition"
+        "pipeline.json missing ProviderConfigYaml definition"
     )
 
     properties = provider_source.get("properties")
     assert isinstance(properties, dict), (
-        "ProviderSourceConfig must define properties in pipeline.json"
+        "ProviderConfigYaml must define properties in pipeline.json"
     )
 
     forbidden = {"batch_size", "page_size", "max_url_length"}
     present = sorted(forbidden.intersection(properties))
     assert not present, (
         "pipeline.json still advertises direct source pagination override keys "
-        f"inside ProviderSourceConfig: {present}"
+        f"inside ProviderConfigYaml: {present}"
     )
 
 
@@ -239,8 +239,11 @@ def test_provider_configs_use_declarative_environment_indirection() -> None:
     crossref = _load_yaml_mapping(PROVIDERS_DIR / "crossref.yaml")
     openalex = _load_yaml_mapping(PROVIDERS_DIR / "openalex.yaml")
     semanticscholar = _load_yaml_mapping(PROVIDERS_DIR / "semanticscholar.yaml")
-    assert crossref["source"]["provider_config"]["mailto"] == ("your-email@example.com")
-    assert openalex["source"]["provider_config"]["mailto"] == ("your-email@example.com")
+    assert "mailto" not in crossref["source"]["provider_config"]
+    assert "mailto" not in openalex["source"]["provider_config"]
+    assert openalex["source"]["provider_config"]["api_key_env"] == (
+        "BIOETL_OPENALEX_API_KEY"
+    )
     assert semanticscholar["source"]["provider_config"]["api_key_env"] == (
         "BIOETL_SEMANTICSCHOLAR_API_KEY"
     )
@@ -306,7 +309,7 @@ def test_config_docs_explain_runtime_values_and_version_scopes() -> None:
     readme = CONFIG_README.read_text(encoding="utf-8")
     guide = PIPELINE_GUIDE.read_text(encoding="utf-8")
     for text in (readme, guide):
-        assert "BIOETL_DEFAULT_EMAIL" in text
+        assert "BIOETL_DEFAULT_EMAIL" not in text
         assert "api_key_env: BIOETL_SEMANTICSCHOLAR_API_KEY" in text
         assert "quality.version" in text
         assert "configs/entities/composite/{entity}.yaml" in text
