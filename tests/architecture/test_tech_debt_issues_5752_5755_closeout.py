@@ -166,7 +166,10 @@ def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
         or f"architecture score `{integral_text}`" in debt_report
     )
     # Allow for some failing gates during governance artifact refresh
-    assert "45 pass / 0 fail" in debt_report and "debt-governance gates" in debt_report.lower()
+    assert (
+        "45 pass / 0 fail" in debt_report
+        and "debt-governance gates" in debt_report.lower()
+    )
     assert "| `bioetl.domain.composite.config` | 0 | 43 |" in debt_report
     assert "| `bioetl.application.composite.merger` | 0 | 5 |" in debt_report
 
