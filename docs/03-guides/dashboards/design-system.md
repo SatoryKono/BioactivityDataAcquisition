@@ -662,4 +662,4 @@ Benign export noise:
 
 ## 9) DUX5 typography & copy residual
 
-Operator reading-order, state classes, and typography floors are normative in [dux5-copy-dictionary.md](dux5-copy-dictionary.md). Screenshot regression protocol: [dux5-screenshot-regression-protocol.md](dux5-screenshot-regression-protocol.md).
+Operator reading-order, state classes, and typography floors are normative in [dux5-copy-dictionary.md](archive/audit-protocols/dux5-copy-dictionary.md). Screenshot regression protocol: [dux5-screenshot-regression-protocol.md](archive/audit-protocols/dux5-screenshot-regression-protocol.md).

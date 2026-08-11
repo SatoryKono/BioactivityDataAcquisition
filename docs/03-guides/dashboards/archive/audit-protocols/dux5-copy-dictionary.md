@@ -1,6 +1,6 @@
 # DUX5 operator copy dictionary
 
-**Status:** active  
+**Status:** archived
 **Wave:** DUX5 (#7116)  
 **Owner:** interface / Grafana dashboard system  
 **Verdict logic owner:** application / control-plane / recording rules (not Grafana transforms)
