@@ -3413,9 +3413,19 @@
                       "color": "gray"
                     }
                   }
+                },
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
                 }
               ],
-              "noValue": "0",
+              "noValue": "UNKNOWN",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -3488,9 +3498,19 @@
                       "color": "gray"
                     }
                   }
+                },
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
                 }
               ],
-              "noValue": "0",
+              "noValue": "UNKNOWN",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
