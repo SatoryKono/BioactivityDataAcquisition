@@ -103,6 +103,7 @@ on:
 jobs:
   docs-governance:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -182,6 +183,7 @@ jobs:
   validate-mkdocs:
     needs: docs-governance
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -233,6 +235,7 @@ jobs:
   # when only non-diagram tooling or mkdocs metadata is modified.
   detect-diagram-changes:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       diagrams_changed: ${{ steps.filter.outputs.diagrams_changed }}
     steps:
@@ -316,6 +319,7 @@ jobs:
     needs: detect-diagram-changes
     if: needs.detect-diagram-changes.outputs.diagrams_changed == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -357,6 +361,7 @@ jobs:
       needs.detect-diagram-changes.outputs.diagrams_changed == 'true' &&
       (needs.validate-mermaid.result == 'success' || needs.validate-mermaid.result == 'skipped')
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -443,6 +448,7 @@ jobs:
       github.event_name == 'pull_request' &&
       needs.detect-diagram-changes.outputs.diagrams_changed == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
