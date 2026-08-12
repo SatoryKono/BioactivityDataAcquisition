@@ -177,8 +177,22 @@ class AggregationValidator:
             return set(properties.keys())
         fields_node = source_schema.get("fields")
         if isinstance(fields_node, list):
-            return {str(field) for field in fields_node}
+            return self._field_names_from_list(fields_node)
         return self._collect_fallback_fields(source_schema)
+
+    @staticmethod
+    def _field_names_from_list(fields_node: list[object]) -> set[str]:
+        """Extract field names from string entries or dict descriptors."""
+        names: set[str] = set()
+        for entry in fields_node:
+            if isinstance(entry, str):
+                names.add(entry)
+                continue
+            if isinstance(entry, dict):
+                name = entry.get("name")
+                if isinstance(name, str) and name:
+                    names.add(name)
+        return names
 
     @staticmethod
     def _collect_fallback_fields(source_schema: JsonDict) -> set[str]:
@@ -186,7 +200,12 @@ class AggregationValidator:
         fields: set[str] = set()
         columns = source_schema.get("columns")
         if isinstance(columns, list):
-            fields.update(str(item) for item in columns)
+            fields.update(str(item) for item in columns if not isinstance(item, dict))
+            for item in columns:
+                if isinstance(item, dict):
+                    name = item.get("name")
+                    if isinstance(name, str) and name:
+                        fields.add(name)
         names = source_schema.get("field_names")
         if isinstance(names, list):
             fields.update(str(item) for item in names)
@@ -219,7 +238,8 @@ class AggregationValidator:
         aggregation_results: list[JsonDict],
         group_by_fields: list[str],
     ) -> list[JsonDict]:
-        seen_groups: set[tuple[str, ...]] = set()
+        # Type-tagged keys: (presence, type_name, canonical_value)
+        seen_groups: set[tuple[tuple[str, str, str], ...]] = set()
         duplicates: list[JsonDict] = []
         for index, record in enumerate(aggregation_results):
             group_key = self._build_group_key(record, group_by_fields)
@@ -238,11 +258,25 @@ class AggregationValidator:
     @staticmethod
     def _build_group_key(
         record: JsonDict, group_by_fields: list[str]
-    ) -> tuple[str, ...]:
-        return tuple(
-            str(record[field]) if field in record else "MISSING"
-            for field in group_by_fields
-        )
+    ) -> tuple[tuple[str, str, str], ...]:
+        """Build a type-preserving group key.
+
+        Each component is ``(presence, type_name, canonical)`` so that
+        integer ``1`` and string ``\"1\"`` do not collide, and a missing field
+        is distinct from the literal string ``\"MISSING\"``.
+        """
+        components: list[tuple[str, str, str]] = []
+        for field in group_by_fields:
+            if field not in record:
+                components.append(("absent", "", ""))
+                continue
+            value = record[field]
+            type_name = type(value).__name__
+            if value is None:
+                components.append(("present", "NoneType", "null"))
+            else:
+                components.append(("present", type_name, repr(value)))
+        return tuple(components)
 
     def _build_uniqueness_issues(
         self,
@@ -274,7 +308,12 @@ class AggregationValidator:
     @staticmethod
     def _build_duplicate_samples(duplicate_groups: list[JsonDict]) -> list[JsonDict]:
         return [
-            {"index": duplicate["index"], "group_key": list(duplicate["group_key"])}
+            {
+                "index": duplicate["index"],
+                "group_key": [
+                    list(component) for component in duplicate["group_key"]
+                ],
+            }
             for duplicate in duplicate_groups[:5]
         ]
 
