@@ -106,11 +106,17 @@ def test_parallel_ci_jobs_exclude_serial_marker() -> None:
     assert f'-m "{unit_fast["marker_expression"]}"' in test_fast, (
         "test-fast marker must match configs/quality/test_matrix.yaml unit-fast"
     )
-    assert '-m "not serial and not memory and not fs_contract"' in workflow, (
-        "test-matrix job must exclude serial, memory, and fs_contract markers in parallel mode"
+    assert (
+        '-m "not serial and not memory and not fs_contract and not subprocess_backed"'
+        in workflow
+    ), (
+        "test-matrix job must exclude serial, memory, fs_contract, and subprocess_backed in parallel mode"
     )
     assert "unit-filesystem-contracts:" in workflow, (
         "serial unit-filesystem-contracts lane must have a dedicated CI job"
+    )
+    assert "unit-subprocess-backed:" in workflow, (
+        "serial unit-subprocess-backed lane must have a dedicated CI job"
     )
     assert "--max-worker-restart=0" in workflow, (
         "parallel CI jobs must fail fast on worker restart loops"

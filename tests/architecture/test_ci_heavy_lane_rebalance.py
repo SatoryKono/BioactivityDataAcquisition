@@ -130,7 +130,10 @@ class TestCiHeavyLaneRebalance:
         assert "--junitxml=reports/test-telemetry/junit-memory.xml" in memory_block
         assert "tests/performance/test_hotspot_budgets.py" in performance_block
         assert '-m "benchmark and performance"' in performance_block
-        assert '-m "not serial and not memory and not fs_contract"' in matrix_block
+        assert (
+            '-m "not serial and not memory and not fs_contract and not subprocess_backed"'
+            in matrix_block
+        )
 
     def test_duration_telemetry_consumes_rebalanced_lane_artifacts(self) -> None:
         policy = _load_policy()
