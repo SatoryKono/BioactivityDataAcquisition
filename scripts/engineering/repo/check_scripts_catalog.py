@@ -478,8 +478,7 @@ def _check_temporary_lifecycle_entry(
         return
     if lifecycle_entry.get("decision") != "temporary_diagnostic":
         violations.append(
-            "temporary script must use decision=temporary_diagnostic: "
-            f"{relative_path}"
+            f"temporary script must use decision=temporary_diagnostic: {relative_path}"
         )
     review_by = lifecycle_entry.get("review_by")
     if not isinstance(review_by, str) or not _parse_iso_date(review_by):
@@ -497,9 +496,7 @@ def _check_temporary_readme_entry(
     violations: list[str],
 ) -> None:
     documentation_tokens = {f"`{path.name}`", f"`{temporary_relative_path}`"}
-    if readme_text and not any(
-        token in readme_text for token in documentation_tokens
-    ):
+    if readme_text and not any(token in readme_text for token in documentation_tokens):
         violations.append(
             f"temporary script missing from scripts/temp/README.md: {relative_path}"
         )
