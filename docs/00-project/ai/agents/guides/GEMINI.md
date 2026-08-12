@@ -11,7 +11,7 @@
   - **Bronze:** Raw JSONL + zstd (append-only).
   - **Silver:** Cleaned Delta Lake tables (merge/upsert by `content-hash`).
   - **Gold:** Агрегированная аналитика (Delta Lake).
-- **Core Tech Stack:** Python 3.11+, Polars, Delta Lake, Pandera, structlog, httpx, click.
+- **Core Tech Stack:** Python 3.12+ (also 3.13; see `pyproject.toml`), Polars, Delta Lake, Pandera, structlog, httpx, click.
 - **Deployment:** Local-First (No external services required per [ADR-010](../../../../02-architecture/decisions/ADR-010-local-only-deployment.md)).
 
 ## 2. Your Persona: Jules
