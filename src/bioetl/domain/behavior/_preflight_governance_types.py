@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from types import MappingProxyType
 
@@ -27,19 +27,30 @@ class PreflightGovernanceConfig:
     policy: GovernancePolicy
     ci_integration: bool = False
     fail_fast: bool = True
-    # Exclude from generated hashing: MappingProxyType is unhashable.
-    issue_code_overrides: Mapping[str, ValidationSeverity] | None = field(
-        default=None,
-        compare=True,
-        hash=False,
-    )
+    issue_code_overrides: Mapping[str, ValidationSeverity] | None = None
 
     def __post_init__(self) -> None:
-        """Snapshot overrides so callers cannot mutate governance policy later."""
+        """Snapshot overrides as an immutable mapping proxy."""
         if self.issue_code_overrides is None:
             return
         object.__setattr__(
             self,
             "issue_code_overrides",
             MappingProxyType(dict(self.issue_code_overrides)),
+        )
+
+    def __hash__(self) -> int:  # noqa: D105 — custom for MappingProxyType field
+        overrides = self.issue_code_overrides
+        override_key = (
+            None
+            if overrides is None
+            else frozenset((key, value) for key, value in overrides.items())
+        )
+        return hash(
+            (
+                self.policy,
+                self.ci_integration,
+                self.fail_fast,
+                override_key,
+            )
         )

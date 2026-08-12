@@ -137,11 +137,18 @@ class SchemaClassifier:
         try:
             old_schema = json.loads(old_schema_str)
             new_schema = json.loads(new_schema_str)
-            return self.classify_changes(old_schema, new_schema)
         except json.JSONDecodeError as e:
             return SchemaChangeClassification.manual_review(
                 explanation=f"Invalid JSON: {e!s}"
             )
+        if not isinstance(old_schema, dict) or not isinstance(new_schema, dict):
+            return SchemaChangeClassification.manual_review(
+                explanation=(
+                    "Registry schema payloads must be JSON objects; "
+                    f"got {type(old_schema).__name__} and {type(new_schema).__name__}"
+                )
+            )
+        return self.classify_changes(old_schema, new_schema)
 
 
 def create_schema_classifier(

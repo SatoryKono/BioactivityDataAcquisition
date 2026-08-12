@@ -176,7 +176,7 @@ class EntityIdentityGenerator:
             if include_fields is not None
             else self._content_hash_include_fields
         )
-        resolved_exclude_fields = self._content_hash_exclude_fields | (
+        resolved_exclude_fields = (self._content_hash_exclude_fields or set()) | (
             exclude_fields or set()
         )
         return generate_content_hash(
@@ -220,7 +220,7 @@ class EntityIdentityGenerator:
             if include_fields is not None
             else self._content_hash_include_fields
         )
-        resolved_exclude_fields = self._content_hash_exclude_fields | (
+        resolved_exclude_fields = (self._content_hash_exclude_fields or set()) | (
             exclude_fields or set()
         )
         return normalize_for_hash(
