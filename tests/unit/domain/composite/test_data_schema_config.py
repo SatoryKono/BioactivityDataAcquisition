@@ -35,6 +35,7 @@ from bioetl.domain.composite.config import (
     DataSchemaConfig,
     LayerColumnConfig,
 )
+from bioetl.domain.immutability import FrozenDict
 
 
 pytestmark = pytest.mark.unit
@@ -279,13 +280,13 @@ class TestLayerColumnConfigRenames:
         config = LayerColumnConfig(columns=["entity_id", "doi"])
         assert config.rename_fields == {}
 
-    def test_rename_fields_converts_to_dict(self):
-        """rename_fields is converted to dict if not already."""
+    def test_rename_fields_converts_to_frozen_dict(self):
+        """rename_fields is detached into an immutable mapping."""
         config = LayerColumnConfig(
             columns=["entity_id"],
             rename_fields={"entity_id": "pub_id"},
         )
-        assert isinstance(config.rename_fields, dict)
+        assert isinstance(config.rename_fields, FrozenDict)
 
 
 class TestDataSchemaConfigIntegration:

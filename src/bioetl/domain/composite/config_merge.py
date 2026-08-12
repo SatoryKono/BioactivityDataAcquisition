@@ -10,8 +10,6 @@ from bioetl.domain.immutability import freeze_fields
 
 from .config_validators import require_non_empty
 
-from .config_validators import require_non_empty
-
 __all__ = [
     "ColumnGroupConfig",
     "MergeConfig",

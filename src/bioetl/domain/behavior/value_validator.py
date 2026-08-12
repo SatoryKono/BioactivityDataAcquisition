@@ -284,7 +284,7 @@ class ValueValidator:
         min_value: float,
         max_value: float,
     ) -> None:
-        """Set custom validation range for a concentration unit.
+        """Set finite, increasing validation bounds for a concentration unit.
 
         Args:
             unit: Unit string.

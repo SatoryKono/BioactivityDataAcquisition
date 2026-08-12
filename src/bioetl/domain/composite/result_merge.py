@@ -38,13 +38,9 @@ def _reject_inconsistent_enrichment(
 
 def _reject_non_finite_duration(duration_seconds: float) -> None:
     if not math.isfinite(duration_seconds):
-        raise ValueError(
-            f"duration_seconds must be finite, got {duration_seconds}"
-        )
+        raise ValueError(f"duration_seconds must be finite, got {duration_seconds}")
     if duration_seconds < 0:
-        raise ValueError(
-            f"duration_seconds must be >= 0, got {duration_seconds}"
-        )
+        raise ValueError(f"duration_seconds must be >= 0, got {duration_seconds}")
 
 
 @dataclass(frozen=True, slots=True)
