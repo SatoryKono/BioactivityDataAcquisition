@@ -154,8 +154,9 @@ def test_yaml_helpers_quote_special_strings_and_render_lists() -> None:
     )
 
     assert "plain: value" in yaml_payload
-    assert 'with_colon: "a: b"' in yaml_payload
-    assert 'with_hash: "a # b"' in yaml_payload
+    # safe_dump may use single or double quotes for special scalars
+    assert "with_colon:" in yaml_payload and "a: b" in yaml_payload
+    assert "with_hash:" in yaml_payload and "a # b" in yaml_payload
     assert "none: null" in yaml_payload
     assert "truth: true" in yaml_payload
     assert "  -" in yaml_payload

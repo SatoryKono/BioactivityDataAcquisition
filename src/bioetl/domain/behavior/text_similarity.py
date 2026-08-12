@@ -11,6 +11,7 @@ cannot import from infrastructure).
 from __future__ import annotations
 
 import string
+import unicodedata
 
 __all__ = [
     "jaccard_similarity",
@@ -18,10 +19,20 @@ __all__ = [
 ]
 
 
+def _is_unicode_punctuation(char: str) -> bool:
+    """Return True for ASCII punctuation and Unicode punctuation categories."""
+    if char in string.punctuation:
+        return True
+    # Unicode general categories: Pc, Pd, Pe, Pf, Pi, Po, Ps
+    return unicodedata.category(char).startswith("P")
+
+
 def normalize_text(text: str) -> str:
     """Normalize text for comparison.
 
-    Lowercases, replaces punctuation with spaces, collapses whitespace.
+    Lowercases, replaces all Unicode punctuation (including typographic
+    apostrophes, quotation marks, en/em dashes, and non-breaking hyphens)
+    with spaces, then collapses whitespace.
 
     Args:
         text: Raw text string.
@@ -31,8 +42,10 @@ def normalize_text(text: str) -> str:
     """
     if not text:
         return ""
-    translator = str.maketrans(string.punctuation, " " * len(string.punctuation))
-    cleaned = text.translate(translator)
+    cleaned_chars = [
+        " " if _is_unicode_punctuation(char) else char for char in text
+    ]
+    cleaned = "".join(cleaned_chars)
     return " ".join(cleaned.lower().strip().split())
 
 

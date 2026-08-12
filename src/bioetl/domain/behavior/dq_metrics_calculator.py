@@ -26,12 +26,16 @@ class DQMetricsInput:
         records: List of record dictionaries to analyze.
         existing_schema_fields: Set of field names from existing table schema.
             Used for schema drift detection. None if table doesn't exist.
+        required_schema_fields: Contract-required field names used to classify
+            missing-field drift as critical. When None, no missing field is
+            treated as critical solely by name.
         quarantined_count: Number of records that failed validation.
         validation_errors: List of validation error messages.
     """
 
     records: list[JsonDict]  # Any: DQ check values vary by check type
     existing_schema_fields: set[str] | None = None
+    required_schema_fields: frozenset[str] | set[str] | None = None
     quarantined_count: int = 0
     validation_errors: list[str] | None = None
 
@@ -60,6 +64,7 @@ class DQMetricsCalculator:
         schema_drift = self._detect_schema_drift(
             input_data.records,
             input_data.existing_schema_fields,
+            required_fields=input_data.required_schema_fields,
         )
 
         return BatchDQMetrics.from_records(
@@ -74,12 +79,14 @@ class DQMetricsCalculator:
         self,
         records: list[JsonDict],  # Any: DQ check values vary by check type
         existing_fields: set[str] | None,
+        required_fields: frozenset[str] | set[str] | None = None,
     ) -> SchemaDriftInfo | None:
         """Detect schema drift between existing and incoming schema.
 
         Args:
             records: Incoming records to check.
             existing_fields: Field names from existing table schema.
+            required_fields: Contract-required field names for critical drift.
 
         Returns:
             SchemaDriftInfo if drift detected, None otherwise.
@@ -96,7 +103,11 @@ class DQMetricsCalculator:
         if not new_fields and not missing_fields:
             return None
 
-        status = self._determine_drift_status(new_fields, missing_fields)
+        status = self._determine_drift_status(
+            new_fields,
+            missing_fields,
+            required_fields=required_fields,
+        )
         return SchemaDriftInfo(
             status=status,
             new_fields=tuple(sorted(new_fields)),
@@ -128,24 +139,34 @@ class DQMetricsCalculator:
         self,
         new_fields: set[str],
         missing_fields: set[str],
+        required_fields: frozenset[str] | set[str] | None = None,
     ) -> Literal["info", "warn", "critical"]:
         """Determine drift severity status.
 
         Drift severity levels:
-        - critical: Missing required fields (non-underscore prefix)
+        - critical: Missing contract-required fields (metadata underscore fields
+          remain non-critical even if listed)
         - warn: More than 3 new fields
         - info: Minor schema changes
         """
-        if self._has_critical_missing_fields(missing_fields):
+        if self._has_critical_missing_fields(missing_fields, required_fields):
             return "critical"
         if self._has_excessive_new_fields(new_fields):
             return "warn"
         return "info"
 
     @staticmethod
-    def _has_critical_missing_fields(missing_fields: set[str]) -> bool:
-        """Return True when required (non-metadata) fields are missing."""
-        return any(not field.startswith("_") for field in missing_fields)
+    def _has_critical_missing_fields(
+        missing_fields: set[str],
+        required_fields: frozenset[str] | set[str] | None = None,
+    ) -> bool:
+        """Return True when contract-required non-metadata fields are missing."""
+        if not required_fields:
+            return False
+        return any(
+            field in required_fields and not field.startswith("_")
+            for field in missing_fields
+        )
 
     @staticmethod
     def _has_excessive_new_fields(new_fields: set[str]) -> bool:
