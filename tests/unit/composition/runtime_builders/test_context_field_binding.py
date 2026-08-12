@@ -16,24 +16,29 @@ from bioetl.composition.runtime_builders._context_field_binding import (
     bind_context_fields,
 )
 
+
 @dataclass(frozen=True, slots=True)
 class _Ctx:
     pipeline: str
     limit: int = 1
+
 
 class _KwargHost:
     def __init__(self, *, pipeline: str, limit: int = 1) -> None:
         self.pipeline = pipeline
         self.limit = limit
 
+
 class _NoKwargHost:
     def __init__(self) -> None:
         self.pipeline = "seed"
         self.limit = 0
 
+
 def test_bind_context_fields_empty_updates_returns_same_instance() -> None:
     ctx = _Ctx(pipeline="activity")
     assert bind_context_fields(ctx, updates={}, unsupported_message="bad") is ctx
+
 
 def test_bind_context_fields_dataclass_replace() -> None:
     ctx = _Ctx(pipeline="activity", limit=1)
@@ -45,6 +50,7 @@ def test_bind_context_fields_dataclass_replace() -> None:
     assert out is not ctx
     assert out == _Ctx(pipeline="activity", limit=9)
 
+
 def test_bind_context_fields_dataclass_unknown_field_raises() -> None:
     ctx = _Ctx(pipeline="activity")
     with pytest.raises(TypeError, match="unknown context fields"):
@@ -53,6 +59,7 @@ def test_bind_context_fields_dataclass_unknown_field_raises() -> None:
             updates={"missing": 1},
             unsupported_message="unsupported context host",
         )
+
 
 def test_bind_context_fields_kwargs_host_copy() -> None:
     host = _KwargHost(pipeline="activity", limit=2)
@@ -66,6 +73,7 @@ def test_bind_context_fields_kwargs_host_copy() -> None:
     assert out.limit == 5
     assert host.limit == 2
 
+
 def test_bind_context_fields_no_kwargs_host_uses_setattr_clone() -> None:
     host = _NoKwargHost()
     out = bind_context_fields(
@@ -77,6 +85,7 @@ def test_bind_context_fields_no_kwargs_host_uses_setattr_clone() -> None:
     assert out.pipeline == "assay"
     assert host.pipeline == "seed"
 
+
 def test_bind_context_fields_unsupported_host_raises() -> None:
     with pytest.raises(TypeError, match="unsupported context host"):
         bind_context_fields(
@@ -84,6 +93,7 @@ def test_bind_context_fields_unsupported_host_raises() -> None:
             updates={"x": 1},
             unsupported_message="unsupported context host",
         )
+
 
 class _InitRejectsKwargs:
     """Constructor rejects kwargs so bind falls back to object.__new__ + setattr."""
@@ -93,6 +103,7 @@ class _InitRejectsKwargs:
             raise TypeError("no kwargs")
         self.pipeline = "seed"
         self.limit = 0
+
 
 def test_bind_context_fields_init_reject_kwargs_uses_object_new_clone() -> None:
     host = _InitRejectsKwargs()
@@ -104,6 +115,7 @@ def test_bind_context_fields_init_reject_kwargs_uses_object_new_clone() -> None:
     assert out is not host
     assert out.pipeline == "target"
     assert host.pipeline == "seed"
+
 
 def test_bind_context_fields_setattr_failure_raises_unsupported() -> None:
     class _SlotsOnly:

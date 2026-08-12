@@ -600,7 +600,6 @@ def _build_duplication_audit() -> dict[str, Any]:
         "scope": {
             "root": DUPLICATION_SURFACE_ROOT.relative_to(ROOT).as_posix(),
             "file_suffixes": list(DUPLICATION_FILE_SUFFIXES),
-            "excluded_generated_prefixes": list(DUPLICATION_EXCLUDED_PREFIXES),
             "files_scanned": len(surface_files),
             "excluded_generated_roots": [
                 path.relative_to(ROOT).as_posix()

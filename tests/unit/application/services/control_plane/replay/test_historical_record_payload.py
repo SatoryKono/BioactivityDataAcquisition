@@ -19,6 +19,7 @@ from bioetl.application.services.control_plane.replay.historical_identity_models
     HistoricalReplayRunIdentity,
 )
 
+
 def _identity() -> HistoricalReplayRunIdentity:
     return HistoricalReplayRunIdentity(
         manifest_id="m-1",
@@ -28,6 +29,7 @@ def _identity() -> HistoricalReplayRunIdentity:
         entity="activity",
         execution_context="batch",
     )
+
 
 def test_build_historical_run_identity_payload_includes_blocking_and_extras() -> None:
     payload = build_historical_run_identity_payload(
@@ -46,6 +48,7 @@ def test_build_historical_run_identity_payload_includes_blocking_and_extras() ->
     assert payload["blocking_reasons"] == ["missing_artifact"]
     assert payload["note"] == "extra"
 
+
 def test_build_historical_certification_payload() -> None:
     payload = build_historical_certification_payload(
         certification_status="blocked",
@@ -57,6 +60,7 @@ def test_build_historical_certification_payload() -> None:
         "replay_occurrence_kind": "duplicate",
         "blocking_reasons": ("stale",),
     }
+
 
 def test_build_historical_certified_identity_payload_from_identity() -> None:
     payload = build_historical_certified_identity_payload(
