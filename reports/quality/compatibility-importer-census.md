@@ -1,6 +1,6 @@
 # Compatibility Importer Census
 
-- snapshot_date: 2026-08-11
+- snapshot_date: 2026-08-12
 - retained_entrypoint_count: 12
 - retained_public_entrypoint_burden: 0
 - removed_compatibility_surface_count: 23
@@ -32,7 +32,7 @@
 | `src/bioetl/composition/health_api.py` | 0 | 2 |
 | `src/bioetl/composition/maintenance_api.py` | 0 | 2 |
 | `src/bioetl/infrastructure/config/__init__.py` | 0 | 7 |
-| `src/bioetl/domain/composite/config.py` | 0 | 39 |
+| `src/bioetl/domain/composite/config.py` | 0 | 40 |
 | `src/bioetl/application/composite/merger.py` | 0 | 5 |
 
 ## Retained Entrypoint Owner/Usage Map
@@ -49,7 +49,7 @@
 | `src/bioetl/composition/health_api.py` | `bioetl.composition` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 2 |
 | `src/bioetl/composition/maintenance_api.py` | `bioetl.composition` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 2 |
 | `src/bioetl/infrastructure/config/__init__.py` | `bioetl.infrastructure.config` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 7 |
-| `src/bioetl/domain/composite/config.py` | `bioetl.domain.composite` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 39 |
+| `src/bioetl/domain/composite/config.py` | `bioetl.domain.composite` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 40 |
 | `src/bioetl/application/composite/merger.py` | `bioetl.application.composite` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 5 |
 
 ## Retained Public Export Facades

@@ -155,6 +155,9 @@ def test_tests_workflow_publishes_duration_telemetry_artifact() -> None:
     assert "lane_wall_time_s" in workflow, (
         "duration telemetry must publish per-lane JUnit suite wall times"
     )
+    assert '"lane_wall_time_source": "junit_testsuite_time"' in workflow, (
+        "lane wall time must come from JUnit testsuite duration, not summed xdist cases"
+    )
     assert 'suite.attrib.get("time", "0")' in workflow, (
         "lane wall time must come from JUnit suite duration, not summed xdist "
         "testcase durations"

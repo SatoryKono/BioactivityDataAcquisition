@@ -12,6 +12,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 DASH = ROOT / "grafana" / "dashboards"
 DOCS = ROOT / "docs" / "03-guides" / "dashboards"
+AUDIT_PROTOCOLS = DOCS / "archive" / "audit-protocols"
 
 pytestmark = pytest.mark.integration
 
@@ -27,10 +28,11 @@ def _dashboards() -> list[Path]:
 
 
 def test_dux5_governance_docs_exist() -> None:
-    assert (DOCS / "dux5-copy-dictionary.md").is_file()
-    assert (DOCS / "dux5-screenshot-regression-protocol.md").is_file()
+    assert (AUDIT_PROTOCOLS / "dux5-copy-dictionary.md").is_file()
+    assert (AUDIT_PROTOCOLS / "dux5-screenshot-regression-protocol.md").is_file()
     design = (DOCS / "design-system.md").read_text(encoding="utf-8")
     assert "dux5-copy-dictionary.md" in design
+    assert "archive/audit-protocols/dux5-copy-dictionary.md" in design
 
 
 def test_nav_bus_complete_without_truncation() -> None:
