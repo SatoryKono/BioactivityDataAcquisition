@@ -1900,7 +1900,9 @@ def _artifact_staleness_errors(
     return errors
 
 
-def _failing_gate_errors(summary: dict[str, object], payload: dict[str, object]) -> list[str]:
+def _failing_gate_errors(
+    summary: dict[str, object], payload: dict[str, object]
+) -> list[str]:
     """Return human-readable errors for currently failing debt-governance gates."""
     fail_count = int(summary["fail_count"])
     if fail_count <= 0:
@@ -1908,9 +1910,7 @@ def _failing_gate_errors(summary: dict[str, object], payload: dict[str, object])
     errors: list[str] = []
     failing = summary.get("failing_gates") or []
     detail = ", ".join(str(name) for name in failing) if failing else "unknown"
-    errors.append(
-        f"Debt governance gates have {fail_count} failing gate(s): {detail}"
-    )
+    errors.append(f"Debt governance gates have {fail_count} failing gate(s): {detail}")
     gates = payload.get("gates")
     if not isinstance(gates, list):
         return errors
