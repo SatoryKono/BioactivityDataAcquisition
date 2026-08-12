@@ -9,5 +9,12 @@ datasources:
     isDefault: true
     editable: true
     jsonData:
-      # Match the slowest primary BioETL scrape so Grafana derives safe rate windows.
-      timeInterval: 30s
+      timeInterval: 15s
+
+  - name: Pushgateway
+    type: prometheus
+    uid: pushgateway
+    url: http://pushgateway:9091
+    access: proxy
+    isDefault: false
+    editable: true

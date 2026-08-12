@@ -3,12 +3,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from dataclasses import asdict, is_dataclass
-from datetime import date, datetime, time, timedelta
-from decimal import Decimal
 from enum import Enum
-from pathlib import Path
 from typing import TYPE_CHECKING, Protocol, cast, runtime_checkable
 from uuid import UUID
 
@@ -21,10 +18,7 @@ __all__ = ["normalize_snapshot", "to_serializable_mapping"]
 @runtime_checkable
 class _ModelDumpHost(Protocol):
     def model_dump(
-        self,
-        *,
-        mode: str = "python",
-        exclude_none: bool = False,
+        self, *, mode: str = "python", exclude_none: bool = False
     ) -> Mapping[str, object]: ...
 
 
@@ -39,19 +33,11 @@ def normalize_snapshot(value: object) -> object:
         return value.value
     if isinstance(value, UUID):
         return str(value)
-    if isinstance(value, datetime | date | time):
-        return value.isoformat()
-    if isinstance(value, timedelta):
-        return value.total_seconds()
-    if isinstance(value, Decimal | Path):
-        return str(value)
     if not isinstance(value, type) and is_dataclass(value):
         return normalize_snapshot(asdict(cast("DataclassInstance", value)))
-    if isinstance(value, Mapping):
+    if isinstance(value, dict):
         return {str(key): normalize_snapshot(item) for key, item in value.items()}
-    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
-        return [normalize_snapshot(item) for item in value]
-    if isinstance(value, (set, frozenset)):
+    if isinstance(value, (list, tuple, set, frozenset)):
         return [normalize_snapshot(item) for item in value]
     if hasattr(value, "__dict__") and not isinstance(value, type):
         return normalize_snapshot(
@@ -63,7 +49,7 @@ def normalize_snapshot(value: object) -> object:
 def to_serializable_mapping(value: object) -> dict[str, object]:
     """Return a normalized mapping for manifest payload serialization."""
     if isinstance(value, _ModelDumpHost):
-        payload: object = value.model_dump(mode="python", exclude_none=True)
+        payload: object = value.model_dump(mode="json", exclude_none=True)
     elif isinstance(value, _DictHost):
         payload = value.dict(exclude_none=True)
     elif hasattr(value, "__dict__") and not isinstance(value, type):

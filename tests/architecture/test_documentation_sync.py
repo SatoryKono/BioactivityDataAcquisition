@@ -523,12 +523,6 @@ def test_no_legacy_kebab_pipeline_ids_in_active_docs(
     candidates.extend(workflow_text_cache)
 
     violations: list[str] = []
-    # Match legacy kebab pipeline IDs as tokens, not as substrings of
-    # artifact names like reports/e2e/chembl-activity-smoke.xml.
-    legacy_patterns = [
-        re.compile(rf"(?<![A-Za-z0-9_]){re.escape(item)}(?![A-Za-z0-9_])")
-        for item in legacy_pipeline_ids
-    ]
     for path in candidates:
         if path == Path("README.md"):
             text = path.read_text(encoding="utf-8")
@@ -536,7 +530,7 @@ def test_no_legacy_kebab_pipeline_ids_in_active_docs(
             text = workflow_text_cache[path]
         else:
             text = docs_text_cache[path]
-        if any(pattern.search(text) for pattern in legacy_patterns):
+        if any(item in text for item in legacy_pipeline_ids):
             violations.append(path.as_posix())
 
     assert not violations, (

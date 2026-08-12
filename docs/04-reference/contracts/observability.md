@@ -53,13 +53,10 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 - `tests/unit/infrastructure/observability/test_logger_port_contract.py`
 - `tests/unit/infrastructure/observability/test_metrics_port_contract.py`
 - `tests/unit/infrastructure/observability/test_tracing_port_contract.py`
-- Shipped Grafana dashboards (`grafana/dashboards/*.json`, 7 UIDs) and
-  `docs/03-guides/dashboards/contracts/dashboard-inventory.yaml`: `bioetl-control-plane-v1`,
-  `bioetl-overview-v2`, `bioetl-runtime`, `bioetl-provider-health-v2`,
-  `bioetl-dq-v2`, `bioetl-incident-v1`, and `bioetl-run-explorer-v1`
-- `bioetl-workflow-overview` and `bioetl-alerts-slo` are retired, not shipped;
-  workflow diagnosis lives in Pipeline Diagnostics and alert triage lives in
-  Incident Workspace (see `docs/03-guides/dashboards/panel-title-inventory.md`)
+- Shipped Grafana dashboards (`grafana/dashboards/*.json`, 8 UIDs) and
+  `docs/03-guides/dashboards/contracts/dashboard-inventory.yaml`
+- Workflow/control-plane panels: `bioetl-workflow-overview`, `bioetl-control-plane-v1`,
+  `bioetl-alerts-slo` (see `docs/03-guides/dashboards/panel-title-inventory.md`)
 
 ## 2. Canonical Conventions
 

@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-08-12",
+  "snapshot_date": "2026-08-11",
   "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
@@ -434,13 +434,12 @@
         "tests/unit/domain/composite/test_data_schema_config.py",
         "tests/unit/domain/composite/test_domain_composite_cr_residuals_8220_8240.py",
         "tests/unit/domain/composite/test_domain_composite_cr_residuals_8222_8255.py",
-        "tests/unit/domain/test_cr_stream_8644_domain_other.py",
         "tests/unit/repo_backed/application/composite/test_merger_golden_snapshots.py",
         "tests/unit/repo_backed/application/composite/test_preflight_validator.py",
         "tests/unit/repo_backed/application/composite/test_publication_schema_columns.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 40,
+      "test_importer_count": 39,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing"
@@ -880,13 +879,12 @@
         "tests/unit/domain/composite/test_data_schema_config.py",
         "tests/unit/domain/composite/test_domain_composite_cr_residuals_8220_8240.py",
         "tests/unit/domain/composite/test_domain_composite_cr_residuals_8222_8255.py",
-        "tests/unit/domain/test_cr_stream_8644_domain_other.py",
         "tests/unit/repo_backed/application/composite/test_merger_golden_snapshots.py",
         "tests/unit/repo_backed/application/composite/test_preflight_validator.py",
         "tests/unit/repo_backed/application/composite/test_publication_schema_columns.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 40,
+      "test_importer_count": 39,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing"

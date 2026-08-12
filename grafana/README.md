@@ -594,13 +594,8 @@ datasources:
     isDefault: true
     editable: true
     jsonData:
-      timeInterval: 30s
+      timeInterval: 15s
 ```
-
-`30s` matches the `job=bioetl` scrape interval and keeps Grafana-derived rate
-windows conservative; histogram panels use at least `2m`. Pushgateway is a
-write endpoint for batch metric publication, not a PromQL datasource. Grafana
-queries the Prometheus datasource only.
 
 ### Datasource configuration standard for shipped dashboards
 
@@ -960,9 +955,10 @@ Primary dashboards `0..5` используют общий operator context shell
 `$pipeline_context`, `$adapter`) добавляются поверх shell. Переменные
 отображаются как выпадающие списки в верхней части дашборда.
 
-Navigation: all seven shipped dashboards render the same theme-safe bus `0..6`.
-The current item is visibly disabled, links wrap at `1024px`, and no dashboard
-has an omission exception.
+Navigation: all seven shipped
+dashboards render the same theme-safe bus `0..6`, followed by `Silver Reject
+bus `0..6` only. The current item is visibly
+disabled, links wrap at `1024px`, and no dashboard has an omission exception.
 
 `$run_id` в primary dashboards остаётся HTTP-backed local identity selector
 для панели `ID`; он не используется в Prometheus label filtering и не
@@ -975,8 +971,11 @@ variables не умеют безопасно auto-write sibling selectors без
 Dashboard-to-dashboard links поэтому явно передают общий shell
 `workflow/pipeline/run_type`, preserved identity `run_id` для primary targets
 и target-specific bounded vars через `var-*`, без `includeVars=true`.
-`0. Trust` and `6. Run Explorer` preserve exact-run handoff through the
-BioETL Ops HTTP endpoints without turning `run_id` into a Prometheus label.
+`bioetl-workflow-overview` дополнительно использует hidden exact-run handoff
+vars (`$workflow_context`, `$pipeline_context_exact`, `$run_type_context_exact`,
+`$provider_context_exact`) через
+`/ops/control-plane/filter-options?exact_run_only=1`, чтобы selected `run_id`
+мог сузить downstream handoff без переписывания видимых sibling selectors.
 Для local-only pilot rollout repo also ships an optional unsigned panel plugin
 under `grafana/plugins/bioetl-selectorshell-panel`; it can call
 `/ops/control-plane/selector-context` and write visible sibling selectors as one
@@ -987,14 +986,14 @@ default.
 
 | Variable | Primary dashboards | Source | Semantics |
 | --- | --- | --- | --- |
-| `$workflow` | `0..6` | `label_values(bioetl_workflow_universe, workflow)` on query-backed dashboards; HTTP-backed identity surfaces use the bounded Ops API. | Context/evidence unless a panel documents truthful current-status intersection. The universe includes terminal workflow outcomes and started workflows published through `bioetl_workflow_expected`. |
-| `$pipeline` | `0..6` | Dashboard-bounded Prometheus universe: Overview/DQ/Provider/Incident use `bioetl_overview_pipeline_run_type_universe`; Pipeline Diagnostics uses `bioetl_runtime_pipeline_run_type_universe`; Trust uses `bioetl_control_plane_run_type_universe`; Run Explorer uses the Ops API. | Canonical pipeline context; Overview may default to `All`, non-Overview dashboards fail-close to `unknown`. Planned workflow child pipelines appear after `bioetl_workflow_pipeline_expected` is published. |
+| `$workflow` | `0..6` | `label_values(bioetl_workflow_universe, workflow)` for query-backed dashboards; Alerts uses a textbox. | Context/evidence unless a panel documents truthful current-status intersection. The universe includes terminal workflow outcomes and started workflows published through `bioetl_workflow_expected`. |
+| `$pipeline` | `0..6` | Dashboard-bounded Prometheus universe: Overview/DQ/Provider/Workflow/Alerts use `bioetl_overview_pipeline_run_type_universe`; Runtime uses `bioetl_runtime_pipeline_run_type_universe`; Control Plane uses `bioetl_control_plane_run_type_universe`. | Canonical pipeline context; Overview may default to `All`, non-Overview dashboards fail-close to `unknown`. Planned workflow child pipelines appear after `bioetl_workflow_pipeline_expected` is published. |
 | `$run_type` | `0..6` | Same bounded universe as `$pipeline` for the dashboard role. | Multi-select Include All. Overview default `All`; other boards default `backfill`. Never `unknown`. |
 | `$run_id` | `0..6` | BioETL Ops HTTP `/ops/control-plane/filter-options?dimension=run_id...&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}` | Preserved HTTP identity context for `ID`/details panels; no Include All; default `-`; options start-time desc (`sort=0`); never a Prometheus label. |
 
-`$workflow` stays single-select with Include All across the seven shipped
-dashboards, so one coherent workflow shell value is preserved during handoff
-while aggregate `All` scope remains available.
+`$workflow` stays single-select with Include All across primary dashboards,
+including `bioetl-workflow-overview`, so one coherent workflow shell value is
+preserved during handoff while aggregate `All` scope remains available.
 
 Common context panels on primary dashboards outside Overview:
 
@@ -2362,17 +2361,18 @@ Primary operator dashboards `0..6` use `refresh: 30s`. That reduces Prometheus
 load and keeps heavy queries (`histogram_quantile`, `rate`, multi-label
 aggregates, Loki hygiene) predictable.
 
-The retired `Silver Reject Explorer` is not part of this refresh contract;
-record-level quarantine forensics use the CLI.
+**Exception:** `Silver Reject Explorer` (`bioetl-silver-reject-explorer`) uses
+`refresh: 1m` and default time range `24h` for forensic/record-level work. Do not
+document a single global 30s refresh for every shipped dashboard.
 
 ### Где legacy v1 dashboards?
 
 Legacy v1 dashboards сохранены только как archived comparison surface. Они не
-являются operator entrypoints; текущая эксплуатация использует семь shipped
+являются operator entrypoints; текущая эксплуатация использует восемь shipped
 JSON surfaces: `bioetl-control-plane-v1`, `bioetl-overview-v2`,
 `bioetl-runtime`, `bioetl-provider-health-v2`, `bioetl-dq-v2`,
-`bioetl-incident-v1` и `bioetl-run-explorer-v1`. Retired Workflow, Alerts/SLO
-и Silver Reject dashboards не входят в shipped inventory.
+`retired: workflow/alerts merged, and
+`bioetl-silver-reject-explorer`.
 
 ### Как добавить новую метрику?
 

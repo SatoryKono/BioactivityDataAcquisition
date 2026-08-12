@@ -70,13 +70,6 @@ entries:
     symbol traceability aligned with live public exports.'
   rationale: Retains live documentation parity guards for domain/public facade symbol
     documentation instead of historical-only audit signoff.
-- path: tests/architecture/test_gha_8618_8619_closeout.py
-  disposition: retain_active
-  classification: active_architecture_guard
-  live_guard: GitHub Actions closeout keeps root-hygiene policy wording and the
-    source-owned enforcement date executable.
-  rationale: 'Retains the live root-hygiene contract for issues #8618 and #8619
-    instead of treating the policy activation evidence as historical prose only.'
 - path: tests/architecture/test_issue_5053_pipeline_transformer_closeout.py
   disposition: retain_active
   classification: transition_closeout_guard

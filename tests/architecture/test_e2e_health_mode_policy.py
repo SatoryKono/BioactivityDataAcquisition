@@ -41,7 +41,7 @@ def test_e2e_matrix_blocking_job_covers_e2e_smoke_ssot_paths() -> None:
     assert "test_pipeline_matrix_smoke" in blocking
     assert "tests/e2e/test_chembl_activity_e2e.py" in blocking
     assert "e2e_smoke" in blocking
-    assert "chembl_activity_smoke.xml" in blocking
+    assert "chembl_activity-smoke.xml" in blocking
 
 
 def test_e2e_matrix_nightly_job_enforces_strict_mode_policy() -> None:

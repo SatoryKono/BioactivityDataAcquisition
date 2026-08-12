@@ -413,15 +413,6 @@ def _artifact_matches(
     return committed == live_payload
 
 
-def _payload_without_volatile_fields(
-    payload: dict[str, object],
-    *,
-    drop_keys: frozenset[str],
-) -> dict[str, object]:
-    """Return a shallow copy without volatile metadata keys."""
-    return {key: value for key, value in payload.items() if key not in drop_keys}
-
-
 def _artifact_matches_builder(
     *,
     repo_root: Path,
@@ -1538,21 +1529,6 @@ def _remote_main_baseline_gate(remote_baseline: dict[str, Any]) -> Gate:
     )
 
 
-def _config_surface_backlog_matches_builder(*, repo_root: Path) -> bool:
-    """Compare config-surface backlog ignoring volatile snapshot_date."""
-    try:
-        live_payload = build_backlog()
-        committed = _load_json(repo_root, "reports/quality/config-surface-backlog.json")
-    except Exception:
-        return False
-    if not isinstance(live_payload, dict) or not isinstance(committed, dict):
-        return False
-    drop = frozenset({"snapshot_date"})
-    return _payload_without_volatile_fields(
-        committed, drop_keys=drop
-    ) == _payload_without_volatile_fields(live_payload, drop_keys=drop)
-
-
 def _in_test_mode() -> bool:
     """Return True when running under pytest."""
     return "pytest" in sys.modules or bool(os.environ.get("PYTEST_CURRENT_TEST"))
@@ -1572,8 +1548,10 @@ def _collect_stale_artifacts(
             "hotspot_family_baseline": not _hotspot_family_baseline_artifact_matches_builder(
                 repo_root=repo_root
             ),
-            "config_surface_backlog": not _config_surface_backlog_matches_builder(
+            "config_surface_backlog": not _artifact_matches_builder(
                 repo_root=repo_root,
+                rel_path="reports/quality/config-surface-backlog.json",
+                payload_builder=build_backlog,
             ),
             "adr_enforcement_matrix": False,
             "remote_main_baseline": False,
@@ -1599,8 +1577,10 @@ def _collect_stale_artifacts(
         "hotspot_family_baseline": not _hotspot_family_baseline_artifact_matches_builder(
             repo_root=repo_root
         ),
-        "config_surface_backlog": not _config_surface_backlog_matches_builder(
+        "config_surface_backlog": not _artifact_matches_builder(
             repo_root=repo_root,
+            rel_path="reports/quality/config-surface-backlog.json",
+            payload_builder=build_backlog,
         ),
         "adr_enforcement_matrix": not _artifact_matches_builder(
             repo_root=repo_root,
@@ -1763,18 +1743,15 @@ def build_payload(
         remote_main_baseline_gate=remote_main_baseline_gate,
     )
     stale_count = sum(1 for stale in stale_artifacts.values() if stale)
-    stale_names = sorted(name for name, is_stale in stale_artifacts.items() if is_stale)
     gates.append(
-        Gate(
+        _hard_limit_gate(
             name="generated_artifact_drift",
-            status="pass" if stale_count == 0 else "fail",
             metric="stale_artifact_count",
-            current={"count": stale_count, "artifacts": stale_names},
+            current=stale_count,
             limit=0,
             source_artifact="reports/quality/*.json",
             remediation=(
-                "Regenerate stale quality artifacts with their canonical QA commands: "
-                + (", ".join(stale_names) if stale_names else "none")
+                "Regenerate stale quality artifacts with their canonical QA commands."
             ),
         )
     )
@@ -1875,55 +1852,6 @@ def _write_artifacts(
     )  # NOSONAR - path confined by resolve_output_path
 
 
-def _artifact_staleness_errors(
-    payload: dict[str, object],
-    *,
-    json_out: Path,
-    md_out: Path,
-) -> list[str]:
-    """Return errors when committed debt-governance artifacts drift from payload."""
-    errors: list[str] = []
-    expected_json = json.dumps(payload, indent=2, sort_keys=True) + "\n"
-    expected_md = render_markdown(payload)
-    if (
-        not json_out.exists()
-        or json_out.read_text(encoding="utf-8")  # NOSONAR - path confined
-        != expected_json
-    ):
-        errors.append(f"Debt governance gate JSON artifact is stale: {json_out}")
-    if (
-        not md_out.exists()
-        or md_out.read_text(encoding="utf-8")  # NOSONAR - path confined
-        != expected_md
-    ):
-        errors.append(f"Debt governance gate Markdown artifact is stale: {md_out}")
-    return errors
-
-
-def _failing_gate_errors(
-    summary: dict[str, object], payload: dict[str, object]
-) -> list[str]:
-    """Return human-readable errors for currently failing debt-governance gates."""
-    fail_count = int(summary["fail_count"])
-    if fail_count <= 0:
-        return []
-    errors: list[str] = []
-    failing = summary.get("failing_gates") or []
-    detail = ", ".join(str(name) for name in failing) if failing else "unknown"
-    errors.append(f"Debt governance gates have {fail_count} failing gate(s): {detail}")
-    gates = payload.get("gates")
-    if not isinstance(gates, list):
-        return errors
-    for gate in gates:
-        if not isinstance(gate, dict) or gate.get("status") != "fail":
-            continue
-        name = gate.get("name")
-        current = gate.get("current")
-        remediation = gate.get("remediation")
-        errors.append(f"  - {name}: current={current!r}; {remediation}")
-    return errors
-
-
 def _check_artifacts(
     payload: dict[str, object],
     *,
@@ -1939,12 +1867,26 @@ def _check_artifacts(
     md_out = resolve_output_path(md_out, root=base)
     errors: list[str] = []
     if compare_artifacts:
-        errors.extend(
-            _artifact_staleness_errors(payload, json_out=json_out, md_out=md_out)
-        )
+        expected_json = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+        expected_md = render_markdown(payload)
+        if (
+            not json_out.exists()
+            or json_out.read_text(encoding="utf-8")  # NOSONAR - path confined
+            != expected_json
+        ):
+            errors.append(f"Debt governance gate JSON artifact is stale: {json_out}")
+        if (
+            not md_out.exists()
+            or md_out.read_text(encoding="utf-8")  # NOSONAR - path confined
+            != expected_md
+        ):
+            errors.append(f"Debt governance gate Markdown artifact is stale: {md_out}")
     summary = payload["summary"]
     assert isinstance(summary, dict)
-    errors.extend(_failing_gate_errors(summary, payload))
+    if int(summary["fail_count"]) > 0:
+        errors.append(
+            f"Debt governance gates have {summary['fail_count']} failing gate(s)"
+        )
     return errors
 
 

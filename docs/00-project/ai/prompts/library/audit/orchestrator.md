@@ -116,7 +116,4 @@ resolved. Full run: N done or allowed early-stop / hard stop with reason.
   `repo-tree`, `github-actions`, `agents-runtime`, `diagrams`, `docs-pipeline`,
   `prompt.architecture.review`
 - Meta one-cycle: `prompt.audit.grok-cycle`
-- **Dual-agent** (A/B, external prompt, CR + peer review, role swap):
-  `prompt.audit.dual-agent-cycle` — use instead of this card when two roles
-  and mutual plan/review gates are required
 - Closeout: `prompt.closeout.grok`

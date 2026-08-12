@@ -18,8 +18,8 @@ tracked coverage measurements.
 Current-baseline note (2026-08-11): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current source baseline is
-`source_module_count=2413` with
-`source_tree_sha256=afdf09bf4fddf6faa49075e7bad7663e1aafd719520b8c85043d5a5f9c7b3f6a`.
+`source_module_count=2412` with
+`source_tree_sha256=56bd31f71039b29dad0402408c6c3350868c923a14e582c599872e0e42a08de2`.
 Raw files dated before `2026-07-19` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence. Refresh (2026-08-05) followed the #4343 composite facade narrowing
@@ -58,9 +58,9 @@ Collected: `6`
   for source, config, tests, scripts, docs, and reports.
 - `src/bioetl/` reflects the intended layered architecture through distinct
   first-order package groups.
-- Current Python file count under `src/bioetl` is `2413`, including two
+- Current Python file count under `src/bioetl` is `2412`, including two
   top-level package modules outside the five first-order architecture layers.
-- Current layer file counts are: `domain=601`, `application=748`,
+- Current layer file counts are: `domain=600`, `application=748`,
   `infrastructure=625`, `composition=282`, `interfaces=155`.
 - Current first-order package counts are: `domain=22`, `application=6`,
   `infrastructure=20`, `composition=5`, `interfaces=2`.
@@ -80,6 +80,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `afdf09bf4fddf6faa49075e7bad7663e1aafd719520b8c85043d5a5f9c7b3f6a`
+- source_tree_sha256: `56bd31f71039b29dad0402408c6c3350868c923a14e582c599872e0e42a08de2`
 
-`source_module_count=2413`
+`source_module_count=2412`

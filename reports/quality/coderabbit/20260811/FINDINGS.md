@@ -1,6 +1,5 @@
 # FINDINGS — CR-FULL 20260811
 
-> Closeout note: accepted findings mapped to stream issues #8643 (behavior), #8644 (domain-other), #8645 (aggregates). See `ISSUES_MAP.json`.
 - Raw findings: **129**
 - Normalized problem records: **145**
 - Accepted problems: **71**

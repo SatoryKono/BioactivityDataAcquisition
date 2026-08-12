@@ -147,12 +147,6 @@ Temporary scripts are classified by:
 
 #### Current Temporary Scripts
 
-The complete current inventory is owned by
-[`scripts/temp/README.md`](../../../scripts/temp/README.md),
-`configs/quality/scripts_inventory_manifest.json`, and
-`configs/quality/scripts_lifecycle_registry.json`. The campaign notes below are
-context for the basedpyright subset, not a second inventory source of truth.
-
 ### basedpyright Diagnostic Scripts (Review by: 2026-09-30)
 
 **Owner:** @bioetl-platform

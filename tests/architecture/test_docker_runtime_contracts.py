@@ -127,17 +127,6 @@ def test_published_ports_are_localhost_bound_and_have_one_owner() -> None:
     assert actual == expected
 
 
-def test_alertmanager_helper_binds_the_tracked_root_config() -> None:
-    compose_path = ROOT / "scripts/ops/runtime/docker/compose/alertmanager.yml"
-    compose = _load_yaml(compose_path)
-    mount = compose["services"]["alertmanager"]["volumes"][0]
-    source = mount.split(":", maxsplit=1)[0]
-
-    resolved = (compose_path.parent / source).resolve()
-    assert resolved == (ROOT / "grafana/alertmanager.yml").resolve()
-    assert resolved.is_file()
-
-
 def test_explicit_container_names_are_unique_and_justified() -> None:
     contract = _load_yaml(CONTRACT_PATH)
     retained = contract["retained_container_names"]

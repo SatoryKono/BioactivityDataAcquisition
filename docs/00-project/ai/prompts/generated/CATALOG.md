@@ -14,9 +14,6 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.closeout.grok` | `library/closeout/grok-closeout.md` | Issue/PR closeout paste with verdicts, evidence, ship-profile note |
 | `prompt.audit.grok-cycle` | `library/audit/grok-audit-cycle.md` | One-cycle audit paste with severity, stop conditions, Windows/memory gates |
 | `prompt.audit.orchestrator` | `library/audit/orchestrator.md` | Fail-closed N-iteration audit → issues → fix → CI → post-audit loop |
-| `prompt.audit.dual-agent-cycle` | `library/audit/dual-agent-cycle.md` | Dual-agent cyclic audit—plan—fix—check with external audit prompt and role swap |
-| `prompt.audit.role-auditor` | `library/audit/role-auditor.md` | Dual-agent Auditor role — CR+agent audit, plan review, implement stream, peer review |
-| `prompt.audit.role-planner` | `library/audit/role-planner.md` | Dual-agent Planner role — fact-check, task pack, plan gate, issues, implement stream |
 | `prompt.tests.speed-optimization` | `library/tests/speed-optimization-loop.md` | Accelerate test runs without weakening coverage |
 | `prompt.tests.fix-retest` | `library/tests/fix-retest-loop.md` | Run → fix → retest until green or blocked |
 | `prompt.tests.cycle` | `library/tests/test-cycle.md` | Cyclic testing — baseline run, triage, fix, retest, delta per cycle |
@@ -50,9 +47,6 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.fragment.reports-output` | `fragments/reports-output.md` | Audit artifacts must land under reports/, not repo root |
 | `prompt.fragment.shell-portability` | `fragments/shell-portability.md` | Portable shell notes for BioETL Windows-first operators |
 | `prompt.fragment.orchestrator-guards` | `fragments/orchestrator-guards.md` | Fail-closed guards for multi-iteration audit/implement orchestrator |
-| `prompt.fragment.dual-agent-handoff` | `fragments/dual-agent-handoff.md` | Handoff and task-pack contracts for dual-agent audit cycles |
-| `prompt.fragment.coderabbit-dual-pass` | `fragments/coderabbit-dual-pass.md` | CodeRabbit then agent order for audit and PR review passes |
-| `prompt.fragment.peer-review-gate` | `fragments/peer-review-gate.md` | Peer agent review gate before issue close |
 | `prompt.fragment.bi-check-schema` | `fragments/bi-check-schema.md` | BI dashboard check result schema and priority mapping |
 
 ## All registry entries
@@ -71,17 +65,11 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.fragment.reports-output` | fragment | active | `fragments/reports-output.md` |
 | `prompt.fragment.shell-portability` | fragment | active | `fragments/shell-portability.md` |
 | `prompt.fragment.orchestrator-guards` | fragment | active | `fragments/orchestrator-guards.md` |
-| `prompt.fragment.dual-agent-handoff` | fragment | active | `fragments/dual-agent-handoff.md` |
-| `prompt.fragment.coderabbit-dual-pass` | fragment | active | `fragments/coderabbit-dual-pass.md` |
-| `prompt.fragment.peer-review-gate` | fragment | active | `fragments/peer-review-gate.md` |
 | `prompt.fragment.bi-check-schema` | fragment | active | `fragments/bi-check-schema.md` |
 | `prompt.session.grok-bootstrap` | operator-paste | active | `library/session/grok-bootstrap.md` |
 | `prompt.closeout.grok` | operator-paste | active | `library/closeout/grok-closeout.md` |
 | `prompt.audit.grok-cycle` | operator-paste | active | `library/audit/grok-audit-cycle.md` |
 | `prompt.audit.orchestrator` | operator-paste | active | `library/audit/orchestrator.md` |
-| `prompt.audit.dual-agent-cycle` | operator-paste | active | `library/audit/dual-agent-cycle.md` |
-| `prompt.audit.role-auditor` | operator-paste | active | `library/audit/role-auditor.md` |
-| `prompt.audit.role-planner` | operator-paste | active | `library/audit/role-planner.md` |
 | `prompt.tests.speed-optimization` | operator-paste | active | `library/tests/speed-optimization-loop.md` |
 | `prompt.tests.fix-retest` | operator-paste | active | `library/tests/fix-retest-loop.md` |
 | `prompt.tests.cycle` | operator-paste | active | `library/tests/test-cycle.md` |
