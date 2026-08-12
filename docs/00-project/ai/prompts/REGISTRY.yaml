@@ -248,6 +248,34 @@ entries:
     tags: [audit, debt, quality, operator]
     summary: Evidence-based technical debt register with risk-ordered paydown
 
+  - id: prompt.audit.tests-cycle
+    path: library/audit/tests-cycle.md
+    status: active
+    class: operator-paste
+    tags: [audit, tests, cycle, quality, operator]
+    summary: Cyclic audit of the test system — inventory, gates, flaky, fix, re-verify
+
+  - id: prompt.audit.docs-cycle
+    path: library/audit/docs-cycle.md
+    status: active
+    class: operator-paste
+    tags: [audit, docs, cycle, content, operator]
+    summary: Cyclic documentation audit — content drift, commands, links, fix, re-verify
+
+  - id: prompt.audit.tech-debt-cycle
+    path: library/audit/tech-debt-cycle.md
+    status: active
+    class: operator-paste
+    tags: [audit, debt, cycle, quality, operator]
+    summary: Cyclic technical-debt audit — register, trend, paydown, residual re-check
+
+  - id: prompt.audit.cyclic-pack
+    path: library/audit/cyclic-pack.md
+    status: active
+    class: operator-paste
+    tags: [audit, cycle, pack, operator]
+    summary: Pack of three cyclic domain audits — tests, docs, tech-debt (paste routing)
+
   - id: prompt.audit.repo-tree
     path: library/audit/repo-tree.md
     status: active

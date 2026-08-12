@@ -1,19 +1,19 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-12T00:46:04.854143+00:00",
+  "generated_at": "2026-08-12T17:35:28.401363+00:00",
   "summary": {
-    "total_scripts": 598,
+    "total_scripts": 599,
     "status_counts": {
       "active": 338,
       "supporting": 251,
-      "temporary_diagnostic": 9
+      "temporary_diagnostic": 10
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 16,
       "ci": 81,
       "docs": 255,
-      "other": 78,
+      "other": 59,
       "scripts": 495,
       "skills": 11,
       "tests": 381
@@ -797,7 +797,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py",
-          "line": 385,
+          "line": 389,
           "source_group": "tests",
           "text": "assert \"scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh\" in backlog_text"
         }
@@ -2574,7 +2574,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 180,
+          "line": 215,
           "source_group": "docs",
           "text": ".\\.venv-win\\Scripts\\python.exe scripts\\ai\\generate_project_domain_audit_workflow.py"
         }
@@ -2635,7 +2635,7 @@
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 158,
+          "line": 193,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\grok\\install_skills.ps1"
         }
@@ -3064,14 +3064,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 5,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 38,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\""
-        },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
           "line": 94,
@@ -3140,14 +3134,8 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 128,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\""
-        },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 137,
@@ -3189,14 +3177,8 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 62,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/.mcp.json",
           "line": 62,
@@ -3257,14 +3239,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 7,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 90,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
-        },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
           "line": 95,
@@ -3333,14 +3309,8 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 4,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 149,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.sh\""
-        },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 157,
@@ -3395,14 +3365,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 69,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_code_interpreter_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/.mcp.json",
           "line": 69,
@@ -3447,14 +3411,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 4,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 55,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/.mcp.json",
           "line": 55,
@@ -3505,14 +3463,8 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 118,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_deja_wrapper.sh\""
-        },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 131,
@@ -3565,7 +3517,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 672,
+          "line": 683,
           "source_group": "tests",
           "text": "powershell_wrapper = (ROOT / \"scripts/ai/mcp/mcp_docker_wrapper.ps1\").read_text("
         }
@@ -3580,14 +3532,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 48,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_docker_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/.mcp.json",
           "line": 48,
@@ -3664,14 +3610,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 26,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/.mcp.json",
           "line": 26,
@@ -3716,14 +3656,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 5,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 17,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
-        },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
           "line": 232,
@@ -3780,14 +3714,8 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 159,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\""
-        },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 163,
@@ -3848,14 +3776,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 7,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 83,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.sh\""
-        },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
           "line": 96,
@@ -3926,14 +3848,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 6,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 6,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_memory_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/.mcp.json",
           "line": 6,
@@ -4008,14 +3924,8 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 111,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/.mcp.json",
           "line": 111,
@@ -4064,14 +3974,8 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 139,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_mutmut_wrapper.sh\""
-        },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 144,
@@ -4145,14 +4049,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 5,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 97,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/.mcp.json",
           "line": 97,
@@ -4209,14 +4107,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 25,
+      "reference_count": 24,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 104,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh\""
-        },
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
           "line": 74,
@@ -4258,6 +4150,12 @@
           "line": 22,
           "source_group": "docs",
           "text": "# Expected: scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
+          "line": 114,
+          "source_group": "docs",
+          "text": "│ scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh             │"
         }
       ]
     },
@@ -4304,14 +4202,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 76,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/.mcp.json",
           "line": 76,
@@ -4419,7 +4311,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 652,
+          "line": 663,
           "source_group": "tests",
           "text": "smoke = ROOT / \"scripts/ai/mcp/protocol_smoke.py\""
         },
@@ -4456,7 +4348,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 662,
+          "line": 673,
           "source_group": "tests",
           "text": "powershell = (ROOT / \"scripts/ai/mcp/support/docker_cli_resolver.ps1\").read_text("
         }
@@ -4954,7 +4846,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 36,
+      "reference_count": 39,
       "references": [
         {
           "path": "docs/00-project/ai/README.md",
@@ -4964,45 +4856,45 @@
         },
         {
           "path": "docs/00-project/ai/prompts/INVENTORY.md",
-          "line": 97,
+          "line": 109,
           "source_group": "docs",
           "text": "- `generated/CATALOG.md` from `REGISTRY.yaml` (`python -m scripts.ai.prompts catalog`)"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 123,
+          "line": 127,
+          "source_group": "docs",
+          "text": "python -m scripts.ai.prompts render prompt.audit.dual-agent-cycle \\"
+        },
+        {
+          "path": "docs/00-project/ai/prompts/README.md",
+          "line": 155,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts list"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 124,
+          "line": 156,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts show prompt.audit.grok-cycle"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 125,
+          "line": 157,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.session.grok-bootstrap \\"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 127,
+          "line": 159,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.audit.grok-cycle --param SCOPE=\"src/bioetl/domain\""
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 128,
+          "line": 160,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.closeout.grok --param SCOPE=\"issues: #NNNN\""
-        },
-        {
-          "path": "docs/00-project/ai/prompts/README.md",
-          "line": 129,
-          "source_group": "docs",
-          "text": "python -m scripts.ai.prompts render prompt.observability.dashboard-panel-audit \\"
         }
       ],
       "owner": "@bioetl-platform",
@@ -5538,7 +5430,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 210,
+          "line": 212,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.data_quality"
         },
@@ -5784,7 +5676,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 122,
+          "line": 123,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.diagrams generate-dataflows \\"
         },
@@ -5892,13 +5784,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 315,
+          "line": 318,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 396,
+          "line": 401,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
@@ -5949,7 +5841,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 418,
+          "line": 423,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_quality_gates.py \\"
         },
@@ -6026,7 +5918,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 407,
+          "line": 412,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_visual_smoke.py \\"
         },
@@ -6098,19 +5990,19 @@
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 231,
+          "line": 232,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py --manifest \"$manifest_tmp\""
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 318,
+          "line": 321,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 401,
+          "line": 406,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
@@ -6534,7 +6426,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 413,
+          "line": 418,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/fix/harmonize_link_styles.py --dry-run --fail-on-errors"
         },
@@ -6818,7 +6710,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 353,
+          "line": 357,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json"
         },
@@ -6863,7 +6755,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 356,
+          "line": 360,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -7605,13 +7497,13 @@
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 207,
+          "line": 208,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 346,
+          "line": 350,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -7970,7 +7862,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 200,
+          "line": 202,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.docs check-links --report-json reports/docs-link-check-report.json"
         },
@@ -9700,6 +9592,18 @@
           "text": "assert \"scripts/engineering/ci/report_quality_debt_weekly.py\" in workflow"
         }
       ]
+    },
+    {
+      "path": "scripts/engineering/ci/rerun_pr_checks.sh",
+      "type": "sh",
+      "status": "temporary_diagnostic",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the bounded GitHub Actions recovery helper for the current billing/LFS incident; remove it after affected pull requests are retriggered or promote the behavior into governed CI tooling if recurring use is approved."
     },
     {
       "path": "scripts/engineering/ci/run_pytest_resilient.py",
@@ -12008,7 +11912,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 169,
+          "line": 170,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-xwalk-missing-backlog \\"
         }
@@ -12159,7 +12063,7 @@
       "references": [
         {
           "path": ".github/workflows/import-linter.yml",
-          "line": 152,
+          "line": 157,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-c901 \\"
         },
@@ -13488,13 +13392,13 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 217,
+          "line": 219,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 221,
+          "line": 223,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --update"
         },
@@ -16015,7 +15919,7 @@
         },
         {
           "path": ".github/workflows/branch-hygiene.yml",
-          "line": 42,
+          "line": 44,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo \\"
         },
@@ -16027,13 +15931,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 197,
+          "line": 199,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo check-versions"
         },
         {
           "path": ".github/workflows/release.yml",
-          "line": 39,
+          "line": 43,
           "source_group": "ci",
           "text": "run: python -m scripts.engineering.repo check-versions"
         },
@@ -19057,7 +18961,7 @@
         },
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 218,
+          "line": 230,
           "source_group": "tests",
           "text": "recover_ps1 = Path(\"scripts/ops/observability/grafana/recover_renderer.ps1\")"
         }
@@ -19125,7 +19029,7 @@
       "references": [
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 219,
+          "line": 231,
           "source_group": "tests",
           "text": "recover_sh = Path(\"scripts/ops/observability/grafana/recover_renderer.sh\")"
         }
@@ -20005,7 +19909,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 873,
+          "line": 884,
           "source_group": "tests",
           "text": "probe = (ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\").read_text("
         },
@@ -20839,7 +20743,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 423,
+          "line": 434,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1\","
         }
@@ -20900,7 +20804,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 422,
+          "line": 433,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/runtime/neo4j/neo4j_quick_start.sh\","
         }
@@ -21401,13 +21305,13 @@
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 62,
+          "line": 65,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.schema generate-artifacts --check"
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 114,
+          "line": 117,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.schema verify-schema-parity --mode blocking"
         }
@@ -22123,13 +22027,13 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 647,
+          "line": 658,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 810,
+          "line": 821,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -22160,7 +22064,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 647,
+          "line": 658,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },
@@ -22191,13 +22095,13 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 647,
+          "line": 658,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 810,
+          "line": 821,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -22228,7 +22132,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 647,
+          "line": 658,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },
