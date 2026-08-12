@@ -106,6 +106,12 @@ class CompositeValidator:
                     {"actual_type": type(config.composite_config).__name__},
                 )
             )
+            # Fail closed: do not probe required fields on a non-mapping payload.
+            return build_validation_result(
+                issues=issues,
+                validation_layer=ValidationLayer.STRUCTURAL,
+                execution_context={"pipeline_name": config.pipeline_name},
+            )
         for required_field in ("sources", "merge_strategy", "output_schema"):
             if required_field in config.composite_config:
                 continue

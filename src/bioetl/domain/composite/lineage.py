@@ -51,8 +51,14 @@ class CompositeLineageMetadata:
 
     def __post_init__(self) -> None:
         """Convert types for immutability."""
+        from bioetl.domain.immutability import freeze_fields
+
         if isinstance(self.source_providers, list):
             object.__setattr__(self, "source_providers", tuple(self.source_providers))
+        freeze_fields(
+            self,
+            ("enrichment_status", "enrichment_timestamps", "field_sources"),
+        )
 
     def has_enrichment(self, provider: str) -> bool:
         """Check if record has successful enrichment from provider.
@@ -96,7 +102,7 @@ class CompositeLineageMetadata:
             "_enrichment_timestamps": {
                 p: ts.isoformat() for p, ts in self.enrichment_timestamps.items()
             },
-            "_field_sources": self.field_sources,
+            "_field_sources": dict(self.field_sources),
             "_seed_record_id": self.seed_record_id,
             "_lineage_created_at": (
                 self.created_at.isoformat() if self.created_at else None
@@ -117,10 +123,16 @@ class CompositeLineageMetadata:
         enrichment_timestamps = _parse_timestamps(
             data.get("_enrichment_timestamps", {})
         )
+        composite_run_id = data.get("_composite_run_id")
+        composite_name = data.get("_composite_name")
+        if composite_run_id is None or str(composite_run_id).strip() == "":
+            raise ValueError("_composite_run_id is required and must be non-empty")
+        if composite_name is None or str(composite_name).strip() == "":
+            raise ValueError("_composite_name is required and must be non-empty")
 
         return cls(
-            composite_run_id=str(data.get("_composite_run_id", "")),
-            composite_name=str(data.get("_composite_name", "")),
+            composite_run_id=str(composite_run_id),
+            composite_name=str(composite_name),
             source_providers=_parse_providers(data.get("_source_providers", [])),
             enrichment_status=enrichment_status,
             enrichment_timestamps=enrichment_timestamps,
@@ -153,10 +165,12 @@ def _status_record_from_value(
     provider_key: str,
     status: object,
 ) -> EnrichmentStatusRecord:
+    from collections.abc import Mapping
+
     if isinstance(status, str):
         return EnrichmentStatusRecord(provider=provider_key, status=status)
-    if isinstance(status, dict):
-        return _status_record_from_mapping(provider_key, status)
+    if isinstance(status, Mapping):
+        return _status_record_from_mapping(provider_key, dict(status))
     return EnrichmentStatusRecord(provider=provider_key, status="error")
 
 
@@ -168,7 +182,9 @@ def _parse_enrichment_status(
     Accepts legacy plain-string values and nested mapping payloads with
     ``status`` / ``timestamp`` / ``error_message``.
     """
-    if not isinstance(raw, dict):
+    from collections.abc import Mapping
+
+    if not isinstance(raw, Mapping):
         return {}
     return {
         str(provider): _status_record_from_value(str(provider), status)
@@ -196,7 +212,9 @@ def _parse_one_timestamp(ts: object) -> datetime | None:
 
 def _parse_timestamps(raw: object) -> dict[str, datetime]:
     """Parse timestamps from raw dict, skipping malformed ISO strings."""
-    if not isinstance(raw, dict):
+    from collections.abc import Mapping
+
+    if not isinstance(raw, Mapping):
         return {}
     result: dict[str, datetime] = {}
     for provider, ts in raw.items():
@@ -227,11 +245,20 @@ def _parse_providers(raw: object) -> tuple[str, ...]:
 
 def _parse_field_sources(raw: object) -> dict[str, str]:
     """Parse field sources from raw value."""
-    if isinstance(raw, dict):
+    from collections.abc import Mapping
+
+    if isinstance(raw, Mapping):
         return {str(k): str(v) for k, v in raw.items()}
     return {}
 
 
 def _parse_seed_id(raw: object) -> str | None:
     """Parse seed record ID from raw value."""
-    return str(raw) if raw else None
+    # Preserve present numeric zero (truthiness would drop it).
+    # Empty/whitespace strings remain absent identifiers.
+    if raw is None:
+        return None
+    text = str(raw).strip()
+    if text == "":
+        return None
+    return text

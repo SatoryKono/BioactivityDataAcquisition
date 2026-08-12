@@ -39,11 +39,33 @@ class FieldGroupRegistry:
         for group_def in groups:
             self._group_to_def[group_def.group_id] = group_def
             for fm in group_def.fields:
-                # Enclosing definition group_id is authoritative (not fm.group).
-                self._field_to_group[fm.base_name.lower()] = group_def.group_id
-                self._field_to_mapping[fm.base_name.lower()] = fm
-                for col in fm.provider_columns:
-                    self._column_to_group[col.lower()] = group_def.group_id
+                self._register_field_mapping(group_def.group_id, fm)
+
+    def _register_field_mapping(self, group_id: FieldGroupId, fm: FieldMapping) -> None:
+        """Register one field mapping; reject duplicate base/column keys."""
+        base_key = fm.base_name.lower()
+        if base_key in self._field_to_group:
+            existing = self._field_to_group[base_key]
+            raise ValueError(
+                f"Duplicate field-group base_name {fm.base_name!r}: "
+                f"already mapped to {existing.value}, "
+                f"also declared in {group_id.value}"
+            )
+        self._field_to_group[base_key] = group_id
+        self._field_to_mapping[base_key] = fm
+        for col in fm.provider_columns:
+            self._register_provider_column(group_id, col)
+
+    def _register_provider_column(self, group_id: FieldGroupId, col: str) -> None:
+        col_key = col.lower()
+        if col_key in self._column_to_group:
+            existing = self._column_to_group[col_key]
+            raise ValueError(
+                f"Duplicate provider column {col!r}: "
+                f"already mapped to {existing.value}, "
+                f"also declared in {group_id.value}"
+            )
+        self._column_to_group[col_key] = group_id
 
     @property
     def groups(self) -> tuple[FieldGroupDefinition, ...]:

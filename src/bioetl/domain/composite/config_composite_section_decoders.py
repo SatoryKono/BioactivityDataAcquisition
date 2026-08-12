@@ -4,22 +4,21 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from bioetl.domain.composite.cross_validation import (
-    ComparisonMethod,
-    EnricherFieldPairing,
-    FieldComparisonSpec,
-)
-
-from .config_cross_validation import CrossValidationConfig
-from .config_dq import CompositeDQConfig, DQOverrideConfig
-from .config_parsing import (
+from bioetl.domain.composite.config_cross_validation import CrossValidationConfig
+from bioetl.domain.composite.config_dq import CompositeDQConfig, DQOverrideConfig
+from bioetl.domain.composite.config_parsing import (
     optional_float,
     optional_str_tuple,
     require_float,
     require_int,
     str_key_mapping,
 )
-from .config_runtime import ExecutionConfig, LineageConfig
+from bioetl.domain.composite.config_runtime import ExecutionConfig, LineageConfig
+from bioetl.domain.composite.cross_validation import (
+    ComparisonMethod,
+    EnricherFieldPairing,
+    FieldComparisonSpec,
+)
 
 __all__ = [
     "build_cross_validation_config",
@@ -45,11 +44,15 @@ def _one_dq_override(name: str, raw: dict[str, object]) -> DQOverrideConfig:
 def _build_dq_overrides(
     overrides_raw: dict[str, object],
 ) -> dict[str, DQOverrideConfig]:
-    return {
-        name: _one_dq_override(name, raw)
-        for name, raw in overrides_raw.items()
-        if isinstance(raw, dict)
-    }
+    overrides: dict[str, DQOverrideConfig] = {}
+    for name, raw in overrides_raw.items():
+        if not isinstance(raw, dict):
+            raise ValueError(
+                f"dq.enricher_overrides[{name}] must be a dictionary, "
+                f"got {type(raw).__name__}"
+            )
+        overrides[name] = _one_dq_override(name, raw)
+    return overrides
 
 
 def build_dq_config(dq_data: dict[str, object]) -> CompositeDQConfig:

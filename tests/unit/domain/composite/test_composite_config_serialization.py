@@ -273,6 +273,23 @@ def test_composite_config_codec_roundtrips_all_business_sections() -> None:
 
 
 def test_composite_section_decoders_filter_invalid_nested_shapes() -> None:
+    # DQ enricher_overrides fail closed on non-object entries (CR stream #8644).
+    with pytest.raises(
+        ValueError, match=r"enricher_overrides\[ignored\] must be a dictionary"
+    ):
+        build_dq_config(
+            {
+                "required_fields": ["doi"],
+                "enricher_overrides": {
+                    "openalex": {
+                        "soft_fail_threshold": 0.2,
+                        "hard_fail_threshold": 0.7,
+                    },
+                    "ignored": "not-an-object",
+                },
+            }
+        )
+
     dq = build_dq_config(
         {
             "required_fields": ["doi"],
@@ -281,7 +298,6 @@ def test_composite_section_decoders_filter_invalid_nested_shapes() -> None:
                     "soft_fail_threshold": 0.2,
                     "hard_fail_threshold": 0.7,
                 },
-                "ignored": "not-an-object",
             },
         }
     )
@@ -354,3 +370,39 @@ def test_cross_validation_decoder_handles_non_sequence_nested_values() -> None:
                 ]
             }
         )
+
+
+def test_composite_merge_column_groups_optional_paths() -> None:
+    """Cover merge.column_groups None/empty/list decoding (CR #8644)."""
+    base: dict[str, object] = {
+        "name": "c",
+        "version": "1",
+        "seed": {"pipeline": "seed", "output_keys": ["id"], "silver_table": "s"},
+        "dependencies": [
+            {
+                "pipeline": "dep",
+                "output_keys": ["id"],
+                "join_keys": ["id"],
+                "silver_table": "d",
+            }
+        ],
+        "enrichers": [],
+        "merge": {
+            "strategy": "left_outer",
+            "conflict_resolution": "seed_priority",
+            "output_silver_path": "silver/c",
+            "output_gold_path": "gold/c",
+        },
+    }
+    assert CompositeConfig.from_dict(base).merge.column_groups == ()
+
+    empty = dict(base)
+    empty["merge"] = {**base["merge"], "column_groups": []}  # type: ignore[index]
+    assert CompositeConfig.from_dict(empty).merge.column_groups == ()
+
+    groups = dict(base)
+    groups["merge"] = {
+        **base["merge"],  # type: ignore[dict-item]
+        "column_groups": [{"name": "ids", "fields": ["id"]}],
+    }
+    assert len(CompositeConfig.from_dict(groups).merge.column_groups) == 1
