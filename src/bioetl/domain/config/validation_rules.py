@@ -2,12 +2,54 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Literal
 
 from bioetl.domain.config._converters import freeze_sequences, require_literal
 
 DQAllowedScalar = str | int | float | bool
+
+
+def _validate_range_parameters(rule: FieldValidation) -> None:
+    if rule.min_value is None:
+        if rule.max_value is None:
+            raise ValueError("range validation requires min_value and/or max_value")
+        return
+    if rule.max_value is not None and rule.min_value > rule.max_value:
+        raise ValueError(
+            "range validation min_value must be <= max_value, "
+            f"got min={rule.min_value}, max={rule.max_value}"
+        )
+
+
+def _validate_pattern_parameters(rule: FieldValidation) -> None:
+    if not rule.pattern or not str(rule.pattern).strip():
+        raise ValueError("pattern validation requires a non-empty pattern")
+
+
+def _validate_enum_parameters(rule: FieldValidation) -> None:
+    if not rule.allowed:
+        raise ValueError("enum validation requires a non-empty allowed set")
+
+
+def _validate_max_length_parameters(rule: FieldValidation) -> None:
+    if rule.max_length is None or rule.max_length < 0:
+        raise ValueError("max_length validation requires a non-negative max_length")
+
+
+def _validate_custom_parameters(rule: FieldValidation) -> None:
+    if not rule.validator or not str(rule.validator).strip():
+        raise ValueError("custom validation requires a validator name")
+
+
+_VARIANT_PARAMETER_VALIDATORS: dict[str, Callable[[FieldValidation], None]] = {
+    "range": _validate_range_parameters,
+    "pattern": _validate_pattern_parameters,
+    "enum": _validate_enum_parameters,
+    "max_length": _validate_max_length_parameters,
+    "custom": _validate_custom_parameters,
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -71,7 +113,7 @@ class FieldValidation:
     error_message: str | None = None
 
     def __post_init__(self) -> None:
-        """Convert lists to tuples for immutability."""
+        """Convert lists to tuples for immutability and validate variant params."""
         require_literal(
             self.validation_type,
             field_name="validation_type",
@@ -100,6 +142,13 @@ class FieldValidation:
                 allowed=frozenset({"error", "warn"}),
             )
         freeze_sequences(self, ("allowed",))
+        self._validate_variant_parameters()
+
+    def _validate_variant_parameters(self) -> None:
+        """Reject incomplete or contradictory variant-specific parameters."""
+        validator = _VARIANT_PARAMETER_VALIDATORS.get(self.validation_type)
+        if validator is not None:
+            validator(self)
 
     def effective_severity(
         self, *, is_enricher: bool = False

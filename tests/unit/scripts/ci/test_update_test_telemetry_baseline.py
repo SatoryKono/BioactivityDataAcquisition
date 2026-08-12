@@ -85,6 +85,29 @@ def test_read_slowest_summary_accepts_compatibility_alias(tmp_path: Path) -> Non
     ]
 
 
+def test_read_slowest_summary_backfills_missing_lane_duration_provenance(
+    tmp_path: Path,
+) -> None:
+    slowest_json = tmp_path / "slowest-tests.json"
+    slowest_json.write_text(
+        json.dumps(
+            {
+                "total_cases": 1,
+                "top_slowest": [],
+                "execution_context": {
+                    "junit_testcase_duration_sum_s": {"junit-fast.xml": 12.5}
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    context = _read_slowest_summary(slowest_json)["execution_context"]
+
+    assert context["lane_wall_time_s"] == {"junit-fast.xml": 12.5}
+    assert context["lane_wall_time_source"] == "junit_testcase_duration_sum_fallback"
+
+
 def test_read_coverage_percent_from_log_returns_percentage(tmp_path: Path) -> None:
     coverage_log = tmp_path / "parallel.log"
     coverage_log.write_text(

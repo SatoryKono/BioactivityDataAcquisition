@@ -4,21 +4,22 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from bioetl.domain.composite.config_cross_validation import CrossValidationConfig
-from bioetl.domain.composite.config_dq import CompositeDQConfig, DQOverrideConfig
-from bioetl.domain.composite.config_parsing import (
+from bioetl.domain.composite.cross_validation import (
+    ComparisonMethod,
+    EnricherFieldPairing,
+    FieldComparisonSpec,
+)
+
+from .config_cross_validation import CrossValidationConfig
+from .config_dq import CompositeDQConfig, DQOverrideConfig
+from .config_parsing import (
     optional_float,
     optional_str_tuple,
     require_float,
     require_int,
     str_key_mapping,
 )
-from bioetl.domain.composite.config_runtime import ExecutionConfig, LineageConfig
-from bioetl.domain.composite.cross_validation import (
-    ComparisonMethod,
-    EnricherFieldPairing,
-    FieldComparisonSpec,
-)
+from .config_runtime import ExecutionConfig, LineageConfig
 
 __all__ = [
     "build_cross_validation_config",
@@ -44,11 +45,15 @@ def _one_dq_override(name: str, raw: dict[str, object]) -> DQOverrideConfig:
 def _build_dq_overrides(
     overrides_raw: dict[str, object],
 ) -> dict[str, DQOverrideConfig]:
-    return {
-        name: _one_dq_override(name, raw)
-        for name, raw in overrides_raw.items()
-        if isinstance(raw, dict)
-    }
+    overrides: dict[str, DQOverrideConfig] = {}
+    for name, raw in overrides_raw.items():
+        if not isinstance(raw, dict):
+            raise ValueError(
+                f"dq.enricher_overrides[{name}] must be a dictionary, "
+                f"got {type(raw).__name__}"
+            )
+        overrides[name] = _one_dq_override(name, raw)
+    return overrides
 
 
 def build_dq_config(dq_data: dict[str, object]) -> CompositeDQConfig:
@@ -89,15 +94,23 @@ def build_execution_config(execution_data: dict[str, object]) -> ExecutionConfig
     )
 
 
+def _provider_lookup_entry(provider: str, fields: object) -> dict[str, str]:
+    if not isinstance(fields, Mapping):
+        raise ValueError(
+            f"lineage.provider_lookup_fields[{provider}] must be a mapping, "
+            f"got {type(fields).__name__}"
+        )
+    return {str(key): str(value) for key, value in fields.items()}
+
+
 def build_lineage_config(lineage_data: dict[str, object]) -> LineageConfig:
     lookup_raw = str_key_mapping(
         lineage_data.get("provider_lookup_fields"),
         "lineage.provider_lookup_fields",
     )
     lookup = {
-        provider: {str(key): str(value) for key, value in fields.items()}
+        provider: _provider_lookup_entry(provider, fields)
         for provider, fields in lookup_raw.items()
-        if isinstance(fields, Mapping)
     }
     track_fields = optional_str_tuple(
         lineage_data.get("track_source_for_fields"),
@@ -118,7 +131,11 @@ def _comparison_method(raw: object) -> ComparisonMethod:
     return ComparisonMethod(str(raw if raw is not None else "exact"))
 
 
-def _one_field_comparison_spec(field: dict[str, object]) -> FieldComparisonSpec:
+def _one_field_comparison_spec(field: object, *, path: str) -> FieldComparisonSpec:
+    if not isinstance(field, dict):
+        raise ValueError(
+            f"{path} entries must be dictionaries, got {type(field).__name__}"
+        )
     return FieldComparisonSpec(
         field_name=str(field.get("field_name") or ""),
         method=_comparison_method(field.get("method", "exact")),
@@ -126,28 +143,43 @@ def _one_field_comparison_spec(field: dict[str, object]) -> FieldComparisonSpec:
     )
 
 
-def _field_comparison_specs(fields_raw: object) -> tuple[FieldComparisonSpec, ...]:
-    if not isinstance(fields_raw, list | tuple):
+def _field_comparison_specs(
+    fields_raw: object, *, path: str
+) -> tuple[FieldComparisonSpec, ...]:
+    if fields_raw is None:
         return ()
-    return tuple(
-        _one_field_comparison_spec(field)
-        for field in fields_raw
-        if isinstance(field, dict)
-    )
+    if not isinstance(fields_raw, list | tuple):
+        raise ValueError(
+            f"{path} must be a sequence of dictionaries, "
+            f"got {type(fields_raw).__name__}"
+        )
+    return tuple(_one_field_comparison_spec(field, path=path) for field in fields_raw)
 
 
-def _one_enricher_pairing(raw: dict[str, object]) -> EnricherFieldPairing:
+def _one_enricher_pairing(raw: object, *, index: int) -> EnricherFieldPairing:
+    path = f"cross_validation.enricher_pairings[{index}]"
+    if not isinstance(raw, dict):
+        raise ValueError(f"{path} must be a dictionary, got {type(raw).__name__}")
     return EnricherFieldPairing(
         enricher_pipeline=str(raw.get("enricher_pipeline") or ""),
-        fields=_field_comparison_specs(raw.get("fields") or ()),
+        fields=_field_comparison_specs(
+            raw.get("fields") or (),
+            path=f"{path}.fields",
+        ),
     )
 
 
 def _enricher_field_pairings(pairings_raw: object) -> tuple[EnricherFieldPairing, ...]:
-    if not isinstance(pairings_raw, list | tuple):
+    if pairings_raw is None:
         return ()
+    if not isinstance(pairings_raw, list | tuple):
+        raise ValueError(
+            "cross_validation.enricher_pairings must be a sequence of dictionaries, "
+            f"got {type(pairings_raw).__name__}"
+        )
     return tuple(
-        _one_enricher_pairing(raw) for raw in pairings_raw if isinstance(raw, dict)
+        _one_enricher_pairing(raw, index=index)
+        for index, raw in enumerate(pairings_raw)
     )
 
 

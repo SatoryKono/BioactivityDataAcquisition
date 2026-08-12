@@ -3,6 +3,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 # Runs contract tests for domain ports to verify:
 # - All ports have required methods
 # - Implementations satisfy Protocol contracts
@@ -126,6 +129,7 @@ jobs:
   contracts-status:
     name: Contract Tests Status
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read
     needs: [port-contracts, hypothesis-contracts]

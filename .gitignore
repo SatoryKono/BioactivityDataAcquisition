@@ -586,7 +586,6 @@ scripts/docs/build/**/*.pyc
 /src/memory/graph/indexes/
 /src/memory/timeline/events/
 data/2026-07-03_20-21-59.gif
-.github/workflows/docs.yml
 .xml
 /_loop_*
 
@@ -637,3 +636,7 @@ _fail_*.txt
 .agents/
 /data/debug_exports
 /data/debug_exports
+/chrome-headless-shell
+
+# Local envrc for Grok/direnv MCP key load (machine-local)
+.envrc

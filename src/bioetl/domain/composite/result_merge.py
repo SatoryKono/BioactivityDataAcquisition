@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
@@ -12,6 +13,34 @@ if TYPE_CHECKING:
     from bioetl.domain.composite.cross_validation import CrossValidationStats
 
 __all__ = ["MergeResult"]
+
+
+def _reject_negative_counts(pairs: tuple[tuple[str, int], ...]) -> None:
+    for name, value in pairs:
+        if value < 0:
+            raise ValueError(f"{name} must be >= 0, got {value}")
+
+
+def _reject_inconsistent_enrichment(
+    records_merged: int, records_enriched: int, records_fully_enriched: int
+) -> None:
+    if records_fully_enriched > records_enriched:
+        raise ValueError(
+            "records_fully_enriched cannot exceed records_enriched: "
+            f"{records_fully_enriched} > {records_enriched}"
+        )
+    if records_enriched > records_merged > 0:
+        raise ValueError(
+            "records_enriched cannot exceed records_merged: "
+            f"{records_enriched} > {records_merged}"
+        )
+
+
+def _reject_non_finite_duration(duration_seconds: float) -> None:
+    if not math.isfinite(duration_seconds):
+        raise ValueError(f"duration_seconds must be finite, got {duration_seconds}")
+    if duration_seconds < 0:
+        raise ValueError(f"duration_seconds must be >= 0, got {duration_seconds}")
 
 
 @dataclass(frozen=True, slots=True)
@@ -31,8 +60,26 @@ class MergeResult:
     cross_validation_stats: CrossValidationStats | None = None
     quarantine_payloads: tuple[JsonDict, ...] = ()
 
+    def _validate_counts(self) -> None:
+        """Reject negative counters and inconsistent enrichment totals."""
+        _reject_negative_counts(
+            (
+                ("records_merged", self.records_merged),
+                ("records_from_seed", self.records_from_seed),
+                ("records_enriched", self.records_enriched),
+                ("records_fully_enriched", self.records_fully_enriched),
+            )
+        )
+        _reject_inconsistent_enrichment(
+            self.records_merged,
+            self.records_enriched,
+            self.records_fully_enriched,
+        )
+        _reject_non_finite_duration(self.duration_seconds)
+
     def __post_init__(self) -> None:
         """Freeze nested mappings/payloads so callers cannot mutate state."""
+        self._validate_counts()
         if isinstance(self.sources_used, list):
             object.__setattr__(self, "sources_used", tuple(self.sources_used))
         payloads = (

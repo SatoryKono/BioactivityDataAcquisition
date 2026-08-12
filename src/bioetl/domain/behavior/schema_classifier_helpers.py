@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.schema_policy import (
     ChangeClassification,
@@ -33,12 +35,16 @@ def build_field_added_change(field_name: str, new_value: object) -> SchemaChange
 
 def build_field_type_change(
     field_name: str,
-    old_field: JsonDict,
-    new_field: JsonDict,
+    old_field: object,
+    new_field: object,
 ) -> SchemaChange | None:
-    """Build type-change schema change when field type changed."""
-    old_type = old_field.get("type")
-    new_type = new_field.get("type")
+    """Build type-change schema change when field type changed.
+
+    Non-mapping property values are treated as having no type (no change),
+    so malformed definitions do not raise AttributeError.
+    """
+    old_type = old_field.get("type") if isinstance(old_field, Mapping) else None
+    new_type = new_field.get("type") if isinstance(new_field, Mapping) else None
     if old_type == new_type:
         return None
     return SchemaChange(
@@ -69,10 +75,10 @@ def removed_field_changes(
     old_properties: JsonDict,
     new_properties: JsonDict,
 ) -> list[SchemaChange]:
-    """Return field removal changes."""
+    """Return field removal changes in deterministic sorted order."""
     return [
         build_field_removed_change(field_name, old_properties[field_name])
-        for field_name in old_properties
+        for field_name in sorted(old_properties)
         if field_name not in new_properties
     ]
 
@@ -81,10 +87,10 @@ def added_field_changes(
     old_properties: JsonDict,
     new_properties: JsonDict,
 ) -> list[SchemaChange]:
-    """Return field addition changes."""
+    """Return field addition changes in deterministic sorted order."""
     return [
         build_field_added_change(field_name, new_properties[field_name])
-        for field_name in new_properties
+        for field_name in sorted(new_properties)
         if field_name not in old_properties
     ]
 
@@ -96,7 +102,7 @@ def changed_field_changes(
     new_properties: JsonDict,
     required_field_additions_as_breaking: bool,
 ) -> tuple[list[SchemaChange], list[SchemaChange]]:
-    """Return (breaking, non-breaking) changes for common fields."""
+    """Return (breaking, non-breaking) changes for common and newly required fields."""
     breaking_changes: list[SchemaChange] = []
     non_breaking_changes: list[SchemaChange] = []
     old_required = set(old_schema.get("required", []))
@@ -110,6 +116,23 @@ def changed_field_changes(
         if type_change is not None:
             breaking_changes.append(type_change)
 
+        required_change = build_required_field_change(
+            field_name=field_name,
+            old_required=old_required,
+            new_required=new_required,
+        )
+        if required_change is None:
+            continue
+        target_changes = (
+            breaking_changes
+            if required_field_additions_as_breaking
+            else non_breaking_changes
+        )
+        target_changes.append(required_change)
+
+    # Newly added properties that are also required must apply the same policy
+    # (067-S1): otherwise only FIELD_ADDED is emitted and breaking never fires.
+    for field_name in sorted(set(new_properties) - set(old_properties)):
         required_change = build_required_field_change(
             field_name=field_name,
             old_required=old_required,

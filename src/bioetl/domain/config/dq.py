@@ -16,6 +16,12 @@ from bioetl.domain.config.validation import (
 )
 from bioetl.domain.types.dq_contracts import DQDisposition
 
+DQDispositionOverrides = (
+    dict[str, DQDisposition]
+    | list[tuple[str, DQDisposition]]
+    | tuple[tuple[str, DQDisposition], ...]
+)
+
 __all__ = [
     "DQConfig",
     "DQReportConfig",
@@ -93,9 +99,10 @@ class DQConfig:
         contract_ref: str | None = None
         contract_version: str | None = None
         rule_bundle_version: str | None = None
-        default_disposition_policy: DQDisposition = DQDisposition.WARN
-        disposition_overrides: dict[str, DQDisposition] = field(default_factory=dict)
-        strictness_mode: Literal["lenient", "moderate", "strict"] = "moderate"
+        default_disposition_policy: Default disposition for unmatched rules.
+        disposition_overrides: Mapping or sequence of (rule_id, disposition)
+            pairs. Stored as an immutable tuple of items after construction.
+        strictness_mode: Policy strictness mode (lenient/moderate/strict).
     """
 
     soft_fail_threshold: float = 0.05
@@ -114,7 +121,8 @@ class DQConfig:
     contract_version: str | None = None
     rule_bundle_version: str | None = None
     default_disposition_policy: DQDisposition = DQDisposition.WARN
-    disposition_overrides: dict[str, DQDisposition] = field(default_factory=dict)
+    # Normalized to immutable item tuples in ``__post_init__``.
+    disposition_overrides: DQDispositionOverrides = ()
     strictness_mode: Literal["lenient", "moderate", "strict"] = "moderate"
 
     def __post_init__(self) -> None:
@@ -142,14 +150,26 @@ class DQConfig:
                 "key_nullability_rules",
             ),
         )
-        # Convert disposition_overrides to tuple of items for hashability
-        # Always convert to tuple to ensure consistency
-        if isinstance(self.disposition_overrides, dict):
-            object.__setattr__(
-                self,
-                "disposition_overrides",
-                tuple(self.disposition_overrides.items()),
+        self._normalize_disposition_overrides()
+
+    def _normalize_disposition_overrides(self) -> None:
+        """Normalize disposition overrides to immutable item tuples."""
+        # Normalize disposition_overrides to an immutable tuple of items.
+        raw_overrides = self.disposition_overrides
+        if isinstance(raw_overrides, dict):
+            normalized = tuple(
+                (str(key), value) for key, value in raw_overrides.items()
             )
+        elif isinstance(raw_overrides, list | tuple):
+            normalized = tuple(
+                (str(rule_id), disposition) for rule_id, disposition in raw_overrides
+            )
+        else:
+            raise TypeError(
+                "disposition_overrides must be a mapping or sequence of "
+                f"(rule_id, disposition) pairs, got {type(raw_overrides).__name__}"
+            )
+        object.__setattr__(self, "disposition_overrides", normalized)
 
     @staticmethod
     def validate_thresholds(

@@ -572,6 +572,48 @@ class TestBatchMutationMixin:
                 foreign_record, "Error", "ERR", quarantined_at=_ts(5)
             )
 
+    def test_quarantine_record_rejects_foreign_record_with_same_index(self, run_id):
+        """Foreign BatchRecord sharing only index must not overwrite owned row (#8645)."""
+        from bioetl.domain.aggregates._batch_record import BatchRecord
+
+        batch = Batch.create(run_id=run_id, created_at=_ts(0))
+        owned = batch.add_record({"id": "owned"})
+        foreign = BatchRecord(
+            index=owned.index,
+            entity_id=owned.entity_id,
+            content_hash=owned.content_hash,
+            data={"id": "foreign-payload"},
+            is_valid=True,
+        )
+
+        with pytest.raises(ValueError, match="does not belong to this batch"):
+            batch.quarantine_record(foreign, "Error", "ERR", quarantined_at=_ts(5))
+
+        assert batch.all_records[0] == owned
+        assert batch.all_records[0].data["id"] == "owned"
+        assert batch.quarantined_count == 0
+
+    def test_quarantine_record_is_idempotent_for_already_quarantined(
+        self, run_id
+    ) -> None:
+        """Retry quarantine must not duplicate projection or events (#8645)."""
+        batch = Batch.create(run_id=run_id, created_at=_ts(0))
+        record = batch.add_record({"id": "1"})
+        batch.collect_events()
+
+        first = batch.quarantine_record(record, "Error", "ERR", quarantined_at=_ts(5))
+        events_after_first = batch.collect_events()
+        second = batch.quarantine_record(
+            first, "Error-retry", "ERR2", quarantined_at=_ts(6)
+        )
+
+        assert second is first or second == first
+        assert not second.is_valid
+        assert second.error == "Error"
+        assert batch.quarantined_count == 1
+        assert batch.collect_events() == []
+        assert len(events_after_first) == 1
+
     def test_assert_open_blocks_operations_on_sealed(self, run_id):
         """_assert_open should raise InvalidStateError for non-modifiable states."""
         batch = Batch.create(run_id=run_id, created_at=_ts(0))

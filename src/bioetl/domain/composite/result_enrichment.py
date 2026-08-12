@@ -48,10 +48,25 @@ class EnrichmentResult:
         )
 
     def _validate_rates_and_duration(self) -> None:
-        if 0.0 <= self.dq_error_rate <= 1.0:
-            self._require_non_negative("duration_seconds", self.duration_seconds)
-            return
-        raise ValueError(f"dq_error_rate must be 0.0-1.0, got {self.dq_error_rate}")
+        if not (0.0 <= self.dq_error_rate <= 1.0):
+            raise ValueError(f"dq_error_rate must be 0.0-1.0, got {self.dq_error_rate}")
+        if not math.isfinite(self.duration_seconds):
+            raise ValueError(
+                f"duration_seconds must be finite, got {self.duration_seconds}"
+            )
+        self._require_non_negative("duration_seconds", self.duration_seconds)
+
+    def _validate_terminal_counter_sum(self) -> None:
+        """Reject overlapping terminal counters whose sum exceeds input."""
+        terminal_total = (
+            self.records_enriched + self.records_not_found + self.records_errored
+        )
+        if terminal_total > self.records_input:
+            raise ValueError(
+                "combined terminal counters "
+                "(records_enriched + records_not_found + records_errored) "
+                f"cannot exceed records_input: {terminal_total} > {self.records_input}"
+            )
 
     def __post_init__(self) -> None:
         """Validate result invariants."""
@@ -64,6 +79,8 @@ class EnrichmentResult:
             self._require_non_negative(name, value)
         self._require_bounded_by_input("records_enriched", self.records_enriched)
         self._require_bounded_by_input("records_not_found", self.records_not_found)
+        self._require_bounded_by_input("records_errored", self.records_errored)
+        self._validate_terminal_counter_sum()
         self._validate_rates_and_duration()
 
     @property

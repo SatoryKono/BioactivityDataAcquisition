@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
@@ -11,6 +12,18 @@ __all__ = [
     "DependencyStatus",
     "SeedResult",
 ]
+
+
+def _require_non_negative_int(name: str, value: int) -> None:
+    if value < 0:
+        raise ValueError(f"{name} must be >= 0, got {value}")
+
+
+def _require_finite_non_negative_duration(name: str, value: float) -> None:
+    if not math.isfinite(value):
+        raise ValueError(f"{name} must be finite, got {value}")
+    if value < 0:
+        raise ValueError(f"{name} must be >= 0, got {value}")
 
 
 @dataclass(frozen=True, slots=True)
@@ -25,6 +38,12 @@ class SeedResult:
     started_at: datetime | None = None
     completed_at: datetime | None = None
     resumed: bool = False
+
+    def __post_init__(self) -> None:
+        _require_non_negative_int("records_extracted", self.records_extracted)
+        _require_non_negative_int("records_silver", self.records_silver)
+        _require_non_negative_int("keys_generated", self.keys_generated)
+        _require_finite_non_negative_duration("duration_seconds", self.duration_seconds)
 
     @property
     def is_success(self) -> bool:
@@ -54,6 +73,11 @@ class DependencyResult:
     completed_at: datetime | None = None
     error_message: str | None = None
     resumed: bool = False
+
+    def __post_init__(self) -> None:
+        _require_non_negative_int("records_extracted", self.records_extracted)
+        _require_non_negative_int("records_silver", self.records_silver)
+        _require_finite_non_negative_duration("duration_seconds", self.duration_seconds)
 
     @property
     def is_success(self) -> bool:
@@ -171,13 +195,15 @@ class DependencyResult:
             DependencyResult with TIMEOUT status. ``duration_seconds`` uses the
             supplied value when provided; otherwise defaults to ``timeout_seconds``.
         """
+        _require_finite_non_negative_duration("timeout_seconds", timeout_seconds)
+        resolved_duration = (
+            timeout_seconds if duration_seconds is None else duration_seconds
+        )
         return cls(
             pipeline_name=pipeline_name,
             status=DependencyStatus.TIMEOUT,
             error_message=f"Timeout after {timeout_seconds}s",
-            duration_seconds=timeout_seconds
-            if duration_seconds is None
-            else duration_seconds,
+            duration_seconds=resolved_duration,
             started_at=started_at,
             completed_at=completed_at,
         )

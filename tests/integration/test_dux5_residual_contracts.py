@@ -32,6 +32,7 @@ def test_dux5_governance_docs_exist() -> None:
     assert (AUDIT_PROTOCOLS / "dux5-screenshot-regression-protocol.md").is_file()
     design = (DOCS / "design-system.md").read_text(encoding="utf-8")
     assert "dux5-copy-dictionary.md" in design
+    assert "archive/audit-protocols/dux5-copy-dictionary.md" in design
 
 
 def test_nav_bus_complete_without_truncation() -> None:

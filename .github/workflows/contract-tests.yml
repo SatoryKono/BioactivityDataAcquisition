@@ -161,6 +161,7 @@ jobs:
   notify-success:
     name: Notify on Success
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: contract-tests
     if: needs.contract-tests.result == 'success'
     permissions:

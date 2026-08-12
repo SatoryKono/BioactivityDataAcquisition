@@ -106,6 +106,12 @@ class CompositeValidator:
                     {"actual_type": type(config.composite_config).__name__},
                 )
             )
+            # Fail closed: do not probe required fields on a non-mapping payload.
+            return build_validation_result(
+                issues=issues,
+                validation_layer=ValidationLayer.STRUCTURAL,
+                execution_context={"pipeline_name": config.pipeline_name},
+            )
         for required_field in ("sources", "merge_strategy", "output_schema"):
             if required_field in config.composite_config:
                 continue
@@ -229,7 +235,7 @@ class CompositeValidator:
             ]
         try:
             aggregation_config = _convert_to_aggregation_config(config)
-        except (KeyError, ValueError) as exc:
+        except (KeyError, TypeError, ValueError) as exc:
             return [
                 _create_issue(
                     IssueCode.CMP_PF_AGG_001,
@@ -253,7 +259,17 @@ class CompositeValidator:
         precheck_errors = self._precheck_cross_validation_config(config)
         if precheck_errors:
             return precheck_errors
-        cross_val_config = _convert_to_cross_validation_config(config)
+        try:
+            cross_val_config = _convert_to_cross_validation_config(config)
+        except (KeyError, TypeError, ValueError) as exc:
+            return [
+                _create_issue(
+                    IssueCode.CMP_PF_CV_002,
+                    ValidationSeverity.BLOCKER,
+                    f"Invalid cross-validation config format: {exc!s}",
+                    {"config": config},
+                )
+            ]
         validation_result: ValidationResult = (
             self._cross_validation_validator.validate_cross_validation_config(
                 cross_val_config, source_names

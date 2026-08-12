@@ -41,6 +41,7 @@ from bioetl.domain.aggregates.quarantine_entry import (
     QuarantineStatus,
 )
 from bioetl.domain.exceptions import InvalidStateError
+from bioetl.domain.serialization import serialize_to_json_canonical
 from bioetl.domain.types import BatchID, RunID
 from tests.helpers.deterministic_ids import deterministic_uuid_value
 
@@ -112,7 +113,9 @@ class TestQuarantineEntryInvariantProperties:
         second = _create_entry(payload, metadata_b)
 
         assert first.payload_hash == second.payload_hash
-        if metadata_a == metadata_b:
+        if serialize_to_json_canonical(metadata_a) == serialize_to_json_canonical(
+            metadata_b
+        ):
             assert first.entry_id == second.entry_id
         else:
             assert first.entry_id != second.entry_id

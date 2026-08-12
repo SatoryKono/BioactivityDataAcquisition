@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-12T01:06:41.287670+00:00",
+  "generated_at": "2026-08-12T00:46:04.854143+00:00",
   "summary": {
     "total_scripts": 598,
     "status_counts": {
@@ -797,7 +797,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py",
-          "line": 382,
+          "line": 385,
           "source_group": "tests",
           "text": "assert \"scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh\" in backlog_text"
         }
@@ -2734,7 +2734,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1598,
+          "line": 1618,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
@@ -5892,13 +5892,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 299,
+          "line": 315,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 380,
+          "line": 396,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
@@ -5949,7 +5949,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 402,
+          "line": 418,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_quality_gates.py \\"
         },
@@ -6026,7 +6026,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 391,
+          "line": 407,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_visual_smoke.py \\"
         },
@@ -6104,13 +6104,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 302,
+          "line": 318,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 385,
+          "line": 401,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
@@ -6534,7 +6534,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 397,
+          "line": 413,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/fix/harmonize_link_styles.py --dry-run --fail-on-errors"
         },
@@ -6818,7 +6818,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 337,
+          "line": 353,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json"
         },
@@ -6863,7 +6863,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 340,
+          "line": 356,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -6983,7 +6983,7 @@
         },
         {
           "path": "tests/architecture/test_diagram_regression_workflow.py",
-          "line": 125,
+          "line": 135,
           "source_group": "tests",
           "text": "wrapper = Path(\"scripts/diagrams/render.ps1\")"
         }
@@ -7611,7 +7611,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 330,
+          "line": 346,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -9274,7 +9274,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 598,
+          "line": 607,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory-live"
         },
@@ -9343,7 +9343,7 @@
         },
         {
           "path": "scripts/engineering/qa/generate_compatibility_facade_snapshot.py",
-          "line": 12,
+          "line": 14,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci._compatibility_registry import (  # type: ignore[import-not-found]"
         },
@@ -9380,25 +9380,25 @@
         },
         {
           "path": "scripts/engineering/ci/quality_integral_gate.py",
-          "line": 26,
+          "line": 30,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci._compatibility_telemetry import (  # type: ignore[import-not-found]"
         },
         {
           "path": "scripts/engineering/ci/quality_integral_gate.py",
-          "line": 33,
+          "line": 37,
           "source_group": "scripts",
           "text": "from ._compatibility_telemetry import ("
         },
         {
           "path": "scripts/engineering/ci/report_quality_debt_weekly.py",
-          "line": 13,
+          "line": 18,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci._compatibility_telemetry import (  # type: ignore[import-not-found]"
         },
         {
           "path": "scripts/engineering/ci/report_quality_debt_weekly.py",
-          "line": 20,
+          "line": 25,
           "source_group": "scripts",
           "text": "from ._compatibility_telemetry import ("
         },
@@ -9710,7 +9710,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1195,
+          "line": 1207,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -9893,7 +9893,7 @@
         },
         {
           "path": "scripts/engineering/qa/report_debt_governance_gates.py",
-          "line": 1095,
+          "line": 1104,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py::\""
         },
@@ -10437,7 +10437,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1664,
+          "line": 1684,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
@@ -13500,7 +13500,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 647,
+          "line": 659,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -16313,7 +16313,7 @@
         },
         {
           "path": "tests/architecture/test_github_actions_runtime_policy.py",
-          "line": 21,
+          "line": 22,
           "source_group": "tests",
           "text": "from scripts.engineering.repo import check_github_actions_runtime_policy as policy"
         }

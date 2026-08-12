@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-31'
+  Last verified: '2026-08-11'
 
 ______________________________________________________________________
 
 # GitHub Interaction Policy
 
-*Synced with RULES.md and ADR-047 | Last updated: 2026-07-31*
+*Synced with RULES.md and ADR-047 | Last updated: 2026-08-11*
 
 ______________________________________________________________________
 
@@ -29,7 +29,7 @@ ______________________________________________________________________
 
 | Branch           | Purpose                         | Protection                                             |
 | ---------------- | ------------------------------- | ------------------------------------------------------ |
-| `main`           | Production-ready code           | Direct merge allowed; no active required-check ruleset |
+| `main`           | Production-ready code           | Ruleset `root-hygiene-required-check` **active**: `checks-complete` + `root-hygiene` |
 | `develop`        | Integration branch (optional)   | Commit lint enforced                                   |
 | Feature branches | `feat/*`, `fix/*`, `refactor/*` | None                                                   |
 
@@ -140,9 +140,9 @@ ______________________________________________________________________
 
 ## 3. Status Checks and Ruleset Contract
 
-Direct merges to `main` are currently allowed. When a PR is used, the following
-checks remain the recommended quality gate even though GitHub does not
-currently enforce them as a blocking repository rule.
+Updates to `main` are governed by active required status checks. The following
+checks remain the recommended quality gate, while the repository ruleset
+enforces the final always-on subset documented below.
 
 ### Final always-on required-check set
 
@@ -154,10 +154,10 @@ The final activation set for repository ruleset
 | `checks-complete` | import-linter.yml | Unfiltered `pull_request` trigger; aggregates lint, C901 governance, architecture, and import-linter gates |
 | `root-hygiene` | root-hygiene.yml | Unfiltered `pull_request` trigger; enforces repository-root governance |
 
-Both checks materialize on every PR targeting `main`. Enabling or changing the
-repository ruleset is an external mutation and requires explicit maintainer
-confirmation. Until that confirmation is given and the API result is verified,
-the ruleset remains documented as disabled below.
+Both checks materialize on every PR targeting `main`. The repository ruleset
+`root-hygiene-required-check` is **active** and enforces exactly this always-on
+set. Further ruleset mutations remain external operations that require explicit
+maintainer confirmation and API re-verification.
 
 ### Path-scoped core checks
 
@@ -204,7 +204,7 @@ To remove drift between workflow-specific job names and governance language, Bio
 
 ### Escalation policy for fail/warn
 
-- **FAIL**: merge is blocked for PRs; if direct merge is used (ruleset disabled), maintainer MUST either fix or explicitly record a risk acceptance in PR/commit discussion.
+- **FAIL**: merge is blocked for PRs where the gate applies. The active always-on ruleset requires `checks-complete` and `root-hygiene`; failures MUST be fixed or explicitly risk-accepted in the PR discussion.
 - **WARN**: merge MAY proceed only with documented justification and a follow-up issue with owner and due date.
 - **WARN→FAIL**: repeated warning in 2 consecutive runs for the same surface, or warning on governance-contract surfaces (`RULES.md`, ADR-linked checks, schema parity, secrets) escalates to FAIL.
 
@@ -226,28 +226,28 @@ To remove drift between workflow-specific job names and governance language, Bio
 
 ### Branch Protection Verification
 
-Repository settings currently allow direct merge to `main`.
-Repo-side evidence remains the `root-hygiene` workflow plus the repository
-ruleset state below.
+PR merges to `main` require the always-on status checks below. Repo-side
+evidence is the active repository ruleset plus the workflows that materialize
+those checks.
 
-Re-verified read-only on `2026-08-11` with repository admin credentials via the
-GitHub REST API.
+Activated and re-verified on `2026-08-11` with repository admin credentials via
+the GitHub REST API (closeout for #8619 / parent #8607).
 
 Live GitHub enforcement state:
 
 - Repository ruleset `root-hygiene-required-check` targets
   `refs/heads/main`.
-- Enforcement: `disabled`.
-- Current rule payload references only status check `root-hygiene`, with
-  `strict_required_status_checks_policy: false`; it is not active.
-- The final activation payload adds `checks-complete` and retains
-  `root-hygiene`, matching the always-on set above.
-- Tracking reference: `#3380`.
+- Enforcement: `active`.
+- Required status checks: exactly `checks-complete` and `root-hygiene`
+  (`strict_required_status_checks_policy: false`).
+- The ruleset has no bypass actors.
+- Tracking references: `#3380`, `#8619`.
 - Evidence: `https://github.com/SatoryKono/BioactivityDataAcquisition/rules/15730586`
+- API: `GET /repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586`
 
 The legacy repository ruleset `main`
 (`https://github.com/SatoryKono/BioactivityDataAcquisition/rules/13643213`)
-also remains disabled.
+remains **disabled** and is not part of the active gate set.
 
 Repeat this verification at least quarterly and after any branch-protection or
 ruleset migration.

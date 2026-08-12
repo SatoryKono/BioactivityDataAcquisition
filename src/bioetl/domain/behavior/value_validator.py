@@ -215,7 +215,8 @@ class ValueValidator:
         if value < 0:
             return False, f"Activity value cannot be negative: {value}"
 
-        # If unit provided, validate as concentration
+        if is_percent_inhibition_type(parsed_type):
+            return self._validate_by_activity_type(value, parsed_type)
         if unit:
             return self.validate_concentration(value, unit)
 
@@ -283,7 +284,7 @@ class ValueValidator:
         min_value: float,
         max_value: float,
     ) -> None:
-        """Set custom validation range for a concentration unit.
+        """Set finite, increasing validation bounds for a concentration unit.
 
         Args:
             unit: Unit string.
@@ -291,8 +292,12 @@ class ValueValidator:
             max_value: Maximum valid value.
 
         Raises:
-            ValueError: If min_value >= max_value.
+            ValueError: If bounds are non-finite or min_value >= max_value.
         """
+        if not math.isfinite(min_value) or not math.isfinite(max_value):
+            raise ValueError(
+                f"concentration bounds must be finite, got min={min_value}, max={max_value}"
+            )
         if min_value >= max_value:
             raise ValueError("min_value must be less than max_value")
 
