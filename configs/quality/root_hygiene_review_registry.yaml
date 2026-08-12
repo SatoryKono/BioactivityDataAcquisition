@@ -194,6 +194,10 @@ review_lanes:
         current_live_state: present_local_only_root_surface
         canonical_path: null
         action_if_reintroduced: remove_root_mcp_shell_log_or_route_retained_runtime_logs_to_reports_logs
+      - path: chrome-headless-shell
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: remove_root_chrome_headless_download_via_reviewed_cleanup_or_rm_rf_do_not_track
       - path: nul
         current_live_state: present_local_only_root_surface
         canonical_path: null

@@ -27,7 +27,7 @@ summary: Audit artifacts under reports/ only; no root audit/ or .audit-runs/
     `findings.json` (optional subdirs `visual/`, `layout/`, `data/`)
   - `reports/audit/grafana-panels/` — engineering panel loop outputs when used
   - `reports/audit/dashboard-cycle/<run_id>/` — cyclic dashboard audit
-    (`prompt.observability.dashboard-audit-cycle`)
+    (`prompt.observability.dashboard-audit-cycle`, render/density/fill + BI)
   - `reports/audit/test-cycle/<run_id>/` — cyclic testing
     (`prompt.tests.cycle`)
   - `reports/audit/project-domain/<run_id>/` — nine-domain project audit rollup
