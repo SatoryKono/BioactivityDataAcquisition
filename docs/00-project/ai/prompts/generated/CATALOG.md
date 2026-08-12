@@ -28,6 +28,10 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.audit.docs-content` | `library/audit/docs-content.md` | Evidence-based audit of project documentation content and drift |
 | `prompt.audit.tests-system` | `library/audit/tests-system.md` | Audit test system as regression detection, not coverage vanity |
 | `prompt.audit.tech-debt` | `library/audit/tech-debt.md` | Evidence-based technical debt register with risk-ordered paydown |
+| `prompt.audit.tests-cycle` | `library/audit/tests-cycle.md` | Cyclic audit of the test system — inventory, gates, flaky, fix, re-verify |
+| `prompt.audit.docs-cycle` | `library/audit/docs-cycle.md` | Cyclic documentation audit — content drift, commands, links, fix, re-verify |
+| `prompt.audit.tech-debt-cycle` | `library/audit/tech-debt-cycle.md` | Cyclic technical-debt audit — register, trend, paydown, residual re-check |
+| `prompt.audit.cyclic-pack` | `library/audit/cyclic-pack.md` | Pack of three cyclic domain audits — tests, docs, tech-debt (paste routing) |
 | `prompt.audit.repo-tree` | `library/audit/repo-tree.md` | Repository tree and root hygiene audit against allowlist |
 | `prompt.audit.github-actions` | `library/audit/github-actions.md` | GitHub Actions supply-chain and correctness audit |
 | `prompt.audit.agents-runtime` | `library/audit/agents-runtime.md` | Audit AI agent instructions, skills, and agent-related scripts |
@@ -93,6 +97,10 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.audit.docs-content` | operator-paste | active | `library/audit/docs-content.md` |
 | `prompt.audit.tests-system` | operator-paste | active | `library/audit/tests-system.md` |
 | `prompt.audit.tech-debt` | operator-paste | active | `library/audit/tech-debt.md` |
+| `prompt.audit.tests-cycle` | operator-paste | active | `library/audit/tests-cycle.md` |
+| `prompt.audit.docs-cycle` | operator-paste | active | `library/audit/docs-cycle.md` |
+| `prompt.audit.tech-debt-cycle` | operator-paste | active | `library/audit/tech-debt-cycle.md` |
+| `prompt.audit.cyclic-pack` | operator-paste | active | `library/audit/cyclic-pack.md` |
 | `prompt.audit.repo-tree` | operator-paste | active | `library/audit/repo-tree.md` |
 | `prompt.audit.github-actions` | operator-paste | active | `library/audit/github-actions.md` |
 | `prompt.audit.agents-runtime` | operator-paste | active | `library/audit/agents-runtime.md` |

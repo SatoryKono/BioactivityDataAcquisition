@@ -59,13 +59,13 @@ of procedures. Domain method: `prompt.audit.docs-content`. Loop shell:
 Build/MkDocs/publish pipeline → `prompt.audit.docs-pipeline` (default via
 `INCLUDE_PIPELINE=true`).
 
-Default **`N=1`**, **`MODE=full`**, **`INCLUDE_PIPELINE=true`**, все **`ALLOW_*=true`**.
+Default **`N=10`**, **`MODE=full`**, **`INCLUDE_PIPELINE=true`**, все **`ALLOW_*=true`**.
 
 ## Params
 
 | Param | Default |
 | --- | --- |
-| `N` | `1` |
+| `N` | `10` |
 | `SCOPE` | `README.md docs/` (narrow by area) |
 | `MODE` | `full` (also: `audit` \| `audit+issues`) |
 | `LANGUAGE` | `ru` |
