@@ -272,7 +272,6 @@ DEFAULT_FILE_STRUCTURE_EXCLUDED_PREFIXES: tuple[str, ...] = (
     "docs/02-architecture/diagrams/foundation/svg",
     "docs/02-architecture/diagrams/views/png",
     "docs/02-architecture/diagrams/views/svg",
-    "docs/02-architecture/diagrams/providers",
     "scripts/diagrams/svg2png.mjs",
     "scripts/archive",
 )
@@ -2596,10 +2595,6 @@ def _is_excluded_file_structure_path(
         name for name in _as_string_list(config.get("excluded_dir_names")) if name
     }
     if any(part in excluded_dir_names for part in path.parts):
-        return True
-    # Keep generated diagram raster/vector trees out of file-structure surfaces.
-    # Aligns with snapshot_invariant_issues path-leak checks for /svg and /png.
-    if any(part in {"svg", "png"} for part in path.parts):
         return True
 
     excluded_prefixes = [

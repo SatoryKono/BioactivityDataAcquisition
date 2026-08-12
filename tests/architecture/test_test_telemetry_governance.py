@@ -264,10 +264,7 @@ def test_duration_telemetry_execution_context_accounts_for_lane_exclusions() -> 
     exclusions = context["explicit_exclusions"]
     assert isinstance(exclusions, list) and exclusions
     assert context["executed_count"] == payload["duration_telemetry"]["total_cases"]
-    # lane_wall_time_s is not yet emitted by the duration-telemetry producer;
-    # keep junit duration sum as the required accounting field.
-    if "lane_wall_time_s" in context:
-        assert context["lane_wall_time_s"]
+    assert context["lane_wall_time_s"]
     assert context["junit_testcase_duration_sum_s"]
     exclusion_lanes = {str(item.get("lane", "")) for item in exclusions}
     assert "live-provider-contracts" in exclusion_lanes

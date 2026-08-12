@@ -1,10 +1,10 @@
 ______________________________________________________________________
 
-Version: 3.7.0
+Version: 3.6.0
 Status: active
 Class: internal (repo-only entrypoint; excluded from MkDocs)
 Owner: BioETL Team
-Last verified: '2026-08-12'
+Last verified: '2026-08-11'
 Epic: '#8513'
 Phase3: '#8517'
 
@@ -60,9 +60,6 @@ docs/00-project/ai/prompts/
 | `prompt.closeout.grok` | [library/closeout/grok-closeout.md](library/closeout/grok-closeout.md) | Issue/PR closeout (v2.2) |
 | `prompt.audit.grok-cycle` | [library/audit/grok-audit-cycle.md](library/audit/grok-audit-cycle.md) | One audit cycle (v2.2) |
 | `prompt.audit.orchestrator` | [library/audit/orchestrator.md](library/audit/orchestrator.md) | N-iteration fail-closed loop (v1.0) |
-| `prompt.audit.dual-agent-cycle` | [library/audit/dual-agent-cycle.md](library/audit/dual-agent-cycle.md) | Dual-agent audit→plan→fix→check + role swap (v1.0) |
-| `prompt.audit.role-auditor` | [library/audit/role-auditor.md](library/audit/role-auditor.md) | Dual-agent Auditor (A) duties |
-| `prompt.audit.role-planner` | [library/audit/role-planner.md](library/audit/role-planner.md) | Dual-agent Planner (B) duties |
 | `prompt.tests.speed-optimization` | [library/tests/speed-optimization-loop.md](library/tests/speed-optimization-loop.md) | Test speed loop |
 | `prompt.tests.fix-retest` | [library/tests/fix-retest-loop.md](library/tests/fix-retest-loop.md) | Run → fix → retest |
 | `prompt.tests.cycle` | [library/tests/test-cycle.md](library/tests/test-cycle.md) | Cyclic testing (N cycles, lanes) |
@@ -99,32 +96,8 @@ Archive megaprompts (opt-in only):
 | --- | --- |
 | Single domain audit | domain card above |
 | One meta cycle | `prompt.audit.grok-cycle` |
-| N-iteration audit→issues→fix→CI (single agent) | `prompt.audit.orchestrator` (`N=1` default; ALLOW_* false) |
-| Dual-agent cycle + external audit prompt + CR + peer review | `prompt.audit.dual-agent-cycle` (`OUTER_CYCLES=1`; ALLOW_* false) |
+| N-iteration audit→issues→fix→CI | `prompt.audit.orchestrator` (`N=1` default; ALLOW_* false) |
 | Issue/PR closeout | `prompt.closeout.grok` |
-
-### Dual-agent cyclic audit
-
-Two roles in one run (**Auditor A** / **Planner B**), external audit prompt
-(`AUDIT_PROMPT_SOURCE=file:…` or library id), CodeRabbit then agent, mutual
-plan review, two implement streams, peer review, optional role swap.
-
-| Need | Card |
-| --- | --- |
-| Full cycle paste | `prompt.audit.dual-agent-cycle` |
-| Auditor duties only | `prompt.audit.role-auditor` |
-| Planner duties only | `prompt.audit.role-planner` |
-
-Fragments: `dual-agent-handoff`, `coderabbit-dual-pass`, `peer-review-gate`,
-`orchestrator-guards`. Artifacts → `reports/audit-runs/<run_id>/`.
-
-```bash
-python -m scripts.ai.prompts render prompt.audit.dual-agent-cycle \
-  --param AUDIT_PROMPT_SOURCE=file:docs/00-project/ai/prompts/library/audit/github-actions.md \
-  --param SCOPE=".github/workflows" --param MODE=plan --param OUTER_CYCLES=1
-```
-
-Workflow (P3, not in this drop): planned `.grok/workflows/dual-agent-audit-cycle.rhai`.
 
 Shared: `fragments/audit-scale.md` (0–3 + optional 0–5 / score_1_5 maps),
 `fragments/finding-schema.md` (JSON contract),
@@ -171,9 +144,6 @@ python -m scripts.ai.prompts render prompt.audit.github-actions \
   --param SCOPE=".github/workflows" --param MODE=audit
 python -m scripts.ai.prompts render prompt.audit.orchestrator \
   --param N=1 --param SCOPE="docs-content,github-actions" --param MODE=plan
-python -m scripts.ai.prompts render prompt.audit.dual-agent-cycle \
-  --param AUDIT_PROMPT_SOURCE=file:docs/00-project/ai/prompts/library/audit/tech-debt.md \
-  --param SCOPE="reports/quality" --param MODE=plan --param OUTER_CYCLES=1
 python -m scripts.ai.prompts check-registry
 python -m scripts.ai.prompts check
 python -m scripts.ai.prompts catalog

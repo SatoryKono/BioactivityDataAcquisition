@@ -3,7 +3,7 @@
   "status": "implemented_local_closeable",
   "budget_policy": "no_growth_ratchet_only",
   "metrics": {
-    "max_non_composite_duplication_clusters": 22
+    "max_non_composite_duplication_clusters": 15
   },
   "issues": [
     {

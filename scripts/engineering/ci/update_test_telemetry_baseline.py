@@ -161,25 +161,10 @@ def _read_slowest_summary(path: Path) -> TelemetryPayload:
         top_slowest = payload.get("top_slowest_tests")
     if not isinstance(top_slowest, list):
         top_slowest = []
-    execution_context = payload.get("execution_context", {})
-    if isinstance(execution_context, dict):
-        execution_context = dict(execution_context)
-        duration_sums = execution_context.get("junit_testcase_duration_sum_s")
-        if (
-            not execution_context.get("lane_wall_time_s")
-            and isinstance(duration_sums, dict)
-            and duration_sums
-        ):
-            execution_context["lane_wall_time_s"] = dict(duration_sums)
-            execution_context["lane_wall_time_source"] = (
-                "junit_testcase_duration_sum_fallback"
-            )
-    else:
-        execution_context = {}
     return {
         "total_cases": total_cases if isinstance(total_cases, int) else None,
         "top_slowest": top_slowest,
-        "execution_context": execution_context,
+        "execution_context": payload.get("execution_context", {}),
     }
 
 

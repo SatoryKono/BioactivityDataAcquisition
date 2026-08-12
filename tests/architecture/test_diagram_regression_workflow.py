@@ -44,16 +44,6 @@ def test_docs_workflow_validates_embedded_mermaid_blocks() -> None:
     assert "'docs/**/*.md'" in workflow
 
 
-def test_docs_workflow_only_renders_when_renderer_inputs_change() -> None:
-    workflow = Path(".github/workflows/docs.yml").read_text(encoding="utf-8")
-
-    assert "render_sources_changed:" in workflow
-    assert (
-        "needs.detect-diagram-changes.outputs.render_sources_changed == 'true'"
-        in workflow
-    )
-
-
 def test_docs_workflow_publishes_step_summary() -> None:
     workflow = Path(".github/workflows/docs.yml").read_text(encoding="utf-8")
 

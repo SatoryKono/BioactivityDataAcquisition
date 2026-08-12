@@ -52,10 +52,8 @@ catalog and rerun the repo governance checks.
 
 `configs/quality/scripts_inventory_manifest.json` is the machine inventory for
 `scripts/**` (status classes: **active**, **supporting**, **temporary_diagnostic**).
-Current counts are authoritative only in `summary.status_counts` of that
-manifest and are intentionally not duplicated here. The catalog gate enforces
-`active <= lifecycle.active_script_count_max`; the cap may only stay flat or
-shrink.
+Snapshot reference (2026-08-05, post-#7706 registration): total **576** —
+active **342**, supporting **229**, temporary_diagnostic **5**.
 
 When adding or renaming a script:
 

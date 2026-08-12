@@ -8,17 +8,17 @@ Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `1cb1e6e5741dcd0efec8408d3b3d4b6c45cdeece`
+Audited commit SHA: `41acba4f8791939ec4c8682d895477540e78e263`
 
-Evidence surface SHA-256: `b52f15f351aeafbf0c38b5ac16ed0507c463d3f8e55e3fe07e1b081466e2bb3d`
+Evidence surface SHA-256: `171aae102f86efa64bedecd4b601bbf993fe4d6cca3b9d1e1993ff41d126f99a`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-07-27-r1",
-  "audited_commit_sha": "1cb1e6e5741dcd0efec8408d3b3d4b6c45cdeece",
-  "evidence_surface_sha256": "b52f15f351aeafbf0c38b5ac16ed0507c463d3f8e55e3fe07e1b081466e2bb3d",
+  "audited_commit_sha": "41acba4f8791939ec4c8682d895477540e78e263",
+  "evidence_surface_sha256": "171aae102f86efa64bedecd4b601bbf993fe4d6cca3b9d1e1993ff41d126f99a",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
@@ -29,11 +29,11 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 1522,
+    "fully_covered_module_count": 1519,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 2,
-    "partially_covered_module_count": 889,
-    "source_module_count": 2413,
+    "partially_covered_module_count": 891,
+    "source_module_count": 2412,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
@@ -51,17 +51,16 @@ Refresh reason: Closeout wave #8584/#8583/#7515/#7517/#7410 — re-pin evidence;
 
 ## Executive summary
 
-1. Debt-governance gates: **45 pass / 0 fail** (`45/45` debt-governance gates).
-1. Release status: **debt-governance gates passing**.
+1. Debt-governance gates: **45 pass / 0 fail** — `45/45` debt-governance gates passing.
 1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
 1. Module inventory (from `module-coverage-inventory.json` only):
-   - source_module_count: **2413**
-   - fully_covered: **1522**
-   - partially_covered: **889**
+   - source_module_count: **2412**
+   - fully_covered: **1519**
+   - partially_covered: **891**
    - no_executable_lines: **2**
    - uncovered: **0**
    - unmeasured: **0**
-   - check: fully + partial + no_exec + uncovered + unmeasured = 2413 == source_module_count
+   - check: fully + partial + no_exec + uncovered + unmeasured = 2412 == source_module_count
 1. Contract coverage matrix schema: **contract-coverage-matrix-v3** (v3: strict Gold required for availability).
 1. Constructor waivers (shrink-only inventory): **1** entries.
 1. Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**.
@@ -92,7 +91,7 @@ python -m scripts.engineering.qa validate-technical-debt-audit --json
 
 | module | src importers | test importers |
 | --- | ---: | ---: |
-| `bioetl.domain.composite.config` | 0 | 40 |
+| `bioetl.domain.composite.config` | 0 | 39 |
 | `bioetl.application.composite.merger` | 0 | 5 |
 
 ## TD2 residual closeout (2026-07-29)

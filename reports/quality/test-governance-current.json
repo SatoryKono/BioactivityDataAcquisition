@@ -258,14 +258,14 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "576",
+      "line": "553",
       "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_stage_name_accepts_valid"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "595",
+      "line": "572",
       "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_stage_completion_running_allows_none_timestamp"
@@ -1524,14 +1524,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "576",
+        "line": "553",
         "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_stage_name_accepts_valid"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "595",
+        "line": "572",
         "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_stage_completion_running_allows_none_timestamp"
@@ -2232,8 +2232,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2282,
-      "test_python_file_count": 2509,
+      "test_glob_file_count": 2278,
+      "test_python_file_count": 2505,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2272,13 +2272,13 @@
       "top_level_directory_count_including_pycache": 15
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2282,
-    "total_test_functions": 24105,
+    "total_test_files": 2278,
+    "total_test_functions": 24029,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "a85a4315a1e33277885562fd7934fd6e0bd6d19672e83754e09b327fced4d8f2",
+  "source_tree_sha256": "e9dd6388da086a1a5c258bf8081846e60cdebb7e883b26dc0672a709b78d9d97",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 101,
@@ -2298,8 +2298,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2282,
-    "test_python_file_count": 2509,
+    "test_glob_file_count": 2278,
+    "test_python_file_count": 2505,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2338,8 +2338,8 @@
     "top_level_directory_count_including_pycache": 15
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2282,
-  "total_test_functions": 24105,
+  "total_test_files": 2278,
+  "total_test_functions": 24029,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

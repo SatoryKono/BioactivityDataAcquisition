@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-11'
+  Last verified: '2026-07-31'
 
 ______________________________________________________________________
 
 # GitHub Interaction Policy
 
-*Synced with RULES.md and ADR-047 | Last updated: 2026-08-11*
+*Synced with RULES.md and ADR-047 | Last updated: 2026-07-31*
 
 ______________________________________________________________________
 
@@ -29,7 +29,7 @@ ______________________________________________________________________
 
 | Branch           | Purpose                         | Protection                                             |
 | ---------------- | ------------------------------- | ------------------------------------------------------ |
-| `main`           | Production-ready code           | Ruleset `root-hygiene-required-check` **active**: `checks-complete` + `root-hygiene` |
+| `main`           | Production-ready code           | Active ruleset requires `checks-complete` and `root-hygiene` |
 | `develop`        | Integration branch (optional)   | Commit lint enforced                                   |
 | Feature branches | `feat/*`, `fix/*`, `refactor/*` | None                                                   |
 
@@ -154,10 +154,9 @@ The final activation set for repository ruleset
 | `checks-complete` | import-linter.yml | Unfiltered `pull_request` trigger; aggregates lint, C901 governance, architecture, and import-linter gates |
 | `root-hygiene` | root-hygiene.yml | Unfiltered `pull_request` trigger; enforces repository-root governance |
 
-Both checks materialize on every PR targeting `main`. The repository ruleset
-`root-hygiene-required-check` is **active** and enforces exactly this always-on
-set. Further ruleset mutations remain external operations that require explicit
-maintainer confirmation and API re-verification.
+Both checks materialize on every PR targeting `main`. The active repository
+ruleset enforces exactly this pair. Any later ruleset change remains an external
+mutation and requires explicit maintainer confirmation plus API verification.
 
 ### Path-scoped core checks
 
@@ -204,7 +203,7 @@ To remove drift between workflow-specific job names and governance language, Bio
 
 ### Escalation policy for fail/warn
 
-- **FAIL**: merge is blocked for PRs where the gate applies. The active always-on ruleset requires `checks-complete` and `root-hygiene`; failures MUST be fixed or explicitly risk-accepted in the PR discussion.
+- **FAIL**: merge is blocked for PRs where the gate applies. The active always-on ruleset requires `checks-complete` and `root-hygiene`; failures in path-scoped gates MUST be fixed or explicitly risk-accepted in the PR discussion.
 - **WARN**: merge MAY proceed only with documented justification and a follow-up issue with owner and due date.
 - **WARN→FAIL**: repeated warning in 2 consecutive runs for the same surface, or warning on governance-contract surfaces (`RULES.md`, ADR-linked checks, schema parity, secrets) escalates to FAIL.
 
@@ -226,28 +225,27 @@ To remove drift between workflow-specific job names and governance language, Bio
 
 ### Branch Protection Verification
 
-PR merges to `main` require the always-on status checks below. Repo-side
-evidence is the active repository ruleset plus the workflows that materialize
-those checks.
+Repository settings enforce the final always-on checks for updates to `main`.
+Repo-side evidence consists of the two unfiltered workflows plus the repository
+ruleset state below.
 
 Activated and re-verified on `2026-08-11` with repository admin credentials via
-the GitHub REST API (closeout for #8619 / parent #8607).
+the GitHub REST API.
 
 Live GitHub enforcement state:
 
 - Repository ruleset `root-hygiene-required-check` targets
   `refs/heads/main`.
 - Enforcement: `active`.
-- Required status checks: exactly `checks-complete` and `root-hygiene`
-  (`strict_required_status_checks_policy: false`).
+- The required-status-check payload contains exactly `checks-complete` and
+  `root-hygiene`, with `strict_required_status_checks_policy: false`.
 - The ruleset has no bypass actors.
-- Tracking references: `#3380`, `#8619`.
+- Tracking reference: `#3380`.
 - Evidence: `https://github.com/SatoryKono/BioactivityDataAcquisition/rules/15730586`
-- API: `GET /repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586`
 
 The legacy repository ruleset `main`
 (`https://github.com/SatoryKono/BioactivityDataAcquisition/rules/13643213`)
-remains **disabled** and is not part of the active gate set.
+also remains disabled.
 
 Repeat this verification at least quarterly and after any branch-protection or
 ruleset migration.

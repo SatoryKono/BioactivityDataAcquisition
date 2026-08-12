@@ -8,13 +8,11 @@ from enum import Enum
 from uuid import UUID
 
 import pytest
-from pydantic import BaseModel, ConfigDict
 
 from bioetl.composition.runtime_builders._snapshot_mapping_support import (
     normalize_snapshot,
     to_serializable_mapping,
 )
-from bioetl.domain.immutability import FrozenDict, FrozenList
 
 pytestmark = pytest.mark.unit
 
@@ -31,12 +29,7 @@ class _SampleDataclass:
 
 
 class _ModelDumpHost:
-    def model_dump(
-        self,
-        *,
-        mode: str = "python",
-        exclude_none: bool = False,
-    ):
+    def model_dump(self, *, mode: str = "python", exclude_none: bool = False):
         del mode, exclude_none
         return {"kind": "model", "value": 1}
 
@@ -45,12 +38,6 @@ class _DictHost:
     def dict(self, *, exclude_none: bool = False):
         del exclude_none
         return {"kind": "dict", "value": 2}
-
-
-class _FrozenPayloadModel(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    payload: object
 
 
 def test_normalize_snapshot_dataclass_enum_uuid() -> None:
@@ -73,21 +60,6 @@ def test_normalize_snapshot_dataclass_enum_uuid() -> None:
 def test_to_serializable_mapping_model_dump_and_dict() -> None:
     assert to_serializable_mapping(_ModelDumpHost()) == {"kind": "model", "value": 1}
     assert to_serializable_mapping(_DictHost()) == {"kind": "dict", "value": 2}
-
-
-def test_to_serializable_mapping_handles_frozen_pydantic_payload() -> None:
-    model = _FrozenPayloadModel(
-        payload=FrozenDict(
-            {
-                "nested": FrozenDict({"value": 1}),
-                "items": FrozenList(("a", "b")),
-            }
-        )
-    )
-
-    assert to_serializable_mapping(model) == {
-        "payload": {"nested": {"value": 1}, "items": ["a", "b"]}
-    }
 
 
 def test_to_serializable_mapping_non_mapping_wraps_value() -> None:

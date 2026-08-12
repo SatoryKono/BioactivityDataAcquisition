@@ -2066,7 +2066,7 @@
       "symbol": "silver_filter_compatibility_mode",
       "path": "src/bioetl/domain/config/runtime.py",
       "occurrence_count": 6,
-      "first_line": 116,
+      "first_line": 105,
       "role": "Execution identity compatibility mode",
       "migration_relevance": "Run manifest/checkpoint/effective config identity must preserve compatibility mode.",
       "notes": ""
@@ -2143,7 +2143,7 @@
       "symbol": "validate_no_semantic_silver_filter_payload",
       "path": "src/bioetl/infrastructure/schemas/pipeline_config.py",
       "occurrence_count": 2,
-      "first_line": 306,
+      "first_line": 277,
       "role": "Fail-fast Silver semantic key guard",
       "migration_relevance": "Boundary hook that rejects semantic Silver keys before domain conversion.",
       "notes": ""
@@ -2220,7 +2220,7 @@
       "symbol": "source_profile",
       "path": "src/bioetl/infrastructure/schemas/pipeline_config.py",
       "occurrence_count": 2,
-      "first_line": 269,
+      "first_line": 240,
       "role": "Versioned source-profile metadata",
       "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
       "notes": ""
@@ -2330,7 +2330,7 @@
       "symbol": "extraction_params",
       "path": "src/bioetl/infrastructure/schemas/pipeline_config.py",
       "occurrence_count": 4,
-      "first_line": 264,
+      "first_line": 235,
       "role": "Source-profile extraction policy",
       "migration_relevance": "extraction_params are provider request policy and must not be treated as Silver filters.",
       "notes": ""
@@ -2363,7 +2363,7 @@
       "symbol": "filters.extraction_params",
       "path": "configs/entities/chembl/assay.yaml",
       "occurrence_count": 1,
-      "first_line": 248,
+      "first_line": 257,
       "role": "Entity source-profile policy for chembl.assay",
       "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
       "notes": "non_empty; parameter_count=4"
@@ -2429,7 +2429,7 @@
       "symbol": "filters.extraction_params",
       "path": "configs/entities/chembl/publication.yaml",
       "occurrence_count": 1,
-      "first_line": 302,
+      "first_line": 311,
       "role": "Entity source-profile policy for chembl.publication",
       "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
       "notes": "non_empty; parameter_count=3"
@@ -2473,7 +2473,7 @@
       "symbol": "filters.extraction_params",
       "path": "configs/entities/chembl/target.yaml",
       "occurrence_count": 1,
-      "first_line": 224,
+      "first_line": 233,
       "role": "Entity source-profile policy for chembl.target",
       "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
       "notes": "non_empty; parameter_count=3"
@@ -2605,7 +2605,7 @@
       "symbol": "filters.source_profile",
       "path": "configs/entities/chembl/assay.yaml",
       "occurrence_count": 1,
-      "first_line": 253,
+      "first_line": 262,
       "role": "Entity source-profile metadata for chembl.assay",
       "migration_relevance": "Versioned source-profile metadata must change before source-side extraction widening.",
       "notes": "profile_id=chembl.assay.curated; version=1.0.0; status=baseline"
@@ -2627,7 +2627,7 @@
       "symbol": "filters.source_profile",
       "path": "configs/entities/chembl/publication.yaml",
       "occurrence_count": 1,
-      "first_line": 306,
+      "first_line": 315,
       "role": "Entity source-profile metadata for chembl.publication",
       "migration_relevance": "Versioned source-profile metadata must change before source-side extraction widening.",
       "notes": "profile_id=chembl.publication.curated; version=1.0.0; status=baseline"
@@ -2649,7 +2649,7 @@
       "symbol": "filters.source_profile",
       "path": "configs/entities/chembl/target.yaml",
       "occurrence_count": 1,
-      "first_line": 228,
+      "first_line": 237,
       "role": "Entity source-profile metadata for chembl.target",
       "migration_relevance": "Versioned source-profile metadata must change before source-side extraction widening.",
       "notes": "profile_id=chembl.target.curated; version=1.0.0; status=baseline"

@@ -3,18 +3,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
-from dataclasses import asdict
 from typing import Literal
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    field_serializer,
-    field_validator,
-    model_validator,
-)
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from bioetl.domain.composite import DataSchemaConfig
 from bioetl.domain.constants import DEFAULT_CHECKPOINT_INTERVAL
@@ -85,15 +76,6 @@ __all__ = [
     "SourceProfileYamlConfig",
     "TransformConfig",
 ]
-
-
-def _serialize_schema_value(value: object) -> object:
-    """Convert immutable domain containers to Pydantic-safe plain containers."""
-    if isinstance(value, Mapping):
-        return {str(key): _serialize_schema_value(item) for key, item in value.items()}
-    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
-        return [_serialize_schema_value(item) for item in value]
-    return value
 
 
 class FieldPolicyConfigSchema(BaseModel):
@@ -235,17 +217,6 @@ class PipelineYamlConfig(BaseModel):
             "Used by writers to enforce include_groups/exclude_fields at runtime."
         ),
     )
-
-    @field_serializer("data_schema")
-    def serialize_data_schema(
-        self,
-        value: DataSchemaConfig | None,
-    ) -> object:
-        """Serialize frozen nested projection mappings as plain JSON objects."""
-        if value is None:
-            return None
-        return _serialize_schema_value(asdict(value))
-
     column_groups: list[ColumnGroupSchema] = Field(
         default_factory=list,
         description="Optional column ordering groups for Silver/Gold output",

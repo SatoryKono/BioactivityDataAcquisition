@@ -92,27 +92,6 @@ entries:
     tags: [guardrail, audit, orchestrator]
     summary: Fail-closed guards for multi-iteration audit/implement orchestrator
 
-  - id: prompt.fragment.dual-agent-handoff
-    path: fragments/dual-agent-handoff.md
-    status: active
-    class: fragment
-    tags: [guardrail, audit, dual-agent, handoff]
-    summary: Handoff and task-pack contracts for dual-agent audit cycles
-
-  - id: prompt.fragment.coderabbit-dual-pass
-    path: fragments/coderabbit-dual-pass.md
-    status: active
-    class: fragment
-    tags: [guardrail, audit, coderabbit, review]
-    summary: CodeRabbit then agent order for audit and PR review passes
-
-  - id: prompt.fragment.peer-review-gate
-    path: fragments/peer-review-gate.md
-    status: active
-    class: fragment
-    tags: [guardrail, audit, dual-agent, review]
-    summary: Peer agent review gate before issue close
-
   - id: prompt.fragment.bi-check-schema
     path: fragments/bi-check-schema.md
     status: active
@@ -148,27 +127,6 @@ entries:
     class: operator-paste
     tags: [audit, orchestrator, github, operator]
     summary: Fail-closed N-iteration audit → issues → fix → CI → post-audit loop
-
-  - id: prompt.audit.dual-agent-cycle
-    path: library/audit/dual-agent-cycle.md
-    status: active
-    class: operator-paste
-    tags: [audit, dual-agent, cycle, coderabbit, github, operator]
-    summary: Dual-agent cyclic audit—plan—fix—check with external audit prompt and role swap
-
-  - id: prompt.audit.role-auditor
-    path: library/audit/role-auditor.md
-    status: active
-    class: operator-paste
-    tags: [audit, dual-agent, role, auditor, operator]
-    summary: Dual-agent Auditor role — CR+agent audit, plan review, implement stream, peer review
-
-  - id: prompt.audit.role-planner
-    path: library/audit/role-planner.md
-    status: active
-    class: operator-paste
-    tags: [audit, dual-agent, role, planner, operator]
-    summary: Dual-agent Planner role — fact-check, task pack, plan gate, issues, implement stream
 
   - id: prompt.tests.speed-optimization
     path: library/tests/speed-optimization-loop.md
