@@ -1198,7 +1198,7 @@ def _refresh_existing_inventory_source_tree(
     *,
     repo_root: Path,
 ) -> dict[str, Any]:
-    _, source_tree_sha256 = _read_stable_source_module_snapshots(repo_root)
+    snapshots, source_tree_sha256 = _read_stable_source_module_snapshots(repo_root)
     refreshed = dict(payload)
     # Without an explicit trusted coverage-verify refresh, every coverage-derived
     # field is immutable. In particular, do not invent rows or statuses for paths
@@ -1206,10 +1206,42 @@ def _refresh_existing_inventory_source_tree(
     refreshed["source_tree_sha256"] = source_tree_sha256
     modules = refreshed.get("modules")
     if isinstance(modules, list):
-        # ``rows`` is a compatibility alias consumed by architecture checks. Keep
-        # it synchronized with the authoritative coverage-derived module rows;
-        # this does not infer coverage for newly discovered source files.
+        live_paths = {snapshot.repo_path for snapshot in snapshots}
+        modules = [
+            row
+            for row in modules
+            if isinstance(row, dict) and str(row.get("path")) in live_paths
+        ]
+        refreshed["modules"] = modules
+        # ``rows`` is the backwards-compatible alias for the authoritative
+        # modules list. Repair alias drift without changing coverage facts.
         refreshed["rows"] = modules
+        summary = dict(refreshed.get("summary") or {})
+        unmeasured = _modules_with_status(
+            modules,
+            status="unmeasured",
+            reason="coverage_xml_has_no_class_entry",
+        )
+        uncovered = _modules_with_status(
+            modules,
+            status="uncovered",
+            reason="coverage_xml_reports_zero_executed_lines",
+        )
+        summary.update(
+            {
+                "source_module_count": len(modules),
+                "status_counts": _coverage_status_counts(modules),
+                "unmeasured_module_count": len(unmeasured),
+                "unmeasured_modules": unmeasured,
+                "uncovered_module_count": len(uncovered),
+                "uncovered_modules": uncovered,
+                "hotspot_family_coverage": _build_hotspot_family_coverage(
+                    modules,
+                    repo_root=repo_root,
+                ),
+            }
+        )
+        refreshed["summary"] = summary
     return refreshed
 
 

@@ -995,7 +995,9 @@ nav:
               - "Reports Output": 00-project/ai/prompts/fragments/reports-output.md
               - "Shell Portability": 00-project/ai/prompts/fragments/shell-portability.md
               - "Unknown Parameters": 00-project/ai/prompts/fragments/unknown-params.md
-          - "Prompt Archive (opt-in)": 00-project/ai/prompts/archive/README.md
+          - "Prompt Archive (opt-in)":
+              - "Overview": 00-project/ai/prompts/archive/README.md
+              - "BI Dashboard Audit Kit (2026-08-11)": 00-project/ai/prompts/archive/campaigns/bi-dashboard-audit-kit-2026-08-11.md
       - "AI Rules":
           - "Overview": 00-project/ai/rules/README.md
           - "Unified Rules": 00-project/ai/rules/bioetl-ai-rules.md

@@ -428,6 +428,83 @@ def _check_active_script_count_budget(
         )
 
 
+def _temporary_manifest_entries(
+    scripts: list[object],
+) -> dict[str, dict[str, object]]:
+    return {
+        str(item["path"]): item
+        for item in scripts
+        if isinstance(item, dict) and isinstance(item.get("path"), str)
+    }
+
+
+def _temporary_executable_paths(temp_root: Path) -> list[Path]:
+    return sorted(
+        path
+        for path in temp_root.rglob("*")
+        if path.is_file()
+        and path.suffix.lower() in SCRIPT_EXTENSIONS
+        and path.name != "__init__.py"
+    )
+
+
+def _check_temporary_manifest_entry(
+    *,
+    relative_path: str,
+    manifest_entry: dict[str, object] | None,
+    violations: list[str],
+) -> None:
+    if manifest_entry is None:
+        violations.append(
+            f"temporary script missing from inventory manifest: {relative_path}"
+        )
+    elif manifest_entry.get("status") != "temporary_diagnostic":
+        violations.append(
+            "temporary script must use status=temporary_diagnostic: "
+            f"{relative_path} (got {manifest_entry.get('status')!r})"
+        )
+
+
+def _check_temporary_lifecycle_entry(
+    *,
+    relative_path: str,
+    lifecycle_entry: object,
+    violations: list[str],
+) -> None:
+    if not isinstance(lifecycle_entry, dict):
+        violations.append(
+            f"temporary script missing lifecycle registry entry: {relative_path}"
+        )
+        return
+    if lifecycle_entry.get("decision") != "temporary_diagnostic":
+        violations.append(
+            "temporary script must use decision=temporary_diagnostic: "
+            f"{relative_path}"
+        )
+    review_by = lifecycle_entry.get("review_by")
+    if not isinstance(review_by, str) or not _parse_iso_date(review_by):
+        violations.append(
+            f"temporary script review_by must be YYYY-MM-DD: {relative_path}"
+        )
+
+
+def _check_temporary_readme_entry(
+    *,
+    path: Path,
+    relative_path: str,
+    temporary_relative_path: str,
+    readme_text: str,
+    violations: list[str],
+) -> None:
+    documentation_tokens = {f"`{path.name}`", f"`{temporary_relative_path}`"}
+    if readme_text and not any(
+        token in readme_text for token in documentation_tokens
+    ):
+        violations.append(
+            f"temporary script missing from scripts/temp/README.md: {relative_path}"
+        )
+
+
 def _check_temporary_script_governance(
     *,
     root: Path,
@@ -447,60 +524,27 @@ def _check_temporary_script_governance(
         readme_text = ""
         violations.append("temporary scripts README not found: scripts/temp/README.md")
 
-    manifest_by_path = {
-        str(item["path"]): item
-        for item in scripts
-        if isinstance(item, dict) and isinstance(item.get("path"), str)
-    }
-    temporary_paths = sorted(
-        path
-        for path in temp_root.rglob("*")
-        if path.is_file()
-        and path.suffix.lower() in SCRIPT_EXTENSIONS
-        and path.name != "__init__.py"
-    )
-
-    for path in temporary_paths:
+    manifest_by_path = _temporary_manifest_entries(scripts)
+    for path in _temporary_executable_paths(temp_root):
         relative_path = path.relative_to(root).as_posix()
         temporary_relative_path = path.relative_to(temp_root).as_posix()
-        manifest_entry = manifest_by_path.get(relative_path)
-        if manifest_entry is None:
-            violations.append(
-                f"temporary script missing from inventory manifest: {relative_path}"
-            )
-        elif manifest_entry.get("status") != "temporary_diagnostic":
-            violations.append(
-                "temporary script must use status=temporary_diagnostic: "
-                f"{relative_path} (got {manifest_entry.get('status')!r})"
-            )
-
-        lifecycle_entry = entries.get(relative_path)
-        if not isinstance(lifecycle_entry, dict):
-            violations.append(
-                f"temporary script missing lifecycle registry entry: {relative_path}"
-            )
-        else:
-            if lifecycle_entry.get("decision") != "temporary_diagnostic":
-                violations.append(
-                    "temporary script must use decision=temporary_diagnostic: "
-                    f"{relative_path}"
-                )
-            review_by = lifecycle_entry.get("review_by")
-            if not isinstance(review_by, str) or not _parse_iso_date(review_by):
-                violations.append(
-                    f"temporary script review_by must be YYYY-MM-DD: {relative_path}"
-                )
-
-        documentation_tokens = {
-            f"`{path.name}`",
-            f"`{temporary_relative_path}`",
-        }
-        if readme_text and not any(
-            token in readme_text for token in documentation_tokens
-        ):
-            violations.append(
-                f"temporary script missing from scripts/temp/README.md: {relative_path}"
-            )
+        _check_temporary_manifest_entry(
+            relative_path=relative_path,
+            manifest_entry=manifest_by_path.get(relative_path),
+            violations=violations,
+        )
+        _check_temporary_lifecycle_entry(
+            relative_path=relative_path,
+            lifecycle_entry=entries.get(relative_path),
+            violations=violations,
+        )
+        _check_temporary_readme_entry(
+            path=path,
+            relative_path=relative_path,
+            temporary_relative_path=temporary_relative_path,
+            readme_text=readme_text,
+            violations=violations,
+        )
 
 
 def _check_entrypoint_surfaces(
