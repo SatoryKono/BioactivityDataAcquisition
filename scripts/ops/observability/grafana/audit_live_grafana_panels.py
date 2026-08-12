@@ -19,13 +19,13 @@ from urllib.request import Request, urlopen
 from bioetl.infrastructure.storage.support.atomic_ops import atomic_write_text
 
 DEFAULT_PROMETHEUS_BASE_URL = "http://localhost:9090"
-DEFAULT_APP_BASE_URL = "http://localhost:8081"
+DEFAULT_APP_BASE_URL = "http://localhost:8000"
 DEFAULT_GRAFANA_BASE_URL = "http://localhost:3000"
 DEFAULT_LOKI_BASE_URL = "http://localhost:3100"
 DEFAULT_TEMPO_BASE_URL = "http://localhost:3200"
 DEFAULT_GRAFANA_USERNAME = "admin"
 DEFAULT_GRAFANA_PASSWORD = ""
-DEFAULT_HTTP_DATASOURCE_NAME = "Quarantine Explorer"
+DEFAULT_HTTP_DATASOURCE_NAME = "BioETL Ops HTTP"
 DEFAULT_OUTPUT_PATH = Path("reports/observability/grafana/live-panel-audit.json")
 DEFAULT_WORKFLOW = "All"
 DEFAULT_PIPELINE = "chembl_target"
@@ -393,7 +393,7 @@ def _parse_args(argv: list[str] | None) -> AuditConfig:
         default=DEFAULT_REQUEST_TIMEOUT_SECONDS,
         help=(
             "Per-request timeout for Prometheus, Grafana datasource discovery, "
-            "Quarantine Explorer, Loki, and Tempo probes."
+            "BioETL Ops HTTP, Loki, and Tempo probes."
         ),
     )
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_PATH)
@@ -895,7 +895,7 @@ def _discover_http_datasource_url(
 
 
 def _grafana_http_datasource_proxy_url(config: AuditConfig) -> str:
-    return f"{config.grafana_base_url}/api/datasources/proxy/uid/quarantine-explorer"
+    return f"{config.grafana_base_url}/api/datasources/proxy/uid/bioetl-ops-http"
 
 
 def _candidate_app_base_urls(config: AuditConfig) -> tuple[str, ...]:
@@ -961,7 +961,7 @@ def _resolve_app_base_url(config: AuditConfig) -> str:
             return candidate
     attempted_urls = ", ".join(_redact_url(url) for url in attempted)
     raise OSError(
-        "Could not reach Quarantine Explorer backend via canonical health probes using candidates: "
+        "Could not reach BioETL Ops HTTP backend via canonical health probes using candidates: "
         f"{attempted_urls}"
     )
 
@@ -1808,7 +1808,7 @@ def _resolve_or_block_app_base_url(
         json.JSONDecodeError,
     ) as exc:
         return None, (
-            "Quarantine Explorer backend could not be resolved; "
+            "BioETL Ops HTTP backend could not be resolved; "
             "all HTTP-backed panel checks are blocked instead of "
             f"being retried per panel: {exc}"
         )

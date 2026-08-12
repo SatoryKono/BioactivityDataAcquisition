@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.types import BronzeRecord
 
@@ -115,28 +115,47 @@ def coerce_openalex_runtime_services_request(
             f"arguments: {unexpected_args}"
         )
 
+    # cast() documents the kwargs→field contract without per-field type: ignore.
     return OpenAlexRuntimeServicesRequest(
-        fallback_fetch_service=kwargs.pop("fallback_fetch_service"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        openalex_query_executor=kwargs.pop("openalex_query_executor", None),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        openalex_response_mapper=kwargs.pop("openalex_response_mapper", None),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        openalex_cursor_flow=kwargs.pop("openalex_cursor_flow", None),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        title_fallback_handler=kwargs.pop("title_fallback_handler", None),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        openalex_fallback_orchestrator=kwargs.pop(  # pyright: ignore[reportArgumentType]
-            "openalex_fallback_orchestrator", None
-        ),  # type: ignore[arg-type]
-        http_client=kwargs.pop("http_client"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        adapter_metrics=kwargs.pop("adapter_metrics"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        request_collector=kwargs.pop("request_collector"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        headers_provider=kwargs.pop("headers_provider"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        api_base=kwargs.pop("api_base"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        mailto=kwargs.pop("mailto"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        api_key=kwargs.pop("api_key", None),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        batch_size=kwargs.pop("batch_size"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        title_search_cache_size=kwargs.pop("title_search_cache_size"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        normalize_doi=kwargs.pop("normalize_doi"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        escape_title_for_search=kwargs.pop("escape_title_for_search"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        extract_record_id=kwargs.pop("extract_record_id"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        search_by_title=kwargs.pop("search_by_title"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        logger=kwargs.pop("logger"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        runtime_errors=kwargs.pop("runtime_errors"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        fallback_fetch_service=cast(
+            "FallbackFetchOrchestrator", kwargs.pop("fallback_fetch_service")
+        ),
+        openalex_query_executor=cast(
+            "OpenAlexQueryExecutor | None",
+            kwargs.pop("openalex_query_executor", None),
+        ),
+        openalex_response_mapper=cast(
+            "OpenAlexResponseMapper | None",
+            kwargs.pop("openalex_response_mapper", None),
+        ),
+        openalex_cursor_flow=cast(
+            "OpenAlexCursorFlow | None", kwargs.pop("openalex_cursor_flow", None)
+        ),
+        title_fallback_handler=cast(
+            "OpenAlexTitleFallbackHandler | None",
+            kwargs.pop("title_fallback_handler", None),
+        ),
+        openalex_fallback_orchestrator=cast(
+            "OpenAlexFallbackOrchestrator | None",
+            kwargs.pop("openalex_fallback_orchestrator", None),
+        ),
+        http_client=cast("UnifiedHTTPClient", kwargs.pop("http_client")),
+        adapter_metrics=cast("AdapterMetricsRecorder", kwargs.pop("adapter_metrics")),
+        request_collector=cast("APIRequestCollector", kwargs.pop("request_collector")),
+        headers_provider=cast("HeadersProvider", kwargs.pop("headers_provider")),
+        api_base=cast(str, kwargs.pop("api_base")),
+        mailto=cast("str | None", kwargs.pop("mailto")),
+        api_key=cast("str | None", kwargs.pop("api_key", None)),
+        batch_size=cast(int, kwargs.pop("batch_size")),
+        title_search_cache_size=cast(int, kwargs.pop("title_search_cache_size")),
+        normalize_doi=cast("NormalizeDoiFn", kwargs.pop("normalize_doi")),
+        escape_title_for_search=cast(
+            "EscapeTitleForSearchFn", kwargs.pop("escape_title_for_search")
+        ),
+        extract_record_id=cast("ExtractRecordIdFn", kwargs.pop("extract_record_id")),
+        search_by_title=cast("SearchByTitleFn", kwargs.pop("search_by_title")),
+        logger=cast("LoggerPort", kwargs.pop("logger")),
+        runtime_errors=cast(
+            "tuple[type[Exception], ...]", kwargs.pop("runtime_errors")
+        ),
     )

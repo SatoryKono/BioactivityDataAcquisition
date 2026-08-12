@@ -190,7 +190,7 @@ related_ssot:
   - docs/00-project/NORMATIVE_SOURCES.md
 anti_patterns: []
 tags: []
-summary: TODO
+summary: Scaffold summary — replace before activation
 ---
 
 # {prompt_id}
@@ -199,12 +199,12 @@ summary: TODO
 
 | Param | Default |
 | --- | --- |
-| `SCOPE` | TODO |
+| `SCOPE` | path or theme (operator fills) |
 | `LANGUAGE` | `ru` |
 
 ## Body
 
-TODO: paste-ready instructions. Link SSOT; do not dump RULES.
+Scaffold body — replace with paste-ready instructions. Link SSOT; do not dump RULES.
 """
     target.write_text(body, encoding="utf-8")
     print(f"created {rel.as_posix()}")
