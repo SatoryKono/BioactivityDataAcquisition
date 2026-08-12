@@ -417,14 +417,15 @@
     {
       "current": {
         "artifacts": [
-          "architecture_quality_scorecard"
+          "architecture_quality_scorecard",
+          "config_surface_backlog"
         ],
-        "count": 1
+        "count": 2
       },
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
-      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: architecture_quality_scorecard",
+      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: architecture_quality_scorecard, config_surface_backlog",
       "source_artifact": "reports/quality/*.json",
       "status": "fail"
     }
@@ -453,7 +454,7 @@
   "stale_artifacts": {
     "adr_enforcement_matrix": false,
     "architecture_quality_scorecard": true,
-    "config_surface_backlog": false,
+    "config_surface_backlog": true,
     "dq_contract_registry_diagnostics": false,
     "hotspot_family_baseline": false,
     "module_coverage_inventory": false,
