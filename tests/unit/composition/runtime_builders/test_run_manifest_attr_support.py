@@ -14,18 +14,22 @@ pytestmark = pytest.mark.unit
 
 from bioetl.composition.runtime_builders._run_manifest_attr_support import read_attr
 
+
 def test_read_attr_without_default_returns_existing_value() -> None:
     host = SimpleNamespace(pipeline="activity")
     assert read_attr(host, "pipeline") == "activity"
+
 
 def test_read_attr_without_default_raises_for_missing_attr() -> None:
     host = SimpleNamespace()
     with pytest.raises(AttributeError):
         read_attr(host, "missing")
 
+
 def test_read_attr_with_default_returns_default_for_missing_attr() -> None:
     host = SimpleNamespace()
     assert read_attr(host, "missing", default="fallback") == "fallback"
+
 
 def test_read_attr_with_default_returns_existing_value() -> None:
     host = SimpleNamespace(value=7)
