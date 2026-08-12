@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `1cb1e6e5741dcd0efec8408d3b3d4b6c45cdeece`
 
-Evidence surface SHA-256: `d66f2a6053bbe30f7e8110e0f80484041ee9050c804f17fac7646ed7fb69fd21`
+Evidence surface SHA-256: `ad9123959cd10f37e9e0e07c97836069256538fce75ce6868aa54360a62906b5`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,7 +18,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-07-27-r1",
   "audited_commit_sha": "1cb1e6e5741dcd0efec8408d3b3d4b6c45cdeece",
-  "evidence_surface_sha256": "d66f2a6053bbe30f7e8110e0f80484041ee9050c804f17fac7646ed7fb69fd21",
+  "evidence_surface_sha256": "ad9123959cd10f37e9e0e07c97836069256538fce75ce6868aa54360a62906b5",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
@@ -92,7 +92,7 @@ python -m scripts.engineering.qa validate-technical-debt-audit --json
 
 | module | src importers | test importers |
 | --- | ---: | ---: |
-| `bioetl.domain.composite.config` | 0 | 42 |
+| `bioetl.domain.composite.config` | 0 | 40 |
 | `bioetl.application.composite.merger` | 0 | 5 |
 
 ## TD2 residual closeout (2026-07-29)
