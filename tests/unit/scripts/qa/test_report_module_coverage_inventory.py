@@ -126,7 +126,41 @@ def test_refresh_existing_inventory_reuses_stable_snapshot_digest(
 
     assert refreshed["source_tree_sha256"] == "stable-digest"
     assert refreshed["modules"][0]["source_lines"] == 999
-    assert refreshed["summary"] == {"source_tree_sha256": "stale-summary-digest"}
+    assert refreshed["summary"]["source_module_count"] == 1
+    assert refreshed["summary"]["status_counts"]["fully_covered"] == 1
+    assert refreshed["summary"]["unmeasured_module_count"] == 0
+    assert refreshed["summary"]["uncovered_module_count"] == 0
+
+
+def test_refresh_existing_inventory_prunes_removed_source_rows(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setattr(
+        "scripts.engineering.qa.report_module_coverage_inventory._read_stable_source_module_snapshots",
+        lambda repo_root: ([], "stable-digest"),
+    )
+    monkeypatch.setattr(
+        "scripts.engineering.qa.report_module_coverage_inventory._build_hotspot_family_coverage",
+        lambda rows, *, repo_root: {},
+    )
+
+    refreshed = _refresh_existing_inventory_source_tree(
+        {
+            "modules": [
+                {
+                    "path": "src/bioetl/removed.py",
+                    "coverage_status": "fully_covered",
+                }
+            ],
+            "summary": {},
+        },
+        repo_root=tmp_path,
+    )
+
+    assert refreshed["modules"] == []
+    assert refreshed["rows"] == []
+    assert refreshed["summary"]["source_module_count"] == 0
 
 
 def test_module_is_declaration_only_treats_private_attrs_surface_as_non_runtime() -> (
