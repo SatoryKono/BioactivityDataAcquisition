@@ -138,8 +138,9 @@ Service ownership for this section is `@bioetl-observability`.
   `up{job="grafana-image-renderer"}`, Grafana `rendererAvailable`, and one
   server-side render probe. Until it clears, mark screenshot evidence as render
   blocked; do not reinterpret interactive Grafana/Prometheus as unavailable.
-- Panels 1–5 on `6. Alerts & SLO` expose this owner/runbook route directly and
-  display Prometheus `ALERTS` output without duplicating rule thresholds.
+- `5. Incident Workspace` exposes the owner/runbook route and Prometheus
+  `ALERTS` output without duplicating rule thresholds. Historical
+  `6. Alerts & SLO` is retired; slot 6 is `6. Run Explorer`.
 
 - Check that the shipped Grafana dashboards load and that the expected filters are
   available for the active pipeline or provider.

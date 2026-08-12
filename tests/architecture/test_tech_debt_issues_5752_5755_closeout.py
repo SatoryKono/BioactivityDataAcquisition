@@ -7,7 +7,7 @@
 # pyright: reportOptionalMemberAccess=false
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
-# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+# PD5 test mock/fixture surface â€” product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Closeout guards for technical-debt issues #5752 through #5755."""
 
 from __future__ import annotations
@@ -161,7 +161,14 @@ def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
         or f"architecture score `{integral_text}`" in debt_report
     )
     # Allow for some failing gates during governance artifact refresh
+<<<<<<< HEAD
+    assert "debt-governance gates" in debt_report.lower()
+||||||| merged common ancestors
     assert "debt-governance gates passing" in debt_report
+    assert "| `bioetl.domain.composite.config` | 0 | 42 |" in debt_report
+=======
+    assert "debt-governance gates passing" in debt_report
+>>>>>>> origin/docs/rf004-final-closeout-evidence
     assert (
         "| `bioetl.domain.composite.config` | 0 | "
         f"{domain_config['test_importer_count']} |" in debt_report

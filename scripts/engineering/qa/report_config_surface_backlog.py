@@ -27,7 +27,10 @@ from scripts.schema.analysis.generate_config_matrix import (
 BACKLOG_PATH = ROOT / "reports/quality/config-surface-backlog.json"
 DUPLICATION_SURFACE_ROOT = ROOT / "configs"
 DUPLICATION_FILE_SUFFIXES = (".yaml", ".yml", ".json")
-DUPLICATION_EXCLUDED_PREFIXES = ("configs/_schema/",)
+GENERATED_DUPLICATION_SURFACE_DIRS = (ROOT / "configs" / "_schema",)
+GENERATED_DUPLICATION_SURFACE_FILES = (
+    ROOT / "configs" / "quality" / "test_telemetry_baseline.yaml",
+)
 JSCPD_IGNORED_PATTERNS = ("**/configs/**", "**/*.yaml", "**/*.yml", "**/*.json")
 MIN_DUPLICATE_BLOCK_BYTES = 200
 MAX_DUPLICATION_BLOCK_DEPTH = 2
@@ -319,6 +322,20 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
             ),
         },
     ),
+    (
+        "$defs",
+        {
+            "owner": OWNER_BIOETL_ARCHITECTURE,
+            "decision": "retain_with_owner",
+            "linked_issue": LINKED_ISSUE_5568,
+            "review_date": "2026-09-30",
+            "rationale": (
+                "Shared JSON Schema $defs property bags are intentionally "
+                "duplicated across pipeline config schemas and retained under "
+                "explicit architecture ownership for #5568 non-composite residual."
+            ),
+        },
+    ),
 )
 
 DEFAULT_DUPLICATION_CLUSTER_GOVERNANCE: dict[str, str] = {
@@ -373,9 +390,11 @@ def _iter_duplication_surface_files() -> list[Path]:
         for path in DUPLICATION_SURFACE_ROOT.rglob("*")
         if path.is_file()
         and path.suffix in DUPLICATION_FILE_SUFFIXES
-        and not path.relative_to(ROOT)
-        .as_posix()
-        .startswith(DUPLICATION_EXCLUDED_PREFIXES)
+        and not any(
+            path.is_relative_to(generated_root)
+            for generated_root in GENERATED_DUPLICATION_SURFACE_DIRS
+        )
+        and path not in GENERATED_DUPLICATION_SURFACE_FILES
     ]
     return sorted(files)
 
@@ -581,8 +600,15 @@ def _build_duplication_audit() -> dict[str, Any]:
         "scope": {
             "root": DUPLICATION_SURFACE_ROOT.relative_to(ROOT).as_posix(),
             "file_suffixes": list(DUPLICATION_FILE_SUFFIXES),
-            "excluded_generated_prefixes": list(DUPLICATION_EXCLUDED_PREFIXES),
             "files_scanned": len(surface_files),
+            "excluded_generated_roots": [
+                path.relative_to(ROOT).as_posix()
+                for path in GENERATED_DUPLICATION_SURFACE_DIRS
+            ],
+            "excluded_generated_files": [
+                path.relative_to(ROOT).as_posix()
+                for path in GENERATED_DUPLICATION_SURFACE_FILES
+            ],
             "ignored_by_jscpd_patterns": list(JSCPD_IGNORED_PATTERNS),
             "structured_block_min_bytes": MIN_DUPLICATE_BLOCK_BYTES,
             "max_traversal_depth": MAX_DUPLICATION_BLOCK_DEPTH,
@@ -602,6 +628,15 @@ def _build_duplication_audit() -> dict[str, Any]:
                 "under configs/** that JSCPD intentionally ignores. Generated "
                 "JSON Schema mirrors stay governed by schema drift checks and are "
                 "excluded from the authored-config duplication debt ratchet."
+            ),
+            (
+                "Generated JSON Schemas are excluded because their repeated $defs "
+                "are materialized from shared Pydantic source models rather than "
+                "independently maintained configuration debt."
+            ),
+            (
+                "The generated test telemetry baseline is excluded because repeated "
+                "duration maps are captured observations, not maintained config debt."
             ),
             (
                 "Clusters report exact canonical JSON subtree duplicates only; "
