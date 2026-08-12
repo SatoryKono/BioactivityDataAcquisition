@@ -308,7 +308,16 @@ class TestCanonicalTestLanes:
         assert lanes["unit-parallel-safe"]["runner_backend"] == "run_pytest_sharded"
         assert (
             lanes["unit-parallel-safe"]["marker_expression"]
-            == "not fs_contract and not repo_backed and not slow and not serial and not benchmark and not memory"
+            == "not fs_contract and not repo_backed and not subprocess_backed and not slow and not serial and not benchmark and not memory"
+        )
+        assert "unit-filesystem-contracts:" in workflow
+        assert "unit-subprocess-backed:" in workflow
+        assert (
+            '-m "fs_contract and not slow and not benchmark and not memory"' in workflow
+        )
+        assert (
+            '-m "not serial and not memory and not fs_contract and not subprocess_backed"'
+            in workflow
         )
         assert lanes["unit-parallel-safe"]["paths"] == ["tests/unit/"]
         assert "S1-domain-core" in lanes["unit-parallel-safe"]["runner_options"]

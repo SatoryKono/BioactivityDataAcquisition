@@ -288,10 +288,10 @@ test_lanes:
         Deterministic pure-unit lane routed through the maintained shard inventory
         with opt-in xdist per shard (see pytest_shards workers_override). Membership
         rules: (1) only tests/unit paths in S1-S4/S6 shards; (2) exclude markers
-        repo_backed, slow, serial, benchmark, memory; (3) pytest.mark.repo_backed
-        MUST live under tests/unit/repo_backed/ only; (4) no VCR, no architecture,
-        no integration paths; (5) forbid_global_xdist_addopts remains true — parallel
-        is shard-scoped only.
+        fs_contract, repo_backed, subprocess_backed, slow, serial, benchmark, memory;
+        (3) pytest.mark.repo_backed MUST live under tests/unit/repo_backed/ only;
+        (4) no VCR, no architecture, no integration paths; (5)
+        forbid_global_xdist_addopts remains true — parallel is shard-scoped only.
       runner_backend: run_pytest_sharded
       runner: scripts/engineering/dev/run_pytest_sharded.sh
       runner_options:
@@ -309,11 +309,11 @@ test_lanes:
         - S6-crosscutting-unit
       paths:
         - tests/unit/
-      marker_expression: "not fs_contract and not repo_backed and not slow and not serial and not benchmark and not memory"
+      marker_expression: "not fs_contract and not repo_backed and not subprocess_backed and not slow and not serial and not benchmark and not memory"
       pytest_args:
         - tests/unit/
         - -m
-        - not fs_contract and not repo_backed and not slow and not serial and not benchmark and not memory
+        - not fs_contract and not repo_backed and not subprocess_backed and not slow and not serial and not benchmark and not memory
       replay_mode: not_applicable
       coverage_gate: none
       expected_artifacts:

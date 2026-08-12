@@ -885,41 +885,22 @@ def test_dashboard_json_has_no_backup_artifacts_in_active_dashboard_tree() -> No
     assert backup_files == []
 
 
-def test_alerts_slo_dashboard_is_first_class_shipped_surface() -> None:
+def test_alerts_slo_dashboard_is_not_in_shipping_surface() -> None:
+    """Retired epic #6647: bioetl-alerts-slo.json must stay off the shipped set."""
     dashboard_path = Path("grafana/dashboards/bioetl-alerts-slo.json")
-    if not dashboard_path.is_file():
-        pytest.skip("bioetl-alerts-slo.json retired from shipping surface (epic #6647)")
-    dashboard = json.loads(dashboard_path.read_text(encoding="utf-8"))
-    variables = {
-        item.get("name") for item in dashboard.get("templating", {}).get("list", [])
-    }
-
-    assert dashboard["uid"] == "bioetl-alerts-slo"
-    assert dashboard["title"] == "6. Alerts & SLO"
-    assert {"workflow", "pipeline", "run_type"}.issubset(variables)
-    assert "run_id" not in variables
-    assert "ALERTS" in json.dumps(dashboard)
+    assert not dashboard_path.is_file(), (
+        "bioetl-alerts-slo.json was retired from shipping surface (epic #6647); "
+        "do not reintroduce without updating this absence contract"
+    )
 
 
-def test_silver_reject_explorer_keeps_shared_shell_context_outside_forensic_scope() -> (
-    None
-):
+def test_silver_reject_explorer_is_not_in_shipping_surface() -> None:
+    """Silver Reject Explorer removed 2026-07-23 — absence is the contract."""
     dashboard_path = Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
-    if not dashboard_path.exists():
-        pytest.skip("Silver Reject Explorer removed 2026-07-23")
-    dashboard = json.loads(dashboard_path.read_text(encoding="utf-8"))
-    variables = {
-        item.get("name") for item in dashboard.get("templating", {}).get("list", [])
-    }
-    serialized = json.dumps(dashboard)
-
-    assert {"pipeline", "run_type"}.issubset(variables)
-    assert "workflow" not in variables
-    assert "run_id" not in variables
-    assert "var-workflow=$workflow" not in serialized
-    assert "var-run_id=$run_id" not in serialized
-    assert "var-quarantine_run_id=$run_id" not in serialized
-    assert "quarantine_run_id remains the forensic row filter" in serialized
+    assert not dashboard_path.exists(), (
+        "bioetl-silver-reject-explorer.json was removed from shipping surface; "
+        "do not reintroduce without updating this absence contract"
+    )
 
 
 def test_silver_reject_explorer_generic_links_do_not_receive_primary_run_context() -> (
@@ -956,7 +937,8 @@ def test_silver_reject_explorer_generic_links_do_not_receive_primary_run_context
         walk(dashboard)
 
 
-def test_runtime_log_hygiene_trend_uses_aggregated_loki_range_queries() -> None:
+def test_runtime_log_hygiene_trend_panel_258_is_not_shipped() -> None:
+    """Loki log-hygiene trend panel id=258 was removed from bioetl-runtime."""
     dashboard = json.loads(
         Path("grafana/dashboards/bioetl-runtime.json").read_text(encoding="utf-8")
     )
@@ -974,15 +956,10 @@ def test_runtime_log_hygiene_trend_uses_aggregated_loki_range_queries() -> None:
         (item for item in walk_panels(dashboard["panels"]) if item.get("id") == 258),
         None,
     )
-    if panel is None:
-        pytest.skip(
-            "Runtime Loki log-hygiene trend panel (id=258) removed from shipped dashboard"
-        )
-    expressions = {target["refId"]: target["expr"] for target in panel["targets"]}
-
-    assert expressions["A"].startswith("sum(count_over_time(")
-    assert expressions["B"].startswith("sum(count_over_time(")
-    assert "No data means" in panel["description"]
+    assert panel is None, (
+        "Runtime Loki log-hygiene trend panel (id=258) must remain removed from "
+        "the shipped bioetl-runtime dashboard"
+    )
 
 
 def test_prometheus_dashboard_panels_do_not_filter_on_run_id_labels() -> None:
@@ -1055,17 +1032,13 @@ def test_run_id_independent_metric_panels_disclose_scope() -> None:
     assert missing_scope == []
 
 
-def test_workflow_status_titles_make_selected_range_scope_visible() -> None:
+def test_workflow_overview_dashboard_is_not_in_shipping_surface() -> None:
+    """Retired epic #6647: bioetl-workflow-overview.json must stay off shipped set."""
     dashboard_path = Path("grafana/dashboards/bioetl-workflow-overview.json")
-    if not dashboard_path.is_file():
-        pytest.skip(
-            "bioetl-workflow-overview.json retired from shipping surface (epic #6647)"
-        )
-    dashboard = json.loads(dashboard_path.read_text(encoding="utf-8"))
-    titles = {panel.get("id"): panel.get("title") for panel in dashboard["panels"]}
-
-    assert titles[9401] == "Status"
-    assert titles[9404] == "Pipeline Status"
+    assert not dashboard_path.is_file(), (
+        "bioetl-workflow-overview.json was retired from shipping surface (epic #6647); "
+        "do not reintroduce without updating this absence contract"
+    )
 
 
 def test_live_audit_isolates_non_required_panel_execution_failures(
