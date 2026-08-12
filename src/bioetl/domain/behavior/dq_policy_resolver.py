@@ -54,12 +54,20 @@ class DQPolicyResolver:
         """Get disposition overrides as a dictionary.
 
         Handles both the original dict format and the frozen tuple format.
+        Unsupported types fail fast so malformed configuration cannot silently
+        drop all overrides.
         """
-        if isinstance(self.config.disposition_overrides, dict):
-            return self.config.disposition_overrides
-        if isinstance(self.config.disposition_overrides, (tuple, list)):
-            return dict(self.config.disposition_overrides)
-        return {}
+        overrides = self.config.disposition_overrides
+        if isinstance(overrides, dict):
+            return overrides
+        if isinstance(overrides, (tuple, list)):
+            return dict(overrides)
+        if overrides is None:
+            return {}
+        raise TypeError(
+            "disposition_overrides must be a dict, list, tuple, or None; "
+            f"got {type(overrides).__name__}"
+        )
 
     def build_policy_ref(self) -> DQPolicyRef:
         """Build a policy reference from the current configuration.

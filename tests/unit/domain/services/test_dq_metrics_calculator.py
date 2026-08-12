@@ -179,20 +179,30 @@ class TestDQMetricsCalculator:
         assert result.status == "warn"
         assert len(result.new_fields) == 4
 
-    def test_detect_schema_drift_critical_status_for_missing_business_fields(self):
-        """Test _detect_schema_drift returns 'critical' for missing business fields."""
+    def test_detect_schema_drift_critical_status_for_missing_required_fields(self):
+        """Critical only when missing fields are in the contract required set."""
         calculator = DQMetricsCalculator()
         records = [{"entity_id": "CHEMBL123"}]
-        existing_fields = {"entity_id", "important_field"}  # Business field missing
+        existing_fields = {"entity_id", "important_field", "optional_note"}
 
-        result = calculator._detect_schema_drift(
+        # Without required set: missing optional business fields are not critical.
+        info_result = calculator._detect_schema_drift(
             records=records,
             existing_fields=existing_fields,
         )
+        assert info_result is not None
+        assert info_result.status == "info"
+        assert "important_field" in info_result.missing_fields
 
-        assert result is not None
-        assert result.status == "critical"
-        assert "important_field" in result.missing_fields
+        # With required set: only listed required fields escalate to critical.
+        critical_result = calculator._detect_schema_drift(
+            records=records,
+            existing_fields=existing_fields,
+            required_fields={"important_field"},
+        )
+        assert critical_result is not None
+        assert critical_result.status == "critical"
+        assert "important_field" in critical_result.missing_fields
 
     def test_calculate_with_schema_drift(self):
         """Test calculate includes schema drift info."""

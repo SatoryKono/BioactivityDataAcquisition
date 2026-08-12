@@ -5,6 +5,8 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import dataclass
+from datetime import date, datetime
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import JsonDict
@@ -48,16 +50,21 @@ class MergedMetadataExplainer:
         _record_data: JsonDict,
         composite_metadata: CompositeOutputExt,
         field_priorities: dict[str, JsonDict] | None = None,
+        merge_strategy: str = "prioritize",
     ) -> MergedFieldExplanation:
         """Describe how one merged field was selected and enriched."""
         source_providers = list(composite_metadata.source_providers or [])
         priority_order = _resolve_priority_order(field_name, field_priorities)
+        final_value_source = _resolve_final_value_source(
+            source_providers=source_providers,
+            priority_order=priority_order,
+        )
         return MergedFieldExplanation(
             field_name=field_name,
             source_providers=source_providers,
-            merge_strategy="prioritize",
+            merge_strategy=merge_strategy,
             priority_order=priority_order,
-            final_value_source=next(iter(source_providers), None),
+            final_value_source=final_value_source,
             conflict_resolution="priority_based" if priority_order else None,
             enrichment_applied=_extract_applied_enrichments(composite_metadata),
         )
@@ -77,6 +84,7 @@ class MergedMetadataExplainer:
                 record_data,
                 composite_metadata,
                 field_priorities,
+                merge_strategy,
             )
             for field_name in _public_field_names(record_data)
         ]
@@ -153,6 +161,22 @@ def _resolve_priority_order(
     return [str(item) for item in priority]
 
 
+def _resolve_final_value_source(
+    *,
+    source_providers: list[str],
+    priority_order: list[str] | None,
+) -> str | None:
+    """Select final value source honoring priority_order when available."""
+    if not source_providers:
+        return None
+    if priority_order:
+        provider_set = set(source_providers)
+        for provider in priority_order:
+            if provider in provider_set:
+                return provider
+    return source_providers[0]
+
+
 def _extract_applied_enrichments(
     composite_metadata: CompositeOutputExt,
 ) -> list[str] | None:
@@ -174,31 +198,47 @@ def _count_conflicts_and_enrichments(
     field_explanations: list[MergedFieldExplanation],
 ) -> tuple[int, int]:
     conflict_count = sum(1 for exp in field_explanations if exp.conflict_resolution)
-    enrichment_count = sum(
-        len(exp.enrichment_applied) if exp.enrichment_applied else 0
-        for exp in field_explanations
-    )
-    return conflict_count, enrichment_count
+    # Count distinct enrichers once per record, not once per field.
+    enrichers: set[str] = set()
+    for exp in field_explanations:
+        if exp.enrichment_applied:
+            enrichers.update(exp.enrichment_applied)
+    return conflict_count, len(enrichers)
 
 
 def _resolve_record_id(record: JsonDict) -> str:
-    candidate = (
-        record.get("_record_id")
-        or record.get("id")
-        or record.get("molecule_id")
-        or _deterministic_record_id(record)
-    )
-    return str(candidate)
+    """Resolve a stable record id, preserving valid falsy identifiers."""
+    for key in ("_record_id", "id", "molecule_id"):
+        if key in record:
+            return str(record[key])
+    return _deterministic_record_id(record)
 
 
 def _deterministic_record_id(record: JsonDict) -> str:
-    payload = json.dumps(
-        record,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=False,
-    )
+    """Produce a deterministic id even for non-JSON-native supported values."""
+    try:
+        payload = json.dumps(
+            record,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+            default=_json_fallback,
+        )
+    except (TypeError, ValueError):
+        payload = repr(sorted(record.items(), key=lambda item: str(item[0])))
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _json_fallback(value: object) -> object:
+    if isinstance(value, (datetime, date)):
+        return value.isoformat()
+    if isinstance(value, Decimal):
+        return str(value)
+    if isinstance(value, (set, frozenset)):
+        return sorted(value, key=lambda item: repr(item))
+    if isinstance(value, bytes):
+        return value.hex()
+    return repr(value)
 
 
 def _empty_explainability_summary() -> JsonDict:
@@ -279,11 +319,12 @@ def _enrichment_summary(
     explanations: list[MergedRecordExplanation],
     totals: dict[str, int],
 ) -> JsonDict:
+    # enrichment_count is now distinct enrichers per record; rate uses records.
     return {
         "total_enrichments": totals["total_enrichments"],
         "enrichment_rate": _safe_ratio(
             totals["total_enrichments"],
-            totals["total_fields"],
+            totals["total_records"],
         ),
         "records_with_enrichments": sum(
             1 for exp in explanations if exp.enrichment_count > 0
