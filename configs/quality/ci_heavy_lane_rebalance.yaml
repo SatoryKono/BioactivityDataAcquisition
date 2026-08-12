@@ -63,7 +63,7 @@ lanes:
       - path: tests/unit/
       - path: tests/integration/
       - path: tests/security/
-    marker_expression: "not serial and not memory"
+    marker_expression: "not serial and not memory and not fs_contract"
     telemetry_artifact: test-telemetry-${{ matrix.test-group.name }}
   - job: memory-tests
     owner: memory-tooling
