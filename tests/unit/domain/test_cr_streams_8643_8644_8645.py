@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-from __future__ import annotations
 import math
 import pytest
 from bioetl.domain.behavior.staged_enforcement import (
