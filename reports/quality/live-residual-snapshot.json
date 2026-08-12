@@ -52,7 +52,7 @@
       "max_internal_fan_in": 3,
       "helper_function_ratio": 0.358,
       "files": 56,
-      "total_loc": 7193,
+      "total_loc": 7207,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 5
     }
@@ -64,7 +64,7 @@
     "repo_wide_candidates_without_owner_tests_count": 0
   },
   "config_surface": {
-    "duplicate_cluster_count": 23
+    "duplicate_cluster_count": 9
   },
   "module_coverage": {
     "uncovered_module_count": 0,

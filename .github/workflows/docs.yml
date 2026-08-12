@@ -228,13 +228,14 @@ jobs:
             docs/02-architecture/generated/module-dependency-map.json || \
             (echo "::error::Dependency map docs were regenerated. Commit updated generated files before merge." && exit 1)
 
-  # Detect whether mermaid/diagram sources or docs Markdown changed so the expensive
-  # Puppeteer-based validate-mermaid and render-diagrams jobs can be skipped
-  # when only non-diagram tooling or mkdocs metadata is modified.
+  # Validate embedded Mermaid when docs Markdown changes, but only re-render tracked
+  # SVG/PNG baselines when renderer inputs change. The renderer does not consume
+  # Markdown, so coupling both decisions creates false visual-smoke drift.
   detect-diagram-changes:
     runs-on: ubuntu-latest
     outputs:
       diagrams_changed: ${{ steps.filter.outputs.diagrams_changed }}
+      render_sources_changed: ${{ steps.filter.outputs.render_sources_changed }}
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -260,6 +261,13 @@ jobs:
             'docs/02-architecture/diagrams/theme/**' \
             'docs/02-architecture/diagrams/tooling/**' \
             'docs/02-architecture/diagrams/manifests/**' || true)
+          render_sources=$(git diff --name-only "$base"...HEAD -- \
+            '*.mmd' '*.mermaid' \
+            'scripts/diagrams/**' \
+            '.github/actions/setup-mermaid/**' \
+            'docs/02-architecture/diagrams/theme/**' \
+            'docs/02-architecture/diagrams/tooling/**' \
+            'docs/02-architecture/diagrams/manifests/**' || true)
           if [[ -n "$changed" ]]; then
             echo "diagrams_changed=true" >> "$GITHUB_OUTPUT"
             echo "Diagram-related files changed:"
@@ -268,10 +276,18 @@ jobs:
             echo "diagrams_changed=false" >> "$GITHUB_OUTPUT"
             echo "No diagram-related files changed — mermaid jobs will be skipped."
           fi
+          if [[ -n "$render_sources" ]]; then
+            echo "render_sources_changed=true" >> "$GITHUB_OUTPUT"
+            echo "Diagram renderer inputs changed:"
+            echo "$render_sources"
+          else
+            echo "render_sources_changed=false" >> "$GITHUB_OUTPUT"
+            echo "No renderer inputs changed — baseline render jobs will be skipped."
+          fi
 
   render-generated-pipeline-dataflows:
     needs: detect-diagram-changes
-    if: needs.detect-diagram-changes.outputs.diagrams_changed == 'true'
+    if: needs.detect-diagram-changes.outputs.render_sources_changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -354,7 +370,7 @@ jobs:
     needs: [detect-diagram-changes, validate-mermaid]
     if: |
       always() &&
-      needs.detect-diagram-changes.outputs.diagrams_changed == 'true' &&
+      needs.detect-diagram-changes.outputs.render_sources_changed == 'true' &&
       (needs.validate-mermaid.result == 'success' || needs.validate-mermaid.result == 'skipped')
     runs-on: ubuntu-latest
     steps:

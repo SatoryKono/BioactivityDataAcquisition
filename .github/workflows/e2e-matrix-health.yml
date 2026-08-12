@@ -63,7 +63,7 @@ jobs:
             echo $? > "reports/e2e/pytest_exit_code_run${run}.txt"
           done
 
-      # e2e-smoke SSOT path (configs/quality/test_matrix.yaml): chembl activity
+      # e2e_smoke SSOT path (configs/quality/test_matrix.yaml): chembl_activity
       # representative entity cycle. Cassette set is non-LFS (#8612).
       - name: Run chembl activity e2e_smoke (cassette playback)
         run: |

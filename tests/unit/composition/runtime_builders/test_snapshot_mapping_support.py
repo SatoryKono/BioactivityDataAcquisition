@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
 from uuid import UUID
@@ -37,9 +36,8 @@ class _ModelDumpHost:
         *,
         mode: str = "python",
         exclude_none: bool = False,
-        fallback: Callable[[object], object] | None = None,
     ):
-        del mode, exclude_none, fallback
+        del mode, exclude_none
         return {"kind": "model", "value": 1}
 
 

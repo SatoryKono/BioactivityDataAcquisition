@@ -1,10 +1,4 @@
-"""Aggregation configuration models for 1:M enrichers.
-
-Defines configuration objects for aggregating multiple rows per join key
-into a single row before joining with seed data in composite pipelines.
-
-See ADR-026 for architectural decisions.
-"""
+"""Aggregation configuration models for 1:M enrichers (ADR-026)."""
 
 from __future__ import annotations
 
@@ -190,12 +184,7 @@ def _validate_known_filter_forms(text: str, upper: str) -> bool:
 
 
 def _validate_aggregation_filter_condition(condition: str) -> None:
-    """Fail closed on empty or unsupported aggregation filter expressions.
-
-    Supported grammar (aligned with application aggregator parser):
-    - ``field IS NULL`` / ``field IS NOT NULL``
-    - ``field == value`` / ``field != value`` (value may be quoted)
-    """
+    """Accept only null checks and single ``==``/``!=`` comparisons."""
     text = condition.strip()
     if not text:
         raise ValueError("aggregation filter_condition cannot be empty")

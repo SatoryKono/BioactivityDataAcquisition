@@ -15,7 +15,7 @@ DOCS_WORKFLOW = ROOT / ".github" / "workflows" / "docs.yml"
 GITHUB_POLICY = ROOT / "docs" / "00-project" / "governance" / "05-github-policy.md"
 
 
-def test_docs_workflow_is_tracked_and_not_gitignored() -> None:
+def test_gha_002_docs_workflow_is_present_and_not_ignored() -> None:
     """GHA-002: docs.yml must be a real tracked gate surface, not gitignored."""
     assert DOCS_WORKFLOW.is_file(), "docs.yml must exist"
     gitignore_lines = {
@@ -31,7 +31,7 @@ def test_github_policy_documents_active_root_hygiene_ruleset() -> None:
     """GHA-003: policy SSOT must document active always-on ruleset on main."""
     text = GITHUB_POLICY.read_text(encoding="utf-8")
     assert "root-hygiene-required-check" in text
-    assert "Enforcement: **`active`**." in text
+    assert "Enforcement: `active`." in text
     assert "`checks-complete`" in text
     assert "`root-hygiene`" in text
     assert "Direct merge allowed; no active required-check ruleset" not in text

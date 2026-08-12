@@ -27,6 +27,10 @@ from scripts.schema.analysis.generate_config_matrix import (
 BACKLOG_PATH = ROOT / "reports/quality/config-surface-backlog.json"
 DUPLICATION_SURFACE_ROOT = ROOT / "configs"
 DUPLICATION_FILE_SUFFIXES = (".yaml", ".yml", ".json")
+GENERATED_DUPLICATION_SURFACE_DIRS = (ROOT / "configs" / "_schema",)
+GENERATED_DUPLICATION_SURFACE_FILES = (
+    ROOT / "configs" / "quality" / "test_telemetry_baseline.yaml",
+)
 JSCPD_IGNORED_PATTERNS = ("**/configs/**", "**/*.yaml", "**/*.yml", "**/*.json")
 MIN_DUPLICATE_BLOCK_BYTES = 200
 MAX_DUPLICATION_BLOCK_DEPTH = 2
@@ -370,7 +374,13 @@ def _iter_duplication_surface_files() -> list[Path]:
     files = [
         path
         for path in DUPLICATION_SURFACE_ROOT.rglob("*")
-        if path.is_file() and path.suffix in DUPLICATION_FILE_SUFFIXES
+        if path.is_file()
+        and path.suffix in DUPLICATION_FILE_SUFFIXES
+        and not any(
+            path.is_relative_to(generated_root)
+            for generated_root in GENERATED_DUPLICATION_SURFACE_DIRS
+        )
+        and path not in GENERATED_DUPLICATION_SURFACE_FILES
     ]
     return sorted(files)
 
@@ -588,6 +598,14 @@ def _build_duplication_audit() -> dict[str, Any]:
             "root": DUPLICATION_SURFACE_ROOT.relative_to(ROOT).as_posix(),
             "file_suffixes": list(DUPLICATION_FILE_SUFFIXES),
             "files_scanned": len(surface_files),
+            "excluded_generated_roots": [
+                path.relative_to(ROOT).as_posix()
+                for path in GENERATED_DUPLICATION_SURFACE_DIRS
+            ],
+            "excluded_generated_files": [
+                path.relative_to(ROOT).as_posix()
+                for path in GENERATED_DUPLICATION_SURFACE_FILES
+            ],
             "ignored_by_jscpd_patterns": list(JSCPD_IGNORED_PATTERNS),
             "structured_block_min_bytes": MIN_DUPLICATE_BLOCK_BYTES,
             "max_traversal_depth": MAX_DUPLICATION_BLOCK_DEPTH,
@@ -605,6 +623,15 @@ def _build_duplication_audit() -> dict[str, Any]:
             (
                 "This audit covers structured config/contract/registry surfaces "
                 "under configs/** that JSCPD intentionally ignores."
+            ),
+            (
+                "Generated JSON Schemas are excluded because their repeated $defs "
+                "are materialized from shared Pydantic source models rather than "
+                "independently maintained configuration debt."
+            ),
+            (
+                "The generated test telemetry baseline is excluded because repeated "
+                "duration maps are captured observations, not maintained config debt."
             ),
             (
                 "Clusters report exact canonical JSON subtree duplicates only; "

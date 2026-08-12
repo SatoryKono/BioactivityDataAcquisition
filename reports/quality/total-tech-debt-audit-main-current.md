@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `1cb1e6e5741dcd0efec8408d3b3d4b6c45cdeece`
 
-Evidence surface SHA-256: `59814e0018b30677c5989777b293fe741300a255b421a6d453e34e19791b71a5`
+Evidence surface SHA-256: `c2067b3631f95427c479b621e98a904fbdad720e620ac1a6861d340f04df22d1`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,7 +18,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-07-27-r1",
   "audited_commit_sha": "1cb1e6e5741dcd0efec8408d3b3d4b6c45cdeece",
-  "evidence_surface_sha256": "59814e0018b30677c5989777b293fe741300a255b421a6d453e34e19791b71a5",
+  "evidence_surface_sha256": "c2067b3631f95427c479b621e98a904fbdad720e620ac1a6861d340f04df22d1",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
@@ -52,6 +52,7 @@ Refresh reason: Closeout wave #8584/#8583/#7515/#7517/#7410 — re-pin evidence;
 ## Executive summary
 
 1. Debt-governance gates: **45 pass / 0 fail** (`45/45` debt-governance gates).
+1. Release status: **debt-governance gates passing**.
 1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
 1. Module inventory (from `module-coverage-inventory.json` only):
    - source_module_count: **2413**
