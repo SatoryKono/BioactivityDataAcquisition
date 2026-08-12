@@ -21,6 +21,7 @@ exclude_docs: |
   00-project/ai/memory/gh-issues-documentation-update.md
   00-project/ai/prompts/README.md
   00-project/ai/prompts/collected/**
+  00-project/ai/prompts/archive/campaigns/**
   00-project/ai/skills/SKILLS-CATALOG.md
   02-architecture/adr-registry/README.md
   99-archive/**
