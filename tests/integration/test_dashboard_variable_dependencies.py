@@ -201,16 +201,3 @@ def test_provider_derivation_queries_are_re2_compatible_and_in_sync():
         assert _derive_provider(pipeline, workflow) == expected, case
 
 
-def test_silver_reject_explorer_variable_dependencies():
-    dashboard = load_dashboard(pytest.skip("Silver Reject Explorer removed 2026-07-23"))
-    variables = {
-        v.get("name"): v for v in dashboard.get("templating", {}).get("list", [])
-    }
-
-    # Check that pipeline and run_type exist
-    assert "pipeline" in variables, ()
-    assert "run_type" in variables, ()
-
-    # Check forensic variables
-    assert "quarantine_run_id" in variables, ()
-    assert "payload_hash" in variables, ()

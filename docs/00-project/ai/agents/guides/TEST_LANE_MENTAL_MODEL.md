@@ -7,9 +7,10 @@
 
 | Intent | Command | Notes |
 |--------|---------|-------|
-| Fast product unit feedback | `pytest tests/unit -m "not repo_backed and not subprocess_backed and not slow and not benchmark and not memory" --ignore=tests/unit/scripts --ignore=tests/unit/repo_backed` | Canonical **unit-fast** |
+| Fast product unit feedback | `pytest tests/unit -m "not fs_contract and not repo_backed and not subprocess_backed and not slow and not benchmark and not memory" --ignore=tests/unit/scripts --ignore=tests/unit/repo_backed` | Canonical **unit-fast** |
 | Architecture boundary feedback | `pytest tests/architecture -m "architecture and not slow and not benchmark and not memory"` | Canonical **architecture-fast-boundary** |
 | Full architecture governance | `pytest tests/architecture` (or CI slow-governance lane) | Heavy; avoid as first local default |
+| Filesystem contracts (serial) | `pytest tests/unit -m "fs_contract and not slow and not benchmark and not memory" -p no:xdist` | Canonical **unit-filesystem-contracts** |
 | Repo-backed unit | `pytest tests/unit/repo_backed -m "repo_backed and not slow"` | Reads repo files |
 | Scripts tooling | `pytest tests/unit/scripts` | **Not** pure hexagonal unit |
 

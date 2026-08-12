@@ -950,6 +950,127 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  # Serial filesystem-contract lane (test_matrix unit-filesystem-contracts).
+  # Classified modules are auto-marked fs_contract in tests/conftest.py and must
+  # not run under test-matrix xdist shards.
+  unit-filesystem-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: smoke-check
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          enable-pytest-cache: "true"
+          pytest-cache-prefix: "pytest-unit-filesystem-contracts"
+          pytest-cache-fingerprint: ${{ hashFiles('tests/unit/infrastructure/**/*.py', 'tests/conftest.py', 'pyproject.toml', 'configs/quality/test_matrix.yaml') }}
+
+      - name: Run canonical unit-filesystem-contracts lane
+        env:
+          COVERAGE_FILE: reports/coverage/.coverage.unit-filesystem-contracts
+        run: |
+          set +e
+          mkdir -p reports/test-telemetry
+          mkdir -p reports/coverage
+          uv run --frozen --no-build pytest tests/unit/ \
+            -m "fs_contract and not slow and not benchmark and not memory" \
+            -p no:xdist -q --tb=short \
+            --junitxml=reports/test-telemetry/junit-unit-filesystem-contracts.xml \
+            --cov=src/bioetl --cov-report=
+          TEST_EXIT=$?
+          cp .coverage "$COVERAGE_FILE" 2>/dev/null || true
+          if [ ! -s "$COVERAGE_FILE" ]; then
+            echo "::error::Unit filesystem-contracts coverage shard was not produced."
+            exit 1
+          fi
+          exit "$TEST_EXIT"
+
+      - name: Upload unit-filesystem-contracts telemetry
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: test-telemetry-unit-filesystem-contracts
+          path: reports/test-telemetry/junit-unit-filesystem-contracts.xml
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload unit filesystem-contracts coverage shard
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: coverage-data-unit-filesystem-contracts
+          path: reports/coverage/.coverage.unit-filesystem-contracts
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+
+  # Serial subprocess-backed unit helpers outside unit-scripts-tooling.
+  # Excluded from test-matrix xdist; scripts path remains owned by unit-scripts-tooling.
+  unit-subprocess-backed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: smoke-check
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          enable-pytest-cache: "true"
+          pytest-cache-prefix: "pytest-unit-subprocess-backed"
+          pytest-cache-fingerprint: ${{ hashFiles('tests/unit/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
+
+      - name: Run serial unit subprocess_backed (non-scripts) lane
+        env:
+          COVERAGE_FILE: reports/coverage/.coverage.unit-subprocess-backed
+        run: |
+          set +e
+          mkdir -p reports/test-telemetry
+          mkdir -p reports/coverage
+          uv run --frozen --no-build pytest tests/unit/ \
+            --ignore=tests/unit/scripts \
+            --ignore=tests/unit/repo_backed \
+            -m "subprocess_backed and not slow and not benchmark and not memory" \
+            -p no:xdist -q --tb=short \
+            --junitxml=reports/test-telemetry/junit-unit-subprocess-backed.xml \
+            --cov=src/bioetl --cov-report=
+          TEST_EXIT=$?
+          cp .coverage "$COVERAGE_FILE" 2>/dev/null || true
+          if [ ! -s "$COVERAGE_FILE" ]; then
+            echo "::error::Unit subprocess-backed coverage shard was not produced."
+            exit 1
+          fi
+          exit "$TEST_EXIT"
+
+      - name: Upload unit-subprocess-backed telemetry
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: test-telemetry-unit-subprocess-backed
+          path: reports/test-telemetry/junit-unit-subprocess-backed.xml
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload unit subprocess-backed coverage shard
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: coverage-data-unit-subprocess-backed
+          path: reports/coverage/.coverage.unit-subprocess-backed
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+
 
   # Full test matrix runs in parallel for comprehensive coverage
   test-matrix:
@@ -1003,7 +1124,7 @@ jobs:
           mkdir -p reports/test-telemetry
           export COVERAGE_FILE="reports/coverage/.coverage.${{ matrix.test-group.name }}"
           uv run --frozen --no-build pytest ${{ matrix.test-group.path }} \
-            -m "not serial and not memory" \
+            -m "not serial and not memory and not fs_contract and not subprocess_backed" \
             -n auto --dist loadscope --max-worker-restart=0 \
             -q --tb=short \
             --junitxml=reports/test-telemetry/junit.${{ matrix.test-group.name }}.xml \
@@ -1153,6 +1274,8 @@ jobs:
       - test-fast
       - repo-backed-unit
       - unit-scripts-tooling
+      - unit-filesystem-contracts
+      - unit-subprocess-backed
       - test-matrix
     timeout-minutes: 20
     permissions:
@@ -1185,6 +1308,8 @@ jobs:
             reports/coverage/.coverage.contract-confidence
             reports/coverage/.coverage.repo-backed-unit
             reports/coverage/.coverage.unit-scripts-tooling
+            reports/coverage/.coverage.unit-filesystem-contracts
+            reports/coverage/.coverage.unit-subprocess-backed
             reports/coverage/.coverage.unit-domain
             reports/coverage/.coverage.unit-application
             reports/coverage/.coverage.unit-infrastructure
@@ -1278,6 +1403,8 @@ jobs:
       - track-d-gates
       - test-fast
       - unit-scripts-tooling
+      - unit-filesystem-contracts
+      - unit-subprocess-backed
       - test-matrix
       - memory-tests
     timeout-minutes: 10
@@ -1557,6 +1684,8 @@ jobs:
       - test-fast
       - repo-backed-unit
       - unit-scripts-tooling
+      - unit-filesystem-contracts
+      - unit-subprocess-backed
       - test-matrix
       - memory-tests
       - coverage-verify
@@ -1633,7 +1762,10 @@ jobs:
           QUALITY_RESULT: ${{ needs.quality-metrics-gate.result }}
           TEST_RESULTS: >-
             ${{ needs.test-fast.result }} ${{ needs.repo-backed-unit.result }}
-            ${{ needs.unit-scripts-tooling.result }} ${{ needs.test-matrix.result }}
+            ${{ needs.unit-scripts-tooling.result }}
+            ${{ needs.unit-filesystem-contracts.result }}
+            ${{ needs.unit-subprocess-backed.result }}
+            ${{ needs.test-matrix.result }}
             ${{ needs.memory-tests.result }} ${{ needs.coverage-verify.result }}
             ${{ needs.duration-telemetry.result }}
           DOCS_RUNTIME_RC: ${{ steps.docs_runtime.outputs.rc }}
