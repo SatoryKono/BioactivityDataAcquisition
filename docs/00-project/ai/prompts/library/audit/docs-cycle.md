@@ -67,6 +67,7 @@ Default **`N=10`**, **`MODE=full`**, **`INCLUDE_PIPELINE=true`**, все **`ALLO
 | Param | Default |
 | --- | --- |
 | `N` | `10` |
+
 | `SCOPE` | `README.md docs/` (narrow by area) |
 | `MODE` | `full` (also: `audit` \| `audit+issues`) |
 | `LANGUAGE` | `ru` |
