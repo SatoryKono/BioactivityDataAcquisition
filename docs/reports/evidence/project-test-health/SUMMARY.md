@@ -1,6 +1,6 @@
 ---
 status: active-non-canonical
-last_verified: "2026-08-04"
+last_verified: "2026-08-12"
 freshness_window_days: 7
 owner: quality
 canonical_sources:
@@ -36,9 +36,10 @@ must be refreshed after each full test campaign.
 
 ## Freshness note
 
-Refreshed on 2026-08-04 during documentation architecture audit cycle 1
-(#7419): canonical source paths remain present and unchanged; interpretation
-stays backlog signal only pending the next full pytest telemetry artifact.
+Refreshed on 2026-08-12 during the PR #8651 governance recovery campaign:
+canonical source paths and the full architecture suite were revalidated;
+interpretation remains backlog signal only pending a new canonical main-branch
+pytest telemetry artifact.
 
 This is a non-canonical repo-only evidence layer. The canonical sources of truth are:
 - `configs/quality/test_matrix.yaml`
