@@ -1,4 +1,4 @@
-"""Deprecated compatibility facade for domain storage/platform exceptions.
+"""Legacy re-export package for domain storage/platform exceptions.
 
 Canonical import path (ARCH-REF-08 / #7709):
 ``bioetl.domain.exceptions.storage``.

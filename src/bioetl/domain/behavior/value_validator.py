@@ -215,12 +215,8 @@ class ValueValidator:
         if value < 0:
             return False, f"Activity value cannot be negative: {value}"
 
-        # Percent-inhibition types use 0-100 activity rules even when a unit is
-        # supplied; concentration validation applies only to non-percent types.
         if is_percent_inhibition_type(parsed_type):
             return self._validate_by_activity_type(value, parsed_type)
-
-        # If unit provided, validate as concentration
         if unit:
             return self.validate_concentration(value, unit)
 
