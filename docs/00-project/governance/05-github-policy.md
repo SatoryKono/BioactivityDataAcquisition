@@ -237,7 +237,7 @@ Live GitHub enforcement state:
 
 - Repository ruleset `root-hygiene-required-check` targets
   `refs/heads/main`.
-- Enforcement: **`active`**.
+- Enforcement: `active`.
 - Required status checks: exactly `checks-complete` and `root-hygiene`
   (`strict_required_status_checks_policy: false`).
 - The ruleset has no bypass actors.

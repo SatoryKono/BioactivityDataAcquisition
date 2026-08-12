@@ -636,3 +636,4 @@ _fail_*.txt
 .agents/
 /data/debug_exports
 /data/debug_exports
+/chrome-headless-shell

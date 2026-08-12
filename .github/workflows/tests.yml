@@ -1390,8 +1390,14 @@ jobs:
           rows: list[dict[str, object]] = []
           junit_paths = sorted(raw_dir.rglob("*.xml"))
           junit_testcase_duration_sum_s: dict[str, float] = {}
+          lane_wall_time_s: dict[str, float] = {}
           for junit_path in junit_paths:
               root = ET.parse(junit_path).getroot()
+              suites = [root] if root.tag == "testsuite" else list(root.findall("testsuite"))
+              lane_wall_time_s[junit_path.name] = round(
+                  sum(float(suite.attrib.get("time", "0") or 0.0) for suite in suites),
+                  3,
+              )
               junit_testcase_duration_sum_s[junit_path.name] = round(
                   sum(
                       float(case.attrib.get("time", "0") or 0.0)
@@ -1463,6 +1469,8 @@ jobs:
                   "junit_testcase_duration_sum_s": (
                       junit_testcase_duration_sum_s
                   ),
+                  "lane_wall_time_s": lane_wall_time_s,
+                  "lane_wall_time_source": "junit_testsuite_time",
                   "explicit_exclusions": [
                       {
                           "lane": "live-provider-contracts",

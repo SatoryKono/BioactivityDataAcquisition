@@ -3,9 +3,12 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict, is_dataclass
+from datetime import date, datetime, time, timedelta
+from decimal import Decimal
 from enum import Enum
+from pathlib import Path
 from typing import TYPE_CHECKING, Protocol, cast, runtime_checkable
 from uuid import UUID
 
@@ -22,7 +25,6 @@ class _ModelDumpHost(Protocol):
         *,
         mode: str = "python",
         exclude_none: bool = False,
-        fallback: Callable[[object], object] | None = None,
     ) -> Mapping[str, object]: ...
 
 
@@ -36,6 +38,12 @@ def normalize_snapshot(value: object) -> object:
     if isinstance(value, Enum):
         return value.value
     if isinstance(value, UUID):
+        return str(value)
+    if isinstance(value, datetime | date | time):
+        return value.isoformat()
+    if isinstance(value, timedelta):
+        return value.total_seconds()
+    if isinstance(value, Decimal | Path):
         return str(value)
     if not isinstance(value, type) and is_dataclass(value):
         return normalize_snapshot(asdict(cast("DataclassInstance", value)))
@@ -55,11 +63,7 @@ def normalize_snapshot(value: object) -> object:
 def to_serializable_mapping(value: object) -> dict[str, object]:
     """Return a normalized mapping for manifest payload serialization."""
     if isinstance(value, _ModelDumpHost):
-        payload: object = value.model_dump(
-            mode="json",
-            exclude_none=True,
-            fallback=normalize_snapshot,
-        )
+        payload: object = value.model_dump(mode="python", exclude_none=True)
     elif isinstance(value, _DictHost):
         payload = value.dict(exclude_none=True)
     elif hasattr(value, "__dict__") and not isinstance(value, type):

@@ -104,9 +104,9 @@
       "source": "reports/quality/full-app-duplication-baseline.json"
     },
     "repo_wide_zero_import_candidates": {
-      "classified": 6,
-      "current": 6,
-      "owner_test_anchored": 6,
+      "classified": 5,
+      "current": 5,
+      "owner_test_anchored": 5,
       "source": "reports/quality/dead-code-inventory.json",
       "untriaged": 0
     },

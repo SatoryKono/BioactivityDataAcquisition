@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2832 |
-| Tracked doc-like files | 2827 |
+| Doc-like files | 2835 |
+| Tracked doc-like files | 2830 |
 | Ignored local docs/reports files | 5 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
@@ -19,7 +19,7 @@
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 5 |
-| tracked | 2827 |
+| tracked | 2830 |
 
 ## Lifecycle Counts
 
@@ -42,7 +42,7 @@
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 21 |
-| working_report | 369 |
+| working_report | 372 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -62,7 +62,7 @@
 | Archived | 169 |
 | Canonical | 70 |
 | Generated | 1014 |
-| Working | 844 |
+| Working | 847 |
 
 ## Surface Families
 
@@ -72,14 +72,14 @@
 | archive | 169 |
 | canonical | 70 |
 | generated | 1014 |
-| working | 844 |
+| working | 847 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 320 |
-| archive-after-migration | 379 |
+| archive-after-migration | 382 |
 | generate-automatically | 1014 |
 | keep | 1115 |
 | reconcile-with-github-state | 4 |

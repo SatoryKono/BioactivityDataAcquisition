@@ -43,9 +43,7 @@ class FieldPolicyConfig:
 
     def __post_init__(self) -> None:
         """Validate and freeze normalized field-level policy settings."""
-        true_values = tuple(
-            value.strip().lower() for value in self.boolean_true_values
-        )
+        true_values = tuple(value.strip().lower() for value in self.boolean_true_values)
         false_values = tuple(
             value.strip().lower() for value in self.boolean_false_values
         )

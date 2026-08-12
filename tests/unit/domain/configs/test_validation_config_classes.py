@@ -106,20 +106,28 @@ class TestFieldValidation:
             fv.field = "other"  # type: ignore[misc]
 
     @pytest.mark.parametrize(
-        "vtype",
+        ("vtype", "parameters"),
         [
-            "required",
-            "not_null",
-            "range",
-            "pattern",
-            "enum",
-            "max_length",
-            "not_empty_list",
-            "custom",
+            ("required", {}),
+            ("not_null", {}),
+            ("range", {"min_value": 0.0}),
+            ("pattern", {"pattern": "x"}),
+            ("enum", {"allowed": ("x",)}),
+            ("max_length", {"max_length": 1}),
+            ("not_empty_list", {}),
+            ("custom", {"validator": "validate_x"}),
         ],
     )
-    def test_all_validation_types(self, vtype: str) -> None:
-        fv = FieldValidation(field="x", validation_type=vtype)  # type: ignore[arg-type]
+    def test_all_validation_types(
+        self,
+        vtype: str,
+        parameters: dict[str, object],
+    ) -> None:
+        fv = FieldValidation(  # type: ignore[arg-type]
+            field="x",
+            validation_type=vtype,
+            **parameters,
+        )
         assert fv.validation_type == vtype
 
 

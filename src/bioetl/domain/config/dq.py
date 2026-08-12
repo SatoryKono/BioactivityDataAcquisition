@@ -16,6 +16,12 @@ from bioetl.domain.config.validation import (
 )
 from bioetl.domain.types.dq_contracts import DQDisposition
 
+DQDispositionOverrides = (
+    dict[str, DQDisposition]
+    | list[tuple[str, DQDisposition]]
+    | tuple[tuple[str, DQDisposition], ...]
+)
+
 __all__ = [
     "DQConfig",
     "DQReportConfig",
@@ -115,8 +121,8 @@ class DQConfig:
     contract_version: str | None = None
     rule_bundle_version: str | None = None
     default_disposition_policy: DQDisposition = DQDisposition.WARN
-    # Declared storage form is immutable item tuples; callers may pass a dict.
-    disposition_overrides: tuple[tuple[str, DQDisposition], ...] = ()
+    # Normalized to immutable item tuples in ``__post_init__``.
+    disposition_overrides: DQDispositionOverrides = ()
     strictness_mode: Literal["lenient", "moderate", "strict"] = "moderate"
 
     def __post_init__(self) -> None:
@@ -156,8 +162,7 @@ class DQConfig:
             )
         elif isinstance(raw_overrides, list | tuple):
             normalized = tuple(
-                (str(item[0]), item[1])  # type: ignore[index]
-                for item in raw_overrides
+                (str(rule_id), disposition) for rule_id, disposition in raw_overrides
             )
         else:
             raise TypeError(

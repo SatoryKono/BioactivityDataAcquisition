@@ -23,19 +23,20 @@ from bioetl.domain.composite.result_seed_dependency import DependencyResult, See
 from bioetl.domain.config.base_provider import BaseProviderConfig
 from bioetl.domain.value_objects import ActivityType
 
-from types import MappingProxyType
-
-from bioetl.domain.composite.aggregation import (
+from bioetl.domain.composite import (
     AggregationConfig,
     AggregationFieldSpec,
     AggregationFunction,
+    CompositeDQConfig,
+    CompositeLineageMetadata,
+    ConflictResolution,
+    DQOverrideConfig,
+    DataSchemaConfig,
+    LayerColumnConfig,
+    MergeConfig,
+    MergeStrategy,
 )
-from bioetl.domain.composite.config_dq import CompositeDQConfig, DQOverrideConfig
-from bioetl.domain.composite.config_merge import MergeConfig
 from bioetl.domain.composite.config_parsing import require_float
-from bioetl.domain.composite.config_schema import DataSchemaConfig, LayerColumnConfig
-from bioetl.domain.composite.lineage import CompositeLineageMetadata
-from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.config.enum_loader import _normalize_coordinate
 from bioetl.domain.config.pipeline import FieldPolicyConfig
@@ -43,6 +44,7 @@ from bioetl.domain.config.runtime import RuntimeConfig
 from bioetl.domain.config.validation_config import ValidationConfig
 from bioetl.domain.config.validation_rules import FieldValidation
 from bioetl.domain.contracts.gold.uniprot import UNIPROT_MAPPING_STATUS_VALUES
+from bioetl.domain.immutability import FrozenDict
 from bioetl.domain.types.dq_contracts import DQDisposition
 from bioetl.domain.types import RunType
 
@@ -156,7 +158,7 @@ def test_layer_column_config_freezes_rename_fields() -> None:
     cfg = LayerColumnConfig(columns=("x",), rename_fields=owned)
     owned["a"] = "mutated"
     assert cfg.rename_fields["a"] == "b"
-    assert isinstance(cfg.rename_fields, MappingProxyType)
+    assert isinstance(cfg.rename_fields, FrozenDict)
     with pytest.raises(TypeError):
         cfg.rename_fields["c"] = "d"  # type: ignore[index]
 
