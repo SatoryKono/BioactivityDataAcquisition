@@ -4,21 +4,22 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from bioetl.domain.composite.config_cross_validation import CrossValidationConfig
-from bioetl.domain.composite.config_dq import CompositeDQConfig, DQOverrideConfig
-from bioetl.domain.composite.config_parsing import (
+from bioetl.domain.composite.cross_validation import (
+    ComparisonMethod,
+    EnricherFieldPairing,
+    FieldComparisonSpec,
+)
+
+from .config_cross_validation import CrossValidationConfig
+from .config_dq import CompositeDQConfig, DQOverrideConfig
+from .config_parsing import (
     optional_float,
     optional_str_tuple,
     require_float,
     require_int,
     str_key_mapping,
 )
-from bioetl.domain.composite.config_runtime import ExecutionConfig, LineageConfig
-from bioetl.domain.composite.cross_validation import (
-    ComparisonMethod,
-    EnricherFieldPairing,
-    FieldComparisonSpec,
-)
+from .config_runtime import ExecutionConfig, LineageConfig
 
 __all__ = [
     "build_cross_validation_config",
@@ -130,9 +131,7 @@ def _comparison_method(raw: object) -> ComparisonMethod:
     return ComparisonMethod(str(raw if raw is not None else "exact"))
 
 
-def _one_field_comparison_spec(
-    field: object, *, path: str
-) -> FieldComparisonSpec:
+def _one_field_comparison_spec(field: object, *, path: str) -> FieldComparisonSpec:
     if not isinstance(field, dict):
         raise ValueError(
             f"{path} entries must be dictionaries, got {type(field).__name__}"
@@ -154,17 +153,13 @@ def _field_comparison_specs(
             f"{path} must be a sequence of dictionaries, "
             f"got {type(fields_raw).__name__}"
         )
-    return tuple(
-        _one_field_comparison_spec(field, path=path) for field in fields_raw
-    )
+    return tuple(_one_field_comparison_spec(field, path=path) for field in fields_raw)
 
 
 def _one_enricher_pairing(raw: object, *, index: int) -> EnricherFieldPairing:
     path = f"cross_validation.enricher_pairings[{index}]"
     if not isinstance(raw, dict):
-        raise ValueError(
-            f"{path} must be a dictionary, got {type(raw).__name__}"
-        )
+        raise ValueError(f"{path} must be a dictionary, got {type(raw).__name__}")
     return EnricherFieldPairing(
         enricher_pipeline=str(raw.get("enricher_pipeline") or ""),
         fields=_field_comparison_specs(
