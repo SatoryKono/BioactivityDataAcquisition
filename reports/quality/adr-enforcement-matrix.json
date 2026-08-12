@@ -276,6 +276,7 @@
         "docs/03-guides/tutorials/monitoring-alerts-setup.md",
         "docs/03-guides/workflows.md",
         "docs/04-reference/api/infrastructure.md",
+        "docs/04-reference/environment-variables.md",
         "docs/04-reference/pipelines/chembl/05-activity-spec.md",
         "docs/04-reference/templates/adr-template.md",
         "docs/04-reference/templates/pipeline-review-checklist.md",
