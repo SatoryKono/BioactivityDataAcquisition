@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-12T17:35:28.401363+00:00",
+  "generated_at": "2026-08-12T19:57:03.515594+00:00",
   "summary": {
-    "total_scripts": 599,
+    "total_scripts": 598,
     "status_counts": {
       "active": 338,
       "supporting": 251,
-      "temporary_diagnostic": 10
+      "temporary_diagnostic": 9
     },
     "reference_group_coverage": {
       "agents": 4,
@@ -2574,7 +2574,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 215,
+          "line": 216,
           "source_group": "docs",
           "text": ".\\.venv-win\\Scripts\\python.exe scripts\\ai\\generate_project_domain_audit_workflow.py"
         }
@@ -2635,7 +2635,7 @@
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 193,
+          "line": 194,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\grok\\install_skills.ps1"
         }
@@ -2734,7 +2734,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1618,
+          "line": 1747,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
@@ -4862,37 +4862,37 @@
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 127,
+          "line": 128,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.audit.dual-agent-cycle \\"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 155,
+          "line": 156,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts list"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 156,
+          "line": 157,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts show prompt.audit.grok-cycle"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 157,
+          "line": 158,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.session.grok-bootstrap \\"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 159,
+          "line": 160,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.audit.grok-cycle --param SCOPE=\"src/bioetl/domain\""
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 160,
+          "line": 161,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.closeout.grok --param SCOPE=\"issues: #NNNN\""
         }
@@ -7608,7 +7608,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 163,
+      "reference_count": 171,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -9594,18 +9594,6 @@
       ]
     },
     {
-      "path": "scripts/engineering/ci/rerun_pr_checks.sh",
-      "type": "sh",
-      "status": "temporary_diagnostic",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "temporary_diagnostic",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as the bounded GitHub Actions recovery helper for the current billing/LFS incident; remove it after affected pull requests are retriggered or promote the behavior into governed CI tooling if recurring use is approved."
-    },
-    {
       "path": "scripts/engineering/ci/run_pytest_resilient.py",
       "type": "py",
       "status": "active",
@@ -9614,7 +9602,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1207,
+          "line": 1332,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -10341,7 +10329,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1684,
+          "line": 1816,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
@@ -10693,7 +10681,7 @@
       "agent_usage": [
         "py-test-bot"
       ],
-      "reference_count": 54,
+      "reference_count": 55,
       "references": [
         {
           "path": ".codex/skills/py-test-bot/SKILL.md",
@@ -15306,7 +15294,7 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_lane_policy.py",
-          "line": 359,
+          "line": 368,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/run_architecture_audit_read_only.py\""
         },
@@ -15897,7 +15885,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 77,
+      "reference_count": 78,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
@@ -20158,13 +20146,19 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 83,
+      "reference_count": 84,
       "references": [
         {
           "path": "Makefile",
           "line": 325,
           "source_group": "build",
           "text": "$(RUN) python scripts/ops/runtime/docker/runtime_manager.py clean --stack main --confirm-destructive CLEAN"
+        },
+        {
+          "path": "docs/04-reference/environment-variables.md",
+          "line": 74,
+          "source_group": "docs",
+          "text": "| `BIOETL_RUNTIME_SOURCE_ID` | Managed runtime source identity (injected by runtime_manager.py) | No |"
         },
         {
           "path": "docs/04-reference/reports/run-reports.md",
@@ -20201,12 +20195,6 @@
           "line": 69,
           "source_group": "docs",
           "text": "| `runtime` | `bioetl-runtime` | `bioetl-main`, `bioetl-neo4j` | `runtime_manager.py` |"
-        },
-        {
-          "path": "docs/05-operations/runbooks/docker-compose-project-migration.md",
-          "line": 71,
-          "source_group": "docs",
-          "text": "`runtime_manager.py start/recover` verifies these networks and creates a missing"
         }
       ],
       "owner": "@bioetl-platform",
