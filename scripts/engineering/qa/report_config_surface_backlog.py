@@ -371,8 +371,11 @@ def _iter_duplication_surface_files() -> list[Path]:
     files = [
         path
         for path in DUPLICATION_SURFACE_ROOT.rglob("*")
-        if path.is_file() and path.suffix in DUPLICATION_FILE_SUFFIXES
-        and not any(root in path.parents for root in DUPLICATION_EXCLUDED_GENERATED_ROOTS)
+        if path.is_file()
+        and path.suffix in DUPLICATION_FILE_SUFFIXES
+        and not any(
+            root in path.parents for root in DUPLICATION_EXCLUDED_GENERATED_ROOTS
+        )
     ]
     return sorted(files)
 
