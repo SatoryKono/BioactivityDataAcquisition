@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
@@ -32,6 +33,17 @@ def _reject_inconsistent_enrichment(
         raise ValueError(
             "records_enriched cannot exceed records_merged: "
             f"{records_enriched} > {records_merged}"
+        )
+
+
+def _reject_non_finite_duration(duration_seconds: float) -> None:
+    if not math.isfinite(duration_seconds):
+        raise ValueError(
+            f"duration_seconds must be finite, got {duration_seconds}"
+        )
+    if duration_seconds < 0:
+        raise ValueError(
+            f"duration_seconds must be >= 0, got {duration_seconds}"
         )
 
 
@@ -67,10 +79,7 @@ class MergeResult:
             self.records_enriched,
             self.records_fully_enriched,
         )
-        if self.duration_seconds < 0:
-            raise ValueError(
-                f"duration_seconds must be >= 0, got {self.duration_seconds}"
-            )
+        _reject_non_finite_duration(self.duration_seconds)
 
     def __post_init__(self) -> None:
         """Freeze nested mappings/payloads so callers cannot mutate state."""

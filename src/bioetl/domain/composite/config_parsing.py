@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping
 
 __all__ = [
@@ -164,9 +165,12 @@ def _coerce_float(value: object, field_name: str) -> float:
     if not _is_float_coercible(value):
         raise ValueError(f"{field_name} must be a number")
     try:
-        return float(value)  # type: ignore[arg-type]
+        result = float(value)  # type: ignore[arg-type]
     except (TypeError, ValueError) as exc:
         raise ValueError(f"{field_name} must be a number") from exc
+    if not math.isfinite(result):
+        raise ValueError(f"{field_name} must be a finite number")
+    return result
 
 
 def require_float(
