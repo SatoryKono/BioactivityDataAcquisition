@@ -2,18 +2,18 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: main
-refreshed_at_utc: '2026-08-11T17:14:19.960361+00:00'
+refreshed_at_utc: '2026-08-11T19:54:54.910082+00:00'
 refresh_status: captured
 source_commit: a4a95fd6396fc2f00319d2ddc10de4dab09be825
 source_run_id: github-31515014563-1
-source_tree_sha256: 0c161e0594be0095e96ec7e6f923973629045895d68553f4ae840ef054390b0f
+source_tree_sha256: 0482fe154dc7e56389bed6f63d357b952ce469bbf5fe2a9cf03e584c1ea2abe2
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
 artifact_inputs:
   coverage_xml: reports/coverage/coverage.xml
   coverage_log: null
-  coverage_percent_fallback: null
+  coverage_percent_fallback: 95.69
   slowest_tests_json: reports/test-telemetry/slowest-tests.json
   junit_inputs: []
 coverage:
@@ -178,6 +178,19 @@ duration_telemetry:
       junit.unit-domain.xml: 122.983
       junit.unit-infrastructure.xml: 38.341
       junit.unit-other.xml: 64.231
+    lane_wall_time_s:
+      junit-contract-confidence.xml: 78.29
+      junit-fast.xml: 146.47
+      junit-memory.xml: 0.399
+      junit-repo-backed-unit.xml: 169.271
+      junit-track-d.xml: 9.607
+      junit-unit-scripts-tooling.xml: 133.691
+      junit.integration.xml: 87.498
+      junit.security.xml: 9.354
+      junit.unit-application.xml: 64.537
+      junit.unit-domain.xml: 99.889
+      junit.unit-infrastructure.xml: 53.988
+      junit.unit-other.xml: 65.1
     worker_mode: 'mixed: xdist unit/integration; serial contracts/repo-backed/memory'
 slow_governance_cache_probe:
   issue_ref: '#4663'

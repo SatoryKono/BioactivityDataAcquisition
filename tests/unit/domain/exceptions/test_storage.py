@@ -35,7 +35,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.exceptions.infrastructure import (
+from bioetl.domain.exceptions.storage import (
     BronzeValidationError,
     BucketNotFoundError,
     DeltaOptimizeError,
