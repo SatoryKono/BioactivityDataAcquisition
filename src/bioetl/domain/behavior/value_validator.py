@@ -284,7 +284,16 @@ class ValueValidator:
         min_value: float,
         max_value: float,
     ) -> None:
-        """Set finite, increasing validation bounds for a concentration unit."""
+        """Set finite, increasing validation bounds for a concentration unit.
+
+        Args:
+            unit: Unit string.
+            min_value: Minimum valid value.
+            max_value: Maximum valid value.
+
+        Raises:
+            ValueError: If bounds are non-finite or min_value >= max_value.
+        """
         if not math.isfinite(min_value) or not math.isfinite(max_value):
             raise ValueError(
                 f"concentration bounds must be finite, got min={min_value}, max={max_value}"

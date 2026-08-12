@@ -125,6 +125,25 @@ Use it when you need to answer:
   focused parity command above must report neither missing nor extra workflow
   files.
 
+## Self-hosted runner isolation (`dashboard-render-host.yml`)
+
+Host-only Grafana render evidence runs on a dedicated self-hosted runner
+label set: `[self-hosted, bioetl-observability]`.
+
+| Control | Requirement |
+| --- | --- |
+| Trigger | **`workflow_dispatch` only** — never add `pull_request` / `pull_request_target` |
+| Permissions | Workflow `contents: read` only |
+| Secrets | `GRAFANA_USERNAME` / `GRAFANA_PASSWORD` injected only into the host job env |
+| Code | Checkout of the **selected ref** at dispatch time (trusted operators) |
+| Host | Runner must be isolated from general CI (dedicated host/VM, no shared untrusted PR jobs) |
+| Dispatch ACL | Restrict who may run workflow_dispatch via GitHub org/repo roles |
+| Residual risk | Host compromise can expose Grafana credentials; prefer short-lived tokens when available |
+
+Do **not** expand this workflow to untrusted PR code paths. Operator checklist:
+`docs/05-operations/runbooks/observability-checklist.md` (ownership
+`@bioetl-observability`).
+
 ## Related References
 
 - [GitHub Local Workflow](../03-guides/github-local-workflow.md)

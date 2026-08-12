@@ -12,31 +12,48 @@ on:
 
 permissions:
   contents: read
-  issues: write
 
 jobs:
   freshness:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
-        with:
-          enable-cache: true
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
       - name: Check repository memory freshness
         id: freshness
-        run: uv run python -m memory.tooling.check_freshness --json
+        run: uv run --frozen --no-build python -m memory.tooling.check_freshness --json
+      - name: Test freshness contracts
+        run: uv run --frozen --no-build pytest tests/unit/memory/test_check_freshness.py -q
+
+  # issues:write only on the schedule failure path (not on pull_request).
+  open-review-issue:
+    needs: freshness
+    if: failure() && github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
       - name: Create or update curated-memory review issue
-        if: failure() && github.event_name == 'schedule'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
           title="[AI-MEM][P2] Review stale curated memory"
           existing="$(gh issue list --state open --search "$title in:title" --json number --jq '.[0].number // empty')"
-          body="$(uv run python -m memory.tooling.review_curated --json || true)"
+          body="$(uv run --frozen --no-build python -m memory.tooling.review_curated --json || true)"
+          issue_body="$(printf 'Scheduled freshness gate found stale curated memory.\n\n```json\n%s\n```\n' "$body")"
+          comment_body="$(printf 'Scheduled freshness gate still fails.\n\n```json\n%s\n```\n' "$body")"
           if [ -n "$existing" ]; then
-            gh issue comment "$existing" --body "Scheduled freshness gate still fails.\n\n\`\`\`json\n${body}\n\`\`\`"
+            gh issue comment "$existing" --body "$comment_body"
           else
-            gh issue create --title "$title" --body "Scheduled freshness gate found stale curated memory.\n\n\`\`\`json\n${body}\n\`\`\`"
+            gh issue create --title "$title" --body "$issue_body"
           fi
-      - name: Test freshness contracts
-        run: uv run pytest tests/unit/memory/test_check_freshness.py -q
