@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `1cb1e6e5741dcd0efec8408d3b3d4b6c45cdeece`
 
-Evidence surface SHA-256: `d1705273b560d8d07bc0435b1a81164a6afe4804a887ad09a02ad6386eb17e8b`
+Evidence surface SHA-256: `d66f2a6053bbe30f7e8110e0f80484041ee9050c804f17fac7646ed7fb69fd21`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,7 +18,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-07-27-r1",
   "audited_commit_sha": "1cb1e6e5741dcd0efec8408d3b3d4b6c45cdeece",
-  "evidence_surface_sha256": "d1705273b560d8d07bc0435b1a81164a6afe4804a887ad09a02ad6386eb17e8b",
+  "evidence_surface_sha256": "d66f2a6053bbe30f7e8110e0f80484041ee9050c804f17fac7646ed7fb69fd21",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
@@ -29,10 +29,10 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 1520,
+    "fully_covered_module_count": 1522,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 2,
-    "partially_covered_module_count": 891,
+    "partially_covered_module_count": 889,
     "source_module_count": 2413,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
@@ -56,8 +56,8 @@ Refresh reason: Closeout wave #8584/#8583/#7515/#7517/#7410 — re-pin evidence;
 1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
 1. Module inventory (from `module-coverage-inventory.json` only):
    - source_module_count: **2413**
-   - fully_covered: **1520**
-   - partially_covered: **891**
+   - fully_covered: **1522**
+   - partially_covered: **889**
    - no_executable_lines: **2**
    - uncovered: **0**
    - unmeasured: **0**

@@ -98,8 +98,8 @@
       "status": "closeable"
     },
     "5794": {
-      "closeout_reason": "Shared composite merge and lineage policy blocks now live in a canonical authority surface and duplicate clusters dropped from 24 to 9.",
-      "current_value": 9,
+      "closeout_reason": "Shared composite merge and lineage policy blocks now live in a canonical authority surface and duplicate clusters dropped from 24 to 6.",
+      "current_value": 6,
       "debt_type": "composite_config_duplication",
       "evidence": [
         "configs/composites/field_groups/shared_policy.yaml",

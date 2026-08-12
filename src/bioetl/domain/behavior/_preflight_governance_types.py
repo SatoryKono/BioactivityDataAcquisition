@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
+from types import MappingProxyType
 
 from bioetl.domain.types.validation_severity import ValidationSeverity
 
@@ -26,7 +27,12 @@ class PreflightGovernanceConfig:
     policy: GovernancePolicy
     ci_integration: bool = False
     fail_fast: bool = True
-    issue_code_overrides: Mapping[str, ValidationSeverity] | None = None
+    # Exclude from generated hashing: MappingProxyType is unhashable.
+    issue_code_overrides: Mapping[str, ValidationSeverity] | None = field(
+        default=None,
+        compare=True,
+        hash=False,
+    )
 
     def __post_init__(self) -> None:
         """Snapshot overrides so callers cannot mutate governance policy later."""
@@ -35,5 +41,5 @@ class PreflightGovernanceConfig:
         object.__setattr__(
             self,
             "issue_code_overrides",
-            dict(self.issue_code_overrides),
+            MappingProxyType(dict(self.issue_code_overrides)),
         )

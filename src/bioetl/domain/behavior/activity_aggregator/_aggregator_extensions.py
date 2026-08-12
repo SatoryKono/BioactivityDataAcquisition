@@ -14,11 +14,15 @@ if TYPE_CHECKING:
 
     class _AggregatorHost(Protocol):
         def aggregate_values(
-            self, values: Sequence[float], method: str | AggregationMethod = "median"
+            self,
+            values: Sequence[float],
+            method: str | AggregationMethod | None = None,
         ) -> float: ...
 
         def aggregate_with_uncertainty(
-            self, values: Sequence[float], method: str | AggregationMethod = "median"
+            self,
+            values: Sequence[float],
+            method: str | AggregationMethod | None = None,
         ) -> tuple[float, float]: ...
 
 
@@ -28,14 +32,15 @@ class _ActivityAggregatorExtensions:
     def aggregate_concentrations(
         self,
         concentrations: Sequence[Concentration],
-        method: str | AggregationMethod = "median",
+        method: str | AggregationMethod | None = None,
     ) -> Concentration:
         """Aggregate multiple concentration measurements.
 
         Args:
             concentrations: Sequence of Concentration values to aggregate;
                 must be non-empty.
-            method: Aggregation method (e.g., 'median', 'mean'); defaults to 'median'.
+            method: Aggregation method (e.g., 'median', 'mean'). When omitted
+                (``None``), uses the host aggregator's configured default method.
 
         Returns:
             Aggregated Concentration in nanomolar units.
@@ -53,14 +58,15 @@ class _ActivityAggregatorExtensions:
     def aggregate_concentrations_with_uncertainty(
         self,
         concentrations: Sequence[Concentration],
-        method: str | AggregationMethod = "median",
+        method: str | AggregationMethod | None = None,
     ) -> tuple[Concentration, float]:
         """Aggregate concentrations with uncertainty estimate.
 
         Args:
             concentrations: Sequence of Concentration values to aggregate;
                 must be non-empty.
-            method: Aggregation method (e.g., 'median', 'mean'); defaults to 'median'.
+            method: Aggregation method (e.g., 'median', 'mean'). When omitted
+                (``None``), uses the host aggregator's configured default method.
         """
         if not concentrations:
             raise ValueError("Cannot aggregate empty sequence of concentrations")
@@ -96,7 +102,7 @@ class _ActivityAggregatorExtensions:
     def filter_and_aggregate(
         self,
         values: Sequence[float],
-        method: str | AggregationMethod = "median",
+        method: str | AggregationMethod | None = None,
         *,
         min_value: float | None = None,
         max_value: float | None = None,
@@ -105,7 +111,8 @@ class _ActivityAggregatorExtensions:
 
         Args:
             values: Sequence of numeric values to filter and aggregate.
-            method: Aggregation method (e.g., 'median', 'mean'); defaults to 'median'.
+            method: Aggregation method (e.g., 'median', 'mean'). When omitted
+                (``None``), uses the host aggregator's configured default method.
             min_value: Optional lower bound; values below this are excluded; defaults to None.
             max_value: Optional upper bound; values above this are excluded; defaults to None.
         """

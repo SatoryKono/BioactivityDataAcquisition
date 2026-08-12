@@ -64,7 +64,7 @@
     "repo_wide_candidates_without_owner_tests_count": 0
   },
   "config_surface": {
-    "duplicate_cluster_count": 20
+    "duplicate_cluster_count": 6
   },
   "module_coverage": {
     "uncovered_module_count": 0,

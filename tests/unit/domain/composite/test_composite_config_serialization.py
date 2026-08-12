@@ -351,15 +351,12 @@ def test_composite_decoder_uses_defaults_when_optional_sections_are_absent() -> 
     assert restored.cross_validation == CrossValidationConfig()
 
 
-def test_cross_validation_decoder_handles_non_sequence_nested_values() -> None:
-    assert (
-        build_cross_validation_config(
-            {"enricher_pairings": "not-a-sequence"}
-        ).enricher_pairings
-        == ()
-    )
+def test_cross_validation_decoder_fail_closed_on_malformed_nested_values() -> None:
+    """CR #8644 composite-014: reject malformed collection shapes at the boundary."""
+    with pytest.raises(ValueError, match="enricher_pairings must be a sequence"):
+        build_cross_validation_config({"enricher_pairings": "not-a-sequence"})
 
-    with pytest.raises(ValueError, match="must have at least one field"):
+    with pytest.raises(ValueError, match="fields must be a sequence"):
         build_cross_validation_config(
             {
                 "enricher_pairings": [

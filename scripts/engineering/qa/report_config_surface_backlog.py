@@ -26,7 +26,6 @@ from scripts.schema.analysis.generate_config_matrix import (
 
 BACKLOG_PATH = ROOT / "reports/quality/config-surface-backlog.json"
 DUPLICATION_SURFACE_ROOT = ROOT / "configs"
-DUPLICATION_EXCLUDED_GENERATED_ROOTS = (DUPLICATION_SURFACE_ROOT / "_schema",)
 DUPLICATION_FILE_SUFFIXES = (".yaml", ".yml", ".json")
 GENERATED_DUPLICATION_SURFACE_DIRS = (ROOT / "configs" / "_schema",)
 GENERATED_DUPLICATION_SURFACE_FILES = (
@@ -601,7 +600,6 @@ def _build_duplication_audit() -> dict[str, Any]:
         "scope": {
             "root": DUPLICATION_SURFACE_ROOT.relative_to(ROOT).as_posix(),
             "file_suffixes": list(DUPLICATION_FILE_SUFFIXES),
-            "excluded_generated_prefixes": list(DUPLICATION_EXCLUDED_PREFIXES),
             "files_scanned": len(surface_files),
             "excluded_generated_roots": [
                 path.relative_to(ROOT).as_posix()
@@ -612,10 +610,6 @@ def _build_duplication_audit() -> dict[str, Any]:
                 for path in GENERATED_DUPLICATION_SURFACE_FILES
             ],
             "ignored_by_jscpd_patterns": list(JSCPD_IGNORED_PATTERNS),
-            "excluded_generated_roots": [
-                path.relative_to(ROOT).as_posix()
-                for path in DUPLICATION_EXCLUDED_GENERATED_ROOTS
-            ],
             "structured_block_min_bytes": MIN_DUPLICATE_BLOCK_BYTES,
             "max_traversal_depth": MAX_DUPLICATION_BLOCK_DEPTH,
         },
@@ -647,10 +641,6 @@ def _build_duplication_audit() -> dict[str, Any]:
             (
                 "Clusters report exact canonical JSON subtree duplicates only; "
                 "near-duplicate prose and comment drift stay out of scope."
-            ),
-            (
-                "Generated JSON schemas are excluded because their repeated definitions "
-                "are projections of source models, not independently maintained config debt."
             ),
             (
                 "The audit is report-only and exists to make YAML/JSON governance "
