@@ -227,7 +227,7 @@ W5  Optional Mode B / auth / watchdog  ─── only if needed
 | **T3b** | `github`, `fetch` | Frequent wrappers | 8820, 8821 |
 | **T3c** | `prometheus`, `grafana` | Ops profile | 8822, 8823 |
 | **T3d** | `neo4j-cypher`, `neo4j-memory` | After neo4j auth healthy | 8824, 8825 |
-| **T3e** | `memory`, `filesystem` | Stateful — design roots first | TBD |
+| **T3e** | `memory`, `filesystem` | Stateful — design roots first | Deferred (design-first approach) |
 | **Defer** | `mutmut`, `code-analyzer`, `github-actions`, `mcp-code-interpreter` | Lower thrash / cost | later |
 | **Never on plane** | `jetbrains`, `node-code-sandbox` | T3 Toolkit; disable only | — |
 

@@ -207,7 +207,7 @@
     },
     "compatibility_importer_census": {
       "path": "reports/quality/compatibility-importer-census.json",
-      "snapshot_date": "2026-08-11"
+      "snapshot_date": "2026-08-12"
     },
     "contract_registry_diagnostics": {
       "path": "reports/quality/contract-registry-diagnostics.json",
@@ -240,7 +240,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "c5b653e09fc69f0802d6f758b2a23643b32726c4e3a5704b20783bc901b542fb",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "cb5823ed33dffb407937080af270b31e28e131b5ee64364c10f994e144f79c3f"
+      "source_tree_sha256": "c1d522a344dcfef221d11e560d0a22c6de8e0e2d39cae693c22d98bbce1c8e51"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

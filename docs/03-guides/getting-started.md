@@ -145,6 +145,8 @@ per-task approval; this command is a human local setup step.
 - `BIOETL_DATA_DIR`: Directory for data storage (default: `./data`).
 - `BIOETL_LOG_LEVEL`: Logging level (default: `INFO`).
 
+> **Note:** For a complete reference of all BIOETL_* environment variables, see [Environment Variables Reference](../04-reference/environment-variables.md).
+
 ### Secrets
 
 If you plan to access APIs requiring authentication, or optional higher-limit provider modes, add your keys to `.env`:
