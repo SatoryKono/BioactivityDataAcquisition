@@ -17,9 +17,13 @@ on:
         default: false
         type: boolean
 
+permissions:
+  contents: read
+
 jobs:
   setup:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Setup Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
