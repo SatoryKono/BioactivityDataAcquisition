@@ -24,9 +24,7 @@ ALLOWED_USES: dict[str, set[str]] = {
     "actions/labeler": {"8558fd74291d67161a8a78ce36a881fa63b766a9"},  # v5
     "actions/stale": {"5bef64f19d7facfb25b37b414482c7164d639639"},  # v9
     "astral-sh/setup-uv": {
-        "37802adc94f370d6bfd71619e3f0bf239e1f3b78",  # v7
-        "94527f2e458b27549849d47d273a16bec83a01e9",  # v7
-        "cda7432b7ae1feb69168d44b610cb8e3cdbd09b0",  # v1
+        "37802adc94f370d6bfd71619e3f0bf239e1f3b78",  # v7 (canonical; composite setup-python-uv)
     },
     "SonarSource/sonarqube-scan-action": {
         "fd88b7d7ccbaefd23d8f36f73b59db7a3d246602",
