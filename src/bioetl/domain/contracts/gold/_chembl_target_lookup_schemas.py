@@ -230,6 +230,7 @@ class ChEMBLSubcellularFractionGoldSchema(StrictGoldContractSchema):
     assay_count: Series[float] = pa.Field(
         nullable=True,
         coerce=True,
+        ge=0,
         description="Number of assays using this fraction",
     )
 

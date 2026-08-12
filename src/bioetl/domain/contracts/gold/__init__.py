@@ -11,6 +11,7 @@ Submodules:
     composite: Composite pipeline schemas (merged multi-source entities)
 
 Example usage:
+    >>> import pandas as pd
     >>> from bioetl.domain.contracts.gold import chembl
     >>> df = pd.read_parquet("data/gold/chembl_activity/")
     >>> chembl.ChEMBLActivityGoldSchema.validate(df)

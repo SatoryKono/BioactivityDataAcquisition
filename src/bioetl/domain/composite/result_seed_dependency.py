@@ -195,13 +195,15 @@ class DependencyResult:
             DependencyResult with TIMEOUT status. ``duration_seconds`` uses the
             supplied value when provided; otherwise defaults to ``timeout_seconds``.
         """
+        _require_finite_non_negative_duration("timeout_seconds", timeout_seconds)
+        resolved_duration = (
+            timeout_seconds if duration_seconds is None else duration_seconds
+        )
         return cls(
             pipeline_name=pipeline_name,
             status=DependencyStatus.TIMEOUT,
             error_message=f"Timeout after {timeout_seconds}s",
-            duration_seconds=timeout_seconds
-            if duration_seconds is None
-            else duration_seconds,
+            duration_seconds=resolved_duration,
             started_at=started_at,
             completed_at=completed_at,
         )
