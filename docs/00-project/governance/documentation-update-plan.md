@@ -35,7 +35,7 @@
 - Ссылки на диаграммы и IR JSON присутствуют
 
 **Требуемые действия:**
-- [ ] Создать пользовательский guide: `docs/03-guides/pipeline-dataflow-documentation.md`
+- [x] Создать пользовательский guide: `docs/03-guides/pipeline-dataflow-documentation.md` (filled 2026-08-12 docs-cycle)
 - [ ] Объяснить назначение pipeline dataflow documentation
 - [ ] Описать как читать и интерпретировать pipeline passports
 - [ ] Добавить примеры использования для разных пайплайнов
