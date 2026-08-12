@@ -200,6 +200,39 @@ UV_CACHE_DIR=/tmp/.uv-cache uv run python -m scripts.docs check-links --links --
 UV_CACHE_DIR=/tmp/.uv-cache uv sync --extra dev --extra tracing --extra docs
 ```
 
+## PR Preview Mechanism
+
+**Current Status:** BioETL does not have an automated PR preview mechanism for documentation changes.
+
+### Local Verification
+
+For documentation changes, verify locally before pushing:
+
+```bash
+# Install docs extra
+uv sync --extra dev --extra tracing --extra docs
+
+# Run full docs verification
+uv run python -m scripts.docs verify
+
+# Build site locally
+uv run python -m scripts.docs build-site
+```
+
+### CI Verification
+
+Documentation changes trigger the `docs.yml` workflow which:
+- Runs full docs verification including strict MkDocs build
+- Validates link integrity, config parity, and architecture drift
+- Regenerates generated documentation artifacts when needed
+
+### Future Enhancement
+
+If PR preview functionality is desired, consider:
+- GitHub Pages preview deployments for PRs
+- Netlify/Vercel preview deployments
+- Manual local verification as documented above
+
 ## Live Docs Watchlist
 
 Use this short watchlist whenever a change touches runtime-facing docs or when a
