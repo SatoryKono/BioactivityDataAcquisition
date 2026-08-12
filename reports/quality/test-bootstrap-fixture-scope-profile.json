@@ -9,7 +9,7 @@
   "result": {
     "status": "pass",
     "test_count": 393,
-    "test_file_count": 43,
+    "test_file_count": 44,
     "bootstrap_reference_count": 939,
     "local_conftest_present": true,
     "local_conftest_path": "tests/unit/composition/bootstrap/conftest.py",
