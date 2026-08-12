@@ -1,8 +1,10 @@
 ﻿# Temporary Diagnostic Scripts
 
 This directory contains temporary diagnostic scripts with bounded lifecycles.
-Every `scripts/temp/*.py` entry MUST appear in:
+Every executable below `scripts/temp/` (`.py`, `.sh`, `.ps1`, `.cmd`, `.bat`),
+except the package marker `__init__.py`, MUST:
 
+- be listed in this README
 - `configs/quality/scripts_lifecycle_registry.json` (`decision: temporary_diagnostic`, with `review_by`)
 - `configs/quality/scripts_inventory_manifest.json` (`status: temporary_diagnostic`)
 

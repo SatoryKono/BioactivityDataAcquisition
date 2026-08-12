@@ -773,6 +773,16 @@ def test_prometheus_config_loads_repo_rule_directory() -> None:
     assert "/etc/prometheus/rules/*.yml" in rule_files
 
 
+def test_prometheus_routes_alerts_to_the_optional_alertmanager_helper() -> None:
+    """The helper is optional, but its configured transport must be usable."""
+    prometheus_config = _load_prometheus_config()
+    alertmanagers = prometheus_config.get("alerting", {}).get("alertmanagers", [])
+
+    assert alertmanagers == [
+        {"static_configs": [{"targets": ["alertmanager:9093"]}]}
+    ]
+
+
 def test_pushgateway_default_target_has_bounded_replace_and_cleanup_lifecycle() -> None:
     """Default Pushgateway must be backed by bounded replace/delete semantics."""
     prometheus_config = _load_prometheus_config()

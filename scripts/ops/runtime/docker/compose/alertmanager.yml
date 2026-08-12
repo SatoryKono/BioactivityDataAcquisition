@@ -6,7 +6,9 @@ services:
     ports:
       - "127.0.0.1:9093:9093"
     volumes:
-      - ./grafana/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      # This helper compose file lives below scripts/ops/runtime/docker/compose.
+      # Resolve the bind from that directory back to the tracked root config.
+      - ../../../../../grafana/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
       - alertmanager-data:/alertmanager
     command:
       - '--config.file=/etc/alertmanager/alertmanager.yml'
