@@ -295,7 +295,7 @@
           "decision": "retain_with_owner",
           "linked_issue": "#5568",
           "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and retained under explicit owner governance for #5568 non-composite residual clusters.",
+          "rationale": "Shared JSON Schema $defs property bags are intentionally duplicated across pipeline config schemas and retained under explicit architecture ownership for #5568 non-composite residual.",
           "review_date": "2026-09-30"
         },
         "occurrence_count": 2,
@@ -323,7 +323,7 @@
           "decision": "retain_with_owner",
           "linked_issue": "#5568",
           "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and retained under explicit owner governance for #5568 non-composite residual clusters.",
+          "rationale": "Shared JSON Schema $defs property bags are intentionally duplicated across pipeline config schemas and retained under explicit architecture ownership for #5568 non-composite residual.",
           "review_date": "2026-09-30"
         },
         "occurrence_count": 2,
@@ -351,7 +351,7 @@
           "decision": "retain_with_owner",
           "linked_issue": "#5568",
           "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and retained under explicit owner governance for #5568 non-composite residual clusters.",
+          "rationale": "Shared JSON Schema $defs property bags are intentionally duplicated across pipeline config schemas and retained under explicit architecture ownership for #5568 non-composite residual.",
           "review_date": "2026-09-30"
         },
         "occurrence_count": 2,
@@ -379,7 +379,7 @@
           "decision": "retain_with_owner",
           "linked_issue": "#5568",
           "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and retained under explicit owner governance for #5568 non-composite residual clusters.",
+          "rationale": "Shared JSON Schema $defs property bags are intentionally duplicated across pipeline config schemas and retained under explicit architecture ownership for #5568 non-composite residual.",
           "review_date": "2026-09-30"
         },
         "occurrence_count": 2,
@@ -519,7 +519,7 @@
           "decision": "retain_with_owner",
           "linked_issue": "#5568",
           "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and retained under explicit owner governance for #5568 non-composite residual clusters.",
+          "rationale": "Shared JSON Schema $defs property bags are intentionally duplicated across pipeline config schemas and retained under explicit architecture ownership for #5568 non-composite residual.",
           "review_date": "2026-09-30"
         },
         "occurrence_count": 2,
@@ -575,7 +575,7 @@
           "decision": "retain_with_owner",
           "linked_issue": "#5568",
           "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and retained under explicit owner governance for #5568 non-composite residual clusters.",
+          "rationale": "Shared JSON Schema $defs property bags are intentionally duplicated across pipeline config schemas and retained under explicit architecture ownership for #5568 non-composite residual.",
           "review_date": "2026-09-30"
         },
         "occurrence_count": 2,
@@ -603,7 +603,7 @@
           "decision": "retain_with_owner",
           "linked_issue": "#5568",
           "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and retained under explicit owner governance for #5568 non-composite residual clusters.",
+          "rationale": "Shared JSON Schema $defs property bags are intentionally duplicated across pipeline config schemas and retained under explicit architecture ownership for #5568 non-composite residual.",
           "review_date": "2026-09-30"
         },
         "occurrence_count": 2,
