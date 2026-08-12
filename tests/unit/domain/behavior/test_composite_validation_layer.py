@@ -61,12 +61,8 @@ def test_structural_validation_reports_non_dict_and_missing_required_fields() ->
     )
 
     codes = [issue.code for issue in result.issues]
-    assert codes == [
-        IssueCode.CMP_STR_SCHEMA_001,
-        IssueCode.CMP_STR_CONFIG_002,
-        IssueCode.CMP_STR_CONFIG_002,
-        IssueCode.CMP_STR_CONFIG_002,
-    ]
+    # Non-dict payload fails closed immediately (CR-20260811-A-S01-domain-behavior-035).
+    assert codes == [IssueCode.CMP_STR_SCHEMA_001]
 
 
 def test_deep_preflight_reports_invalid_sections() -> None:

@@ -148,16 +148,22 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
         error_message = str(error) if isinstance(error, Exception) else error
         ended_at = completed_at
 
-        self._stages.append(
-            StageResult(
-                stage=stage,
-                status=StageStatus.FAILED,
-                started_at=started_at,
-                completed_at=ended_at,
-                error=error_message,
-                error_type=error_type,
-            )
+        failed = StageResult(
+            stage=stage,
+            status=StageStatus.FAILED,
+            started_at=started_at,
+            completed_at=ended_at,
+            error=error_message,
+            error_type=error_type,
         )
+        # Match record_stage_success: replace RUNNING entry when present so a
+        # stage does not accumulate both RUNNING and FAILED projections.
+        if not self._replace_running_stage(stage, failed):
+            # Idempotent failure: do not append a second FAILED when the stage
+            # was already failed and no RUNNING entry remains.
+            if self._has_stage_status(stage, StageStatus.FAILED):
+                return
+            self._stages.append(failed)
         self._status = PipelineRunState.FAILED
         self._ended_at = ended_at
         self._events.append(

@@ -162,6 +162,14 @@ class _BatchMutationMixin(_BatchReadModelMixin):
         position = record.index - self._start_index
         if position < 0 or position >= len(self._records):
             raise ValueError("Record does not belong to this batch")
+        owned = self._records[position]
+        # Reject foreign records that only share an index with a batch-owned row.
+        if owned != record:
+            raise ValueError("Record does not belong to this batch")
+        # Idempotent quarantine: already-invalid owned records must not
+        # duplicate the quarantine projection or RecordQuarantined events.
+        if not owned.is_valid:
+            return owned
 
         quarantined = record.with_validation_error(error, error_code)
         self._records[position] = quarantined
