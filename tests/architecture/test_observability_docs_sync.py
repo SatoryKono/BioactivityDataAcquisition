@@ -23,6 +23,19 @@ METRICS_GUIDE_PATH = Path("docs/03-guides/metrics-monitoring.md")
 OBSERVABILITY_CONTRACT_PATH = Path("docs/04-reference/contracts/observability.md")
 GRAFANA_README_PATH = Path("grafana/README.md")
 MONITORING_INDEX_PATH = Path("docs/03-guides/dashboards/monitoring-index.md")
+OBSERVABILITY_CHECKLIST_PATH = Path(
+    "docs/05-operations/runbooks/observability-checklist.md"
+)
+
+SHIPPED_DASHBOARD_UIDS = (
+    "bioetl-control-plane-v1",
+    "bioetl-overview-v2",
+    "bioetl-runtime",
+    "bioetl-provider-health-v2",
+    "bioetl-dq-v2",
+    "bioetl-incident-v1",
+    "bioetl-run-explorer-v1",
+)
 
 
 @pytest.mark.architecture
@@ -279,3 +292,24 @@ def test_grafana_readme_health_metric_catalog_matches_canonical_label_policy() -
         "grafana/README.md must not duplicate the "
         "`bioetl_health_check_latency_seconds` metric row."
     )
+
+
+@pytest.mark.architecture
+def test_active_monitoring_docs_publish_the_seven_dashboard_contract() -> None:
+    contract = OBSERVABILITY_CONTRACT_PATH.read_text(encoding="utf-8")
+    readme = GRAFANA_README_PATH.read_text(encoding="utf-8")
+    checklist = OBSERVABILITY_CHECKLIST_PATH.read_text(encoding="utf-8")
+
+    assert "7 UIDs" in contract
+    for uid in SHIPPED_DASHBOARD_UIDS:
+        assert uid in contract
+        assert uid in readme
+
+    for retired_uid in ("bioetl-workflow-overview", "bioetl-alerts-slo"):
+        assert retired_uid in contract
+        assert "retired" in contract.lower()
+
+    assert "восемь shipped" not in readme
+    assert "6. Alerts & SLO` expose" not in checklist
+    assert "`6. Alerts & SLO` is retired" in checklist
+    assert "slot 6 is `6. Run Explorer`" in checklist

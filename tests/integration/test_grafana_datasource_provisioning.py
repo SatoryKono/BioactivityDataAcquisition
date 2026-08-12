@@ -130,9 +130,7 @@ def test_grafana_compose_pins_compatible_infinity_plugin() -> None:
     assert INFINITY_PLUGIN_VERSION in bootstrap
 
 
-def test_monitoring_images_are_pinned_and_legacy_pushgateway_datasource_is_inert() -> (
-    None
-):
+def test_monitoring_images_are_pinned_and_pushgateway_is_not_a_datasource() -> None:
     monitoring = _load_monitoring_compose()
     assert monitoring["services"]["grafana"]["image"] == (
         "grafana/grafana:12.0.0@sha256:"
@@ -152,6 +150,20 @@ def test_monitoring_images_are_pinned_and_legacy_pushgateway_datasource_is_inert
         )
     )
     assert legacy["datasources"] == []
+
+    core = yaml.safe_load(
+        Path("grafana/provisioning/datasources-core/prometheus.yml").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert [datasource["name"] for datasource in core["datasources"]] == [
+        "Prometheus"
+    ]
+    prometheus = core["datasources"][0]
+    assert prometheus["uid"] == "prometheus"
+    assert prometheus["url"] == "http://prometheus:9090"
+    assert prometheus["jsonData"]["timeInterval"] == "30s"
+    assert "pushgateway:9091" not in str(core).lower()
 
 
 def test_grafana_uses_remote_renderer_sidecar() -> None:
@@ -241,7 +253,7 @@ def test_prometheus_scrapes_remote_renderer_and_bioetl_only() -> None:
     ]
 
 
-def test_bootstrap_prunes_retired_loki_tempo_quarantine_datasources() -> None:
+def test_bootstrap_prunes_retired_and_non_query_datasources() -> None:
     """Bootstrap must delete retired datasources from persistent grafana-data volumes."""
     content = Path("grafana/scripts/bootstrap-datasources.sh").read_text(
         encoding="utf-8"
@@ -250,6 +262,7 @@ def test_bootstrap_prunes_retired_loki_tempo_quarantine_datasources() -> None:
     assert "name: Loki" in content
     assert "name: Tempo" in content
     assert "name: Quarantine Explorer" in content
+    assert "name: Pushgateway" in content
     assert "BIOETL_ENABLE_TRACING_DATASOURCES" not in content
 
 
