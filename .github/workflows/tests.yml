@@ -582,9 +582,12 @@ jobs:
 
       - name: Start local Neo4j for live audit
         env:
-          # Placeholder for compose interpolation; live audit uses local Neo4j only.
+          NEO4J_USERNAME: neo4j
+          # CI-only placeholder; live audit talks to the local compose stack.
           NEO4J_PASSWORD: ci-neo4j-live-audit
-        run: docker compose up -d neo4j
+        run: |
+          docker network create bioetl-runtime >/dev/null 2>&1 || true
+          docker compose -f docker-compose.neo4j.yml up -d neo4j
 
       - name: Wait for Neo4j HTTP health
         run: |
@@ -598,13 +601,17 @@ jobs:
           exit 1
 
       - name: Apply sync and validate live Neo4j audit
+        env:
+          NEO4J_USERNAME: neo4j
+          NEO4J_PASSWORD: ci-neo4j-live-audit
         run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory-live
 
       - name: Stop local Neo4j
         if: always()
         env:
+          NEO4J_USERNAME: neo4j
           NEO4J_PASSWORD: ci-neo4j-live-audit
-        run: docker compose down -v neo4j
+        run: docker compose -f docker-compose.neo4j.yml down -v neo4j
 
   config-schema-preflight:
     runs-on: ubuntu-latest

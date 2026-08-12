@@ -1875,6 +1875,55 @@ def _write_artifacts(
     )  # NOSONAR - path confined by resolve_output_path
 
 
+def _artifact_staleness_errors(
+    payload: dict[str, object],
+    *,
+    json_out: Path,
+    md_out: Path,
+) -> list[str]:
+    """Return errors when committed debt-governance artifacts drift from payload."""
+    errors: list[str] = []
+    expected_json = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    expected_md = render_markdown(payload)
+    if (
+        not json_out.exists()
+        or json_out.read_text(encoding="utf-8")  # NOSONAR - path confined
+        != expected_json
+    ):
+        errors.append(f"Debt governance gate JSON artifact is stale: {json_out}")
+    if (
+        not md_out.exists()
+        or md_out.read_text(encoding="utf-8")  # NOSONAR - path confined
+        != expected_md
+    ):
+        errors.append(f"Debt governance gate Markdown artifact is stale: {md_out}")
+    return errors
+
+
+def _failing_gate_errors(summary: dict[str, object], payload: dict[str, object]) -> list[str]:
+    """Return human-readable errors for currently failing debt-governance gates."""
+    fail_count = int(summary["fail_count"])
+    if fail_count <= 0:
+        return []
+    errors: list[str] = []
+    failing = summary.get("failing_gates") or []
+    detail = ", ".join(str(name) for name in failing) if failing else "unknown"
+    errors.append(
+        f"Debt governance gates have {fail_count} failing gate(s): {detail}"
+    )
+    gates = payload.get("gates")
+    if not isinstance(gates, list):
+        return errors
+    for gate in gates:
+        if not isinstance(gate, dict) or gate.get("status") != "fail":
+            continue
+        name = gate.get("name")
+        current = gate.get("current")
+        remediation = gate.get("remediation")
+        errors.append(f"  - {name}: current={current!r}; {remediation}")
+    return errors
+
+
 def _check_artifacts(
     payload: dict[str, object],
     *,
@@ -1890,37 +1939,12 @@ def _check_artifacts(
     md_out = resolve_output_path(md_out, root=base)
     errors: list[str] = []
     if compare_artifacts:
-        expected_json = json.dumps(payload, indent=2, sort_keys=True) + "\n"
-        expected_md = render_markdown(payload)
-        if (
-            not json_out.exists()
-            or json_out.read_text(encoding="utf-8")  # NOSONAR - path confined
-            != expected_json
-        ):
-            errors.append(f"Debt governance gate JSON artifact is stale: {json_out}")
-        if (
-            not md_out.exists()
-            or md_out.read_text(encoding="utf-8")  # NOSONAR - path confined
-            != expected_md
-        ):
-            errors.append(f"Debt governance gate Markdown artifact is stale: {md_out}")
+        errors.extend(
+            _artifact_staleness_errors(payload, json_out=json_out, md_out=md_out)
+        )
     summary = payload["summary"]
     assert isinstance(summary, dict)
-    if int(summary["fail_count"]) > 0:
-        failing = summary.get("failing_gates") or []
-        detail = ", ".join(str(name) for name in failing) if failing else "unknown"
-        errors.append(
-            f"Debt governance gates have {summary['fail_count']} failing gate(s): {detail}"
-        )
-        gates = payload.get("gates")
-        if isinstance(gates, list):
-            for gate in gates:
-                if not isinstance(gate, dict) or gate.get("status") != "fail":
-                    continue
-                name = gate.get("name")
-                current = gate.get("current")
-                remediation = gate.get("remediation")
-                errors.append(f"  - {name}: current={current!r}; {remediation}")
+    errors.extend(_failing_gate_errors(summary, payload))
     return errors
 
 
