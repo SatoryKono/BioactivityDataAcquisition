@@ -160,15 +160,8 @@ def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
         f"Integral score `{integral_text}`" in debt_report
         or f"architecture score `{integral_text}`" in debt_report
     )
-    # Allow for some failing gates during governance artifact refresh
-<<<<<<< HEAD
-    assert "debt-governance gates" in debt_report.lower()
-||||||| merged common ancestors
+    # Final closeout evidence must retain the passing release-gate statement.
     assert "debt-governance gates passing" in debt_report
-    assert "| `bioetl.domain.composite.config` | 0 | 42 |" in debt_report
-=======
-    assert "debt-governance gates passing" in debt_report
->>>>>>> origin/docs/rf004-final-closeout-evidence
     assert (
         "| `bioetl.domain.composite.config` | 0 | "
         f"{domain_config['test_importer_count']} |" in debt_report
