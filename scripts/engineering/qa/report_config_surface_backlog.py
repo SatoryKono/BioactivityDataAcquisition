@@ -323,6 +323,20 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
             ),
         },
     ),
+    (
+        "$defs",
+        {
+            "owner": OWNER_BIOETL_ARCHITECTURE,
+            "decision": "retain_with_owner",
+            "linked_issue": LINKED_ISSUE_5568,
+            "review_date": "2026-09-30",
+            "rationale": (
+                "Shared JSON Schema $defs property bags are intentionally "
+                "duplicated across pipeline config schemas and retained under "
+                "explicit architecture ownership for #5568 non-composite residual."
+            ),
+        },
+    ),
 )
 
 DEFAULT_DUPLICATION_CLUSTER_GOVERNANCE: dict[str, str] = {

@@ -48270,7 +48270,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-10",
-  "source_tree_sha256": "988bde088bafe571f2f103593885a105ed6542d392ce5a28c2e63c6f496bb136",
+  "source_tree_sha256": "cb5823ed33dffb407937080af270b31e28e131b5ee64364c10f994e144f79c3f",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -48428,9 +48428,9 @@
     "source_module_count": 2413,
     "status_counts": {
       "coverage_xml_missing": 0,
-      "fully_covered": 1520,
+      "fully_covered": 1522,
       "no_executable_lines": 2,
-      "partially_covered": 891,
+      "partially_covered": 889,
       "uncovered": 0,
       "unmeasured": 0
     },
