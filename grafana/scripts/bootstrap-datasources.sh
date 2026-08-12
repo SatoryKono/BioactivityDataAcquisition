@@ -136,6 +136,7 @@ deleteDatasources:
   - name: Loki
   - name: Tempo
   - name: Quarantine Explorer
+  - name: Pushgateway
   - name: BioETL Ops HTTP
     orgId: 1
 EOF
