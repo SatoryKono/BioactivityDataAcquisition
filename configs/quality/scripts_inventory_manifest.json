@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-11T18:25:40.573008+00:00",
+  "generated_at": "2026-08-12T01:06:41.287670+00:00",
   "summary": {
     "total_scripts": 598,
     "status_counts": {
@@ -797,7 +797,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py",
-          "line": 385,
+          "line": 382,
           "source_group": "tests",
           "text": "assert \"scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh\" in backlog_text"
         }
