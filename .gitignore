@@ -586,7 +586,6 @@ scripts/docs/build/**/*.pyc
 /src/memory/graph/indexes/
 /src/memory/timeline/events/
 data/2026-07-03_20-21-59.gif
-.github/workflows/docs.yml
 .xml
 /_loop_*
 
