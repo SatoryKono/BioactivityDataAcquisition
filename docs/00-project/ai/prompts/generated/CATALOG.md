@@ -31,8 +31,9 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.audit.tests-cycle` | `library/audit/tests-cycle.md` | Cyclic audit of the test system — inventory, gates, flaky, fix, re-verify |
 | `prompt.audit.docs-cycle` | `library/audit/docs-cycle.md` | Cyclic documentation audit — content drift, commands, links, fix, re-verify |
 | `prompt.audit.tech-debt-cycle` | `library/audit/tech-debt-cycle.md` | Cyclic technical-debt audit — register, trend, paydown, residual re-check |
-| `prompt.audit.cyclic-pack` | `library/audit/cyclic-pack.md` | Pack of three cyclic domain audits — tests, docs, tech-debt (paste routing) |
+| `prompt.audit.cyclic-pack` | `library/audit/cyclic-pack.md` | Pack of cyclic domain audits — tests, docs, tech-debt, repo hygiene |
 | `prompt.audit.repo-tree` | `library/audit/repo-tree.md` | Repository tree and root hygiene audit against allowlist |
+| `prompt.audit.repo-tree-cycle` | `library/audit/repo-tree-cycle.md` | Cyclic repository hygiene audit — root allowlist, clutter, ignore, fix, re-verify |
 | `prompt.audit.github-actions` | `library/audit/github-actions.md` | GitHub Actions supply-chain and correctness audit |
 | `prompt.audit.agents-runtime` | `library/audit/agents-runtime.md` | Audit AI agent instructions, skills, and agent-related scripts |
 | `prompt.audit.diagrams` | `library/audit/diagrams.md` | Audit version-controlled diagrams and render scripts |
@@ -102,6 +103,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.audit.tech-debt-cycle` | operator-paste | active | `library/audit/tech-debt-cycle.md` |
 | `prompt.audit.cyclic-pack` | operator-paste | active | `library/audit/cyclic-pack.md` |
 | `prompt.audit.repo-tree` | operator-paste | active | `library/audit/repo-tree.md` |
+| `prompt.audit.repo-tree-cycle` | operator-paste | active | `library/audit/repo-tree-cycle.md` |
 | `prompt.audit.github-actions` | operator-paste | active | `library/audit/github-actions.md` |
 | `prompt.audit.agents-runtime` | operator-paste | active | `library/audit/agents-runtime.md` |
 | `prompt.audit.diagrams` | operator-paste | active | `library/audit/diagrams.md` |

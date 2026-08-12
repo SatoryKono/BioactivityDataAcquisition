@@ -14,19 +14,20 @@ related_ssot:
   - docs/00-project/ai/prompts/library/audit/orchestrator.md
   - docs/00-project/ai/prompts/library/audit/dual-agent-cycle.md
 tags: [audit, cycle, pack, operator]
-summary: Pack of three cyclic domain audits — tests, docs, tech-debt (paste routing)
+summary: Pack of cyclic domain audits — tests, docs, tech-debt, repo hygiene
 max_body_lines: 120
 ---
 
-# Cyclic audit pack (tests / docs / tech-debt)
+# Cyclic audit pack (tests / docs / tech-debt / repo hygiene)
 
-Три **готовых** циклических аудита. Каждая строка — отдельный paste card.
+Четыре **готовых** циклических аудита. Каждая строка — отдельный paste card.
 
 | # | Domain | Card | Domain method | Artifacts |
 | --- | --- | --- | --- | --- |
 | 1 | Тесты | `prompt.audit.tests-cycle` → [tests-cycle.md](tests-cycle.md) | `prompt.audit.tests-system` | `reports/audit-runs/<run_id>/` |
 | 2 | Документация | `prompt.audit.docs-cycle` → [docs-cycle.md](docs-cycle.md) | `prompt.audit.docs-content` | same |
 | 3 | Техдолг | `prompt.audit.tech-debt-cycle` → [tech-debt-cycle.md](tech-debt-cycle.md) | `prompt.audit.tech-debt` | same |
+| 4 | Гигиена репо | `prompt.audit.repo-tree-cycle` → [repo-tree-cycle.md](repo-tree-cycle.md) | `prompt.audit.repo-tree` | same |
 
 ## Shared defaults (operator full-run)
 
@@ -59,7 +60,8 @@ Tests/tech-debt cards ignore it if unused. Override ALLOW_* only to *restrict*.
 ```text
 Use prompt.audit.orchestrator with:
   N=10
-  AUDIT_PROMPT_SOURCE=prompt.audit.tests-system   # or docs-content / tech-debt
+  AUDIT_PROMPT_SOURCE=prompt.audit.tests-system
+    # or docs-content / tech-debt / repo-tree
   SCOPE=<paths>
   MODE=full
   INCLUDE_PIPELINE=true
@@ -74,7 +76,8 @@ Use prompt.audit.orchestrator with:
 ```text
 Use prompt.audit.dual-agent-cycle with:
   OUTER_CYCLES=10
-  AUDIT_PROMPT_SOURCE=prompt.audit.tests-system   # or docs-content / tech-debt
+  AUDIT_PROMPT_SOURCE=prompt.audit.tests-system
+    # or docs-content / tech-debt / repo-tree
   SCOPE=<paths>
   MODE=full
   INCLUDE_PIPELINE=true
@@ -91,6 +94,8 @@ Use prompt.audit.dual-agent-cycle with:
 | --- | --- |
 | `prompt.tests.cycle` | **Run** pytest loop (baseline → fix → retest) |
 | `prompt.audit.tests-cycle` | **Audit** the test *system* (lanes, flaky, gates) |
+| `prompt.audit.repo-tree` | One-shot root/tree hygiene audit |
+| `prompt.audit.repo-tree-cycle` | **Cyclic** root/tree hygiene (N loops + fix/PR) |
 | `prompt.audit.grok-cycle` | Generic one-cycle meta audit (any SCOPE) |
 | `prompt.audit.orchestrator` | Generic N-loop shell (needs AUDIT_PROMPT_SOURCE) |
 

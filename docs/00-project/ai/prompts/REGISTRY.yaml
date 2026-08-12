@@ -274,7 +274,7 @@ entries:
     status: active
     class: operator-paste
     tags: [audit, cycle, pack, operator]
-    summary: Pack of three cyclic domain audits — tests, docs, tech-debt (paste routing)
+    summary: Pack of cyclic domain audits — tests, docs, tech-debt, repo hygiene
 
   - id: prompt.audit.repo-tree
     path: library/audit/repo-tree.md
@@ -282,6 +282,13 @@ entries:
     class: operator-paste
     tags: [audit, repo, hygiene, root, operator]
     summary: Repository tree and root hygiene audit against allowlist
+
+  - id: prompt.audit.repo-tree-cycle
+    path: library/audit/repo-tree-cycle.md
+    status: active
+    class: operator-paste
+    tags: [audit, repo, hygiene, root, cycle, operator]
+    summary: Cyclic repository hygiene audit — root allowlist, clutter, ignore, fix, re-verify
 
   - id: prompt.audit.github-actions
     path: library/audit/github-actions.md
