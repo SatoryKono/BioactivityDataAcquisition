@@ -8,11 +8,13 @@ See ADR-026 for architectural decisions.
 
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
 from enum import StrEnum
 
-from .config_validators import require_non_empty
+from bioetl.domain.composite.aggregation_filters import (
+    _validate_aggregation_filter_condition,
+)
+from bioetl.domain.composite.config_validators import require_non_empty
 
 
 class AggregationFunction(StrEnum):
@@ -119,69 +121,6 @@ def _coerce_text_tuple(value: object, name: str) -> tuple[str, ...]:
     return normalized
 
 
-_FILTER_FIELD_RE = re.compile(
-    r"^[A-Za-z_]\w*$"
-)  # NOSONAR - requires non-digit first char, \w+ alone is insufficient
-
-
-def _require_filter_field(field: str) -> None:
-    if not _FILTER_FIELD_RE.fullmatch(field):
-        raise ValueError(
-            f"aggregation filter_condition has invalid field name: {field!r}"
-        )
-
-
-def _validate_null_filter(text: str, upper: str, token: str) -> bool:
-    if token not in upper:
-        return False
-    field = text[: upper.find(token)].strip()
-    _require_filter_field(field)
-    return True
-
-
-def _try_comparison_operator(text: str, operator: str) -> bool:
-    if operator not in text:
-        return False
-    left, right = text.split(operator, 1)
-    _require_filter_field(left.strip())
-    if not right.strip():
-        raise ValueError("aggregation filter_condition comparison requires a value")
-    return True
-
-
-def _validate_comparison_filter(text: str) -> bool:
-    if _try_comparison_operator(text, " == "):
-        return True
-    return _try_comparison_operator(text, " != ")
-
-
-def _validate_known_filter_forms(text: str, upper: str) -> bool:
-    if _validate_null_filter(text, upper, " IS NOT NULL"):
-        return True
-    if _validate_null_filter(text, upper, " IS NULL"):
-        return True
-    return _validate_comparison_filter(text)
-
-
-def _validate_aggregation_filter_condition(condition: str) -> None:
-    """Fail closed on empty or unsupported aggregation filter expressions.
-
-    Supported grammar (aligned with application aggregator parser):
-    - ``field IS NULL`` / ``field IS NOT NULL``
-    - ``field == value`` / ``field != value`` (value may be quoted)
-    """
-    text = condition.strip()
-    if not text:
-        raise ValueError("aggregation filter_condition cannot be empty")
-    if _validate_known_filter_forms(text, text.upper()):
-        return
-    raise ValueError(
-        "aggregation filter_condition uses unsupported syntax; "
-        "expected IS NULL / IS NOT NULL / == / != forms, "
-        f"got {condition!r}"
-    )
-
-
 @dataclass(frozen=True, slots=True)
 class AggregationFieldSpec:
     """Specification for a single aggregated field.
@@ -224,6 +163,26 @@ class AggregationFieldSpec:
         return self.output_field or self.source_field
 
 
+def _coerce_aggregation_fields(fields: object) -> tuple[AggregationFieldSpec, ...]:
+    if isinstance(fields, str) or not isinstance(fields, list | tuple):
+        raise ValueError(
+            "aggregation.fields must be a sequence of AggregationFieldSpec "
+            f"entries, got {type(fields).__name__}"
+        )
+    return tuple(
+        AggregationFieldSpec(**f) if isinstance(f, dict) else f for f in fields
+    )
+
+
+def _require_field_specs(fields: tuple[AggregationFieldSpec, ...]) -> None:
+    for index, entry in enumerate(fields):
+        if not isinstance(entry, AggregationFieldSpec):
+            raise ValueError(
+                "aggregation.fields entries must be AggregationFieldSpec, "
+                f"got {type(entry).__name__} at index {index}"
+            )
+
+
 @dataclass(frozen=True, slots=True)
 class AggregationConfig:
     """Configuration for 1:M enricher aggregation.
@@ -243,12 +202,7 @@ class AggregationConfig:
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
-        if isinstance(self.fields, list | tuple):
-            converted = tuple(
-                AggregationFieldSpec(**f) if isinstance(f, dict) else f
-                for f in self.fields
-            )
-            object.__setattr__(self, "fields", converted)
+        object.__setattr__(self, "fields", _coerce_aggregation_fields(self.fields))
         object.__setattr__(
             self,
             "order_by",
@@ -261,6 +215,7 @@ class AggregationConfig:
         require_non_empty(self.group_by, "aggregation group_by")
         if not self.fields:
             raise ValueError("aggregation.fields cannot be empty")
+        _require_field_specs(self.fields)
 
 
 __all__ = [

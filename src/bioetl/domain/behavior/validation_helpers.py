@@ -15,7 +15,9 @@ def validate_data(data: object) -> None:
         ValueError: If data is None or an empty collection/string.
     """
     if data is None or (
-        isinstance(data, (str, bytes, bytearray, list, tuple, set, dict, range))
+        isinstance(
+            data, (str, bytes, bytearray, list, tuple, set, frozenset, dict, range)
+        )
         and len(data) == 0
     ):
         raise ValueError("Data is empty")

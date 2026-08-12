@@ -184,8 +184,9 @@ def normalize_affiliation_string(text: str) -> str | None:
     """
     if not text:
         return None
-    normalized = _HTML_TAG_PATTERN.sub("", text)
-    normalized = unescape(normalized)
+    # Unescape first so entity-encoded markup (e.g. &lt;b&gt;) is stripped too.
+    normalized = unescape(text)
+    normalized = _HTML_TAG_PATTERN.sub("", normalized)
     normalized = _WHITESPACE_PATTERN.sub(" ", normalized)
     normalized = _CONTROL_CHARS_PATTERN.sub("", normalized)
     normalized = unicodedata.normalize("NFC", normalized)
