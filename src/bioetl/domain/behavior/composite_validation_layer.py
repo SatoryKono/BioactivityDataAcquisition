@@ -235,7 +235,7 @@ class CompositeValidator:
             ]
         try:
             aggregation_config = _convert_to_aggregation_config(config)
-        except (KeyError, ValueError) as exc:
+        except (KeyError, TypeError, ValueError) as exc:
             return [
                 _create_issue(
                     IssueCode.CMP_PF_AGG_001,
@@ -259,7 +259,17 @@ class CompositeValidator:
         precheck_errors = self._precheck_cross_validation_config(config)
         if precheck_errors:
             return precheck_errors
-        cross_val_config = _convert_to_cross_validation_config(config)
+        try:
+            cross_val_config = _convert_to_cross_validation_config(config)
+        except (KeyError, TypeError, ValueError) as exc:
+            return [
+                _create_issue(
+                    IssueCode.CMP_PF_CV_002,
+                    ValidationSeverity.BLOCKER,
+                    f"Invalid cross-validation config format: {exc!s}",
+                    {"config": config},
+                )
+            ]
         validation_result: ValidationResult = (
             self._cross_validation_validator.validate_cross_validation_config(
                 cross_val_config, source_names

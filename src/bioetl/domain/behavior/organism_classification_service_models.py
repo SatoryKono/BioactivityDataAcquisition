@@ -59,6 +59,11 @@ class ClassificationStats:
                 "cellularity bucket counts must sum to total "
                 f"(got {bucket_sum} != {self.total})"
             )
+        if self.conflict_count > self.total:
+            raise ValueError(
+                "conflict_count cannot exceed total "
+                f"(got {self.conflict_count} > {self.total})"
+            )
 
     @property
     def resolved_count(self) -> int:
