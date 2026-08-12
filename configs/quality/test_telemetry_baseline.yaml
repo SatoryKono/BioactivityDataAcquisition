@@ -2,11 +2,11 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: main
-refreshed_at_utc: '2026-08-11T17:14:19.960361+00:00'
+refreshed_at_utc: '2026-08-12T00:36:24.929725+00:00'
 refresh_status: captured
-source_commit: a4a95fd6396fc2f00319d2ddc10de4dab09be825
+source_commit: 4e748a9053edac03a7cdef815d521160f9caabdc
 source_run_id: github-31515014563-1
-source_tree_sha256: 0c161e0594be0095e96ec7e6f923973629045895d68553f4ae840ef054390b0f
+source_tree_sha256: d71e754ed17df99e6a01e370da69933e7908f2ce968e147175844341e4a3813a
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
@@ -151,6 +151,19 @@ duration_telemetry:
       reason: benchmark-owned non-blocking workflow
     - lane: manual-e2e
       reason: operator-triggered external-runtime lane
+    lane_wall_time_s:
+      contract-confidence: 115
+      integration: 116
+      memory-tests: 37
+      repo-backed-unit: 198
+      security: 37
+      test-fast: 179
+      track-d-gates: 44
+      unit-application: 94
+      unit-domain: 197
+      unit-infrastructure: 121
+      unit-other: 106
+      unit-scripts-tooling: 208
     junit_source_count: 12
     junit_sources:
     - junit-contract-confidence.xml
