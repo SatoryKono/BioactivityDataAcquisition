@@ -72,21 +72,28 @@ class EntityIdentityGenerator:
     ) -> None:
         """Initialize service with optional default content-hash field policy."""
         # Snapshot caller sets so later mutations cannot change hash policy.
+        # None means "not provided"; empty set is an explicit empty policy.
         self._content_hash_include_fields = (
             set(content_hash_include_fields)
             if content_hash_include_fields is not None
             else None
         )
-        self._content_hash_exclude_fields = set(content_hash_exclude_fields or ())
+        self._content_hash_exclude_fields = (
+            set(content_hash_exclude_fields)
+            if content_hash_exclude_fields is not None
+            else None
+        )
 
     def has_explicit_content_hash_policy(self) -> bool:
         """Return True when instance-level include/exclude hash field policy is set.
 
         Used by transformers to decide whether contract-level legacy hash
         scoping should be skipped in favor of the identity collaborator policy.
+        Empty sets still count as explicit policy (checked via ``is not None``).
         """
-        return bool(self._content_hash_include_fields) or bool(
-            self._content_hash_exclude_fields
+        return (
+            self._content_hash_include_fields is not None
+            or self._content_hash_exclude_fields is not None
         )
 
     def compute_entity_id(
@@ -169,7 +176,7 @@ class EntityIdentityGenerator:
             if include_fields is not None
             else self._content_hash_include_fields
         )
-        resolved_exclude_fields = self._content_hash_exclude_fields | (
+        resolved_exclude_fields = (self._content_hash_exclude_fields or set()) | (
             exclude_fields or set()
         )
         return generate_content_hash(
@@ -213,7 +220,7 @@ class EntityIdentityGenerator:
             if include_fields is not None
             else self._content_hash_include_fields
         )
-        resolved_exclude_fields = self._content_hash_exclude_fields | (
+        resolved_exclude_fields = (self._content_hash_exclude_fields or set()) | (
             exclude_fields or set()
         )
         return normalize_for_hash(
