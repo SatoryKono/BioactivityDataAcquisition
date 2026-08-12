@@ -131,9 +131,7 @@ def _comparison_method(raw: object) -> ComparisonMethod:
     return ComparisonMethod(str(raw if raw is not None else "exact"))
 
 
-def _one_field_comparison_spec(
-    field: object, *, path: str
-) -> FieldComparisonSpec:
+def _one_field_comparison_spec(field: object, *, path: str) -> FieldComparisonSpec:
     if not isinstance(field, dict):
         raise ValueError(
             f"{path} entries must be dictionaries, got {type(field).__name__}"
@@ -155,17 +153,13 @@ def _field_comparison_specs(
             f"{path} must be a sequence of dictionaries, "
             f"got {type(fields_raw).__name__}"
         )
-    return tuple(
-        _one_field_comparison_spec(field, path=path) for field in fields_raw
-    )
+    return tuple(_one_field_comparison_spec(field, path=path) for field in fields_raw)
 
 
 def _one_enricher_pairing(raw: object, *, index: int) -> EnricherFieldPairing:
     path = f"cross_validation.enricher_pairings[{index}]"
     if not isinstance(raw, dict):
-        raise ValueError(
-            f"{path} must be a dictionary, got {type(raw).__name__}"
-        )
+        raise ValueError(f"{path} must be a dictionary, got {type(raw).__name__}")
     return EnricherFieldPairing(
         enricher_pipeline=str(raw.get("enricher_pipeline") or ""),
         fields=_field_comparison_specs(
