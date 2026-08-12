@@ -151,6 +151,14 @@ class UniProtProteinGoldSchema(StrictGoldContractSchema):
     )  # Swiss-Prot vs TrEMBL
 
 
+UNIPROT_MAPPING_STATUS_VALUES: tuple[str, ...] = (
+    "found",
+    "not_found",
+    "error",
+    "multiple",
+)
+
+
 class UniProtIDMappingGoldSchema(StrictGoldContractSchema):
     """Schema for UniProt ID Mapping in Gold layer.
 
@@ -172,7 +180,10 @@ class UniProtIDMappingGoldSchema(StrictGoldContractSchema):
     uniprot_accession: Series[str] = pa.Field(nullable=True)
 
     # Mapping status: 'found', 'not_found', 'error', 'multiple'
-    mapping_status: Series[str] = pa.Field(nullable=False)
+    mapping_status: Series[str] = pa.Field(
+        nullable=False,
+        isin=list(UNIPROT_MAPPING_STATUS_VALUES),
+    )
 
     # UniProt entry metadata
     uniprot_entry_name: Series[str] = pa.Field(nullable=True)
@@ -191,6 +202,7 @@ class UniProtIDMappingGoldSchema(StrictGoldContractSchema):
 
 
 __all__ = [
+    "UNIPROT_MAPPING_STATUS_VALUES",
     "UniProtIDMappingGoldSchema",
     "UniProtProteinGoldSchema",
 ]
