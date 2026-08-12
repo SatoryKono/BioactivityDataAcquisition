@@ -292,10 +292,10 @@
         "block_path": "$defs.ProviderConfigYaml",
         "fingerprint": "b22ede9cd1f9",
         "governance": {
-          "decision": "review_required",
+          "decision": "retain_with_owner",
           "linked_issue": "#5568",
           "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
+          "rationale": "Exact structured config duplication is measured and retained under explicit owner governance for #5568 non-composite residual clusters.",
           "review_date": "2026-09-30"
         },
         "occurrence_count": 2,
@@ -320,10 +320,10 @@
         "block_path": "$defs.PaginationConfig",
         "fingerprint": "62f4ba00e2d0",
         "governance": {
-          "decision": "review_required",
+          "decision": "retain_with_owner",
           "linked_issue": "#5568",
           "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
+          "rationale": "Exact structured config duplication is measured and retained under explicit owner governance for #5568 non-composite residual clusters.",
           "review_date": "2026-09-30"
         },
         "occurrence_count": 2,
@@ -348,10 +348,10 @@
         "block_path": "$defs.FallbackPolicyYamlConfig",
         "fingerprint": "7a389f06de06",
         "governance": {
-          "decision": "review_required",
+          "decision": "retain_with_owner",
           "linked_issue": "#5568",
           "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
+          "rationale": "Exact structured config duplication is measured and retained under explicit owner governance for #5568 non-composite residual clusters.",
           "review_date": "2026-09-30"
         },
         "occurrence_count": 2,
@@ -376,10 +376,10 @@
         "block_path": "$defs.HttpClientConfig",
         "fingerprint": "7030d1e7ccf8",
         "governance": {
-          "decision": "review_required",
+          "decision": "retain_with_owner",
           "linked_issue": "#5568",
           "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
+          "rationale": "Exact structured config duplication is measured and retained under explicit owner governance for #5568 non-composite residual clusters.",
           "review_date": "2026-09-30"
         },
         "occurrence_count": 2,
@@ -516,10 +516,10 @@
         "block_path": "$defs.SourceCircuitBreakerYamlConfig",
         "fingerprint": "d4f4a1b7ba60",
         "governance": {
-          "decision": "review_required",
+          "decision": "retain_with_owner",
           "linked_issue": "#5568",
           "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
+          "rationale": "Exact structured config duplication is measured and retained under explicit owner governance for #5568 non-composite residual clusters.",
           "review_date": "2026-09-30"
         },
         "occurrence_count": 2,
@@ -572,10 +572,10 @@
         "block_path": "$defs.BaseRateLimitConfig",
         "fingerprint": "d5996c79d68a",
         "governance": {
-          "decision": "review_required",
+          "decision": "retain_with_owner",
           "linked_issue": "#5568",
           "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
+          "rationale": "Exact structured config duplication is measured and retained under explicit owner governance for #5568 non-composite residual clusters.",
           "review_date": "2026-09-30"
         },
         "occurrence_count": 2,
@@ -600,10 +600,10 @@
         "block_path": "$defs.BaseRateLimitValues",
         "fingerprint": "f270cb8e6309",
         "governance": {
-          "decision": "review_required",
+          "decision": "retain_with_owner",
           "linked_issue": "#5568",
           "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
+          "rationale": "Exact structured config duplication is measured and retained under explicit owner governance for #5568 non-composite residual clusters.",
           "review_date": "2026-09-30"
         },
         "occurrence_count": 2,
