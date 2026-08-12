@@ -636,3 +636,7 @@ _fail_*.txt
 .agents/
 /data/debug_exports
 /data/debug_exports
+
+# Local envrc for Grok/direnv MCP key load (machine-local)
+.envrc
+/chrome-headless-shell
