@@ -59,6 +59,7 @@ of procedures. Domain method: `prompt.audit.docs-content`. Loop shell:
 Build/MkDocs/publish pipeline → `prompt.audit.docs-pipeline` (default via
 `INCLUDE_PIPELINE=true`).
 
+
 Default **`N=10`**, **`MODE=full`**, **`INCLUDE_PIPELINE=true`**, все **`ALLOW_*=true`**.
 
 ## Params
