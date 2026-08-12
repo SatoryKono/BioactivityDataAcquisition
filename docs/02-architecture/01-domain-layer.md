@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-06'
+  Last verified: '2026-08-12'
 
 ______________________________________________________________________
 
@@ -52,9 +52,12 @@ ______________________________________________________________________
 
 `src/bioetl/domain/ports/` содержит `Protocol`-контракты для Ports & Adapters:
 
-Сейчас пакет включает **74 Python modules** (65 port modules + 9 package `__init__.py`
-facades) во вложенной структуре. На корневом уровне пакета — **19** flat modules
-(включая фасадный `__init__.py`). Полный module catalog:
+Сейчас пакет включает **76** Python files (**67** port modules + **9** package
+`__init__.py` facades) во вложенной структуре
+(`reports/quality/domain-ports-inventory.json`: `port_module_files=67`,
+`scanned_python_files=76`, `port_protocol_classes=86`). На корневом уровне
+пакета — **21** `*.py` files (19 public port modules + `__init__.py` +
+`_facade_support.py`). Полный module catalog:
 [Domain Ports](../04-reference/domain/ports.md).
 
 - config/ (3 port modules)
@@ -68,10 +71,13 @@ facades) во вложенной структуре. На корневом ур�
 - flat root modules: `adr.py`, `audit.py`, `data_normalization.py`, `data_source.py`,
   `delta_reader.py`, `export.py`, `filtering.py`, `health_check.py`, `idmapping.py`,
   `logger_port.py`, `pii.py`, `protein_classification.py`, `publication_strategy.py`,
-  `resilience.py`, `serialization.py`, `storage_maintenance.py`,
+  `resilience.py`, `serialization.py`, `stage_accounting.py`,
+  `storage_maintenance.py`,
   `workflow_foreign_key_reconciliation.py`, `workflow_row_reconciliation.py`
+  (plus private `_facade_support.py` and package `__init__.py`)
 
-Корневое число **19** синхронизируется архитектурным тестом `test_ports_count_matches_docs`.
+Корневое число **21** (`Path.glob("*.py")`) синхронизируется архитектурным
+тестом `test_ports_count_matches_docs`.
 
 ### 2.1.1. Дополнительные порты
 
