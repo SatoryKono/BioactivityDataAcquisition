@@ -64,7 +64,8 @@ docs/00-project/ai/prompts/
 | `prompt.audit.tests-cycle` | [library/audit/tests-cycle.md](library/audit/tests-cycle.md) | Cyclic **tests-system** audit (v1.0) |
 | `prompt.audit.docs-cycle` | [library/audit/docs-cycle.md](library/audit/docs-cycle.md) | Cyclic **docs content** audit (v1.0) |
 | `prompt.audit.tech-debt-cycle` | [library/audit/tech-debt-cycle.md](library/audit/tech-debt-cycle.md) | Cyclic **tech-debt** audit (v1.0) |
-| `prompt.audit.cyclic-pack` | [library/audit/cyclic-pack.md](library/audit/cyclic-pack.md) | Pack routing: tests / docs / debt cycles |
+| `prompt.audit.repo-tree-cycle` | [library/audit/repo-tree-cycle.md](library/audit/repo-tree-cycle.md) | Cyclic **repo hygiene** audit (v1.0) |
+| `prompt.audit.cyclic-pack` | [library/audit/cyclic-pack.md](library/audit/cyclic-pack.md) | Pack routing: tests / docs / debt / hygiene cycles |
 | `prompt.audit.role-auditor` | [library/audit/role-auditor.md](library/audit/role-auditor.md) | Dual-agent Auditor (A) duties |
 | `prompt.audit.role-planner` | [library/audit/role-planner.md](library/audit/role-planner.md) | Dual-agent Planner (B) duties |
 | `prompt.tests.speed-optimization` | [library/tests/speed-optimization-loop.md](library/tests/speed-optimization-loop.md) | Test speed loop |
@@ -105,7 +106,7 @@ Archive megaprompts (opt-in only):
 | One meta cycle | `prompt.audit.grok-cycle` |
 | N-iteration audit→issues→fix→CI (single agent) | `prompt.audit.orchestrator` (`N=1` default; ALLOW_* false) |
 | Dual-agent cycle + external audit prompt + CR + peer review | `prompt.audit.dual-agent-cycle` (`OUTER_CYCLES=1`; ALLOW_* false) |
-| Cyclic tests / docs / tech-debt pack | `prompt.audit.cyclic-pack` → domain `*-cycle` cards |
+| Cyclic tests / docs / tech-debt / repo hygiene pack | `prompt.audit.cyclic-pack` → domain `*-cycle` cards |
 | Issue/PR closeout | `prompt.closeout.grok` |
 
 ### Dual-agent cyclic audit

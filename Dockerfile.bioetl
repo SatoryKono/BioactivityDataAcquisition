@@ -5,17 +5,43 @@ FROM python@sha256:c3d81d25b3154142b0b42eb1e61300024426268edeb5b5a26dd7ddf64d9da
 
 WORKDIR /app
 
+# Network-resilient install knobs for Docker Desktop / flaky registry paths.
+# Parallel cutover builds without these timeouts hang or fail mid-pip/uv.
+ENV PIP_DEFAULT_TIMEOUT=180 \
+    PIP_RETRIES=10 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    UV_HTTP_TIMEOUT=300 \
+    UV_CONCURRENT_DOWNLOADS=4 \
+    UV_LINK_MODE=copy \
+    UV_NO_PROGRESS=1
+
 # Install build dependencies and uv.
 # Debian security packages track moving distro revisions (no stable =version pins).
+# Prefer the official uv installer (binary, no sdist); fall back to pip with
+# explicit timeout/retries if the installer is unreachable.
 # hadolint ignore=DL3008
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         build-essential \
         ca-certificates \
+        curl \
         libffi-dev \
         libssl-dev \
     && rm -rf /var/lib/apt/lists/* \
-    && pip install --only-binary=:all: --no-cache-dir uv==0.11.26
+    && ( \
+        curl -fsSL --retry 5 --retry-delay 2 --retry-all-errors \
+            --connect-timeout 30 --max-time 180 \
+            "https://astral.sh/uv/0.11.26/install.sh" \
+            | sh \
+        && ln -sf /root/.local/bin/uv /usr/local/bin/uv \
+    ) || ( \
+        echo "uv official installer failed; falling back to pip" \
+        && python -m pip install --upgrade --no-cache-dir \
+            --default-timeout=180 --retries=10 pip \
+        && python -m pip install --only-binary=:all: --no-cache-dir \
+            --default-timeout=180 --retries=10 uv==0.11.26 \
+    ) \
+    && uv --version
 
 # Copy package metadata and source required by setuptools/uv build resolution.
 COPY pyproject.toml uv.lock ./
@@ -23,12 +49,12 @@ COPY src/ ./src/
 # Lockfile-backed third-party install without sdist/setup scripts (Sonar docker:S8541).
 # Local project: build a wheel, then install that binary artifact pinned by pyproject version.
 RUN printf '# BioETL\n' > README.md \
-    && UV_NO_BUILD=1 uv sync --no-dev --frozen --no-build --no-install-project \
+    && UV_NO_BUILD=1 UV_HTTP_TIMEOUT=300 uv sync --no-dev --frozen --no-build --no-install-project \
         --directory /app \
-    && uv build --wheel --out-dir /tmp/bioetl-wheels --directory /app \
+    && UV_HTTP_TIMEOUT=300 uv build --wheel --out-dir /tmp/bioetl-wheels --directory /app \
     && BIOETL_VERSION="$(python -c "import tomllib; \
 print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")" \
-    && uv pip install --python /app/.venv/bin/python --no-deps \
+    && UV_HTTP_TIMEOUT=300 uv pip install --python /app/.venv/bin/python --no-deps \
         --only-binary :all: --no-index \
         --find-links=/tmp/bioetl-wheels "bioetl==${BIOETL_VERSION}" \
     && rm -rf /tmp/bioetl-wheels
