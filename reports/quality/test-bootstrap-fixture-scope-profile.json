@@ -8,7 +8,7 @@
   "command": ".venv/bin/python -m pytest tests/unit/composition/bootstrap -q --durations=10 --tb=short",
   "result": {
     "status": "pass",
-    "test_count": 394,
+    "test_count": 393,
     "test_file_count": 44,
     "bootstrap_reference_count": 939,
     "local_conftest_present": true,
@@ -25,29 +25,29 @@
   },
   "slowest_durations": [
     {
-      "seconds": 2.94,
-      "phase": "setup",
-      "nodeid": "tests/unit/composition/bootstrap/test_bootstrap_cache_fixtures.py::test_cached_bootstrap_metadata_is_immutable_and_reusable"
-    },
-    {
-      "seconds": 1.8,
+      "seconds": 9.92,
       "phase": "call",
-      "nodeid": "tests/unit/composition/bootstrap/runtime/test_composite_helpers.py::TestBuildFallbackMapping::test_returns_mapping_when_title_in_join_keys"
+      "nodeid": "tests/unit/composition/bootstrap/test_bootstrap_entrypoints.py::TestBootstrapPipeline::test_bootstrap_pipeline_creates_runner_without_starting_server"
     },
     {
-      "seconds": 1.1,
-      "phase": "call",
-      "nodeid": "tests/unit/composition/bootstrap/runtime/test_composite_helpers.py::TestBuildFallbackMapping::test_returns_none_when_title_not_in_join_keys"
-    },
-    {
-      "seconds": 0.57,
+      "seconds": 0.9,
       "phase": "setup",
       "nodeid": "tests/unit/composition/bootstrap/cli/test_config.py::TestBootstrapConfigService::test_returns_config_service"
     },
     {
-      "seconds": 0.29,
+      "seconds": 0.41,
       "phase": "call",
-      "nodeid": "tests/unit/composition/bootstrap/runtime/test_composite_config_loader.py::TestCompositeConfigColumnGroups::test_rejects_retired_column_groups_file"
+      "nodeid": "tests/unit/composition/bootstrap/test_runner_bootstrap.py::TestBootstrapPipelineRunnerService::test_bootstrap_returns_pipeline_runner_service"
+    },
+    {
+      "seconds": 0.34,
+      "phase": "call",
+      "nodeid": "tests/unit/composition/bootstrap/runtime/test_composite_control_plane_builder.py::test_build_composite_control_plane_bundle_persists_effective_config_artifact_and_hashes"
+    },
+    {
+      "seconds": 0.33,
+      "phase": "call",
+      "nodeid": "tests/unit/composition/bootstrap/runtime/test_composite_control_plane_builder.py::test_build_composite_control_plane_bundle_persists_manifest_created_when_ledger_enabled"
     }
   ],
   "fixture_scope_policy": {

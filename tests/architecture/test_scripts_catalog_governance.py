@@ -85,6 +85,65 @@ def test_scripts_catalog_caps_active_script_surface() -> None:
     assert lifecycle["active_script_count_review_by"]
 
 
+def test_temporary_scripts_require_all_governance_surfaces(tmp_path: Path) -> None:
+    """A new scripts/temp executable must fail until every surface owns it."""
+    module = _load_catalog_module()
+    temp_root = tmp_path / "scripts" / "temp"
+    temp_root.mkdir(parents=True)
+    (temp_root / "README.md").write_text("# Temporary scripts\n", encoding="utf-8")
+    (temp_root / "unregistered.py").write_text("pass\n", encoding="utf-8")
+    violations: list[str] = []
+
+    module._check_temporary_script_governance(
+        root=tmp_path,
+        scripts=[],
+        entries={},
+        violations=violations,
+    )
+
+    assert violations == [
+        "temporary script missing from inventory manifest: "
+        "scripts/temp/unregistered.py",
+        "temporary script missing lifecycle registry entry: "
+        "scripts/temp/unregistered.py",
+        "temporary script missing from scripts/temp/README.md: "
+        "scripts/temp/unregistered.py",
+    ]
+
+
+def test_temporary_scripts_reject_wrong_status_and_lifecycle(tmp_path: Path) -> None:
+    """Temp entries must use the bounded temporary classification and review date."""
+    module = _load_catalog_module()
+    temp_root = tmp_path / "scripts" / "temp"
+    temp_root.mkdir(parents=True)
+    (temp_root / "README.md").write_text(
+        "- `wrong.py` — diagnostic\n", encoding="utf-8"
+    )
+    (temp_root / "wrong.py").write_text("pass\n", encoding="utf-8")
+    relative_path = "scripts/temp/wrong.py"
+    violations: list[str] = []
+
+    module._check_temporary_script_governance(
+        root=tmp_path,
+        scripts=[{"path": relative_path, "status": "active"}],
+        entries={
+            relative_path: {
+                "decision": "legacy_manual_utility",
+                "review_by": "later",
+            }
+        },
+        violations=violations,
+    )
+
+    assert violations == [
+        "temporary script must use status=temporary_diagnostic: "
+        "scripts/temp/wrong.py (got 'active')",
+        "temporary script must use decision=temporary_diagnostic: "
+        "scripts/temp/wrong.py",
+        "temporary script review_by must be YYYY-MM-DD: scripts/temp/wrong.py",
+    ]
+
+
 def test_scripts_catalog_declares_entrypoint_surfaces() -> None:
     """Entrypoint and router surfaces must be catalogued, not implicit."""
     root = _project_root()
