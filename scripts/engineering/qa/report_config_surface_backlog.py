@@ -504,20 +504,9 @@ def _record_block_occurrence(
     )
 
 
-def _is_ignored_single_file_cluster(
-    cluster: dict[str, Any],
-    *,
-    unique_paths: set[str],
-) -> bool:
-    """True for intentional same-file mirrors that are not multi-surface debt."""
-    if len(unique_paths) != 1:
-        return False
-    block_path = str(cluster["block_path"])
-    if block_path.startswith("contracts.hash_"):
-        return True
-    if block_path.startswith("entries.scripts/"):
-        return True
-    return False
+def _is_ignored_single_file_cluster(*, unique_paths: set[str]) -> bool:
+    """True for same-file mirrors that are not cross-surface config debt."""
+    return len(unique_paths) == 1
 
 
 def _duplicate_cluster_payload(cluster: dict[str, Any]) -> dict[str, Any]:
@@ -556,7 +545,7 @@ def _select_duplicate_clusters(
         }
         if len(unique_locations) < 2:
             continue
-        if _is_ignored_single_file_cluster(cluster, unique_paths=unique_paths):
+        if _is_ignored_single_file_cluster(unique_paths=unique_paths):
             continue
         affected_files.update(entry["path"] for entry in occurrences)
         duplicate_clusters.append(_duplicate_cluster_payload(cluster))
@@ -598,6 +587,7 @@ def _build_duplication_audit() -> dict[str, Any]:
         "scope": {
             "root": DUPLICATION_SURFACE_ROOT.relative_to(ROOT).as_posix(),
             "file_suffixes": list(DUPLICATION_FILE_SUFFIXES),
+            "excluded_generated_prefixes": list(DUPLICATION_EXCLUDED_PREFIXES),
             "files_scanned": len(surface_files),
             "excluded_generated_roots": [
                 path.relative_to(ROOT).as_posix()
@@ -627,7 +617,9 @@ def _build_duplication_audit() -> dict[str, Any]:
         "notes": [
             (
                 "This audit covers structured config/contract/registry surfaces "
-                "under configs/** that JSCPD intentionally ignores."
+                "under configs/** that JSCPD intentionally ignores. Generated "
+                "JSON Schema mirrors stay governed by schema drift checks and are "
+                "excluded from the authored-config duplication debt ratchet."
             ),
             (
                 "Generated JSON Schemas are excluded because their repeated $defs "

@@ -5,9 +5,10 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-from bioetl.domain.composite.config_validators import require_non_empty
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 from bioetl.domain.immutability import freeze_fields
+
+from .config_validators import require_non_empty
 
 __all__ = [
     "ColumnGroupConfig",

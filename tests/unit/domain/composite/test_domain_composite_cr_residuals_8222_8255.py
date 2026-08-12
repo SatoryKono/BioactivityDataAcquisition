@@ -14,14 +14,14 @@ from bioetl.domain.composite.aggregation import (
 )
 from bioetl.domain.composite.config import (
     CompositeConfig,
+    CrossValidationConfig,
     DependencyConfig,
     EnricherConfig,
     MergeConfig,
     SeedConfig,
     composite_from_dict,
 )
-from bioetl.domain.composite.config_cross_validation import (
-    CrossValidationConfig,
+from tests.unit.domain.composite._config_internal_test_support import (
     _validate_cross_validation_thresholds,
     _validate_cross_validation_tolerances,
 )
