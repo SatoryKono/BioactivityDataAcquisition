@@ -5,7 +5,7 @@
 [![Code Style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
 [![Coverage](https://img.shields.io/badge/coverage-%E2%89%A585%25-brightgreen)](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/workflows/tests.yml)
-[![Version](https://img.shields.io/badge/version-6.1.0-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-6.1.0%20(unreleased)-blue)](CHANGELOG.md)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-blue)](.github/SECURITY.md)
 
 > **Canonical repository:** [SatoryKono/BioactivityDataAcquisition](https://github.com/SatoryKono/BioactivityDataAcquisition)

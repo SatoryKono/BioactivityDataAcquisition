@@ -1,6 +1,6 @@
 # Documentation Index
 
-This page exists to satisfy legacy references to `INDEX.md`.
+> **DEPRECATED**: This page exists to satisfy legacy references to `INDEX.md`. Please use [Project Map](00-project/00-map.md) instead. This file will be removed in a future update.
 
 Use the primary active documentation entry points:
 
