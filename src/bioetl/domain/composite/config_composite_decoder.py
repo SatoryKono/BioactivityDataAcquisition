@@ -4,15 +4,13 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
-
-from .config_composite_section_decoders import (
+from bioetl.domain.composite.config_composite_section_decoders import (
     build_cross_validation_config,
     build_dq_config,
     build_execution_config,
     build_lineage_config,
 )
-from .config_parsing import (
+from bioetl.domain.composite.config_parsing import (
     optional_bool,
     optional_int,
     optional_str,
@@ -24,6 +22,7 @@ from .config_parsing import (
     require_str_tuple,
     str_key_mapping,
 )
+from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 
 __all__ = ["composite_from_dict"]
 
