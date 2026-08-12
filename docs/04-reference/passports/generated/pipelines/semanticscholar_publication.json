@@ -21,7 +21,7 @@
       "run_ledger": true,
       "run_manifest": true
     },
-    "effective_config_hash": "sha256:7373e34efddd59c63b1efc82f95cb8fbc0734a21b033b6609002260010d7c95c",
+    "effective_config_hash": "sha256:c798dc076bf0a76f95af34dae72a929de07c2ea744eabfed719d3194c67ebcd7",
     "projection_profiles": [
       "batch",
       "http"
@@ -299,7 +299,7 @@
   "provenance": {
     "projector_version": "1.1.0",
     "semantic_content_hash": "sha256:f51802163632b5793e64e1038b007d92cd613d7d9f42144889cf4e822cc99dc8",
-    "source_revision": "8a5ed85d561221d6b4174ae8530740bf337f3216"
+    "source_revision": "41acba4f8791939ec4c8682d895477540e78e263"
   },
   "silver": {
     "column_projection": {
