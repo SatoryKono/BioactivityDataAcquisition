@@ -36,7 +36,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.composite.config_parsing import (
+from tests.unit.domain.composite._config_internal_test_support import (
     optional_bool,
     optional_int,
     optional_str,

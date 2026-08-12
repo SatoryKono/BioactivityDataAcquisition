@@ -14,14 +14,14 @@ See ADR-026 for architectural decisions.
 
 from __future__ import annotations
 
-from bioetl.domain.composite.aggregation import (
+from .aggregation import (
     AggregationConfig,
     AggregationFieldSpec,
     AggregationFunction,
     EnricherCardinality,
 )
-from bioetl.domain.composite.config_merge import ColumnGroupConfig
-from bioetl.domain.composite.config_models import (
+from .config_merge import ColumnGroupConfig
+from .config_models import (
     CompositeConfig,
     CompositeDQConfig,
     CrossValidationConfig,
@@ -35,7 +35,7 @@ from bioetl.domain.composite.config_models import (
     MergeConfig,
     SeedConfig,
 )
-from bioetl.domain.composite.cross_validation import (
+from .cross_validation import (
     ComparisonMethod,
     CrossValidationStats,
     CrossValidationVerdict,
@@ -45,19 +45,19 @@ from bioetl.domain.composite.cross_validation import (
     FieldMismatch,
     RecordCrossValidationResult,
 )
-from bioetl.domain.composite.field_groups import (
+from .field_groups import (
     FieldGroupDefinition,
     FieldGroupId,
     FieldGroupRegistry,
     FieldMapping,
     build_field_group_registry,
 )
-from bioetl.domain.composite.lineage import (
+from .lineage import (
     CompositeLineageMetadata,
     EnrichmentStatusRecord,
     FieldSource,
 )
-from bioetl.domain.composite.result import (
+from .result import (
     CompositeResult,
     DependencyResult,
     DependencyStatus,
@@ -66,14 +66,14 @@ from bioetl.domain.composite.result import (
     MergeResult,
     SeedResult,
 )
-from bioetl.domain.composite.state import (
+from .state import (
     CompositePipelineState,
     TransitionRules,
     can_transition,
     get_transition_rules,
     validate_transition,
 )
-from bioetl.domain.composite.strategy import (
+from .strategy import (
     ConflictResolution,
     FallbackStrategy,
     MergeStrategy,

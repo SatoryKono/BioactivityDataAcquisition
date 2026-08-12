@@ -27,14 +27,15 @@ from bioetl.domain.composite import (
     MergeConfig,
     SeedConfig,
 )
-from bioetl.domain.composite.config_composite_serialization import (
+
+from .config_composite_serialization import (
     composite_from_dict,
     composite_to_dict,
 )
-from bioetl.domain.composite.config_composite_validation import (
+from .config_composite_validation import (
     validate_composite_config,
 )
-from bioetl.domain.composite.config_validators import (
+from .config_validators import (
     require_non_empty,
     validate_positive,
 )

@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "310c9a0c88236bd3a3c65a03210d2cb61b65603aed58178c9af07b6757519a7c",
-    "bioetl-dq-v2": "35bc2239aa5c239c78485b3758f4c70348a057419fadc65071f44f3b1f20c5b3",
+    "bioetl-control-plane-v1": "a537be37ac4d6081155ad0c998c3189190262d8ac6969d9352c90809ce22b424",
+    "bioetl-dq-v2": "4d2dfbceb594849e92c3d4e002f06c55828f555a00adcc5d7d742cd1f0b4bb70",
     "bioetl-incident-v1": "18e02d74352da5314042263b3a46f479d864144f113a235d5a9670e80f511237",
-    "bioetl-overview-v2": "67e7446be3ab8905ecc641b68bc567512ccbe05cc017016b935519f58e6f513d",
-    "bioetl-provider-health-v2": "23d47a89a8e134d038a7064c227e29694026fab1b7ac8a937a4a3b9881d4f0ad",
-    "bioetl-run-explorer-v1": "5697c21be7de2ed9eebd0226116879fa3283164de06ee71d1f65453078615059",
-    "bioetl-runtime": "2f10d727667b0c640d51cfd515c2dbf565b3f2fd1a19e75a64cc59d66f21a22a"
+    "bioetl-overview-v2": "4923d33edf7268610c6ca4eefe267dc189bfa4f6cbfe046a265b8b23948ea61b",
+    "bioetl-provider-health-v2": "a0e8938373ec5f6a6d8f7874d3141f0f9110761c63d0423c589b1681916802ba",
+    "bioetl-run-explorer-v1": "65846e760376afce48d720bf15db32e11fd0ab23822e335c2dff44116c36badd",
+    "bioetl-runtime": "15315693f6204ba2b229c96d28318844f29b598f0ab23e8092fa1e7764f3e160"
   },
   "panels": [
     {
@@ -2770,7 +2770,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "((sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range]))) / clamp_min((sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range]))) + (sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range]))) + (sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range]))), 1))"
+          "((sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range]))) / ((sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range]))) + (sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range]))) + (sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])))))"
         ],
         "target_count": 1
       }
