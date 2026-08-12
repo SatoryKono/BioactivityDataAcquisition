@@ -41,7 +41,7 @@ class SilverDQAnalyzeRequest:
 
 
 def _record_silver_dq_field(
-    field: Field[object],
+    field: object,
     *,
     positional: list[str],
     required: list[str],
