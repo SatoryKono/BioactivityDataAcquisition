@@ -4,8 +4,8 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import MISSING, dataclass, fields
-from typing import TYPE_CHECKING, Any, Final
+from dataclasses import MISSING, Field, dataclass, fields
+from typing import TYPE_CHECKING, Any, Final, cast
 
 from bioetl.domain.types import JsonDict
 
@@ -41,16 +41,16 @@ class SilverDQAnalyzeRequest:
 
 
 def _record_silver_dq_field(
-    field: object,
+    field: Field[Any],
     *,
     positional: list[str],
     required: list[str],
     defaults: dict[str, object],
 ) -> None:
-    name = field.name  # type: ignore[attr-defined]
+    name = field.name
     positional.append(name)
-    default = field.default  # type: ignore[attr-defined]
-    default_factory = field.default_factory  # type: ignore[attr-defined]
+    default = field.default
+    default_factory = field.default_factory
     if default is MISSING and default_factory is MISSING:
         required.append(name)
         return
@@ -106,19 +106,25 @@ def coerce_silver_dq_analyze_request(
     )
     return SilverDQAnalyzeRequest(
         data=resolved_kwargs["data"],
-        run_id=resolved_kwargs["run_id"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        pipeline=resolved_kwargs["pipeline"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        target_table=resolved_kwargs["target_table"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        source_batch_ids=resolved_kwargs["source_batch_ids"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        config=resolved_kwargs["config"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        timestamp=resolved_kwargs["timestamp"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        primary_keys=resolved_kwargs["primary_keys"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        soft_fail_threshold=resolved_kwargs["soft_fail_threshold"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        hard_fail_threshold=resolved_kwargs["hard_fail_threshold"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        input_record_count=resolved_kwargs["input_record_count"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        quarantined_count=resolved_kwargs["quarantined_count"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        previous_schema=resolved_kwargs["previous_schema"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-        key_nullability_rules=resolved_kwargs["key_nullability_rules"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        run_id=cast(str, resolved_kwargs["run_id"]),
+        pipeline=cast(str, resolved_kwargs["pipeline"]),
+        target_table=cast(str, resolved_kwargs["target_table"]),
+        source_batch_ids=cast(list[str], resolved_kwargs["source_batch_ids"]),
+        config=cast("SilverDQConfigPort", resolved_kwargs["config"]),
+        timestamp=cast("datetime", resolved_kwargs["timestamp"]),
+        primary_keys=cast(list[str], resolved_kwargs["primary_keys"]),
+        soft_fail_threshold=cast(float, resolved_kwargs["soft_fail_threshold"]),
+        hard_fail_threshold=cast(float, resolved_kwargs["hard_fail_threshold"]),
+        input_record_count=cast(
+            "int | None", resolved_kwargs["input_record_count"]
+        ),
+        quarantined_count=cast(int, resolved_kwargs["quarantined_count"]),
+        previous_schema=cast(
+            "dict[str, str] | None", resolved_kwargs["previous_schema"]
+        ),
+        key_nullability_rules=cast(
+            "list[JsonDict] | None", resolved_kwargs["key_nullability_rules"]
+        ),
     )
 
 
