@@ -119,6 +119,10 @@ def test_config_surface_duplication_audit_matches_live_backlog() -> None:
     assert "**/configs/**" in scope["ignored_by_jscpd_patterns"]
     assert "**/*.yaml" in scope["ignored_by_jscpd_patterns"]
     assert "**/*.json" in scope["ignored_by_jscpd_patterns"]
+    assert scope["excluded_generated_roots"] == ["configs/_schema"]
+    assert scope["excluded_generated_files"] == [
+        "configs/quality/test_telemetry_baseline.yaml"
+    ]
     assert scope["files_scanned"] > 0
     assert summary["duplicate_cluster_count"] >= summary["reported_cluster_count"] >= 0
 

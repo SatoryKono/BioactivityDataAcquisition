@@ -14,6 +14,7 @@ from bioetl.domain.composite.config_parsing import (
     require_str,
     require_str_tuple,
 )
+<<<<<<< HEAD
 from bioetl.domain.composite.config_validators import (
     _validate_optional_threshold,
     _validate_positive,
@@ -26,6 +27,13 @@ __all__ = [
     "_validate_optional_threshold",
     "_validate_positive",
     "_validate_threshold_order",
+||||||| merged common ancestors
+=======
+
+__all__ = [
+    "_validate_cross_validation_thresholds",
+    "_validate_cross_validation_tolerances",
+>>>>>>> origin/docs/rf004-final-closeout-evidence
     "optional_bool",
     "optional_int",
     "optional_str",
