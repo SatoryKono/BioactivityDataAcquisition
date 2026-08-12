@@ -28,6 +28,7 @@ max_body_lines: 120
 | 2 | Документация | `prompt.audit.docs-cycle` → [docs-cycle.md](docs-cycle.md) | `prompt.audit.docs-content` | same |
 | 3 | Техдолг | `prompt.audit.tech-debt-cycle` → [tech-debt-cycle.md](tech-debt-cycle.md) | `prompt.audit.tech-debt` | same |
 | 4 | Гигиена репо | `prompt.audit.repo-tree-cycle` → [repo-tree-cycle.md](repo-tree-cycle.md) | `prompt.audit.repo-tree` | same |
+| 5 | Дашборды | `prompt.observability.dashboard-audit-cycle` → [../observability/dashboard-audit-cycle.md](../observability/dashboard-audit-cycle.md) | panel-audit + bi-acceptance | `reports/audit/dashboard-cycle/` |
 
 ## Shared defaults (operator full-run)
 

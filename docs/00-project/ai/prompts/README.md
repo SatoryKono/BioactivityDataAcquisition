@@ -75,7 +75,7 @@ docs/00-project/ai/prompts/
 | `prompt.architecture.review` | [library/architecture/review-assessment.md](library/architecture/review-assessment.md) | Architecture review (v2.2) |
 | `prompt.observability.dashboard-panel-audit` | [library/observability/dashboard-panel-audit.md](library/observability/dashboard-panel-audit.md) | Grafana panel audit (5 phases, v1.1) |
 | `prompt.observability.bi-dashboard-acceptance` | [library/observability/bi-dashboard-acceptance.md](library/observability/bi-dashboard-acceptance.md) | BI acceptance: visual / layout / data |
-| `prompt.observability.dashboard-audit-cycle` | [library/observability/dashboard-audit-cycle.md](library/observability/dashboard-audit-cycle.md) | Cyclic dashboard audit (N cycles, fail-closed) |
+| `prompt.observability.dashboard-audit-cycle` | [library/observability/dashboard-audit-cycle.md](library/observability/dashboard-audit-cycle.md) | Cyclic dashboard audit **N=20** — render, density, fill, acceptance (v1.1) |
 
 ### Domain audit cards (nine-kit intake)
 
