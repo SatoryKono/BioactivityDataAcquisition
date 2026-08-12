@@ -45,7 +45,7 @@ from bioetl.composition.bootstrap.runtime.runtime_basics import (
 from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
     CompositeInfrastructureContext,
 )
-from bioetl.domain.composite.config import CompositeConfig
+from bioetl.domain.composite import CompositeConfig
 
 
 _FIXED_UUID = UUID("12345678-1234-5678-1234-567812345678")

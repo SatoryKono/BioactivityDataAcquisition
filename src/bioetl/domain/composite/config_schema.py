@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from bioetl.domain.composite.config_merge import ColumnGroupConfig
-from bioetl.domain.composite.config_validators import (
+from .config_merge import ColumnGroupConfig
+from .config_validators import (
     coerce_to_tuple,
     coerce_to_typed_tuple,
 )
