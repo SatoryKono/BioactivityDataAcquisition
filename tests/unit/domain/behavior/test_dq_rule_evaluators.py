@@ -340,7 +340,12 @@ def test_field_rule_dispatch_covers_required_null_range_pattern_and_enum_rules()
     )
     assert _field_rule_violated(
         {"year": "not-numeric"},
-        FieldValidation(field="year", validation_type="range"),
+        FieldValidation(
+            field="year",
+            validation_type="range",
+            min_value=1900,
+            max_value=2100,
+        ),
     )
     assert not _field_rule_violated(
         {"doi": "10.1000/example"},
@@ -417,18 +422,15 @@ def test_field_rule_dispatch_covers_malformed_rule_inputs_and_unknown_dispatcher
     ):
         _field_rule_violated({"field": "value"}, unknown_rule)  # type: ignore[arg-type]
 
-    assert _field_rule_violated(
-        {"doi": "10.1000/example"},
-        FieldValidation(field="doi", validation_type="pattern", pattern=None),
-    )
+    # Incomplete pattern rules are rejected at construction time.
+    with pytest.raises(ValueError, match="pattern"):
+        FieldValidation(field="doi", validation_type="pattern", pattern=None)
     assert _field_rule_violated(
         {"doi": 10},
         FieldValidation(field="doi", validation_type="pattern", pattern=r"^10\."),
     )
-    assert _field_rule_violated(
-        {"title": "short"},
-        FieldValidation(field="title", validation_type="max_length", max_length=None),
-    )
+    with pytest.raises(ValueError, match="max_length"):
+        FieldValidation(field="title", validation_type="max_length", max_length=None)
     assert _field_rule_violated(
         {"title": 123},
         FieldValidation(field="title", validation_type="max_length", max_length=5),
@@ -462,7 +464,12 @@ def test_field_rule_dispatch_covers_malformed_rule_inputs_and_unknown_dispatcher
 def test_field_rule_dispatch_ignores_optional_missing_values() -> None:
     assert not _field_rule_violated(
         {},
-        FieldValidation(field="optional", validation_type="range"),
+        FieldValidation(
+            field="optional",
+            validation_type="range",
+            min_value=0,
+            max_value=10,
+        ),
     )
     assert not _field_rule_violated(
         {"optional": None},
