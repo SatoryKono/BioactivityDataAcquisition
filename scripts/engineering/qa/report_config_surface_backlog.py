@@ -26,8 +26,11 @@ from scripts.schema.analysis.generate_config_matrix import (
 
 BACKLOG_PATH = ROOT / "reports/quality/config-surface-backlog.json"
 DUPLICATION_SURFACE_ROOT = ROOT / "configs"
-DUPLICATION_EXCLUDED_GENERATED_ROOTS = (DUPLICATION_SURFACE_ROOT / "_schema",)
 DUPLICATION_FILE_SUFFIXES = (".yaml", ".yml", ".json")
+GENERATED_DUPLICATION_SURFACE_DIRS = (ROOT / "configs" / "_schema",)
+GENERATED_DUPLICATION_SURFACE_FILES = (
+    ROOT / "configs" / "quality" / "test_telemetry_baseline.yaml",
+)
 JSCPD_IGNORED_PATTERNS = ("**/configs/**", "**/*.yaml", "**/*.yml", "**/*.json")
 MIN_DUPLICATE_BLOCK_BYTES = 200
 MAX_DUPLICATION_BLOCK_DEPTH = 2
@@ -319,6 +322,20 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
             ),
         },
     ),
+    (
+        "$defs",
+        {
+            "owner": OWNER_BIOETL_ARCHITECTURE,
+            "decision": "retain_with_owner",
+            "linked_issue": LINKED_ISSUE_5568,
+            "review_date": "2026-09-30",
+            "rationale": (
+                "Shared JSON Schema $defs property bags are intentionally "
+                "duplicated across pipeline config schemas and retained under "
+                "explicit architecture ownership for #5568 non-composite residual."
+            ),
+        },
+    ),
 )
 
 DEFAULT_DUPLICATION_CLUSTER_GOVERNANCE: dict[str, str] = {
@@ -374,8 +391,10 @@ def _iter_duplication_surface_files() -> list[Path]:
         if path.is_file()
         and path.suffix in DUPLICATION_FILE_SUFFIXES
         and not any(
-            root in path.parents for root in DUPLICATION_EXCLUDED_GENERATED_ROOTS
+            path.is_relative_to(generated_root)
+            for generated_root in GENERATED_DUPLICATION_SURFACE_DIRS
         )
+        and path not in GENERATED_DUPLICATION_SURFACE_FILES
     ]
     return sorted(files)
 
@@ -498,20 +517,9 @@ def _record_block_occurrence(
     )
 
 
-def _is_ignored_single_file_cluster(
-    cluster: dict[str, Any],
-    *,
-    unique_paths: set[str],
-) -> bool:
-    """True for intentional same-file mirrors that are not multi-surface debt."""
-    if len(unique_paths) != 1:
-        return False
-    block_path = str(cluster["block_path"])
-    if block_path.startswith("contracts.hash_"):
-        return True
-    if block_path.startswith("entries.scripts/"):
-        return True
-    return False
+def _is_ignored_single_file_cluster(*, unique_paths: set[str]) -> bool:
+    """True for same-file mirrors that are not cross-surface config debt."""
+    return len(unique_paths) == 1
 
 
 def _duplicate_cluster_payload(cluster: dict[str, Any]) -> dict[str, Any]:
@@ -550,7 +558,7 @@ def _select_duplicate_clusters(
         }
         if len(unique_locations) < 2:
             continue
-        if _is_ignored_single_file_cluster(cluster, unique_paths=unique_paths):
+        if _is_ignored_single_file_cluster(unique_paths=unique_paths):
             continue
         affected_files.update(entry["path"] for entry in occurrences)
         duplicate_clusters.append(_duplicate_cluster_payload(cluster))
@@ -593,11 +601,15 @@ def _build_duplication_audit() -> dict[str, Any]:
             "root": DUPLICATION_SURFACE_ROOT.relative_to(ROOT).as_posix(),
             "file_suffixes": list(DUPLICATION_FILE_SUFFIXES),
             "files_scanned": len(surface_files),
-            "ignored_by_jscpd_patterns": list(JSCPD_IGNORED_PATTERNS),
             "excluded_generated_roots": [
                 path.relative_to(ROOT).as_posix()
-                for path in DUPLICATION_EXCLUDED_GENERATED_ROOTS
+                for path in GENERATED_DUPLICATION_SURFACE_DIRS
             ],
+            "excluded_generated_files": [
+                path.relative_to(ROOT).as_posix()
+                for path in GENERATED_DUPLICATION_SURFACE_FILES
+            ],
+            "ignored_by_jscpd_patterns": list(JSCPD_IGNORED_PATTERNS),
             "structured_block_min_bytes": MIN_DUPLICATE_BLOCK_BYTES,
             "max_traversal_depth": MAX_DUPLICATION_BLOCK_DEPTH,
         },
@@ -613,15 +625,22 @@ def _build_duplication_audit() -> dict[str, Any]:
         "notes": [
             (
                 "This audit covers structured config/contract/registry surfaces "
-                "under configs/** that JSCPD intentionally ignores."
+                "under configs/** that JSCPD intentionally ignores. Generated "
+                "JSON Schema mirrors stay governed by schema drift checks and are "
+                "excluded from the authored-config duplication debt ratchet."
+            ),
+            (
+                "Generated JSON Schemas are excluded because their repeated $defs "
+                "are materialized from shared Pydantic source models rather than "
+                "independently maintained configuration debt."
+            ),
+            (
+                "The generated test telemetry baseline is excluded because repeated "
+                "duration maps are captured observations, not maintained config debt."
             ),
             (
                 "Clusters report exact canonical JSON subtree duplicates only; "
                 "near-duplicate prose and comment drift stay out of scope."
-            ),
-            (
-                "Generated JSON schemas are excluded because their repeated definitions "
-                "are projections of source models, not independently maintained config debt."
             ),
             (
                 "The audit is report-only and exists to make YAML/JSON governance "

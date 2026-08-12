@@ -272,7 +272,76 @@ def test_composite_config_codec_roundtrips_all_business_sections() -> None:
     ]
 
 
-def test_composite_section_decoders_filter_invalid_nested_shapes() -> None:
+def test_composite_section_decoders_fail_closed_on_invalid_nested_shapes() -> None:
+    # CR stream #8644 composite-014: reject malformed nested shapes at boundary.
+    with pytest.raises(
+        ValueError, match=r"enricher_overrides\[ignored\] must be a dictionary"
+    ):
+        build_dq_config(
+            {
+                "required_fields": ["doi"],
+                "enricher_overrides": {
+                    "openalex": {
+                        "soft_fail_threshold": 0.2,
+                        "hard_fail_threshold": 0.7,
+                    },
+                    "ignored": "not-an-object",
+                },
+            }
+        )
+
+    with pytest.raises(
+        ValueError, match=r"provider_lookup_fields\[ignored\] must be a mapping"
+    ):
+        build_lineage_config(
+            {
+                "provider_lookup_fields": {
+                    "openalex": {"work_id": "id"},
+                    "ignored": "not-an-object",
+                },
+                "track_source_for_fields": ["title"],
+            }
+        )
+
+    with pytest.raises(ValueError, match="must be a dictionary"):
+        build_cross_validation_config(
+            {
+                "enricher_pairings": [
+                    "not-an-object",
+                    {
+                        "enricher_pipeline": "openalex_publication",
+                        "fields": [
+                            {
+                                "field_name": "doi",
+                                "method": ComparisonMethod.EXACT,
+                                "threshold": 0.0,
+                            },
+                        ],
+                    },
+                ]
+            }
+        )
+
+    with pytest.raises(ValueError, match="fields entries must be dictionaries"):
+        build_cross_validation_config(
+            {
+                "enricher_pairings": [
+                    {
+                        "enricher_pipeline": "openalex_publication",
+                        "fields": [
+                            "not-an-object",
+                            {
+                                "field_name": "doi",
+                                "method": ComparisonMethod.EXACT,
+                                "threshold": 0.0,
+                            },
+                        ],
+                    },
+                ]
+            }
+        )
+
+    # Valid payloads still decode successfully.
     dq = build_dq_config(
         {
             "required_fields": ["doi"],
@@ -281,7 +350,6 @@ def test_composite_section_decoders_filter_invalid_nested_shapes() -> None:
                     "soft_fail_threshold": 0.2,
                     "hard_fail_threshold": 0.7,
                 },
-                "ignored": "not-an-object",
             },
         }
     )
@@ -290,7 +358,6 @@ def test_composite_section_decoders_filter_invalid_nested_shapes() -> None:
         {
             "provider_lookup_fields": {
                 "openalex": {"work_id": "id"},
-                "ignored": "not-an-object",
             },
             "track_source_for_fields": ["title"],
         }
@@ -298,11 +365,9 @@ def test_composite_section_decoders_filter_invalid_nested_shapes() -> None:
     cross_validation = build_cross_validation_config(
         {
             "enricher_pairings": [
-                "not-an-object",
                 {
                     "enricher_pipeline": "openalex_publication",
                     "fields": [
-                        "not-an-object",
                         {
                             "field_name": "doi",
                             "method": ComparisonMethod.EXACT,
@@ -335,15 +400,12 @@ def test_composite_decoder_uses_defaults_when_optional_sections_are_absent() -> 
     assert restored.cross_validation == CrossValidationConfig()
 
 
-def test_cross_validation_decoder_handles_non_sequence_nested_values() -> None:
-    assert (
-        build_cross_validation_config(
-            {"enricher_pairings": "not-a-sequence"}
-        ).enricher_pairings
-        == ()
-    )
+def test_cross_validation_decoder_fail_closed_on_malformed_nested_values() -> None:
+    """CR #8644 composite-014: reject malformed collection shapes at the boundary."""
+    with pytest.raises(ValueError, match="enricher_pairings must be a sequence"):
+        build_cross_validation_config({"enricher_pairings": "not-a-sequence"})
 
-    with pytest.raises(ValueError, match="must have at least one field"):
+    with pytest.raises(ValueError, match="fields must be a sequence"):
         build_cross_validation_config(
             {
                 "enricher_pairings": [
@@ -354,3 +416,39 @@ def test_cross_validation_decoder_handles_non_sequence_nested_values() -> None:
                 ]
             }
         )
+
+
+def test_composite_merge_column_groups_optional_paths() -> None:
+    """Cover merge.column_groups None/empty/list decoding (CR #8644)."""
+    base: dict[str, object] = {
+        "name": "c",
+        "version": "1",
+        "seed": {"pipeline": "seed", "output_keys": ["id"], "silver_table": "s"},
+        "dependencies": [
+            {
+                "pipeline": "dep",
+                "output_keys": ["id"],
+                "join_keys": ["id"],
+                "silver_table": "d",
+            }
+        ],
+        "enrichers": [],
+        "merge": {
+            "strategy": "left_outer",
+            "conflict_resolution": "seed_priority",
+            "output_silver_path": "silver/c",
+            "output_gold_path": "gold/c",
+        },
+    }
+    assert CompositeConfig.from_dict(base).merge.column_groups == ()
+
+    empty = dict(base)
+    empty["merge"] = {**base["merge"], "column_groups": []}  # type: ignore[index]
+    assert CompositeConfig.from_dict(empty).merge.column_groups == ()
+
+    groups = dict(base)
+    groups["merge"] = {
+        **base["merge"],  # type: ignore[dict-item]
+        "column_groups": [{"name": "ids", "fields": ["id"]}],
+    }
+    assert len(CompositeConfig.from_dict(groups).merge.column_groups) == 1

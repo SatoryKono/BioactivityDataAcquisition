@@ -39,7 +39,7 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from bioetl.domain.composite.config import CompositeConfig
+from bioetl.domain.composite import CompositeConfig
 from bioetl.infrastructure.schemas.composite_config import (
     CompositeConfigSchema,
     CompositeDQSchema,

@@ -45,39 +45,6 @@
         }
       },
       {
-        "block_path": "pipeline.sink.gold",
-        "fingerprint": "224fb15fbaa3",
-        "governance": {
-          "decision": "retain_shared_entity_gold_sink_policy",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-config",
-          "rationale": "Gold sink settings are shared intentionally across matching entity configs to preserve deterministic sink layout policy.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 3,
-        "occurrences": [
-          {
-            "block_path": "pipeline.sink.gold",
-            "path": "configs/entities/chembl/assay.yaml",
-            "surface_kind": "entity_config"
-          },
-          {
-            "block_path": "pipeline.sink.gold",
-            "path": "configs/entities/chembl/publication.yaml",
-            "surface_kind": "entity_config"
-          },
-          {
-            "block_path": "pipeline.sink.gold",
-            "path": "configs/entities/chembl/target.yaml",
-            "surface_kind": "entity_config"
-          }
-        ],
-        "serialized_bytes": 205,
-        "surface_kind_counts": {
-          "entity_config": 3
-        }
-      },
-      {
         "block_path": "composite.merge.column_groups",
         "fingerprint": "4be2a0f66fdc",
         "governance": {
@@ -221,100 +188,20 @@
           "composite_config": 1,
           "entity_config": 1
         }
-      },
-      {
-        "block_path": "pipelines.*.shadow_analysis",
-        "fingerprint": "5978e7a685a1",
-        "governance": {
-          "decision": "retain_shared_quality_shadow_analysis_policy",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-dq",
-          "rationale": "Quality-registry shadow-analysis blocks intentionally share provider-family boundary policy; retained duplication stays visible in the config backlog and must not grow without review.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "pipelines.chembl_cell_line.shadow_analysis",
-            "path": "configs/quality/silver_filter_boundary_inventory.yaml",
-            "surface_kind": "quality_registry"
-          },
-          {
-            "block_path": "pipelines.chembl_tissue.shadow_analysis",
-            "path": "configs/quality/silver_filter_boundary_inventory.yaml",
-            "surface_kind": "quality_registry"
-          }
-        ],
-        "serialized_bytes": 1009,
-        "surface_kind_counts": {
-          "quality_registry": 2
-        }
-      },
-      {
-        "block_path": "schema.gold.include_groups",
-        "fingerprint": "99c4316b0650",
-        "governance": {
-          "decision": "retain_entity_specific",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-composite",
-          "rationale": "Gold include_groups blocks are entity-local contract copies retained until a shared gold projection schema object exists.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "schema.gold.include_groups",
-            "path": "configs/entities/composite/activity.yaml",
-            "surface_kind": "entity_config"
-          },
-          {
-            "block_path": "schema.silver.include_groups",
-            "path": "configs/entities/composite/activity.yaml",
-            "surface_kind": "entity_config"
-          }
-        ],
-        "serialized_bytes": 221,
-        "surface_kind_counts": {
-          "entity_config": 2
-        }
-      },
-      {
-        "block_path": "schema.gold.include_groups",
-        "fingerprint": "d4aa51ec3c98",
-        "governance": {
-          "decision": "retain_entity_specific",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-composite",
-          "rationale": "Gold include_groups blocks are entity-local contract copies retained until a shared gold projection schema object exists.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "schema.gold.include_groups",
-            "path": "configs/entities/composite/target.yaml",
-            "surface_kind": "entity_config"
-          },
-          {
-            "block_path": "schema.silver.include_groups",
-            "path": "configs/entities/composite/target.yaml",
-            "surface_kind": "entity_config"
-          }
-        ],
-        "serialized_bytes": 211,
-        "surface_kind_counts": {
-          "entity_config": 2
-        }
       }
     ],
     "notes": [
-      "This audit covers structured config/contract/registry surfaces under configs/** that JSCPD intentionally ignores.",
+      "This audit covers structured config/contract/registry surfaces under configs/** that JSCPD intentionally ignores. Generated JSON Schema mirrors stay governed by schema drift checks and are excluded from the authored-config duplication debt ratchet.",
+      "Generated JSON Schemas are excluded because their repeated $defs are materialized from shared Pydantic source models rather than independently maintained configuration debt.",
+      "The generated test telemetry baseline is excluded because repeated duration maps are captured observations, not maintained config debt.",
       "Clusters report exact canonical JSON subtree duplicates only; near-duplicate prose and comment drift stay out of scope.",
-      "Generated JSON schemas are excluded because their repeated definitions are projections of source models, not independently maintained config debt.",
       "The audit is report-only and exists to make YAML/JSON governance duplication reviewable in CI-visible artifacts.",
       "Every reported duplicate cluster carries owner/rationale metadata so retained duplication is explicit debt rather than implicit residue."
     ],
     "scope": {
+      "excluded_generated_files": [
+        "configs/quality/test_telemetry_baseline.yaml"
+      ],
       "excluded_generated_roots": [
         "configs/_schema"
       ],
@@ -323,7 +210,7 @@
         ".yml",
         ".json"
       ],
-      "files_scanned": 231,
+      "files_scanned": 230,
       "ignored_by_jscpd_patterns": [
         "**/configs/**",
         "**/*.yaml",
@@ -335,10 +222,10 @@
       "structured_block_min_bytes": 200
     },
     "summary": {
-      "affected_file_count": 14,
-      "duplicate_cluster_count": 10,
-      "duplicate_occurrence_count": 24,
-      "reported_cluster_count": 10
+      "affected_file_count": 10,
+      "duplicate_cluster_count": 6,
+      "duplicate_occurrence_count": 15,
+      "reported_cluster_count": 6
     }
   },
   "entity_effective": {

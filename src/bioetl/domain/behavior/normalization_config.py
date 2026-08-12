@@ -72,9 +72,14 @@ class PChemblRangeConfig:
             raise ValueError("min_value must be less than max_value")
 
     def _validate_typical_range(self) -> None:
-        """Validate typical range is ordered."""
+        """Validate typical range is ordered and within absolute bounds."""
         if self.typical_min >= self.typical_max:
             raise ValueError("typical_min must be less than typical_max")
+        if self.typical_min < self.min_value or self.typical_max > self.max_value:
+            raise ValueError(
+                "typical_min and typical_max must fall within "
+                f"[{self.min_value}, {self.max_value}]"
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -120,6 +125,16 @@ class NormalizationConfig:
             raise ValueError("high_potency_threshold cannot be negative")
         if self.high_potency_threshold < self.potency_threshold:
             raise ValueError("high_potency_threshold must be >= potency_threshold")
+        pchembl_max = self.pchembl_range.max_value
+        if self.potency_threshold > pchembl_max:
+            raise ValueError(
+                f"potency_threshold cannot exceed pChEMBL max_value ({pchembl_max})"
+            )
+        if self.high_potency_threshold > pchembl_max:
+            raise ValueError(
+                "high_potency_threshold cannot exceed pChEMBL max_value "
+                f"({pchembl_max})"
+            )
         valid_methods = {"mean", "median", "geometric_mean"}
         if self.default_aggregation_method not in valid_methods:
             raise ValueError(

@@ -126,6 +126,7 @@ def test_refresh_existing_inventory_reuses_stable_snapshot_digest(
 
     assert refreshed["source_tree_sha256"] == "stable-digest"
     assert refreshed["modules"][0]["source_lines"] == 999
+    assert refreshed["rows"] == refreshed["modules"]
     assert refreshed["summary"]["source_module_count"] == 1
     assert refreshed["summary"]["status_counts"]["fully_covered"] == 1
     assert refreshed["summary"]["unmeasured_module_count"] == 0

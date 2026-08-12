@@ -11,7 +11,7 @@ from bioetl.domain.composite.aggregation import (
     AggregationFunction,
     EnricherCardinality,
 )
-from bioetl.domain.composite.config import ColumnGroupConfig, MergeConfig
+from bioetl.domain.composite import ColumnGroupConfig, MergeConfig
 from bioetl.domain.composite.cross_validation import (
     EnricherFieldPairing,
     FieldComparisonSpec,

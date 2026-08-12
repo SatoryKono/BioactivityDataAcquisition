@@ -4,13 +4,15 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from bioetl.domain.composite.config_composite_section_decoders import (
+from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
+
+from .config_composite_section_decoders import (
     build_cross_validation_config,
     build_dq_config,
     build_execution_config,
     build_lineage_config,
 )
-from bioetl.domain.composite.config_parsing import (
+from .config_parsing import (
     optional_bool,
     optional_int,
     optional_str,
@@ -22,7 +24,6 @@ from bioetl.domain.composite.config_parsing import (
     require_str_tuple,
     str_key_mapping,
 )
-from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 
 __all__ = ["composite_from_dict"]
 
@@ -119,6 +120,12 @@ def _parse_field_priorities(raw: object) -> dict[str, tuple[str, ...]]:
     }
 
 
+def _optional_column_groups(raw: object) -> object:
+    if raw in (None, ()):
+        return ()
+    return require_object_dict_sequence(raw or (), "merge.column_groups")
+
+
 def _build_merge_config[ConfigT](
     merge_data: dict[str, object],
     merge_cls: Callable[..., ConfigT],
@@ -154,7 +161,7 @@ def _build_merge_config[ConfigT](
         field_mappings=require_str_mapping(
             merge_data.get("field_mappings"), "merge.field_mappings"
         ),
-        column_groups=merge_data.get("column_groups") or (),
+        column_groups=_optional_column_groups(merge_data.get("column_groups")),
         exclude_fields=optional_str_tuple(
             merge_data.get("exclude_fields"), "merge.exclude_fields"
         )

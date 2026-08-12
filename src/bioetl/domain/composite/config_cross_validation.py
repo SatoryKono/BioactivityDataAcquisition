@@ -5,10 +5,11 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
-from bioetl.domain.composite.config_validators import (
+from bioetl.domain.composite.cross_validation import EnricherFieldPairing
+
+from .config_validators import (
     coerce_to_typed_tuple,
 )
-from bioetl.domain.composite.cross_validation import EnricherFieldPairing
 
 
 def _require_finite_number(value: float | int, name: str) -> None:

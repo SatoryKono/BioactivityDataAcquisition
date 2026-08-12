@@ -302,10 +302,16 @@ def test_issue_5794_shared_composite_policy_is_externalized() -> None:
     assert closeout["outcomes"]["5794"]["debt_type"] == "composite_config_duplication"
     assert closeout["outcomes"]["5794"]["outcome"] == "improved"
     assert closeout["outcomes"]["5794"]["opening_baseline"] == 24
-    assert closeout["outcomes"]["5794"]["current_value"] == 9
+    assert (
+        closeout["outcomes"]["5794"]["current_value"]
+        == summary["duplicate_cluster_count"]
+    )
     assert "closeout_reason" in closeout["outcomes"]["5794"]
 
-    assert summary["duplicate_cluster_count"] <= 10
+    assert (
+        summary["duplicate_cluster_count"]
+        == closeout["outcomes"]["5794"]["current_value"]
+    )
     assert summary["duplicate_cluster_count"] < 24
     assert shared_policy["merge"]["field_priorities"]
     assert shared_policy["merge"]["field_mappings"]

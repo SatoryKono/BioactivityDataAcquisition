@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from bioetl.domain.composite.config_validators import (
+from .config_validators import (
     validate_optional_threshold,
     validate_threshold_order,
 )
@@ -65,6 +65,8 @@ class CompositeDQConfig:
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
+        from bioetl.domain.immutability import freeze_fields
+
         if isinstance(self.required_fields, list):
             object.__setattr__(self, "required_fields", tuple(self.required_fields))
         if isinstance(self.field_validations, list):
@@ -79,6 +81,8 @@ class CompositeDQConfig:
                 "cross_field_validations",
                 tuple(self.cross_field_validations),
             )
+        # Detach caller-owned override mapping for frozen determinism.
+        freeze_fields(self, ("enricher_overrides",))
         self._validate()
 
     def _require_unit_interval(self, name: str, value: float) -> None:

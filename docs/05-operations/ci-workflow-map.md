@@ -34,7 +34,7 @@ the human index.
 | `consolidation-gates.yml` | consolidation-gates | Consolidation / cleanup governance gates |
 | `contract-governance-fast-check.yml` | Contract Governance Fast Check | Fast contract surface check |
 | `contract-tests.yml` | Monthly Contract Tests | Scheduled deep contract tests |
-| `dashboard-render-host.yml` | Dashboard render release evidence | Host-only Grafana render evidence |
+| `dashboard-render-host.yml` | Dashboard render release evidence | Host-only Grafana render evidence on self-hosted `[self-hosted, bioetl-observability]`; `workflow_dispatch` only — see isolation notes in `docs/04-reference/github-actions-workflows.md` |
 | `diagram-nightly.yml` | Diagram Nightly Regression | Nightly diagram regression / PNG compat |
 | `docker.yml` | Docker Build & Compose Validation | Optional Docker contract (ADR-010 adjunct) |
 | `docs.yml` | Docs & Diagrams | MkDocs, links, mermaid lint, render, drift |

@@ -46,6 +46,27 @@ def _catalog_http_servers(catalog: dict[str, object]) -> dict[str, dict[str, obj
     return servers
 
 
+def _client_headers_from_env_http_headers(
+    env_http_headers: object,
+) -> dict[str, str] | None:
+    """Convert Codex-style env_http_headers to Grok/Cursor headers with ${VAR}.
+
+    Tracked portable inventory keeps env_http_headers (env *names* only). Local
+    multi-client JSON projections need expanded ``headers`` values so clients
+    that do not understand env_http_headers still authenticate remote HTTPS
+    servers (ref, deepwiki) when the process environment provides the keys.
+    """
+    if not isinstance(env_http_headers, dict):
+        return None
+    headers: dict[str, str] = {}
+    for header, env_name in env_http_headers.items():
+        name = str(env_name).strip()
+        if not name:
+            continue
+        headers[str(header)] = f"${{{name}}}"
+    return headers or None
+
+
 def _merge_tracked_https_servers(
     servers: dict[str, dict[str, object]],
     tracked_path: Path,
@@ -57,8 +78,23 @@ def _merge_tracked_https_servers(
         if not isinstance(cfg, dict):
             continue
         url = str(cfg.get("url") or "")
-        if url.startswith("https://"):
-            servers[name] = {"type": "http", "url": url}
+        if not url.startswith("https://"):
+            continue
+        entry: dict[str, object] = {"type": "http", "url": url}
+        timeout = cfg.get("startup_timeout_sec")
+        if isinstance(timeout, int) and timeout > 0:
+            entry["startup_timeout_sec"] = timeout
+        # Prefer explicit headers; else project env_http_headers → ${ENV} form.
+        headers = cfg.get("headers")
+        if isinstance(headers, dict) and headers:
+            entry["headers"] = {str(k): str(v) for k, v in headers.items()}
+        else:
+            projected = _client_headers_from_env_http_headers(
+                cfg.get("env_http_headers")
+            )
+            if projected:
+                entry["headers"] = projected
+        servers[name] = entry
 
 
 def _payload_for_target(

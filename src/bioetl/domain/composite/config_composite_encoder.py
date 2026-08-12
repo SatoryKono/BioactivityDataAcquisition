@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.domain.composite.config_composite_protocols import (
+from .config_composite_protocols import (
     CompositeConfigProtocol,
     _AggregationConfigProtocol,
     _AggregationFieldProtocol,

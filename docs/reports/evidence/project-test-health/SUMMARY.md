@@ -36,9 +36,9 @@ must be refreshed after each full test campaign.
 
 ## Freshness note
 
-Refreshed on 2026-08-12 during the PR #8651 governance recovery campaign:
-canonical source paths and the full architecture suite were revalidated;
-interpretation remains backlog signal only pending a new canonical main-branch
+Refreshed on 2026-08-12 during documentation architecture audit cycle 1
+(#7419) and PR #8651 governance recovery: canonical source paths remain
+present; interpretation stays backlog signal only pending the next full
 pytest telemetry artifact.
 
 This is a non-canonical repo-only evidence layer. The canonical sources of truth are:

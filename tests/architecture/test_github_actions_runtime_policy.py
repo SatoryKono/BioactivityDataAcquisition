@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import subprocess
 from typing import Any, cast
 
 import pytest
@@ -28,6 +29,7 @@ CODERABBIT_WORKFLOW = ROOT / ".github" / "workflows" / "coderabbit.yml"
 NIGHTLY_REPLAY_WORKFLOW = ROOT / ".github" / "workflows" / "nightly-replay-parity.yml"
 TESTS_WORKFLOW = ROOT / ".github" / "workflows" / "tests.yml"
 RELEASE_WORKFLOW = ROOT / ".github" / "workflows" / "release.yml"
+DOCS_WORKFLOW = ROOT / ".github" / "workflows" / "docs.yml"
 GITHUB_POLICY = ROOT / "docs" / "00-project" / "governance" / "05-github-policy.md"
 ALWAYS_ON_REQUIRED_CHECKS = {
     "checks-complete": ROOT / ".github" / "workflows" / "import-linter.yml",
@@ -64,6 +66,27 @@ def test_runtime_policy_parses_standard_step_uses_entries() -> None:
 
 def test_repository_actions_refs_satisfy_runtime_policy() -> None:
     assert not policy._collect_uses_violations()
+
+
+def test_docs_workflow_is_tracked_and_not_gitignored() -> None:
+    relative_path = DOCS_WORKFLOW.relative_to(ROOT).as_posix()
+
+    tracked = subprocess.run(
+        ["git", "ls-files", "--error-unmatch", relative_path],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    ignored = subprocess.run(
+        ["git", "check-ignore", "--no-index", "--quiet", relative_path],
+        cwd=ROOT,
+        check=False,
+    )
+
+    assert DOCS_WORKFLOW.is_file()
+    assert tracked.returncode == 0, tracked.stderr
+    assert ignored.returncode == 1
 
 
 def test_github_policy_python_version_claims_match_workflows() -> None:

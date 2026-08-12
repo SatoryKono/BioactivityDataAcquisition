@@ -1522,7 +1522,7 @@ def run_checks(repo_root: Path) -> list[Violation]:
     return violations
 
 
-def _parse_args() -> argparse.Namespace:
+def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Check naming/package consistency pre-merge rules."
     )
@@ -1531,12 +1531,12 @@ def _parse_args() -> argparse.Namespace:
         action="store_true",
         help="Exit non-zero when violations are found (CI mode).",
     )
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     """CLI entrypoint."""
-    _ = _parse_args()
+    _ = _parse_args(argv)
     repo_root = Path(__file__).resolve().parents[3]
     violations = run_checks(repo_root)
 

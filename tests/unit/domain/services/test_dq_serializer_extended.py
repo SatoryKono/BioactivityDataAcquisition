@@ -303,10 +303,10 @@ class TestDQReportSerializerInternals:
         assert serializer._status_color("passed") == "pass"
 
     def test_status_color_warn(self) -> None:
-        """Test _status_color returns 'warning' for warn status."""
+        """Test _status_color returns stylesheet class 'warn' for warn/warning status."""
         serializer = DQReportSerializer()
-        assert serializer._status_color("warn") == "warning"
-        assert serializer._status_color("warning") == "warning"
+        assert serializer._status_color("warn") == "warn"
+        assert serializer._status_color("warning") == "warn"
 
     def test_status_color_fail(self) -> None:
         """Test _status_color returns 'fail' for unknown status."""
