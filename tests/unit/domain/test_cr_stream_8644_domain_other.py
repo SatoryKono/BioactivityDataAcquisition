@@ -42,6 +42,7 @@ from bioetl.domain.types.dq_contracts import DQDisposition
 
 pytestmark = pytest.mark.unit
 
+
 def test_base_provider_config_hides_api_key_in_repr() -> None:
     cfg = BaseProviderConfig(base_url="https://example.com", api_key="secret-key")
     text = repr(cfg)
@@ -106,9 +107,7 @@ def test_section_decoders_fail_closed_on_malformed_entries() -> None:
     with pytest.raises(ValueError, match="must be a dictionary"):
         build_cross_validation_config({"enricher_pairings": ["bad"]})
     with pytest.raises(ValueError, match="provider_lookup_fields"):
-        build_lineage_config(
-            {"provider_lookup_fields": {"chembl": "not-a-mapping"}}
-        )
+        build_lineage_config({"provider_lookup_fields": {"chembl": "not-a-mapping"}})
 
 
 def test_dependency_timeout_rejects_non_finite_timeout_seconds() -> None:
@@ -429,5 +428,3 @@ def test_composite_merge_column_groups_optional_via_public_decoder() -> None:
     }
     cfg_groups = _load(with_groups)
     assert len(cfg_groups.merge.column_groups) == 1
-
-
