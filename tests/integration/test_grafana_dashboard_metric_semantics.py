@@ -753,55 +753,6 @@ def test_review_panels_explain_empty_state_explicitly(
     assert defaults.get("noValue") == expected_no_value
 
 
-def test_silver_reject_explorer_custom_no_value_copy_is_intentional_http_forensic_behavior() -> (
-    None
-):
-    """Explorer keeps datasource-specific noValue copy because panels distinguish forensic states."""
-    dashboard = load_dashboard(pytest.skip("Silver Reject Explorer removed 2026-07-23"))
-    expected_panels = {
-        "Monitor Filtered Records Total": (
-            "Verify BioETL Ops HTTP before treating this as OK.",
-        ),
-        "Track Reject Rate vs Bronze": (
-            "Treat as UNKNOWN until Bronze denominator and quarantine API are confirmed.",
-        ),
-        "Inspect Run Scope Summary": (
-            "Check pipeline selection and BioETL Ops HTTP availability.",
-        ),
-        "Inspect Filtered Records Table": (
-            "VALID EMPTY",
-            "QUERY/DATASOURCE ERROR",
-        ),
-        "Inspect Selected Record Details": (
-            "VALID EMPTY",
-            "QUERY/DATASOURCE ERROR",
-        ),
-    }
-    panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") in expected_panels
-    }
-    assert set(panels) == set(expected_panels)
-
-    for panel_title, expected_no_value_tokens in expected_panels.items():
-        panel = panels[panel_title]
-        no_value = str(
-            panel.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
-        )
-        for token in expected_no_value_tokens:
-            assert token in no_value, (
-                f"{panel_title} must preserve terminal noValue token {token!r}"
-            )
-        description = str(panel.get("description", "")).lower()
-        assert any(
-            token in description
-            for token in ("quarantine explorer", "backend", "api", "unknown", "empty")
-        ), (
-            f"{panel_title} description must explain HTTP-forensic missing-data semantics"
-        )
-
-
 def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
     """Count-like summary panels should avoid fractional event semantics."""
     expected_panel_snippets = {
