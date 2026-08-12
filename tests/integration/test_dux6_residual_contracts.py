@@ -12,6 +12,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 DASH = ROOT / "grafana" / "dashboards"
 DOCS = ROOT / "docs" / "03-guides" / "dashboards"
+AUDIT_PROTOCOLS = DOCS / "archive" / "audit-protocols"
 
 pytestmark = pytest.mark.integration
 
@@ -23,9 +24,9 @@ def _walk(panels: list[dict[str, Any]] | None):
 
 
 def test_dux6_docs_exist() -> None:
-    assert (DOCS / "dux6-residual-readability.md").is_file()
+    assert (AUDIT_PROTOCOLS / "dux6-residual-readability.md").is_file()
     assert "dux6-residual-readability.md" in (
-        DOCS / "dux5-copy-dictionary.md"
+        AUDIT_PROTOCOLS / "dux5-copy-dictionary.md"
     ).read_text(encoding="utf-8")
 
 
