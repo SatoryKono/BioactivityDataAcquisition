@@ -64,7 +64,7 @@
       "closeout_files_using_live_residual_helpers": 6,
       "fold_into_generic_inventory_count": 60,
       "retained_public_entrypoint_count": 12,
-      "zero_reference_supporting_script_count": 5
+      "zero_reference_supporting_script_count": 4
     }
   },
   "batch_20260804c": {
@@ -85,7 +85,7 @@
       "closeout_files_using_live_residual_helpers": 8,
       "fold_into_generic_inventory_count": 60,
       "retained_public_entrypoint_count": 12,
-      "zero_reference_supporting_script_count": 5
+      "zero_reference_supporting_script_count": 4
     },
     "generator": "python -m scripts.engineering.qa.report_live_residual_snapshot",
     "check_command": "python -m scripts.engineering.qa.report_live_residual_snapshot --check"
