@@ -197,7 +197,7 @@
         "overrides": []
       },
       "options": {
-        "colorMode": "value",
+        "colorMode": "background",
         "dataLinks": [
           {
             "title": "Inspect Provider Telemetry Freshness",
