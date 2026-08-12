@@ -90,10 +90,18 @@ def _extract_validation_mode(
 def _extract_schema_columns(
     gold_schema: object,
 ) -> list[SchemaColumnMetadata]:
-    """Extract columns from schema via to_schema() when available."""
+    """Extract columns from schema via to_schema() when available.
+
+    Catches Pandera schema-construction failures so malformed models return
+    empty metadata instead of propagating errors.
+    """
     try:
         schema_instance = _safe_to_schema(gold_schema)
     except (AttributeError, TypeError, ValueError):
+        return []
+    except Exception as exc:  # noqa: BLE001 — narrow to Pandera when present
+        if not _is_pandera_schema_error(exc):
+            raise
         return []
 
     raw_columns = getattr(schema_instance, "columns", None)
@@ -104,6 +112,15 @@ def _extract_schema_columns(
         _build_schema_column_metadata(col_name, col_schema)
         for col_name, col_schema in raw_columns.items()
     ]
+
+
+def _is_pandera_schema_error(exc: BaseException) -> bool:
+    """Return True when ``exc`` is a Pandera schema-construction failure."""
+    try:
+        from pandera.errors import SchemaDefinitionError, SchemaInitError
+    except ImportError:
+        return False
+    return isinstance(exc, (SchemaInitError, SchemaDefinitionError))
 
 
 def _safe_to_schema(gold_schema: object) -> object:

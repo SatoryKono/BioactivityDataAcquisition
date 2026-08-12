@@ -117,13 +117,14 @@ def test_post_aggregation_uniqueness_reports_duplicate_group_samples() -> None:
     assert issue.code == IssueCode.CMP_RT_GRAIN_001
     assert issue.details is not None
     assert issue.details["duplicate_count"] == 2
+    # Type-tagged keys: (presence, type_name, repr)
     assert issue.details["sample_duplicates"][0]["group_key"] == [
-        "CHEMBL1",
-        "human",
+        ["present", "str", "'CHEMBL1'"],
+        ["present", "str", "'human'"],
     ]
     assert issue.details["sample_duplicates"][1]["group_key"] == [
-        "CHEMBL3",
-        "MISSING",
+        ["present", "str", "'CHEMBL3'"],
+        ["absent", "", ""],
     ]
 
 

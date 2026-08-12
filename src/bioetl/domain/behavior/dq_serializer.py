@@ -4,11 +4,13 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import fields, is_dataclass
-from datetime import datetime
+from datetime import date, datetime
+from decimal import Decimal
 from enum import Enum
 from typing import Any, cast  # Any: needed for _serialize_value recursive return
 
 import orjson
+import yaml
 
 from bioetl.domain.behavior._dq_serializer_html import (
     format_detail_value,
@@ -56,11 +58,17 @@ def _serialize_dataclass(
 
 
 def _serialize_collection(
-    value: Mapping[str, object] | list[object] | tuple[object, ...],
+    value: Mapping[str, object]
+    | list[object]
+    | tuple[object, ...]
+    | set[object]
+    | frozenset[object],
 ) -> JsonDict | list[object]:  # output mirrors heterogeneous input structure
-    """Serialize dict/list/tuple recursively."""
+    """Serialize dict/list/tuple/set recursively."""
     if isinstance(value, Mapping):
         return {key: _serialize_value(item) for key, item in value.items()}
+    if isinstance(value, (set, frozenset)):
+        return [_serialize_value(item) for item in sorted(value, key=repr)]
     return [_serialize_value(item) for item in value]
 
 
@@ -79,8 +87,14 @@ def _serialize_value(
         return value.value
     if isinstance(value, datetime):
         return value.isoformat()
-    if isinstance(value, (Mapping, list, tuple)):
+    if isinstance(value, date):
+        return value.isoformat()
+    if isinstance(value, Decimal):
+        return str(value)
+    if isinstance(value, (Mapping, list, tuple, set, frozenset)):
         return _serialize_collection(value)
+    if isinstance(value, bytes):
+        return value.hex()
     return value
 
 
@@ -136,15 +150,22 @@ class DQReportSerializer:
         return result
 
     def _to_yaml(self, report: BronzeDQReport | SilverDQReport | GoldDQReport) -> str:
-        """Serialize to YAML format (simple, no external dependencies)."""
-        return self._dict_to_yaml(to_dict(report))
+        """Serialize to YAML via safe_dump for correct scalar quoting."""
+        data = to_dict(report)
+        dumped = yaml.safe_dump(
+            data,
+            default_flow_style=False,
+            allow_unicode=True,
+            sort_keys=True,
+        )
+        return cast(str, dumped).rstrip("\n")
 
     def _to_html(self, report: BronzeDQReport | SilverDQReport | GoldDQReport) -> str:
         """Serialize to HTML report with styling."""
         return self._generate_html(to_dict(report), report)
 
     def _dict_to_yaml(self, data: JsonDict, indent: int = 0) -> str:
-        """Simple YAML serialization without external dependencies."""
+        """Simple YAML serialization with explicit empty collections."""
         lines = []
         prefix = "  " * indent
 
@@ -162,8 +183,12 @@ class DQReportSerializer:
     ) -> list[str]:
         """Convert a single key-value pair to YAML lines."""
         if isinstance(value, dict):
+            if not value:
+                return [f"{prefix}{key}: {{}}"]
             return [f"{prefix}{key}:", self._dict_to_yaml(value, indent + 1)]
         if isinstance(value, list):
+            if not value:
+                return [f"{prefix}{key}: []"]
             return [f"{prefix}{key}:", *self._yaml_list(value, prefix, indent)]
         return [f"{prefix}{key}: {self._yaml_value(value)}"]
 
@@ -177,27 +202,33 @@ class DQReportSerializer:
         lines = []
         for item in items:
             if isinstance(item, dict):
-                lines.append(f"{prefix}  -")
-                lines.append(self._dict_to_yaml(item, indent + 2))
+                if not item:
+                    lines.append(f"{prefix}  - {{}}")
+                else:
+                    lines.append(f"{prefix}  -")
+                    lines.append(self._dict_to_yaml(item, indent + 2))
+            elif isinstance(item, list):
+                if not item:
+                    lines.append(f"{prefix}  - []")
+                else:
+                    lines.append(f"{prefix}  -")
+                    lines.extend(self._yaml_list(item, prefix + "  ", indent + 1))
             else:
                 lines.append(f"{prefix}  - {self._yaml_value(item)}")
         return lines
 
     def _yaml_value(self, value: object) -> str:
-        """Format a single value for YAML."""
-        if value is None:
-            return "null"
-        if isinstance(value, bool):
-            return str(value).lower()
-        if isinstance(value, str):
-            return self._quote_yaml_string(value)
-        return str(value)
+        """Format a single value for YAML using safe_dump scalar form."""
+        dumped = yaml.safe_dump(
+            value,
+            default_flow_style=True,
+            allow_unicode=True,
+        )
+        return cast(str, dumped).strip()
 
     def _quote_yaml_string(self, value: str) -> str:
-        """Quote YAML string if it contains special characters."""
-        if "\n" in value or ":" in value or "#" in value:
-            return f'"{value}"'
-        return value
+        """Quote YAML string with full escaping via safe_dump."""
+        return self._yaml_value(value)
 
     def _generate_html(
         self,
