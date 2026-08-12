@@ -223,8 +223,8 @@ entries:
     path: library/observability/dashboard-audit-cycle.md
     status: active
     class: operator-paste
-    tags: [observability, dashboard, grafana, audit, cycle, operator]
-    summary: Cyclic Grafana/BI dashboard audit — inventory, acceptance, panels, fix, re-verify
+    tags: [observability, dashboard, grafana, audit, cycle, density, render, operator]
+    summary: Cyclic dashboard audit N loops — render, density, fill, visual/layout/data, fix, re-verify
 
   # --- domain audit cards (generic nine-kit intake 2026-08) ---
   - id: prompt.audit.docs-content
