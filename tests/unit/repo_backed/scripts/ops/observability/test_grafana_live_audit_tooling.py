@@ -376,7 +376,7 @@ def test_live_audit_parse_args_uses_grafana_env_defaults(
         ]
     )
 
-    assert config.app_base_url == "http://localhost:8081"
+    assert config.app_base_url == "http://localhost:8000"
     assert config.loki_base_url == "http://localhost:3100"
     assert config.tempo_base_url == "http://localhost:3200"
     assert config.grafana_base_url == "http://grafana.local:3000"
@@ -1116,7 +1116,7 @@ def test_live_audit_resolves_http_backend_from_datasource_candidates(
 ) -> None:
     config = audit_subject.AuditConfig(
         prometheus_base_url="http://localhost:9090",
-        app_base_url="http://localhost:8081",
+        app_base_url="http://localhost:8000",
         loki_base_url="http://localhost:3100",
         tempo_base_url="http://localhost:3200",
         grafana_base_url="http://localhost:3000",
@@ -1133,18 +1133,18 @@ def test_live_audit_resolves_http_backend_from_datasource_candidates(
     monkeypatch.setattr(
         audit_subject,
         "_discover_http_datasource_url",
-        lambda *_args, **_kwargs: "http://host.docker.internal:8081",
+        lambda *_args, **_kwargs: "http://host.docker.internal:8000",
     )
 
     def fake_fetch_json(url: str, *, timeout_seconds: float) -> object:
         assert timeout_seconds == config.request_timeout_seconds
-        if url == "http://localhost:8081/health/live":
+        if url == "http://localhost:8000/health/live":
             return {"status": "ok"}
         raise OSError(url)
 
     monkeypatch.setattr(audit_subject, "_fetch_json", fake_fetch_json)
 
-    assert audit_subject._resolve_app_base_url(config) == "http://localhost:8081"
+    assert audit_subject._resolve_app_base_url(config) == "http://localhost:8000"
 
 
 def test_live_audit_resolves_http_backend_through_grafana_datasource_proxy(
@@ -1152,7 +1152,7 @@ def test_live_audit_resolves_http_backend_through_grafana_datasource_proxy(
 ) -> None:
     config = audit_subject.AuditConfig(
         prometheus_base_url="http://localhost:9090",
-        app_base_url="http://localhost:8081",
+        app_base_url="http://localhost:8000",
         loki_base_url="http://localhost:3100",
         tempo_base_url="http://localhost:3200",
         grafana_base_url="http://localhost:3000",
@@ -1189,10 +1189,10 @@ def test_live_audit_resolves_http_backend_through_grafana_datasource_proxy(
 
     assert (
         audit_subject._resolve_app_base_url(config)
-        == "http://localhost:3000/api/datasources/proxy/uid/quarantine-explorer"
+        == "http://localhost:3000/api/datasources/proxy/uid/bioetl-ops-http"
     )
     assert captured["url"].endswith(
-        "/api/datasources/proxy/uid/quarantine-explorer/health/live"
+        "/api/datasources/proxy/uid/bioetl-ops-http/health/live"
     )
     assert captured["auth_header"].startswith("Basic ")
 
@@ -1202,7 +1202,7 @@ def test_live_audit_strips_userinfo_before_authenticated_proxy_request(
 ) -> None:
     config = audit_subject.AuditConfig(
         prometheus_base_url="http://localhost:9090",
-        app_base_url="http://admin:changeme@localhost:3000/api/datasources/proxy/uid/quarantine-explorer",
+        app_base_url="http://admin:changeme@localhost:3000/api/datasources/proxy/uid/bioetl-ops-http",
         loki_base_url="http://localhost:3100",
         tempo_base_url="http://localhost:3200",
         grafana_base_url="http://localhost:3000",
@@ -1235,6 +1235,6 @@ def test_live_audit_strips_userinfo_before_authenticated_proxy_request(
     assert payload == {"status": "ok"}
     assert captured["url"] == (
         "http://localhost:3000/api/datasources/proxy/uid/"
-        "quarantine-explorer/health/live"
+        "bioetl-ops-http/health/live"
     )
     assert captured["auth_header"].startswith("Basic ")
