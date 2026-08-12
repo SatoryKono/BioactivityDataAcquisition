@@ -116,7 +116,7 @@ class BaseProviderConfig(BaseClientConfig):
     """
 
     batch_size: int = 100
-    api_key: str | None = None
+    api_key: str | None = field(default=None, repr=False)
 
     def __post_init__(self) -> None:
         """Validate provider configuration."""

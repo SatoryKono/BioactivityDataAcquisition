@@ -42,7 +42,7 @@ class EnumLoaderProtocol(Protocol):
 def _normalize_coordinate(value: str, *, label: str) -> str:
     normalized = value.strip().lower()
     if not normalized:
-        raise KeyError(f"Enum {label} cannot be blank")
+        raise ValueError(f"Enum {label} cannot be blank")
     return normalized
 
 
