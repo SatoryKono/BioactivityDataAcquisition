@@ -703,12 +703,6 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
-    "scripts/engineering/ci/rerun_pr_checks.sh": {
-      "decision": "temporary_diagnostic",
-      "next_step": "Retain only as the bounded GitHub Actions recovery helper for the current billing/LFS incident; remove it after affected pull requests are retriggered or promote the behavior into governed CI tooling if recurring use is approved.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
     "scripts/engineering/common/cli_dispatch.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the shared CLI dispatch helper for canonical scripts.engineering and adjacent routers; promote it to active inventory once helper modules receive explicit catalog classification.",
