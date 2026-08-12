@@ -76,6 +76,18 @@ Target **6** active operator-paste cards:
 Migration rules: strip evaluation scorecards from paste body; add YAML
 frontmatter; compose shared guardrails via `fragments/`.
 
+## Dual-agent cycle intake (2026-08-12)
+
+| Path | Class | Status | Notes |
+| --- | --- | --- | --- |
+| `library/audit/dual-agent-cycle.md` | operator-paste | active | Parent cycle card |
+| `library/audit/role-auditor.md` | operator-paste | active | Role A duties |
+| `library/audit/role-planner.md` | operator-paste | active | Role B duties |
+| `fragments/dual-agent-handoff.md` | fragment | active | task-pack / handoff |
+| `fragments/coderabbit-dual-pass.md` | fragment | active | CR → agent |
+| `fragments/peer-review-gate.md` | fragment | active | peer close gate |
+| Workflow `dual-agent-audit-cycle.rhai` | — | planned P3 | not shipped in P1 |
+
 ## Phase 3 archive / demote (#8517) — **DONE**
 
 ### Runtime mirrors → `archive/mirrors/` (done)

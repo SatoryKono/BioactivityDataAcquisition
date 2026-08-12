@@ -45,39 +45,6 @@
         }
       },
       {
-        "block_path": "pipeline.sink.gold",
-        "fingerprint": "224fb15fbaa3",
-        "governance": {
-          "decision": "retain_shared_entity_gold_sink_policy",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-config",
-          "rationale": "Gold sink settings are shared intentionally across matching entity configs to preserve deterministic sink layout policy.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 3,
-        "occurrences": [
-          {
-            "block_path": "pipeline.sink.gold",
-            "path": "configs/entities/chembl/assay.yaml",
-            "surface_kind": "entity_config"
-          },
-          {
-            "block_path": "pipeline.sink.gold",
-            "path": "configs/entities/chembl/publication.yaml",
-            "surface_kind": "entity_config"
-          },
-          {
-            "block_path": "pipeline.sink.gold",
-            "path": "configs/entities/chembl/target.yaml",
-            "surface_kind": "entity_config"
-          }
-        ],
-        "serialized_bytes": 205,
-        "surface_kind_counts": {
-          "entity_config": 3
-        }
-      },
-      {
         "block_path": "composite.merge.column_groups",
         "fingerprint": "4be2a0f66fdc",
         "governance": {
@@ -225,20 +192,25 @@
     ],
     "notes": [
       "This audit covers structured config/contract/registry surfaces under configs/** that JSCPD intentionally ignores. Generated JSON Schema mirrors stay governed by schema drift checks and are excluded from the authored-config duplication debt ratchet.",
+      "Generated JSON Schemas are excluded because their repeated $defs are materialized from shared Pydantic source models rather than independently maintained configuration debt.",
+      "The generated test telemetry baseline is excluded because repeated duration maps are captured observations, not maintained config debt.",
       "Clusters report exact canonical JSON subtree duplicates only; near-duplicate prose and comment drift stay out of scope.",
       "The audit is report-only and exists to make YAML/JSON governance duplication reviewable in CI-visible artifacts.",
       "Every reported duplicate cluster carries owner/rationale metadata so retained duplication is explicit debt rather than implicit residue."
     ],
     "scope": {
-      "excluded_generated_prefixes": [
-        "configs/_schema/"
+      "excluded_generated_files": [
+        "configs/quality/test_telemetry_baseline.yaml"
+      ],
+      "excluded_generated_roots": [
+        "configs/_schema"
       ],
       "file_suffixes": [
         ".yaml",
         ".yml",
         ".json"
       ],
-      "files_scanned": 231,
+      "files_scanned": 230,
       "ignored_by_jscpd_patterns": [
         "**/configs/**",
         "**/*.yaml",
@@ -250,10 +222,10 @@
       "structured_block_min_bytes": 200
     },
     "summary": {
-      "affected_file_count": 13,
-      "duplicate_cluster_count": 7,
-      "duplicate_occurrence_count": 18,
-      "reported_cluster_count": 7
+      "affected_file_count": 10,
+      "duplicate_cluster_count": 6,
+      "duplicate_occurrence_count": 15,
+      "reported_cluster_count": 6
     }
   },
   "entity_effective": {
@@ -289,5 +261,5 @@
     "composite_runtime family is at zero inconsistent keys as of Stream B plateau.",
     "Residual entity drift is limited to intentional entity-specific filters, metadata policy blocks, schema field-alias surfaces, and pipeline overrides."
   ],
-  "snapshot_date": "2026-08-11"
+  "snapshot_date": "2026-08-12"
 }

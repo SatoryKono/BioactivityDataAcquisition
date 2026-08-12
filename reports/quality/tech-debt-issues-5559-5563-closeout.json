@@ -3,8 +3,8 @@
   "status": "implemented_local_closeable",
   "budget_policy": "no_growth_ratchet_only",
   "metrics": {
-    "config_duplicate_cluster_count": 16,
-    "config_duplicate_occurrence_count": 38
+    "config_duplicate_cluster_count": 23,
+    "config_duplicate_occurrence_count": 52
   },
   "issues": [
     {

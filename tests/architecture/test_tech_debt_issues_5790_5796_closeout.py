@@ -302,7 +302,16 @@ def test_issue_5794_shared_composite_policy_is_externalized() -> None:
     assert closeout["outcomes"]["5794"]["debt_type"] == "composite_config_duplication"
     assert closeout["outcomes"]["5794"]["outcome"] == "improved"
     assert closeout["outcomes"]["5794"]["opening_baseline"] == 24
+<<<<<<< HEAD
+    assert (
+        closeout["outcomes"]["5794"]["current_value"]
+        == summary["duplicate_cluster_count"]
+    )
+||||||| merged common ancestors
+    assert closeout["outcomes"]["5794"]["current_value"] == 9
+=======
     assert closeout["outcomes"]["5794"]["current_value"] <= 9
+>>>>>>> origin/docs/rf004-final-closeout-evidence
     assert "closeout_reason" in closeout["outcomes"]["5794"]
 
     assert (
