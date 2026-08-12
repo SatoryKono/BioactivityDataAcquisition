@@ -48,8 +48,6 @@ class EnrichmentResult:
         )
 
     def _validate_rates_and_duration(self) -> None:
-        import math
-
         if not (0.0 <= self.dq_error_rate <= 1.0):
             raise ValueError(f"dq_error_rate must be 0.0-1.0, got {self.dq_error_rate}")
         if not math.isfinite(self.duration_seconds):
