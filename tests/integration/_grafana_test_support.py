@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 
+import copy
 import io
 import json
 import logging
@@ -55,6 +56,7 @@ __all__ = [
     "get_row_child_panels",
     "index_panels_by_base_title",
     "load_dashboard",
+    "materialize_expanded",
     "panel_base_title",
     "require_dashboard_navigation_links",
     "strip_scope_title_prefix",
@@ -263,6 +265,35 @@ def load_dashboard(dashboard_path: Path) -> dict:
     """Load one dashboard JSON payload."""
     with open(dashboard_path, encoding="utf-8-sig") as f:
         return json.load(f)
+
+
+def materialize_expanded(dashboard: dict) -> dict:
+    """Return a deep copy of ``dashboard`` with every row group expanded.
+
+    Test/audit-stage materialization only. Collapsed forensic rows are expanded
+    (``collapsed=False``) and their nested child panels are hoisted to the root
+    ``panels`` list immediately after the row, mirroring Grafana row expansion.
+    The shipped/production JSON stays collapsed on disk (progressive disclosure,
+    design-system section 4.3); callers receive an independent, mutated copy and
+    the cached ``load_dashboard`` payload is never mutated.
+    """
+    materialized = copy.deepcopy(dashboard)
+    root_panels = materialized.get("panels")
+    if not isinstance(root_panels, list):
+        return materialized
+
+    expanded: list[dict] = []
+    for panel in root_panels:
+        if isinstance(panel, dict) and panel.get("type") == "row":
+            nested = panel.get("panels") or []
+            panel["collapsed"] = False
+            panel["panels"] = []
+            expanded.append(panel)
+            expanded.extend(child for child in nested if isinstance(child, dict))
+        else:
+            expanded.append(panel)
+    materialized["panels"] = expanded
+    return materialized
 
 
 @cache
