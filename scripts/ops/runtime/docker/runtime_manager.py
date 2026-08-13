@@ -59,6 +59,48 @@ def _dashboard_runtime_environment(
                 os.environ[name] = value
 
 
+def _materialize_report_source_identity(
+    *,
+    spec: StackSpec,
+    contract_path: Path,
+) -> Path | None:
+    """Attest the selected reports bind before a main start/recover preflight."""
+    if spec.name != "main":
+        return None
+    contract = _load_contract(contract_path)
+    data_plane = contract.get("dashboard_data_plane")
+    if not isinstance(data_plane, Mapping):
+        raise ValueError("dashboard_data_plane contract is missing")
+    source_contract = data_plane.get("source_identity")
+    mount_contract = data_plane.get("required_bind_mounts")
+    if not isinstance(source_contract, Mapping) or not isinstance(
+        mount_contract, Mapping
+    ):
+        raise ValueError("dashboard source identity contract is incomplete")
+    environment = runtime_preflight.dashboard_source_environment(ROOT, contract)
+    identity_environment = str(source_contract.get("environment_name") or "").strip()
+    source_id = environment.get(identity_environment, "")
+    reports_spec = mount_contract.get("/app/reports")
+    if not isinstance(reports_spec, Mapping):
+        raise ValueError("dashboard reports bind contract is missing")
+    reports_environment = str(reports_spec.get("environment_name") or "").strip()
+    reports_source = environment.get(reports_environment, "")
+    if not source_id or not reports_source:
+        raise ValueError("dashboard report source identity cannot be resolved")
+    from bioetl.application.services.run_reports.paths import (
+        write_report_root_source_identity,
+    )
+
+    reports_root = runtime_preflight.host_filesystem_path(
+        reports_source,
+        root=ROOT,
+    )
+    return write_report_root_source_identity(
+        report_root=reports_root / "run-reports",
+        source_id=source_id,
+    )
+
+
 @dataclass(frozen=True)
 class CommandResult:
     command: list[str]
@@ -1628,6 +1670,7 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 _STATUS_ORIGIN_CODES = frozenset(
     {
+        "DASHBOARD_REPORT_SOURCE_IDENTITY",
         "DASHBOARD_SOURCE_IDENTITY",
         "DASHBOARD_SOURCE_MOUNT",
         "MOUNT_ORIGIN",
@@ -1745,6 +1788,10 @@ def _dispatch_action(
         print(json.dumps(payload, sort_keys=True, default=str))
         return 0 if report.ok else 1
     if args.action in {"start", "recover"}:
+        _materialize_report_source_identity(
+            spec=spec,
+            contract_path=contract_path,
+        )
         return start_or_recover(
             spec,
             contract_path,

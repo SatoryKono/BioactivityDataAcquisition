@@ -21,10 +21,25 @@ from typing import Any
 import yaml
 
 _REPO_ROOT = Path(__file__).resolve().parents[4]
-if str(_REPO_ROOT) not in sys.path:
+_SRC_ROOT = _REPO_ROOT / "src"
+for _import_root in (_REPO_ROOT, _SRC_ROOT):
     # Keep the supported direct CLI entrypoint able to import shared script
     # helpers even though Python otherwise anchors sys.path at this directory.
-    sys.path.insert(0, str(_REPO_ROOT))
+    if str(_import_root) not in sys.path:
+        sys.path.insert(0, str(_import_root))
+
+from bioetl.application.services.run_reports.paths import (
+    inspect_report_root_source_identity,
+)
+from bioetl.application.services.run_reports.source_identity import (
+    IDENTITY_STATE_ALIGNED,
+    compare_runtime_source_identity,
+    compute_runtime_source_id,
+    load_repository_source_environment,
+    normalize_runtime_path,
+    resolve_runtime_source_identity,
+    runtime_path_to_local_path,
+)
 
 DEFAULT_CONTRACT = Path("configs/quality/docker_runtime_contracts.yaml")
 _WSL_EXE = "wsl.exe"
@@ -209,45 +224,17 @@ def _path_origin(path: str) -> str:
 
 
 def _normalise_path(path: str, *, root: Path) -> str:
-    value = path.strip().strip('"').replace("\\", "/")
-    drive_match = WINDOWS_DRIVE_PATTERN.match(value)
-    if drive_match:
-        drive, suffix = drive_match.groups()
-        suffix_norm = (suffix or "").lstrip("/")
-        # Return canonical /mnt form without Path() round-trip: on Windows,
-        # Path("/mnt/c/...") becomes a bogus "C:\\mnt\\c\\..." and breaks
-        # dashboard bind equivalence checks used by preflight/start gates.
-        if suffix_norm:
-            return f"/mnt/{drive.lower()}/{suffix_norm}".casefold()
-        return f"/mnt/{drive.lower()}".casefold()
-    docker_desktop_match = re.match(
-        r"^/(?:run/desktop/mnt/host|host_mnt)/([A-Za-z])(?:/(.*))?$",
-        value,
-        flags=re.IGNORECASE,
-    )
-    if docker_desktop_match:
-        drive, suffix = docker_desktop_match.groups()
-        if suffix:
-            return f"/mnt/{drive.lower()}/{suffix}".casefold()
-        return f"/mnt/{drive.lower()}".casefold()
-    wsl_unc_match = re.match(
-        r"^//(?:wsl\$|wsl\.localhost)/[^/]+(/.*)$",
-        value,
-        flags=re.IGNORECASE,
-    )
-    if wsl_unc_match:
-        value = wsl_unc_match.group(1)
-    if re.match(r"^/mnt/[a-z](?:/|$)", value, flags=re.IGNORECASE):
-        return value.casefold()
-    candidate = Path(value)
-    if not candidate.is_absolute():
-        candidate = root / candidate
-        # Re-enter for absolute Windows paths produced from relative sources.
-        return _normalise_path(str(candidate), root=root)
-    normalized = os.path.normcase(os.path.normpath(str(candidate)))
-    if re.match(r"^/mnt/[a-z](?:/|$)", normalized, flags=re.IGNORECASE):
-        return normalized.casefold()
-    return normalized
+    return normalize_runtime_path(path, root=root)
+
+
+def normalise_host_path(path: str | Path, *, root: Path) -> str:
+    """Return one comparison form for WSL, Windows, and Desktop host paths."""
+    return _normalise_path(str(path), root=root)
+
+
+def host_filesystem_path(path: str | Path, *, root: Path) -> Path:
+    """Resolve a host path to a locally readable form without changing identity."""
+    return runtime_path_to_local_path(path, root=root)
 
 
 def compose_host_bind_path(path: str | Path, *, root: Path) -> str:
@@ -278,6 +265,9 @@ def compose_host_bind_path(path: str | Path, *, root: Path) -> str:
 def dashboard_source_environment(
     root: Path,
     contract: Mapping[str, Any],
+    *,
+    process_environment: Mapping[str, object] | None = None,
+    repository_environment: Mapping[str, object] | None = None,
 ) -> dict[str, str]:
     """Build the explicit bind-root and opaque source-identity environment.
 
@@ -293,6 +283,26 @@ def dashboard_source_environment(
     ):
         return {}
 
+    process = process_environment if process_environment is not None else os.environ
+    identity_environment = str(identity_contract.get("environment_name") or "").strip()
+    source_names = {
+        identity_environment,
+        *(
+            str(spec.get("environment_name") or "").strip()
+            for spec in mount_contract.values()
+            if isinstance(spec, Mapping)
+        ),
+    }
+    repository = (
+        dict(repository_environment)
+        if repository_environment is not None
+        else load_repository_source_environment(
+            root,
+            names=source_names,
+            process_environment=process,
+        )
+    )
+
     environment: dict[str, str] = {}
     identity_mounts: dict[str, str] = {}
     for target, raw_spec in sorted(
@@ -304,36 +314,45 @@ def dashboard_source_environment(
         environment_name = str(raw_spec.get("environment_name") or "").strip()
         if not relative_source or not environment_name:
             continue
+        # An explicit absolute override selects the artifact tree intentionally;
+        # otherwise the contracted path remains rooted at this checkout.
+        selected_source = (
+            str(process.get(environment_name) or "").strip()
+            or str(repository.get(environment_name) or "").strip()
+            or relative_source
+        )
         # Identity hash stays on the canonical comparison form; Compose env uses
         # host-safe absolute bind sources so Desktop cannot pin a stale empty tree.
-        identity_mounts[str(target)] = _normalise_path(relative_source, root=root)
+        identity_mounts[str(target)] = _normalise_path(selected_source, root=root)
         environment[environment_name] = compose_host_bind_path(
-            relative_source, root=root
+            selected_source, root=root
         )
 
-    identity_environment = str(identity_contract.get("environment_name") or "").strip()
     schema_version = str(identity_contract.get("schema_version") or "").strip()
     if identity_environment and schema_version and identity_mounts:
-        identity_payload = {
-            "schema_version": schema_version,
-            "repository_root": _normalise_path(str(root), root=root),
-            "mounts": identity_mounts,
-        }
-        canonical_payload = json.dumps(
-            identity_payload,
-            sort_keys=True,
-            separators=(",", ":"),
-        ).encode("utf-8")
-        environment[identity_environment] = hashlib.sha256(
-            canonical_payload
-        ).hexdigest()
+        computed = compute_runtime_source_id(
+            runtime_root=root,
+            mounts=identity_mounts,
+            schema_version=schema_version,
+        )
+        resolution = resolve_runtime_source_identity(
+            computed_identity=computed,
+            process_environment=process,
+            repository_environment=repository,
+            environment_name=identity_environment,
+            label_name=str(identity_contract.get("label_name") or "").strip(),
+        )
+        if resolution.value is not None:
+            environment[identity_environment] = resolution.value
     return environment
 
 
 def _is_discouraged_bind_source(path: str, discouraged: Sequence[str]) -> bool:
     normalized = path.replace("\\", "/").lower()
-    return _path_origin(path) != "linux" or any(
-        normalized.startswith(prefix.lower()) for prefix in discouraged
+    comparable = _normalise_path(normalized, root=_repo_root())
+    return any(
+        comparable.startswith(_normalise_path(str(prefix), root=_repo_root()).lower())
+        for prefix in discouraged
     )
 
 
@@ -1321,6 +1340,7 @@ _CONTAINER_INSPECT_FORMAT = (
     '"project":{{json (index .Config.Labels "com.docker.compose.project")}},'
     '"service":{{json (index .Config.Labels "com.docker.compose.service")}},'
     '"dashboard_source_id":{{json (index .Config.Labels "io.bioetl.dashboard-source-id")}},'
+    '"environment":{{json .Config.Env}},'
     '"ports":{{json .NetworkSettings.Ports}},"mounts":{{json .Mounts}}}'
 )
 
@@ -1406,6 +1426,20 @@ def _project_to_stack_map(contract: Mapping[str, Any]) -> dict[Any, Any]:
         stack["project_name"]: stack_name
         for stack_name, stack in contract.get("stacks", {}).items()
     }
+
+
+def _container_environment_values(container: Mapping[str, Any]) -> dict[str, str]:
+    """Decode Docker's bounded ``KEY=value`` environment list."""
+    values: dict[str, str] = {}
+    raw_environment = container.get("environment")
+    if not isinstance(raw_environment, list):
+        return values
+    for item in raw_environment:
+        if not isinstance(item, str) or "=" not in item:
+            continue
+        name, value = item.split("=", 1)
+        values[name] = value
+    return values
 
 
 def _port_owners_from_containers(
@@ -1497,6 +1531,34 @@ def _dashboard_source_findings(
     expected_identity = expected_environment.get(identity_environment)
     unmanaged_value = str(identity_contract.get("unmanaged_value") or "unmanaged")
     findings: list[Finding] = []
+
+    reports_spec = required_mounts.get("/app/reports")
+    if isinstance(reports_spec, Mapping) and expected_identity:
+        reports_environment = str(reports_spec.get("environment_name") or "").strip()
+        reports_source = expected_environment.get(reports_environment)
+        if reports_source:
+            report_root = (
+                host_filesystem_path(reports_source, root=root) / "run-reports"
+            )
+            source_check = inspect_report_root_source_identity(
+                report_root=report_root,
+                expected_source_id=expected_identity,
+            )
+            if source_check.get("source_identity_status") != "healthy":
+                findings.append(
+                    Finding(
+                        "DASHBOARD_REPORT_SOURCE_IDENTITY",
+                        "error",
+                        "Dashboard report root is not attested to this runtime source",
+                        {
+                            "stack": producer_stack,
+                            "service": producer_service,
+                            "source_identity": source_check.get("source_identity"),
+                            "expected": source_check.get("source_identity_expected"),
+                            "actual": source_check.get("source_identity_actual"),
+                        },
+                    )
+                )
     for container in containers:
         stack_name = project_to_stack.get(container.get("project"))
         if stack_name != producer_stack or container.get("service") != producer_service:
@@ -1510,10 +1572,14 @@ def _dashboard_source_findings(
             if not isinstance(raw_spec, Mapping):
                 continue
             relative_source = str(raw_spec.get("relative_source") or "").strip()
-            if not relative_source:
+            environment_name = str(raw_spec.get("environment_name") or "").strip()
+            if not relative_source or not environment_name:
                 continue
             target_text = str(target)
-            expected_source = _normalise_path(relative_source, root=root)
+            expected_source = _normalise_path(
+                expected_environment.get(environment_name, relative_source),
+                root=root,
+            )
             actual_source = mounts_by_target.get(target_text)
             normalized_actual = (
                 _normalise_path(actual_source, root=root) if actual_source else None
@@ -1533,8 +1599,23 @@ def _dashboard_source_findings(
                         },
                     )
                 )
-        actual_identity = str(container.get("dashboard_source_id") or "")
-        if not expected_identity or actual_identity in {"", unmanaged_value}:
+        label_name = str(identity_contract.get("label_name") or "").strip()
+        container_resolution = resolve_runtime_source_identity(
+            container_environment=_container_environment_values(container),
+            container_labels={label_name: container.get("dashboard_source_id")},
+            environment_name=identity_environment,
+            label_name=label_name,
+        )
+        actual_identity = container_resolution.value
+        comparison = compare_runtime_source_identity(
+            expected=expected_identity,
+            actual=actual_identity,
+        )
+        if (
+            not expected_identity
+            or not container_resolution.is_resolved
+            or str(container.get("dashboard_source_id") or "") == unmanaged_value
+        ):
             findings.append(
                 Finding(
                     "DASHBOARD_SOURCE_IDENTITY",
@@ -1544,11 +1625,16 @@ def _dashboard_source_findings(
                         "stack": producer_stack,
                         "service": producer_service,
                         "expected": expected_identity,
-                        "actual": actual_identity or None,
+                        "actual": actual_identity,
+                        "state": comparison.state,
+                        "source": container_resolution.source,
                     },
                 )
             )
-        elif actual_identity != expected_identity:
+        elif (
+            comparison.state != IDENTITY_STATE_ALIGNED
+            or not container_resolution.is_consistent
+        ):
             findings.append(
                 Finding(
                     "DASHBOARD_SOURCE_IDENTITY",
@@ -1559,6 +1645,10 @@ def _dashboard_source_findings(
                         "service": producer_service,
                         "expected": expected_identity,
                         "actual": actual_identity,
+                        "state": comparison.state,
+                        "source": container_resolution.source,
+                        "conflicts": list(container_resolution.conflicts),
+                        "invalid_sources": list(container_resolution.invalid_sources),
                     },
                 )
             )
