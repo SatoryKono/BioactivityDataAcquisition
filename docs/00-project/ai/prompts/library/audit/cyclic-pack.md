@@ -64,7 +64,7 @@ above **explicitly** enables mutations. `INCLUDE_PIPELINE` applies to **docs-cyc
 
 ### A. Single-agent cyclic (default)
 
-1. Open the domain card (`prompt.audit.cycle.*` or legacy tests-cycle / docs-cycle / …).
+1. Open the domain card (tests-cycle / docs-cycle / tech-debt-cycle / …).
 2. Paste into agent with params filled (for mutations set ALLOW_* true).
 3. Agent may open issues, push PRs, merge, and close when acceptance is met.
 
@@ -120,14 +120,11 @@ Use prompt.audit.coderabbit-project-cycle with:
 | --- | --- |
 | `prompt.tests.cycle` | **Run** pytest loop (baseline → fix → retest) |
 | `prompt.audit.tests-cycle` | **Audit** the test *system* (lanes, flaky, gates) |
-| `prompt.audit.cycle.tests` | Canonical cyclic test-system card in `cycle/` |
 | `prompt.audit.repo-tree` | One-shot root/tree hygiene audit |
 | `prompt.audit.repo-tree-cycle` | **Cyclic** root/tree hygiene (N loops + fix/PR) |
 | `prompt.architecture.review` | One-shot architecture review (hexagonal/C4) |
 | `prompt.architecture.cycle` | **Cyclic** architecture audit (v1.1): 10 categories → plan → implement |
-| `prompt.audit.cycle.architecture` | Canonical cyclic architecture card in `cycle/` |
 | `prompt.audit.coderabbit-project-cycle` | **Exhaustive** project cyclic audit + CodeRabbit dual-pass |
-| `prompt.audit.cycle.coderabbit` | Canonical cyclic CodeRabbit card in `cycle/` |
 | `prompt.audit.grok-cycle` | Generic one-cycle meta audit (any SCOPE) |
 | `prompt.audit.orchestrator` | Generic N-loop shell (needs AUDIT_PROMPT_SOURCE) |
 

@@ -23,17 +23,10 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.tests.cycle` | `library/tests/test-cycle.md` | Cyclic testing — baseline run, triage, fix, retest, delta per cycle |
 | `prompt.docs.ai-audit-planning` | `library/docs/ai-audit-planning.md` | Plan an audit of docs/00-project/ai surfaces |
 | `prompt.architecture.review` | `library/architecture/review-assessment.md` | Architecture review v2.3 (hexagonal/C4/arc42) with findings.json outputs |
-<<<<<<< Updated upstream
-| `prompt.architecture.cycle` | `library/architecture/architecture-cycle.md` | Cyclic project architecture audit — layers, boundaries, ADR drift, fix waves |
-||||||| Stash base
-| `prompt.architecture.cycle` | `library/architecture/architecture-cycle.md` | Cyclic architecture audit — 10-category scorecard, plan, implement waves |
-| `prompt.audit.coderabbit-project-cycle` | `library/audit/coderabbit-project-cycle.md` | Exhaustive cyclic project audit with CodeRabbit dual-pass |
-=======
 | `prompt.architecture.cycle` | `library/architecture/architecture-cycle.md` | Cyclic architecture audit — 10-category scorecard, improvement plan, implement waves |
->>>>>>> Stashed changes
 | `prompt.observability.dashboard-panel-audit` | `library/observability/dashboard-panel-audit.md` | Five-phase Grafana panel audit — render, GH issues, fix, closeout (v1.1) |
 | `prompt.observability.bi-dashboard-acceptance` | `library/observability/bi-dashboard-acceptance.md` | BI dashboard acceptance — visual, layout, data contours with measurable checks |
-| `prompt.observability.dashboard-audit-cycle` | `library/observability/dashboard-audit-cycle.md` | Cyclic dashboard audit N loops — render, density, fill, visual/layout/data, fix, re-verify |
+| `prompt.observability.dashboard-audit-cycle` | `library/observability/dashboard-audit-cycle.md` | Exhaustive cyclic Grafana audit of every panel, viewport, density, typography, color, scroll, whitespace, data, and render contract |
 | `prompt.audit.docs-content` | `library/audit/docs-content.md` | Evidence-based audit of project documentation content and drift |
 | `prompt.audit.tests-system` | `library/audit/tests-system.md` | Audit test system as regression detection, not coverage vanity |
 | `prompt.audit.tech-debt` | `library/audit/tech-debt.md` | Evidence-based technical debt register with risk-ordered paydown |
