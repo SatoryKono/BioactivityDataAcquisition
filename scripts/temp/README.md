@@ -27,11 +27,6 @@ Bounded cycle-2 Grafana contour diagnostics. Prefer `reports/audit/` for dumps; 
 - `panels_static_audit_cycle2.py` — static panel contour diagnostic
 - `panels_contour_cycle2_notes.md` — operator notes for the cycle-2 panel contour run (not executable)
 
-### Merge / audit campaign helpers (Review by: 2026-09-30)
-
-- `resolve_coderabbit_merge_conflicts.py` — bounded CodeRabbit report merge recovery helper (not reusable merge policy)
-- `create_nine_domain_audit_issues.py` — one-shot helper that opened nine-domain audit GitHub issues
-
 ## Lifecycle Management
 
 - **Expiration Date:** 2026-09-30
