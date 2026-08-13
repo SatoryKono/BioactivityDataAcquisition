@@ -2,7 +2,7 @@
 record_id: dashboard-audit-cycle-fb73ff9b
 record_type: working
 repo_id: bioactivitydataacquisition
-git_commit: 623fe318d46cf95021f54676dc5b8e2caa4a3593
+git_commit: 08c9ff2b925265b8747e648468644789a608ac97
 branch: main
 worktree_id: 1e6d1ab8b15f9a38
 task_id: dashboard-audit-cycle-fb73ff9b
@@ -10,7 +10,7 @@ actor:
   runtime: codex
   agent: codex
   model: null
-created_at: '2026-08-13T09:18:16.081379+00:00'
+created_at: '2026-08-13T09:31:29.649593+00:00'
 source_refs:
 - reports/audit-runs/20260813T090218Z-dash-cycle-fb73ff9b/final-summary.md
 source_hashes: {}
@@ -19,15 +19,15 @@ security_class: internal
 status: active
 supersedes: []
 schema_version: 1
-content_digest: 14d3f778161ed9ef7474d8a80c751a1e72f9477b5b7973a90e3ff45be19d0ead
+content_digest: 9168338018211a44a97bbe55916f931ab7720172d0b7dd0363deb901a251ae77
 id: dashboard-audit-cycle-fb73ff9b
 title: Cyclic dashboard render and design audit
 ttl_days: 14
 confidence: episodic
-summary: Inventoried 7 shipped dashboards and 223 panels; static governance gates
-  passed; recorded two PROVEN P2 presentation findings; stopped after iteration 1
-  because the shared checkout was externally switched/reverted and GitHub access was
-  unavailable; monitoring remained off.
+summary: 'Recovered GitHub access with GITHUB_CDX_PERSONAL_ACCESS_TOKEN from .env
+  without logging the value; deduplicated and created issues #8729 and #8730 for the
+  two PROVEN P2 dashboard findings; updated audit artifacts; product remediation remains
+  blocked by concurrent checkout mutation.'
 ---
 
 # Episodic summary
@@ -38,7 +38,7 @@ summary: Inventoried 7 shipped dashboards and 223 panels; static governance gate
 
 ## Outcome
 
-- Inventoried 7 shipped dashboards and 223 panels; static governance gates passed; recorded two PROVEN P2 presentation findings; stopped after iteration 1 because the shared checkout was externally switched/reverted and GitHub access was unavailable; monitoring remained off.
+- Recovered GitHub access with GITHUB_CDX_PERSONAL_ACCESS_TOKEN from .env without logging the value; deduplicated and created issues #8729 and #8730 for the two PROVEN P2 dashboard findings; updated audit artifacts; product remediation remains blocked by concurrent checkout mutation.
 
 ## Lessons learned
 
