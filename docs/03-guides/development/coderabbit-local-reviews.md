@@ -8,7 +8,9 @@ Manual multi-topic CodeRabbit reviews for local engineering work.
   CodeRabbit review topics (`architecture-boundaries`, `adapters-resilience`,
   `pipelines-determinism`, `security`, `contracts-docs-drift`).
 
-Requires `CODERABBIT_API_KEY`. Prefer CI CodeRabbit workflow for merge gates.
+Requires CodeRabbit credentials: either `CODERABBIT_API_KEY` in the environment or a
+cached `coderabbit auth login` (`~/.coderabbit/auth.json`). Prefer CI CodeRabbit
+workflow for merge gates.
 
 
 ## WSL residual waves (env / API auth)
