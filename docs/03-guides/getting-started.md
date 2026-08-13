@@ -103,13 +103,14 @@ hit the known socket-buffer ceiling sooner than WSL/Linux.
 Manual fallback when you do not use the recommended bootstrap helper:
 
 ```bash
-uv sync --extra dev --extra tracing
+uv sync --extra dev --extra tests --extra tracing
 ```
 
-If you need MkDocs/site tooling, install the separate docs toolchain extra:
+If you need MkDocs/site tooling, install the separate docs toolchain extra on
+top of the canonical bootstrap extras:
 
 ```bash
-uv sync --extra dev --extra tracing --extra docs
+uv sync --extra dev --extra tests --extra tracing --extra docs
 ```
 
 On Windows without `make` or `uv`:
@@ -117,7 +118,7 @@ On Windows without `make` or `uv`:
 ```powershell
 py -3.13 -m venv .venv-win
 .\.venv-win\Scripts\Activate.ps1
-pip install -e .[dev,tracing,docs]
+pip install -e ".[dev,tests,tracing,docs]"
 ```
 
 For the supported aggregate setup flow, run
