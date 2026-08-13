@@ -243,7 +243,7 @@ Explorer health probe and monitoring setup docs for that reason.
    cards недоказательными.
    Datasource trust markers are targeted: `Runtime` keeps this explicit
    telemetry-gap panel first-screen, `Control Plane` uses
-   `Monitor Telemetry Coverage`, while CLI/API forensics (`bioetl quarantine inspect`) rely on
+   `Monitor Telemetry`, while CLI/API forensics (`bioetl quarantine inspect`) rely on
    explicit no-data/backend-failure copy instead of a generic datasource-health
    stat tile.
 1. `bioetl-runtime`, row-группы по сценарию:
@@ -255,7 +255,7 @@ Explorer health probe and monitoring setup docs for that reason.
 1. `bioetl-control-plane-v1`, answer row:
    `Inspect Scope & Evidence`, `Status`, `ID`, `Processed Records`, then
    `Monitor Replay Safety`, `Monitor Checkpoint Age`,
-   `Monitor Manifest & Ledger Failures` и `Monitor Telemetry Coverage`
+   `Monitor Manifest/Ledger` и `Monitor Telemetry`
    отвечают на L1/L2 вопрос: можно ли доверять
    manifest/ledger/checkpoint/lineage state и безопасно выполнять
    replay/resume прямо сейчас. Headline `Status` reads
@@ -547,7 +547,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
   same trust verdict as `chembl_assay`.
 
   **First 2 clicks (L1):**
-  1. Click #1: открыть `bioetl-control-plane-v1`, проверить `Monitor Replay Safety` (`id=891`), `Monitor Telemetry Coverage` (`id=907`) и `Review First Recovery Action` (`id=906`).
+  1. Click #1: открыть `bioetl-control-plane-v1`, проверить `Monitor Replay Safety` (`id=891`), `Monitor Telemetry` (`id=907`) и `Review First Recovery Action` (`id=906`).
   2. Click #2: перейти через top-level bus в `2. Pipeline Diagnostics` (если есть активный blocker) или `4. Data Quality` (если blocker связан с downstream quality symptoms). На первом экране оставлены current-status Trust KPI: `id=891..893`, `id=907`, copyable identity anchors and единый CTA `id=906`; `Track Replay Blockers in Range` (`id=130`) живёт внутри первого collapsed replay/checkpoint row, а `Review Terminal Run Outcomes` (`id=908`) остаётся manifest/ledger range evidence.
   Все остальные control-plane метрики перенесены в collapsed incident rows.
   Рекомендованный operator path: сначала проверить blocker cards, затем открыть
@@ -693,7 +693,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
   quarantine pressure, spike = incident. Next action: `Top Silver Reject
   Reasons` + `bioetl quarantine inspect` (CLI).
 - `runtime.id=16 (Monitor Runtime Blockers)`: non-zero = active blocker count; `UNKNOWN` means missing current runtime status/blocker telemetry and must not be treated as OK. Next action: runtime blockers table + culprit stage panels, затем file logs under `reports/logs/` при необходимости (no Grafana Loki/Tempo UI).
-- `runtime.id=9102 (Metrics Evidence)`: `0=SCRAPING/RULES OK`, `1=SCRAPE/RULE GAP`, `>=2=SCRAPE+RULE GAP`, `null=UNKNOWN`; checks scrape health plus runtime dashboard recording-rule evaluation failures, rule-group presence, and rule-group freshness. Any non-zero value forces headline `Status` and `Runtime Status` to `INCOMPLETE` (`3`).
+- `runtime.id=9102 (Metrics Evidence)`: `0=SCRAPING/RULES OK`, `1=RULE/SERIES GAP`, `>=2=RULE+SERIES GAP`, `null=UNKNOWN`; checks scrape health plus runtime dashboard recording-rule evaluation failures, rule-group presence, and rule-group freshness. Any non-zero value forces headline `Status` and `Runtime Status` to `INCOMPLETE` (`3`).
 - `runtime.id=205/id=236 (Failed Runs / Monitor No-Records Runs)`: `0` is valid only when `bioetl_runtime_pipeline_run_type_universe` confirms the selected scope; missing selected scope remains `UNKNOWN`.
 - `runtime.id=220 (Runtime Error Rate)`: elevated ratio with meaningful 30m Bronze denominator (`>=20`) = degradation risk; WARN starts at 5%, dashboard CRIT escalation at 20%, and lower/missing denominator stays `UNKNOWN`. Next action: `Inspect Errors by Stage / Error Code / Range` + failed runs/backlog/lag panels.
 - `runtime` current-triage panels normalize a manually selected `workflow_<pipeline>` value back to the entity pipeline before reading current runtime recording rules and error-rate/lag evidence. For example, `workflow_chembl_assay` resolves to the same current status and blocker scope as `chembl_assay`; `UNKNOWN` on error-rate still remains valid when the 30m Bronze denominator is absent or `<20`.
@@ -701,7 +701,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
   `3=INCOMPLETE`, `null=UNKNOWN`; it reads
   `bioetl_control_plane_current_status_trusted`, so missing/stale checkpoint or
   required telemetry evidence blocks replay/resume approval.
-- `control-plane.id=907 (Monitor Telemetry Coverage)`: `0=OK`, `1=WARN`, `>=2=CRIT`, `null=UNKNOWN`; non-zero/UNKNOWN means validate scrape/rules before trusting blocker zeros.
+- `control-plane.id=907 (Monitor Telemetry)`: `0=OK`, `1=WARN`, `>=2=CRIT`, `null=UNKNOWN`; non-zero/UNKNOWN means validate scrape/rules before trusting blocker zeros.
 - `control-plane.id=130 (Track Replay Blockers in Range)`: selected-range blocker count across manifest writes, ledger appends, checkpoint compatibility, replay reconstructability, replay drift, and lineage refs. Любой non-zero value означает investigate before replay/resume, но это historical range evidence, а не first-screen current-status verdict.
 
 - `overview.Status`: `CRIT` при failed runs `>0`, stage backlog `>0`,
@@ -737,7 +737,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
   improving first-click triage.
 - `control-plane.Track Replay Blockers in Range`: selected-range blocker
   count. Нулевое значение само по себе не доказывает safety; его нужно читать
-  вместе с current trust cards и `Monitor Telemetry Coverage = 0`.
+  вместе с current trust cards и `Monitor Telemetry = 0`.
 - `control-plane.Review Terminal Run Outcomes`: selected-range
   terminal evidence grouped by `terminal_status`. Эта панель pipeline-scoped only:
   metric contract не несёт `run_type`, поэтому `run_type` selector здесь не

@@ -565,7 +565,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor Manifest & Ledger Failures",
+      "title": "Monitor Manifest/Ledger",
       "type": "stat"
     },
     {
@@ -666,7 +666,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor Telemetry Coverage",
+      "title": "Monitor Telemetry",
       "type": "stat"
     },
     {
@@ -3579,7 +3579,7 @@
                 "inspect": true
               },
               "unit": "none",
-              "noValue": "No overview identity rows. Use the replay/resume summary above first; then verify backend health (/health/live) and selected run_id before treating this forensic view as empty."
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity."
             },
             "overrides": [
               {
@@ -3720,7 +3720,7 @@
                 }
               ],
               "unit": "none",
-              "noValue": "No copyable identity handoffs for this scope. Use the summary cards above, then select an exact run_id or verify backend health before treating this as expected empty."
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity."
             },
             "overrides": [
               {
@@ -3837,7 +3837,9 @@
         {
           "datasource": null,
           "fieldConfig": {
-            "defaults": {},
+            "defaults": {
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity."
+            },
             "overrides": []
           },
           "pluginVersion": "12.0.2",
@@ -3905,7 +3907,7 @@
                 "inspect": true
               },
               "unit": "none",
-              "noValue": "No identity gap rows for this forensic view. Use the summary cards above, then verify backend health and selected run scope before treating this as expected empty."
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity."
             },
             "overrides": [
               {
@@ -4302,7 +4304,7 @@
                 "inspect": true
               },
               "unit": "none",
-              "noValue": "Not resolved — no identity rows for the selected run/scope. Check backend health (/health/live), then select or reset run_id; this is not a valid empty run.",
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity.",
               "links": [
                 {
                   "title": "Copy/Open full value (plain text)",
@@ -4459,7 +4461,7 @@
               },
               "decimals": 0,
               "unit": "none",
-              "noValue": "Not resolved — no processed-record rows. Check backend health and selector scope; backend unavailable is not a valid zero-record state.",
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run in Browse Recent Runs. UNKNOWN/QUERY ERROR if a selected run has no accounting.",
               "links": [
                 {
                   "title": "Check BioETL Ops HTTP health",
@@ -4694,6 +4696,34 @@
                     "value": {
                       "type": "color-text"
                     }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "No data": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          },
+                          "UNKNOWN": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      },
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "null",
+                          "result": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               }

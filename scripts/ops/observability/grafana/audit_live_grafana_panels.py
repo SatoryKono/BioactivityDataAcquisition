@@ -1141,6 +1141,11 @@ def _summarize_processed_records_values(
 
 
 def _classify_processed_records_payload(payload: dict[str, object]) -> tuple[str, str]:
+    if payload.get("selection") == "required":
+        return (
+            "expected_empty",
+            "SELECT RUN — processed records require an exact run_id",
+        )
     if payload.get("contract") != _PROCESSED_RECORDS_CONTRACT:
         return (
             "invalid_shape",
@@ -1221,6 +1226,11 @@ def _classify_identity_payload(payload: dict[str, object]) -> tuple[str, str]:
     resolved_via = payload.get("resolved_via")
     if not isinstance(resolved_via, str) or not resolved_via:
         return ("invalid_shape", "Identity payload missing resolved_via")
+    if resolved_via == "selection_required":
+        return (
+            "expected_empty",
+            "SELECT RUN — identity requires an exact run_id",
+        )
     if resolved_via in _UNRESOLVED_IDENTITY_MODES:
         return ("unresolved_identity", f"Identity scope resolved via {resolved_via}")
     rows = payload.get("rows")

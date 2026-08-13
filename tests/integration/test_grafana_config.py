@@ -1155,8 +1155,8 @@ def test_control_plane_l1_triage_row_has_3_to_5_kpis_and_one_next_step() -> None
     kpi_titles = {
         "Monitor Replay Safety",
         "Monitor Checkpoint Age",
-        "Monitor Manifest & Ledger Failures",
-        "Monitor Telemetry Coverage",
+        "Monitor Manifest/Ledger",
+        "Monitor Telemetry",
     }
     next_step_title = "Review Recovery Action"
     first_screen_titles = {

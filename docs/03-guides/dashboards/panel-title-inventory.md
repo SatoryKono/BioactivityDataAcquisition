@@ -20,8 +20,8 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 906 | Review Recovery Action |
 | bioetl-control-plane-v1.json | 891 | Monitor Replay Safety |
 | bioetl-control-plane-v1.json | 892 | Monitor Checkpoint Age |
-| bioetl-control-plane-v1.json | 893 | Monitor Manifest & Ledger Failures |
-| bioetl-control-plane-v1.json | 907 | Monitor Telemetry Coverage |
+| bioetl-control-plane-v1.json | 893 | Monitor Manifest/Ledger |
+| bioetl-control-plane-v1.json | 907 | Monitor Telemetry |
 | bioetl-control-plane-v1.json | 902 | Inspect Replay & Checkpoint Evidence |
 | bioetl-control-plane-v1.json | 894 | Review Coverage Limits |
 | bioetl-control-plane-v1.json | 130 | Track Replay Blockers |

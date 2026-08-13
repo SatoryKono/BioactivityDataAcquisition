@@ -310,8 +310,8 @@ def visualization_upgrades() -> None:
         recovery["options"]["mode"] = recovery["options"].get("mode") or "markdown"
     for title in (
         "Monitor Replay Safety",
-        "Monitor Manifest & Ledger Failures",
-        "Monitor Telemetry Coverage",
+        "Monitor Manifest/Ledger",
+        "Monitor Telemetry",
     ):
         if title in p and p[title].get("type") == "stat":
             append_desc(

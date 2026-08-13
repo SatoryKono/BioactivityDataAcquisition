@@ -249,7 +249,7 @@
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:12px;white-space:normal\"><strong>First action:</strong> If Pipeline Health is <strong>OK</strong>, Metrics Coverage is <strong>SCRAPING</strong>, and no blocker is listed: <strong>No action required — continue monitoring.</strong> Otherwise open the highest-severity blocker; verify coverage before interpreting an empty blocker table.</div>"
+        "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:12px;white-space:normal\"><strong>First action:</strong> OK + SCRAPING + no blocker → continue monitoring. Otherwise open the highest-severity blocker; verify coverage before trusting an empty blocker table.</div>"
       },
       "links": [
         {
@@ -430,7 +430,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Shows current Prometheus scrape and recording-rule coverage. Mapping: 0=SCRAPING, 1=SCRAPE/RULE GAP, >=2=SCRAPE+RULE GAP, null=UNKNOWN. This measures evidence confidence, not Pipeline Health; zero-valued diagnostics are inconclusive while coverage is not healthy",
+      "description": "Shows Prometheus scrape vs recording-rule/series coverage. Mapping: 0=SCRAPING (metrics present), 1=RULE/SERIES GAP (pipeline_runs_total absent or BioETL rule-group stale/failing), 2=RULE+SERIES GAP (both), null=UNKNOWN. Value 1 is inconclusive about scrape-target health: the job can be up while rules/series are missing. This is evidence confidence, not Pipeline Health.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -456,11 +456,11 @@
                 },
                 "1": {
                   "color": "orange",
-                  "text": "SCRAPE/RULE GAP"
+                  "text": "RULE/SERIES GAP"
                 },
                 "2": {
                   "color": "red",
-                  "text": "SCRAPE+RULE GAP"
+                  "text": "RULE+SERIES GAP"
                 }
               }
             }
@@ -2977,7 +2977,7 @@
                 "inspect": true
               },
               "unit": "none",
-              "noValue": "Not resolved — no identity rows for the selected run/scope. Check backend health (/health/live), then select or reset run_id; this is not a valid empty run.",
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity.",
               "links": [
                 {
                   "title": "Copy/Open full value (plain text)",
@@ -3134,7 +3134,7 @@
               },
               "decimals": 0,
               "unit": "none",
-              "noValue": "Not resolved — no processed-record rows. Check backend health and selector scope; backend unavailable is not a valid zero-record state.",
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run in Browse Recent Runs. UNKNOWN/QUERY ERROR if a selected run has no accounting.",
               "links": [
                 {
                   "title": "Check BioETL Ops HTTP health",
