@@ -1,63 +1,41 @@
 {
   "pages": [
     {
-      "title": "Reference Documentation",
-      "purpose": "Index of reference materials: CLI commands, configuration formats, data contracts, and operational procedures.",
+      "title": "Quality Governance and CI/CD",
+      "purpose": "Index of CI/CD workflows, architecture quality scorecard, debt governance, testing strategy, and schema governance.",
       "page_notes": [
         {
-          "content": "Canonical anchors: docs/04-reference/, docs/00-project/RULES.md."
+          "content": "Canonical anchors: .github/workflows/, configs/quality/, Makefile, docs/00-project/RULES.md."
         }
       ]
     },
     {
-      "title": "CLI Reference",
-      "parent": "Reference Documentation",
-      "purpose": "Documents all CLI commands, their options, and usage examples.",
+      "title": "CI/CD Workflows",
+      "purpose": "Documentation for GitHub Actions workflows including test matrix, quality gates, and deployment pipelines.",
+      "parent": "Quality Governance and CI/CD",
       "page_notes": [
         {
-          "content": "Canonical anchors: docs/04-reference/cli/, src/bioetl/interfaces/."
-        },
-        "Current command groups (2026-08): run (pipeline execution), health (health checks), quarantine (quarantine management), checkpoint (checkpoint management), run-manifest (manifest inspection), export (Gold layer export), maintenance (maintenance operations), diagnostics (unified diagnostics with diagnostics guide subcommand)."
-      ]
-    },
-    {
-      "title": "Configuration Reference",
-      "parent": "Reference Documentation",
-      "purpose": "Explains configuration file formats, schema validation, and environment variable handling.",
-      "page_notes": [
-        {
-          "content": "Canonical anchors: configs/, docs/04-reference/configs/."
+          "content": "Canonical anchors: .github/workflows/, docs/04-reference/github-actions-workflows.md."
         }
       ]
     },
     {
-      "title": "Data Contracts",
-      "parent": "Reference Documentation",
-      "purpose": "Documents data contracts, schema versions, and compatibility guarantees.",
+      "title": "Architecture Quality Scorecard and Debt Governance",
+      "purpose": "Documentation for architecture quality gates, technical debt scorecard, exemption management, and governance policies.",
+      "parent": "Quality Governance and CI/CD",
       "page_notes": [
         {
-          "content": "Canonical anchors: src/bioetl/domain/schema/, docs/04-reference/contracts/."
+          "content": "Canonical anchors: configs/quality/debt_scorecard.yaml, configs/quality/architecture_metric_exemptions.yaml, scripts/engineering/qa/."
         }
       ]
     },
     {
-      "title": "Operational Procedures",
-      "parent": "Reference Documentation",
-      "purpose": "Covers operational procedures: deployment, monitoring, backup, and disaster recovery.",
+      "title": "Testing Strategy and Infrastructure",
+      "purpose": "Documentation for testing strategy matrix, test categories (unit, integration, e2e, contract), and testing infrastructure.",
+      "parent": "Quality Governance and CI/CD",
       "page_notes": [
         {
-          "content": "Canonical anchors: docs/04-reference/operations/, scripts/ops/."
-        },
-        "Script reorganization (2026-08): scripts/ai/sync/ (AI-facing setup and MCP operations), scripts/engineering/ (engineering-related scripts), scripts/memory/ (Neo4j project-memory tooling). Legacy tools from src/tools/ migrated or removed per docs/00-project/TOOLS.md."
-      ]
-    },
-    {
-      "title": "MCP Inventory",
-      "parent": "AI Runtime Governance",
-      "purpose": "Lists the MCP surfaces, their transport rules, and which runtime config owns each server.",
-      "page_notes": [
-        {
-          "content": "Canonical anchors: .codex/settings.json, .gemini/settings.json, .mcp.json, scripts/ai/.mcp.json, scripts/ai/codex/setup_mcp.py."
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md, tests/, pyproject.toml [tool.pytest]."
         }
       ]
     }

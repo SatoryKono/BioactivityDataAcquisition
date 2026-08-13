@@ -34,7 +34,7 @@ from bioetl.application.core.batch_executor_state_flow import (
 from bioetl.application.core.batch_extraction_loop_service import (
     BatchExtractionLoopService,
 )
-from bioetl.application.core.batch_runtime_failure_policy import (
+from bioetl.application.core.batch_pipeline_execution_errors import (
     PIPELINE_EXECUTION_ERRORS as _RF005_SHARED_FAILURE_POLICY,
 )
 from bioetl.application.core.lifecycle.batch_fsm import (

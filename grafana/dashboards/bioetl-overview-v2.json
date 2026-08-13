@@ -230,12 +230,6 @@
             "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id",
             "targetBlank": false,
             "includeVars": false
-          },
-          {
-            "title": "Open Pipeline Diagnostics",
-            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
-            "targetBlank": false,
-            "includeVars": false
           }
         ]
       },
@@ -969,12 +963,6 @@
           {
             "title": "Open Provider Health",
             "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id",
-            "targetBlank": false,
-            "includeVars": false
-          },
-          {
-            "title": "Open Pipeline Diagnostics",
-            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
             "targetBlank": false,
             "includeVars": false
           }

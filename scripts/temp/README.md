@@ -1,6 +1,6 @@
-﻿# Temporary Diagnostic Scripts
+# Temporary Diagnostic Scripts
 
-This directory contains temporary diagnostic scripts with bounded lifecycles.
+This directory holds **temporary** diagnostic scripts with bounded lifecycles.
 Every executable below `scripts/temp/` (`.py`, `.sh`, `.ps1`, `.cmd`, `.bat`),
 except the package marker `__init__.py`, MUST:
 
@@ -10,42 +10,13 @@ except the package marker `__init__.py`, MUST:
 
 ## Scripts
 
-### basedpyright Diagnostic Scripts (Review by: 2026-09-30)
+_No temporary diagnostic executables are currently checked in._
 
-These scripts support the typing debt campaign and should be consolidated into the canonical QA report surface or retired after the campaign closes.
-
-- `report_basedpyright_error_snapshot.py` — shrink-only basedpyright product error snapshot
-- `report_basedpyright_suppression_inventory.py` — basedpyright suppression inventory
-- `report_basedpyright_tests_snapshot.py` — basedpyright test-snapshot for scripts/tests advisory
-- `report_basedpyright_warning_snapshot.py` — basedpyright warning snapshot
-
-### Dashboard audit campaign (Review by: 2026-09-30)
-
-Bounded cycle-2 Grafana contour diagnostics. Prefer `reports/audit/` for dumps; remove or promote after campaign closeout.
-
-- `layout_contour_audit_cycle2.py` — layout-contour companion diagnostic
-- `panels_static_audit_cycle2.py` — static panel contour diagnostic
-- `panels_contour_cycle2_notes.md` — operator notes for the cycle-2 panel contour run (not executable)
-
-### Merge / audit campaign helpers (Review by: 2026-09-30)
-
-- `resolve_coderabbit_merge_conflicts.py` — bounded CodeRabbit report merge recovery helper (not reusable merge policy)
-- `create_nine_domain_audit_issues.py` — one-shot helper that opened nine-domain audit GitHub issues
+Campaign helpers retired in tech-debt closeout (#8709 / #8705):
+basedpyright snapshot generators, Grafana contour cycle-2 tools, and one-shot
+issue/merge helpers. Reintroduce only with owner + `review_by` ≤ 30 days.
 
 ## Lifecycle Management
 
-- **Expiration Date:** 2026-09-30
-- **Owners:** `@bioetl-platform` (typing/merge/audit helpers), `@bioetl-observability` (dashboard contour)
-- **Purpose:** Temporary utilities for campaign evidence collection
-- **Next Step:** Consolidate into canonical QA/dashboard tooling or retire after campaign closes
-
-## Usage
-
-These scripts are not part of the standard development workflow and should only be used for specific diagnostic purposes during their campaigns.
-
-## Cleanup
-
-After each campaign closes (no later than 2026-09-30), these scripts should be:
-
-1. Consolidated into the canonical QA / dashboard report surface, OR
-2. Removed from the repository and dropped from lifecycle + inventory registries
+- **Owners:** `@bioetl-platform`, `@bioetl-observability`
+- **Policy:** no perpetual `temporary_diagnostic` without a near-term `review_by`

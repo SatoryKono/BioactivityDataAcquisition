@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-05'
+  Last verified: '2026-08-12'
 
 ______________________________________________________________________
 
@@ -129,6 +129,8 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 | [ADR-053](decisions/ADR-053-optional-grafana-scenes-app-shell.md) | Optional Grafana Scenes app shell (presentation adapter) | §3.2, ADR-010 |
 | [ADR-054](decisions/ADR-054-passport-documentation-projections.md) | Evidence-backed passport documentation projections | §6, DOC-GOV |
 | [ADR-055](decisions/ADR-055-workflow-reconciliation-data-step-ownership.md) | Workflow reconciliation data-step ownership | §2.4, ADR-047 |
+| [ADR-056](decisions/ADR-056-proof-or-stop-lifecycle-control.md) | Proof-or-Stop lifecycle control | §6, governance |
+| [ADR-057](decisions/ADR-057-deterministic-runtime-config-authority-and-identity.md) | Deterministic runtime config authority and identity | §1, ADR-032/044/046/052 |
 
 ______________________________________________________________________
 

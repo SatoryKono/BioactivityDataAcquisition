@@ -163,12 +163,6 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
     },
-    "scripts/ai/grok/prepare_nine_domain_audits.ps1": {
-      "decision": "temporary_diagnostic",
-      "next_step": "Prep helper for nine-domain audit workflow; retire after campaign or fold into docs.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
     "scripts/ai/junie/check_junie_mirror.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the Python implementation behind the canonical check_junie_mirror.sh entrypoint; keep direct contributor usage routed through the shell wrapper.",
@@ -210,12 +204,6 @@
       "next_step": "Retain as the MCP transport wrapper for ADR Analysis while canonical MCP configs route through it; keep it supporting unless it becomes a standalone governed CLI entrypoint.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
-    },
-    "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1": {
-      "decision": "windows_compatibility_wrapper",
-      "next_step": "Retain as the Windows-side companion for the canonical AST Grep MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-07-15"
     },
     "scripts/ai/mcp/mcp_ast_grep_wrapper.sh": {
       "decision": "mcp_compatibility_wrapper",
@@ -703,12 +691,6 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
-    "scripts/engineering/ci/rerun_pr_checks.sh": {
-      "decision": "temporary_diagnostic",
-      "next_step": "Retain only as the bounded GitHub Actions recovery helper for the current billing/LFS incident; remove it after affected pull requests are retriggered or promote the behavior into governed CI tooling if recurring use is approved.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
     "scripts/engineering/common/cli_dispatch.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the shared CLI dispatch helper for canonical scripts.engineering and adjacent routers; promote it to active inventory once helper modules receive explicit catalog classification.",
@@ -733,12 +715,6 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-07-15"
     },
-    "scripts/engineering/dev/setup_bioetl_wsl_fixed.ps1": {
-      "decision": "windows_compatibility_wrapper",
-      "next_step": "Retain as the bounded Windows/WSL compatibility setup wrapper while contributors still need the PowerShell entrypoint; keep environment setup delegated to the canonical WSL setup surface and retire this wrapper when no documented callers remain.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
     "scripts/engineering/dev/zed_env_doctor.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the stdlib-only environment validation helper shared by the tracked Zed task adapters; keep `.zed/tasks.json` as the governed editor entry surface and do not promote this helper without offsetting an active script elsewhere.",
@@ -756,12 +732,6 @@
       "next_step": "Retain as the guarded Python launcher behind tracked native-Windows Zed tasks; keep `.zed/tasks.json` as the governed editor entry surface and do not promote this launcher without offsetting an active script elsewhere.",
       "owner": "@bioetl-platform",
       "review_by": "2026-10-31"
-    },
-    "scripts/engineering/dev/zed_task.ps1": {
-      "decision": "legacy_manual_utility",
-      "next_step": "Retain as a bounded Zed editor task launcher helper for local Windows development; promote only if Zed task automation becomes a governed first-class developer workflow entrypoint.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-10-21"
     },
     "scripts/engineering/dev/zed_vulture.py": {
       "decision": "legacy_manual_utility",
@@ -1165,12 +1135,6 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
-    "scripts/ops/neo4j_memory_sync.py": {
-      "decision": "compatibility_wrapper",
-      "next_step": "Retain only as the compatibility alias for memory.graph.sync; migrate remaining callers to the canonical memory module and remove this wrapper after repository and operator references reach zero.",
-      "owner": "@bioetl-memory",
-      "review_by": "2026-09-30"
-    },
     "scripts/ops/observability/check_prometheus_rules_health.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the Prometheus rule-health implementation used by validate_live_observability.py; keep the canonical operator workflow routed through the aggregate live validator.",
@@ -1519,53 +1483,11 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
-    "scripts/temp/create_nine_domain_audit_issues.py": {
-      "decision": "temporary_diagnostic",
-      "next_step": "One-shot helper that opened nine-domain audit GitHub issues; remove after campaign closeout.",
+    "scripts/engineering/dev/setup_bioetl_wsl.ps1": {
+      "decision": "active_operator_entrypoint",
+      "next_step": "Canonical Windows→WSL BioETL setup entrypoint after retirement of setup_bioetl_wsl_fixed.ps1 (#8708).",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
-    "scripts/temp/layout_contour_audit_cycle2.py": {
-      "decision": "temporary_diagnostic",
-      "next_step": "Retain only as the cycle-2 dashboard layout diagnostic while its audit evidence is reviewed; remove it after the campaign closes or promote reusable checks into canonical dashboard tooling.",
-      "owner": "@bioetl-observability",
-      "review_by": "2026-09-30"
-    },
-    "scripts/temp/panels_static_audit_cycle2.py": {
-      "decision": "temporary_diagnostic",
-      "next_step": "Retain only as the documented cycle-2 static panel diagnostic; remove it after the campaign closes or promote reusable checks into canonical dashboard audit tooling.",
-      "owner": "@bioetl-observability",
-      "review_by": "2026-09-30"
-    },
-    "scripts/temp/report_basedpyright_error_snapshot.py": {
-      "decision": "temporary_diagnostic",
-      "next_step": "Retain as a bounded basedpyright error-snapshot utility while the typing debt campaign needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
-    "scripts/temp/report_basedpyright_suppression_inventory.py": {
-      "decision": "temporary_diagnostic",
-      "next_step": "Retain as a bounded basedpyright suppression-inventory utility while suppression governance needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
-    "scripts/temp/report_basedpyright_tests_snapshot.py": {
-      "decision": "temporary_diagnostic",
-      "next_step": "Retain as a bounded basedpyright test-snapshot utility while the test typing campaign needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
-    "scripts/temp/report_basedpyright_warning_snapshot.py": {
-      "decision": "temporary_diagnostic",
-      "next_step": "Retain as a bounded basedpyright warning-snapshot utility while the typing debt campaign needs reproducible shrink-only evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
-    "scripts/temp/resolve_coderabbit_merge_conflicts.py": {
-      "decision": "temporary_diagnostic",
-      "next_step": "Retain only as evidence of the bounded 2026-08 CodeRabbit report merge recovery; remove it after the campaign closeout because it is not a reusable merge policy.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-31"
     }
   },
   "schema_version": "1.0"
