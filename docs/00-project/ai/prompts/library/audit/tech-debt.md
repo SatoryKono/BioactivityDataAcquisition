@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.tech-debt
-version: 1.1.0
+version: 1.2.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -18,6 +18,7 @@ includes:
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/shell-portability.md
+  - fragments/generic-nine-contract.md
 related_ssot:
   - AGENTS.md
   - docs/00-project/RULES.md
@@ -34,10 +35,12 @@ max_body_lines: 140
 
 # Technical debt audit
 
+**Kit:** prompt 3 of `prompt.audit.generic-nine.pack`.
 Build an evidence-backed debt register: concrete code/config signals → risk →
 change cost → paydown order. Separate deliberate tradeoffs, historical
 constraints, maintainability debt, obsolete deps, test debt, and architecture
 drift. **Never increase** debt/quality budgets (see debt-budget-ban).
+Prioritize by probability × blast radius, not TODO count.
 
 
 **Machine outputs:** always pair `report.md` + `findings.json` under `reports/audit/tech-debt/`. For multi-iteration loops use `prompt.audit.orchestrator` and `reports/audit-runs/<run_id>/`.
