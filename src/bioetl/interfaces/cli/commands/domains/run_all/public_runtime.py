@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable, Coroutine, Mapping
 from contextlib import AbstractAsyncContextManager
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import click
 
@@ -48,6 +48,12 @@ from bioetl.interfaces.cli.commands.domains.run_all.support import (
 )
 from bioetl.interfaces.cli.commands.domains.run_all.support import (
     handle_destructive_confirmation as handle_destructive_confirmation_impl,
+)
+from bioetl.interfaces.cli.commands.domains.shared.option_mapping import (
+    option_bool,
+    option_int,
+    option_optional_int,
+    option_str,
 )
 
 if TYPE_CHECKING:
@@ -174,15 +180,15 @@ def build_run_all_command_input_from_options(
 ) -> RunAllCommandInput:
     backend_options = build_observability_backend_cli_kwargs_from_options(options)
     return build_input(
-        source=cast("str", options["source"]),
-        run_type=cast("str", options["run_type"]),
-        limit=cast(int | None, options["limit"]),
-        dry_run=cast("bool", options["dry_run"]),
-        yes=cast("bool", options["yes"]),
-        list_only=cast("bool", options["list_only"]),
-        debug=cast("bool", options["debug"]),
-        health_server=cast("bool", options["health_server"]),
-        health_port=cast("int", options["health_port"]),
+        source=option_str(options, "source"),
+        run_type=option_str(options, "run_type"),
+        limit=option_optional_int(options, "limit"),
+        dry_run=option_bool(options, "dry_run"),
+        yes=option_bool(options, "yes"),
+        list_only=option_bool(options, "list_only"),
+        debug=option_bool(options, "debug"),
+        health_server=option_bool(options, "health_server"),
+        health_port=option_int(options, "health_port"),
         ensure_observability_backend=backend_options.ensure_observability_backend,
         observability_backend_port=backend_options.observability_backend_port,
     )
@@ -197,14 +203,11 @@ def run_all_callback_runtime(
 ) -> None:
     cli_input = runtime.build_cli_input_from_options(options)
     if not cli_input.list_only and not cli_input.dry_run:
-        cli_input = cast(
-            "RunAllCommandInput",
-            attach_observability_backend_to_cli_input(
-                cli_input,
-                required_probe_paths=runtime.build_probe_paths(),
-                ensure_backend_started_fn=runtime.ensure_observability_backend_started,
-                disable_transient_health_server_fn=runtime.disable_transient_health_server,
-            ),
+        cli_input = attach_observability_backend_to_cli_input(
+            cli_input,
+            required_probe_paths=runtime.build_probe_paths(),
+            ensure_backend_started_fn=runtime.ensure_observability_backend_started,
+            disable_transient_health_server_fn=runtime.disable_transient_health_server,
         )
     runtime.dispatch_cli_callback(
         click_context,
