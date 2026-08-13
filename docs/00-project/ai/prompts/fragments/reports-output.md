@@ -22,7 +22,9 @@ summary: Audit artifacts under reports/ only; no root audit/ or .audit-runs/
   - `reports/audit/agents/`
   - `reports/audit/diagrams/`
   - `reports/audit/docs-pipeline/`
-  - `reports/audit/architecture/`
+  - `reports/audit/architecture/` — one-shot or latest mirror of architecture cycle
+  - `reports/audit-runs/<run_id>/` — cyclic architecture audit
+    (`prompt.architecture.cycle`)
   - `reports/audit/bi-dashboard/` — acceptance: `report.md`, `checks.json`,
     `findings.json` (optional subdirs `visual/`, `layout/`, `data/`)
   - `reports/audit/grafana-panels/` — engineering panel loop outputs when used

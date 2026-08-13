@@ -72,7 +72,8 @@ docs/00-project/ai/prompts/
 | `prompt.tests.fix-retest` | [library/tests/fix-retest-loop.md](library/tests/fix-retest-loop.md) | Run → fix → retest |
 | `prompt.tests.cycle` | [library/tests/test-cycle.md](library/tests/test-cycle.md) | Cyclic testing (N cycles, lanes) |
 | `prompt.docs.ai-audit-planning` | [library/docs/ai-audit-planning.md](library/docs/ai-audit-planning.md) | Docs/AI surface audit plan |
-| `prompt.architecture.review` | [library/architecture/review-assessment.md](library/architecture/review-assessment.md) | Architecture review (v2.2) |
+| `prompt.architecture.review` | [library/architecture/review-assessment.md](library/architecture/review-assessment.md) | Architecture review (v2.3) |
+| `prompt.architecture.cycle` | [library/architecture/architecture-cycle.md](library/architecture/architecture-cycle.md) | Cyclic **project architecture** audit (v1.0, N=10) |
 | `prompt.observability.dashboard-panel-audit` | [library/observability/dashboard-panel-audit.md](library/observability/dashboard-panel-audit.md) | Grafana panel audit (5 phases, v1.1) |
 | `prompt.observability.bi-dashboard-acceptance` | [library/observability/bi-dashboard-acceptance.md](library/observability/bi-dashboard-acceptance.md) | BI acceptance: visual / layout / data |
 | `prompt.observability.dashboard-audit-cycle` | [library/observability/dashboard-audit-cycle.md](library/observability/dashboard-audit-cycle.md) | Cyclic dashboard audit **N=20** — render, density, fill, acceptance (v1.1) |
@@ -106,7 +107,8 @@ Archive megaprompts (opt-in only):
 | One meta cycle | `prompt.audit.grok-cycle` |
 | N-iteration audit→issues→fix→CI (single agent) | `prompt.audit.orchestrator` (`N=1` default; ALLOW_* false) |
 | Dual-agent cycle + external audit prompt + CR + peer review | `prompt.audit.dual-agent-cycle` (`OUTER_CYCLES=1`; ALLOW_* false) |
-| Cyclic tests / docs / tech-debt / repo hygiene pack | `prompt.audit.cyclic-pack` → domain `*-cycle` cards |
+| Cyclic tests / docs / tech-debt / repo hygiene / dashboards pack | `prompt.audit.cyclic-pack` → domain `*-cycle` cards |
+| Cyclic project architecture | `prompt.architecture.cycle` |
 | Issue/PR closeout | `prompt.closeout.grok` |
 
 ### Dual-agent cyclic audit
