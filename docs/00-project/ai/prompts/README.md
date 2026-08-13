@@ -175,10 +175,11 @@ Artifacts → `reports/audit/<domain>/` or `reports/audit-runs/<run_id>/`.
 | Acceptance only: a11y, layout, data DQ | `prompt.observability.bi-dashboard-acceptance` |
 | Full BI matrices / multi-tool notes | archive `bi-dashboard-audit-kit-2026-08-11.md` |
 
-The five-card set, evidence contract, and recommended order are documented in
+Folder index and **sequential run order**:
+[library/observability/README.md](library/observability/README.md).
+The five-card set lives in
 [library/observability/grafana-audit/README.md](library/observability/grafana-audit/README.md).
-The earlier `grafana-six` kit remains available only as a deprecated historical
-route with explicit successor metadata.
+The earlier `grafana-six` kit is deprecated (successor metadata on each card).
 
 Root-level `grok-*.md` / `test_*.md` paths remain as **redirect stubs** for
 bookmarks from #8279.

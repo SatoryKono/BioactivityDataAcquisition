@@ -49,6 +49,10 @@ Example:
   --param LANGUAGE=ru
 ```
 
+Folder-wide sequential order (master → visual → layout → data →
+regression → panel-audit → BI acceptance → one cycle):
+[../README.md](../README.md).
+
 Write/fix loops remain separate:
 `prompt.observability.dashboard-audit-cycle` and
 `prompt.observability.dashboard-panel-audit`.
