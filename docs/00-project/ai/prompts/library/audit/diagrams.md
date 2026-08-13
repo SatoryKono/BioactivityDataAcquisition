@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.diagrams
-version: 1.1.0
+version: 1.2.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -18,6 +18,7 @@ includes:
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/shell-portability.md
+  - fragments/generic-nine-contract.md
 related_ssot:
   - AGENTS.md
   - docs/00-project/NORMATIVE_SOURCES.md
@@ -33,6 +34,7 @@ max_body_lines: 140
 
 # Diagrams audit
 
+**Kit:** prompt 7 of `prompt.audit.generic-nine.pack`.
 Audit architecture/technical diagrams as engineering artifacts: canonical
 source, reproducible render, match to code/infra, and scripts/CI that build
 them. A pretty but wrong diagram scores worse than a minimal accurate
@@ -65,14 +67,24 @@ text-as-code diagram.
    `git diff --exit-code` only when policy requires; else temp output.
 7. No secrets/internal endpoints that must not be published.
 
+## Surface score (this domain)
+
+| Score | Meaning |
+| --- | --- |
+| 3 | Text source in VCS; deterministic render; CI validation; model matches system |
+| 2 | Diagrams current; some regeneration/review still manual |
+| 1 | Binary-only, unclear source, or regular drift |
+| 0 | Key diagram wrong enough to cause a bad security/deploy decision |
+
+P0: wrong security/deploy model with ops impact. P1: wrong key dependency.
+P2: stale runtime/component views. P3: layout/style.
+
 ## Output
 
-- `reports/audit/diagrams/report.md`
-- `reports/audit/diagrams/findings.json` (finding-schema)
-- optional extras listed below or in method notes
-- `surface_score` 0–3 (map any 0–5 dimensions via audit-scale)
-- findings per finding-schema; top remediations
-- `MODE=propose-patches` / write modes: only after operator approval and ALLOW flags when orchestrated
+- `reports/audit/diagrams/report.md` + `findings.json`
+- kit extras: `diagram-inventory.csv`, `render-failures.txt`,
+  `diagram-code-drift.csv`, canonical-source map
+- `surface_score` 0–3; remediations; `MODE=propose-patches` only with approval
 
 ## Stop
 
