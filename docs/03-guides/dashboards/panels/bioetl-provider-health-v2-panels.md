@@ -56,10 +56,12 @@ as a synthetic green zero.
 - **Purpose:** Show top provider failure causes.
 - **Data sources:** `bioetl_provider_current_cause`
 
-### 9. Monitor Telemetry Freshness
+### 9. Monitor Telemetry Presence
 - **Type:** Stat
 - **Purpose:** Show `PRESENT` only when current selected-provider telemetry
-  exists; missing/stale evidence is fail-closed `UNKNOWN`, not green zero.
+  exists; missing evidence is fail-closed `UNKNOWN`, not green zero. This is
+  a presence bit, not sample age. On 1366 the chip sits below the conservative
+  fold (`y=15`).
 - **Data sources:** `bioetl_provider_current_status`
 
 Selected-provider, range/debug, and run-context panels ship in three collapsed

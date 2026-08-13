@@ -156,8 +156,14 @@
                 "2": {
                   "text": "CRIT",
                   "color": "red"
-                },
-                "3": {
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
                   "text": "UNKNOWN",
                   "color": "gray"
                 }
@@ -166,7 +172,7 @@
             {
               "type": "special",
               "options": {
-                "match": "null",
+                "match": "nan",
                 "result": {
                   "text": "UNKNOWN",
                   "color": "gray"
@@ -239,7 +245,8 @@
       "targets": [
         {
           "expr": "max(bioetl_provider_current_status{provider=~\"$provider\"})",
-          "refId": "A"
+          "refId": "A",
+          "instant": true
         }
       ]
     },
@@ -247,7 +254,7 @@
       "id": 9002,
       "type": "text",
       "title": "Start Provider Triage",
-      "description": "Start with Fleet Severity, then check Telemetry Freshness, Non-OK Providers, and Top Causes. If fleet severity is non-OK but Top Causes is empty, treat it as an explainability gap. Use selected-provider and range panels only after the fleet-level cause is understood.",
+      "description": "Start with Fleet Severity, then check Telemetry Presence, Non-OK Providers, and Top Causes. If fleet severity is non-OK but Top Causes is empty, treat it as an explainability gap. Use selected-provider and range panels only after the fleet-level cause is understood.",
       "gridPos": {
         "h": 2,
         "w": 24,
@@ -295,8 +302,7 @@
           "custom": {
             "align": "auto",
             "cellOptions": {
-              "type": "color-background",
-              "mode": "basic"
+              "type": "auto"
             },
             "inspect": false
           },
@@ -364,6 +370,63 @@
               {
                 "id": "displayName",
                 "value": "Count"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "0": {
+                        "text": "OK",
+                        "color": "green"
+                      },
+                      "1": {
+                        "text": "WARN",
+                        "color": "orange"
+                      },
+                      "2": {
+                        "text": "CRIT",
+                        "color": "red"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null",
+                      "result": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "nan",
+                      "result": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           }
@@ -452,8 +515,7 @@
           "custom": {
             "align": "auto",
             "cellOptions": {
-              "type": "color-background",
-              "mode": "basic"
+              "type": "auto"
             },
             "inspect": false
           },
@@ -511,6 +573,63 @@
               {
                 "id": "displayName",
                 "value": "Count"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "0": {
+                        "text": "OK",
+                        "color": "green"
+                      },
+                      "1": {
+                        "text": "WARN",
+                        "color": "orange"
+                      },
+                      "2": {
+                        "text": "CRIT",
+                        "color": "red"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null",
+                      "result": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "nan",
+                      "result": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           }
@@ -575,8 +694,7 @@
           "custom": {
             "align": "auto",
             "cellOptions": {
-              "type": "color-background",
-              "mode": "basic"
+              "type": "auto"
             },
             "inspect": false
           },
@@ -634,6 +752,63 @@
               {
                 "id": "displayName",
                 "value": "Count"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "0": {
+                        "text": "OK",
+                        "color": "green"
+                      },
+                      "1": {
+                        "text": "WARN",
+                        "color": "orange"
+                      },
+                      "2": {
+                        "text": "CRIT",
+                        "color": "red"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null",
+                      "result": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "nan",
+                      "result": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           }
@@ -716,7 +891,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Confidence marker for current provider telemetry evidence. PRESENT means at least one selected-provider status series exists; missing evidence is fail-closed UNKNOWN and must never be read as healthy. Alias mapping: PRESENT=OK.",
+      "description": "Presence gate for selected-provider current status (max(status)*0). 0=PRESENT means the status series exists; null=UNKNOWN means telemetry is absent. This is not sample age/staleness. Alias mapping: PRESENT=OK. On 1366 this chip sits at y=15 (below conservative fold); 1920 shows it. Confidence marker for current provider telemetry evidence. PRESENT means at least one selected-provider status series exists; missing evidence is fail-closed UNKNOWN and must never be read as healthy. Alias mapping: PRESENT=OK.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -731,14 +906,6 @@
                 "0": {
                   "text": "PRESENT",
                   "color": "green"
-                },
-                "1": {
-                  "text": "WARN",
-                  "color": "orange"
-                },
-                "2": {
-                  "text": "CRIT",
-                  "color": "red"
                 }
               }
             },
@@ -808,7 +975,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor Telemetry Freshness",
+      "title": "Monitor Telemetry Presence",
       "type": "stat"
     },
     {
@@ -921,7 +1088,7 @@
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "continuous-GrYlRd"
+                "mode": "thresholds"
               },
               "decimals": 0,
               "mappings": [

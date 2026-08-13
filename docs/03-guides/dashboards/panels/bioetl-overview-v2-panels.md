@@ -202,7 +202,7 @@ Exact blocker reasons live in the Control Plane, Runtime, Data Quality, Provider
 - The full-width `Inputs` matrix is the deviation-first subsystem summary.
   Repeated Control Plane, Runtime, Data Quality, Provider, Data Validation, and
   Workflow mirrors live in the collapsed `Inspect Domain Diagnostics` row.
-- `Inspect Alerts` is the intentional expanded decision-row exception. L1
-  Historical Trends, Range Evidence, and Domain Diagnostics are collapsed
-  progressive disclosure.
+- `Inspect Alerts` is collapsed by default (first screen is Status + First
+  Action + Domain Status). L1 Historical Trends, Range Evidence, and Domain
+  Diagnostics stay collapsed progressive disclosure.
 - First Action panel provides operator guidance based on current state.

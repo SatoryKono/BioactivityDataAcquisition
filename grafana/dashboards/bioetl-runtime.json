@@ -231,7 +231,8 @@
       "targets": [
         {
           "expr": "max(bioetl_runtime_current_status_trusted{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
-          "refId": "A"
+          "refId": "A",
+          "instant": true
         }
       ]
     },
@@ -505,7 +506,7 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto",
+        "textMode": "value",
         "dataLinks": [
           {
             "title": "Open Prometheus Targets",
@@ -517,7 +518,8 @@
       "targets": [
         {
           "expr": "max(bioetl_runtime_trust_gap_status_10m)",
-          "refId": "A"
+          "refId": "A",
+          "instant": true
         }
       ],
       "title": "Monitor Metrics Coverage",

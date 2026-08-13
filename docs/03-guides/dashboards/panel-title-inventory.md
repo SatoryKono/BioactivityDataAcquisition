@@ -158,7 +158,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-provider-health-v2.json | 9101 | Monitor Fleet Severity |
 | bioetl-provider-health-v2.json | 9102 | Inspect Non-OK Providers |
 | bioetl-provider-health-v2.json | 9103 | Inspect Top Provider Causes |
-| bioetl-provider-health-v2.json | 9104 | Monitor Telemetry Freshness |
+| bioetl-provider-health-v2.json | 9104 | Monitor Telemetry Presence |
 | bioetl-provider-health-v2.json | 91 | Selected Provider Details |
 | bioetl-provider-health-v2.json | 106 | Track Health Failures & Degradation |
 | bioetl-provider-health-v2.json | 107 | Track Failure Share |
@@ -184,7 +184,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-provider-health-v2.json | 9403 | Inspect Processed Records |
 | bioetl-run-explorer-v1.json | 1000 | Navigate Dashboards |
 | bioetl-run-explorer-v1.json | 1 | Understand Run Scope |
-| bioetl-run-explorer-v1.json | 3010 | Browse Recent Runs |
+| bioetl-run-explorer-v1.json | 3010 | Browse Recent Runs (last 20) |
 | bioetl-run-explorer-v1.json | 9402 | Inspect Run Identity |
 | bioetl-run-explorer-v1.json | 9403 | Inspect Processed Records |
 | bioetl-run-explorer-v1.json | 3099 | Selected Run Details |

@@ -236,7 +236,8 @@
       "targets": [
         {
           "expr": "max(bioetl_l0_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
-          "refId": "A"
+          "refId": "A",
+          "instant": true
         }
       ],
       "title": "Monitor Fleet Health",
@@ -248,7 +249,7 @@
       "type": "table",
       "title": "Review First Action",
       "gridPos": {
-        "h": 8,
+        "h": 6,
         "w": 12,
         "x": 0,
         "y": 7
@@ -339,7 +340,8 @@
               }
             ]
           },
-          "unit": "none"
+          "unit": "none",
+          "noValue": "No route for this scope"
         },
         "overrides": [
           {
@@ -523,7 +525,7 @@
                         "text": "No recent activity"
                       },
                       "selected_scope_not_present": {
-                        "text": "Selector not present"
+                        "text": "Scope not in universe"
                       },
                       "provider_global_degradation": {
                         "text": "Provider issue"
@@ -628,7 +630,7 @@
       },
       "targets": [
         {
-          "expr": "topk(4, bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or bioetl_l0_next_action_no_route)",
+          "expr": "topk(4, bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or (absent(bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})*bioetl_l0_next_action_no_route))",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -639,7 +641,7 @@
         "footer": {
           "show": false
         },
-        "cellHeight": "md",
+        "cellHeight": "sm",
         "sortBy": [
           {
             "desc": true,
@@ -698,7 +700,7 @@
           }
         }
       ],
-      "description": "Open Action on the top row first — routes are ranked by urgency (RUNTIME > CP > GOLD > DQ > PROV > WF > MON). MON/NR means keep watching when Fleet Health is OK.  Scope: current fleet/status verdict for selected pipeline, workflow, and time range; not a per-run_id metric.",
+      "description": "Open Action on the top row first — routes are ranked by urgency (RUNTIME > CP > GOLD > DQ > PROV > WF > MON). MON/NR means keep watching when Fleet Health is OK.  Scope: current fleet/status verdict for selected pipeline, workflow, and time range; not a per-run_id metric. NO_ROUTE/no_route appears only when the selected scope has no route series (absent(route)*no_route); it is not a healthy empty and does not mean the dashboard selector widget is blank.",
       "links": [
         {
           "title": "Open Runtime",
@@ -731,7 +733,7 @@
       "type": "table",
       "title": "Review Domain Status",
       "gridPos": {
-        "h": 8,
+        "h": 6,
         "w": 12,
         "x": 12,
         "y": 7
@@ -810,7 +812,8 @@
               }
             ]
           },
-          "unit": "none"
+          "unit": "none",
+          "noValue": "UNKNOWN — no domain status for this scope"
         },
         "overrides": [
           {
@@ -1012,199 +1015,200 @@
       "id": 9600,
       "type": "row",
       "title": "Inspect Alerts",
-      "collapsed": false,
+      "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 13
       },
-      "panels": [],
-      "description": "Contains selected-range alert evidence for triage. It supports investigation but does not determine current Fleet Health; expand it after the first-screen verdict points to an alert condition."
-    },
-    {
-      "id": 9601,
-      "type": "table",
-      "title": "Review Active Alerts",
-      "gridPos": {
-        "h": 6,
-        "w": 24,
-        "x": 0,
-        "y": 16
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Shows firing and pending BioETL alerts from Prometheus for the active time range. An inactive row means no active alert was observed; an empty result or UNKNOWN means alert evidence is unavailable, not OK. Continue in Pipeline Diagnostics for blocker scope.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
+      "panels": [
+        {
+          "id": 9601,
+          "type": "table",
+          "title": "Review Active Alerts",
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 14
           },
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": false
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
           },
-          "mappings": [
-            {
-              "type": "special",
-              "options": {
-                "match": "null+nan",
-                "result": {
-                  "text": "—",
-                  "color": "transparent",
-                  "index": 0
-                }
-              }
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "gray",
-                "value": null
+          "description": "Shows firing and pending BioETL alerts from Prometheus for the active time range. An inactive row means no active alert was observed; an empty result or UNKNOWN means alert evidence is unavailable, not OK. Continue in Pipeline Diagnostics for blocker scope.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
               },
-              {
-                "color": "green",
-                "value": 0
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
               },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Value"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Active Alerts"
-              },
-              {
-                "id": "custom.align",
-                "value": "right"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background",
-                  "applyToRow": false
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "severity"
-            },
-            "properties": [
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^(critical|page|p0|p1)$",
-                      "result": {
-                        "text": "CRITICAL",
-                        "color": "red"
-                      }
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "—",
+                      "color": "transparent",
+                      "index": 0
                     }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "gray",
+                    "value": null
                   },
                   {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^(warning|warn)$",
-                      "result": {
-                        "text": "WARNING",
-                        "color": "orange"
-                      }
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Active Alerts"
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "right"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-background",
+                      "applyToRow": false
                     }
                   }
                 ]
               },
               {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background"
-                }
+                "matcher": {
+                  "id": "byName",
+                  "options": "severity"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^(critical|page|p0|p1)$",
+                          "result": {
+                            "text": "CRITICAL",
+                            "color": "red"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^(warning|warn)$",
+                          "result": {
+                            "text": "WARNING",
+                            "color": "orange"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-background"
+                    }
+                  }
+                ]
               }
             ]
-          }
-        ]
-      },
-      "targets": [
-        {
-          "expr": "count by (alertname, severity) (ALERTS{alertstate=\"firing\"})",
-          "format": "table",
-          "instant": true,
-          "refId": "A"
+          },
+          "targets": [
+            {
+              "expr": "count by (alertname, severity) (ALERTS{alertstate=\"firing\"})",
+              "format": "table",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false
+            },
+            "dataLinks": [
+              {
+                "title": "Open Runtime Conditions",
+                "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id",
+                "targetBlank": false,
+                "includeVars": false
+              },
+              {
+                "title": "Open 2. Runtime (alert conditions)",
+                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+                "targetBlank": false,
+                "includeVars": false
+              }
+            ],
+            "cellHeight": "sm"
+          },
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "alertname": 0,
+                  "alertstate": 1,
+                  "severity": 2,
+                  "Value": 3
+                },
+                "renameByName": {
+                  "alertname": "Alert",
+                  "alertstate": "State",
+                  "severity": "Severity",
+                  "Value": "Active Alerts",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
+                }
+              }
+            }
+          ]
         }
       ],
-      "options": {
-        "showHeader": true,
-        "footer": {
-          "show": false
-        },
-        "dataLinks": [
-          {
-            "title": "Open Runtime Conditions",
-            "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id",
-            "targetBlank": false,
-            "includeVars": false
-          },
-          {
-            "title": "Open 2. Runtime (alert conditions)",
-            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
-            "targetBlank": false,
-            "includeVars": false
-          }
-        ],
-        "cellHeight": "sm"
-      },
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "__name__": true
-            },
-            "indexByName": {
-              "alertname": 0,
-              "alertstate": 1,
-              "severity": 2,
-              "Value": 3
-            },
-            "renameByName": {
-              "alertname": "Alert",
-              "alertstate": "State",
-              "severity": "Severity",
-              "Value": "Active Alerts",
-              "Value #A": "Series A",
-              "Value #B": "Series B",
-              "Value #C": "Series C"
-            }
-          }
-        }
-      ]
+      "description": "Contains selected-range alert evidence for triage. It supports investigation but does not determine current Fleet Health; expand it after the first-screen verdict points to an alert condition."
     },
     {
       "type": "row",
@@ -1215,7 +1219,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 14
       },
       "panels": [
         {
@@ -1510,7 +1514,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 23
+        "y": 15
       },
       "collapsed": true,
       "description": "Contains selected-range run, terminal-state, and reject evidence. Empty history is not proof of current health, and these panels do not determine current Fleet Health.",
@@ -1845,7 +1849,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 24
+        "y": 16
       },
       "description": "Contains current domain summaries and diagnostic routing. It supports the first-screen verdict and stays collapsed until Domain Status or First Action identifies an affected area.",
       "panels": [
@@ -3016,7 +3020,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 25
+        "y": 17
       },
       "id": 9602,
       "panels": [

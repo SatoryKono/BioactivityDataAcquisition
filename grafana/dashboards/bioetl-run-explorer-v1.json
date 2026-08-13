@@ -97,7 +97,7 @@
       "type": "text",
       "title": "Understand Run Scope",
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 24,
         "x": 0,
         "y": 2
@@ -111,13 +111,13 @@
     {
       "id": 3010,
       "type": "table",
-      "title": "Browse Recent Runs",
-      "description": "Browse mode: Recent pipeline-run reports found on disk for the selected pipeline. Choose a row to set the run ID and open exact-run evidence. An empty table is valid when no matching reports exist. If reports are expected, treat backend unavailable as a distinct failure state and verify BioETL Ops HTTP at /health/live. Empty table: no matching reports under reports/run-reports/pipeline/<name>/. Has reports: chembl_assay, chembl_target, chembl_publication. chembl_activity may appear in run_id (control-plane) but has no report artifacts yet. If the host has reports and this is empty: bind mismatch — python -m scripts.ops.runtime.docker.verify_report_bind",
+      "title": "Browse Recent Runs (last 20)",
+      "description": "Browse mode: Recent pipeline-run reports found on disk for the selected pipeline. Choose a row to set the run ID and open exact-run evidence. An empty table is valid when no matching reports exist. If reports are expected, treat backend unavailable as a distinct failure state and verify BioETL Ops HTTP at /health/live. Empty table: no matching reports under reports/run-reports/pipeline/<name>/. Has reports: chembl_assay, chembl_target, chembl_publication. chembl_activity may appear in run_id (control-plane) but has no report artifacts yet. If the host has reports and this is empty: bind mismatch — python -m scripts.ops.runtime.docker.verify_report_bind Index is bounded to the last 20 pipeline-run-report artifacts (limit=20). Older runs are omitted by design; they are not a missing backend.",
       "gridPos": {
-        "h": 9,
+        "h": 5,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 5
       },
       "datasource": "BioETL Ops HTTP",
       "fieldConfig": {
@@ -126,7 +126,7 @@
             "align": "left",
             "inspect": true
           },
-          "noValue": "No pipeline-run-report artifacts for this pipeline on disk."
+          "noValue": "No run-report artifacts for this pipeline on disk (index is last 20)."
         },
         "overrides": [
           {
@@ -209,7 +209,7 @@
         "h": 6,
         "w": 10,
         "x": 0,
-        "y": 15
+        "y": 10
       },
       "datasource": "BioETL Ops HTTP",
       "description": "Selected run: Exact identity for the selected run, including run, manifest, provider entity, contract, execution, replay, and checkpoint evidence. Selection required when no run ID is set. Valid empty means no matching identity was found for that run. On errors or unexpected emptiness, verify /health/live. Use existing Open/Copy actions for full values.",
@@ -365,7 +365,7 @@
         "h": 6,
         "w": 14,
         "x": 10,
-        "y": 15
+        "y": 10
       },
       "datasource": "BioETL Ops HTTP",
       "description": "Selected run: Bronze, Silver, and Gold stage/outcome accounting for the selected run. Zero-valued outcomes are evidence and must not be presented as success by themselves. Selection required when no run ID is set. Valid empty means no matching accounting rows exist; unexpected empty or errors require an Ops HTTP /health/live check.",
@@ -675,7 +675,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 16
       },
       "panels": [
         {
@@ -687,7 +687,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 20
+            "y": 16
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -746,7 +746,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 26
+            "y": 22
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -805,7 +805,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 31
+            "y": 27
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -924,7 +924,7 @@
             "h": 3,
             "w": 24,
             "x": 0,
-            "y": 39
+            "y": 35
           },
           "options": {
             "mode": "html",
@@ -940,7 +940,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 42
+            "y": 38
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -1021,7 +1021,7 @@
             "h": 4,
             "w": 24,
             "x": 0,
-            "y": 47
+            "y": 43
           },
           "options": {
             "mode": "html",
@@ -1036,7 +1036,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 51
+            "y": 47
           },
           "options": {
             "mode": "html",
