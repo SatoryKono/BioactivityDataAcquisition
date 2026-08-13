@@ -73,14 +73,24 @@ Optimization is secondary to credential and release integrity.
 - [ ] Actions not on floating `main`/`latest` without pin policy exception
 - [ ] Deploy uses environment protections where required
 
+## Surface score (this domain)
+
+| Score | Meaning |
+| --- | --- |
+| 3 | Least privilege; safe triggers; pinned actions; reproducible CI; controlled deploy |
+| 2 | Safe base with a few local gaps |
+| 1 | Broad permissions, unpinned actions, duplication, weak timeout/cache |
+| 0 | Exploitable trust boundary, credential leak, unsafe privileged PR, or unsafe deploy |
+
+P0: credential/supply-chain/RCE. P1: release integrity. P2: CI reliability/cost.
+P3: YAML hygiene.
+
 ## Output
 
-- `reports/audit/gha/report.md`
-- `reports/audit/gha/findings.json` (finding-schema)
-- optional extras listed below or in method notes
-- `surface_score` 0–3 (map any 0–5 dimensions via audit-scale)
-- findings per finding-schema; top remediations
-- `MODE=propose-patches` / write modes: only after operator approval and ALLOW flags when orchestrated
+- `reports/audit/gha/report.md` + `findings.json`
+- kit extras: `workflow-matrix.csv`, `permissions-matrix.csv`,
+  `third-party-actions.csv`, `trigger-risk.csv`, `cache-artifact-policy.csv`
+- `surface_score` 0–3; remediations; `MODE=propose-patches` only with approval
 
 ## Stop
 
