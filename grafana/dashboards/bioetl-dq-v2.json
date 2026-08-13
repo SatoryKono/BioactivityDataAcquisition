@@ -157,7 +157,7 @@
                   "color": "red"
                 },
                 "3": {
-                  "text": "INCOMPLETE",
+                  "text": "UNKNOWN",
                   "color": "gray"
                 }
               }
@@ -869,7 +869,7 @@
               "custom": {
                 "align": "auto",
                 "cellOptions": {
-                  "type": "color-background",
+                  "type": "auto",
                   "mode": "basic",
                   "wrapText": true
                 },
@@ -1474,6 +1474,19 @@
               "decimals": 0,
               "mappings": [
                 {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "OK",
+                      "color": "green"
+                    },
+                    "1": {
+                      "text": "CRIT",
+                      "color": "red"
+                    }
+                  }
+                },
+                {
                   "type": "special",
                   "options": {
                     "match": "null",
@@ -1533,7 +1546,7 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "value"
           },
           "targets": [
             {
@@ -2406,6 +2419,15 @@
               "decimals": 0,
               "mappings": [
                 {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "0",
+                      "color": "gray"
+                    }
+                  }
+                },
+                {
                   "type": "special",
                   "options": {
                     "match": "null",
@@ -2422,6 +2444,14 @@
                   {
                     "color": "gray",
                     "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
                   }
                 ]
               },
@@ -2456,7 +2486,7 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "value"
           },
           "targets": [
             {
