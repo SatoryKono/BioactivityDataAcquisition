@@ -5,6 +5,7 @@ from __future__ import annotations
 import io
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tarfile
@@ -24,7 +25,11 @@ MATRIX_PATH = OUT / "01-scope-matrix.json"
 PROGRESS_PATH = OUT / "progress.json"
 BLOCKERS_PATH = OUT / "BLOCKERS.md"
 PROMPT_PATH = OUT / "02-review-prompt.md"
-CODERABBIT = os.environ.get("CODERABBIT_BIN", "/home/fedor/.local/bin/coderabbit")
+CODERABBIT = (
+    os.environ.get("CODERABBIT_BIN")
+    or shutil.which("coderabbit")
+    or "/home/fedor/.local/bin/coderabbit"
+)
 REVIEW_TIMEOUT_SECONDS = int(os.environ.get("CODERABBIT_REVIEW_TIMEOUT", "600"))
 SLEEP_SECONDS = float(os.environ.get("CODERABBIT_SLEEP", "5"))
 
@@ -151,7 +156,9 @@ def run_leaf(leaf: dict[str, Any], base_sha: str) -> dict[str, Any]:
     paths = manifest_files(leaf)
     started = time.monotonic()
     env = os.environ.copy()
-    env["PATH"] = f"/home/fedor/.local/bin:{env.get('PATH', '')}"
+    bin_dir = Path(CODERABBIT).parent
+    if str(bin_dir) not in {"", "."}:
+        env["PATH"] = f"{bin_dir}:{env.get('PATH', '')}"
     env["NO_COLOR"] = "1"
     env["TERM"] = "dumb"
     env["GIT_LFS_SKIP_SMUDGE"] = "1"
