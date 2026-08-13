@@ -48,21 +48,18 @@ Consolidated agent registry for published docs navigation.
 
 `docs/00-project/ai/agents/agents/**` is a published/internal mirror surface. It must not define runtime behavior independently from tracked runtime trees such as `.devin/agents/**`. Edit the active runtime profile first, then refresh this mirror when behavior or contributor guidance changes.
 
-## BioETL Core (9 active Devin runtime agents)
+## BioETL Core (6 active Devin runtime agents)
 
-Active set **MUST** match `.devin/agents/ORCHESTRATION.md` and the tracked `py-*.md` profiles under `.devin/agents/`.
+Active set **MUST** match `.devin/agents/ORCHESTRATION.md` and the tracked `*/AGENT.md` profiles under `.devin/agents/`.
 
-|| Agent                        | Model  | Role                                                                                   |
-|| ---------------------------- | ------ | -------------------------------------------------------------------------------------- |
-|| `py-audit-bot`               | parent | Baseline/final аудит, code review, arch guardian, API validation                       |
-|| `py-audit-bot`   | parent | Architecture-debt workflow: generate → plan → execute → verify                         |
-|| `py-plan-bot`                | parent | Task planning, RF-\* decomposition, composite design                                   |
-|| `py-test-bot`                | swe-1.6 | Tests (baseline/final/retest), coverage                                                |
-|| `py-config-bot`              | swe-1.6 | YAML configs (pipeline/DQ/filter/composite)                                            |
-|| `py-debug-bot`               | parent | RCA, bug fixes, regression debugging                                                   |
-|| `py-doc-bot`                 | swe-1.6 | Docs, ADR, CHANGELOG, Mermaid diagrams                                                 |
-|| `py-test-bot`              | parent | Hierarchical testing (L1→L2→L3)                                                        |
-|| `py-audit-bot`     | parent | Hierarchical code review (S1–S8)                                                       |
+| Agent | Model | Role |
+| --- | --- | --- |
+| `py-audit-bot` | parent | Baseline/final/targeted audit, review, debt, reproducibility (read-only) |
+| `py-plan-bot` | parent | Task planning, RF-\* decomposition, composite design (read-only) |
+| `py-debug-bot` | parent | Reproduce / isolate / remediation guidance (read-only) |
+| `py-test-bot` | default subagent model | Tests (baseline/final/retest), coverage |
+| `py-config-bot` | default subagent model | YAML configs (pipeline/DQ/filter/composite) |
+| `py-doc-bot` | default subagent model | Docs, ADR, CHANGELOG, Mermaid diagrams |
 
 Runtime mapping: `.devin/agents/DEVIN-RUNTIME.md`. Production code is written by the orchestrator directly.
 
@@ -75,7 +72,7 @@ Repo-wide documentation audits are routed through the `py-doc-bot` / `py-doc-bot
 || Agent spawning | `spawn_agent(agent_type, message)` | `run_subagent(title, task, profile, is_background)` |
 || Built-in profiles | `default`, `explorer`, `worker` | `subagent_explore`, `subagent_general` |
 || Custom profiles | Native agent roles | Custom subagent profiles in `.devin/agents/*/AGENT.md` |
-|| Model assignment | Fixed per profile (opus/sonnet) | Inherits parent model or explicit `model:` field |
+| Model assignment | Inherit parent (no provider-specific model labels) | Inherits parent model or explicit `model:` field |
 || Execution modes | Sequential/parallel | Foreground/background with permissions |
 
 ## Docs-only generic utilities (non-runtime)

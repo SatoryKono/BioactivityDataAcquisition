@@ -24,13 +24,13 @@ docker_args=(
 )
 
 if [[ -n "${PROMETHEUS_USERNAME:-}" ]]; then
-  docker_args+=(-e "PROMETHEUS_USERNAME=${PROMETHEUS_USERNAME}")
+  docker_args+=(-e PROMETHEUS_USERNAME)
 fi
 if [[ -n "${PROMETHEUS_PASSWORD:-}" ]]; then
-  docker_args+=(-e "PROMETHEUS_PASSWORD=${PROMETHEUS_PASSWORD}")
+  docker_args+=(-e PROMETHEUS_PASSWORD)
 fi
 if [[ -n "${PROMETHEUS_TOKEN:-}" ]]; then
-  docker_args+=(-e "PROMETHEUS_TOKEN=${PROMETHEUS_TOKEN}")
+  docker_args+=(-e PROMETHEUS_TOKEN)
 fi
 
 exec "${docker_bin}" "${docker_args[@]}" \

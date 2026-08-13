@@ -50,6 +50,9 @@ ACTIVE_RUNTIME_TEXT_PATHS = (
     *tuple(f".codex/agents/{name}.md" for name in AGENT_NAMES),
     *tuple(f".codex/agents/{name}.toml" for name in AGENT_NAMES),
     *tuple(f".codex/skills/{name}/SKILL.md" for name in AGENT_NAMES),
+    ".junie/agents/JUNIE-RUNTIME.md",
+    ".devin/agents/DEVIN-RUNTIME.md",
+    ".devin/agents/ORCHESTRATION.md",
     "docs/00-project/ai/memory/agent-memory.md",
     *tuple(f"docs/00-project/ai/memory/memory-{name}.md" for name in AGENT_NAMES),
 )
@@ -59,8 +62,12 @@ STALE_RUNTIME_PATTERNS = {
         r"Claude Code|WebSearch|WebFetch|TodoWrite|Task tool|Read tool|Grep tool"
     ),
     "ghost skill discovery path": re.compile(r"\.agents/skills"),
-    "retired role name": re.compile(r"py-review-orchestrator|py-architecture-debt-bot"),
-    "stale catalog count": re.compile(r"\b(?:nine|девять)\b", re.I),
+    "retired role name": re.compile(
+        r"py-review-orchestrator|py-architecture-debt-bot|py-test-swarm"
+    ),
+    "stale catalog count": re.compile(
+        r"\b(?:nine|девять|9 активн)\b", re.I
+    ),
 }
 
 GENERATED_MARKER = "<!-- generated-by: scripts.ai.codex.native_runtime_contract -->"
