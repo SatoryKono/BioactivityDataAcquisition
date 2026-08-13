@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import stat
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -144,7 +145,8 @@ def test_debug_uses_deterministic_subprocess_and_redacts_output(
     assert "vendor-secret" not in (output_dir / "stdout.txt").read_text(
         encoding="utf-8"
     )
-    assert stat.S_IMODE((output_dir / "summary.json").stat().st_mode) == 0o600
+    if sys.platform != "win32":
+        assert stat.S_IMODE((output_dir / "summary.json").stat().st_mode) == 0o600
 
 
 @pytest.mark.parametrize(
@@ -354,6 +356,10 @@ def test_platform_entrypoint_names_are_explicit() -> None:
     assert f"{cli.TOOLS['agentdebugx'].executable}.exe" == "agentdebug.exe"
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="symlink_to POSIX targets raises WinError 1314 without privilege",
+)
 def test_executable_lookup_keeps_virtualenv_launcher_directory(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

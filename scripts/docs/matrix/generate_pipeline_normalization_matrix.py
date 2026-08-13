@@ -47,6 +47,19 @@ def _maybe_exit_help_only_cli() -> None:
 
 _maybe_exit_help_only_cli()
 
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from scripts.docs.common.bootstrap import ensure_repo_imports
+else:
+    from scripts.docs.common.bootstrap import ensure_repo_imports
+
+ensure_repo_imports(include_src=True)
+
+from bioetl.application.composite.checkpoint import (  # noqa: F401
+    create_expected_checkpoint_context,
+    merge_expected_anchors,
+)
+
 from scripts.docs.matrix.normalization_matrix_catalog import (
     CANONICAL_COMPOSITE_RUN_ID,
     CANONICAL_CONTRACT_REF,
@@ -111,13 +124,11 @@ from scripts.docs.matrix.normalization_matrix_catalog import (
     build_execution_identity_payload,
     chembl_json_fields,
     chembl_policy_surface,
-    create_expected_checkpoint_context,
     initialize_bootstrap_chembl_policy_registry,
     is_date_field,
     is_doi_field,
     is_pmid_field,
     is_smiles_field,
-    merge_expected_anchors,
     normalize_profile_json_string,
     normalize_profile_json_string_strict,
     normalize_profile_passthrough,

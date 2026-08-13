@@ -10,6 +10,8 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 import re
@@ -59,7 +61,7 @@ def test_report_duplication_baseline_main_accepts_dispatcher_argv(
     monkeypatch.setattr(
         report,
         "_write_text",
-        lambda path, _content, *, root: written_paths.append(str(path)),
+        lambda path, _content, *, root: written_paths.append(Path(path).as_posix()),
     )
 
     result = report.main(
@@ -98,13 +100,13 @@ src\\bioetl\\application\\baz.py:21:0: R0801: Similar lines in 2 files
     clusters = _parse_pylint_duplicate_output(stdout)
 
     assert len(clusters) == 2
-    assert clusters[0].path == r"src\bioetl\application\foo.py"
+    assert clusters[0].path.replace("\\", "/") == "src/bioetl/application/foo.py"
     assert clusters[0].line == 10
     assert [m.module for m in clusters[0].modules] == [
         "bioetl.application.foo",
         "bioetl.application.bar",
     ]
-    assert clusters[1].path == r"src\bioetl\application\baz.py"
+    assert clusters[1].path.replace("\\", "/") == "src/bioetl/application/baz.py"
     assert clusters[1].line == 21
 
 

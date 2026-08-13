@@ -30,7 +30,6 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -42,8 +41,11 @@ from bioetl.composition.factories.pipeline._factory_method_types import (
 from bioetl.composition.pipeline_runner_request import (
     build_pipeline_create_runner_request_from_kwargs as build_canonical_runner_request,
 )
+from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.ports import PipelineCreateRunnerRequest
+from bioetl.domain.ports.config import SettingsPort
+from bioetl.domain.ports.runtime.runner import ExecutionObservabilityPort
 from bioetl.domain.types import RunID, RunType
 
 
@@ -82,10 +84,10 @@ def test_compat_shim_builds_runner_request_for_minimal_kwargs() -> None:
     """Compat shim must continue to build a valid request for legacy callers."""
     request = build_pipeline_create_runner_request_from_kwargs(
         run_id=RunID("00000000-0000-0000-0000-000000000001"),
-        runtime=SimpleNamespace(run_type=RunType.INCREMENTAL),
+        runtime=RuntimeConfig(run_type=RunType.INCREMENTAL),
         started_at=datetime(2026, 5, 21, tzinfo=UTC),
-        settings=SimpleNamespace(env="test"),
-        observability=MagicMock(),
+        settings=MagicMock(spec=SettingsPort),
+        observability=MagicMock(spec=ExecutionObservabilityPort),
         filter_config=None,
         config=None,
         cached_bronze=CachedBronzeContext.disabled(),

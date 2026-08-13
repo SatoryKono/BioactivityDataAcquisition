@@ -10,7 +10,7 @@ from __future__ import annotations
 import contextlib
 import os
 import tempfile
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 # Bound checkpoint I/O to protect operators from oversized / runaway listings.
 _DEFAULT_MAX_CHECKPOINT_BYTES = 16 * 1024 * 1024  # 16 MiB
@@ -39,7 +39,12 @@ class FileCompositeCheckpointWriter:
         max_checkpoint_bytes: int = _DEFAULT_MAX_CHECKPOINT_BYTES,
         max_glob_matches: int = _DEFAULT_MAX_GLOB_MATCHES,
     ) -> None:
-        self._checkpoint_dir = checkpoint_dir.resolve()
+        candidate = Path(checkpoint_dir)
+        # POSIX-absolute roots (``/custom/...``) must not pick up a Windows drive.
+        if candidate.as_posix().startswith("/") and not candidate.drive:
+            self._checkpoint_dir = candidate
+        else:
+            self._checkpoint_dir = candidate.resolve()
         self._max_checkpoint_bytes = max_checkpoint_bytes
         self._max_glob_matches = max_glob_matches
 
@@ -52,11 +57,15 @@ class FileCompositeCheckpointWriter:
             raise CheckpointPathError(
                 f"Checkpoint path must be relative to checkpoint root: {path!r}"
             )
-        candidate = (self._checkpoint_dir / path).resolve()
-        if not candidate.is_relative_to(self._checkpoint_dir):
+        candidate = self._checkpoint_dir / path
+        root_posix = PurePosixPath(self._checkpoint_dir.as_posix())
+        candidate_posix = PurePosixPath(candidate.as_posix())
+        if not candidate_posix.is_relative_to(root_posix):
             raise CheckpointPathError(
                 f"Checkpoint path escapes checkpoint root: {path!r}"
             )
+        if self._checkpoint_dir.drive:
+            return candidate.resolve()
         return candidate
 
     def read(self, path: str) -> str | None:

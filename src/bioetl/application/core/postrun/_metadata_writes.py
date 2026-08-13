@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from datetime import datetime
+from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
@@ -32,7 +33,9 @@ def resolve_report_path(
         path = dq_reports.gold_report_path
     else:
         return None
-    return str(path) if path else None
+    if not path:
+        return None
+    return Path(path).as_posix()
 
 
 def get_run_statistics(executor: ExecutorMetricsPort) -> dict[str, object]:
@@ -111,17 +114,20 @@ def _build_silver_metadata_write_coro(
         return None
     if not storage.is_table_initialized(silver_table, layer="silver"):
         return None
-    silver_path = storage.get_table_path(silver_table, layer="silver")
-    version_after = resolve_delta_version(str(silver_path), "silver")
-    silver_metadata_write: Awaitable[object] = metadata_writer.finalize_silver_metadata(
-        str(silver_path),
-        dq_report_path=resolve_report_path(dq_reports, layer="silver"),
-        completed_at=completed_at,
-        delta_version_after=version_after,
-        provider=config.provider,
-        entity=config.entity_type,
-    )
-    return silver_metadata_write
+    silver_path = Path(storage.get_table_path(silver_table, layer="silver")).as_posix()
+    version_after = resolve_delta_version(silver_path, "silver")
+
+    async def _finalize_silver() -> object:
+        return await metadata_writer.finalize_silver_metadata(
+            silver_path,
+            dq_report_path=resolve_report_path(dq_reports, layer="silver"),
+            completed_at=completed_at,
+            delta_version_after=version_after,
+            provider=config.provider,
+            entity=config.entity_type,
+        )
+
+    return _finalize_silver()
 
 
 def _build_gold_metadata_write_coro(
@@ -147,12 +153,15 @@ def _build_gold_metadata_write_coro(
         return None
     if not storage.is_table_initialized(gold_table, layer="gold"):
         return None
-    gold_path = storage.get_table_path(gold_table, layer="gold")
-    gold_metadata_write: Awaitable[object] = metadata_writer.finalize_gold_metadata(
-        str(gold_path),
-        dq_report_path=resolve_report_path(dq_reports, layer="gold"),
-        completed_at=completed_at,
-        provider=config.provider,
-        entity=config.entity_type,
-    )
-    return gold_metadata_write
+    gold_path = Path(storage.get_table_path(gold_table, layer="gold")).as_posix()
+
+    async def _finalize_gold() -> object:
+        return await metadata_writer.finalize_gold_metadata(
+            gold_path,
+            dq_report_path=resolve_report_path(dq_reports, layer="gold"),
+            completed_at=completed_at,
+            provider=config.provider,
+            entity=config.entity_type,
+        )
+
+    return _finalize_gold()
