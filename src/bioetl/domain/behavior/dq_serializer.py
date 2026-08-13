@@ -224,7 +224,8 @@ class DQReportSerializer:
             default_flow_style=True,
             allow_unicode=True,
         )
-        return cast(str, dumped).strip()
+        # Remove trailing '...' and whitespace from yaml.safe_dump output
+        return cast(str, dumped).strip().rstrip('...').strip()
 
     def _quote_yaml_string(self, value: str) -> str:
         """Quote YAML string with full escaping via safe_dump."""
