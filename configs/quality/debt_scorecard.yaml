@@ -460,10 +460,10 @@ hotspot_family_ratchets:
       total_loc: 23076
       files_ge_250_loc: 0
       helper_function_ratio: 0.363
-      max_internal_fan_in: 8
-      max_internal_fan_in_module: bioetl.application.core.batch_runtime_failure_policy
+      max_internal_fan_in: 6
+      max_internal_fan_in_module: bioetl.application.core.pipeline_span_lifecycle
     trend:
-      status: reduced_2026-07-29_td2_03_failure_policy_fanin
+      status: reduced_2026-08-13_issues_8706_8707_fanin_split
       next_action: '2026-07-28 PD-05 collapses excess blank lines in application/core, lowering total_loc
         22735->21805 while files_ge_250_loc remains 0. Bounded-growth budgets stay flat at 0 files_ge_250_loc
         and max_internal_fan_in 10; no technical-debt budget is increased. Hotspot baseline refreshed
@@ -545,9 +545,9 @@ hotspot_family_ratchets:
       files_ge_250_loc: 0
       helper_function_ratio: 0.421
       max_internal_fan_in: 3
-      max_internal_fan_in_module: bioetl.application.services.control_plane.run_manifest_reproducibility_scoring_support
+      max_internal_fan_in_module: bioetl.application.services.control_plane.replay.reproducibility_score_cards_types
     trend:
-      status: reviewed_2026-07-29_td2_02_package_reexport_trim
+      status: reduced_2026-08-13_issue_8706_scoring_support_collapse
       next_action: 2026-07-28 ARCH-REF-03/04 reduces control_plane files_ge_250_loc to 0 and max_internal_fan_in
         4->3 via lazy facades and extract helpers; bounded-growth budgets ratcheted to files_ge_250_loc
         0 and max_internal_fan_in 3; no technical-debt budget is increased.

@@ -34,7 +34,8 @@ def test_scripts_memory_router_delegates_to_canonical_graph_modules() -> None:
     }
 
 
-def test_scripts_ops_neo4j_memory_sync_is_canonical_module_alias() -> None:
-    legacy = importlib.import_module("scripts.ops.neo4j_memory_sync")
-    canonical = importlib.import_module("memory.graph.sync")
-    assert legacy is canonical
+def test_scripts_ops_neo4j_memory_sync_alias_is_retired() -> None:
+    """#8708: compatibility wrapper removed; use memory.graph.sync / scripts.memory sync."""
+    import importlib.util
+
+    assert importlib.util.find_spec("scripts.ops.neo4j_memory_sync") is None
