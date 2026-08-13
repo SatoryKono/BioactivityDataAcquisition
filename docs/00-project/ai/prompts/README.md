@@ -73,10 +73,11 @@ docs/00-project/ai/prompts/
 | `prompt.tests.cycle` | [library/tests/test-cycle.md](library/tests/test-cycle.md) | Cyclic testing (N cycles, lanes) |
 | `prompt.docs.ai-audit-planning` | [library/docs/ai-audit-planning.md](library/docs/ai-audit-planning.md) | Docs/AI surface audit plan |
 | `prompt.architecture.review` | [library/architecture/review-assessment.md](library/architecture/review-assessment.md) | Architecture review (v2.3) |
-| `prompt.architecture.cycle` | [library/architecture/architecture-cycle.md](library/architecture/architecture-cycle.md) | Cyclic **project architecture** audit (v1.0, N=10) |
+| `prompt.architecture.cycle` | [library/architecture/architecture-cycle.md](library/architecture/architecture-cycle.md) | Cyclic **project architecture** audit (v1.1): **10 categories** → plan → implement |
+| `prompt.audit.coderabbit-project-cycle` | [library/audit/coderabbit-project-cycle.md](library/audit/coderabbit-project-cycle.md) | Exhaustive cyclic **project** audit + **CodeRabbit** dual-pass (v1.0, N=10) |
 | `prompt.observability.dashboard-panel-audit` | [library/observability/dashboard-panel-audit.md](library/observability/dashboard-panel-audit.md) | Grafana panel audit (5 phases, v1.1) |
 | `prompt.observability.bi-dashboard-acceptance` | [library/observability/bi-dashboard-acceptance.md](library/observability/bi-dashboard-acceptance.md) | BI acceptance: visual / layout / data |
-| `prompt.observability.dashboard-audit-cycle` | [library/observability/dashboard-audit-cycle.md](library/observability/dashboard-audit-cycle.md) | Cyclic dashboard audit **N=20** — render, density, fill, acceptance (v1.1) |
+| `prompt.observability.dashboard-audit-cycle` | [library/observability/dashboard-audit-cycle.md](library/observability/dashboard-audit-cycle.md) | Exhaustive cyclic audit of every panel × viewport — density, typography, color, scroll, whitespace, data, render (v2.0) |
 
 ### Domain audit cards (nine-kit intake)
 
@@ -109,6 +110,7 @@ Archive megaprompts (opt-in only):
 | Dual-agent cycle + external audit prompt + CR + peer review | `prompt.audit.dual-agent-cycle` (`OUTER_CYCLES=1`; ALLOW_* false) |
 | Cyclic tests / docs / tech-debt / repo hygiene / dashboards pack | `prompt.audit.cyclic-pack` → domain `*-cycle` cards |
 | Cyclic project architecture | `prompt.architecture.cycle` |
+| Exhaustive project audit + CodeRabbit | `prompt.audit.coderabbit-project-cycle` |
 | Issue/PR closeout | `prompt.closeout.grok` |
 
 ### Dual-agent cyclic audit
@@ -166,8 +168,8 @@ python -m scripts.ai.prompts render prompt.observability.dashboard-panel-audit \
 python -m scripts.ai.prompts render prompt.observability.bi-dashboard-acceptance \
   --param SCOPE="grafana/dashboards" --param DEPTH=quick --param PLATFORM=grafana
 python -m scripts.ai.prompts render prompt.observability.dashboard-audit-cycle \
-  --param SCOPE="grafana/dashboards" --param CYCLE_COUNT=1 --param MODE=audit \
-  --param DEPTH=quick --param CONTOURS="panels,visual,layout,data"
+  --param SCOPE="grafana/dashboards" --param N=20 --param MODE=audit \
+  --param DEPTH=full --param MONITORING=false
 python -m scripts.ai.prompts render prompt.tests.cycle \
   --param SCOPE="tests/unit/domain" --param LANE=unit-fast \
   --param CYCLE_COUNT=1 --param MODE=run+fix

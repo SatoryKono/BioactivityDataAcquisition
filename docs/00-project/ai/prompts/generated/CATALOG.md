@@ -23,9 +23,10 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.docs.ai-audit-planning` | `library/docs/ai-audit-planning.md` | Plan an audit of docs/00-project/ai surfaces |
 | `prompt.architecture.review` | `library/architecture/review-assessment.md` | Architecture review v2.3 (hexagonal/C4/arc42) with findings.json outputs |
 | `prompt.architecture.cycle` | `library/architecture/architecture-cycle.md` | Cyclic project architecture audit — layers, boundaries, ADR drift, fix waves |
+| `prompt.audit.coderabbit-project-cycle` | `library/audit/coderabbit-project-cycle.md` | Exhaustive cyclic project audit with CodeRabbit dual-pass |
 | `prompt.observability.dashboard-panel-audit` | `library/observability/dashboard-panel-audit.md` | Five-phase Grafana panel audit — render, GH issues, fix, closeout (v1.1) |
 | `prompt.observability.bi-dashboard-acceptance` | `library/observability/bi-dashboard-acceptance.md` | BI dashboard acceptance — visual, layout, data contours with measurable checks |
-| `prompt.observability.dashboard-audit-cycle` | `library/observability/dashboard-audit-cycle.md` | Cyclic dashboard audit N loops — render, density, fill, visual/layout/data, fix, re-verify |
+| `prompt.observability.dashboard-audit-cycle` | `library/observability/dashboard-audit-cycle.md` | Exhaustive cyclic Grafana audit of every panel, viewport, density, typography, color, scroll, whitespace, data, and render contract |
 | `prompt.audit.docs-content` | `library/audit/docs-content.md` | Evidence-based audit of project documentation content and drift |
 | `prompt.audit.tests-system` | `library/audit/tests-system.md` | Audit test system as regression detection, not coverage vanity |
 | `prompt.audit.tech-debt` | `library/audit/tech-debt.md` | Evidence-based technical debt register with risk-ordered paydown |
@@ -94,6 +95,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.docs.ai-audit-planning` | operator-paste | active | `library/docs/ai-audit-planning.md` |
 | `prompt.architecture.review` | operator-paste | active | `library/architecture/review-assessment.md` |
 | `prompt.architecture.cycle` | operator-paste | active | `library/architecture/architecture-cycle.md` |
+| `prompt.audit.coderabbit-project-cycle` | operator-paste | active | `library/audit/coderabbit-project-cycle.md` |
 | `prompt.observability.dashboard-panel-audit` | operator-paste | active | `library/observability/dashboard-panel-audit.md` |
 | `prompt.observability.bi-dashboard-acceptance` | operator-paste | active | `library/observability/bi-dashboard-acceptance.md` |
 | `prompt.observability.dashboard-audit-cycle` | operator-paste | active | `library/observability/dashboard-audit-cycle.md` |
