@@ -29,6 +29,12 @@ from bioetl.application.services.control_plane.manifest.inspection_models import
 )
 from bioetl.application.services.control_plane.manifest.inspection_models import (
     resolve_verify_verdict as resolve_verify_verdict,
+    _RUN_MANIFEST_INSPECTION_MODEL_EXPORTS,
+    RunManifestDiffEntry,
+    RunManifestDiffResult,
+    RunManifestInspectionCorruptionError,
+    RunManifestInspectionResult,
+    RunManifestVerifyResult,
 )
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.types import RunID

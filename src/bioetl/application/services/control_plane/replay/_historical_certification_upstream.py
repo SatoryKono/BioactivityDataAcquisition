@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.diagnostics import (
+from bioetl.application.services.control_plane.replay._historical_certification_models import (
     build_diagnostics_summary,
 )
 from bioetl.application.services.control_plane.replay._historical_certification_models import (

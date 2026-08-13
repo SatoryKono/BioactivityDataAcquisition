@@ -166,11 +166,16 @@ def _resolve_final_value_source(
     source_providers: list[str],
     priority_order: list[str] | None,
 ) -> str | None:
-    """Select final value source honoring priority_order when available."""
+    """Select final value source honoring priority_order when available.
+    
+    Priority order is highest-first (first item = highest priority).
+    Returns the highest-priority provider that exists in source_providers.
+    """
     if not source_providers:
         return None
     if priority_order:
         provider_set = set(source_providers)
+        # Return the first (highest priority) provider from priority_order that exists in source_providers
         for provider in priority_order:
             if provider in provider_set:
                 return provider

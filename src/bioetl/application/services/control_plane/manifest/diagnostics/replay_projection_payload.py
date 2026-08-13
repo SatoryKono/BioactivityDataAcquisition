@@ -10,7 +10,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.operator_rep
 from bioetl.application.services.control_plane.manifest.diagnostics.persistence import (
     build_lineage_closure_boundary,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_blockers import (
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_state import (
     _collect_append_mode_semantic_sinks,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_readiness import (
@@ -26,6 +26,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_state
 from bioetl.application.services.control_plane.manifest.replay_taxonomy import (
     resolve_replay_next_action,
     resolve_replay_resume_rebuild_verdict,
+    build_replay_taxonomy_projection,
 )
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (

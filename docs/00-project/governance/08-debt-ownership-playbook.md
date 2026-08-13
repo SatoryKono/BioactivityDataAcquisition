@@ -116,3 +116,35 @@ When a review discusses file-size debt:
 1. If structural context is needed, generate or refresh a raw hotspot inventory snapshot using the canonical command in `scripts/engineering/README.md`.
 1. Treat that raw snapshot as evidence for prioritization, not as a blocking gate by itself.
 1. Only convert hotspot inventory into enforceable debt through an explicit scorecard or named-hotspot decision.
+
+## Shrink-before-grow freezes (#8714)
+
+Scorecard ratchets that sit at `current_count == max_count` are **hard freezes**.
+Examples (see live residual + scorecard):
+
+- `config_surface_ratchet.metrics.config_count` (27/27)
+- `config_surface_ratchet.metrics.unique_parameter_count` (419/419)
+- `application_services_control_plane.max_internal_fan_in` (2/2)
+- retirement `repo_wide_zero_import_candidate_count` (5/5)
+- sanctioned public entrypoint / facade ceilings
+
+**PR rule:** any change that would increase a ceiling metric **MUST** either:
+
+1. Shrink another residual in the same PR (net flat or down), or
+2. Split/refactor so the metric does not grow,
+
+and **MUST NOT** raise `max_count` / `bounded_growth_budgets` / exemptions.
+
+Validation:
+
+```bash
+python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main
+```
+
+Bare `--check` without `--changed-from-ref` records
+`budget_increase_count=not_evaluated_without_changed_from_ref` and does **not**
+evaluate saturated-metric compensation. CI and freeze PRs MUST pass the
+reference-aware invocation so scorecard `max_count` / `bounded_growth_budgets`
+cannot grow unnoticed.
+
+

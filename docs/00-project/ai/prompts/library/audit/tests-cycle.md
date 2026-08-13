@@ -59,7 +59,7 @@ N-итерационный **аудит тестовой системы** (regre
 
 Для **run → fix → retest** без audit-реестра используй `prompt.tests.cycle`.
 
-Default **`N=10`**, **`MODE=full`**, все **`ALLOW_*=true`** (issues / push / merge / close).
+Default **`N=10`**, **`MODE=full`**, все **`ALLOW_*=false`**. Operator full-run must set `ALLOW_ISSUE_WRITE/PUSH/MERGE/CLOSE=true` explicitly.
 
 ## Params
 
@@ -71,10 +71,10 @@ Default **`N=10`**, **`MODE=full`**, все **`ALLOW_*=true`** (issues / push / 
 | `LANGUAGE` | `ru` |
 | `LANE` | `unit` \| `arch` \| `fast` \| `full` (budget for optional focused runs) |
 | `AUDIT_MODE` | `full` \| `differential` |
-| `ALLOW_ISSUE_WRITE` | `true` |
-| `ALLOW_PUSH` | `true` |
-| `ALLOW_MERGE` | `true` |
-| `ALLOW_CLOSE` | `true` |
+| `ALLOW_ISSUE_WRITE` | `false` (operator full-run: `true`) |
+| `ALLOW_PUSH` | `false` (operator full-run: `true`) |
+| `ALLOW_MERGE` | `false` (operator full-run: `true`) |
+| `ALLOW_CLOSE` | `false` (operator full-run: `true`) |
 | `MAX_ISSUES_PER_ITERATION` | `5` |
 | `BASE_BRANCH` | `main` |
 | `REPO` | `SatoryKono/BioactivityDataAcquisition` |
@@ -106,6 +106,8 @@ Default **`N=10`**, **`MODE=full`**, все **`ALLOW_*=true`** (issues / push / 
 | **D Fix** | Minimal diff; focused tests for behavior change; no new skips/xfail as “fix”. |
 | **E Validate** | Same LANE/SCOPE re-check; if `ALLOW_PUSH` → PR + required checks. No admin bypass. |
 | **F Post** | Per finding: `resolved` \| `unchanged` \| `regressed` \| `new`. Update `iteration-i/delta.md`. |
+
+`MODE=audit` → stop after A. `audit+issues` → stop after C (no implement). `full` → through F.
 
 ## Focus checklist (each cycle)
 

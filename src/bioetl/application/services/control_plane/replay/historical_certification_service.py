@@ -16,6 +16,11 @@ from bioetl.application.services.control_plane.replay._historical_snapshot_certi
 )
 from bioetl.application.services.control_plane.replay.historical_corpus_models import (
     HistoricalReplaySnapshotCertification,
+    HistoricalReplayBulkCertificationRecord,
+    HistoricalReplayBulkCertificationResult,
+    HistoricalReplayBulkCertificationSpec,
+    HistoricalReplayCertifiabilityInventory,
+    HistoricalReplayCertifiabilityRecord,
 )
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 from bioetl.domain.types import RunID

@@ -6,6 +6,7 @@ from typing import Protocol, cast
 
 from bioetl.application.services.control_plane.replay.historical_closure_models import (
     HistoricalReplayResidualDispositionRecord,
+    HistoricalReplayClaimScopeMode,
 )
 
 
