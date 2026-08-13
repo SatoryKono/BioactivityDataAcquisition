@@ -74,7 +74,10 @@ N-итерационный цикл: **оценить архитектуру п�
 | Loop shell | `prompt.audit.orchestrator` |
 
 Default **`N=10`**, **`MODE=full`**, **`INCLUDE_PIPELINE=true`**,
-**`LAYERS=all`**, **`SCORE_SOURCE=live+committed`**, все **`ALLOW_*=true`**.
+**`LAYERS=all`**, **`SCORE_SOURCE=live+committed`**, все **`ALLOW_*=false`**.
+
+Operator **full-run** paste must set `ALLOW_ISSUE_WRITE/PUSH/MERGE/CLOSE=true`
+explicitly before Phases G–I mutate GitHub/git. Without flags → plan/payloads only.
 
 Пустые циклы запрещены. Early-stop: 2 подряд итерации без новых actionable
 PROVEN P0/P1, без regression и без падения `integral_score` / category scores.
@@ -87,16 +90,16 @@ PROVEN P0/P1, без regression и без падения `integral_score` / cate
 | --- | --- |
 | `N` | `10` |
 | `SCOPE` | `src/bioetl/` (+ `tests/architecture`, configs, compose as needed) |
-| `MODE` | `full` (also: `audit` \| `audit+plan` \| `audit+issues`) |
+| `MODE` | `full` (`audit` \| `audit+plan` \| `audit+issues` \| `full`) |
 | `LANGUAGE` | `ru` |
 | `AUDIT_MODE` | `full` \| `differential` |
 | `INCLUDE_PIPELINE` | `true` (arch CI, import-linter, architecture tests) |
 | `LAYERS` | `all` or CSV of hexagonal layers |
 | `SCORE_SOURCE` | `live+committed` \| `committed` \| `live` |
-| `ALLOW_ISSUE_WRITE` | `true` |
-| `ALLOW_PUSH` | `true` |
-| `ALLOW_MERGE` | `true` |
-| `ALLOW_CLOSE` | `true` |
+| `ALLOW_ISSUE_WRITE` | `false` (operator full-run: `true`) |
+| `ALLOW_PUSH` | `false` (operator full-run: `true`) |
+| `ALLOW_MERGE` | `false` (operator full-run: `true`) |
+| `ALLOW_CLOSE` | `false` (operator full-run: `true`) |
 | `MAX_ISSUES_PER_ITERATION` | `5` |
 | `MAX_WAVES_PER_ITERATION` | `3` |
 | `BASE_BRANCH` | `main` |
@@ -182,7 +185,7 @@ PROVEN P0/P1, без regression и без падения `integral_score` / cate
 | **I Validate** | import-linter / architecture subset; re-score touched categories; PR+checks if ALLOW_PUSH; merge if ALLOW_MERGE. |
 | **J Post** | Per finding: resolved \| unchanged \| regressed \| new. Score delta table. `iteration-i/delta.md`. |
 
-`MODE=audit` → stop after E. `audit+plan` → stop after F. `full` → through J.
+`MODE=audit` → stop after E. `audit+plan` → stop after F. `audit+issues` → stop after G (issues only, no implement H). `full` → through J.
 
 If `INCLUDE_PIPELINE=true`: audit arch CI jobs, import-linter wiring, architecture gate; tag `pipeline`.
 

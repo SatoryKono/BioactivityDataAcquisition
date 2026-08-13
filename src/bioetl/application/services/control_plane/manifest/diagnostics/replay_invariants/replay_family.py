@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context import (
+    ReplayFamilyContext,
     build_replay_family_context,
 )
 from bioetl.domain.control_plane import RunManifest
@@ -21,7 +22,9 @@ def _resolve_exact_replay_support_boundary(manifest: RunManifest) -> str:
 
 
 __all__ = [
+    "ReplayFamilyContext",
     "_resolve_exact_replay_support_boundary",
     "_resolve_replay_family_contract",
     "_resolve_reproducibility_profile",
+    "build_replay_family_context",
 ]

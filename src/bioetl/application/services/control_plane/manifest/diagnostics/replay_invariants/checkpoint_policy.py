@@ -2,13 +2,22 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.nested_mapping import (
-    lookup_mapping_path,
-)
+from collections.abc import Mapping
+
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
 )
+
+
+def lookup_mapping_path(mapping: Mapping[str, object], *path: str) -> object | None:
+    """Local copy of diagnostics.nested_mapping.lookup_mapping_path (fan-in split)."""
+    current: object = mapping
+    for component in path:
+        if not isinstance(current, Mapping):
+            return None
+        current = current.get(component)
+    return current
 
 
 def _resolve_applied_checkpoint_compatibility_policy(

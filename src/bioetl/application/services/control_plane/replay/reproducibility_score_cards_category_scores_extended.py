@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_types import (
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_core import (
     ScoreCardRecord,
     build_score_card_record,
     string_items,
