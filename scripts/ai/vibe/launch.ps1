@@ -76,8 +76,9 @@ if ($Args.Count -eq 0) {
     $PromptText = $Args -join ' '
     Write-MistralInfo "Prompt length: $($PromptText.Length) chars"
     $PromptB64 = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($PromptText))
-    # Base64 payload only — never interpolate raw prompt into bash -c.
-    wsl -e bash -c "$EnvPrelude && vibe --workdir '$WSLRepoRoot' \"\$(printf '%s' '$PromptB64' | base64 -d)\""
+    # Keep the payload out of bash source: bash receives it as positional $1.
+    $VibeCommand = '{0} && decoded_prompt="$(printf ''%s'' "$1" | base64 -d)" && vibe --workdir ''{1}'' "$decoded_prompt"' -f $EnvPrelude, $WSLRepoRoot
+    wsl -e bash -c $VibeCommand -- $PromptB64
 }
 
 exit $LASTEXITCODE

@@ -38,3 +38,14 @@ def test_vibe_module_router_compatibility_entrypoint_stays_retired() -> None:
     assert "scripts.ai.vibe" not in top_level_router
     assert "launch.sh" in top_level_router
     assert "launch.ps1" in top_level_router
+
+
+def test_vibe_powershell_launcher_passes_prompt_as_data() -> None:
+    root = Path(__file__).resolve().parents[2]
+    launcher = (root / "scripts" / "ai" / "vibe" / "launch.ps1").read_text(
+        encoding="utf-8"
+    )
+
+    assert "wsl -e bash -c $VibeCommand -- $PromptB64" in launcher
+    assert 'decoded_prompt="$(printf \'\'%s\'\' "$1" | base64 -d)"' in launcher
+    assert '\\$(printf' not in launcher

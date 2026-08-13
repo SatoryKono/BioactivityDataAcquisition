@@ -83,6 +83,11 @@ def test_mcp_env_loading_smoke_redacts_secret_values() -> None:
     assert "NEO4J_AUTH=${NEO4J_AUTH" not in text
     assert "SET" in text
     assert "NOT SET" in text
+    assert "bolt://host.docker.internal:7687" not in text
+    assert "(bolt|neo4j)" in text
+    assert '[[ -z "${NEO4J_PASSWORD:-}" ]]' in text
+    assert '[[ "${NEO4J_PASSWORD}" == *_secure_password ]]' in text
+    assert "matches a legacy placeholder pattern" in text
 
 
 def test_mcp_token_docs_cover_sources_rotation_validation_and_ci_stance() -> None:

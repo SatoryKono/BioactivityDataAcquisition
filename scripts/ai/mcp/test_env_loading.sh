@@ -19,10 +19,10 @@ done
 echo ""
 
 status=0
-if [[ "${NEO4J_URI:-}" == "bolt://host.docker.internal:7687" ]]; then
-    echo "✓ NEO4J_URI is correct"
+if [[ "${NEO4J_URI:-}" =~ ^(bolt|neo4j)(\+s|\+ssc)?://[^[:space:]]+$ ]]; then
+    echo "✓ NEO4J_URI uses a supported Neo4j scheme"
 else
-    echo "✗ NEO4J_URI is incorrect or not set"
+    echo "✗ NEO4J_URI is missing or does not use a supported Neo4j scheme"
     status=1
 fi
 
@@ -33,11 +33,14 @@ else
     status=1
 fi
 
-if [[ "${NEO4J_PASSWORD:-}" == *_secure_password ]]; then
-    echo "✓ NEO4J_PASSWORD is correct"
-else
-    echo "✗ NEO4J_PASSWORD is incorrect"
+if [[ -z "${NEO4J_PASSWORD:-}" ]]; then
+    echo "✗ NEO4J_PASSWORD is not set"
     status=1
+elif [[ "${NEO4J_PASSWORD}" == *_secure_password ]]; then
+    echo "✗ NEO4J_PASSWORD matches a legacy placeholder pattern"
+    status=1
+else
+    echo "✓ NEO4J_PASSWORD is set and does not match the legacy placeholder"
 fi
 
 if [[ "${NEO4J_DATABASE:-}" == "neo4j" ]]; then

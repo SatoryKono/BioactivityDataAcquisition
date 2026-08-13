@@ -70,6 +70,21 @@ def test_runtime_ownership_covers_tracked_devin_profiles() -> None:
     assert "not** a parallel 9-bot agent registry" not in ownership
 
 
+def test_runtime_ownership_keeps_devin_source_above_foreign_profiles() -> None:
+    ownership = Path(
+        "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md"
+    ).read_text(encoding="utf-8")
+    precedence = ownership.split("## Precedence Model", 1)[1].split(
+        "## Sync Direction", 1
+    )[0]
+
+    devin_runtime = precedence.index(".devin/agents/DEVIN-RUNTIME.md")
+    matching_profiles = precedence.index("matching runtime profiles and skills")
+    devin_profile = precedence.index(".devin/agents/*/AGENT.md")
+
+    assert devin_runtime < matching_profiles < devin_profile
+
+
 def test_no_tracked_devin_atomic_temp_config_duplicates() -> None:
     tracked = subprocess.check_output(
         ["git", "ls-files", ".devin/"],

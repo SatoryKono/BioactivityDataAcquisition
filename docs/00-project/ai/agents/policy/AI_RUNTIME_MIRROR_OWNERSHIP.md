@@ -72,15 +72,19 @@ ______________________________________________________________________
 
 Default precedence for AI behavior and guidance:
 
-1. active runtime source for the current agent or skill — equal peers
-   `.codex/**` (`.codex/agents/CODEX-RUNTIME.md`) and `.junie/**`
-   (`.junie/agents/JUNIE-RUNTIME.md`, with root contract `.junie/guidelines.md`)
-1. matching runtime profiles and skills in the same tree (`.codex/agents/py-*.md`,
-   `.codex/skills/**`, `.junie/agents/py-*.md`, `.junie/skills/**`)
-1. `.devin/agents/DEVIN-RUNTIME.md` and the selected
-   `.devin/agents/*/AGENT.md` profile for Devin sessions
-1. a matching tracked `.gemini/**` surface only when that tree exists in the
-   current checkout and has been verified in the same change
+1. active runtime source for the current agent or skill — equal peers:
+   - `.codex/agents/CODEX-RUNTIME.md`
+   - `.junie/agents/JUNIE-RUNTIME.md`, with root contract
+     `.junie/guidelines.md`
+   - `.devin/agents/DEVIN-RUNTIME.md` for Devin sessions
+   - a matching tracked `.gemini/**` runtime source only when that tree exists
+     in the current checkout and has been verified in the same change
+1. matching runtime profiles and skills in the selected runtime tree:
+   - `.codex/agents/py-*.md`, `.codex/skills/**`
+   - `.junie/agents/py-*.md`, `.junie/skills/**`
+   - `.devin/agents/*/AGENT.md`, `.devin/skills/**` for Devin sessions
+   - matching tracked `.gemini/agents/**` and `.gemini/skills/**` only when the
+     runtime tree exists and is verified in the same change
 1. `docs/00-project/NORMATIVE_SOURCES.md`
 1. `docs/00-project/RULES.md`
 1. `docs/01-requirements/REQUIREMENTS.md`
