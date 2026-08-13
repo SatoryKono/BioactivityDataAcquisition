@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.execution_identity_support import (
+from bioetl.application.services.control_plane.manifest._service_support import (
     build_degraded_runtime_anchor_payload,
     build_execution_identity_payload_from_code_provenance,
     build_identity_graph_core,

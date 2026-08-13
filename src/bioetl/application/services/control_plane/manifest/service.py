@@ -12,7 +12,7 @@ from bioetl.application.services.control_plane.manifest._service_support import 
     RunManifestHydrationMixin,
     RunManifestPayloadMixin,
 )
-from bioetl.application.services.control_plane.manifest.models import (
+from bioetl.application.services.control_plane.manifest.validation import (
     RunManifestCreateSpec,
 )
 from bioetl.application.services.control_plane.manifest.service_scaffold import (

@@ -9,7 +9,7 @@ from bioetl.application.services.control_plane.replay.closure_claims import (
     build_narrowed_scope_global_claim,
     build_universal_scope_global_claim,
 )
-from bioetl.application.services.control_plane.replay.historical_closure_models import (
+from bioetl.application.services.control_plane.replay.closure_claims import (
     HistoricalReplayClaimScopeMode,
     HistoricalReplayResidualDispositionRecord,
 )

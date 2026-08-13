@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from bioetl.application.services.control_plane.replay.historical_certification import (
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.snapshot_envelope import (
     LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,
 )
 from bioetl.domain.control_plane import RunLedgerEntry
