@@ -100,7 +100,7 @@ PROVEN P0/P1 и без regression.
 | `CONTOURS` | `render,density,fill,visual,layout,data` |
 | `VIEWPORT` | `1366x768` (record actual if different) |
 | `USER_ROLE` | `analyst` (or `manager` / `executive` / list) |
-| `MONITORING` | `false` until UI needed; set `true` only with operator approval |
+| `MONITORING` | `true` until UI needed; set `true` only with operator approval |
 | `INCLUDE_PIPELINE` | `true` (render scripts, scenes ledger, CI dashboard gates if any) |
 | `ALLOW_ISSUE_WRITE` | `true` |
 | `ALLOW_PUSH` | `true` |

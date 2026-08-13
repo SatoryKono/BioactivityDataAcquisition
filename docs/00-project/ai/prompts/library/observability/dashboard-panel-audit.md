@@ -71,7 +71,7 @@ reports.
 | `AUDIT_MODE` | `full` \| `differential` |
 | `REQUIRE_GH_TRACKING` | `false` |
 | `LANGUAGE` | `ru` |
-| `MONITORING` | `false` (start stack **only** if UI required and operator sets `true`) |
+| `MONITORING` | `true` (start stack **only** if UI required and operator sets `true`) |
 
 ## Phase 1 — Inventory
 
