@@ -224,7 +224,7 @@ entries:
     status: active
     class: operator-paste
     tags: [architecture, review, operator, audit]
-    summary: Architecture review v2.3 (hexagonal/C4/arc42) with findings.json outputs
+    summary: Architecture review v2.4 (hexagonal/C4/arc42) with findings.json outputs
 
   - id: prompt.architecture.cycle
     path: library/architecture/architecture-cycle.md
@@ -481,7 +481,7 @@ entries:
     status: archived
     class: campaign
     tags: [audit, campaign, archive, generic-kit]
-    summary: Cleaned generic nine-domain audit kit (2026-08); prefer library/audit cards
+    summary: Cleaned generic nine-domain audit kit (2026-08); prefer prompt.audit.generic-nine.pack
 
   - id: prompt.campaign.project-audit-orchestrator-kit
     path: archive/campaigns/project-audit-orchestrator-kit-2026-08-11.md

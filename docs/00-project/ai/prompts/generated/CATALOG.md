@@ -22,11 +22,12 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.tests.fix-retest` | `library/tests/fix-retest-loop.md` | Run → fix → retest until green or blocked |
 | `prompt.tests.cycle` | `library/tests/test-cycle.md` | Cyclic testing — baseline run, triage, fix, retest, delta per cycle |
 | `prompt.docs.ai-audit-planning` | `library/docs/ai-audit-planning.md` | Plan an audit of docs/00-project/ai surfaces |
-| `prompt.architecture.review` | `library/architecture/review-assessment.md` | Architecture review v2.3 (hexagonal/C4/arc42) with findings.json outputs |
+| `prompt.architecture.review` | `library/architecture/review-assessment.md` | Architecture review v2.4 (hexagonal/C4/arc42) with findings.json outputs |
 | `prompt.architecture.cycle` | `library/architecture/architecture-cycle.md` | Cyclic architecture audit — 10-category scorecard, improvement plan, implement waves |
 | `prompt.observability.dashboard-panel-audit` | `library/observability/dashboard-panel-audit.md` | Five-phase Grafana panel audit — render, GH issues, fix, closeout (v1.1) |
 | `prompt.observability.bi-dashboard-acceptance` | `library/observability/bi-dashboard-acceptance.md` | BI dashboard acceptance — visual, layout, data contours with measurable checks |
 | `prompt.observability.dashboard-audit-cycle` | `library/observability/dashboard-audit-cycle.md` | Exhaustive cyclic Grafana audit of every panel, viewport, density, typography, color, scroll, whitespace, data, and render contract |
+| `prompt.audit.generic-nine.pack` | `library/audit/generic-nine/pack.md` | Pack routing for the nine-domain generic code/project audit kit |
 | `prompt.observability.grafana-six.pack` | `library/observability/grafana-six/pack.md` | Pack routing for the six-prompt read-only Grafana dashboard audit |
 | `prompt.observability.grafana-six.evidence` | `library/observability/grafana-six/evidence.md` | Read-only Grafana evidence pack — inventory, preflight, scopes, renders |
 | `prompt.observability.grafana-six.visual` | `library/observability/grafana-six/visual.md` | Read-only Grafana visual audit — palette, contrast, typography, clipping |
@@ -79,6 +80,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.fragment.peer-review-gate` | `fragments/peer-review-gate.md` | Peer agent review gate before issue close |
 | `prompt.fragment.bi-check-schema` | `fragments/bi-check-schema.md` | BI dashboard check result schema and priority mapping |
 | `prompt.fragment.grafana-six-contract` | `fragments/grafana-six-contract.md` | Shared read-only contract for the six-prompt Grafana dashboard audit kit |
+| `prompt.fragment.generic-nine-contract` | `fragments/generic-nine-contract.md` | Shared contract for the nine-domain generic audit kit |
 
 ## All registry entries
 
@@ -101,6 +103,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.fragment.peer-review-gate` | fragment | active | `fragments/peer-review-gate.md` |
 | `prompt.fragment.bi-check-schema` | fragment | active | `fragments/bi-check-schema.md` |
 | `prompt.fragment.grafana-six-contract` | fragment | active | `fragments/grafana-six-contract.md` |
+| `prompt.fragment.generic-nine-contract` | fragment | active | `fragments/generic-nine-contract.md` |
 | `prompt.session.grok-bootstrap` | operator-paste | active | `library/session/grok-bootstrap.md` |
 | `prompt.closeout.grok` | operator-paste | active | `library/closeout/grok-closeout.md` |
 | `prompt.audit.grok-cycle` | operator-paste | active | `library/audit/grok-audit-cycle.md` |
@@ -118,6 +121,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.observability.dashboard-panel-audit` | operator-paste | active | `library/observability/dashboard-panel-audit.md` |
 | `prompt.observability.bi-dashboard-acceptance` | operator-paste | active | `library/observability/bi-dashboard-acceptance.md` |
 | `prompt.observability.dashboard-audit-cycle` | operator-paste | active | `library/observability/dashboard-audit-cycle.md` |
+| `prompt.audit.generic-nine.pack` | operator-paste | active | `library/audit/generic-nine/pack.md` |
 | `prompt.observability.grafana-six.pack` | operator-paste | active | `library/observability/grafana-six/pack.md` |
 | `prompt.observability.grafana-six.evidence` | operator-paste | active | `library/observability/grafana-six/evidence.md` |
 | `prompt.observability.grafana-six.visual` | operator-paste | active | `library/observability/grafana-six/visual.md` |
