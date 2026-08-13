@@ -101,6 +101,8 @@ frontmatter; compose shared guardrails via `fragments/`.
 
 - Pre-library megaprompts + nine-kit / orchestrator / BI kits under
   `archive/campaigns/` with archived banners.
+- Nine-kit operator routing: `prompt.audit.generic-nine.pack` →
+  `library/audit/generic-nine/` (domain cards stay in `library/audit/*`).
 - Active short cards under `library/**` only; root paths are **redirect stubs**
   where bookmarks still exist (`grok-*.md`, `test_*.md`, etc.).
 

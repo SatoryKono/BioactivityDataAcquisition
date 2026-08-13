@@ -1,5 +1,6 @@
 {
   "schema_version": 2,
+  "supersedes": "docs/99-archive/configs/ai_skill_parity_contract.pre-consolidation.json",
   "parity_ssot": "scripts/ai/codex/skills-mirror-contract.json",
   "expected_entrypoint_count": 14,
   "canonical_root": ".codex/skills",
@@ -26,8 +27,39 @@
     "vcr-record",
     "verify-architecture"
   ],
+  "required_identical_files": [
+    "agent-debugging/agents/openai.yaml",
+    "agent-debugging/references/advisory-contract.md",
+    "new-pipeline/agents/openai.yaml",
+    "observability-dashboard/agents/openai.yaml",
+    "observability-prometheus/agents/openai.yaml",
+    "py-audit-bot/agents/openai.yaml",
+    "py-audit-bot/references/wrapper-contract.md",
+    "py-config-bot/agents/openai.yaml",
+    "py-debug-bot/agents/openai.yaml",
+    "py-doc-bot/agents/openai.yaml",
+    "py-plan-bot/agents/openai.yaml",
+    "py-test-bot/agents/openai.yaml",
+    "research-workflow/agents/openai.yaml",
+    "research-workflow/references/architecture-template.md",
+    "research-workflow/references/brief-template.md",
+    "research-workflow/references/constraint-rules.md",
+    "research-workflow/references/decision-ledger-schema.md",
+    "research-workflow/references/evidence-decision-contract.md",
+    "research-workflow/references/evidence-object-schema.md",
+    "research-workflow/references/id-generation-rules.md",
+    "research-workflow/references/pillar-definitions.md",
+    "research-workflow/references/prd-template.md",
+    "research-workflow/references/research-protocols.md",
+    "research-workflow/references/risk-ledger-schema.md",
+    "research-workflow/references/synthesis-template.md",
+    "technical-designer-mermaid/agents/openai.yaml",
+    "technical-designer-mermaid/references/patterns.md",
+    "vcr-record/agents/openai.yaml",
+    "verify-architecture/agents/openai.yaml"
+  ],
   "notes": [
-    "Parity enforcement is owned by scripts/ai/codex/skills-mirror-contract.json.",
+    "Parity enforcement is owned by scripts/ai/codex/skills-mirror-contract.json and check_skills_mirror.sh.",
     "This inventory tracks the live .codex/skills tree only. Pre-consolidation 30-skill list is retired."
   ]
 }

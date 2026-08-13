@@ -14,6 +14,12 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime
     attach_observability_backend_to_cli_input,
     build_observability_backend_cli_kwargs_from_options,
 )
+from bioetl.interfaces.cli.commands.domains.shared.option_mapping import (
+    option_bool,
+    option_int,
+    option_optional_int,
+    option_str,
+)
 from bioetl.interfaces.cli.commands.domains.run_all.command_policy import (
     RunAllCommandInput,
     build_run_all_command_input,
