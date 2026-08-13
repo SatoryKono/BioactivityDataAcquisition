@@ -31,7 +31,8 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.application.core import batch_runtime_failure_policy
+from bioetl.application.core import batch_pipeline_execution_errors
+from bioetl.application.core import batch_source_metadata_errors
 from bioetl.application.core.batch_operation_errors import OPERATION_ERRORS
 from bioetl.application.core.batch_operation_errors import is_operation_error
 from bioetl.application.core.batch_operation_errors import operation_error_type_name
@@ -53,8 +54,16 @@ def test_operation_errors_include_runtime_and_domain_failures() -> None:
     )
 
 
-def test_runtime_failure_policy_reexports_operation_errors() -> None:
-    assert batch_runtime_failure_policy.OPERATION_ERRORS is OPERATION_ERRORS
+def test_pipeline_execution_errors_extend_operation_errors() -> None:
+    assert batch_pipeline_execution_errors.PIPELINE_EXECUTION_ERRORS == OPERATION_ERRORS
+
+
+def test_source_metadata_errors_include_attribute_error() -> None:
+    assert AttributeError in batch_source_metadata_errors.SOURCE_METADATA_ERRORS
+    assert all(
+        err in batch_source_metadata_errors.SOURCE_METADATA_ERRORS
+        for err in OPERATION_ERRORS
+    )
 
 
 def test_batch_processing_runtime_reexports_operation_errors() -> None:

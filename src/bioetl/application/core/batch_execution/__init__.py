@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from bioetl.application.core.batch_execution.contracts import (
+    BatchExecutionCountersSnapshot,
     BatchExecutionStateProtocol,
     BatchResultBuilderProtocol,
 )
@@ -19,6 +20,7 @@ from bioetl.application.core.batch_execution.state_service import (
 
 __all__ = [
     *_LIFECYCLE_EXPORTS,
+    "BatchExecutionCountersSnapshot",
     "BatchExecutionStateProtocol",
     "BatchResultBuilderProtocol",
     "BatchExecutionRunService",
