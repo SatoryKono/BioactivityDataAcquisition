@@ -1,51 +1,12 @@
 {
   "pages": [
     {
-      "title": "Provider Adapters",
-      "purpose": "Index of the adapter layer, HTTP resilience patterns, and the child pages for provider-specific integrations.",
+      "title": "Provider Documentation",
+      "purpose": "Index of provider-specific documentation including API details, rate limits, and normalization rules.",
+      "parent": "Data Pipelines",
       "page_notes": [
         {
-          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
-        }
-      ]
-    },
-    {
-      "title": "HTTP Client",
-      "purpose": "Documents the UnifiedHTTPClient, circuit breaker (CLOSED/OPEN/HALF_OPEN states), token-bucket rate limiter, retry mixin, and the ErrorService taxonomy. Explains how adapters share these cross-cutting concerns.",
-      "parent": "Provider Adapters",
-      "page_notes": [
-        {
-          "content": "Canonical anchors: src/bioetl/infrastructure/adapters/, tests/unit/infrastructure/adapters/, tests/fixtures/vcr/."
-        }
-      ]
-    },
-    {
-      "title": "Unified Client",
-      "parent": "HTTP Client",
-      "purpose": "Describes the shared HTTP client abstraction, request lifecycle, and the policy surface that adapters must use instead of ad hoc transport code.",
-      "page_notes": [
-        {
-          "content": "Canonical anchors: src/bioetl/infrastructure/adapters/, tests/unit/infrastructure/adapters/, tests/fixtures/vcr/."
-        }
-      ]
-    },
-    {
-      "title": "Retry Policy",
-      "parent": "HTTP Client",
-      "purpose": "Explains circuit-breaker transitions, retry semantics, and the failure modes that adapters inherit from the shared resilience layer.",
-      "page_notes": [
-        {
-          "content": "Canonical anchors: docs/00-project/RULES.md, docs/01-requirements/REQUIREMENTS.md, docs/02-architecture/decisions/, docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md."
-        }
-      ]
-    },
-    {
-      "title": "Rate Limiter",
-      "parent": "HTTP Client",
-      "purpose": "Documents rate limiting, backoff behavior, and the transport policy that keeps provider access stable and predictable under load.",
-      "page_notes": [
-        {
-          "content": "Canonical anchors: docs/00-project/RULES.md, docs/01-requirements/REQUIREMENTS.md, docs/02-architecture/decisions/, docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md."
+          "content": "Canonical anchors: docs/04-reference/providers/, configs/entities/, src/bioetl/infrastructure/adapters/."
         }
       ]
     }

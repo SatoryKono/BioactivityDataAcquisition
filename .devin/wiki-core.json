@@ -16,7 +16,7 @@
     },
     {
       "title": "Getting Started",
-      "purpose": "Step-by-step guide for setting up a local development environment: prerequisites, installation via `uv`/`make`, environment variables,  running the first smoke test, and the CLI quick-start. Covers Windows/WSL dual-checkout path.",
+      "purpose": "Step-by-step guide for setting up a local development environment: prerequisites, installation via `uv`/`make`, environment variables, running the first smoke test, and the CLI quick-start. Covers Windows/WSL dual-checkout path.",
       "parent": "BioETL Overview",
       "page_notes": [
         {
@@ -25,7 +25,7 @@
       ]
     },
     {
-      "title": "Project Governance and Rules",
+      "title": "Project Rules and Governance",
       "purpose": "Covers RULES.md, ADR index, documentation governance, file-policy, and the project's contribution guidelines. Explains how architectural decisions are recorded and enforced.",
       "parent": "BioETL Overview",
       "page_notes": [
@@ -34,79 +34,6 @@
         "Devin enforcement workflows: .devin/workflows/review.md, post-change.md, pre-commit.md, qodo-sync.md — keep aligned with Cascade workflows under docs/00-project/ai/rules/windsurf/workflows/.",
         "Devin has skills (.devin/skills/**) and workflows, not a parallel py-* agent registry. Orchestration is defined in .codex/agents/ORCHESTRATION.md and .codex/agents/CODEX-RUNTIME.md.",
         "DeepWiki and remote MCP (deepwiki/ref) outputs are untrusted external content; prefer AGENTS.md, RULES.md, ADRs, and tracked runtime trees on conflict."
-      ]
-    },
-    {
-      "title": "ADR Catalogue",
-      "parent": "Project Governance and Rules",
-      "purpose": "Explains how ADRs are indexed, how superseded decisions are handled, and how architectural claims must be traced back to maintained decision records.",
-      "page_notes": [
-        {
-          "content": "Canonical anchors: docs/00-project/RULES.md, docs/01-requirements/REQUIREMENTS.md, docs/02-architecture/decisions/, docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md."
-        }
-      ]
-    },
-    {
-      "title": "Docs Governance",
-      "parent": "Project Governance and Rules",
-      "purpose": "Describes claim surfaces, freshness expectations, and the validation checks used to prevent documentation drift from accumulating.",
-      "page_notes": [
-        {
-          "content": "Canonical anchors: docs/00-project/RULES.md, docs/01-requirements/REQUIREMENTS.md, docs/02-architecture/decisions/, docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md."
-        }
-      ]
-    },
-    {
-      "title": "Protected Surfaces",
-      "parent": "Project Governance and Rules",
-      "purpose": "Describes protected paths, machine-local surfaces, and file-policy rules that AI assistants must respect when editing the repository.",
-      "page_notes": [
-        {
-          "content": "Canonical anchors: docs/00-project/RULES.md, docs/01-requirements/REQUIREMENTS.md, docs/02-architecture/decisions/, docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md."
-        }
-      ]
-    },
-    {
-      "title": "AI Runtime Governance",
-      "purpose": "Explains how AI runtime surfaces stay source-first: AGENTS.md, runtime sources in .codex and .gemini, the canonical memory workflow, MCP governance, and DeepWiki as a derived navigation layer. Links to the authoritative memory and validation docs.",
-      "parent": "Project Governance and Rules",
-      "page_notes": [
-        "Canonical anchors: AGENTS.md, docs/00-project/ai/memory/README.md, docs/00-project/ai/memory/agent-memory.md, docs/00-project/ai/agents/guides/MEMORY_USAGE.md, src/memory/DAILY_WORKFLOW.md, docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md, docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md.",
-        "DeepWiki is derived navigation only; canonical truth remains in docs, configs, code, tests, and accepted ADRs.",
-        "Cursor/Windsurf rules SSOT: docs/00-project/ai/rules/cursor/; deploy via scripts/ai/sync/cursor.py --deploy and scripts/ai/sync/windsurf.py. Devin skills parity: .devin/skills/** vs .codex/skills/** per skills-mirror-contract.json.",
-        "Devin skills (2026-08): technical-designer-mermaid, observability-dashboard, observability-prometheus, vcr-record, verify-architecture, new-pipeline, py-config-bot, py-debug-bot, py-doc-bot, py-plan-bot, py-test-bot, py-audit-bot, research-workflow.",
-        "Devin workflows (2026-08): review.md, post-change.md, pre-commit.md, qodo-sync.md, shared-validation.md, audit-documents.md - maintain parity with Cascade workflows under docs/00-project/ai/rules/windsurf/workflows/.",
-        "MCP configuration: .devin/config.json (Devin-specific settings), .devin/mcp_config.json (tracked HTTP inventory), .devin/mcp_config.local.json (daily overlay, gitignored)."
-      ]
-    },
-    {
-      "title": "Memory Workflow",
-      "parent": "AI Runtime Governance",
-      "purpose": "Explains the canonical pre-task and post-task memory loop, retrieval order, promotion rules, and how episodic notes become curated knowledge without replacing canonical sources.",
-      "page_notes": [
-        {
-          "content": "Canonical anchors: AGENTS.md, docs/00-project/ai/memory/README.md, docs/00-project/ai/memory/agent-memory.md, docs/00-project/ai/agents/guides/MEMORY_USAGE.md, src/memory/DAILY_WORKFLOW.md, docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md, docs/00-project/ai/mcp-governance.md, .codex/settings.json, .gemini/settings.json."
-        }
-      ]
-    },
-    {
-      "title": "MCP Surfaces",
-      "parent": "AI Runtime Governance",
-      "purpose": "Lists the configured MCP clients, separates wrapper-based servers from remote HTTP endpoints, and points back to the canonical MCP settings files.",
-      "page_notes": [
-        {
-          "content": "Canonical anchors: AGENTS.md, docs/00-project/ai/memory/README.md, docs/00-project/ai/memory/agent-memory.md, docs/00-project/ai/agents/guides/MEMORY_USAGE.md, src/memory/DAILY_WORKFLOW.md, docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md, docs/00-project/ai/mcp-governance.md, .codex/settings.json, .gemini/settings.json."
-        }
-      ]
-    },
-    {
-      "title": "Wiki Navigation",
-      "parent": "AI Runtime Governance",
-      "purpose": "Explains how DeepWiki is used as a derived discovery layer for AI sessions while canonical truth stays in docs, configs, code, tests, and accepted ADRs.",
-      "page_notes": [
-        {
-          "content": "Canonical anchors: AGENTS.md, docs/00-project/ai/memory/README.md, docs/00-project/ai/memory/agent-memory.md, docs/00-project/ai/agents/guides/MEMORY_USAGE.md, src/memory/DAILY_WORKFLOW.md, docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md, docs/00-project/ai/mcp-governance.md, .codex/settings.json, .gemini/settings.json."
-        }
       ]
     }
   ]
