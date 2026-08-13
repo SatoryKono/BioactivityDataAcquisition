@@ -4,12 +4,18 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Awaitable, Callable, Mapping
-from typing import Protocol, cast
+from typing import Protocol
 
 import click
 
 from bioetl.interfaces.cli.commands.domains.shared.inspection_output import (
     emit_inspection_payload,
+)
+from bioetl.interfaces.cli.commands.domains.shared.option_mapping import (
+    option_bool,
+    option_int,
+    option_optional_str,
+    option_str,
 )
 from bioetl.interfaces.cli.formatters import echo_error
 
@@ -145,14 +151,14 @@ def run_quarantine_stats_command(
     show_stats_for_pipeline(
         get_runtime_service,
         get_manifest_service,
-        pipeline=cast(str, command_args["pipeline"]),
-        output_json=cast(bool, command_args["output_json"]),
-        error_code=cast(str | None, command_args["error_code"]),
-        silver_filter_only=cast(bool, command_args["silver_filter_only"]),
+        pipeline=option_str(command_args, "pipeline"),
+        output_json=option_bool(command_args, "output_json"),
+        error_code=option_optional_str(command_args, "error_code"),
+        silver_filter_only=option_bool(command_args, "silver_filter_only"),
         silver_filter_error_code=silver_filter_error_code,
-        top=cast(int, command_args["top"]),
-        group_by=cast(str | None, command_args["group_by"]),
-        run_id=cast(str | None, command_args["run_id"]),
+        top=option_int(command_args, "top"),
+        group_by=option_optional_str(command_args, "group_by"),
+        run_id=option_optional_str(command_args, "run_id"),
     )
 
 
