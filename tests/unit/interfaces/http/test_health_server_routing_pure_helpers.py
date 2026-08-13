@@ -392,6 +392,41 @@ async def test_readiness_fails_closed_when_report_root_marker_enforced(
 
 
 @pytest.mark.asyncio
+async def test_readiness_fails_closed_for_valid_layout_from_foreign_source(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """A valid generic layout marker cannot hide a foreign report source."""
+    from bioetl.application.services.run_reports.paths import (
+        REPORT_ROOT_MARKER_NAME,
+        REPORT_ROOT_MARKER_VALUE,
+        write_report_root_source_identity,
+    )
+    from bioetl.interfaces.http.report_root_config import (
+        ENFORCE_REPORT_ROOT_MARKER_ENV,
+        REPORT_ROOT_ENV,
+        RUNTIME_SOURCE_ID_ENV,
+    )
+
+    report_root = tmp_path / "run-reports"
+    report_root.mkdir()
+    (tmp_path / REPORT_ROOT_MARKER_NAME).write_text(
+        REPORT_ROOT_MARKER_VALUE + "\n",
+        encoding="utf-8",
+    )
+    write_report_root_source_identity(report_root=report_root, source_id="a" * 64)
+    monkeypatch.setenv(REPORT_ROOT_ENV, str(report_root))
+    monkeypatch.setenv(ENFORCE_REPORT_ROOT_MARKER_ENV, "1")
+    monkeypatch.setenv(RUNTIME_SOURCE_ID_ENV, "b" * 64)
+
+    ready = await _RoutingHost()._handle_readiness()
+
+    assert ready.status == "unhealthy"
+    assert ready.checks["report_root"]["layout_status"] == "healthy"
+    assert ready.checks["report_root"]["source_identity"] == "mismatch"
+
+
+@pytest.mark.asyncio
 async def test_routing_support_dispatches_control_plane_branches(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

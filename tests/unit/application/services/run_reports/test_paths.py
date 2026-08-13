@@ -15,10 +15,15 @@ pytestmark = pytest.mark.unit
 from bioetl.application.services.run_reports.paths import (
     REPORT_ROOT_MARKER_NAME,
     REPORT_ROOT_MARKER_VALUE,
+    REPORT_ROOT_SOURCE_IDENTITY_NAME,
+    REPORT_ROOT_SOURCE_IDENTITY_SCHEMA,
     inspect_report_root_marker,
+    inspect_report_root_source_identity,
     report_root_marker_is_healthy,
     report_root_marker_path,
+    report_root_source_identity_path,
     resolve_report_root,
+    write_report_root_source_identity,
 )
 
 
@@ -76,3 +81,86 @@ def test_inspect_marker_token_mismatch(tmp_path: Path) -> None:
     check = inspect_report_root_marker(report_root=root)
     assert check["status"] == "unhealthy"
     assert check["marker"] == "mismatch"
+
+
+def test_source_identity_path_follows_bind_root_layout(tmp_path: Path) -> None:
+    root = tmp_path / "run-reports"
+    assert report_root_source_identity_path(report_root=root) == (
+        tmp_path / REPORT_ROOT_SOURCE_IDENTITY_NAME
+    )
+
+
+def test_source_identity_round_trip_exact_match(tmp_path: Path) -> None:
+    root = tmp_path / "run-reports"
+    root.mkdir()
+    source_id = "a" * 64
+
+    target = write_report_root_source_identity(
+        report_root=root,
+        source_id=source_id,
+    )
+    check = inspect_report_root_source_identity(
+        report_root=root,
+        expected_source_id=source_id,
+    )
+
+    assert target.name == REPORT_ROOT_SOURCE_IDENTITY_NAME
+    assert check["source_identity_status"] == "healthy"
+    assert check["source_identity"] == "ok"
+    assert check["source_identity_state"] == "aligned"
+    assert check["source_identity_schema_actual"] == REPORT_ROOT_SOURCE_IDENTITY_SCHEMA
+    assert check["source_identity_actual"] == source_id
+
+
+def test_source_identity_fails_closed_for_foreign_checkout(tmp_path: Path) -> None:
+    root = tmp_path / "run-reports"
+    root.mkdir()
+    write_report_root_source_identity(report_root=root, source_id="a" * 64)
+
+    check = inspect_report_root_source_identity(
+        report_root=root,
+        expected_source_id="b" * 64,
+    )
+
+    assert check["source_identity_status"] == "unhealthy"
+    assert check["source_identity"] == "mismatch"
+    assert check["source_identity_state"] == "foreign"
+    assert check["source_identity_actual"] == "a" * 64
+
+
+@pytest.mark.parametrize(
+    ("payload", "reason"),
+    [
+        (None, "missing"),
+        ("not-json", "unreadable"),
+        (
+            '{"schema_version":"wrong","runtime_source_id":"' + "a" * 64 + '"}',
+            "schema_mismatch",
+        ),
+        (
+            '{"schema_version":"bioetl-report-source-v1","runtime_source_id":"bad"}',
+            "invalid",
+        ),
+    ],
+)
+def test_source_identity_invalid_states_fail_closed(
+    tmp_path: Path,
+    payload: str | None,
+    reason: str,
+) -> None:
+    root = tmp_path / "run-reports"
+    root.mkdir()
+    marker = tmp_path / REPORT_ROOT_SOURCE_IDENTITY_NAME
+    if payload is not None:
+        marker.write_text(payload, encoding="utf-8")
+
+    check = inspect_report_root_source_identity(
+        report_root=root,
+        expected_source_id="a" * 64,
+    )
+
+    assert check["source_identity_status"] == "unhealthy"
+    assert check["source_identity"] == reason
+    assert check["source_identity_state"] == (
+        "missing" if reason == "missing" else "invalid"
+    )

@@ -81,6 +81,22 @@ def test_contract_preserves_adr010_and_stability_slo() -> None:
     }
     assert contract["hardening_targets"]["implementation_issue"] == 6293
     assert contract["path_policy"]["mixed_origin_for_same_project_forbidden"] is True
+    source_identity = contract["dashboard_data_plane"]["source_identity"]
+    assert source_identity["report_marker_name"] == ".bioetl-report-source.json"
+    assert source_identity["report_marker_schema_version"] == "bioetl-report-source-v1"
+    assert source_identity["resolution_precedence"] == [
+        "runtime_root",
+        "process_environment",
+        "repository_environment",
+        "container_environment",
+        "container_label",
+    ]
+    assert source_identity["comparison_states"] == [
+        "missing",
+        "invalid",
+        "foreign",
+        "aligned",
+    ]
 
 
 def test_every_compose_stack_has_unique_project_and_single_service_owner() -> None:
@@ -386,6 +402,7 @@ def test_dashboard_data_plane_rejects_healthy_producer_from_stale_checkout(
     )
 
     assert {finding.code for finding in findings} == {
+        "DASHBOARD_REPORT_SOURCE_IDENTITY",
         "DASHBOARD_SOURCE_IDENTITY",
         "DASHBOARD_SOURCE_MOUNT",
     }
@@ -397,6 +414,15 @@ def test_dashboard_data_plane_accepts_exact_managed_mounts(tmp_path: Path) -> No
     preflight = _load_preflight()
     contract = _load_yaml(CONTRACT_PATH)
     environment = preflight.dashboard_source_environment(tmp_path, contract)
+    from bioetl.application.services.run_reports.paths import (
+        write_report_root_source_identity,
+    )
+
+    (tmp_path / "reports" / "run-reports").mkdir(parents=True)
+    write_report_root_source_identity(
+        report_root=tmp_path / "reports" / "run-reports",
+        source_id=environment["BIOETL_RUNTIME_SOURCE_ID"],
+    )
     containers = [
         {
             "project": "bioetl-main",
@@ -426,6 +452,78 @@ def test_dashboard_data_plane_accepts_exact_managed_mounts(tmp_path: Path) -> No
         )
         == []
     )
+
+
+def test_dashboard_data_plane_rejects_container_env_label_conflict(
+    tmp_path: Path,
+) -> None:
+    preflight = _load_preflight()
+    contract = _load_yaml(CONTRACT_PATH)
+    environment = preflight.dashboard_source_environment(tmp_path, contract)
+    expected = environment["BIOETL_RUNTIME_SOURCE_ID"]
+    foreign = "f" * 64 if expected != "f" * 64 else "e" * 64
+    from bioetl.application.services.run_reports.paths import (
+        write_report_root_source_identity,
+    )
+
+    (tmp_path / "reports" / "run-reports").mkdir(parents=True)
+    write_report_root_source_identity(
+        report_root=tmp_path / "reports" / "run-reports",
+        source_id=expected,
+    )
+    containers = [
+        {
+            "project": "bioetl-main",
+            "service": "bioetl",
+            "environment": [f"BIOETL_RUNTIME_SOURCE_ID={expected}"],
+            "dashboard_source_id": foreign,
+            "mounts": [
+                {
+                    "Type": "bind",
+                    "Source": str(tmp_path / "data"),
+                    "Destination": "/app/data",
+                },
+                {
+                    "Type": "bind",
+                    "Source": str(tmp_path / "reports"),
+                    "Destination": "/app/reports",
+                },
+            ],
+        }
+    ]
+
+    findings = preflight._dashboard_source_findings(
+        tmp_path,
+        containers,
+        contract=contract,
+        project_to_stack={"bioetl-main": "main"},
+    )
+
+    source_findings = [
+        finding for finding in findings if finding.code == "DASHBOARD_SOURCE_IDENTITY"
+    ]
+    assert len(source_findings) == 1
+    assert source_findings[0].evidence["source"] == "container_environment"
+    assert source_findings[0].evidence["conflicts"] == ["container_label"]
+
+
+def test_runtime_source_identity_is_not_a_prometheus_label() -> None:
+    observability_root = ROOT / "src/bioetl/infrastructure/observability"
+    metric_paths = [
+        path
+        for path in observability_root.rglob("*.py")
+        if "metric" in path.stem or "prometheus" in path.stem
+    ]
+    assert metric_paths
+    forbidden = (
+        "BIOETL_RUNTIME_SOURCE_ID",
+        "runtime_source_id",
+        "source_identity",
+    )
+    for path in metric_paths:
+        content = path.read_text(encoding="utf-8")
+        for marker in forbidden:
+            assert marker not in content, f"{path.relative_to(ROOT)}: {marker}"
 
 
 def test_neo4j_helpers_delegate_to_the_single_compose_owner() -> None:

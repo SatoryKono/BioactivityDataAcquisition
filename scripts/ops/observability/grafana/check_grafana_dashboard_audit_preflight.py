@@ -30,6 +30,17 @@ from scripts.ops.observability.grafana import (
     rerender_grafana_screenshots as rerender_screenshots,
 )
 from scripts.ops.runtime.docker import docker_runtime_preflight as runtime_preflight
+from bioetl.application.services.run_reports.source_identity import (
+    IDENTITY_STATE_ALIGNED,
+    IDENTITY_STATE_FOREIGN,
+    IDENTITY_STATE_INVALID,
+    IDENTITY_STATE_MISSING,
+    RUNTIME_SOURCE_ID_ENV,
+    RuntimeSourceIdentityResolution,
+    compare_runtime_source_identity,
+    load_repository_source_environment,
+    resolve_runtime_source_identity,
+)
 
 DEFAULT_GRAFANA_BASE_URL = "http://localhost:3000"
 DEFAULT_PROMETHEUS_BASE_URL = "http://localhost:9090"
@@ -97,24 +108,44 @@ def _resolve_grafana_username() -> str:
     return DEFAULT_GRAFANA_USERNAME
 
 
-def _resolve_expected_runtime_source_id() -> str:
-    """Resolve the expected opaque identity without reading any `.env` file."""
-    configured = _read_env("BIOETL_RUNTIME_SOURCE_ID").lower()
-    if _RUNTIME_SOURCE_ID_PATTERN.fullmatch(configured):
-        return configured
+def _resolve_expected_runtime_source_identity() -> RuntimeSourceIdentityResolution:
+    """Resolve the expected identity with the canonical source precedence."""
     root = Path(__file__).resolve().parents[4]
     contract_path = root / "configs/quality/docker_runtime_contracts.yaml"
     payload = yaml.safe_load(contract_path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
-        return ""
-    environment = runtime_preflight.dashboard_source_environment(root, payload)
+        return resolve_runtime_source_identity()
     identity_contract = payload.get("dashboard_data_plane", {}).get(
         "source_identity", {}
     )
     if not isinstance(identity_contract, dict):
-        return ""
-    environment_name = str(identity_contract.get("environment_name") or "")
-    return environment.get(environment_name, "")
+        return resolve_runtime_source_identity()
+    environment_name = str(
+        identity_contract.get("environment_name") or RUNTIME_SOURCE_ID_ENV
+    )
+    repository_environment = load_repository_source_environment(
+        root,
+        names=(environment_name,),
+        process_environment=os.environ,
+    )
+    environment = runtime_preflight.dashboard_source_environment(
+        root,
+        payload,
+        process_environment=os.environ,
+        repository_environment=repository_environment,
+    )
+    return resolve_runtime_source_identity(
+        computed_identity=environment.get(environment_name),
+        process_environment=os.environ,
+        repository_environment=repository_environment,
+        environment_name=environment_name,
+        label_name=str(identity_contract.get("label_name") or ""),
+    )
+
+
+def _resolve_expected_runtime_source_id() -> str:
+    """Backward-compatible digest-only wrapper for existing call sites."""
+    return _resolve_expected_runtime_source_identity().value or ""
 
 
 def _has_grafana_auth_material(*, username: str, password: str) -> bool:
@@ -1228,8 +1259,18 @@ def _check_bioetl_control_plane_source(
     ops_http_base_url: str,
     expected_runtime_source_id: str,
     timeout_seconds: float,
+    expected_resolution_state: str = IDENTITY_STATE_ALIGNED,
 ) -> PreflightCheck:
     """Fail closed when Ops HTTP serves a different runtime/data origin."""
+    if expected_resolution_state != IDENTITY_STATE_ALIGNED:
+        return PreflightCheck(
+            name="bioetl-control-plane-source",
+            status="error",
+            detail=(
+                "Expected runtime source identity resolution is not aligned: "
+                f"{expected_resolution_state}"
+            ),
+        )
     url = f"{ops_http_base_url.rstrip('/')}/ops/control-plane/ready"
     if not _RUNTIME_SOURCE_ID_PATTERN.fullmatch(expected_runtime_source_id):
         return PreflightCheck(
@@ -1257,14 +1298,23 @@ def _check_bioetl_control_plane_source(
             status="error",
             detail=f"{url} did not return a JSON object",
         )
-    actual_identity = str(payload.get("runtime_source_id") or "")
-    if actual_identity != expected_runtime_source_id:
+    actual_identity = payload.get("runtime_source_id")
+    comparison = compare_runtime_source_identity(
+        expected=expected_runtime_source_id,
+        actual=actual_identity,
+    )
+    if comparison.state != IDENTITY_STATE_ALIGNED:
+        reason = {
+            IDENTITY_STATE_MISSING: "is missing",
+            IDENTITY_STATE_INVALID: "is invalid",
+            IDENTITY_STATE_FOREIGN: "belongs to another checkout",
+        }.get(comparison.state, "does not match")
         return PreflightCheck(
             name="bioetl-control-plane-source",
             status="error",
             detail=(
-                "Ops HTTP runtime source identity mismatch; the backend may be "
-                "serving another checkout or stale artifact mounts"
+                f"Ops HTTP runtime source identity {reason}; the backend may "
+                "be serving another checkout or stale artifact mounts"
             ),
         )
     return PreflightCheck(
@@ -1316,11 +1366,13 @@ def main(argv: list[str] | None = None) -> int:
         screenshot_uids=tuple(str(uid) for uid in args.screenshot_uids),
     )
     if not args.skip_semantic_checks:
+        expected_source_resolution = _resolve_expected_runtime_source_identity()
         checks.append(
             _check_bioetl_control_plane_source(
                 ops_http_base_url=args.ops_http_base_url,
-                expected_runtime_source_id=_resolve_expected_runtime_source_id(),
+                expected_runtime_source_id=expected_source_resolution.value or "",
                 timeout_seconds=args.timeout_seconds,
+                expected_resolution_state=expected_source_resolution.state,
             )
         )
         checks.append(
