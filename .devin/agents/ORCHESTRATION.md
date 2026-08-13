@@ -17,7 +17,7 @@ Read before planning or editing:
 
 ## 1. Обзор
 
-Команда из **9 активных субагентов** (7 core + 2 orchestrator/swarm) обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент (Devin) выступает оркестратором, делегируя работу субагентам через custom subagent profiles с использованием `run_subagent` tool. Production-код пишется напрямую оркестратором (без отдельного `py-code-bot`).
+Команда из **6 активных субагентов** (ровно шесть tracked `.devin/agents/*/AGENT.md` профилей) обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент (Devin) выступает оркестратором, делегируя работу субагентам через custom subagent profiles с использованием `run_subagent` tool. Production-код пишется напрямую оркестратором (без отдельного `py-code-bot`). Бывшие иерархические review/debt/swarm роли — **режимы** `py-audit-bot` (`review`, `debt`) и `py-test-bot`, а не отдельные профили.
 
 **Запуск логического профиля в Devin runtime:**
 
@@ -32,32 +32,28 @@ run_subagent(
 
 > Runtime mapping: см. `.devin/agents/DEVIN-RUNTIME.md`.
 
-||  #   | Субагент (`profile`)        | Model  | Роль                                                                                   | Артефакт                                               | Execution Mode |
-|| :--: | --------------------------- | ------ | -------------------------------------------------------------------------------------- | ------------------------------------------------------ | -------------- |
-||  I   | **py-audit-bot**            | parent | Baseline/final аудит, code review, arch guardian, API validation                       | `review_py-audit-bot_{YYYYMMDD}_{HHMM}_{phase}.md`     | Foreground     |
-||  II  | **py-audit-bot** | parent | Полный workflow устранения архитектурного долга: generate -> plan -> execute -> verify | `review_py-audit-bot_{YYYYMMDD}_{HHMM}.md` | Foreground     |
-|| III  | **py-plan-bot**             | parent | Планирование, декомпозиция, composite design                                           | `review_py-plan-bot_{YYYYMMDD}_{HHMM}.md`              | Foreground     |
-||  IV  | **py-test-bot**             | default subagent model | Тестирование                                                                           | `review_py-test-bot_{YYYYMMDD}_{HHMM}.md`              | Foreground/background |
-||  V   | **py-config-bot**           | default subagent model | Конфигурации (pipeline, DQ, filter, composite)                                         | `review_py-config-bot_{YYYYMMDD}_{HHMM}.md`            | Foreground     |
-||  VI  | **py-debug-bot**            | parent | Отладка падений                                                                        | `review_py-debug-bot_{YYYYMMDD}_{HHMM}.md`             | Foreground     |
-|| VII  | **py-doc-bot**              | default subagent model | Документация, ADR, диаграммы (Mermaid)                                                 | `review_py-doc-bot_{YYYYMMDD}_{HHMM}.md`               | Foreground     |
-|| VIII | **py-test-bot**            | parent | Иерархическое тестирование (L1→L2→L3)                                                  | test reports                                           | Background     |
-||  IX  | **py-audit-bot**  | parent | Иерархический code review (S1-S8)                                                      | review reports                                         | Background     |
+| # | Субагент (`profile`) | Model | Роль | Артефакт | Execution Mode |
+| :---: | --- | --- | --- | --- | --- |
+| I | **py-audit-bot** | parent | Baseline/final/targeted audit, review, debt, reproducibility (read-only) | `review_py-audit-bot_{YYYYMMDD}_{HHMM}_{phase}.md` | Foreground |
+| II | **py-plan-bot** | parent | Планирование, декомпозиция, composite design (read-only) | `review_py-plan-bot_{YYYYMMDD}_{HHMM}.md` | Foreground |
+| III | **py-test-bot** | default subagent model | Тестирование, flake triage, broad campaign | `review_py-test-bot_{YYYYMMDD}_{HHMM}.md` | Foreground/background |
+| IV | **py-config-bot** | default subagent model | Конфигурации (pipeline, DQ, filter, composite) | `review_py-config-bot_{YYYYMMDD}_{HHMM}.md` | Foreground |
+| V | **py-debug-bot** | parent | Reproduce / isolate / remediation guidance (read-only; fixes пишет оркестратор) | `review_py-debug-bot_{YYYYMMDD}_{HHMM}.md` | Foreground |
+| VI | **py-doc-bot** | default subagent model | Документация, ADR, диаграммы (Mermaid) | `review_py-doc-bot_{YYYYMMDD}_{HHMM}.md` | Foreground |
 
 > **Note:** `py-code-bot` removed — production code is written directly by the orchestrator. `py-diagram-bot` merged into `py-doc-bot`. Repo-wide documentation audits now route through the `py-doc-bot` / `py-doc-bot` skills rather than a dedicated documentation-only subagent profile.
 
 ### Разделение ответственности (файловые зоны)
 
-|| Субагент                 | Зона записи                                                           | Только чтение                         |
-|| ------------------------ | --------------------------------------------------------------------- | ------------------------------------- |
-|| orchestrator (direct)    | `src/bioetl/`, `tests/`                                               | `configs/`, `docs/`                   |
-|| py-audit-bot | `src/bioetl/`, `tests/`, `reports/quality/`, root task JSON artifacts | `configs/`, `docs/` (edits delegated) |
-|| py-config-bot            | `configs/`                                                            | `src/bioetl/`, `docs/`                |
-|| py-doc-bot               | `docs/`, docstrings, `docs/00-project/ai/agents/scripts/diagrams/`    | `configs/`, `tests/`                  |
-|| py-test-bot              | `tests/`                                                              | `src/bioetl/`, `configs/`             |
-|| py-debug-bot             | `src/bioetl/`, `tests/` (fixes)                                       | `configs/`, `docs/`                   |
-|| py-audit-bot             | — (read-only)                                                         | всё                                   |
-|| py-plan-bot              | — (read-only)                                                         | всё                                   |
+| Субагент | Зона записи | Только чтение |
+| --- | --- | --- |
+| orchestrator (direct) | `src/bioetl/`, `tests/` | `configs/`, `docs/` (delegated) |
+| py-audit-bot | — (read-only) | всё |
+| py-plan-bot | — (read-only) | всё |
+| py-debug-bot | — (read-only; implementation stays with orchestrator) | всё |
+| py-config-bot | `configs/` | `src/bioetl/`, `docs/` |
+| py-doc-bot | `docs/`, docstrings | `configs/`, `tests/` |
+| py-test-bot | — (exec only; `AGENT.md` denies write/edit) | `src/bioetl/`, `configs/`, `tests/` |
 
 ### Определения субагентов
 

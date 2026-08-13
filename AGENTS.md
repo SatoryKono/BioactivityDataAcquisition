@@ -87,8 +87,8 @@ Minimum expectation:
    result. Divergences MUST be resolved before submit.
 1. After changes under `src/bioetl/**/*.py`, refresh
    `reports/quality/module-coverage-inventory.json` field `source_tree_sha256`
-   via `python _refresh_module_coverage_inventory.py` and run the architecture
-   hash guard when feasible.
+   via `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml`
+   and run the architecture hash guard when feasible.
 1. Report checks run, skipped checks, and mirror-sync status explicitly.
 
 ## Guardrails
