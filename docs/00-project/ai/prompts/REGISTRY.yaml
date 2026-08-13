@@ -219,6 +219,13 @@ entries:
     tags: [architecture, audit, cycle, scorecard, hexagonal, plan, implement, operator]
     summary: Cyclic architecture audit — 10-category scorecard, improvement plan, implement waves
 
+  - id: prompt.audit.cycle.architecture
+    path: library/audit/cycle/architecture.md
+    status: active
+    class: operator-paste
+    tags: [architecture, audit, cycle, scorecard, hexagonal, operator]
+    summary: Cyclic architecture audit -- 10-category scorecard, plan, implement waves
+
   - id: prompt.observability.dashboard-panel-audit
     path: library/observability/dashboard-panel-audit.md
     status: active

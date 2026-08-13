@@ -14,6 +14,7 @@ related_ssot:
   - docs/00-project/ai/prompts/library/audit/orchestrator.md
   - docs/00-project/ai/prompts/library/audit/dual-agent-cycle.md
   - docs/00-project/ai/prompts/library/audit/coderabbit-project-cycle.md
+  - docs/00-project/ai/prompts/library/audit/cycle/README.md
 tags: [audit, cycle, pack, operator]
 summary: Pack of cyclic domain audits — tests, docs, debt, hygiene, dashboards, architecture, CodeRabbit
 max_body_lines: 130
