@@ -40,6 +40,19 @@ __all__ = [
 ]
 
 
+def _logical_fs_path(path: Path) -> Path:
+    """Keep POSIX-absolute roots logical; do not pin them to a Windows drive.
+
+    ``Path('/custom/x').resolve()`` on Windows becomes ``C:\\custom\\x``.
+    Tests and operator-supplied POSIX roots must stay comparable as POSIX.
+    """
+    candidate = Path(path)
+    posix = candidate.as_posix()
+    if posix.startswith("/") and not candidate.drive:
+        return candidate
+    return candidate
+
+
 def bootstrap_quarantine_adapter(*, data_root: Path | None = None) -> QuarantinePort:
     """Create a quarantine port implementation for record quarantine storage.
 
@@ -53,12 +66,12 @@ def bootstrap_quarantine_adapter(*, data_root: Path | None = None) -> Quarantine
         QuarantinePort implementation for quarantine operations.
     """
     settings = get_settings()
-    quarantine_path = (
+    quarantine_path = _logical_fs_path(
         data_root / "output" / "quarantine"
         if data_root is not None
-        else settings.quarantine_path
+        else Path(settings.quarantine_path)
     )
-    quarantine = UnifiedQuarantineAdapter(base_path=str(quarantine_path))
+    quarantine = UnifiedQuarantineAdapter(base_path=quarantine_path.as_posix())
     assert isinstance(quarantine, QuarantinePort), (
         f"UnifiedQuarantineAdapter must implement QuarantinePort, got {type(quarantine)}"
     )
@@ -84,10 +97,10 @@ def bootstrap_checkpoint_adapter(
         CheckpointPort implementation for checkpoint operations.
     """
     settings = get_settings()
-    checkpoint_path = (
+    checkpoint_path = _logical_fs_path(
         data_root / "output" / "checkpoints"
         if data_root is not None
-        else settings.checkpoint_path
+        else Path(settings.checkpoint_path)
     )
     checkpoint = LocalCheckpointAdapter(
         base_path=checkpoint_path,
@@ -111,7 +124,7 @@ def bootstrap_composite_checkpoint_writer() -> CompositeCheckpointPort:
     """
     settings = get_settings()
     checkpoint = FileCompositeCheckpointWriter(
-        checkpoint_dir=settings.checkpoint_path / "composite",
+        checkpoint_dir=_logical_fs_path(Path(settings.checkpoint_path) / "composite"),
     )
     assert isinstance(checkpoint, CompositeCheckpointPort), (
         "FileCompositeCheckpointWriter must implement CompositeCheckpointPort, "

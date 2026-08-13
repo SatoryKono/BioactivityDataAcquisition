@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import sys
 from pathlib import Path
 
 import pytest
@@ -40,6 +41,10 @@ def test_blocking_cli_is_independent_of_current_working_directory(
     assert parity.main(["--mode", "blocking"]) == 0
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="FileNotFoundError regex uses host separators; POSIX as_posix match is Linux/WSL",
+)
 def test_missing_config_error_contains_canonical_resolved_path() -> None:
     relative_path = "configs/entities/__missing__/pipeline.yaml"
 

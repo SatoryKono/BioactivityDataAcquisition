@@ -843,8 +843,9 @@ def test_codex_only_updates_user_managed_block_without_workspace_writes(
     assert "[mcp_servers.ref]" in rendered
     assert "[mcp_servers.filesystem]" in rendered
     assert not output_root.exists()
-    assert stat.S_IMODE(codex_dir.stat().st_mode) == 0o700
-    assert stat.S_IMODE(codex_config.stat().st_mode) == 0o600
+    if sys.platform != "win32":
+        assert stat.S_IMODE(codex_dir.stat().st_mode) == 0o700
+        assert stat.S_IMODE(codex_config.stat().st_mode) == 0o600
 
 
 def test_setup_mcp_check_mode_is_read_only_and_detects_drift(

@@ -56,8 +56,16 @@ class PipelineCreateRunnerExtras:
 
 
 def _require_run_id(value: object) -> RunID:
+    """Accept a UUID, a RunID NewType, or a UUID string (legacy callers)."""
     if isinstance(value, UUID):
         return RunID(value)
+    if isinstance(value, str):
+        try:
+            return RunID(UUID(value))
+        except ValueError as exc:
+            raise TypeError(
+                f"run_id must be UUID/RunID, got {type(value).__name__}"
+            ) from exc
     raise TypeError(f"run_id must be UUID/RunID, got {type(value).__name__}")
 
 

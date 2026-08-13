@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import stat
+import sys
 from pathlib import Path
 
 import pytest
@@ -73,6 +74,10 @@ def test_script_command_uses_native_shell() -> None:
     ]
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="POSIX owner-execute bit (S_IXUSR) is not enforced on Windows",
+)
 def test_ensure_user_executable_changes_only_posix_owner_bit(tmp_path: Path) -> None:
     script = tmp_path / "generated.sh"
     script.write_text("#!/usr/bin/env bash\n", encoding="utf-8")

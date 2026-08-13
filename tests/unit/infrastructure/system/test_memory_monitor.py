@@ -612,6 +612,7 @@ class TestMemoryMonitorResourceFallback:
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """Unix fallback reports process and host values without psutil."""
+        pytest.importorskip("resource")
         meminfo = "MemTotal: 8192 kB\nMemAvailable: 2048 kB\n"
         monkeypatch.setattr(
             memory_monitor_module.Path,
@@ -639,6 +640,7 @@ class TestMemoryMonitorResourceFallback:
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """Unreadable procfs degrades to deterministic conservative estimates."""
+        pytest.importorskip("resource")
         monkeypatch.setattr(
             memory_monitor_module.Path,
             "open",
