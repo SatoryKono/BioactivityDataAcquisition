@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.github-actions
-version: 1.1.0
+version: 1.2.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -18,6 +18,7 @@ includes:
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/shell-portability.md
+  - fragments/generic-nine-contract.md
 related_ssot:
   - AGENTS.md
   - .github/workflows
@@ -33,6 +34,7 @@ max_body_lines: 140
 
 # GitHub Actions audit
 
+**Kit:** prompt 5 of `prompt.audit.generic-nine.pack`.
 Audit `.github/workflows` as executable supply chain and security boundary.
 Order: **trust model** (events, tokens, secrets, third-party actions, runners)
 → correctness → reproducibility → performance/cache → artifacts → deploy.

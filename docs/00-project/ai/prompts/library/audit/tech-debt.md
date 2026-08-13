@@ -68,14 +68,21 @@ Prioritize by probability × blast radius, not TODO count.
    proposing higher limits.
 5. Optional Sonar/analyzer metrics = signal only, not architecture substitute.
 
+## Surface score (this domain)
+
+| Score | Meaning |
+| --- | --- |
+| 3 | Debt identified with owner/risk/effort; new code does not worsen baseline |
+| 2 | Main debt controlled; some items informal |
+| 1 | Suppressions/workarounds without systemic management |
+| 0 | Critical accumulated issues ignored or make change unsafe |
+
 ## Output
 
-- `reports/audit/tech-debt/report.md`
-- `reports/audit/tech-debt/findings.json` (finding-schema)
-- optional extras listed below or in method notes
-- `surface_score` 0–3 (map any 0–5 dimensions via audit-scale)
-- findings per finding-schema; top remediations
-- `MODE=propose-patches` / write modes: only after operator approval and ALLOW flags when orchestrated
+- `reports/audit/tech-debt/report.md` + `findings.json`
+- kit extras: `technical-debt-register.csv` (id,path,line,type,evidence,age,risk,blast_radius,effort,owner,priority),
+  `debt-heatmap.md`, top-20, quick wins vs strategic vs dependency debt
+- `surface_score` 0–3; remediations; `MODE=propose-patches` only with approval
 
 ## Priority hints
 
