@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.docs-pipeline
-version: 1.1.0
+version: 1.2.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -18,6 +18,7 @@ includes:
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/shell-portability.md
+  - fragments/generic-nine-contract.md
 related_ssot:
   - AGENTS.md
   - docs/00-project/NORMATIVE_SOURCES.md
@@ -33,6 +34,7 @@ max_body_lines: 140
 
 # Docs pipeline audit
 
+**Kit:** prompt 8 of `prompt.audit.generic-nine.pack`.
 Audit scripts and pipelines that **generate, check, build, sync, or publish**
 documentation. Prove chain: source-of-truth → generator → validation →
 artifact → publication. Generated docs are not correct merely because the
@@ -66,14 +68,24 @@ stale prose → `prompt.audit.docs-content`.
    claimed; internal link check; secrets not in generated pages/logs.
 6. PR preview / publish path without hidden developer-local state.
 
+## Surface score (this domain)
+
+| Score | Meaning |
+| --- | --- |
+| 3 | One-command clean build; pinned toolchain; deterministic; links/API in CI |
+| 2 | Pipeline reproducible; some semantic checks still manual |
+| 1 | Hidden preconditions, generated drift, or unpredictable publish |
+| 0 | Build broken, leaks secrets, or publishes dangerously wrong material |
+
+P0: secret leak or wrong prod/security procedure. P1: stale API published as
+current. P2: nondeterministic build/broken links. P3: style.
+
 ## Output
 
-- `reports/audit/docs-pipeline/report.md`
-- `reports/audit/docs-pipeline/findings.json` (finding-schema)
-- optional extras listed below or in method notes
-- `surface_score` 0–3 (map any 0–5 dimensions via audit-scale)
-- findings per finding-schema; top remediations
-- `MODE=propose-patches` / write modes: only after operator approval and ALLOW flags when orchestrated
+- `reports/audit/docs-pipeline/report.md` + `findings.json`
+- kit extras: `docs-pipeline.csv`, `generated-files.csv`, `docs-build.log`,
+  `link-report.json`, `source-of-truth-map.md`
+- `surface_score` 0–3; remediations; `MODE=propose-patches` only with approval
 
 ## Stop
 
