@@ -136,7 +136,8 @@ def test_field_explanation_uses_priority_and_applied_enrichments() -> None:
     assert explanation.field_name == "title"
     assert explanation.source_providers == ["chembl", "pubmed"]
     assert explanation.priority_order == ["pubmed", "chembl"]
-    assert explanation.final_value_source == "chembl"
+    # Priority order is highest-first, so "pubmed" should be the final value source
+    assert explanation.final_value_source == "pubmed"
     assert explanation.conflict_resolution == "priority_based"
     assert explanation.enrichment_applied == ["mesh"]
 
