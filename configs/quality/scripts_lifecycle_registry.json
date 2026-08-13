@@ -1513,12 +1513,6 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
-    "scripts/temp/create_nine_domain_audit_issues.py": {
-      "decision": "temporary_diagnostic",
-      "next_step": "One-shot helper that opened nine-domain audit GitHub issues; remove after campaign closeout.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
     "scripts/temp/layout_contour_audit_cycle2.py": {
       "decision": "temporary_diagnostic",
       "next_step": "Retain only as the cycle-2 dashboard layout diagnostic while its audit evidence is reviewed; remove it after the campaign closes or promote reusable checks into canonical dashboard tooling.",
@@ -1552,12 +1546,6 @@
     "scripts/temp/report_basedpyright_warning_snapshot.py": {
       "decision": "temporary_diagnostic",
       "next_step": "Retain as a bounded basedpyright warning-snapshot utility while the typing debt campaign needs reproducible shrink-only evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
-    "scripts/temp/resolve_coderabbit_merge_conflicts.py": {
-      "decision": "temporary_diagnostic",
-      "next_step": "Retain only as evidence of the bounded 2026-08 CodeRabbit report merge recovery; remove it after the campaign closeout because it is not a reusable merge policy.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     }

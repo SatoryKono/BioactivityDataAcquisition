@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-12T19:57:03.515594+00:00",
+  "generated_at": "2026-08-13T01:58:49.729146+00:00",
   "summary": {
-    "total_scripts": 598,
+    "total_scripts": 596,
     "status_counts": {
       "active": 338,
       "supporting": 251,
-      "temporary_diagnostic": 9
+      "temporary_diagnostic": 7
     },
     "reference_group_coverage": {
       "agents": 4,
@@ -14,7 +14,7 @@
       "ci": 81,
       "docs": 255,
       "other": 59,
-      "scripts": 495,
+      "scripts": 493,
       "skills": 11,
       "tests": 381
     }
@@ -2574,7 +2574,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 216,
+          "line": 218,
           "source_group": "docs",
           "text": ".\\.venv-win\\Scripts\\python.exe scripts\\ai\\generate_project_domain_audit_workflow.py"
         }
@@ -2635,7 +2635,7 @@
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 194,
+          "line": 196,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\grok\\install_skills.ps1"
         }
@@ -4862,37 +4862,37 @@
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 128,
+          "line": 130,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.audit.dual-agent-cycle \\"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 156,
+          "line": 158,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts list"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 157,
+          "line": 159,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts show prompt.audit.grok-cycle"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 158,
+          "line": 160,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.session.grok-bootstrap \\"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 160,
+          "line": 162,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.audit.grok-cycle --param SCOPE=\"src/bioetl/domain\""
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 161,
+          "line": 163,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.closeout.grok --param SCOPE=\"issues: #NNNN\""
         }
@@ -22143,25 +22143,6 @@
       "next_step": "Retain only as the legacy root shell launcher while canonical Docker helper lifecycle management moves to scripts/ops/docker-setup.sh; keep it supporting and do not expand its fixed-delay startup behavior."
     },
     {
-      "path": "scripts/temp/create_nine_domain_audit_issues.py",
-      "type": "py",
-      "status": "temporary_diagnostic",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/temp/README.md",
-          "line": 33,
-          "source_group": "scripts",
-          "text": "- `create_nine_domain_audit_issues.py` — one-shot helper that opened nine-domain audit GitHub issues"
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "temporary_diagnostic",
-      "review_by": "2026-09-30",
-      "next_step": "One-shot helper that opened nine-domain audit GitHub issues; remove after campaign closeout."
-    },
-    {
       "path": "scripts/temp/layout_contour_audit_cycle2.py",
       "type": "py",
       "status": "temporary_diagnostic",
@@ -22340,31 +22321,6 @@
       "lifecycle_decision": "temporary_diagnostic",
       "review_by": "2026-09-30",
       "next_step": "Retain as a bounded basedpyright warning-snapshot utility while the typing debt campaign needs reproducible shrink-only evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
-    },
-    {
-      "path": "scripts/temp/resolve_coderabbit_merge_conflicts.py",
-      "type": "py",
-      "status": "temporary_diagnostic",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "scripts/ops/coderabbit/README.md",
-          "line": 10,
-          "source_group": "scripts",
-          "text": "| `scripts/temp/resolve_coderabbit_merge_conflicts.py` | Bounded merge-recovery helper for campaign artifacts |"
-        },
-        {
-          "path": "scripts/temp/README.md",
-          "line": 32,
-          "source_group": "scripts",
-          "text": "- `resolve_coderabbit_merge_conflicts.py` — bounded CodeRabbit report merge recovery helper (not reusable merge policy)"
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "temporary_diagnostic",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as evidence of the bounded 2026-08 CodeRabbit report merge recovery; remove it after the campaign closeout because it is not a reusable merge policy."
     },
     {
       "path": "scripts/test_selection_strategy.py",
