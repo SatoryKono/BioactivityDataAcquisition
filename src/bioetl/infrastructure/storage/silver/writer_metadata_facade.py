@@ -129,20 +129,23 @@ class SilverWriterMetadataFacade:
     @staticmethod
     def _compute_column_stats(series: pl.Series, valid_records: int) -> ColumnStats:
         """Compute bounded DQ stats for one Silver metadata column."""
-        numeric_values = [
-            float(value)
-            for value in series.drop_nulls().to_list()
-            if isinstance(value, int | float) and not isinstance(value, bool)
-        ]
-        return ColumnStats(
-            null_rate=(series.null_count() / valid_records) if valid_records else 0.0,
-            unique_count=series.n_unique(),
-            min_value=min(numeric_values) if numeric_values else None,
-            max_value=max(numeric_values) if numeric_values else None,
-            mean_value=(sum(numeric_values) / len(numeric_values))
-            if numeric_values
-            else None,
-        )
+        import polars as pl
+        if series.dtype in (pl.Float32, pl.Float64, pl.Int8, pl.Int16, pl.Int32, pl.Int64, pl.UInt8, pl.UInt16, pl.UInt32, pl.UInt64):
+            return ColumnStats(
+                null_rate=(series.null_count() / valid_records) if valid_records else 0.0,
+                unique_count=series.n_unique(),
+                min_value=series.min(),
+                max_value=series.max(),
+                mean_value=series.mean(),
+            )
+        else:
+            return ColumnStats(
+                null_rate=(series.null_count() / valid_records) if valid_records else 0.0,
+                unique_count=series.n_unique(),
+                min_value=None,
+                max_value=None,
+                mean_value=None,
+            )
 
     def _should_skip_silver_metadata_write(
         self,
