@@ -1,10 +1,11 @@
 ---
 id: prompt.fragment.grafana-six-contract
-version: 1.0.0
-status: active
+version: 1.0.1
+status: deprecated
 class: fragment
 owner: BioETL Team
 summary: Shared read-only contract for the six-prompt Grafana dashboard audit kit
+successor: prompt.fragment.grafana-audit-contract
 ---
 
 ## Grafana six-kit contract (read-only)

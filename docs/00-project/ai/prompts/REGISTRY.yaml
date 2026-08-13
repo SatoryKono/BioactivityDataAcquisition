@@ -122,10 +122,18 @@ entries:
 
   - id: prompt.fragment.grafana-six-contract
     path: fragments/grafana-six-contract.md
-    status: active
+    status: deprecated
     class: fragment
     tags: [guardrail, observability, grafana, audit]
-    summary: Shared read-only contract for the six-prompt Grafana dashboard audit kit
+    summary: Deprecated shared contract for the superseded six-prompt Grafana audit kit
+    successor: prompt.fragment.grafana-audit-contract
+
+  - id: prompt.fragment.grafana-audit-contract
+    path: fragments/grafana-audit-contract.md
+    status: active
+    class: fragment
+    tags: [guardrail, observability, grafana, dashboard, audit]
+    summary: Shared evidence, severity, and release-gate contract for Grafana audits
 
   - id: prompt.fragment.generic-nine-contract
     path: fragments/generic-nine-contract.md
@@ -254,6 +262,41 @@ entries:
     tags: [observability, dashboard, grafana, audit, cycle, density, typography, color, layout, render, operator]
     summary: Exhaustive cyclic Grafana audit of every panel, viewport, density, typography, color, scroll, whitespace, data, and render contract
 
+  - id: prompt.observability.grafana-audit.master
+    path: library/observability/grafana-audit/master.md
+    status: active
+    class: operator-paste
+    tags: [observability, grafana, dashboard, audit, master, evidence, operator]
+    summary: Complete read-only Grafana audit across visual, layout, and data contours
+
+  - id: prompt.observability.grafana-audit.visual
+    path: library/observability/grafana-audit/visual.md
+    status: active
+    class: operator-paste
+    tags: [observability, grafana, dashboard, audit, accessibility, wcag, visual, operator]
+    summary: Grafana visual audit for palette, contrast, typography, and status encoding
+
+  - id: prompt.observability.grafana-audit.layout
+    path: library/observability/grafana-audit/layout.md
+    status: active
+    class: operator-paste
+    tags: [observability, grafana, dashboard, audit, layout, navigation, operator]
+    summary: Grafana layout audit for hierarchy, first viewport, variables, and drill-down
+
+  - id: prompt.observability.grafana-audit.data-integrity
+    path: library/observability/grafana-audit/data-integrity.md
+    status: active
+    class: operator-paste
+    tags: [observability, grafana, dashboard, audit, data, lineage, integrity, operator]
+    summary: Forensic Grafana audit for lineage, exact queries, invariants, and reconciliation
+
+  - id: prompt.observability.grafana-audit.regression
+    path: library/observability/grafana-audit/regression.md
+    status: active
+    class: operator-paste
+    tags: [observability, grafana, dashboard, audit, regression, acceptance, release, operator]
+    summary: Grafana baseline-to-candidate regression acceptance and release gate
+
   # --- generic nine-prompt audit kit (2026-08-11 07:12 BST) ---
   - id: prompt.audit.generic-nine.pack
     path: library/audit/generic-nine/pack.md
@@ -262,55 +305,62 @@ entries:
     tags: [audit, pack, generic-nine, operator]
     summary: Pack routing for the nine-domain generic code/project audit kit
 
-  # --- grafana six-prompt read-only audit kit (2026-08-11) ---
+  # --- deprecated grafana six-prompt read-only audit kit (2026-08-11) ---
   - id: prompt.observability.grafana-six.pack
     path: library/observability/grafana-six/pack.md
-    status: active
+    status: deprecated
     class: operator-paste
     tags: [observability, grafana, audit, pack, read-only, operator]
-    summary: Pack routing for the six-prompt read-only Grafana dashboard audit
+    summary: Deprecated six-prompt routing; use prompt.observability.grafana-audit.master
+    successor: prompt.observability.grafana-audit.master
 
   - id: prompt.observability.grafana-six.evidence
     path: library/observability/grafana-six/evidence.md
-    status: active
+    status: deprecated
     class: operator-paste
     tags: [observability, grafana, audit, evidence, read-only, operator]
-    summary: Read-only Grafana evidence pack — inventory, preflight, scopes, renders
+    summary: Deprecated evidence stage; use the master Grafana audit
+    successor: prompt.observability.grafana-audit.master
 
   - id: prompt.observability.grafana-six.visual
     path: library/observability/grafana-six/visual.md
-    status: active
+    status: deprecated
     class: operator-paste
     tags: [observability, grafana, audit, visual, a11y, read-only, operator]
-    summary: Read-only Grafana visual audit — palette, contrast, typography, clipping
+    summary: Deprecated visual audit; use prompt.observability.grafana-audit.visual
+    successor: prompt.observability.grafana-audit.visual
 
   - id: prompt.observability.grafana-six.layout
     path: library/observability/grafana-six/layout.md
-    status: active
+    status: deprecated
     class: operator-paste
     tags: [observability, grafana, audit, layout, ia, read-only, operator]
-    summary: Read-only Grafana layout audit — composition, IA, sizes, navigation
+    summary: Deprecated layout audit; use prompt.observability.grafana-audit.layout
+    successor: prompt.observability.grafana-audit.layout
 
   - id: prompt.observability.grafana-six.data
     path: library/observability/grafana-six/data.md
-    status: active
+    status: deprecated
     class: operator-paste
     tags: [observability, grafana, audit, data, promql, read-only, operator]
-    summary: Read-only Grafana data-fill audit — queries, semantics, zero vs no-data
+    summary: Deprecated data audit; use prompt.observability.grafana-audit.data-integrity
+    successor: prompt.observability.grafana-audit.data-integrity
 
   - id: prompt.observability.grafana-six.consolidate
     path: library/observability/grafana-six/consolidate.md
-    status: active
+    status: deprecated
     class: operator-paste
     tags: [observability, grafana, audit, consolidate, read-only, operator]
-    summary: Consolidate Grafana visual/layout/data audits — dedupe and prioritize
+    summary: Deprecated consolidation stage; use the master Grafana audit
+    successor: prompt.observability.grafana-audit.master
 
   - id: prompt.observability.grafana-six.reverify
     path: library/observability/grafana-six/reverify.md
-    status: active
+    status: deprecated
     class: operator-paste
     tags: [observability, grafana, audit, reverify, read-only, operator]
-    summary: Independent Grafana re-audit after fixes — before/after evidence
+    summary: Deprecated reverify audit; use prompt.observability.grafana-audit.regression
+    successor: prompt.observability.grafana-audit.regression
 
   # --- domain audit cards (generic nine-kit intake 2026-08) ---
   - id: prompt.audit.docs-content

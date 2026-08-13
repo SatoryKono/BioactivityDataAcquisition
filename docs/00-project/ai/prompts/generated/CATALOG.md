@@ -27,14 +27,12 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.observability.dashboard-panel-audit` | `library/observability/dashboard-panel-audit.md` | Five-phase Grafana panel audit — render, GH issues, fix, closeout (v1.1) |
 | `prompt.observability.bi-dashboard-acceptance` | `library/observability/bi-dashboard-acceptance.md` | BI dashboard acceptance — visual, layout, data contours with measurable checks |
 | `prompt.observability.dashboard-audit-cycle` | `library/observability/dashboard-audit-cycle.md` | Exhaustive cyclic Grafana audit of every panel, viewport, density, typography, color, scroll, whitespace, data, and render contract |
+| `prompt.observability.grafana-audit.master` | `library/observability/grafana-audit/master.md` | Complete read-only Grafana audit across visual, layout, and data contours |
+| `prompt.observability.grafana-audit.visual` | `library/observability/grafana-audit/visual.md` | Grafana visual audit for palette, contrast, typography, and status encoding |
+| `prompt.observability.grafana-audit.layout` | `library/observability/grafana-audit/layout.md` | Grafana layout audit for hierarchy, first viewport, variables, and drill-down |
+| `prompt.observability.grafana-audit.data-integrity` | `library/observability/grafana-audit/data-integrity.md` | Forensic Grafana audit for lineage, exact queries, invariants, and reconciliation |
+| `prompt.observability.grafana-audit.regression` | `library/observability/grafana-audit/regression.md` | Grafana baseline-to-candidate regression acceptance and release gate |
 | `prompt.audit.generic-nine.pack` | `library/audit/generic-nine/pack.md` | Pack routing for the nine-domain generic code/project audit kit |
-| `prompt.observability.grafana-six.pack` | `library/observability/grafana-six/pack.md` | Pack routing for the six-prompt read-only Grafana dashboard audit |
-| `prompt.observability.grafana-six.evidence` | `library/observability/grafana-six/evidence.md` | Read-only Grafana evidence pack — inventory, preflight, scopes, renders |
-| `prompt.observability.grafana-six.visual` | `library/observability/grafana-six/visual.md` | Read-only Grafana visual audit — palette, contrast, typography, clipping |
-| `prompt.observability.grafana-six.layout` | `library/observability/grafana-six/layout.md` | Read-only Grafana layout audit — composition, IA, sizes, navigation |
-| `prompt.observability.grafana-six.data` | `library/observability/grafana-six/data.md` | Read-only Grafana data-fill audit — queries, semantics, zero vs no-data |
-| `prompt.observability.grafana-six.consolidate` | `library/observability/grafana-six/consolidate.md` | Consolidate Grafana visual/layout/data audits — dedupe and prioritize |
-| `prompt.observability.grafana-six.reverify` | `library/observability/grafana-six/reverify.md` | Independent Grafana re-audit after fixes — before/after evidence |
 | `prompt.audit.docs-content` | `library/audit/docs-content.md` | Evidence-based audit of project documentation content and drift |
 | `prompt.audit.tests-system` | `library/audit/tests-system.md` | Audit test system as regression detection, not coverage vanity |
 | `prompt.audit.tech-debt` | `library/audit/tech-debt.md` | Evidence-based technical debt register with risk-ordered paydown |
@@ -79,7 +77,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.fragment.coderabbit-dual-pass` | `fragments/coderabbit-dual-pass.md` | CodeRabbit then agent order for audit and PR review passes |
 | `prompt.fragment.peer-review-gate` | `fragments/peer-review-gate.md` | Peer agent review gate before issue close |
 | `prompt.fragment.bi-check-schema` | `fragments/bi-check-schema.md` | BI dashboard check result schema and priority mapping |
-| `prompt.fragment.grafana-six-contract` | `fragments/grafana-six-contract.md` | Shared read-only contract for the six-prompt Grafana dashboard audit kit |
+| `prompt.fragment.grafana-audit-contract` | `fragments/grafana-audit-contract.md` | Shared evidence, severity, and release-gate contract for Grafana audits |
 | `prompt.fragment.generic-nine-contract` | `fragments/generic-nine-contract.md` | Shared contract for the nine-domain generic audit kit |
 
 ## All registry entries
@@ -102,7 +100,8 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.fragment.coderabbit-dual-pass` | fragment | active | `fragments/coderabbit-dual-pass.md` |
 | `prompt.fragment.peer-review-gate` | fragment | active | `fragments/peer-review-gate.md` |
 | `prompt.fragment.bi-check-schema` | fragment | active | `fragments/bi-check-schema.md` |
-| `prompt.fragment.grafana-six-contract` | fragment | active | `fragments/grafana-six-contract.md` |
+| `prompt.fragment.grafana-six-contract` | fragment | deprecated | `fragments/grafana-six-contract.md` |
+| `prompt.fragment.grafana-audit-contract` | fragment | active | `fragments/grafana-audit-contract.md` |
 | `prompt.fragment.generic-nine-contract` | fragment | active | `fragments/generic-nine-contract.md` |
 | `prompt.session.grok-bootstrap` | operator-paste | active | `library/session/grok-bootstrap.md` |
 | `prompt.closeout.grok` | operator-paste | active | `library/closeout/grok-closeout.md` |
@@ -121,14 +120,19 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.observability.dashboard-panel-audit` | operator-paste | active | `library/observability/dashboard-panel-audit.md` |
 | `prompt.observability.bi-dashboard-acceptance` | operator-paste | active | `library/observability/bi-dashboard-acceptance.md` |
 | `prompt.observability.dashboard-audit-cycle` | operator-paste | active | `library/observability/dashboard-audit-cycle.md` |
+| `prompt.observability.grafana-audit.master` | operator-paste | active | `library/observability/grafana-audit/master.md` |
+| `prompt.observability.grafana-audit.visual` | operator-paste | active | `library/observability/grafana-audit/visual.md` |
+| `prompt.observability.grafana-audit.layout` | operator-paste | active | `library/observability/grafana-audit/layout.md` |
+| `prompt.observability.grafana-audit.data-integrity` | operator-paste | active | `library/observability/grafana-audit/data-integrity.md` |
+| `prompt.observability.grafana-audit.regression` | operator-paste | active | `library/observability/grafana-audit/regression.md` |
 | `prompt.audit.generic-nine.pack` | operator-paste | active | `library/audit/generic-nine/pack.md` |
-| `prompt.observability.grafana-six.pack` | operator-paste | active | `library/observability/grafana-six/pack.md` |
-| `prompt.observability.grafana-six.evidence` | operator-paste | active | `library/observability/grafana-six/evidence.md` |
-| `prompt.observability.grafana-six.visual` | operator-paste | active | `library/observability/grafana-six/visual.md` |
-| `prompt.observability.grafana-six.layout` | operator-paste | active | `library/observability/grafana-six/layout.md` |
-| `prompt.observability.grafana-six.data` | operator-paste | active | `library/observability/grafana-six/data.md` |
-| `prompt.observability.grafana-six.consolidate` | operator-paste | active | `library/observability/grafana-six/consolidate.md` |
-| `prompt.observability.grafana-six.reverify` | operator-paste | active | `library/observability/grafana-six/reverify.md` |
+| `prompt.observability.grafana-six.pack` | operator-paste | deprecated | `library/observability/grafana-six/pack.md` |
+| `prompt.observability.grafana-six.evidence` | operator-paste | deprecated | `library/observability/grafana-six/evidence.md` |
+| `prompt.observability.grafana-six.visual` | operator-paste | deprecated | `library/observability/grafana-six/visual.md` |
+| `prompt.observability.grafana-six.layout` | operator-paste | deprecated | `library/observability/grafana-six/layout.md` |
+| `prompt.observability.grafana-six.data` | operator-paste | deprecated | `library/observability/grafana-six/data.md` |
+| `prompt.observability.grafana-six.consolidate` | operator-paste | deprecated | `library/observability/grafana-six/consolidate.md` |
+| `prompt.observability.grafana-six.reverify` | operator-paste | deprecated | `library/observability/grafana-six/reverify.md` |
 | `prompt.audit.docs-content` | operator-paste | active | `library/audit/docs-content.md` |
 | `prompt.audit.tests-system` | operator-paste | active | `library/audit/tests-system.md` |
 | `prompt.audit.tech-debt` | operator-paste | active | `library/audit/tech-debt.md` |

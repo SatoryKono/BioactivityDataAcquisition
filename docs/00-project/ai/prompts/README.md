@@ -88,7 +88,11 @@ docs/00-project/ai/prompts/
 | `prompt.observability.dashboard-panel-audit` | [library/observability/dashboard-panel-audit.md](library/observability/dashboard-panel-audit.md) | Grafana panel audit (5 phases, v1.1) |
 | `prompt.observability.bi-dashboard-acceptance` | [library/observability/bi-dashboard-acceptance.md](library/observability/bi-dashboard-acceptance.md) | BI acceptance: visual / layout / data |
 | `prompt.observability.dashboard-audit-cycle` | [library/observability/dashboard-audit-cycle.md](library/observability/dashboard-audit-cycle.md) | Exhaustive cyclic audit of every panel × viewport — density, typography, color, scroll, whitespace, data, render (v2.0) |
-| `prompt.observability.grafana-six.pack` | [library/observability/grafana-six/pack.md](library/observability/grafana-six/pack.md) | Read-only **six-prompt** Grafana kit (evidence → visual/layout/data → consolidate → reverify) |
+| `prompt.observability.grafana-audit.master` | [library/observability/grafana-audit/master.md](library/observability/grafana-audit/master.md) | Complete evidence-based read-only Grafana audit |
+| `prompt.observability.grafana-audit.visual` | [library/observability/grafana-audit/visual.md](library/observability/grafana-audit/visual.md) | Palette, WCAG contrast, typography, visual encoding |
+| `prompt.observability.grafana-audit.layout` | [library/observability/grafana-audit/layout.md](library/observability/grafana-audit/layout.md) | Composition, first viewport, variables, drill-down |
+| `prompt.observability.grafana-audit.data-integrity` | [library/observability/grafana-audit/data-integrity.md](library/observability/grafana-audit/data-integrity.md) | Full lineage, exact queries, invariants, reconciliation |
+| `prompt.observability.grafana-audit.regression` | [library/observability/grafana-audit/regression.md](library/observability/grafana-audit/regression.md) | Baseline/candidate retest and release gate |
 | `prompt.audit.generic-nine.pack` | [library/audit/generic-nine/pack.md](library/audit/generic-nine/pack.md) | Nine-domain generic code/project audit kit (2026-08-11) |
 
 ### Domain audit cards (nine-kit intake)
@@ -161,11 +165,20 @@ Artifacts → `reports/audit/<domain>/` or `reports/audit-runs/<run_id>/`.
 
 | Need | Card |
 | --- | --- |
-| **Read-only** six-prompt kit (evidence → visual ∥ layout ∥ data → consolidate → reverify) | `prompt.observability.grafana-six.pack` → [grafana-six/](library/observability/grafana-six/README.md) |
+| Complete evidence-based read-only audit | `prompt.observability.grafana-audit.master` |
+| Specialist palette / contrast / typography audit | `prompt.observability.grafana-audit.visual` |
+| Specialist composition / navigation audit | `prompt.observability.grafana-audit.layout` |
+| Specialist forensic data-integrity audit | `prompt.observability.grafana-audit.data-integrity` |
+| Baseline/candidate regression acceptance | `prompt.observability.grafana-audit.regression` |
 | **Cyclic** audit → issues → fix → re-verify | `prompt.observability.dashboard-audit-cycle` |
 | Per-panel render/query → issues → fix (one shot) | `prompt.observability.dashboard-panel-audit` |
 | Acceptance only: a11y, layout, data DQ | `prompt.observability.bi-dashboard-acceptance` |
 | Full BI matrices / multi-tool notes | archive `bi-dashboard-audit-kit-2026-08-11.md` |
+
+The five-card set, evidence contract, and recommended order are documented in
+[library/observability/grafana-audit/README.md](library/observability/grafana-audit/README.md).
+The earlier `grafana-six` kit remains available only as a deprecated historical
+route with explicit successor metadata.
 
 Root-level `grok-*.md` / `test_*.md` paths remain as **redirect stubs** for
 bookmarks from #8279.
@@ -186,6 +199,17 @@ python -m scripts.ai.prompts render prompt.observability.bi-dashboard-acceptance
 python -m scripts.ai.prompts render prompt.observability.dashboard-audit-cycle \
   --param SCOPE="grafana/dashboards" --param N=20 --param MODE=audit \
   --param DEPTH=full --param MONITORING=false
+python -m scripts.ai.prompts render prompt.observability.grafana-audit.master \
+  --param SCOPE="grafana/dashboards" --param MONITORING=false
+python -m scripts.ai.prompts render prompt.observability.grafana-audit.data-integrity \
+  --param SCOPE="grafana/dashboards" \
+  --param TIME_RANGE="2026-08-13T00:00:00Z/2026-08-13T01:00:00Z" \
+  --param MONITORING=false
+python -m scripts.ai.prompts render prompt.observability.grafana-audit.regression \
+  --param BASELINE_REF="<sha>" --param CANDIDATE_REF=HEAD \
+  --param BASELINE_REPORT="reports/audit/grafana/<run_id>/report.md" \
+  --param FIXED_WINDOWS="2026-08-13T00:00:00Z/2026-08-13T01:00:00Z" \
+  --param MONITORING=false
 python -m scripts.ai.prompts render prompt.tests.cycle \
   --param SCOPE="tests/unit/domain" --param LANE=unit-fast \
   --param CYCLE_COUNT=1 --param MODE=run+fix

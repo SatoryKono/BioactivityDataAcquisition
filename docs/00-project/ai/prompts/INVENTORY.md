@@ -1,10 +1,10 @@
 ______________________________________________________________________
 
-Version: 1.2.0
+Version: 1.3.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
-Last verified: '2026-08-11'
+Last verified: '2026-08-13'
 Epic: '#8513'
 Phase: 0 (#8515) + domain-audit intake + Phase 3 archive (#8517)
 
@@ -87,6 +87,25 @@ frontmatter; compose shared guardrails via `fragments/`.
 | `fragments/coderabbit-dual-pass.md` | fragment | active | CR → agent |
 | `fragments/peer-review-gate.md` | fragment | active | peer close gate |
 | Workflow `dual-agent-audit-cycle.rhai` | — | planned P3 | not shipped in P1 |
+
+## Grafana five-prompt audit set (2026-08-13)
+
+The source-backed read-only set lives under
+`library/observability/grafana-audit/`. It complements the existing cyclic
+write/fix cards and supersedes the earlier `grafana-six` read-only route.
+
+| Path | Id | Primary outcome |
+| --- | --- | --- |
+| `master.md` | `prompt.observability.grafana-audit.master` | unified visual/layout/data P0–P3 audit |
+| `visual.md` | `prompt.observability.grafana-audit.visual` | measurable accessibility and readability findings |
+| `layout.md` | `prompt.observability.grafana-audit.layout` | question map and minimal re-layout |
+| `data-integrity.md` | `prompt.observability.grafana-audit.data-integrity` | lineage, T1–T10, query reconciliation |
+| `regression.md` | `prompt.observability.grafana-audit.regression` | baseline retest and machine-readable release gate |
+
+Shared evidence/severity/release rules are defined once in
+`fragments/grafana-audit-contract.md` and included by all five cards. The
+`grafana-six` cards and fragment are retained with `status: deprecated` and
+explicit `successor` fields; their full historical bodies are not deleted.
 
 ## Phase 3 archive / demote (#8517) — **DONE**
 

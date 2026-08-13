@@ -1,9 +1,10 @@
 ---
 id: prompt.observability.grafana-six.pack
-version: 1.0.0
-status: active
+version: 1.0.1
+status: deprecated
 class: operator-paste
 owner: BioETL Team
+successor: prompt.observability.grafana-audit.master
 runtimes: [any]
 params: [SCOPE, BRANCH, COMMIT_SHA, LANGUAGE, MONITORING, OUTPUT_DIR]
 includes:

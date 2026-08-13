@@ -1,9 +1,10 @@
 ---
 id: prompt.observability.grafana-six.consolidate
-version: 1.0.0
-status: active
+version: 1.0.1
+status: deprecated
 class: operator-paste
 owner: BioETL Team
+successor: prompt.observability.grafana-audit.master
 runtimes: [grok, codex, any]
 params:
   - SCOPE

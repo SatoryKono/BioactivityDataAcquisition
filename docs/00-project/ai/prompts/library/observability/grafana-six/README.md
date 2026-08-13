@@ -1,7 +1,7 @@
 ______________________________________________________________________
 
-Version: 1.0.0
-Status: active
+Version: 1.0.1
+Status: deprecated
 Class: internal (repo-only index; not a paste card)
 Owner: BioETL Team
 Last verified: '2026-08-13'
@@ -10,6 +10,10 @@ Source kit: 2026-08-11 07:55 Europe/London
 ______________________________________________________________________
 
 # Grafana six-prompt audit kit
+
+Deprecated on 2026-08-13. Use the source-backed five-card successor at
+[`../grafana-audit/README.md`](../grafana-audit/README.md). The historical full
+texts are retained for reproducibility; do not start a new audit with this kit.
 
 Read-only audit of shipped BioETL Grafana dashboards: visual language,
 panel composition, and data-fill semantics. Not runtime SSOT.
