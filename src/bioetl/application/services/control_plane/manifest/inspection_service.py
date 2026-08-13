@@ -18,22 +18,22 @@ from bioetl.application.services.control_plane.manifest.diagnostics import (
 from bioetl.application.services.control_plane.manifest.inspection_helpers import (
     build_authoritative_replay_dossier,
 )
-from bioetl.application.services.control_plane.manifest.inspection_models import (
+from bioetl.application.services.control_plane.manifest.inspection_verification import (
     _RUN_MANIFEST_INSPECTION_MODEL_EXPORTS as _RUN_MANIFEST_INSPECTION_MODEL_EXPORTS,
 )
-from bioetl.application.services.control_plane.manifest.inspection_models import (
+from bioetl.application.services.control_plane.manifest.inspection_verification import (
     RunManifestDiffEntry as RunManifestDiffEntry,
 )
-from bioetl.application.services.control_plane.manifest.inspection_models import (
+from bioetl.application.services.control_plane.manifest.inspection_verification import (
     RunManifestDiffResult as RunManifestDiffResult,
 )
-from bioetl.application.services.control_plane.manifest.inspection_models import (
+from bioetl.application.services.control_plane.manifest.inspection_verification import (
     RunManifestInspectionCorruptionError as RunManifestInspectionCorruptionError,
 )
-from bioetl.application.services.control_plane.manifest.inspection_models import (
+from bioetl.application.services.control_plane.manifest.inspection_verification import (
     RunManifestInspectionResult as RunManifestInspectionResult,
 )
-from bioetl.application.services.control_plane.manifest.inspection_models import (
+from bioetl.application.services.control_plane.manifest.inspection_verification import (
     RunManifestVerifyResult as RunManifestVerifyResult,
 )
 from bioetl.application.services.control_plane.manifest.inspection_verification import (

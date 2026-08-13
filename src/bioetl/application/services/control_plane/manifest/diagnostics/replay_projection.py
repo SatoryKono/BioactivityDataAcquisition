@@ -11,7 +11,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_proje
     _build_replay_projection_context_kwargs,
     _build_replay_state_projection_for_context,
 )
-from bioetl.application.services.control_plane.manifest.replay_taxonomy import (
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload import (
     build_replay_taxonomy_projection,
 )
 from bioetl.domain.control_plane import RunManifest

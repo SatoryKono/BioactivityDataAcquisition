@@ -28,7 +28,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.summary impo
     _FinalSummaryRequest,
     _RuntimeViewsRequest,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
+from bioetl.application.services.control_plane.manifest.diagnostics.summary import (
     build_runtime_views as _build_runtime_views,
 )
 from bioetl.application.services.control_plane.run_manifest_reproducibility_scoring import (

@@ -456,8 +456,8 @@ hotspot_family_ratchets:
       max_internal_fan_in: 10
     metrics:
       duplication_clusters: 0
-      files: 190
-      total_loc: 23076
+      files: 192
+      total_loc: 23094
       files_ge_250_loc: 0
       helper_function_ratio: 0.363
       max_internal_fan_in: 6
@@ -537,20 +537,22 @@ hotspot_family_ratchets:
     - src/bioetl/application/services/control_plane/
     bounded_growth_budgets:
       files_ge_250_loc: 0
-      max_internal_fan_in: 3
+      max_internal_fan_in: 2
     metrics:
       duplication_clusters: 0
-      files: 140
-      total_loc: 16000
+      files: 139
+      total_loc: 16050
       files_ge_250_loc: 0
-      helper_function_ratio: 0.421
-      max_internal_fan_in: 3
-      max_internal_fan_in_module: bioetl.application.services.control_plane.replay.reproducibility_score_cards_types
+      helper_function_ratio: 0.42
+      max_internal_fan_in: 2
+      max_internal_fan_in_module: bioetl.application.services.control_plane.workflow.manifest_models
     trend:
-      status: reduced_2026-08-13_issue_8706_scoring_support_collapse
-      next_action: 2026-07-28 ARCH-REF-03/04 reduces control_plane files_ge_250_loc to 0 and max_internal_fan_in
-        4->3 via lazy facades and extract helpers; bounded-growth budgets ratcheted to files_ge_250_loc
-        0 and max_internal_fan_in 3; no technical-debt budget is increased.
+      status: reduced_2026-08-13_issue_8719_fan_in_headroom
+      next_action: '2026-08-13 #8719 rerouted family-internal hubs so max_internal_fan_in dropped from
+        3 to 2; bounded-growth budget ratcheted from 3 to 2 (shrink-only); no technical-debt budget is
+        increased.
+
+        '
   - name: composition_runtime_builders
     owner: '@bioetl-platform'
     linked_rf: RF-023

@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-import inspect
 from importlib import import_module
+from unittest.mock import patch
 
-# Repo-wide classified zero-import set (dead-code inventory / scorecard ceiling 5/5).
+from tests.unit.application.services.run_manifest_test_support import make_run_manifest
+
 ZERO_IMPORT_MODULES = (
     "bioetl.application.services.control_plane.manifest.diagnostics.base",
     "bioetl.application.services.control_plane.manifest.diagnostics.finalization",
@@ -14,7 +15,11 @@ ZERO_IMPORT_MODULES = (
     "bioetl.domain.ports.stage_accounting",
 )
 
-DIAGNOSTICS_LEAVES = ZERO_IMPORT_MODULES[:3]
+DIAGNOSTICS_LEAVES = (
+    "bioetl.application.services.control_plane.manifest.diagnostics.base",
+    "bioetl.application.services.control_plane.manifest.diagnostics.finalization",
+    "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support",
+)
 
 
 def test_classified_zero_import_modules_import() -> None:
@@ -28,22 +33,28 @@ def test_classified_zero_import_modules_import() -> None:
 
 
 def test_diagnostics_package_summary_entrypoint_uses_dynamic_leaves() -> None:
-    """Package facade must keep importlib loading of diagnostics leaf modules."""
+    """Entrypoint must importlib-load the three diagnostics leaves."""
     pkg = import_module(
         "bioetl.application.services.control_plane.manifest.diagnostics"
     )
-    source = inspect.getsource(pkg.build_diagnostics_summary)
-    assert "import_module" in source
-    for leaf in (
-        "manifest.diagnostics.base",
-        "manifest.diagnostics.finalization",
-        "replay_refresh_support",
-    ):
-        assert leaf in source or leaf.rsplit(".", maxsplit=1)[-1] in source
+    loaded: list[str] = []
+    real_import = import_module
+
+    def _tracking_import(name: str, package: str | None = None):
+        loaded.append(name)
+        return real_import(name, package) if package else real_import(name)
+
+    with patch.object(pkg, "import_module", side_effect=_tracking_import):
+        summary = pkg.build_diagnostics_summary(make_run_manifest(), ())
+
+    assert isinstance(summary, dict)
+    assert summary
+    for leaf in DIAGNOSTICS_LEAVES:
+        assert leaf in loaded, f"entrypoint did not importlib-load {leaf}"
 
 
 def test_diagnostics_dynamic_leaves_match_package_wiring() -> None:
-    """Leaf modules listed for dynamic load remain present on disk and importable."""
+    """Leaf modules remain importable owner surfaces used by the package."""
     for name in DIAGNOSTICS_LEAVES:
         mod = import_module(name)
         assert any(

@@ -5,6 +5,8 @@ from __future__ import annotations
 from bioetl.application.services.control_plane.ledger.diagnostic_support import (
     LEDGER_DIAGNOSTIC_CONTRACT_VERSION,
     _RunLedgerDiagnosticRequest,
+    RunLedgerCorrelationFieldsProtocol,
+    build_run_ledger_diagnostic_request,
 )
 from bioetl.domain.normalization import (
     normalize_contract_ref,

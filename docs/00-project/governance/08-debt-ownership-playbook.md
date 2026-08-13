@@ -124,7 +124,7 @@ Examples (see live residual + scorecard):
 
 - `config_surface_ratchet.metrics.config_count` (27/27)
 - `config_surface_ratchet.metrics.unique_parameter_count` (419/419)
-- `application_services_control_plane.max_internal_fan_in` (3/3)
+- `application_services_control_plane.max_internal_fan_in` (2/2)
 - retirement `repo_wide_zero_import_candidate_count` (5/5)
 - sanctioned public entrypoint / facade ceilings
 
@@ -138,7 +138,13 @@ and **MUST NOT** raise `max_count` / `bounded_growth_budgets` / exemptions.
 Validation:
 
 ```bash
-python -m scripts.engineering.qa report-debt-governance-gates --check
+python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main
 ```
+
+Bare `--check` without `--changed-from-ref` records
+`budget_increase_count=not_evaluated_without_changed_from_ref` and does **not**
+evaluate saturated-metric compensation. CI and freeze PRs MUST pass the
+reference-aware invocation so scorecard `max_count` / `bounded_growth_budgets`
+cannot grow unnoticed.
 
 

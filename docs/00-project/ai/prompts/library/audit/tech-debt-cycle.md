@@ -58,7 +58,7 @@ residual re-check. Domain method: `prompt.audit.tech-debt`. Loop shell:
 
 **УВЕЛИЧИВАТЬ бюджеты техдолга ЗАПРЕЩЕНО** (debt-budget-ban / AGENTS.md).
 
-Default **`N=10`**, **`MODE=full`**, все **`ALLOW_*=true`** (issues / push / merge / close).
+Default **`N=10`**, **`MODE=full`**, все **`ALLOW_*=false`**. Operator full-run must set `ALLOW_ISSUE_WRITE/PUSH/MERGE/CLOSE=true` explicitly.
 
 ## Params
 
@@ -69,10 +69,10 @@ Default **`N=10`**, **`MODE=full`**, все **`ALLOW_*=true`** (issues / push / 
 | `MODE` | `full` (also: `audit` \| `audit+issues`) |
 | `LANGUAGE` | `ru` |
 | `AUDIT_MODE` | `full` \| `differential` |
-| `ALLOW_ISSUE_WRITE` | `true` |
-| `ALLOW_PUSH` | `true` |
-| `ALLOW_MERGE` | `true` |
-| `ALLOW_CLOSE` | `true` |
+| `ALLOW_ISSUE_WRITE` | `false` (operator full-run: `true`) |
+| `ALLOW_PUSH` | `false` (operator full-run: `true`) |
+| `ALLOW_MERGE` | `false` (operator full-run: `true`) |
+| `ALLOW_CLOSE` | `false` (operator full-run: `true`) |
 | `MAX_ISSUES_PER_ITERATION` | `5` |
 | `BASE_BRANCH` | `main` |
 | `REPO` | `SatoryKono/BioactivityDataAcquisition` |
@@ -104,6 +104,8 @@ Default **`N=10`**, **`MODE=full`**, все **`ALLOW_*=true`** (issues / push / 
 | **D Fix** | Pay down only; never raise budgets/exemptions/hotspot caps. Refresh inventories only via project scripts when required. |
 | **E Validate** | Re-run debt/residual gates if project provides commands; architecture residual non-growth must still pass. |
 | **F Post** | Residual delta table: before/after for touched families; list rejected “raise budget” ideas as `REJECTED_POLICY`. |
+
+`MODE=audit` → stop after A. `audit+issues` → stop after C (no implement). `full` → through F.
 
 ## Focus checklist (each cycle)
 

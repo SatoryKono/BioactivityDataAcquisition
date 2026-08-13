@@ -20,6 +20,7 @@ from bioetl.application.services.control_plane.effective_config.serialization im
     canonical_source_refs,
     serialize_artifact,
     stable_hash,
+    semantic_artifact_payload,
 )
 from bioetl.domain.behavior.dq_policy_resolver import DQPolicyResolver
 from bioetl.domain.config.dq import DQConfig
