@@ -60,6 +60,7 @@
   ],
   "notes": [
     "Parity enforcement is owned by scripts/ai/codex/skills-mirror-contract.json and check_skills_mirror.sh.",
-    "This inventory tracks the live .codex/skills tree only. Pre-consolidation 30-skill list is retired."
+    "This inventory tracks the live .codex/skills tree only. Pre-consolidation 30-skill list is retired.",
+    "This file is a derived inventory of the live .codex/skills tree so audits do not resurrect retired names."
   ]
 }
