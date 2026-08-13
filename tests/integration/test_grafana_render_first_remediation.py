@@ -501,7 +501,7 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
         assert len(row.get("panels") or []) > 0
     alerts = _panel(overview, 9600)
     assert alerts.get("type") == "row"
-    assert alerts.get("collapsed") is False
+    assert alerts.get("collapsed") is True
     assert _panel(overview, 215)["title"] == "Review First Action"
     assert _panel(overview, 9601).get("type") == "table"
 
@@ -550,10 +550,10 @@ def test_audit_followup_action_first_layout_contracts() -> None:
         "Selected Range · Validation Diagnostics",
     ]
     assert [panel.get("gridPos", {}).get("y") for panel in dq_rows] == [
+        13,
         14,
         15,
         16,
-        17,
     ]
     assert all(panel.get("collapsed") is True for panel in dq_rows)
 

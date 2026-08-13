@@ -322,7 +322,7 @@ def test_current_status_and_current_cause_panels_do_not_use_zero_fallback() -> N
         "bioetl-provider-health-v2.json": [
             "Monitor Fleet Severity",
             "Inspect Top Provider Causes",
-            "Monitor Telemetry Freshness",
+            "Monitor Telemetry Presence",
         ],
         "bioetl-dq-v2.json": [
             "Monitor Current DQ Status",
@@ -614,3 +614,72 @@ def test_navigation_bus_panels_document_handoff_policy() -> None:
                 f"{dashboard_path.name}:navigation panel description "
                 "must document traced-run-only Explore Traces semantics"
             )
+
+
+def test_current_status_headlines_use_instant_queries() -> None:
+    """#8746: fail-closed headlines must not lastNotNull a dashboard range."""
+    expectations = {
+        "bioetl-overview-v2.json": ("Monitor Fleet Health",),
+        "bioetl-control-plane-v1.json": (
+            "Monitor Replay Readiness",
+            "Monitor Checkpoint Age",
+        ),
+        "bioetl-runtime.json": (
+            "Monitor Pipeline Status",
+            "Monitor Metrics Coverage",
+        ),
+        "bioetl-provider-health-v2.json": ("Monitor Selected Provider",),
+    }
+    for dashboard_name, titles in expectations.items():
+        dashboard = load_dashboard(_DASHBOARD_DIR / dashboard_name)
+        panels = {
+            panel.get("title"): panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("title")
+        }
+        for title in titles:
+            panel = panels[title]
+            instants = [
+                target.get("instant")
+                for target in panel.get("targets", [])
+                if isinstance(target.get("expr"), str)
+            ]
+            assert instants and all(flag is True for flag in instants), (
+                f"{dashboard_name}:{title} must set targets[].instant=true"
+            )
+
+
+def test_run_explorer_identity_is_on_the_first_screen() -> None:
+    """#8747: Run Explorer hub ships identity/accounting above the 1366 fold."""
+    dashboard = load_dashboard(_DASHBOARD_DIR / "bioetl-run-explorer-v1.json")
+    panels = {
+        panel.get("id"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if isinstance(panel.get("id"), int)
+    }
+    browse = panels[3010]
+    identity = panels[9402]
+    records = panels[9403]
+    assert browse.get("gridPos", {}).get("h", 99) <= 5
+    assert identity.get("gridPos", {}).get("y", 999) <= 12
+    assert records.get("gridPos", {}).get("y", 999) <= 12
+    assert "last 20" in str(browse.get("title", "")).lower()
+
+
+def test_overview_alerts_row_is_collapsed() -> None:
+    """#8745: Inspect Alerts is T3, not a second first-screen question."""
+    dashboard = load_dashboard(_DASHBOARD_DIR / "bioetl-overview-v2.json")
+    row = next(panel for panel in dashboard.get("panels", []) if panel.get("id") == 9600)
+    assert row.get("collapsed") is True
+    assert any(
+        child.get("id") == 9601 for child in (row.get("panels") or [])
+    )
+
+
+def test_incident_domain_suspect_row_is_collapsed() -> None:
+    """#8752: Domain Suspect Details stays T4 until ranked-suspect triage needs it."""
+    dashboard = load_dashboard(_DASHBOARD_DIR / "bioetl-incident-v1.json")
+    row = next(panel for panel in dashboard.get("panels", []) if panel.get("id") == 2099)
+    assert row.get("collapsed") is True
+    nested_ids = {child.get("id") for child in (row.get("panels") or [])}
+    assert {2002, 2003, 2004} <= nested_ids

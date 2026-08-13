@@ -202,6 +202,9 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
         "bioetl_l0_next_action_no_route" in next_action_expr
         or "selected_scope_not_present" in next_action_expr
     )
+    # #8748: no_route only when the selected scope has no route series.
+    assert "absent(" in next_action_expr
+    assert "or bioetl_l0_next_action_no_route)" not in next_action_expr
     assert len(next_action_expr) <= 200
 
     # Phase 2: Priority is a short color-background badge; Action is sole color-text CTA.
@@ -260,7 +263,7 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
         for prop in action_override.get("properties", [])
     }
     assert action_props.get("custom.cellOptions", {}).get("type") == "color-text"
-    assert next_action.get("options", {}).get("cellHeight") == "md"
+    assert next_action.get("options", {}).get("cellHeight") == "sm"
     assert int(action_props.get("custom.width") or 0) >= 180, (
         "Action column must be wide enough to avoid truncation at default density"
     )

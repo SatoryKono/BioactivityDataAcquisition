@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "4a6d3cd5ea11ddff690754d7ac532bd46991b9aa1e29c1f4003b4c727c024923",
-    "bioetl-dq-v2": "4d2dfbceb594849e92c3d4e002f06c55828f555a00adcc5d7d742cd1f0b4bb70",
-    "bioetl-incident-v1": "18e02d74352da5314042263b3a46f479d864144f113a235d5a9670e80f511237",
-    "bioetl-overview-v2": "77caefb3eeabcf9c445cbecbe1935218a217671635f10512c7e513d2efe0d7f3",
-    "bioetl-provider-health-v2": "467487d952f6a8f22826bc3678d52726716f8a69b3fa4ac1b4c18e63d67e1d99",
-    "bioetl-run-explorer-v1": "2cf62ae21e1017f7a6a92975d027e49620ae26bd10159f910f0ecc35f1f23dae",
-    "bioetl-runtime": "95b03fafa8809b7d7b1dadff62636874c1e47499772b915c9e944c0b29dbf757"
+    "bioetl-control-plane-v1": "5a73250004a522bf93d4773ad8f3e0229837f496ac41b8e9e1bc302d0c25090a",
+    "bioetl-dq-v2": "301410ac830b85ce832282afe2f8a19d8659a7e4f51563346894f4e69300b441",
+    "bioetl-incident-v1": "89dc903689eb6c499b193e21581134e4e913d3e5a4ce7f0b615a6d4795eb09f8",
+    "bioetl-overview-v2": "3181468899ee86373f60d27e616dbc8e95c7b9b6ce77f57495f8456f67ec55cb",
+    "bioetl-provider-health-v2": "f8add82df9b5c8b2c3e8ccafce6b32c2d9f083cf7cc0cb3059223e0baee5b5c9",
+    "bioetl-run-explorer-v1": "7578d8f674687843d85377a42d9ade7de3e74e867355923cb0432d31e4756c6c",
+    "bioetl-runtime": "a078eb2404ffde4893e879c85a9efcae24b00f1c93f6c7af2d2474e17550669a"
   },
   "panels": [
     {
@@ -1978,7 +1978,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "topk(4, bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or bioetl_l0_next_action_no_route)"
+          "topk(4, bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or (absent(bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})*bioetl_l0_next_action_no_route))"
         ],
         "target_count": 1
       }
@@ -2440,7 +2440,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-provider-health-v2",
       "panel_id": 9104,
-      "panel_title": "Monitor Telemetry Freshness",
+      "panel_title": "Monitor Telemetry Presence",
       "route": "dependency-health",
       "source": {
         "datasource_type": "prometheus",
@@ -2874,7 +2874,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-run-explorer-v1",
       "panel_id": 3010,
-      "panel_title": "Browse Recent Runs",
+      "panel_title": "Browse Recent Runs (last 20)",
       "route": "run-explorer",
       "source": {
         "datasource_type": null,

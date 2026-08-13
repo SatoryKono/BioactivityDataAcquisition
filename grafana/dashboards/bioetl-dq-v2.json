@@ -326,8 +326,8 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
-        "w": 24,
+        "h": 4,
+        "w": 16,
         "x": 0,
         "y": 9
       },
@@ -351,7 +351,7 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "value"
       },
       "targets": [
         {
@@ -371,7 +371,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 13
       },
       "id": 9405,
       "panels": [
@@ -851,7 +851,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 14
       },
       "id": 9404,
       "panels": [
@@ -870,7 +870,6 @@
                 "align": "auto",
                 "cellOptions": {
                   "type": "auto",
-                  "mode": "basic",
                   "wrapText": true
                 },
                 "inspect": true
@@ -909,6 +908,63 @@
                   {
                     "id": "displayName",
                     "value": "Count"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-background",
+                      "mode": "basic"
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "0": {
+                            "text": "OK",
+                            "color": "green"
+                          },
+                          "1": {
+                            "text": "WARN",
+                            "color": "orange"
+                          },
+                          "2": {
+                            "text": "CRIT",
+                            "color": "red"
+                          }
+                        }
+                      },
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "null",
+                          "result": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      },
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "nan",
+                          "result": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               }
@@ -1454,7 +1510,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 15
       },
       "id": 220,
       "title": "Selected Range · Reject Evidence",
@@ -2021,7 +2077,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 16
       },
       "id": 221,
       "title": "Selected Range · Validation Diagnostics",

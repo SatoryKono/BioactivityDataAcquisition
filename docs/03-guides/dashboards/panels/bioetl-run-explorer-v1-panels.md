@@ -37,12 +37,13 @@ collapsed progressive-disclosure row. `run_id` is never a Prometheus label.
   distinct operator states.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/processed-records` (not Prometheus).
 
-### 5. Browse Recent Runs
-- **Type:** Table (first-screen empty-selection utility)
-- **Purpose:** Recent pipeline-run reports for the selected pipeline; pick a
-  row to set `run_id` and open exact-run evidence (Browse mode).
+### 5. Browse Recent Runs (last 20)
+- **Type:** Table (compact first-screen index)
+- **Purpose:** Last 20 pipeline-run reports for the selected pipeline; pick a
+  row to set `run_id` and open exact-run identity/accounting above the fold.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`
-- **Layout:** Visible on first screen; selected-run forensics stay collapsed.
+- **Layout:** Compact index; Inspect Run Identity / Processed Records stay on
+  the first screen (`y<=12`). Selected-run forensics stay collapsed.
 - **Empty states:** Valid empty when no matching reports exist. Backend
   unavailable when Ops HTTP cannot load the index — verify `/health/live`
   and report-root bind (`python scripts/ops/runtime/docker/verify_report_bind.py`).

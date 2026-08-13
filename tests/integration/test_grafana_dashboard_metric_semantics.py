@@ -253,7 +253,6 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
     first_answer_titles = {
         "Monitor Fleet Health",
         "Review First Action",
-        "Review Active Alerts",
         "Review Domain Status",
     }
     compact_evidence = {
@@ -301,7 +300,12 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
         for row in disclosure_rows.values():
             assert row.get("type") == "row"
             assert row.get("collapsed") is (
-                row.get("title") in {"Domain Status Tracks", "Inspect Range Evidence"}
+                row.get("title")
+                in {
+                    "Domain Status Tracks",
+                    "Inspect Range Evidence",
+                    "Inspect Alerts",
+                }
             )
             assert row.get("gridPos", {}).get("y", 0) > max_first_answer_y
         for panel_title, row_title in disclosure_by_panel.items():
@@ -1253,7 +1257,7 @@ def test_provider_severity_matrix_preserves_unknown_and_critical_mapping() -> No
 
 
 def test_provider_telemetry_freshness_fails_closed_when_status_is_missing() -> None:
-    """Provider first screen must expose telemetry freshness separately from health."""
+    """Provider first screen must expose telemetry presence separately from health."""
     dashboard = load_dashboard(
         Path("grafana/dashboards/bioetl-provider-health-v2.json")
     )
@@ -1261,11 +1265,11 @@ def test_provider_telemetry_freshness_fails_closed_when_status_is_missing() -> N
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor Telemetry Freshness"
+            if item.get("title") == "Monitor Telemetry Presence"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Monitor Telemetry Freshness' not found"
+    assert panel is not None, "Panel 'Monitor Telemetry Presence' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert len(expressions) == 1
@@ -1289,7 +1293,7 @@ def test_provider_telemetry_freshness_fails_closed_when_status_is_missing() -> N
         if mapping.get("type") == "value"
     )
     assert value_mapping["options"]["0"]["text"] == "PRESENT"
-    assert value_mapping["options"]["1"]["text"] == "WARN"
+    assert "1" not in value_mapping["options"]
     assert "Alias mapping: PRESENT=OK" in str(panel.get("description", ""))
     special_mapping = next(
         mapping
@@ -1518,7 +1522,6 @@ def test_dq_selected_range_evidence_panels_use_neutral_thresholds() -> None:
         "Monitor Bronze Records",
         "Monitor Gold Records",
         "Monitor Quarantined Records",
-        "Monitor Silver Validation Failures",
     }
 
     panels = {

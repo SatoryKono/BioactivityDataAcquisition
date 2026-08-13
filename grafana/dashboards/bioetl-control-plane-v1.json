@@ -226,7 +226,8 @@
       "targets": [
         {
           "expr": "max(bioetl_control_plane_current_status_trusted{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
-          "refId": "A"
+          "refId": "A",
+          "instant": true
         }
       ]
     },
@@ -343,7 +344,7 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "value"
       },
       "pluginVersion": "9.5.0",
       "targets": [
@@ -405,7 +406,7 @@
             ]
           },
           "unit": "s",
-          "noValue": "No data"
+          "noValue": "UNKNOWN"
         },
         "overrides": []
       },
@@ -428,13 +429,14 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "value"
       },
       "pluginVersion": "9.5.0",
       "targets": [
         {
           "expr": "max(bioetl_checkpoint_age_seconds{pipeline=~\"$pipeline\"})",
-          "refId": "A"
+          "refId": "A",
+          "instant": true
         }
       ],
       "transformations": [
@@ -553,7 +555,7 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "value"
       },
       "pluginVersion": "9.5.0",
       "targets": [
@@ -654,7 +656,7 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "value"
       },
       "pluginVersion": "9.5.0",
       "targets": [
