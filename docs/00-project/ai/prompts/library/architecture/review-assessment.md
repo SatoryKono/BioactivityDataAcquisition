@@ -1,6 +1,6 @@
 ---
 id: prompt.architecture.review
-version: 2.3.0
+version: 2.4.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -18,6 +18,7 @@ includes:
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/shell-portability.md
+  - fragments/generic-nine-contract.md
 related_ssot:
   - AGENTS.md
   - docs/00-project/RULES.md
@@ -36,12 +37,14 @@ max_body_lines: 150
 
 # Architecture review and refactoring assessment
 
+**Kit:** prompt 9 of `prompt.audit.generic-nine.pack`.
 Restore **actual** architecture from code, manifests, infra, CI, and runtime
 relationships; compare to documented architecture. Separate proven fact from
-inference. Default mode does **not** apply code changes.
+inference. Default mode does **not** apply code changes. C4 «container» is
+not Docker unless proven.
 
-Full generic megaprompts (archive):  
-`archive/campaigns/generic-nine-audit-kit-2026-08.md` (prompt 9);  
+Full generic megaprompts (archive):
+`archive/campaigns/generic-nine-audit-kit-2026-08.md` (prompt 9);
 `archive/campaigns/project-audit-orchestrator-kit-2026-08-11.md` (architecture + loop).
 
 
