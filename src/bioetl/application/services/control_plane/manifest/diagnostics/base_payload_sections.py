@@ -19,22 +19,22 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_invar
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_parentage import (
     _build_replay_parentage,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection import (
+from bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context import (
     _build_replay_projection_bundle,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_status import (
     _resolve_snapshot_status,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
+from bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context import (
     collect_input_snapshot_content_hashes as _collect_input_snapshot_content_hashes,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
+from bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context import (
     collect_input_snapshot_ids as _collect_input_snapshot_ids,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
+from bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context import (
     compute_input_snapshot_identity_fingerprint as _compute_input_snapshot_identity_fingerprint,
 )
-from bioetl.application.services.control_plane.manifest.replay_family_contract_payload import (
+from bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context import (
     build_replay_family_contract_payload as _build_replay_family_contract_payload,
 )
 from bioetl.domain.control_plane import RunManifest

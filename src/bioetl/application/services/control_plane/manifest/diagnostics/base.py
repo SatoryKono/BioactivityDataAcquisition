@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.diagnostics.artifact_support import (
+from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
     build_produced_artifact_trace as _build_produced_artifact_trace,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.base_effective_config_diagnostics import (

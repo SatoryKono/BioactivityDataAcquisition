@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.application.services.control_plane.manifest.inspection_result_model import (
+from bioetl.application.services.control_plane.replay._bundle_descriptor_payloads import (
     RunManifestInspectionResult,
 )
 from bioetl.application.services.control_plane.replay._bundle_descriptor_payloads import (

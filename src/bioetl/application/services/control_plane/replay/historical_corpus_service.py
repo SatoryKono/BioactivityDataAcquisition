@@ -6,25 +6,15 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from importlib import import_module
 
-from bioetl.application.services.control_plane.replay import historical_corpus_models
 from bioetl.application.services.control_plane.replay.historical_certification_service import (
+    HistoricalReplayBulkCertificationRecord,
+    HistoricalReplayBulkCertificationResult,
+    HistoricalReplayBulkCertificationSpec,
+    HistoricalReplayCertifiabilityInventory,
+    HistoricalReplayCertifiabilityRecord,
     HistoricalReplayCertificationResult,
     HistoricalReplayCertificationService,
-)
-from bioetl.application.services.control_plane.replay.historical_corpus_models import (
-    HistoricalReplayBulkCertificationRecord as HistoricalReplayBulkCertificationRecord,
-)
-from bioetl.application.services.control_plane.replay.historical_corpus_models import (
-    HistoricalReplayBulkCertificationResult as HistoricalReplayBulkCertificationResult,
-)
-from bioetl.application.services.control_plane.replay.historical_corpus_models import (
-    HistoricalReplayBulkCertificationSpec as HistoricalReplayBulkCertificationSpec,
-)
-from bioetl.application.services.control_plane.replay.historical_corpus_models import (
-    HistoricalReplayCertifiabilityInventory as HistoricalReplayCertifiabilityInventory,
-)
-from bioetl.application.services.control_plane.replay.historical_corpus_models import (
-    HistoricalReplayCertifiabilityRecord as HistoricalReplayCertifiabilityRecord,
+    HistoricalReplaySnapshotCertification,
 )
 from bioetl.application.services.control_plane.replay.historical_corpus_policy import (
     bulk_spec_order_key,
@@ -55,7 +45,15 @@ def _build_diagnostics_summary(
 
 build_diagnostics_summary = _build_diagnostics_summary
 
-__all__ = [*historical_corpus_models.__all__, "HistoricalReplayCorpusService"]
+__all__ = [
+    "HistoricalReplayBulkCertificationRecord",
+    "HistoricalReplayBulkCertificationResult",
+    "HistoricalReplayBulkCertificationSpec",
+    "HistoricalReplayCertifiabilityInventory",
+    "HistoricalReplayCertifiabilityRecord",
+    "HistoricalReplaySnapshotCertification",
+    "HistoricalReplayCorpusService",
+]
 
 
 @dataclass(slots=True)

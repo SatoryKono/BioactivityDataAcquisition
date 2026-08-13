@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
 
-from bioetl.application.services.control_plane.ledger.diagnostic_support import (
+from bioetl.application.services.control_plane.ledger.entry_diagnostic_details import (
     RunLedgerCorrelationFieldsProtocol,
     build_run_ledger_diagnostic_request,
 )
