@@ -29,7 +29,7 @@ max_body_lines: 120
 | 3 | Техдолг | `prompt.audit.tech-debt-cycle` → [tech-debt-cycle.md](tech-debt-cycle.md) | `prompt.audit.tech-debt` | same |
 | 4 | Гигиена репо | `prompt.audit.repo-tree-cycle` → [repo-tree-cycle.md](repo-tree-cycle.md) | `prompt.audit.repo-tree` | same |
 | 5 | Дашборды | `prompt.observability.dashboard-audit-cycle` → [../observability/dashboard-audit-cycle.md](../observability/dashboard-audit-cycle.md) | panel-audit + bi-acceptance | `reports/audit/dashboard-cycle/` |
-| 6 | Архитектура | `prompt.architecture.cycle` → [../architecture/architecture-cycle.md](../architecture/architecture-cycle.md) | `prompt.architecture.review` | `reports/audit-runs/` + `reports/audit/architecture/` |
+| 6 | Архитектура | `prompt.architecture.cycle` → [../architecture/architecture-cycle.md](../architecture/architecture-cycle.md) | `prompt.architecture.review` + 10-category scorecard → plan → implement | `reports/audit-runs/` + `reports/audit/architecture/` |
 
 ## Shared defaults (operator full-run)
 
@@ -99,7 +99,7 @@ Use prompt.audit.dual-agent-cycle with:
 | `prompt.audit.repo-tree` | One-shot root/tree hygiene audit |
 | `prompt.audit.repo-tree-cycle` | **Cyclic** root/tree hygiene (N loops + fix/PR) |
 | `prompt.architecture.review` | One-shot architecture review (hexagonal/C4) |
-| `prompt.architecture.cycle` | **Cyclic** project architecture audit (N loops + fix/PR) |
+| `prompt.architecture.cycle` | **Cyclic** architecture audit (v1.1): 10 categories → plan → implement |
 | `prompt.audit.grok-cycle` | Generic one-cycle meta audit (any SCOPE) |
 | `prompt.audit.orchestrator` | Generic N-loop shell (needs AUDIT_PROMPT_SOURCE) |
 

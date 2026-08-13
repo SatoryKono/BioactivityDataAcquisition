@@ -190,7 +190,7 @@ supported test families, cassette lifecycle, and CI/live-contract split.
 If you need MkDocs/site tooling, install the separate docs toolchain extra:
 
 ```bash
-uv sync --extra dev --extra tracing --extra docs
+uv sync --extra dev --extra tests --extra tracing --extra docs
 # or, without uv:
 pip install -e ".[dev,tracing,docs]"
 ```

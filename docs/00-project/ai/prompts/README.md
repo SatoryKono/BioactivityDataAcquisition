@@ -73,7 +73,7 @@ docs/00-project/ai/prompts/
 | `prompt.tests.cycle` | [library/tests/test-cycle.md](library/tests/test-cycle.md) | Cyclic testing (N cycles, lanes) |
 | `prompt.docs.ai-audit-planning` | [library/docs/ai-audit-planning.md](library/docs/ai-audit-planning.md) | Docs/AI surface audit plan |
 | `prompt.architecture.review` | [library/architecture/review-assessment.md](library/architecture/review-assessment.md) | Architecture review (v2.3) |
-| `prompt.architecture.cycle` | [library/architecture/architecture-cycle.md](library/architecture/architecture-cycle.md) | Cyclic **project architecture** audit (v1.0, N=10) |
+| `prompt.architecture.cycle` | [library/architecture/architecture-cycle.md](library/architecture/architecture-cycle.md) | Cyclic **project architecture** audit (v1.1): **10 categories** → plan → implement |
 | `prompt.observability.dashboard-panel-audit` | [library/observability/dashboard-panel-audit.md](library/observability/dashboard-panel-audit.md) | Grafana panel audit (5 phases, v1.1) |
 | `prompt.observability.bi-dashboard-acceptance` | [library/observability/bi-dashboard-acceptance.md](library/observability/bi-dashboard-acceptance.md) | BI acceptance: visual / layout / data |
 | `prompt.observability.dashboard-audit-cycle` | [library/observability/dashboard-audit-cycle.md](library/observability/dashboard-audit-cycle.md) | Cyclic dashboard audit **N=20** — render, density, fill, acceptance (v1.1) |
