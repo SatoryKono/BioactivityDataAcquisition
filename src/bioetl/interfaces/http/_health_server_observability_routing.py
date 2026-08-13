@@ -263,7 +263,19 @@ async def handle_processed_records_table(
     )
     operation: Callable[[], dict[str, object]]
     run_ledger = host._run_ledger_port
-    if selected_run_id is not None and run_ledger is not None:
+    if selected_run_id is None:
+
+        def build_selection_required() -> dict[str, object]:
+            return {
+                "contract": "processed_records_table_v1",
+                "pipeline": pipeline,
+                "run_type": [part for part in (run_type or "").split(",") if part.strip()],
+                "selection": "required",
+                "rows": [],
+            }
+
+        operation = build_selection_required
+    elif run_ledger is not None:
 
         def build_from_ledger() -> dict[str, object]:
             return build_processed_records_table_payload_from_ledger(

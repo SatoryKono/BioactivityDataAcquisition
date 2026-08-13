@@ -211,8 +211,8 @@ class TestProcessedRecordsTable:
         assert payload["pipeline"] == "unknown"
         assert payload["run_type"] == []
         assert len(payload["rows"]) == 11
-        assert all("No data" in str(row["value"]) for row in payload["rows"])
-        assert all("No data" in str(row["percentage"]) for row in payload["rows"])
+        assert all("UNKNOWN" in str(row["value"]) for row in payload["rows"])
+        assert all("UNKNOWN" in str(row["percentage"]) for row in payload["rows"])
 
     def test_prometheus_payload_fetches_values_for_known_pipeline(
         self, monkeypatch: pytest.MonkeyPatch
@@ -269,8 +269,8 @@ class TestProcessedRecordsTable:
         assert payload["pipeline"] == "chembl_target"
         assert payload["run_type"] == ["backfill", "incremental"]
         assert len(payload["rows"]) == 11
-        assert all("No data" in str(row["value"]) for row in payload["rows"])
-        assert all("No data" in str(row["percentage"]) for row in payload["rows"])
+        assert all("UNKNOWN" in str(row["value"]) for row in payload["rows"])
+        assert all("UNKNOWN" in str(row["percentage"]) for row in payload["rows"])
 
     def test_ledger_payload_uses_metrics_snapshot_when_artifacts_are_absent(
         self,
@@ -435,13 +435,25 @@ class TestProcessedRecordsTable:
         await server.start()
         try:
             port = self._get_server_port(server)
-            status_code, _, body = await self._send_request(
+            empty_status, _, empty_body = await self._send_request(
                 port,
                 "/ops/observability/processed-records?"
                 "pipeline=chembl_activity&run_type=backfill&run_id=-",
             )
+            status_code, _, body = await self._send_request(
+                port,
+                "/ops/observability/processed-records?"
+                "pipeline=chembl_activity&run_type=backfill"
+                "&run_id=00000000-0000-4000-8000-000000000001",
+            )
         finally:
             await server.stop()
+
+        assert empty_status == 200
+        empty = json.loads(empty_body)
+        assert empty["contract"] == "processed_records_table_v1"
+        assert empty["selection"] == "required"
+        assert empty["rows"] == []
 
         assert status_code == 200
         data = json.loads(body)

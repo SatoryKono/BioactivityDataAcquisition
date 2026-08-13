@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "5a73250004a522bf93d4773ad8f3e0229837f496ac41b8e9e1bc302d0c25090a",
-    "bioetl-dq-v2": "301410ac830b85ce832282afe2f8a19d8659a7e4f51563346894f4e69300b441",
+    "bioetl-control-plane-v1": "0851953bf54d9a6f915ee0231afd0b4403ffa2ac1313a162c83e47c5e1c95c88",
+    "bioetl-dq-v2": "a3570c52c9c4211e3ee217668781885e315fdd74ec7e80ed5488e5cad55087ee",
     "bioetl-incident-v1": "89dc903689eb6c499b193e21581134e4e913d3e5a4ce7f0b615a6d4795eb09f8",
-    "bioetl-overview-v2": "3181468899ee86373f60d27e616dbc8e95c7b9b6ce77f57495f8456f67ec55cb",
-    "bioetl-provider-health-v2": "f8add82df9b5c8b2c3e8ccafce6b32c2d9f083cf7cc0cb3059223e0baee5b5c9",
-    "bioetl-run-explorer-v1": "8a3b3c1c92504338c6cc7a52cf06e3df19e61ce19837e5d60c15b13d4553fbbb",
-    "bioetl-runtime": "a078eb2404ffde4893e879c85a9efcae24b00f1c93f6c7af2d2474e17550669a"
+    "bioetl-overview-v2": "7e7a1ca6417e84e3aa02c9b60b641969ca20e6be47341ef262c22b0a71d1caa1",
+    "bioetl-provider-health-v2": "7cd65f6862f9f2ffba0f775f7cf06676ec057a3b388a120ce23b4acba9b96d93",
+    "bioetl-run-explorer-v1": "c8aa039d58d62f3e935b1b6f554f0e284289d867d9fa773683a21da6ffce27d6",
+    "bioetl-runtime": "f988446de36e97b49caf38b55951207921007969285eb48d16edb9e39439489e"
   },
   "panels": [
     {
@@ -145,7 +145,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
       "panel_id": 893,
-      "panel_title": "Monitor Manifest & Ledger Failures",
+      "panel_title": "Monitor Manifest/Ledger",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",
@@ -164,7 +164,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
       "panel_id": 907,
-      "panel_title": "Monitor Telemetry Coverage",
+      "panel_title": "Monitor Telemetry",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": "prometheus",

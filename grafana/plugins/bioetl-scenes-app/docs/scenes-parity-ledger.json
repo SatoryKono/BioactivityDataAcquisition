@@ -160,7 +160,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 893,
-      "panel_title": "Monitor Manifest & Ledger Failures",
+      "panel_title": "Monitor Manifest/Ledger",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -179,7 +179,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 907,
-      "panel_title": "Monitor Telemetry Coverage",
+      "panel_title": "Monitor Telemetry",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",

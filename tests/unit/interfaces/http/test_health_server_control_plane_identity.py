@@ -1370,7 +1370,7 @@ class TestHealthServerControlPlaneSelector:
         self,
         running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
     ) -> None:
-        """Identity table should resolve latest persisted manifest for scope."""
+        """Identity table must not bleed latest manifest when run_id is unset."""
         server, _manifest_store = running_server_with_run_catalog
         port = self._get_server_port(server)
 
@@ -1382,22 +1382,9 @@ class TestHealthServerControlPlaneSelector:
 
         assert status_code == 200
         data = json.loads(body)
-        rows = {item["parameter"]: item["value"] for item in data["rows"]}
-        assert data["resolved_via"] == "latest_manifest_for_scope"
-        assert rows["Manifest ID [Control Plane]"] == "manifest-2"
-        assert rows["Provider.Entity [Version]"] == "chembl.activity [1.0.0]"
-        assert rows["Run ID [Pipeline]"]
-        assert rows["Contract [Schema]"] == (
-            "chembl.activity.2026.05 "
-            "[bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb]"
-        )
-        assert rows["Execution [Type|Context|Git]"] == (
-            "backfill | isolated | git=def5678"
-        )
-        assert rows["Resume|Dry run|Cached Bronze"] == "No | No | No"
-        assert rows["Replay [Capability.Mode]"] == "Yes [Supported.Backfill]"
-        assert rows["Checkpoint [Anchors]"] == "PARTIAL"
-        assert rows["Identity Health [Gaps]"] == "Incomplete [1 gaps]"
+        assert data["resolved_via"] == "selection_required"
+        assert data["rows"] == []
+        assert data["selected_run_id"] is None
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_compact_health_matches_identity_evidence(
@@ -1405,19 +1392,26 @@ class TestHealthServerControlPlaneSelector:
         running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
     ) -> None:
         """Compact ID panel health must not drift from identity-evidence summary."""
-        server, _manifest_store = running_server_with_run_catalog
+        server, manifest_store = running_server_with_run_catalog
         port = self._get_server_port(server)
+        selected_manifest = next(
+            manifest
+            for manifest in manifest_store.list_all()
+            if manifest.manifest_id == "manifest-2"
+        )
 
         table_status, _, table_body = await self._send_request(
             port,
             "GET",
-            "/ops/control-plane/identity-table?pipeline=chembl_activity",
+            "/ops/control-plane/identity-table?"
+            f"pipeline=chembl_activity&run_id={selected_manifest.run_id}",
         )
         evidence_status, _, evidence_body = await self._send_request(
             port,
             "GET",
             "/ops/control-plane/identity-evidence?"
-            "pipeline=chembl_activity&view=overview",
+            f"pipeline=chembl_activity&run_id={selected_manifest.run_id}"
+            "&view=overview",
         )
 
         assert table_status == 200
@@ -1440,7 +1434,7 @@ class TestHealthServerControlPlaneSelector:
         self,
         running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
     ) -> None:
-        """ID panel should still resolve a concrete pipeline when run_type=All."""
+        """ID panel stays fail-closed when run_type=All and run_id is unset."""
         server, _manifest_store = running_server_with_run_catalog
         port = self._get_server_port(server)
 
@@ -1453,10 +1447,8 @@ class TestHealthServerControlPlaneSelector:
 
         assert status_code == 200
         data = json.loads(body)
-        rows = {item["parameter"]: item["value"] for item in data["rows"]}
-        assert data["resolved_via"] == "latest_manifest_for_scope"
-        assert rows["Manifest ID [Control Plane]"] == "manifest-2"
-        assert rows["Provider.Entity [Version]"] == "chembl.activity [1.0.0]"
+        assert data["resolved_via"] == "selection_required"
+        assert data["rows"] == []
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_unknown_pipeline_scope_fails_fast(
@@ -1502,10 +1494,8 @@ class TestHealthServerControlPlaneSelector:
 
         assert status_code == 200
         data = json.loads(body)
-        rows = {item["parameter"]: item["value"] for item in data["rows"]}
-        assert data["resolved_via"] == "latest_manifest_for_scope"
-        assert rows["Manifest ID [Control Plane]"] == "manifest-2"
-        assert rows["Provider.Entity [Version]"] == "chembl.activity [1.0.0]"
+        assert data["resolved_via"] == "selection_required"
+        assert data["rows"] == []
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_prefers_selected_run_id(
@@ -1687,13 +1677,19 @@ class TestHealthServerControlPlaneSelector:
         running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
     ) -> None:
         """The shared shell ID endpoint must stay compact and backward compatible."""
-        server, _manifest_store = running_server_with_run_catalog
+        server, manifest_store = running_server_with_run_catalog
         port = self._get_server_port(server)
+        selected_manifest = next(
+            manifest
+            for manifest in manifest_store.list_all()
+            if manifest.manifest_id == "manifest-1"
+        )
 
         status_code, _, body = await self._send_request(
             port,
             "GET",
-            "/ops/control-plane/identity-table?pipeline=chembl_activity",
+            "/ops/control-plane/identity-table?"
+            f"pipeline=chembl_activity&run_id={selected_manifest.run_id}",
         )
 
         assert status_code == 200
@@ -1746,20 +1742,26 @@ class TestHealthServerControlPlaneSelector:
         running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
     ) -> None:
         """Dedicated identity endpoint should expose P0/P1/P2 evidence rows."""
-        server, _manifest_store = running_server_with_run_catalog
+        server, manifest_store = running_server_with_run_catalog
         port = self._get_server_port(server)
+        selected_manifest = next(
+            manifest
+            for manifest in manifest_store.list_all()
+            if manifest.manifest_id == "manifest-2"
+        )
 
         status_code, _, body = await self._send_request(
             port,
             "GET",
             "/ops/control-plane/identity-evidence?"
-            "pipeline=chembl_activity&view=anchors",
+            f"pipeline=chembl_activity&run_id={selected_manifest.run_id}"
+            "&view=anchors",
         )
 
         assert status_code == 200
         data = json.loads(body)
         assert data["contract"] == "control_plane_identity_evidence_v1"
-        assert data["resolved_via"] == "latest_manifest_for_scope"
+        assert data["resolved_via"] == "selected_run_id"
         rows = {item["name"]: item for item in data["anchors"]}
         assert rows["run_id"]["priority"] == "P0"
         assert rows["manifest_id"]["value_full"] == "manifest-2"
@@ -1887,14 +1889,20 @@ class TestHealthServerControlPlaneSelector:
         running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
     ) -> None:
         """Copy handoffs should exist only for copyable full-value anchors."""
-        server, _manifest_store = running_server_with_run_catalog
+        server, manifest_store = running_server_with_run_catalog
         port = self._get_server_port(server)
+        selected_manifest = next(
+            manifest
+            for manifest in manifest_store.list_all()
+            if manifest.manifest_id == "manifest-2"
+        )
 
         status_code, _, body = await self._send_request(
             port,
             "GET",
             "/ops/control-plane/identity-evidence?"
-            "pipeline=chembl_activity&view=copy_values",
+            f"pipeline=chembl_activity&run_id={selected_manifest.run_id}"
+            "&view=copy_values",
         )
 
         assert status_code == 200

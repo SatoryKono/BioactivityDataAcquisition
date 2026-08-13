@@ -349,7 +349,7 @@ def test_control_plane_replay_and_manifest_panels_route_to_expected_runbooks() -
             "Open Checkpoint Debugging Runbook",
             "docs/05-operations/runbooks/checkpoint-debugging.md",
         ),
-        "Monitor Manifest & Ledger Failures": (
+        "Monitor Manifest/Ledger": (
             "Open Run Manifest Inspection",
             "docs/05-operations/runbooks/run-manifest-inspection.md",
         ),
@@ -473,7 +473,7 @@ def test_control_plane_first_screen_stat_panels_do_not_duplicate_runbook_ctas() 
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     expected_titles = {
         "Monitor Replay Safety",
-        "Monitor Manifest & Ledger Failures",
+        "Monitor Manifest/Ledger",
     }
 
     for panel_title in expected_titles:
