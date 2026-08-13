@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.cyclic-pack
-version: 1.0.0
+version: 1.1.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -13,14 +13,16 @@ related_ssot:
   - docs/00-project/ai/prompts/README.md
   - docs/00-project/ai/prompts/library/audit/orchestrator.md
   - docs/00-project/ai/prompts/library/audit/dual-agent-cycle.md
+  - docs/00-project/ai/prompts/library/audit/coderabbit-project-cycle.md
 tags: [audit, cycle, pack, operator]
-summary: Pack of cyclic domain audits — tests, docs, tech-debt, repo hygiene
-max_body_lines: 120
+summary: Pack of cyclic domain audits — tests, docs, debt, hygiene, dashboards, architecture, CodeRabbit
+max_body_lines: 130
 ---
 
-# Cyclic audit pack (tests / docs / tech-debt / repo hygiene)
+# Cyclic audit pack (tests / docs / tech-debt / repo hygiene / …)
 
-Четыре **готовых** циклических аудита. Каждая строка — отдельный paste card.
+**Семь** готовых циклических аудитов (включая architecture и CodeRabbit project).
+Каждая строка — отдельный paste card.
 
 | # | Domain | Card | Domain method | Artifacts |
 | --- | --- | --- | --- | --- |
@@ -30,6 +32,7 @@ max_body_lines: 120
 | 4 | Гигиена репо | `prompt.audit.repo-tree-cycle` → [repo-tree-cycle.md](repo-tree-cycle.md) | `prompt.audit.repo-tree` | same |
 | 5 | Дашборды | `prompt.observability.dashboard-audit-cycle` → [../observability/dashboard-audit-cycle.md](../observability/dashboard-audit-cycle.md) | panel-audit + bi-acceptance | `reports/audit/dashboard-cycle/` |
 | 6 | Архитектура | `prompt.architecture.cycle` → [../architecture/architecture-cycle.md](../architecture/architecture-cycle.md) | `prompt.architecture.review` + 10-category scorecard → plan → implement | `reports/audit-runs/` + `reports/audit/architecture/` |
+| 7 | Проект + CodeRabbit | `prompt.audit.coderabbit-project-cycle` → [coderabbit-project-cycle.md](coderabbit-project-cycle.md) | multi-domain matrix + CR dual-pass → plan → fix → re-CR | `reports/audit-runs/` + `reports/audit/coderabbit-project/` |
 
 ## Shared defaults (operator full-run)
 
@@ -46,15 +49,16 @@ BASE_BRANCH=main
 REPO=SatoryKono/BioactivityDataAcquisition
 ```
 
-`INCLUDE_PIPELINE` applies to **docs-cycle** (and orchestrator docs runs).  
-Tests/tech-debt cards ignore it if unused. Override ALLOW_* only to *restrict*.
+Library cards may default `ALLOW_*=false` (fail-closed). Operator full-run paste
+above **explicitly** enables mutations. `INCLUDE_PIPELINE` applies to **docs-cycle**
+(and orchestrator docs runs). Tests/tech-debt cards ignore it if unused.
 
 ## How to run
 
 ### A. Single-agent cyclic (default)
 
-1. Open the domain card (tests-cycle / docs-cycle / tech-debt-cycle).
-2. Paste into agent with params filled (defaults already MODE=full + ALLOW_* true).
+1. Open the domain card (tests-cycle / docs-cycle / tech-debt-cycle / …).
+2. Paste into agent with params filled (for mutations set ALLOW_* true).
 3. Agent may open issues, push PRs, merge, and close when acceptance is met.
 
 ### B. Orchestrator + domain method
@@ -79,11 +83,24 @@ Use prompt.audit.orchestrator with:
 Use prompt.audit.dual-agent-cycle with:
   OUTER_CYCLES=10
   AUDIT_PROMPT_SOURCE=prompt.audit.tests-system
-    # or docs-content / tech-debt / repo-tree / architecture.review
   SCOPE=<paths>
   MODE=full
   INCLUDE_PIPELINE=true
   CODERABBIT=required-then-agent
+  ALLOW_ISSUE_WRITE=true
+  ALLOW_PUSH=true
+  ALLOW_MERGE=true
+  ALLOW_CLOSE=true
+```
+
+### D. Exhaustive project + CodeRabbit
+
+```text
+Use prompt.audit.coderabbit-project-cycle with:
+  N=10
+  MODE=full
+  CODERABBIT=required-then-agent
+  INCLUDE_DOMAINS=all
   ALLOW_ISSUE_WRITE=true
   ALLOW_PUSH=true
   ALLOW_MERGE=true
@@ -100,6 +117,7 @@ Use prompt.audit.dual-agent-cycle with:
 | `prompt.audit.repo-tree-cycle` | **Cyclic** root/tree hygiene (N loops + fix/PR) |
 | `prompt.architecture.review` | One-shot architecture review (hexagonal/C4) |
 | `prompt.architecture.cycle` | **Cyclic** architecture audit (v1.1): 10 categories → plan → implement |
+| `prompt.audit.coderabbit-project-cycle` | **Exhaustive** project cyclic audit + CodeRabbit dual-pass |
 | `prompt.audit.grok-cycle` | Generic one-cycle meta audit (any SCOPE) |
 | `prompt.audit.orchestrator` | Generic N-loop shell (needs AUDIT_PROMPT_SOURCE) |
 
