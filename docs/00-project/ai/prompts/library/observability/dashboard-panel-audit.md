@@ -1,6 +1,6 @@
 ---
 id: prompt.observability.dashboard-panel-audit
-version: 1.1.0
+version: 1.2.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -25,6 +25,7 @@ includes:
   - fragments/evidence-contract.md
   - fragments/language-ru.md
   - fragments/finding-schema.md
+  - fragments/audit-scale.md
   - fragments/reports-output.md
 related_ssot:
   - AGENTS.md
@@ -68,9 +69,9 @@ reports.
 | `CYCLE_COUNT` | `1` |
 | `PHASES` | `5` (named phases below — not empty re-cycles) |
 | `AUDIT_MODE` | `full` \| `differential` |
-| `REQUIRE_GH_TRACKING` | `true` |
+| `REQUIRE_GH_TRACKING` | `false` |
 | `LANGUAGE` | `ru` |
-| `MONITORING` | start `docker-compose.monitoring.yml` **only** if UI/render required and operator approved |
+| `MONITORING` | `false` (start stack **only** if UI required and operator sets `true`) |
 
 ## Phase 1 — Inventory
 

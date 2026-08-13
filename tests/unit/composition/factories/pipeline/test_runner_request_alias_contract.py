@@ -30,7 +30,9 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
+from uuid import UUID
 
 import pytest
 
@@ -45,7 +47,6 @@ from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.ports import PipelineCreateRunnerRequest
 from bioetl.domain.ports.config import SettingsPort
-from bioetl.domain.ports.runtime.runner import ExecutionObservabilityPort
 from bioetl.domain.types import RunID, RunType
 
 
@@ -87,11 +88,17 @@ def test_compat_shim_builds_runner_request_for_minimal_kwargs() -> None:
         runtime=RuntimeConfig(run_type=RunType.INCREMENTAL),
         started_at=datetime(2026, 5, 21, tzinfo=UTC),
         settings=MagicMock(spec=SettingsPort),
-        observability=MagicMock(spec=ExecutionObservabilityPort),
+        observability=SimpleNamespace(
+            logger=MagicMock(),
+            metrics=MagicMock(),
+            tracer=None,
+            audit=MagicMock(),
+            dq_monitor=None,
+        ),
         filter_config=None,
         config=None,
         cached_bronze=CachedBronzeContext.disabled(),
     )
 
     assert isinstance(request, PipelineCreateRunnerRequest)
-    assert request.run_id == RunID("00000000-0000-0000-0000-000000000001")
+    assert request.run_id == RunID(UUID("00000000-0000-0000-0000-000000000001"))
