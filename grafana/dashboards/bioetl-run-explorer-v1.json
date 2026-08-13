@@ -112,7 +112,7 @@
       "id": 3010,
       "type": "table",
       "title": "Browse Recent Runs",
-      "description": "Browse mode: Recent pipeline-run reports found on disk for the selected pipeline. Choose a row to set the run ID and open exact-run evidence. An empty table is valid when no matching reports exist. If reports are expected, treat backend unavailable as a distinct failure state and verify BioETL Ops HTTP at /health/live.",
+      "description": "Browse mode: Recent pipeline-run reports found on disk for the selected pipeline. Choose a row to set the run ID and open exact-run evidence. An empty table is valid when no matching reports exist. If reports are expected, treat backend unavailable as a distinct failure state and verify BioETL Ops HTTP at /health/live. Empty table: no matching reports under reports/run-reports/pipeline/<name>/. Has reports: chembl_assay, chembl_target, chembl_publication. chembl_activity may appear in run_id (control-plane) but has no report artifacts yet. If the host has reports and this is empty: bind mismatch — python -m scripts.ops.runtime.docker.verify_report_bind",
       "gridPos": {
         "h": 9,
         "w": 24,
@@ -126,7 +126,7 @@
             "align": "left",
             "inspect": true
           },
-          "noValue": "No pipeline-run-report artifacts for this pipeline under reports/run-reports/pipeline/<name>/. Has reports: chembl_assay, chembl_target, chembl_publication. chembl_activity may appear in run_id (control-plane) but has no report artifacts yet. If host has reports and this is empty: bind mismatch — python -m scripts.ops.runtime.docker.verify_report_bind"
+          "noValue": "No pipeline-run-report artifacts for this pipeline on disk."
         },
         "overrides": [
           {

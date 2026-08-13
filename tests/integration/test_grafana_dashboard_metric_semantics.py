@@ -913,7 +913,7 @@ def test_dq_current_status_panels_use_explicit_status_value_mappings() -> None:
             "0": {"text": "OK", "color": "green"},
             "1": {"text": "WARN", "color": "orange"},
             "2": {"text": "CRIT", "color": "red"},
-            "3": {"text": "INCOMPLETE", "color": "gray"},
+            "3": {"text": "UNKNOWN", "color": "gray"},
         },
         "Monitor DQ Threshold State": {
             "0": {"text": "OK", "color": "green"},
@@ -1290,6 +1290,7 @@ def test_provider_telemetry_freshness_fails_closed_when_status_is_missing() -> N
     )
     assert value_mapping["options"]["0"]["text"] == "PRESENT"
     assert value_mapping["options"]["1"]["text"] == "WARN"
+    assert "Alias mapping: PRESENT=OK" in str(panel.get("description", ""))
     special_mapping = next(
         mapping
         for mapping in defaults.get("mappings", [])
