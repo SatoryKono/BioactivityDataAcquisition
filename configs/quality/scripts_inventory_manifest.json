@@ -1,20 +1,19 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-13T01:58:49.729146+00:00",
+  "generated_at": "2026-08-13T02:19:56.136128+00:00",
   "summary": {
-    "total_scripts": 596,
+    "total_scripts": 585,
     "status_counts": {
       "active": 338,
-      "supporting": 251,
-      "temporary_diagnostic": 7
+      "supporting": 247
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 16,
       "ci": 81,
-      "docs": 255,
-      "other": 59,
-      "scripts": 493,
+      "docs": 251,
+      "other": 56,
+      "scripts": 486,
       "skills": 11,
       "tests": 381
     }
@@ -1643,7 +1642,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 57,
+      "reference_count": 56,
       "references": [
         {
           "path": ".github/ISSUES/AI-AGENT-CONFIG-AUDIT-2026-07-14-ISSUE-PACK.md",
@@ -2646,25 +2645,6 @@
       "next_step": "Retain as an optional personal/project installer for the tracked Grok skill sources; keep the docs tree authoritative and do not treat this machine-local copy helper as an active runtime surface."
     },
     {
-      "path": "scripts/ai/grok/prepare_nine_domain_audits.ps1",
-      "type": "ps1",
-      "status": "temporary_diagnostic",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ai/grok/README.md",
-          "line": 6,
-          "source_group": "scripts",
-          "text": "| `prepare_nine_domain_audits.ps1` | Render nine-domain audit operator prompts into `reports/audit-runs/<run_id>/prompts/` (does not run audits; pairs with `.grok/workflows/nine-domain-audit.rhai`) |"
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "temporary_diagnostic",
-      "review_by": "2026-09-30",
-      "next_step": "Prep helper for nine-domain audit workflow; retire after campaign or fold into docs."
-    },
-    {
       "path": "scripts/ai/junie/check_junie_mirror.py",
       "type": "py",
       "status": "supporting",
@@ -3159,18 +3139,6 @@
       "lifecycle_decision": "mcp_compatibility_wrapper",
       "review_by": "2026-09-30",
       "next_step": "Retain as the MCP transport wrapper for ADR Analysis while canonical MCP configs route through it; keep it supporting unless it becomes a standalone governed CLI entrypoint."
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1",
-      "type": "ps1",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "windows_compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as the Windows-side companion for the canonical AST Grep MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
     },
     {
       "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
@@ -4420,7 +4388,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 25,
+      "reference_count": 24,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
@@ -4459,13 +4427,13 @@
           "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
         },
         {
-          "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1",
+          "path": "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
           "line": 6,
           "source_group": "scripts",
           "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
         },
         {
-          "path": "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
+          "path": "scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1",
           "line": 6,
           "source_group": "scripts",
           "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
@@ -4558,7 +4526,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 22,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
@@ -4585,12 +4553,6 @@
           "text": ". (Join-Path $PSScriptRoot \"support/token_validation.ps1\")"
         },
         {
-          "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1",
-          "line": 10,
-          "source_group": "scripts",
-          "text": ". (Join-Path $PSScriptRoot \"support/token_validation.ps1\")"
-        },
-        {
           "path": "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
           "line": 10,
           "source_group": "scripts",
@@ -4604,6 +4566,12 @@
         },
         {
           "path": "scripts/ai/mcp/mcp_code_interpreter_wrapper.ps1",
+          "line": 10,
+          "source_group": "scripts",
+          "text": ". (Join-Path $PSScriptRoot \"support/token_validation.ps1\")"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_context7_wrapper.ps1",
           "line": 10,
           "source_group": "scripts",
           "text": ". (Join-Path $PSScriptRoot \"support/token_validation.ps1\")"
@@ -10002,7 +9970,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 234,
+      "reference_count": 230,
       "references": [
         {
           "path": "docs/00-project/ai/agents/scripts/py-config-bot-1.py",
@@ -10936,40 +10904,26 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
         {
-          "path": "scripts/engineering/dev/setup_bioetl_wsl_fixed.ps1",
-          "line": 16,
+          "path": "scripts/engineering/dev/README.md",
+          "line": 259,
           "source_group": "scripts",
-          "text": ".\\setup_bioetl_wsl.ps1 `"
-        },
-        {
-          "path": "scripts/engineering/dev/setup_bioetl_wsl_fixed.ps1",
-          "line": 21,
-          "source_group": "scripts",
-          "text": ".\\setup_bioetl_wsl.ps1 `"
+          "text": "Canonical entrypoint: `scripts/engineering/dev/setup_bioetl_wsl.ps1`."
         }
-      ]
-    },
-    {
-      "path": "scripts/engineering/dev/setup_bioetl_wsl_fixed.ps1",
-      "type": "ps1",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      ],
       "owner": "@bioetl-platform",
-      "lifecycle_decision": "windows_compatibility_wrapper",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as the bounded Windows/WSL compatibility setup wrapper while contributors still need the PowerShell entrypoint; keep environment setup delegated to the canonical WSL setup surface and retire this wrapper when no documented callers remain."
+      "lifecycle_decision": "active_operator_entrypoint",
+      "review_by": "2026-12-31",
+      "next_step": "Canonical Windows→WSL BioETL setup entrypoint after retirement of setup_bioetl_wsl_fixed.ps1 (#8708)."
     },
     {
       "path": "scripts/engineering/dev/setup_env_windows.ps1",
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 43,
+      "reference_count": 42,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -11026,7 +10980,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 37,
+      "reference_count": 34,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -11461,18 +11415,6 @@
       "lifecycle_decision": "internal_compatibility_launcher",
       "review_by": "2026-10-31",
       "next_step": "Retain as the guarded Python launcher behind tracked native-Windows Zed tasks; keep `.zed/tasks.json` as the governed editor entry surface and do not promote this launcher without offsetting an active script elsewhere."
-    },
-    {
-      "path": "scripts/engineering/dev/zed_task.ps1",
-      "type": "ps1",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-10-21",
-      "next_step": "Retain as a bounded Zed editor task launcher helper for local Windows development; promote only if Zed task automation becomes a governed first-class developer workflow entrypoint."
     },
     {
       "path": "scripts/engineering/dev/zed_vulture.py",
@@ -14287,7 +14229,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -14300,18 +14242,6 @@
           "line": 184,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_dashboard_panel_audit_matrix\""
-        },
-        {
-          "path": "scripts/temp/panels_static_audit_cycle2.py",
-          "line": 16,
-          "source_group": "scripts",
-          "text": "from scripts.engineering.qa import report_dashboard_panel_audit_matrix as matrix"
-        },
-        {
-          "path": "scripts/temp/panels_static_audit_cycle2.py",
-          "line": 409,
-          "source_group": "scripts",
-          "text": "\"scripts/engineering/qa/report_dashboard_panel_audit_matrix.py:EXPECTED_PANEL_COUNT\","
         },
         {
           "path": "tests/integration/test_dashboard_panel_audit_matrix_contract.py",
@@ -18332,18 +18262,6 @@
       ]
     },
     {
-      "path": "scripts/ops/neo4j_memory_sync.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-memory",
-      "lifecycle_decision": "compatibility_wrapper",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as the compatibility alias for memory.graph.sync; migrate remaining callers to the canonical memory module and remove this wrapper after repository and operator references reach zero."
-    },
-    {
       "path": "scripts/ops/observability/check_bioetl_prometheus_scrape.py",
       "type": "py",
       "status": "active",
@@ -20373,7 +20291,7 @@
         },
         {
           "path": "scripts/ai/grok/README.md",
-          "line": 8,
+          "line": 7,
           "source_group": "scripts",
           "text": "MCP dual-config apply remains under `scripts/ops/runtime/mcp/apply-shared-to-grok.ps1`."
         },
@@ -22141,186 +22059,6 @@
       "lifecycle_decision": "compatibility_wrapper",
       "review_by": "2026-09-30",
       "next_step": "Retain only as the legacy root shell launcher while canonical Docker helper lifecycle management moves to scripts/ops/docker-setup.sh; keep it supporting and do not expand its fixed-delay startup behavior."
-    },
-    {
-      "path": "scripts/temp/layout_contour_audit_cycle2.py",
-      "type": "py",
-      "status": "temporary_diagnostic",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "scripts/temp/README.md",
-          "line": 26,
-          "source_group": "scripts",
-          "text": "- `layout_contour_audit_cycle2.py` — layout-contour companion diagnostic"
-        },
-        {
-          "path": "scripts/temp/panels_contour_cycle2_notes.md",
-          "line": 56,
-          "source_group": "scripts",
-          "text": "`scripts/temp/layout_contour_audit_cycle2.py` is the companion layout-contour"
-        }
-      ],
-      "owner": "@bioetl-observability",
-      "lifecycle_decision": "temporary_diagnostic",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as the cycle-2 dashboard layout diagnostic while its audit evidence is reviewed; remove it after the campaign closes or promote reusable checks into canonical dashboard tooling."
-    },
-    {
-      "path": "scripts/temp/panels_static_audit_cycle2.py",
-      "type": "py",
-      "status": "temporary_diagnostic",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": "scripts/temp/README.md",
-          "line": 27,
-          "source_group": "scripts",
-          "text": "- `panels_static_audit_cycle2.py` — static panel contour diagnostic"
-        },
-        {
-          "path": "scripts/temp/panels_contour_cycle2_notes.md",
-          "line": 53,
-          "source_group": "scripts",
-          "text": "`scripts/temp/panels_static_audit_cycle2.py` prepared for local re-run when Python available:"
-        },
-        {
-          "path": "scripts/temp/panels_contour_cycle2_notes.md",
-          "line": 54,
-          "source_group": "scripts",
-          "text": "`.\\.venv-win\\Scripts\\python.exe scripts\\temp\\panels_static_audit_cycle2.py reports\\audit\\dashboard-cycle\\20260811T180000Z-c205349-dash\\cycle-2`"
-        }
-      ],
-      "owner": "@bioetl-observability",
-      "lifecycle_decision": "temporary_diagnostic",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as the documented cycle-2 static panel diagnostic; remove it after the campaign closes or promote reusable checks into canonical dashboard audit tooling."
-    },
-    {
-      "path": "scripts/temp/report_basedpyright_error_snapshot.py",
-      "type": "py",
-      "status": "temporary_diagnostic",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": ".github/ISSUES/PD3-2026-07-28-PROJECT-DIAGNOSTICS-STRUCTURAL-DEBT-ISSUE-PACK.md",
-          "line": 5,
-          "source_group": "other",
-          "text": "- `scripts/engineering/qa/report_basedpyright_error_snapshot.py`"
-        },
-        {
-          "path": "docs/00-project/governance/makefile-and-temporary-scripts-management.md",
-          "line": 162,
-          "source_group": "docs",
-          "text": "- `report_basedpyright_error_snapshot.py` - Generate shrink-only basedpyright product error snapshot"
-        },
-        {
-          "path": "scripts/temp/README.md",
-          "line": 17,
-          "source_group": "scripts",
-          "text": "- `report_basedpyright_error_snapshot.py` — shrink-only basedpyright product error snapshot"
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "temporary_diagnostic",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as a bounded basedpyright error-snapshot utility while the typing debt campaign needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
-    },
-    {
-      "path": "scripts/temp/report_basedpyright_suppression_inventory.py",
-      "type": "py",
-      "status": "temporary_diagnostic",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": ".github/ISSUES/PD3-2026-07-28-PROJECT-DIAGNOSTICS-STRUCTURAL-DEBT-ISSUE-PACK.md",
-          "line": 6,
-          "source_group": "other",
-          "text": "- `scripts/engineering/qa/report_basedpyright_suppression_inventory.py`"
-        },
-        {
-          "path": "docs/00-project/governance/makefile-and-temporary-scripts-management.md",
-          "line": 163,
-          "source_group": "docs",
-          "text": "- `report_basedpyright_suppression_inventory.py` - Generate basedpyright suppression inventory"
-        },
-        {
-          "path": "scripts/temp/README.md",
-          "line": 18,
-          "source_group": "scripts",
-          "text": "- `report_basedpyright_suppression_inventory.py` — basedpyright suppression inventory"
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "temporary_diagnostic",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as a bounded basedpyright suppression-inventory utility while suppression governance needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
-    },
-    {
-      "path": "scripts/temp/report_basedpyright_tests_snapshot.py",
-      "type": "py",
-      "status": "temporary_diagnostic",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": ".github/ISSUES/PD3-2026-07-28-PROJECT-DIAGNOSTICS-STRUCTURAL-DEBT-ISSUE-PACK.md",
-          "line": 7,
-          "source_group": "other",
-          "text": "- `scripts/engineering/qa/report_basedpyright_tests_snapshot.py`"
-        },
-        {
-          "path": "docs/00-project/governance/makefile-and-temporary-scripts-management.md",
-          "line": 164,
-          "source_group": "docs",
-          "text": "- `report_basedpyright_tests_snapshot.py` - Generate basedpyright test-snapshot for scripts/tests advisory"
-        },
-        {
-          "path": "scripts/temp/README.md",
-          "line": 19,
-          "source_group": "scripts",
-          "text": "- `report_basedpyright_tests_snapshot.py` — basedpyright test-snapshot for scripts/tests advisory"
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "temporary_diagnostic",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as a bounded basedpyright test-snapshot utility while the test typing campaign needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
-    },
-    {
-      "path": "scripts/temp/report_basedpyright_warning_snapshot.py",
-      "type": "py",
-      "status": "temporary_diagnostic",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": "docs/00-project/ai/agents/guides/BASEDPRIGHT_PROJECT_DIAGNOSTICS.md",
-          "line": 45,
-          "source_group": "docs",
-          "text": "`scripts/engineering/qa/report_basedpyright_warning_snapshot.py`."
-        },
-        {
-          "path": "docs/00-project/governance/makefile-and-temporary-scripts-management.md",
-          "line": 165,
-          "source_group": "docs",
-          "text": "- `report_basedpyright_warning_snapshot.py` - Generate basedpyright warning snapshot"
-        },
-        {
-          "path": "scripts/temp/README.md",
-          "line": 20,
-          "source_group": "scripts",
-          "text": "- `report_basedpyright_warning_snapshot.py` — basedpyright warning snapshot"
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "temporary_diagnostic",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as a bounded basedpyright warning-snapshot utility while the typing debt campaign needs reproducible shrink-only evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
     },
     {
       "path": "scripts/test_selection_strategy.py",

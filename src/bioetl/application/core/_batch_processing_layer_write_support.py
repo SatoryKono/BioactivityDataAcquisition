@@ -10,7 +10,7 @@ from bioetl.application.core._batch_processing_metrics_support import (
     track_storage_write_metrics,
 )
 from bioetl.application.core._batch_write_support import safe_write_layer
-from bioetl.application.core.batch_runtime_failure_policy import (
+from bioetl.application.core.batch_shared_operation_errors import (
     OPERATION_ERRORS as _OPERATION_ERRORS,
 )
 from bioetl.application.core.batch_transformer import TransformResult

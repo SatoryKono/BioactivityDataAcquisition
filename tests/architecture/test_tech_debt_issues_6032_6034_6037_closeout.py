@@ -98,10 +98,11 @@ def test_issue_6032_application_core_fan_in_has_headroom() -> None:
     )
     assert row["max_internal_fan_in"] < budgets["max_internal_fan_in"]
     assert budgets["max_internal_fan_in"] >= residual_core["budget_max_internal_fan_in"]
-    assert (
-        row["max_internal_fan_in_module"]
-        == "bioetl.application.core.batch_runtime_failure_policy"
+    # Hub split (#8707): max-fan-in module must not re-form a single failure-policy hub.
+    assert row["max_internal_fan_in_module"] != (
+        "bioetl.application.core.batch_runtime_failure_policy"
     )
+    assert int(row["max_internal_fan_in"]) <= 6
     # Informational near/at-budget notes are allowed; only budget_warnings fail-fast.
     assert all(
         str(note).startswith(("at_budget:", "near_budget:"))

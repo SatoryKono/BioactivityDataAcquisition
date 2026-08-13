@@ -30,7 +30,6 @@ APPROVED_FLAT_CONTROL_PLANE_MODULES = frozenset(
         "run_manifest_reproducibility_claims.py",
         "run_manifest_reproducibility_score_cards.py",
         "run_manifest_reproducibility_scoring.py",
-        "run_manifest_reproducibility_scoring_support.py",
     }
 )
 
