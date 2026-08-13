@@ -205,6 +205,13 @@ entries:
     tags: [architecture, review, operator, audit]
     summary: Architecture review v2.3 (hexagonal/C4/arc42) with findings.json outputs
 
+  - id: prompt.architecture.cycle
+    path: library/architecture/architecture-cycle.md
+    status: active
+    class: operator-paste
+    tags: [architecture, audit, cycle, hexagonal, operator]
+    summary: Cyclic project architecture audit — layers, boundaries, ADR drift, fix waves
+
   - id: prompt.observability.dashboard-panel-audit
     path: library/observability/dashboard-panel-audit.md
     status: active
