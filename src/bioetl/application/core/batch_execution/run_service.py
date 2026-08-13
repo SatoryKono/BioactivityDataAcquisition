@@ -17,7 +17,7 @@ from bioetl.application.core.batch_execution.lifecycle import (
     BatchExecutionLifecycleContext,
     BatchExecutionLifecycleService,
 )
-from bioetl.application.core.batch_runtime_failure_policy import (
+from bioetl.application.core.batch_pipeline_execution_errors import (
     PIPELINE_EXECUTION_ERRORS,
 )
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError

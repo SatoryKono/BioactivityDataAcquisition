@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.application.core.batch_runtime_failure_policy import (
+from bioetl.application.core.batch_shared_operation_errors import (
     OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
 )
 from bioetl.application.core.pipeline_span_lifecycle import (

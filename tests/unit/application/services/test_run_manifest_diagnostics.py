@@ -63,7 +63,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_sta
 from bioetl.application.services.control_plane.manifest.diagnostics.source_posture import (
     _resolve_source_posture,
 )
-from bioetl.application.services.control_plane.run_manifest_reproducibility_scoring_support import (
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_types import (
     bounded,
     string_items,
     supported_boundary_block_reason,

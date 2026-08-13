@@ -6,18 +6,16 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.core.batch_execution import (
+    BatchExecutionCountersSnapshot,
     BatchExecutionRunService,
     prepare_execution_context,
-)
-from bioetl.application.core.batch_execution.contracts import (
-    BatchExecutionCountersSnapshot,
 )
 from bioetl.application.core.batch_executor_protocols import (
     BatchStateCommitProtocol,
     PipelineProcessingProtocol,
 )
 from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
-from bioetl.application.core.batch_runtime_failure_policy import (
+from bioetl.application.core.batch_pipeline_execution_errors import (
     PIPELINE_EXECUTION_ERRORS,
 )
 from bioetl.application.core.lifecycle.batch_fsm import (
@@ -28,8 +26,8 @@ from bioetl.application.core.lifecycle.batch_fsm import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.core.batch_execution import BatchExecutionContext
-    from bioetl.application.core.batch_execution.contracts import (
+    from bioetl.application.core.batch_execution import (
+        BatchExecutionContext,
         BatchResultBuilderProtocol,
     )
     from bioetl.application.core.batch_executor import BatchResult

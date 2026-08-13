@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.application.core.batch_runtime_failure_policy import (
+from bioetl.application.core.batch_shared_operation_errors import (
     OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
 )
 from bioetl.application.core.lifecycle._checkpoint_types import (

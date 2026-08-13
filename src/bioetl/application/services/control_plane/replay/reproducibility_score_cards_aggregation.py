@@ -5,8 +5,6 @@ from __future__ import annotations
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
     JsonDict,
     ScoreCardRecord,
-)
-from bioetl.application.services.control_plane.run_manifest_reproducibility_scoring_support import (
     string_items,
     supported_boundary_block_reason,
 )

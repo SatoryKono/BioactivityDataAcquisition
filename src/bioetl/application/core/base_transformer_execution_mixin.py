@@ -24,7 +24,7 @@ from bioetl.application.core.base_transformer.errors import (
 from bioetl.application.core.base_transformer_helpers_mixin import (
     _BaseTransformerRecordHelpersMixin,
 )
-from bioetl.application.core.pipeline_span_lifecycle import _ClosableSpan
+from bioetl.application.core._base_transformer_execution_support import _ClosableSpan
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
