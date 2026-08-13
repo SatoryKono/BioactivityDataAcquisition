@@ -81,18 +81,96 @@ def test_dashboard_runtime_environment_is_scoped_and_managed(tmp_path: Path) -> 
         ),
         encoding="utf-8",
     )
-    previous = os.environ.pop("BIOETL_RUNTIME_SOURCE_ID", None)
+    previous = os.environ.get("BIOETL_RUNTIME_SOURCE_ID")
+    stale_process_identity = "f" * 64
+    os.environ["BIOETL_RUNTIME_SOURCE_ID"] = stale_process_identity
     try:
         with runtime_manager._dashboard_runtime_environment(contract) as environment:
             assert len(environment["BIOETL_RUNTIME_SOURCE_ID"]) == 64
+            assert environment["BIOETL_RUNTIME_SOURCE_ID"] != stale_process_identity
             assert (
                 os.environ["BIOETL_RUNTIME_SOURCE_ID"]
                 == environment["BIOETL_RUNTIME_SOURCE_ID"]
             )
-        assert "BIOETL_RUNTIME_SOURCE_ID" not in os.environ
+        assert os.environ["BIOETL_RUNTIME_SOURCE_ID"] == stale_process_identity
     finally:
-        if previous is not None:
+        if previous is None:
+            os.environ.pop("BIOETL_RUNTIME_SOURCE_ID", None)
+        else:
             os.environ["BIOETL_RUNTIME_SOURCE_ID"] = previous
+
+
+def test_main_start_materializes_source_bound_report_attestation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    contract = tmp_path / "contract.yml"
+    contract.write_text(
+        yaml.safe_dump(
+            {
+                "dashboard_data_plane": {
+                    "required_bind_mounts": {
+                        "/app/data": {
+                            "relative_source": "data",
+                            "environment_name": "BIOETL_DASHBOARD_DATA_ROOT",
+                        },
+                        "/app/reports": {
+                            "relative_source": "reports",
+                            "environment_name": "BIOETL_DASHBOARD_REPORT_ROOT",
+                        },
+                    },
+                    "source_identity": {
+                        "schema_version": "bioetl-dashboard-source-v1",
+                        "environment_name": "BIOETL_RUNTIME_SOURCE_ID",
+                    },
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    (tmp_path / "data").mkdir()
+    (tmp_path / "reports" / "run-reports").mkdir(parents=True)
+    monkeypatch.setattr(runtime_manager, "ROOT", tmp_path)
+    monkeypatch.delenv("BIOETL_DASHBOARD_DATA_ROOT", raising=False)
+    monkeypatch.delenv("BIOETL_DASHBOARD_REPORT_ROOT", raising=False)
+
+    target = runtime_manager._materialize_report_source_identity(
+        spec=_spec(),
+        contract_path=contract,
+    )
+    payload = json.loads(target.read_text(encoding="utf-8"))
+    expected = runtime_manager.runtime_preflight.dashboard_source_environment(
+        tmp_path,
+        yaml.safe_load(contract.read_text(encoding="utf-8")),
+    )["BIOETL_RUNTIME_SOURCE_ID"]
+
+    assert target == tmp_path / "reports" / ".bioetl-report-source.json"
+    assert payload == {
+        "schema_version": "bioetl-report-source-v1",
+        "runtime_source_id": expected,
+    }
+
+
+def test_post_start_source_gate_failure_cannot_report_success(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from scripts.ops.runtime.docker import verify_report_bind
+
+    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    monkeypatch.setattr(verify_report_bind, "verify", lambda **_kwargs: 1)
+
+    result = runtime_manager._post_start_report_bind_gate(
+        spec=_spec(),
+        report_dir=tmp_path,
+    )
+
+    assert result == 1
+    incident = json.loads(
+        (tmp_path / "docker-incident-main.json").read_text(encoding="utf-8")
+    )
+    assert incident["primary_cause"] == "report_bind_mismatch"
 
 
 def test_preflight_errors_are_recoverable_for_dashboard_and_cross_stack(

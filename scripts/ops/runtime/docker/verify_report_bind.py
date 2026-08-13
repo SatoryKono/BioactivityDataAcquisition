@@ -31,6 +31,8 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 _REPO_ROOT = Path(__file__).resolve().parents[4]
 _SRC_ROOT = _REPO_ROOT / "src"
 for _path in (_REPO_ROOT, _SRC_ROOT):
@@ -41,10 +43,18 @@ from bioetl.application.services.run_reports.paths import (
     REPORT_ROOT_MARKER_NAME,
     REPORT_ROOT_MARKER_VALUE,
     inspect_report_root_marker,
+    inspect_report_root_source_identity,
 )
 from bioetl.application.services.run_reports.query import (
     list_pipeline_reports,
 )
+from bioetl.application.services.run_reports.source_identity import (
+    IDENTITY_STATE_ALIGNED,
+    RuntimeSourceIdentityResolution,
+    compare_runtime_source_identity,
+    resolve_runtime_source_identity,
+)
+from scripts.ops.runtime.docker import docker_runtime_preflight as runtime_preflight
 
 DEFAULT_OPS_URL = "http://127.0.0.1:8000"
 DEFAULT_CONTAINER = "bioetl"
@@ -124,6 +134,68 @@ def _docker_inspect_mounts(container: str) -> list[dict[str, Any]] | None:
     return mounts if isinstance(mounts, list) else None
 
 
+def _docker_inspect_source_identity(
+    container: str,
+) -> RuntimeSourceIdentityResolution | None:
+    """Resolve the producer identity from container env, then its label."""
+    try:
+        completed = subprocess.run(
+            [
+                "docker",
+                "inspect",
+                container,
+                "--format",
+                (
+                    '{"environment":{{json .Config.Env}},'
+                    '"label":{{json (index .Config.Labels '
+                    '"io.bioetl.dashboard-source-id")}}}'
+                ),
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        print(f"WARN: docker source identity inspect failed: {exc}")
+        return None
+    if completed.returncode != 0:
+        print(
+            f"WARN: docker source identity inspect rc={completed.returncode}: "
+            f"{completed.stderr.strip() or completed.stdout.strip()}"
+        )
+        return None
+    try:
+        payload = json.loads(completed.stdout)
+    except json.JSONDecodeError:
+        print("WARN: docker source identity inspect returned non-JSON output")
+        return None
+    if not isinstance(payload, Mapping):
+        return None
+    container_environment: dict[str, str] = {}
+    raw_environment = payload.get("environment")
+    if isinstance(raw_environment, list):
+        for item in raw_environment:
+            if isinstance(item, str) and "=" in item:
+                name, value = item.split("=", 1)
+                container_environment[name] = value
+    return resolve_runtime_source_identity(
+        container_environment=container_environment,
+        container_labels={"io.bioetl.dashboard-source-id": payload.get("label")},
+    )
+
+
+def _coerce_container_source_resolution(
+    value: RuntimeSourceIdentityResolution | str | None,
+) -> RuntimeSourceIdentityResolution | None:
+    """Keep tests/callers using the historical digest-only seam compatible."""
+    if value is None or isinstance(value, RuntimeSourceIdentityResolution):
+        return value
+    return resolve_runtime_source_identity(
+        container_environment={"BIOETL_RUNTIME_SOURCE_ID": value}
+    )
+
+
 def _mount_source_for_target(
     mounts: Sequence[Mapping[str, Any]],
     target: str,
@@ -136,15 +208,20 @@ def _mount_source_for_target(
 
 
 def _paths_equivalent(left: str, right: Path) -> bool:
-    try:
-        left_resolved = Path(left).resolve()
-    except OSError:
-        left_resolved = Path(left)
-    try:
-        right_resolved = right.resolve()
-    except OSError:
-        right_resolved = right
-    return left_resolved.as_posix().lower() == right_resolved.as_posix().lower()
+    return runtime_preflight.normalise_host_path(
+        left,
+        root=_repo_root(),
+    ) == runtime_preflight.normalise_host_path(right, root=_repo_root())
+
+
+def _expected_runtime_environment(repo: Path) -> dict[str, str]:
+    contract_path = repo / runtime_preflight.DEFAULT_CONTRACT
+    if not contract_path.is_file():
+        contract_path = _REPO_ROOT / runtime_preflight.DEFAULT_CONTRACT
+    payload = yaml.safe_load(contract_path.read_text(encoding="utf-8"))
+    if not isinstance(payload, Mapping):
+        raise ValueError(f"invalid Docker runtime contract: {contract_path}")
+    return runtime_preflight.dashboard_source_environment(repo, payload)
 
 
 def verify(
@@ -157,6 +234,8 @@ def verify(
 ) -> int:
     host_mount = _host_reports_mount(repo)
     host_root = _host_report_root(repo)
+    expected_environment = _expected_runtime_environment(repo)
+    expected_source_id = expected_environment.get("BIOETL_RUNTIME_SOURCE_ID")
     findings: list[str] = []
     ok = True
 
@@ -187,6 +266,18 @@ def verify(
         ok = False
         findings.append(f"FAIL: {host_check.get('message')}")
 
+    host_source_check = inspect_report_root_source_identity(
+        report_root=host_root,
+        expected_source_id=expected_source_id,
+    )
+    print(f"host_source_check={json.dumps(host_source_check, sort_keys=True)}")
+    if host_source_check.get("source_identity_status") != "healthy":
+        ok = False
+        findings.append(
+            "FAIL: "
+            + str(host_source_check.get("source_identity_message") or "source mismatch")
+        )
+
     host_count: int | None = None
     if pipeline:
         entries = list_pipeline_reports(
@@ -195,13 +286,21 @@ def verify(
             root=host_root,
         )
         host_count = len(entries)
+        host_latest_run_id = entries[0].run_id if entries else None
         print(f"host_pipeline_count pipeline={pipeline!r} count={host_count}")
+        print(f"host_latest_run_id={host_latest_run_id!r}")
         if host_count == 0:
             findings.append(
                 f"WARN: no host pipeline reports for {pipeline!r} under {host_root}"
             )
 
     mounts = _docker_inspect_mounts(container)
+    container_resolution = _coerce_container_source_resolution(
+        _docker_inspect_source_identity(container)
+    )
+    container_source_id = (
+        container_resolution.value if container_resolution is not None else None
+    )
     if mounts is None:
         findings.append(
             f"WARN: could not inspect container {container!r}; "
@@ -229,6 +328,35 @@ def verify(
             )
         else:
             print("OK: container bind source matches host reports mount")
+    print(
+        "container_source_identity="
+        + json.dumps(
+            container_resolution.as_dict() if container_resolution else None,
+            sort_keys=True,
+        )
+    )
+    container_comparison = compare_runtime_source_identity(
+        expected=expected_source_id,
+        actual=container_source_id,
+    )
+    if container_resolution is None or not container_resolution.is_resolved:
+        message = f"could not inspect managed source identity for {container!r}"
+        if require_ops:
+            ok = False
+            findings.append(f"FAIL: {message}")
+        else:
+            findings.append(f"WARN: {message}")
+    elif (
+        container_comparison.state != IDENTITY_STATE_ALIGNED
+        or not container_resolution.is_consistent
+    ):
+        ok = False
+        findings.append(
+            "FAIL: container source identity mismatch — "
+            f"state={container_comparison.state!r} "
+            f"actual={container_source_id!r} expected={expected_source_id!r} "
+            f"conflicts={container_resolution.conflicts!r}"
+        )
 
     ready = _json_get(f"{ops_url.rstrip('/')}/health/ready")
     if ready is None:
@@ -253,6 +381,21 @@ def verify(
         if ready.get("status") == "unhealthy":
             ok = False
             findings.append("FAIL: /health/ready status=unhealthy")
+        if (
+            not isinstance(report_check, Mapping)
+            or report_check.get("source_identity_status") != "healthy"
+        ):
+            ok = False
+            findings.append("FAIL: /health/ready source identity is not healthy")
+        elif report_check.get("source_identity_state") not in {
+            None,
+            IDENTITY_STATE_ALIGNED,
+        }:
+            ok = False
+            findings.append("FAIL: /health/ready source identity is not aligned")
+        elif report_check.get("source_identity_actual") != expected_source_id:
+            ok = False
+            findings.append("FAIL: /health/ready source identity differs from host")
 
     if pipeline:
         list_url = (
@@ -276,6 +419,21 @@ def verify(
                 findings.append(
                     f"FAIL: ops list marker_status={listed.get('marker_status')!r}"
                 )
+            if listed.get("source_identity_status") != "healthy":
+                ok = False
+                findings.append(
+                    "FAIL: ops list source_identity_status="
+                    f"{listed.get('source_identity_status')!r}"
+                )
+            elif listed.get("source_identity_state") not in {
+                None,
+                IDENTITY_STATE_ALIGNED,
+            }:
+                ok = False
+                findings.append("FAIL: ops list source identity is not aligned")
+            elif listed.get("source_identity_actual") != expected_source_id:
+                ok = False
+                findings.append("FAIL: ops list source identity differs from host")
             if host_count is not None and host_count > 0 and ops_count == 0:
                 ok = False
                 findings.append(
@@ -284,6 +442,22 @@ def verify(
                 )
             elif host_count is not None and ops_count > 0:
                 print("OK: ops HTTP sees pipeline reports")
+            ops_items = listed.get("items")
+            ops_latest_run_id = (
+                str(ops_items[0].get("run_id"))
+                if isinstance(ops_items, list)
+                and ops_items
+                and isinstance(ops_items[0], Mapping)
+                and ops_items[0].get("run_id")
+                else None
+            )
+            print(f"ops_latest_run_id={ops_latest_run_id!r}")
+            if host_latest_run_id != ops_latest_run_id:
+                ok = False
+                findings.append(
+                    "FAIL: newest run mismatch — "
+                    f"host={host_latest_run_id!r} ops={ops_latest_run_id!r}"
+                )
 
     for line in findings:
         print(line)

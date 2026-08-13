@@ -75,11 +75,9 @@ hardening_targets:
     running_state_is_not_ready: true
 
 path_policy:
-  preferred_repository_origin: linux_filesystem
+  preferred_repository_origin: explicit_absolute_bind
   discouraged_origins:
-    - /mnt/c
-    - /mnt/d
-    - /mnt/e
+    - /run/desktop/mnt/host/wsl/docker-desktop-bind-mounts
   mixed_origin_for_same_project_forbidden: true
 
 dashboard_data_plane:
@@ -97,6 +95,15 @@ dashboard_data_plane:
     environment_name: BIOETL_RUNTIME_SOURCE_ID
     label_name: io.bioetl.dashboard-source-id
     unmanaged_value: unmanaged
+    resolution_precedence:
+      - runtime_root
+      - process_environment
+      - repository_environment
+      - container_environment
+      - container_label
+    comparison_states: [missing, invalid, foreign, aligned]
+    report_marker_name: .bioetl-report-source.json
+    report_marker_schema_version: bioetl-report-source-v1
   consumers:
     monitoring:
       - grafana

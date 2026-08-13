@@ -102,8 +102,10 @@ Missing artifact → structured 404 (`status=not_found`), not invented zeros.
 An empty list is a successful artifact-index response
 (`status=ok`, `count=0`, `items=[]`); it is distinct from the bounded forensic
 endpoint timeout response (`504`, `contract=forensic_endpoint_error_v1`).
-List responses also expose `report_root`, `marker`, and `marker_status` so
-operators can distinguish “no runs yet” from a stale Docker bind.
+List responses also expose the backward-compatible `report_root`, `marker`, and
+`marker_status` fields plus bounded `source_identity*` diagnostics. The layout
+marker and source identity are independent, so operators can distinguish “no
+runs yet”, “invalid reports tree”, and “valid tree from another checkout”.
 
 ## Report root and Docker bind
 
@@ -111,7 +113,8 @@ operators can distinguish “no runs yet” from a stale Docker bind.
 |---------|------------|
 | Run-reports root (writers + Ops HTTP) | `reports/run-reports` (default) or `BIOETL_REPORT_ROOT` |
 | Dashboard bind mount (Compose) | host `BIOETL_DASHBOARD_REPORT_ROOT` → container `/app/reports` |
-| Bind-identity marker | `reports/.bioetl-report-root` (token `bioetl-report-root-v1`) |
+| Layout marker (tracked) | `reports/.bioetl-report-root` (token `bioetl-report-root-v1`) |
+| Source attestation (machine-local, ignored) | `reports/.bioetl-report-source.json` (`bioetl-report-source-v1`) |
 | Fail-closed readiness | `BIOETL_ENFORCE_REPORT_ROOT_MARKER=1` (default in `docker-compose.yml`) |
 
 Inside the main `bioetl` container the effective root is
@@ -125,6 +128,7 @@ Verify:
 ```bash
 python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay
 curl -s http://127.0.0.1:8000/health/ready | jq .checks.report_root
+```
 
 ### Preventing empty Browse Recent Runs (bind mismatch)
 
@@ -136,21 +140,33 @@ Guards (fail-closed):
 
 1. `runtime_manager` injects **absolute** compose-safe `BIOETL_DASHBOARD_*` paths
    (`E:/repo/reports`, not relative `./reports` and not backslash paths).
-2. Main stack `up` uses `--force-recreate` so old empty binds cannot stick.
-3. After successful readiness, `runtime_manager start --stack main` runs
-   `verify_report_bind.py` and fails the start when host has reports but Ops
-   HTTP returns `count=0`.
-4. Operator re-check: `python scripts/ops/runtime/docker/verify_report_bind.py`.
-5. After application code changes that touch Ops HTTP / `report_root` readiness,
+2. Before main `start`/`recover`, the manager atomically writes the versioned
+   source attestation. Its digest binds the selected repository root and the
+   contracted `data/` + `reports/` mount roots to `BIOETL_RUNTIME_SOURCE_ID`.
+   The canonical resolver in
+   `src/bioetl/application/services/run_reports/source_identity.py` uses this
+   precedence: computed runtime root, process environment, repository env
+   loader, container environment, then container label. A present invalid
+   higher-precedence value and any lower-precedence disagreement fail closed.
+3. `/health/ready` requires both `layout_status=healthy` and
+   `source_identity_status=healthy` when enforcement is enabled. A valid static
+   marker from another checkout therefore cannot make readiness healthy.
+4. Main stack `up` uses `--force-recreate` so old empty binds cannot stick.
+5. After successful readiness, `runtime_manager start --stack main` runs
+   `verify_report_bind.py`. The verifier compares the normalized bind path,
+   container label, host attestation, Ops readiness/list identities, and newest
+   run ID; any mismatch fails the lifecycle action even when counts are equal or
+   both trees are empty.
+6. Operator re-check: `python scripts/ops/runtime/docker/verify_report_bind.py`.
+7. After application code changes that touch Ops HTTP / `report_root` readiness,
    refresh the image source tree (full `docker compose build bioetl` or a
    src-overlay rebuild) so `/health/ready` exposes `checks.report_root`.
    Host-side verify **must not** export container path
    `BIOETL_REPORT_ROOT=/app/reports/run-reports` into the shell — that path is
    for the container only; on Windows it becomes a bogus `E:\app\...` root.
-```
 
 If verification fails, recreate the main stack from the canonical checkout
-(not a Desktop hash worktree path):
+(not a transient Docker Desktop hash bind path):
 
 ```bash
 python scripts/ops/runtime/docker/runtime_manager.py start --stack main --timeout 180

@@ -6,12 +6,14 @@ import json
 from pathlib import Path
 from typing import Any
 
-from bioetl.application.services.run_reports.paths import inspect_report_root_marker
 from bioetl.application.services.run_reports.query import (
     list_pipeline_reports,
     list_workflow_reports,
 )
-from bioetl.interfaces.http.report_root_config import configured_report_root
+from bioetl.interfaces.http.report_root_config import (
+    configured_report_root,
+    report_root_readiness_check,
+)
 
 
 def _safe_segment(value: str) -> str:
@@ -94,13 +96,22 @@ def list_pipeline_run_report_payloads(
         limit=limit,
         root=base,
     )
-    marker = inspect_report_root_marker(report_root=base)
+    diagnostics = report_root_readiness_check(root=base)
     return {
         "status": "ok",
         "count": len(entries),
         "report_root": str(base.as_posix()),
-        "marker": marker.get("marker"),
-        "marker_status": marker.get("status"),
+        "marker": diagnostics.get("marker"),
+        # Backward-compatible layout status for existing Grafana payloads.
+        "marker_status": diagnostics.get("layout_status"),
+        "source_identity": diagnostics.get("source_identity"),
+        "source_identity_state": diagnostics.get("source_identity_state"),
+        "source_identity_status": diagnostics.get("source_identity_status"),
+        "source_identity_expected": diagnostics.get("source_identity_expected"),
+        "source_identity_actual": diagnostics.get("source_identity_actual"),
+        "source_identity_resolution_source": diagnostics.get(
+            "source_identity_resolution_source"
+        ),
         "items": [
             {
                 "pipeline": item.owner,
@@ -130,13 +141,21 @@ def list_workflow_run_report_payloads(
         limit=limit,
         root=base,
     )
-    marker = inspect_report_root_marker(report_root=base)
+    diagnostics = report_root_readiness_check(root=base)
     return {
         "status": "ok",
         "count": len(entries),
         "report_root": str(base.as_posix()),
-        "marker": marker.get("marker"),
-        "marker_status": marker.get("status"),
+        "marker": diagnostics.get("marker"),
+        "marker_status": diagnostics.get("layout_status"),
+        "source_identity": diagnostics.get("source_identity"),
+        "source_identity_state": diagnostics.get("source_identity_state"),
+        "source_identity_status": diagnostics.get("source_identity_status"),
+        "source_identity_expected": diagnostics.get("source_identity_expected"),
+        "source_identity_actual": diagnostics.get("source_identity_actual"),
+        "source_identity_resolution_source": diagnostics.get(
+            "source_identity_resolution_source"
+        ),
         "items": [
             {
                 "workflow": item.owner,

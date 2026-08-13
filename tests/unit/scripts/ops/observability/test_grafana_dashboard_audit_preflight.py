@@ -188,3 +188,38 @@ def test_bioetl_control_plane_source_accepts_matching_identity(
     )
 
     assert check.status == "ok"
+
+
+def test_expected_source_identity_prefers_computed_runtime_root(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    stale_process_identity = "f" * 64
+    monkeypatch.setenv("BIOETL_RUNTIME_SOURCE_ID", stale_process_identity)
+
+    resolution = preflight._resolve_expected_runtime_source_identity()
+
+    assert resolution.source == "runtime_root"
+    assert resolution.value is not None
+    assert resolution.value != stale_process_identity
+    assert "process_environment" in resolution.conflicts
+    assert resolution.state == "foreign"
+
+
+def test_control_plane_source_fails_before_http_when_expected_resolution_foreign(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        preflight,
+        "_fetch_json",
+        lambda *_args, **_kwargs: pytest.fail("HTTP must not be queried"),
+    )
+
+    check = preflight._check_bioetl_control_plane_source(
+        ops_http_base_url="http://localhost:8000",
+        expected_runtime_source_id="a" * 64,
+        expected_resolution_state="foreign",
+        timeout_seconds=1.0,
+    )
+
+    assert check.status == "error"
+    assert "not aligned: foreign" in check.detail
