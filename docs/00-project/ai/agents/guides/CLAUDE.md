@@ -36,7 +36,7 @@ make run-local        # Сэмпловый pipeline-run (chembl_activity, limit=
 make lint && make test
 ```
 
-Канонический bootstrap: `uv sync` + `make install` / `python -m scripts.ops setup-plugins`. `scripts/engineering/dev/dev_setup.sh` **удалён** и не считается
+Канонический bootstrap: `uv sync --extra dev --extra tests --extra tracing` + `make install` / `python -m scripts.ops setup-plugins`. `scripts/engineering/dev/dev_setup.sh` **удалён** и не считается
 поддерживаемым onboarding path.
 
 ### Mixed Windows + WSL checkout

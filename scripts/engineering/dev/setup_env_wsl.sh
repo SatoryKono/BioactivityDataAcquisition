@@ -57,7 +57,7 @@ if command -v uv >/dev/null 2>&1; then
     export VIRTUAL_ENV="$VENV_DIR"
     export PATH="$VENV_DIR/bin:$PATH"
     # Lockfile-backed sync; --no-build refuses sdist/setup-script execution (shell:S8541).
-    UV_NO_BUILD=1 uv sync --active --frozen --no-build --extra dev --extra tracing || {
+    UV_NO_BUILD=1 uv sync --active --frozen --no-build --extra dev --extra tests --extra tracing || {
         echo "[setup_env_wsl][error] uv sync failed." >&2
         echo "[setup_env_wsl][hint] Retry with the same command; UV_HTTP_TIMEOUT defaults to $UV_HTTP_TIMEOUT seconds." >&2
         exit 1
@@ -69,7 +69,7 @@ if command -v uv >/dev/null 2>&1; then
     INSTALLED_EXTRAS=()
     OPTIONAL_FAILURES=0
     for EXTRA in "${OPTIONAL_EXTRAS[@]}"; do
-        SYNC_ARGS=(--active --frozen --no-build --extra dev --extra tracing)
+        SYNC_ARGS=(--active --frozen --no-build --extra dev --extra tests --extra tracing)
         for INSTALLED in "${INSTALLED_EXTRAS[@]}"; do
             SYNC_ARGS+=(--extra "$INSTALLED")
         done
@@ -94,7 +94,7 @@ else
 
     # Binary-only bootstrap + project extras (shell:S8541).
     "$VENV_PYTHON" -m pip install --only-binary=:all: --upgrade "pip==25.0.1" "setuptools==75.8.0" "wheel==0.45.1"
-    "$VENV_PYTHON" -m pip install --only-binary=:all: -e '.[dev,tracing]'
+    "$VENV_PYTHON" -m pip install --only-binary=:all: -e '.[dev,tests,tracing]'
     OPTIONAL_EXTRAS=()
     [[ "$AGENT_TOOLS" == "agentdebugx" || "$AGENT_TOOLS" == "all" ]] && OPTIONAL_EXTRAS+=("agentdebugx")
     [[ "$AGENT_TOOLS" == "proofagent" || "$AGENT_TOOLS" == "all" ]] && OPTIONAL_EXTRAS+=("proofagent")

@@ -35,7 +35,7 @@ Operator/developer playbook for frequent BioETL failures.
 | **Symptoms** | `No module named bioetl...` or missing third-party package |
 | **Root causes** | Wrong venv; incomplete `make install` / `uv sync`; running from wrong cwd |
 | **Diagnosis** | `python -c "import bioetl; print(bioetl.__file__)"`; confirm `.venv` / `.venv-win` active |
-| **Resolution** | `make install` or `uv sync`; use `uv run python -m bioetl ...` |
+| **Resolution** | `make install` or `uv sync --extra dev --extra tests --extra tracing`; use `uv run python -m bioetl ...` |
 | **Prevention** | Document env activation in [quick-start](../../03-guides/quick-start.md) |
 
 ### Layer boundary / circular import
