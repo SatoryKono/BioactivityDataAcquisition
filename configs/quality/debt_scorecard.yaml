@@ -633,7 +633,7 @@ supporting_scripts_governance:
   inventory_source: configs/quality/scripts_inventory_manifest.json
   metrics:
     zero_reference_supporting_script_count:
-      current_count: 8
+      current_count: 0
       max_count: 15
       owner: '@bioetl-platform'
       linked_issue: '#7039'

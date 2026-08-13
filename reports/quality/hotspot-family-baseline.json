@@ -17,8 +17,8 @@
         "src/bioetl/application/core/"
       ],
       "duplication_clusters": 0,
-      "files": 189,
-      "total_loc": 23058,
+      "files": 192,
+      "total_loc": 23094,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.363,
       "max_internal_fan_in": 6,
