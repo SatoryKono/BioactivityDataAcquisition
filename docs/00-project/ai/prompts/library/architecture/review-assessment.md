@@ -84,14 +84,27 @@ Full generic megaprompts (archive):
    reducing only).
 7. If `MODE=propose-patches`: minimal patches only after operator approval.
 
+## Surface score (this domain)
+
+| Score | Meaning |
+| --- | --- |
+| 3 | Boundaries clear; deps controlled; quality goals/ADR current; docs match code |
+| 2 | Consistent architecture; local drift or a few implicit contracts |
+| 1 | Cycles / hidden deps / unrecorded decisions raise change cost |
+| 0 | Critical boundaries missing, or architecture creates security/reliability/data risk |
+
+P0: broken authz / uncontrolled data ownership / catastrophic single failure.
+P1: critical coupling, unsafe deploy, migration risk, core-path cycle.
+P2: drift / change amplification. P3: incomplete diagram/ADR metadata.
+No whole-repo code-level diagram.
+
 ## Output
 
-- `reports/audit/architecture/report.md`
-- `reports/audit/architecture/findings.json` (finding-schema)
-- optional extras listed below or in method notes
-- `surface_score` 0–3 (map any 0–5 dimensions via audit-scale)
-- findings per finding-schema; top remediations
-- `MODE=propose-patches` / write modes: only after operator approval and ALLOW flags when orchestrated
+- `reports/audit/architecture/report.md` + `findings.json`
+- kit extras: `system-context.mmd`, `container-view.mmd`, machine-readable
+  dependency graph, `boundary-violations.csv`, `runtime-scenarios.md`,
+  `adr-gaps.md`, `architecture-risk-register.csv`, roadmap (quick / tactical / strategic)
+- `surface_score` 0–3; remediations; `MODE=propose-patches` only with approval
 
 ## Stop
 

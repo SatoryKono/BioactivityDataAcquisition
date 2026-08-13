@@ -1,10 +1,10 @@
 ______________________________________________________________________
 
-Version: 3.7.0
+Version: 3.8.0
 Status: active
 Class: internal (repo-only entrypoint; excluded from MkDocs)
 Owner: BioETL Team
-Last verified: '2026-08-12'
+Last verified: '2026-08-13'
 Epic: '#8513'
 Phase3: '#8517'
 
@@ -89,11 +89,14 @@ docs/00-project/ai/prompts/
 | `prompt.observability.bi-dashboard-acceptance` | [library/observability/bi-dashboard-acceptance.md](library/observability/bi-dashboard-acceptance.md) | BI acceptance: visual / layout / data |
 | `prompt.observability.dashboard-audit-cycle` | [library/observability/dashboard-audit-cycle.md](library/observability/dashboard-audit-cycle.md) | Exhaustive cyclic audit of every panel × viewport — density, typography, color, scroll, whitespace, data, render (v2.0) |
 | `prompt.observability.grafana-six.pack` | [library/observability/grafana-six/pack.md](library/observability/grafana-six/pack.md) | Read-only **six-prompt** Grafana kit (evidence → visual/layout/data → consolidate → reverify) |
+| `prompt.audit.generic-nine.pack` | [library/audit/generic-nine/pack.md](library/audit/generic-nine/pack.md) | Nine-domain generic code/project audit kit (2026-08-11) |
 
 ### Domain audit cards (nine-kit intake)
 
-Short operator-paste cards (v1.1+) with `report.md` + `findings.json`.
-Archive megaprompts (opt-in only):
+Routing: `prompt.audit.generic-nine.pack` →
+[library/audit/generic-nine/](library/audit/generic-nine/README.md).
+Short operator-paste cards (v1.2+) with `report.md` + `findings.json` and
+kit-specific extras. Archive megaprompts (opt-in only):
 
 - [generic-nine-audit-kit-2026-08.md](archive/campaigns/generic-nine-audit-kit-2026-08.md)
 - [project-audit-orchestrator-kit-2026-08-11.md](archive/campaigns/project-audit-orchestrator-kit-2026-08-11.md)
@@ -116,6 +119,7 @@ Archive megaprompts (opt-in only):
 | Need | Card |
 | --- | --- |
 | Single domain audit | domain card above |
+| All nine one-shot domains | `prompt.audit.generic-nine.pack` |
 | One meta cycle | `prompt.audit.grok-cycle` |
 | N-iteration audit→issues→fix→CI (single agent) | `prompt.audit.orchestrator` (`N=1` default; ALLOW_* false) |
 | Dual-agent cycle + external audit prompt + CR + peer review | `prompt.audit.dual-agent-cycle` (`OUTER_CYCLES=1`; ALLOW_* false) |
