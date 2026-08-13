@@ -36,10 +36,22 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
+## Canonical `uv sync` commands
+
+| Purpose | Command |
+|---------|---------|
+| Bootstrap (dev / tests / tracing) | `uv sync --extra dev --extra tests --extra tracing` |
+| Docs site tooling (MkDocs) | `uv sync --extra dev --extra tests --extra tracing --extra docs` |
+| Extended local pytest surface | `uv sync --extra dev --extra tests --extra tests_full --extra tracing` |
+
+Do not omit `--extra tests` from active bootstrap or docs-install examples. Image
+build / lock-frozen production paths may use different flags (`--frozen`,
+`--no-dev`) and are not the contributor bootstrap contract.
+
 ## Docs Toolchain
 
 - `mkdocs` pinned to `<2.0` in `pyproject.toml` to avoid known compatibility risk with current Material stack.
-- Docs site tooling lives in the separate `docs` extra; install it via `uv sync --extra dev --extra tracing --extra docs` or `pip install -e ".[dev,tracing,docs]"` before running MkDocs commands.
+- Docs site tooling lives in the separate `docs` extra; install it via `uv sync --extra dev --extra tests --extra tracing --extra docs` or `pip install -e ".[dev,tests,tracing,docs]"` before running MkDocs commands.
 - Preferred invocation after `uv sync` is `uv run python -m scripts.<group> ...`.
   With an activated virtual environment, `python -m scripts.<group> ...` remains a valid fallback.
 - Local automation that must resolve the project-preferred interpreter without
