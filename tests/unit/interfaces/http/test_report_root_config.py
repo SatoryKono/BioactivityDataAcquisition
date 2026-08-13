@@ -63,6 +63,11 @@ def test_readiness_check_with_marker(
     monkeypatch.setenv(REPORT_ROOT_ENV, str(root))
     monkeypatch.setenv(ENFORCE_REPORT_ROOT_MARKER_ENV, "1")
     monkeypatch.setenv(RUNTIME_SOURCE_ID_ENV, "a" * 64)
+    monkeypatch.setattr(
+        report_root_config_module,
+        "load_repository_source_environment",
+        lambda *_args, **_kwargs: {},
+    )
     write_report_root_source_identity(report_root=root, source_id="a" * 64)
     check = report_root_readiness_check()
     assert check["status"] == "healthy"
