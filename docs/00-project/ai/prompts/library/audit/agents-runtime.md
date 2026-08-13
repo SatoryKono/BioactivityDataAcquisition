@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.agents-runtime
-version: 1.1.0
+version: 1.2.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -18,6 +18,7 @@ includes:
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/shell-portability.md
+  - fragments/generic-nine-contract.md
 related_ssot:
   - AGENTS.md
   - docs/00-project/NORMATIVE_SOURCES.md
@@ -36,6 +37,7 @@ max_body_lines: 150
 
 # Agents / runtime instructions audit
 
+**Kit:** prompt 6 of `prompt.audit.generic-nine.pack`.
 Audit repository instructions and scripts for AI coding/review agents.
 Criteria: correct project context, least privilege, reproducible
 bootstrap/build/test, no conflicting instructions, safe shell/tool use.
@@ -83,14 +85,24 @@ write vs read-only roles).
 5. Mirror parity: if `.codex` or `.junie` changed in remediation path, note
    `scripts/ai/junie/check_junie_mirror.sh --check`.
 
+## Surface score (this domain)
+
+| Score | Meaning |
+| --- | --- |
+| 3 | Instructions consistent; scripts reproducible; tools limited; validation automated |
+| 2 | Main workflow reliable; a few undocumented preconditions |
+| 1 | Implicit env assumptions, excessive permissions, or conflicting instructions |
+| 0 | Agent can leak a secret, destroy data, or run uncontrolled privileged action |
+
+P0: destructive/secret/RCE. P1: wrong build/release/deploy. P2: nondeterminism.
+P3: discoverability.
+
 ## Output
 
-- `reports/audit/agents/report.md`
-- `reports/audit/agents/findings.json` (finding-schema)
-- optional extras listed below or in method notes
-- `surface_score` 0–3 (map any 0–5 dimensions via audit-scale)
-- findings per finding-schema; top remediations
-- `MODE=propose-patches` / write modes: only after operator approval and ALLOW flags when orchestrated
+- `reports/audit/agents/report.md` + `findings.json`
+- kit extras: `agent-instruction-map.md`, `agent-scripts.csv`,
+  `tool-permissions.csv`, `instruction-conflicts.csv`, command matrix
+- `surface_score` 0–3; remediations; `MODE=propose-patches` only with approval
 
 ## Stop
 
