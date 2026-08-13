@@ -56,7 +56,8 @@ ______________________________________________________________________
    uv run python -m scripts.engineering.dev run-tests smoke
    ```
 
-   Канонический bootstrap — `uv sync` / `make install`; `scripts/engineering/dev/dev_setup.sh` **удалён** и не является
+   Канонический bootstrap — `uv sync --extra dev --extra tests --extra tracing` /
+   `make install`; `scripts/engineering/dev/dev_setup.sh` **удалён** и не является
    поддерживаемым bootstrap path.
 
 > **Note:** BioETL использует **Local-Only** архитектуру (ADR-010).

@@ -84,21 +84,21 @@ can sustain more workers without `WinError 10055`.
 git clone https://github.com/SatoryKono/BioactivityDataAcquisition.git
 cd BioactivityDataAcquisition
 
-# Preferred manual path without make
-uv sync --extra dev --extra tracing
+# Preferred manual path without make (same canonical extras as Option A)
+uv sync --extra dev --extra tests --extra tracing
 
 # Fallback without uv: use an installed Python 3.12+ interpreter.
 python3 -m venv .venv
 . .venv/bin/activate
-pip install -e ".[dev,tracing]"
+pip install -e ".[dev,tests,tracing]"
 ```
 
 If you need MkDocs/site tooling, install the separate docs toolchain as well:
 
 ```bash
-uv sync --extra dev --extra tracing --extra docs
+uv sync --extra dev --extra tests --extra tracing --extra docs
 # or, without uv:
-pip install -e ".[dev,tracing,docs]"
+pip install -e ".[dev,tests,tracing,docs]"
 ```
 
 ## Run Your First Pipeline

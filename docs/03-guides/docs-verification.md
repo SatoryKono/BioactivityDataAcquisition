@@ -46,17 +46,17 @@ supporting evidence only.
 - Preferred: `uv`
 - Required for strict docs/site checks: docs extra installed
 
-Recommended setup:
+Recommended setup (canonical bootstrap extras plus the docs site extra):
 
 ```bash
-uv sync --extra dev --extra tracing --extra docs
+uv sync --extra dev --extra tests --extra tracing --extra docs
 ```
 
 If you hit cache- or wheel-related `uv` installation failures in WSL, rerun the
 same sync with an explicit writable cache path:
 
 ```bash
-UV_CACHE_DIR=/tmp/.uv-cache uv sync --extra dev --extra tracing --extra docs
+UV_CACHE_DIR=/tmp/.uv-cache uv sync --extra dev --extra tests --extra tracing --extra docs
 ```
 
 Fallback without `uv`:
@@ -64,7 +64,7 @@ Fallback without `uv`:
 ```bash
 python3 -m venv .venv
 . .venv/bin/activate
-pip install -e ".[dev,tracing,docs]"
+pip install -e ".[dev,tests,tracing,docs]"
 ```
 
 ## Verification Flow
@@ -197,7 +197,7 @@ location explicitly:
 
 ```bash
 UV_CACHE_DIR=/tmp/.uv-cache uv run python -m scripts.docs check-links --links --specs --configs
-UV_CACHE_DIR=/tmp/.uv-cache uv sync --extra dev --extra tracing --extra docs
+UV_CACHE_DIR=/tmp/.uv-cache uv sync --extra dev --extra tests --extra tracing --extra docs
 ```
 
 ## PR Preview Mechanism
@@ -209,8 +209,8 @@ UV_CACHE_DIR=/tmp/.uv-cache uv sync --extra dev --extra tracing --extra docs
 For documentation changes, verify locally before pushing:
 
 ```bash
-# Install docs extra
-uv sync --extra dev --extra tracing --extra docs
+# Install docs extra (canonical bootstrap + docs)
+uv sync --extra dev --extra tests --extra tracing --extra docs
 
 # Run full docs verification
 uv run python -m scripts.docs verify
