@@ -9,10 +9,14 @@ import asyncio
 import sys
 from collections.abc import Mapping
 from functools import partial
-from typing import TYPE_CHECKING, NoReturn, cast
+from typing import TYPE_CHECKING, NoReturn
 
 import click
 
+from bioetl.interfaces.cli.commands._typed_option_values import (
+    optional_option,
+    require_option,
+)
 from bioetl.interfaces.cli.commands.domains.health.metrics_publication_integration import (
     publish_metrics_safely,
 )
@@ -200,16 +204,13 @@ def _run_command_with_cli_policy(
     cli_input: RunCommandInput,
 ) -> None:
     """Execute the prepared run command through the canonical CLI policy path."""
-    cli_input = cast(
-        "RunCommandInput",
-        attach_observability_backend_to_cli_input(
-            cli_input,
-            required_probe_paths=build_observability_backend_required_probe_paths(
-                pipelines=(cli_input.pipeline,)
-            ),
-            ensure_backend_started_fn=ensure_observability_backend_started,
-            disable_transient_health_server_fn=should_disable_transient_health_server,
+    cli_input = attach_observability_backend_to_cli_input(
+        cli_input,
+        required_probe_paths=build_observability_backend_required_probe_paths(
+            pipelines=(cli_input.pipeline,)
         ),
+        ensure_backend_started_fn=ensure_observability_backend_started,
+        disable_transient_health_server_fn=should_disable_transient_health_server,
     )
 
     registry = resolve_context_registry(ctx)
@@ -265,34 +266,34 @@ def _build_run_command_input_from_options(
         default_port=DEFAULT_HEALTH_SERVER_PORT,
     )
     return RunCommandInput(
-        pipeline=cast("str", options["pipeline"]),
-        run_type=cast("str", options["run_type"]),
-        resume=cast("bool", options["resume"]),
-        start_offset=cast(int | None, options["start_offset"]),
-        limit=cast(int | None, options["limit"]),
-        input_csv=cast(str | None, options["input_csv"]),
-        filter_column=cast(str | None, options["filter_column"]),
-        filter_field=cast(str | None, options["filter_field"]),
-        dry_run=cast("bool", options["dry_run"]),
-        yes=cast("bool", options["yes"]),
-        vacuum_after_run=cast("bool | None", options["vacuum_after_run"]),
-        vacuum_retention_days=cast(int | None, options["vacuum_retention_days"]),
-        debug=cast("bool", options["debug"]),
-        health_server=cast("bool", options["health_server"]),
-        health_port=cast("int", options["health_port"]),
+        pipeline=require_option(options, "pipeline", str),
+        run_type=require_option(options, "run_type", str),
+        resume=require_option(options, "resume", bool),
+        start_offset=optional_option(options, "start_offset", int),
+        limit=optional_option(options, "limit", int),
+        input_csv=optional_option(options, "input_csv", str),
+        filter_column=optional_option(options, "filter_column", str),
+        filter_field=optional_option(options, "filter_field", str),
+        dry_run=require_option(options, "dry_run", bool),
+        yes=require_option(options, "yes", bool),
+        vacuum_after_run=optional_option(options, "vacuum_after_run", bool),
+        vacuum_retention_days=optional_option(options, "vacuum_retention_days", int),
+        debug=require_option(options, "debug", bool),
+        health_server=require_option(options, "health_server", bool),
+        health_port=require_option(options, "health_port", int),
         ensure_observability_backend=backend_options.ensure_observability_backend,
         observability_backend_port=backend_options.observability_backend_port,
-        enable_tracing=cast("bool | None", options["enable_tracing"]),
-        use_cached_bronze=cast("bool", options["use_cached_bronze"]),
-        cached_bronze_date=cast(str | None, options["cached_bronze_date"]),
-        cached_bronze_path=cast(str | None, options["cached_bronze_path"]),
-        replay_of_run_id=cast(str | None, options["replay_of_run_id"]),
-        replay_of_manifest_id=cast(str | None, options["replay_of_manifest_id"]),
-        resume_run_id=cast(str | None, options["resume_run_id"]),
-        resume_manifest_id=cast(str | None, options["resume_manifest_id"]),
-        exact_replay=cast("bool", options["exact_replay"]),
-        required_persistence_profile=cast(
-            str | None, options["required_persistence_profile"]
+        enable_tracing=optional_option(options, "enable_tracing", bool),
+        use_cached_bronze=require_option(options, "use_cached_bronze", bool),
+        cached_bronze_date=optional_option(options, "cached_bronze_date", str),
+        cached_bronze_path=optional_option(options, "cached_bronze_path", str),
+        replay_of_run_id=optional_option(options, "replay_of_run_id", str),
+        replay_of_manifest_id=optional_option(options, "replay_of_manifest_id", str),
+        resume_run_id=optional_option(options, "resume_run_id", str),
+        resume_manifest_id=optional_option(options, "resume_manifest_id", str),
+        exact_replay=require_option(options, "exact_replay", bool),
+        required_persistence_profile=optional_option(
+            options, "required_persistence_profile", str
         ),
     )
 

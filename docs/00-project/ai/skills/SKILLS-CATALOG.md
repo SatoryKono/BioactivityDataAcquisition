@@ -24,25 +24,25 @@
 
 ### Оркестрация
 
-| Skill                                 | Назначение                                                                                                                             |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `hierarchical-evidence-orchestration` | Иерархическая evidence-wave orchestration: shard collection через `collecting-evidence` + shard synthesis через `synthesizing-pillars` |
-| `py-review-orchestrator`              | Иерархическая кампания code review                                                                                                     |
-| `py-test-swarm`                       | Иерархический test swarm (L1/L2/L3)                                                                                                    |
+Live Codex tree does **not** ship dedicated orchestration skills. Hierarchical
+review and test campaigns are modes of `py-audit-bot` (`review`) and
+`py-test-bot`. Historical names `py-review-orchestrator` and `py-test-swarm`
+are retired.
 
-### Профильные Skills
+### Профильные Skills (live `.codex/skills/`)
 
-| Skill           | Назначение           |
-| --------------- | -------------------- |
-| `py-audit-bot`  | Профиль аудита       |
-| `py-architecture-debt-bot` | Полный workflow снижения архитектурного долга |
-| `py-code-bot`   | Deprecated compatibility marker for historical references |
-| `py-config-bot` | Профиль конфигурации |
-| `py-debug-bot`  | Профиль отладки      |
-| `py-doc-bot`    | Профиль документации |
-| `py-plan-bot`   | Профиль планирования |
-| `py-reproducibility-audit` | Аудит replay determinism и воспроизводимости |
-| `py-test-bot`   | Профиль тестирования |
+| Skill | Назначение |
+| --- | --- |
+| `py-audit-bot` | baseline, final, targeted, review, debt, reproducibility |
+| `py-config-bot` | configuration, schema, contract |
+| `py-debug-bot` | reproduce, isolate, remediation guidance (read-only) |
+| `py-doc-bot` | focused docs, broad docs audit, mirror sync |
+| `py-plan-bot` | implementation, refactor, release planning |
+| `py-test-bot` | focused tests, broad campaign, flake triage |
+| `py-code-bot` | Deprecated compatibility marker only |
+
+Retired profile names (`py-architecture-debt-bot`, `py-reproducibility-audit`)
+are modes of `py-audit-bot`, not standalone skills.
 
 ### Архитектура и Качество
 
@@ -54,14 +54,14 @@
 
 ### Observability
 
-| Skill                          | Назначение                                                               |
-| ------------------------------ | ------------------------------------------------------------------------ |
-| `grafana-dashboard-extension`  | Расширение, правка и валидация shipped Grafana dashboards                |
-| `grafana-dashboard-render`     | Render/preflight/audit evidence for shipped Grafana dashboards           |
-| `prometheus-metric-discovery`  | Поиск реальных Prometheus metrics, labels и selector-кандидатов          |
-| `prometheus-query-debugger`    | Отладка PromQL, empty-state semantics и aggregation mistakes             |
-| `prometheus-alert-rule-editor` | Создание и безопасная правка Prometheus-backed alert rules               |
-| `prometheus-rule-testing`      | Детерминированная проверка repo-backed Prometheus rules через `promtool` |
+Live skills are `observability-dashboard` and `observability-prometheus`.
+Retired names `grafana-dashboard-extension` / `grafana-dashboard-render` and
+the split `prometheus-*` skills must not be treated as current routes.
+
+| Skill | Назначение |
+| --- | --- |
+| `observability-dashboard` | dashboard edit, render, query debug |
+| `observability-prometheus` | rule edit, rule test, query debug |
 
 ### Документация
 

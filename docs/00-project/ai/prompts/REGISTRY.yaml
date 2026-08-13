@@ -288,7 +288,7 @@ entries:
     status: active
     class: operator-paste
     tags: [audit, cycle, pack, operator]
-    summary: Pack of cyclic domain audits — tests, docs, tech-debt, repo hygiene
+    summary: Pack of cyclic domain audits — 10-domain prompt.audit.cycle.* program
 
   - id: prompt.audit.repo-tree
     path: library/audit/repo-tree.md
@@ -331,6 +331,77 @@ entries:
     class: operator-paste
     tags: [audit, docs, pipeline, scripts, operator]
     summary: Audit docs generate/validate/publish scripts and pipelines
+
+  # --- ten-domain cyclic pack (library/audit/cycle/) ---
+  - id: prompt.audit.cycle.docs
+    path: library/audit/cycle/docs.md
+    status: active
+    class: operator-paste
+    tags: [audit, docs, cycle, content, pipeline, scripts, operator]
+    summary: Cyclic audit of documentation content and docs helper scripts
+
+  - id: prompt.audit.cycle.diagrams
+    path: library/audit/cycle/diagrams.md
+    status: active
+    class: operator-paste
+    tags: [audit, diagrams, mermaid, cycle, scripts, operator]
+    summary: Cyclic audit of version-controlled diagrams and render scripts
+
+  - id: prompt.audit.cycle.agents-memory
+    path: library/audit/cycle/agents-memory.md
+    status: active
+    class: operator-paste
+    tags: [audit, agents, memory, runtime, scripts, cycle, operator]
+    summary: Cyclic audit of AI runtime, agent scripts, and agent memory
+
+  - id: prompt.audit.cycle.configs
+    path: library/audit/cycle/configs.md
+    status: active
+    class: operator-paste
+    tags: [audit, configs, schema, cycle, operator]
+    summary: Cyclic audit of project config files, schemas, and compatibility
+
+  - id: prompt.audit.cycle.tests
+    path: library/audit/cycle/tests.md
+    status: active
+    class: operator-paste
+    tags: [audit, tests, cycle, quality, operator]
+    summary: Cyclic audit of the test system -- lanes, gates, flaky, fix, re-verify
+
+  - id: prompt.audit.cycle.tech-debt
+    path: library/audit/cycle/tech-debt.md
+    status: active
+    class: operator-paste
+    tags: [audit, debt, cycle, quality, operator]
+    summary: Cyclic technical-debt audit -- register, trend, paydown, residual re-check
+
+  - id: prompt.audit.cycle.architecture
+    path: library/audit/cycle/architecture.md
+    status: active
+    class: operator-paste
+    tags: [architecture, audit, cycle, scorecard, hexagonal, operator]
+    summary: Cyclic architecture audit -- 10-category scorecard, plan, implement waves
+
+  - id: prompt.audit.cycle.telemetry
+    path: library/audit/cycle/telemetry.md
+    status: active
+    class: operator-paste
+    tags: [audit, observability, telemetry, metrics, prometheus, cycle, operator]
+    summary: Cyclic audit of observability instrumentation and dashboard data feed
+
+  - id: prompt.audit.cycle.dashboards
+    path: library/audit/cycle/dashboards.md
+    status: active
+    class: operator-paste
+    tags: [observability, dashboard, grafana, render, design, cycle, operator]
+    summary: Cyclic render and design audit of dashboards and individual panels
+
+  - id: prompt.audit.cycle.coderabbit
+    path: library/audit/cycle/coderabbit.md
+    status: active
+    class: operator-paste
+    tags: [audit, cycle, coderabbit, project, exhaustive, operator]
+    summary: Exhaustive cyclic project audit with CodeRabbit dual-pass
 
   # --- archived campaigns (discoverability; not default paste) ---
   - id: prompt.campaign.generic-nine-audit-kit

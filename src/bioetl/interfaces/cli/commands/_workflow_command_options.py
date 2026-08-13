@@ -2,10 +2,16 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, cast
 from uuid import UUID
 
+from bioetl.interfaces.cli.commands._typed_option_values import (
+    option_or_default,
+    optional_option,
+    require_option,
+    string_tuple_option,
+)
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
 )
@@ -56,50 +62,51 @@ class WorkflowCommandOptions:
     @classmethod
     def from_click_kwargs(
         cls,
-        raw: dict[str, Any],  # Any: Click injects heterogeneous option values
+        raw: Mapping[str, object],
     ) -> WorkflowCommandOptions:
         """Build options from Click-injected keyword arguments."""
         return cls(
-            dry_run=bool(raw["dry_run"]),
-            only_steps=cast(str | None, raw.get("only_steps")),
-            run_type=cast(str | None, raw.get("run_type")),
-            start_offset=cast(int | None, raw.get("start_offset")),
-            limit=cast(int | None, raw.get("limit")),
-            input_csv=cast(str | None, raw.get("input_csv")),
-            filter_column=cast(str | None, raw.get("filter_column")),
-            filter_field=cast(str | None, raw.get("filter_field")),
-            vacuum_after_run=cast(bool | None, raw.get("vacuum_after_run")),
-            vacuum_retention_days=cast(int | None, raw.get("vacuum_retention_days")),
-            log_level=cast(str | None, raw.get("log_level")),
-            ignore_yaml_filter=cast(bool | None, raw.get("ignore_yaml_filter")),
-            skip_gold=cast(bool | None, raw.get("skip_gold")),
-            execution_context=cast(str | None, raw.get("execution_context")),
-            use_cached_bronze=cast(bool | None, raw.get("use_cached_bronze")),
-            cached_bronze_path=cast(str | None, raw.get("cached_bronze_path")),
-            cached_bronze_date=cast(str | None, raw.get("cached_bronze_date")),
-            exact_replay=cast(bool | None, raw.get("exact_replay")),
-            required_persistence_profile=cast(
-                str | None, raw.get("required_persistence_profile")
+            dry_run=require_option(raw, "dry_run", bool),
+            only_steps=optional_option(raw, "only_steps", str),
+            run_type=optional_option(raw, "run_type", str),
+            start_offset=optional_option(raw, "start_offset", int),
+            limit=optional_option(raw, "limit", int),
+            input_csv=optional_option(raw, "input_csv", str),
+            filter_column=optional_option(raw, "filter_column", str),
+            filter_field=optional_option(raw, "filter_field", str),
+            vacuum_after_run=optional_option(raw, "vacuum_after_run", bool),
+            vacuum_retention_days=optional_option(raw, "vacuum_retention_days", int),
+            log_level=optional_option(raw, "log_level", str),
+            ignore_yaml_filter=optional_option(raw, "ignore_yaml_filter", bool),
+            skip_gold=optional_option(raw, "skip_gold", bool),
+            execution_context=optional_option(raw, "execution_context", str),
+            use_cached_bronze=optional_option(raw, "use_cached_bronze", bool),
+            cached_bronze_path=optional_option(raw, "cached_bronze_path", str),
+            cached_bronze_date=optional_option(raw, "cached_bronze_date", str),
+            exact_replay=optional_option(raw, "exact_replay", bool),
+            required_persistence_profile=optional_option(
+                raw, "required_persistence_profile", str
             ),
-            replay_of_run_id=cast(str | None, raw.get("replay_of_run_id")),
-            replay_of_manifest_id=cast(str | None, raw.get("replay_of_manifest_id")),
-            enable_tracing=cast(bool | None, raw.get("enable_tracing")),
-            debug_export_enabled=cast(bool | None, raw.get("debug_export_enabled")),
-            debug_export_formats=cast(
-                tuple[str, ...], raw.get("debug_export_formats", ())
+            replay_of_run_id=optional_option(raw, "replay_of_run_id", str),
+            replay_of_manifest_id=optional_option(raw, "replay_of_manifest_id", str),
+            enable_tracing=optional_option(raw, "enable_tracing", bool),
+            debug_export_enabled=optional_option(raw, "debug_export_enabled", bool),
+            debug_export_formats=string_tuple_option(raw, "debug_export_formats"),
+            debug_export_dir=optional_option(raw, "debug_export_dir", str),
+            resume_last=option_or_default(raw, "resume_last", False, bool),
+            resume_manifest_id=optional_option(raw, "resume_manifest_id", str),
+            resume_run_id=optional_option(raw, "resume_run_id", UUID),
+            force_steps=optional_option(raw, "force_steps", str),
+            repair_steps=optional_option(raw, "repair_steps", str),
+            incremental=option_or_default(raw, "incremental", False, bool),
+            ensure_observability_backend=option_or_default(
+                raw, "ensure_observability_backend", False, bool
             ),
-            debug_export_dir=cast(str | None, raw.get("debug_export_dir")),
-            resume_last=bool(raw.get("resume_last", False)),
-            resume_manifest_id=cast(str | None, raw.get("resume_manifest_id")),
-            resume_run_id=cast(UUID | None, raw.get("resume_run_id")),
-            force_steps=cast(str | None, raw.get("force_steps")),
-            repair_steps=cast(str | None, raw.get("repair_steps")),
-            incremental=bool(raw.get("incremental", False)),
-            ensure_observability_backend=bool(
-                raw.get("ensure_observability_backend", False)
-            ),
-            observability_backend_port=int(
-                raw.get("observability_backend_port", DEFAULT_HEALTH_SERVER_PORT)
+            observability_backend_port=option_or_default(
+                raw,
+                "observability_backend_port",
+                DEFAULT_HEALTH_SERVER_PORT,
+                int,
             ),
         )
 

@@ -28,13 +28,13 @@ $dockerArgs = @(
 )
 
 if ($env:PROMETHEUS_USERNAME) {
-    $dockerArgs += @("-e", "PROMETHEUS_USERNAME=$($env:PROMETHEUS_USERNAME)")
+    $dockerArgs += @("-e", "PROMETHEUS_USERNAME")
 }
 if ($env:PROMETHEUS_PASSWORD) {
-    $dockerArgs += @("-e", "PROMETHEUS_PASSWORD=$($env:PROMETHEUS_PASSWORD)")
+    $dockerArgs += @("-e", "PROMETHEUS_PASSWORD")
 }
 if ($env:PROMETHEUS_TOKEN) {
-    $dockerArgs += @("-e", "PROMETHEUS_TOKEN=$($env:PROMETHEUS_TOKEN)")
+    $dockerArgs += @("-e", "PROMETHEUS_TOKEN")
 }
 
 $dockerArgs += "ghcr.io/pab1it0/prometheus-mcp-server"

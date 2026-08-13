@@ -1,76 +1,52 @@
 {
   "pages": [
     {
-      "title": "Observability",
-      "purpose": "Index of observability infrastructure: logging, metrics, tracing, dashboards, alerting, and quality gates.",
+      "title": "Run Control Plane and Observability",
+      "purpose": "Index of run manifest, control plane, quarantine system, metrics/tracing/logging, and Grafana dashboards.",
       "page_notes": [
         {
-          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, src/bioetl/infrastructure/observability/, grafana/dashboards/."
-        },
-        "Current dashboards (2026-08): bioetl-control-plane-v1, bioetl-overview-v2, bioetl-runtime, bioetl-provider-health-v2, bioetl-dq-v2, bioetl-incident-v1, bioetl-run-explorer-v1. Retired: bioetl-workflow-overview, bioetl-alerts-slo, bioetl-silver-reject-explorer.",
-        "Infrastructure changes (2026-08): Loki, Promtail, Tempo, Quarantine Explorer UI removed; BioETL Ops HTTP datasource for identity panels; opt-in monitoring via make docker-start-monitoring."
-      ]
-    },
-    {
-      "title": "Logging",
-      "parent": "Observability",
-      "purpose": "Documents the UnifiedLogger, LogEvents enum, structured logging conventions, and the logger port abstraction.",
-      "page_notes": [
-        {
-          "content": "Canonical anchors: src/bioetl/infrastructure/observability/logging/, docs/00-project/RULES.md."
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md, docs/02-architecture/decisions/ADR-017-observability-architecture.md, src/bioetl/application/services/control_plane/."
         }
       ]
     },
     {
-      "title": "Metrics",
-      "parent": "Observability",
-      "purpose": "Covers Prometheus metrics, metric naming conventions, and the metrics port abstraction.",
+      "title": "Run Manifest and Control Plane",
+      "purpose": "Documentation for immutable run manifests, append-only ledgers, provenance tracking, and workflow control plane.",
+      "parent": "Run Control Plane and Observability",
       "page_notes": [
         {
-          "content": "Canonical anchors: src/bioetl/infrastructure/observability/metrics/, docs/02-architecture/decisions/."
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md, docs/02-architecture/decisions/ADR-047-workflow-control-plane.md, src/bioetl/application/services/control_plane/."
         }
       ]
     },
     {
-      "title": "Tracing",
-      "parent": "Observability",
-      "purpose": "Documents distributed tracing, span propagation, and the tracing port abstraction.",
+      "title": "Quarantine System",
+      "purpose": "Documentation for the quarantine system, quarantine entry aggregates, and quarantine inspection/replay operations.",
+      "parent": "Run Control Plane and Observability",
       "page_notes": [
         {
-          "content": "Canonical anchors: src/bioetl/infrastructure/observability/tracing/, docs/02-architecture/decisions/."
+          "content": "Canonical anchors: src/bioetl/domain/aggregates/_quarantine_aggregate.py, src/bioetl/infrastructure/storage/quarantine/, docs/05-operations/runbooks/quarantine-*.md."
         }
       ]
     },
     {
-      "title": "Dashboards",
-      "parent": "Observability",
-      "purpose": "Index of Grafana dashboards, panel queries, and visualization conventions.",
+      "title": "Metrics, Tracing, and Logging",
+      "purpose": "Documentation for observability ports, Prometheus metrics, OpenTelemetry tracing, and structured logging.",
+      "parent": "Run Control Plane and Observability",
       "page_notes": [
         {
-          "content": "Canonical anchors: grafana/dashboards/, scripts/ops/observability/grafana/."
-        },
-        "Recent refactoring (2026-08): Run Explorer simplification (HTTP narrative, up to 4 next actions), Data Quality panel updates (DQ Now vs Range lanes, TELEMETRY MISSING language), Metrics Evidence panel (replaces SCRAPING jargon), Navigation bus updates (Panel ID 1000)."
-      ]
-    },
-    {
-      "title": "Alerting",
-      "parent": "Observability",
-      "purpose": "Documents Prometheus alert rules, recording rules, and alert routing.",
-      "page_notes": [
-        {
-          "content": "Canonical anchors: configs/observability/prometheus/, docs/02-architecture/decisions/"
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-017-observability-architecture.md, docs/02-architecture/decisions/ADR-019-observability-port-enforcement.md, src/bioetl/domain/ports/observability/."
         }
       ]
     },
     {
-      "title": "Observability Skills",
-      "parent": "Observability",
-      "purpose": "Documents Devin skills for dashboard and Prometheus management: observability-dashboard, observability-prometheus, and related Grafana/Prometheus skills.",
+      "title": "Grafana Dashboards",
+      "purpose": "Documentation for Grafana dashboards, panel configuration, and monitoring setup.",
+      "parent": "Run Control Plane and Observability",
       "page_notes": [
         {
-          "content": "Canonical anchors: .devin/skills/observability-dashboard/SKILL.md, .devin/skills/observability-prometheus/SKILL.md, docs/00-project/ai/skills/SKILLS-CATALOG.md."
-        },
-        "Available skills (2026-08): grafana-dashboard-render (rendering, preflight, auditing), grafana-dashboard-extension (editing, validating), prometheus-metric-discovery (real metrics discovery), prometheus-query-debugger (PromQL debugging), prometheus-alert-rule-editor (alert rule tuning), prometheus-rule-testing (promtool validation)."
+          "content": "Canonical anchors: grafana/dashboards/, docs/03-guides/dashboards/, docs/03-guides/dashboards/monitoring-index.md."
+        }
       ]
     }
   ]

@@ -98,7 +98,7 @@ to repository, commit, branch, worktree, task, and source references.
 | Agent spawning | `spawn_agent(agent_type, message)` | `run_subagent(title, task, profile, is_background)` |
 | Built-in profiles | `default`, `explorer`, `worker` | `subagent_explore`, `subagent_general` |
 | Custom profiles | Native agent roles | Custom subagent profiles in `.devin/agents/*/AGENT.md` |
-| Model assignment | Fixed per profile (opus/sonnet) | Inherits parent model or explicit `model:` field |
+| Model assignment | Inherit parent (no provider-specific model labels) | Inherits parent model or explicit `model:` field |
 | Execution modes | Sequential/parallel | Foreground/background with permissions |
 | Tool permissions | Role-based | Profile-based + session grants |
 
@@ -107,16 +107,13 @@ to repository, commit, branch, worktree, task, and source references.
 Logical `py-*` profiles → Devin custom subagent profiles:
 
 | Logical Profile | Devin Profile | Model | Tool Access | Execution Mode |
-| --------------- | ------------- | ----- | ----------- | -------------- |
-| `py-audit-bot` | `py-audit-bot` | Parent model | Read-only (read, grep, glob, exec) | Foreground |
-| `py-audit-bot` | `py-audit-bot` | Parent model | Read + limited write (reports/) | Foreground |
+| --- | --- | --- | --- | --- |
+| `py-audit-bot` | `py-audit-bot` | Parent model | Read-only (`read`, `grep`, `glob`, `exec`); modes `baseline`/`final`/`targeted`/`review`/`debt`/`reproducibility` | Foreground |
 | `py-plan-bot` | `py-plan-bot` | Parent model | Read-only | Foreground |
-| `py-test-bot` | `py-test-bot` | Default subagent model | Read + exec (tests) | Foreground/background |
-| `py-config-bot` | `py-config-bot` | Default subagent model | Read + write (configs/) | Foreground |
-| `py-debug-bot` | `py-debug-bot` | Parent model | Read + write (src/, tests/) | Foreground |
-| `py-doc-bot` | `py-doc-bot` | Default subagent model | Read + write (docs/) | Foreground |
-| `py-test-bot` | `py-test-bot` | Parent model | Read + exec + write (reports/) | Background |
-| `py-audit-bot` | `py-audit-bot` | Parent model | Read-only | Background |
+| `py-debug-bot` | `py-debug-bot` | Parent model | Read-only (reproduce/isolate/guidance; no `src/` or `tests/` writes) | Foreground |
+| `py-config-bot` | `py-config-bot` | Default subagent model | Read + write (`configs/`) | Foreground |
+| `py-doc-bot` | `py-doc-bot` | Default subagent model | Read + write (`docs/`) | Foreground |
+| `py-test-bot` | `py-test-bot` | Default subagent model | Read + exec (`pytest`/`python`); profile denies `write`/`edit` — test file edits stay with orchestrator | Foreground/background |
 
 ## Devin Subagent Invocation
 
@@ -233,7 +230,7 @@ Each custom subagent profile lives in `.devin/agents/<profile-name>/AGENT.md`:
 ---
 name: py-audit-bot
 description: Baseline/final audit, code review, architecture guardian
-model: parent  # or specific model like "claude-opus-4"
+model: parent  # inherit parent; do not pin a provider-specific model label
 allowed-tools:
   - read
   - grep

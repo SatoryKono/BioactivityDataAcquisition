@@ -65,7 +65,17 @@ docs/00-project/ai/prompts/
 | `prompt.audit.docs-cycle` | [library/audit/docs-cycle.md](library/audit/docs-cycle.md) | Cyclic **docs content** audit (v1.0) |
 | `prompt.audit.tech-debt-cycle` | [library/audit/tech-debt-cycle.md](library/audit/tech-debt-cycle.md) | Cyclic **tech-debt** audit (v1.0) |
 | `prompt.audit.repo-tree-cycle` | [library/audit/repo-tree-cycle.md](library/audit/repo-tree-cycle.md) | Cyclic **repo hygiene** audit (v1.0) |
-| `prompt.audit.cyclic-pack` | [library/audit/cyclic-pack.md](library/audit/cyclic-pack.md) | Pack routing: tests / docs / debt / hygiene cycles |
+| `prompt.audit.cyclic-pack` | [library/audit/cyclic-pack.md](library/audit/cyclic-pack.md) | Pack routing: 10-domain `prompt.audit.cycle.*` |
+| `prompt.audit.cycle.docs` | [library/audit/cycle/docs.md](library/audit/cycle/docs.md) | Cyclic **docs + scripts/docs** |
+| `prompt.audit.cycle.diagrams` | [library/audit/cycle/diagrams.md](library/audit/cycle/diagrams.md) | Cyclic **diagrams + scripts/diagrams** |
+| `prompt.audit.cycle.agents-memory` | [library/audit/cycle/agents-memory.md](library/audit/cycle/agents-memory.md) | Cyclic **agents + memory** |
+| `prompt.audit.cycle.configs` | [library/audit/cycle/configs.md](library/audit/cycle/configs.md) | Cyclic **project configs** |
+| `prompt.audit.cycle.tests` | [library/audit/cycle/tests.md](library/audit/cycle/tests.md) | Cyclic **test layer** |
+| `prompt.audit.cycle.tech-debt` | [library/audit/cycle/tech-debt.md](library/audit/cycle/tech-debt.md) | Cyclic **tech-debt** |
+| `prompt.audit.cycle.architecture` | [library/audit/cycle/architecture.md](library/audit/cycle/architecture.md) | Cyclic **architecture** (10 categories) |
+| `prompt.audit.cycle.telemetry` | [library/audit/cycle/telemetry.md](library/audit/cycle/telemetry.md) | Cyclic **observability / dashboard feed** |
+| `prompt.audit.cycle.dashboards` | [library/audit/cycle/dashboards.md](library/audit/cycle/dashboards.md) | Cyclic **dashboard render/design** |
+| `prompt.audit.cycle.coderabbit` | [library/audit/cycle/coderabbit.md](library/audit/cycle/coderabbit.md) | Cyclic **full project + CodeRabbit** |
 | `prompt.audit.role-auditor` | [library/audit/role-auditor.md](library/audit/role-auditor.md) | Dual-agent Auditor (A) duties |
 | `prompt.audit.role-planner` | [library/audit/role-planner.md](library/audit/role-planner.md) | Dual-agent Planner (B) duties |
 | `prompt.tests.speed-optimization` | [library/tests/speed-optimization-loop.md](library/tests/speed-optimization-loop.md) | Test speed loop |
@@ -108,7 +118,7 @@ Archive megaprompts (opt-in only):
 | One meta cycle | `prompt.audit.grok-cycle` |
 | N-iteration audit→issues→fix→CI (single agent) | `prompt.audit.orchestrator` (`N=1` default; ALLOW_* false) |
 | Dual-agent cycle + external audit prompt + CR + peer review | `prompt.audit.dual-agent-cycle` (`OUTER_CYCLES=1`; ALLOW_* false) |
-| Cyclic tests / docs / tech-debt / repo hygiene / dashboards pack | `prompt.audit.cyclic-pack` → domain `*-cycle` cards |
+| Cyclic 10-domain pack (docs → CR) | `prompt.audit.cyclic-pack` → `prompt.audit.cycle.*` in [library/audit/cycle/](library/audit/cycle/README.md) |
 | Cyclic project architecture | `prompt.architecture.cycle` |
 | Exhaustive project audit + CodeRabbit | `prompt.audit.coderabbit-project-cycle` |
 | Issue/PR closeout | `prompt.closeout.grok` |

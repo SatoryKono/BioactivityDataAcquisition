@@ -33,22 +33,19 @@ It must not define runtime behavior independently from tracked runtime trees
 such as `.codex/agents/**`. Edit the active runtime profile first, then refresh this
 mirror when behavior or contributor guidance changes.
 
-## BioETL Core (9 active Codex runtime agents)
+## BioETL Core (6 active Codex runtime agents)
 
 Active set **MUST** match `.codex/agents/ORCHESTRATION.md` and the tracked
 `py-*.md` profiles under `.codex/agents/`.
 
-| Agent                        | Model  | Role                                                                                   |
-| ---------------------------- | ------ | -------------------------------------------------------------------------------------- |
-| `py-audit-bot`               | opus   | Baseline/final audit, code review, architecture guardian                               |
-| `py-audit-bot`   | opus   | Architecture-debt workflow: generate → plan → execute → verify                         |
-| `py-plan-bot`                | opus   | Task planning, RF-\* decomposition, composite design                                   |
-| `py-test-bot`                | sonnet | Tests (baseline/final/retest), coverage                                                |
-| `py-config-bot`              | sonnet | YAML configs (pipeline/DQ/filter/composite)                                            |
-| `py-debug-bot`               | opus   | RCA, bug fixes, regression debugging                                                   |
-| `py-doc-bot`                 | sonnet | Docs, ADR, CHANGELOG, Mermaid diagrams                                                 |
-| `py-test-bot`              | opus   | Hierarchical testing (L1→L2→L3)                                                        |
-| `py-audit-bot`     | opus   | Hierarchical code review (S1–S8)                                                       |
+| Agent | Model | Role |
+| --- | --- | --- |
+| `py-audit-bot` | inherit parent | Baseline/final/targeted audit, review, debt, reproducibility (read-only) |
+| `py-plan-bot` | inherit parent | Task planning, RF-\* decomposition, composite design (read-only) |
+| `py-debug-bot` | inherit parent | RCA and remediation guidance (read-only) |
+| `py-test-bot` | inherit parent | Tests (baseline/final/retest), coverage |
+| `py-config-bot` | inherit parent | YAML configs (pipeline/DQ/filter/composite) |
+| `py-doc-bot` | inherit parent | Docs, ADR, CHANGELOG, Mermaid diagrams |
 
 Runtime mapping: `.codex/agents/CODEX-RUNTIME.md`. Production code is written by
 the orchestrator directly (`py-code-bot` skill is a deprecated tombstone only).

@@ -7,13 +7,6 @@ import asyncio
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
-from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_quarantine_keys import (
-    CURRENT_FLAG_COLUMNS,
-    VALID_TO_COLUMNS,
-    build_orphan_key_rows,
-    require_sql_identifier,
-    resolve_present_column,
-)
 import pyarrow as pa
 from deltalake.exceptions import DeltaError
 
@@ -39,6 +32,13 @@ from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_identity 
     build_quarantine_batch_id,
     coerce_optional_run_id,
     orphan_error_code,
+)
+from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_quarantine_keys import (
+    CURRENT_FLAG_COLUMNS,
+    VALID_TO_COLUMNS,
+    build_orphan_key_rows,
+    require_sql_identifier,
+    resolve_present_column,
 )
 from bioetl.infrastructure.time.system_clock import current_utc_time
 
@@ -282,7 +282,6 @@ def _expire_gold_orphan_rows_once(
     )
 
 
-
 async def _delta_table_column_names(
     module: Any,  # Any: gold writer module providing DeltaTable
     table_path: str,
@@ -316,9 +315,6 @@ async def _delta_table_column_names(
             fallback="orphan_rows",
         )
         return None
-
-
-
 
 
 async def quarantine_orphan_rows(

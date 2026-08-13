@@ -11,12 +11,12 @@ mirror does not redefine runtime behavior.
 - Diagnose without fixing: use `py-debug-bot`; remain read-only.
 - Implement a focused fix: implement directly and add `py-config-bot` only for
   config impact; run targeted lint and tests.
-- Review the current diff: use `py-audit-bot` or `code-review`;
-  perform no write action.
-- Investigate and fix CI: identify the failing check/root cause before writing;
-  rerun failed checks and a targeted regression.
-- Prepare a PR: use `create-pr` after the request authorizes publish actions.
-- Audit architecture debt: use `py-audit-bot`; never increase debt
+- Review the current diff: use `py-audit-bot` (`review`); perform no write action.
+- Diagnose CI: use `py-debug-bot` (read-only). Implement the remediations in
+  the parent workflow, then rerun failed checks and a targeted regression.
+- Prepare a PR: use the parent workflow after the request authorizes publish
+  actions. There is no live `create-pr` skill in `.codex/skills/`.
+- Audit architecture debt: use `py-audit-bot` (`debt`); never increase debt
   budgets, exemption limits, hotspot thresholds, or family caps.
 
 ## Validation tiers
