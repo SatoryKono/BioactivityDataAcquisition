@@ -39,7 +39,7 @@ class PreflightGovernanceConfig:
             MappingProxyType(dict(self.issue_code_overrides)),
         )
 
-    def __hash__(self) -> int:  # noqa: D105 — custom for MappingProxyType field
+    def __hash__(self) -> int:
         overrides = self.issue_code_overrides
         override_key = (
             None

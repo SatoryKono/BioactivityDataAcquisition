@@ -23,7 +23,7 @@ ______________________________________________________________________
 | Surface | Primary role | Source-of-truth status | Editable for behavior | Expected content |
 | ----------------------- | --------------------------------- | ---------------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | `.codex/**` | Codex runtime surface | Canonical for tracked runtime behavior on `main` | Yes | portable `.codex/config.toml`, native `.codex/agents/*.toml`, behavioral `.codex/agents/*.md`, skills, and Codex orchestration |
-| `.junie/**` | JetBrains Junie runtime surface | Canonical for tracked runtime behavior on `main` (equal peer to `.codex/**`) | Yes, keeping parity with `.codex/**` | `.junie/guidelines.md` (root contract), `.junie/agents/**` (JUNIE-RUNTIME + 9 py-* profiles + README/ORCHESTRATION mirrors), `.junie/skills/**` (mirror of `.codex/skills/**`), `.junie/plans/**` |
+| `.junie/**` | JetBrains Junie runtime surface | Canonical for tracked runtime behavior on `main` (equal peer to `.codex/**`) | Yes, keeping parity with `.codex/**` | `.junie/guidelines.md` (root contract), `.junie/agents/**` (JUNIE-RUNTIME + 6 py-* profiles + README/ORCHESTRATION mirrors), `.junie/skills/**` (mirror of `.codex/skills/**`), `.junie/plans/**` |
 | `.devin/agents/**`, `.devin/skills/**` | Devin runtime surface | Canonical for tracked Devin-specific runtime behavior | Yes, subject to Codex–Devin skill parity contracts | `DEVIN-RUNTIME`, custom profile entrypoints, orchestration, and Devin skill adaptations |
 | `.gemini/settings.json` | Gemini local config surface | Local-only runtime config; not a tracked behavior tree on `main` | Yes, for machine-local settings only | optional local checkout settings with machine-specific paths |
 | `.gemini/agents/**`, `.gemini/skills/**` | Gemini runtime behavior tree | Not present in the current `main` checkout | No tracked source on `main` today | if a future task adds them, they must be verified and documented in the same change |
@@ -75,10 +75,13 @@ Default precedence for AI behavior and guidance:
 1. active runtime source for the current agent or skill — equal peers
    `.codex/**` (`.codex/agents/CODEX-RUNTIME.md`) and `.junie/**`
    (`.junie/agents/JUNIE-RUNTIME.md`, with root contract `.junie/guidelines.md`)
+1. matching runtime profiles and skills in the same tree (`.codex/agents/py-*.md`,
+   `.codex/skills/**`, `.junie/agents/py-*.md`, `.junie/skills/**`)
 1. `.devin/agents/DEVIN-RUNTIME.md` and the selected
    `.devin/agents/*/AGENT.md` profile for Devin sessions
 1. a matching tracked `.gemini/**` surface only when that tree exists in the
    current checkout and has been verified in the same change
+1. `docs/00-project/NORMATIVE_SOURCES.md`
 1. `docs/00-project/RULES.md`
 1. `docs/01-requirements/REQUIREMENTS.md`
 1. accepted ADRs

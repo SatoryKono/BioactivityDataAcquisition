@@ -6,65 +6,12 @@
       "page_notes": [
         {
           "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
-        },
-        "Recent ADR updates (2026-08): ADR-040 diagram governance, ADR-034 schema↔domain pairs, ADR-037 canonical schema generation, ADR-050 silver structural/gold semantic filter boundary."
-      ]
-    },
-    {
-      "title": "Layer Boundaries",
-      "parent": "Architecture",
-      "purpose": "Defines the layer separation rules and import boundaries that protect the domain from infrastructure leakage.",
-      "page_notes": [
-        {
-          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
-        }
-      ]
-    },
-    {
-      "title": "Ports",
-      "parent": "Architecture",
-      "purpose": "Shows how the domain port facade and adapter-facing APIs keep the public surface narrow and explicit.",
-      "page_notes": [
-        {
-          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
-        }
-      ]
-    },
-    {
-      "title": "Wiring Rules",
-      "parent": "Architecture",
-      "purpose": "Explains how composition wires interfaces, adapters, and application services without moving policy into runtime glue.",
-      "page_notes": [
-        {
-          "content": "Coverage: composition root, bootstrap ordering, and DI compliance. Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/test_di_compliance.py, src/bioetl/composition/."
         }
       ]
     },
     {
       "title": "Domain Layer",
-      "purpose": "Deep dive into the pure domain layer: Ports (Protocol interfaces), Aggregates, Value Objects, Entities, Schemas (Pandera DataFrameModel), Exceptions hierarchy, and the domain's public API facade. Covers domain purity rules and allowed imports.",
-      "parent": "Architecture",
-      "page_notes": [
-        {
-          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
-        },
-        "Recent additions (2026-08): silver DQ request port in src/bioetl/domain/ports/quality/silver_dq_request.py for data quality validation requests, schema↔domain configuration pairs per ADR-034, and canonical schema generation per ADR-037."
-      ]
-    },
-    {
-      "title": "Application Layer",
-      "purpose": "Covers the orchestration layer: BasePipeline, PipelineRunner, RecordProcessor, BatchExecutor, BaseTransformer, and the data-quality service. Explains how a pipeline run flows from runner to batch to record processing.",
-      "parent": "Architecture",
-      "page_notes": [
-        {
-          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
-        },
-        "Recent additions (2026-08): fetch forwarding implementation in src/bioetl/application/core/_fetch_forwarding.py for improved data fetching efficiency and error handling."
-      ]
-    },
-    {
-      "title": "Infrastructure Layer",
-      "purpose": "Covers concrete adapters, HTTP client, storage writers, observability implementations, quarantine, locking, and validation. Explains how infrastructure implements domain ports.",
+      "purpose": "Deep dive into the pure domain layer: Ports (Protocol interfaces), Aggregates, Value Objects, Entities, Schemas (Pandera DataFrameModel), Exceptions hierarchy, and the domain's public API facade.",
       "parent": "Architecture",
       "page_notes": [
         {
@@ -73,19 +20,28 @@
       ]
     },
     {
-      "title": "Composition Layer",
-      "purpose": "Explains the Dependency Injection wiring layer: factories, provider registry, runtime builders, bootstrap contexts, and how all components are assembled into a runnable pipeline. Covers entrypoints and the composition API.",
+      "title": "Application Layer",
+      "purpose": "Covers the orchestration layer: BasePipeline, PipelineRunner, RecordProcessor, BatchExecutor, BaseTransformer, and the data-quality service.",
       "parent": "Architecture",
       "page_notes": [
         {
           "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
-        },
-        "Recent additions (2026-08): versioning service in src/bioetl/composition/services/versioning.py for component version management, updated bootstrap ordering, and DI compliance improvements per ADR-025 pipeline config unification."
+        }
       ]
     },
     {
-      "title": "Interfaces Layer",
-      "purpose": "Documents the CLI (Click-based), HTTP health server, and observability API surfaces. Lists all CLI command groups (run, health, quarantine, checkpoint, run-manifest, export, maintenance, diagnostics) and their options.",
+      "title": "Infrastructure Layer",
+      "purpose": "Covers concrete adapters, HTTP client, storage writers, observability implementations, quarantine, locking, and validation.",
+      "parent": "Architecture",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    },
+    {
+      "title": "Composition and Interfaces Layers",
+      "purpose": "Explains the Dependency Injection wiring layer and CLI/HTTP interfaces.",
       "parent": "Architecture",
       "page_notes": [
         {

@@ -15,6 +15,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.audit.grok-cycle` | `library/audit/grok-audit-cycle.md` | One-cycle audit paste with severity, stop conditions, Windows/memory gates |
 | `prompt.audit.orchestrator` | `library/audit/orchestrator.md` | Fail-closed N-iteration audit → issues → fix → CI → post-audit loop |
 | `prompt.audit.dual-agent-cycle` | `library/audit/dual-agent-cycle.md` | Dual-agent cyclic audit—plan—fix—check with external audit prompt and role swap |
+| `prompt.audit.coderabbit-project-cycle` | `library/audit/coderabbit-project-cycle.md` | Exhaustive cyclic project audit with CodeRabbit dual-pass — matrix, plan, fix, re-CR |
 | `prompt.audit.role-auditor` | `library/audit/role-auditor.md` | Dual-agent Auditor role — CR+agent audit, plan review, implement stream, peer review |
 | `prompt.audit.role-planner` | `library/audit/role-planner.md` | Dual-agent Planner role — fact-check, task pack, plan gate, issues, implement stream |
 | `prompt.tests.speed-optimization` | `library/tests/speed-optimization-loop.md` | Accelerate test runs without weakening coverage |
@@ -22,8 +23,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.tests.cycle` | `library/tests/test-cycle.md` | Cyclic testing — baseline run, triage, fix, retest, delta per cycle |
 | `prompt.docs.ai-audit-planning` | `library/docs/ai-audit-planning.md` | Plan an audit of docs/00-project/ai surfaces |
 | `prompt.architecture.review` | `library/architecture/review-assessment.md` | Architecture review v2.3 (hexagonal/C4/arc42) with findings.json outputs |
-| `prompt.architecture.cycle` | `library/architecture/architecture-cycle.md` | Cyclic architecture audit — 10-category scorecard, plan, implement waves |
-| `prompt.audit.coderabbit-project-cycle` | `library/audit/coderabbit-project-cycle.md` | Exhaustive cyclic project audit with CodeRabbit dual-pass |
+| `prompt.architecture.cycle` | `library/architecture/architecture-cycle.md` | Cyclic architecture audit — 10-category scorecard, improvement plan, implement waves |
 | `prompt.observability.dashboard-panel-audit` | `library/observability/dashboard-panel-audit.md` | Five-phase Grafana panel audit — render, GH issues, fix, closeout (v1.1) |
 | `prompt.observability.bi-dashboard-acceptance` | `library/observability/bi-dashboard-acceptance.md` | BI dashboard acceptance — visual, layout, data contours with measurable checks |
 | `prompt.observability.dashboard-audit-cycle` | `library/observability/dashboard-audit-cycle.md` | Exhaustive cyclic Grafana audit of every panel, viewport, density, typography, color, scroll, whitespace, data, and render contract |
@@ -33,13 +33,23 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.audit.tests-cycle` | `library/audit/tests-cycle.md` | Cyclic audit of the test system — inventory, gates, flaky, fix, re-verify |
 | `prompt.audit.docs-cycle` | `library/audit/docs-cycle.md` | Cyclic documentation audit — content drift, commands, links, fix, re-verify |
 | `prompt.audit.tech-debt-cycle` | `library/audit/tech-debt-cycle.md` | Cyclic technical-debt audit — register, trend, paydown, residual re-check |
-| `prompt.audit.cyclic-pack` | `library/audit/cyclic-pack.md` | Pack of cyclic domain audits — tests, docs, tech-debt, repo hygiene |
+| `prompt.audit.cyclic-pack` | `library/audit/cyclic-pack.md` | Pack of cyclic domain audits — 10-domain prompt.audit.cycle.* program |
 | `prompt.audit.repo-tree` | `library/audit/repo-tree.md` | Repository tree and root hygiene audit against allowlist |
 | `prompt.audit.repo-tree-cycle` | `library/audit/repo-tree-cycle.md` | Cyclic repository hygiene audit — root allowlist, clutter, ignore, fix, re-verify |
 | `prompt.audit.github-actions` | `library/audit/github-actions.md` | GitHub Actions supply-chain and correctness audit |
 | `prompt.audit.agents-runtime` | `library/audit/agents-runtime.md` | Audit AI agent instructions, skills, and agent-related scripts |
 | `prompt.audit.diagrams` | `library/audit/diagrams.md` | Audit version-controlled diagrams and render scripts |
 | `prompt.audit.docs-pipeline` | `library/audit/docs-pipeline.md` | Audit docs generate/validate/publish scripts and pipelines |
+| `prompt.audit.cycle.docs` | `library/audit/cycle/docs.md` | Cyclic audit of documentation content and docs helper scripts |
+| `prompt.audit.cycle.diagrams` | `library/audit/cycle/diagrams.md` | Cyclic audit of version-controlled diagrams and render scripts |
+| `prompt.audit.cycle.agents-memory` | `library/audit/cycle/agents-memory.md` | Cyclic audit of AI runtime, agent scripts, and agent memory |
+| `prompt.audit.cycle.configs` | `library/audit/cycle/configs.md` | Cyclic audit of project config files, schemas, and compatibility |
+| `prompt.audit.cycle.tests` | `library/audit/cycle/tests.md` | Cyclic audit of the test system -- lanes, gates, flaky, fix, re-verify |
+| `prompt.audit.cycle.tech-debt` | `library/audit/cycle/tech-debt.md` | Cyclic technical-debt audit -- register, trend, paydown, residual re-check |
+| `prompt.audit.cycle.architecture` | `library/audit/cycle/architecture.md` | Cyclic architecture audit -- 10-category scorecard, plan, implement waves |
+| `prompt.audit.cycle.telemetry` | `library/audit/cycle/telemetry.md` | Cyclic audit of observability instrumentation and dashboard data feed |
+| `prompt.audit.cycle.dashboards` | `library/audit/cycle/dashboards.md` | Cyclic render and design audit of dashboards and individual panels |
+| `prompt.audit.cycle.coderabbit` | `library/audit/cycle/coderabbit.md` | Exhaustive cyclic project audit with CodeRabbit dual-pass |
 
 ## Active fragments
 
@@ -87,6 +97,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.audit.grok-cycle` | operator-paste | active | `library/audit/grok-audit-cycle.md` |
 | `prompt.audit.orchestrator` | operator-paste | active | `library/audit/orchestrator.md` |
 | `prompt.audit.dual-agent-cycle` | operator-paste | active | `library/audit/dual-agent-cycle.md` |
+| `prompt.audit.coderabbit-project-cycle` | operator-paste | active | `library/audit/coderabbit-project-cycle.md` |
 | `prompt.audit.role-auditor` | operator-paste | active | `library/audit/role-auditor.md` |
 | `prompt.audit.role-planner` | operator-paste | active | `library/audit/role-planner.md` |
 | `prompt.tests.speed-optimization` | operator-paste | active | `library/tests/speed-optimization-loop.md` |
@@ -95,7 +106,6 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.docs.ai-audit-planning` | operator-paste | active | `library/docs/ai-audit-planning.md` |
 | `prompt.architecture.review` | operator-paste | active | `library/architecture/review-assessment.md` |
 | `prompt.architecture.cycle` | operator-paste | active | `library/architecture/architecture-cycle.md` |
-| `prompt.audit.coderabbit-project-cycle` | operator-paste | active | `library/audit/coderabbit-project-cycle.md` |
 | `prompt.observability.dashboard-panel-audit` | operator-paste | active | `library/observability/dashboard-panel-audit.md` |
 | `prompt.observability.bi-dashboard-acceptance` | operator-paste | active | `library/observability/bi-dashboard-acceptance.md` |
 | `prompt.observability.dashboard-audit-cycle` | operator-paste | active | `library/observability/dashboard-audit-cycle.md` |
@@ -112,6 +122,16 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.audit.agents-runtime` | operator-paste | active | `library/audit/agents-runtime.md` |
 | `prompt.audit.diagrams` | operator-paste | active | `library/audit/diagrams.md` |
 | `prompt.audit.docs-pipeline` | operator-paste | active | `library/audit/docs-pipeline.md` |
+| `prompt.audit.cycle.docs` | operator-paste | active | `library/audit/cycle/docs.md` |
+| `prompt.audit.cycle.diagrams` | operator-paste | active | `library/audit/cycle/diagrams.md` |
+| `prompt.audit.cycle.agents-memory` | operator-paste | active | `library/audit/cycle/agents-memory.md` |
+| `prompt.audit.cycle.configs` | operator-paste | active | `library/audit/cycle/configs.md` |
+| `prompt.audit.cycle.tests` | operator-paste | active | `library/audit/cycle/tests.md` |
+| `prompt.audit.cycle.tech-debt` | operator-paste | active | `library/audit/cycle/tech-debt.md` |
+| `prompt.audit.cycle.architecture` | operator-paste | active | `library/audit/cycle/architecture.md` |
+| `prompt.audit.cycle.telemetry` | operator-paste | active | `library/audit/cycle/telemetry.md` |
+| `prompt.audit.cycle.dashboards` | operator-paste | active | `library/audit/cycle/dashboards.md` |
+| `prompt.audit.cycle.coderabbit` | operator-paste | active | `library/audit/cycle/coderabbit.md` |
 | `prompt.campaign.generic-nine-audit-kit` | campaign | archived | `archive/campaigns/generic-nine-audit-kit-2026-08.md` |
 | `prompt.campaign.project-audit-orchestrator-kit` | campaign | archived | `archive/campaigns/project-audit-orchestrator-kit-2026-08-11.md` |
 | `prompt.campaign.bi-dashboard-audit-kit` | campaign | archived | `archive/campaigns/bi-dashboard-audit-kit-2026-08-11.md` |

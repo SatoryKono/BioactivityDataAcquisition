@@ -97,7 +97,7 @@
       "type": "text",
       "title": "Understand Run Scope",
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 2
@@ -117,7 +117,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 5
+        "y": 6
       },
       "datasource": "BioETL Ops HTTP",
       "fieldConfig": {
@@ -209,7 +209,7 @@
         "h": 6,
         "w": 10,
         "x": 0,
-        "y": 14
+        "y": 15
       },
       "datasource": "BioETL Ops HTTP",
       "description": "Selected run: Exact identity for the selected run, including run, manifest, provider entity, contract, execution, replay, and checkpoint evidence. Selection required when no run ID is set. Valid empty means no matching identity was found for that run. On errors or unexpected emptiness, verify /health/live. Use existing Open/Copy actions for full values.",
@@ -365,7 +365,7 @@
         "h": 6,
         "w": 14,
         "x": 10,
-        "y": 14
+        "y": 15
       },
       "datasource": "BioETL Ops HTTP",
       "description": "Selected run: Bronze, Silver, and Gold stage/outcome accounting for the selected run. Zero-valued outcomes are evidence and must not be presented as success by themselves. Selection required when no run ID is set. Valid empty means no matching accounting rows exist; unexpected empty or errors require an Ops HTTP /health/live check.",
@@ -675,7 +675,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 21
       },
       "panels": [
         {

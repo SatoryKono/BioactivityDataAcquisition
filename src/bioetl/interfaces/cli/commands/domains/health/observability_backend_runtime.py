@@ -164,14 +164,16 @@ def build_observability_backend_cli_kwargs_from_options(
     )
 
 
-def attach_observability_backend_to_cli_input(
-    cli_input: RunCommandInput | RunAllCommandInput,
+def attach_observability_backend_to_cli_input[
+    CliInputT: (RunCommandInput, RunAllCommandInput)
+](
+    cli_input: CliInputT,
     *,
     required_probe_paths: tuple[str, ...],
     ensure_backend_started_fn: Callable[..., ObservabilityBackendEnsureResult]
     | None = None,
     disable_transient_health_server_fn: Callable[..., bool] | None = None,
-) -> RunCommandInput | RunAllCommandInput:
+) -> CliInputT:
     """Ensure backend startup and disable the transient health server when replaced."""
     ensure_backend_started = (
         ensure_backend_started_fn or ensure_observability_backend_started

@@ -41,7 +41,7 @@ class SilverDQAnalyzeRequest:
 
 
 def _record_silver_dq_field(
-    field: object,
+    field: Field[Any],
     *,
     positional: list[str],
     required: list[str],
@@ -115,9 +115,7 @@ def coerce_silver_dq_analyze_request(
         primary_keys=cast(list[str], resolved_kwargs["primary_keys"]),
         soft_fail_threshold=cast(float, resolved_kwargs["soft_fail_threshold"]),
         hard_fail_threshold=cast(float, resolved_kwargs["hard_fail_threshold"]),
-        input_record_count=cast(
-            "int | None", resolved_kwargs["input_record_count"]
-        ),
+        input_record_count=cast("int | None", resolved_kwargs["input_record_count"]),
         quarantined_count=cast(int, resolved_kwargs["quarantined_count"]),
         previous_schema=cast(
             "dict[str, str] | None", resolved_kwargs["previous_schema"]

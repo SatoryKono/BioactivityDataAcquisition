@@ -58,8 +58,6 @@ def build_score_card_record(
     return ScoreCardRecord(category, max(0, min(10, score)), *items)
 
 
-
-
 def bounded(score: int) -> int:
     """Clamp a reproducibility score into the inclusive [0, 10] band."""
     return max(0, min(10, score))
@@ -77,6 +75,7 @@ def supported_boundary_block_reason(lineage_boundary: object) -> str:
     if isinstance(lineage_boundary, dict) and lineage_boundary.get("reason"):
         return str(lineage_boundary.get("reason"))
     return "blocked_outside_supported_boundary"
+
 
 __all__ = [
     "PROFILE_SCORE_THRESHOLDS",
