@@ -2455,7 +2455,8 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "none",
+              "decimals": 0
             },
             "overrides": []
           },
