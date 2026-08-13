@@ -3478,7 +3478,7 @@
           ],
           "title": "Track Failed Workflow Runs",
           "type": "stat",
-          "description": "Counts failed Workflow runs in the selected range for Workflow and Pipeline. Zero, including an empty selected-range result rendered through noValue, means no matching failures; it is neutral range evidence, not current Workflow or Pipeline Health. Use runtime localization or Trust evidence when non-zero, and use Metrics Evidence to assess telemetry confidence."
+          "description": "Counts failed Workflow runs in the selected range for Workflow and Pipeline. Zero means no matching failures in the selected range, including when an empty selected-range result is rendered through noValue; it is neutral range evidence, not current Workflow or Pipeline Health. Use runtime localization or Trust evidence when non-zero, and use Metrics Evidence to assess telemetry confidence."
         },
         {
           "datasource": {
@@ -3563,7 +3563,7 @@
           ],
           "title": "Track Failed Workflow Steps",
           "type": "stat",
-          "description": "Counts failed Workflow pipeline steps in the selected range for Workflow and Pipeline. The metric has no Stage label. Zero, including an empty selected-range result rendered through noValue, means no matching failures; it is neutral range evidence, not stage success or current Pipeline Health. Use runtime localization or Trust evidence when non-zero, and use Metrics Evidence to assess telemetry confidence."
+          "description": "Counts failed Workflow pipeline steps in the selected range for Workflow and Pipeline. The metric has no Stage label. Zero means no matching failures in the selected range, including when an empty selected-range result is rendered through noValue; it is neutral range evidence, not stage success or current Pipeline Health. Use runtime localization or Trust evidence when non-zero, and use Metrics Evidence to assess telemetry confidence."
         }
       ],
       "description": "Contains selected-range workflow failure evidence merged into Pipeline Diagnostics. These panels support localization and do not determine current Pipeline Health"
