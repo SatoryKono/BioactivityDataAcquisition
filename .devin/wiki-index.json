@@ -1,5 +1,5 @@
 {
-  "version": "2.0",
+  "version": "2.1",
   "modular": true,
   "modules": [
     "wiki-core.json",
@@ -10,5 +10,5 @@
     "wiki-observability.json",
     "wiki-reference.json"
   ],
-  "description": "Modular wiki structure for faster loading and easier maintenance. Load modules dynamically based on context."
+  "description": "Modular wiki structure for faster loading and easier maintenance. Load modules dynamically based on context. Updated 2026-08-13 to align with DeepWiki MCP structure."
 }

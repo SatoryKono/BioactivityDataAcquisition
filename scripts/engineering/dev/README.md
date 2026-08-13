@@ -253,3 +253,7 @@ python -m scripts.engineering.dev <command> [args...]
 | `scripts/engineering/dev/setup_env_wsl.sh`                   | Create/update the stable WSL virtualenv outside the repo (default: `$HOME/.venvs/bioetl`) |
 | `scripts/engineering/dev/.wsl-vpn-fix.ps1`                   | Recover Windows-side VPN proxy settings for WSL interoperability                          |
 | `scripts/engineering/dev/.setup_wsl_codex.sh`                | WSL/Codex DNS and connectivity bootstrap helper for the documented WSL setup flow         |
+
+## WSL setup
+
+Canonical entrypoint: `scripts/engineering/dev/setup_bioetl_wsl.ps1`.

@@ -39,13 +39,13 @@ BATCH_EXECUTION_SHARED_CONTRACT_USERS: dict[str, set[str]] = {
 
 APPLICATION_CORE_SHARED_FAILURE_POLICY_USERS: dict[str, set[str]] = {
     "src/bioetl/application/core/batch_executor.py": {
-        "bioetl.application.core.batch_runtime_failure_policy",
+        "bioetl.application.core.batch_pipeline_execution_errors",
     },
     "src/bioetl/application/core/batch_execution/run_service.py": {
-        "bioetl.application.core.batch_runtime_failure_policy",
+        "bioetl.application.core.batch_pipeline_execution_errors",
     },
     "src/bioetl/application/core/batch_processing_support.py": {
-        "bioetl.application.core.batch_runtime_failure_policy",
+        "bioetl.application.core.batch_shared_operation_errors",
     },
 }
 

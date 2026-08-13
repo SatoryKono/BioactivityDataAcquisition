@@ -9,79 +9,19 @@
   "related_issues": [
     "#7455"
   ],
-  "reviewed_on": "2026-08-04",
+  "reviewed_on": "2026-08-13",
   "schema_version": "zero-ref-supporting-scripts-review-v1",
-  "scripts": [
-    {
-      "decision": "retain",
-      "importer_proof": {
-        "active_callers": [],
-        "companion_canonical": "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
-        "method": "git_grep_basename",
-        "notes": "Windows companion for Linux/WSL .sh wrapper still required for dual-platform MCP operators; no delete without Windows MCP config promotion."
-      },
-      "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1",
-      "reference_count": 0,
-      "status": "supporting"
-    },
-    {
-      "decision": "retain",
-      "importer_proof": {
-        "active_callers": [],
-        "method": "lifecycle_registry_review",
-        "notes": "Bounded Windows/WSL compatibility setup wrapper; retain until the reviewed operator migration completes."
-      },
-      "path": "scripts/engineering/dev/setup_bioetl_wsl_fixed.ps1",
-      "reference_count": 0,
-      "status": "supporting"
-    },
-    {
-      "decision": "retain",
-      "importer_proof": {
-        "active_callers": [],
-        "method": "git_grep_basename",
-        "notes": "Manual operator utility; no tracked importer. Eligible for delete only after operator confirm at review_by."
-      },
-      "path": "scripts/engineering/dev/zed_task.ps1",
-      "reference_count": 0,
-      "status": "supporting"
-    },
-    {
-      "decision": "retain",
-      "importer_proof": {
-        "active_callers": [
-          "tests/unit/scripts/ops/test_memory_alias_contracts.py"
-        ],
-        "method": "compatibility_alias_contract",
-        "notes": "Compatibility alias for memory.graph.sync remains owner-tested pending final caller retirement."
-      },
-      "path": "scripts/ops/neo4j_memory_sync.py",
-      "reference_count": 0,
-      "status": "supporting"
-    }
-  ],
+  "scripts": [],
   "summary": {
-    "delete_count": 0,
-    "promote_candidates": [
-      "scripts/engineering/qa/report_live_residual_snapshot.py"
-    ],
-    "retain_count": 4,
-    "script_count": 5,
-    "zero_reference_supporting_script_count": 4
+    "delete_count": 4,
+    "promote_candidates": [],
+    "retain_count": 0,
+    "script_count": 0,
+    "zero_reference_supporting_script_count": 0
   },
-  "wave_schedule": {
-    "2026-09-30": [
-      "scripts/engineering/dev/setup_bioetl_wsl_fixed.ps1",
-      "scripts/engineering/qa/report_live_residual_snapshot.py",
-      "scripts/ops/neo4j_memory_sync.py"
-    ],
-    "2026-10-15": [
-      "scripts/ai/codex/helper/wsl-support.ps1",
-      "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1",
-      "scripts/ai/mcp/mcp_mermaid_wrapper.ps1"
-    ],
-    "2026-10-21": [
-      "scripts/engineering/dev/zed_task.ps1"
-    ]
-  }
+  "wave_schedule": {},
+  "linked_issues": [
+    "#8708"
+  ],
+  "notes": "Zero-ref supporting residual burned down in #8708: neo4j_memory_sync alias retired; setup_bioetl_wsl_fixed superseded by setup_bioetl_wsl.ps1; mcp_ast_grep_wrapper.ps1 retired in favor of .sh; zed_task.ps1 unused by .zed/tasks.json."
 }

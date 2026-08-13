@@ -156,6 +156,13 @@ entries:
     tags: [audit, dual-agent, cycle, coderabbit, github, operator]
     summary: Dual-agent cyclic audit—plan—fix—check with external audit prompt and role swap
 
+  - id: prompt.audit.coderabbit-project-cycle
+    path: library/audit/coderabbit-project-cycle.md
+    status: active
+    class: operator-paste
+    tags: [audit, cycle, coderabbit, project, exhaustive, plan, implement, operator]
+    summary: Exhaustive cyclic project audit with CodeRabbit dual-pass — matrix, plan, fix, re-CR
+
   - id: prompt.audit.role-auditor
     path: library/audit/role-auditor.md
     status: active
@@ -209,8 +216,8 @@ entries:
     path: library/architecture/architecture-cycle.md
     status: active
     class: operator-paste
-    tags: [architecture, audit, cycle, hexagonal, operator]
-    summary: Cyclic project architecture audit — layers, boundaries, ADR drift, fix waves
+    tags: [architecture, audit, cycle, scorecard, hexagonal, plan, implement, operator]
+    summary: Cyclic architecture audit — 10-category scorecard, improvement plan, implement waves
 
   - id: prompt.observability.dashboard-panel-audit
     path: library/observability/dashboard-panel-audit.md
@@ -230,8 +237,8 @@ entries:
     path: library/observability/dashboard-audit-cycle.md
     status: active
     class: operator-paste
-    tags: [observability, dashboard, grafana, audit, cycle, density, render, operator]
-    summary: Cyclic dashboard audit N loops — render, density, fill, visual/layout/data, fix, re-verify
+    tags: [observability, dashboard, grafana, audit, cycle, density, typography, color, layout, render, operator]
+    summary: Exhaustive cyclic Grafana audit of every panel, viewport, density, typography, color, scroll, whitespace, data, and render contract
 
   # --- domain audit cards (generic nine-kit intake 2026-08) ---
   - id: prompt.audit.docs-content

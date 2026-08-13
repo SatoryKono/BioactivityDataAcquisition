@@ -13,7 +13,7 @@
       "type": "text",
       "title": "Navigate Dashboards",
       "gridPos": {
-        "h": 3,
+        "h": 2,
         "w": 24,
         "x": 0,
         "y": 0
@@ -97,10 +97,10 @@
       "type": "text",
       "title": "Understand Run Scope",
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 24,
         "x": 0,
-        "y": 3
+        "y": 2
       },
       "options": {
         "mode": "html",
@@ -114,10 +114,10 @@
       "title": "Browse Recent Runs",
       "description": "Browse mode: Recent pipeline-run reports found on disk for the selected pipeline. Choose a row to set the run ID and open exact-run evidence. An empty table is valid when no matching reports exist. If reports are expected, treat backend unavailable as a distinct failure state and verify BioETL Ops HTTP at /health/live.",
       "gridPos": {
-        "h": 7,
+        "h": 9,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 5
       },
       "datasource": "BioETL Ops HTTP",
       "fieldConfig": {
@@ -687,7 +687,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 21
+            "y": 20
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -746,7 +746,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 27
+            "y": 26
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -805,7 +805,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 32
+            "y": 31
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -924,7 +924,7 @@
             "h": 3,
             "w": 24,
             "x": 0,
-            "y": 40
+            "y": 39
           },
           "options": {
             "mode": "html",
@@ -940,7 +940,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 43
+            "y": 42
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -1021,7 +1021,7 @@
             "h": 4,
             "w": 24,
             "x": 0,
-            "y": 48
+            "y": 47
           },
           "options": {
             "mode": "html",
@@ -1036,7 +1036,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 52
+            "y": 51
           },
           "options": {
             "mode": "html",
