@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.tech-debt
-version: 1.1.0
+version: 1.2.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -18,6 +18,7 @@ includes:
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/shell-portability.md
+  - fragments/generic-nine-contract.md
 related_ssot:
   - AGENTS.md
   - docs/00-project/RULES.md
@@ -34,10 +35,12 @@ max_body_lines: 140
 
 # Technical debt audit
 
+**Kit:** prompt 3 of `prompt.audit.generic-nine.pack`.
 Build an evidence-backed debt register: concrete code/config signals → risk →
 change cost → paydown order. Separate deliberate tradeoffs, historical
 constraints, maintainability debt, obsolete deps, test debt, and architecture
 drift. **Never increase** debt/quality budgets (see debt-budget-ban).
+Prioritize by probability × blast radius, not TODO count.
 
 
 **Machine outputs:** always pair `report.md` + `findings.json` under `reports/audit/tech-debt/`. For multi-iteration loops use `prompt.audit.orchestrator` and `reports/audit-runs/<run_id>/`.
@@ -65,14 +68,21 @@ drift. **Never increase** debt/quality budgets (see debt-budget-ban).
    proposing higher limits.
 5. Optional Sonar/analyzer metrics = signal only, not architecture substitute.
 
+## Surface score (this domain)
+
+| Score | Meaning |
+| --- | --- |
+| 3 | Debt identified with owner/risk/effort; new code does not worsen baseline |
+| 2 | Main debt controlled; some items informal |
+| 1 | Suppressions/workarounds without systemic management |
+| 0 | Critical accumulated issues ignored or make change unsafe |
+
 ## Output
 
-- `reports/audit/tech-debt/report.md`
-- `reports/audit/tech-debt/findings.json` (finding-schema)
-- optional extras listed below or in method notes
-- `surface_score` 0–3 (map any 0–5 dimensions via audit-scale)
-- findings per finding-schema; top remediations
-- `MODE=propose-patches` / write modes: only after operator approval and ALLOW flags when orchestrated
+- `reports/audit/tech-debt/report.md` + `findings.json`
+- kit extras: `technical-debt-register.csv` (id,path,line,type,evidence,age,risk,blast_radius,effort,owner,priority),
+  `debt-heatmap.md`, top-20, quick wins vs strategic vs dependency debt
+- `surface_score` 0–3; remediations; `MODE=propose-patches` only with approval
 
 ## Priority hints
 

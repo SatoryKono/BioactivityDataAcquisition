@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.tests-system
-version: 1.1.0
+version: 1.2.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -18,6 +18,7 @@ includes:
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/shell-portability.md
+  - fragments/generic-nine-contract.md
 related_ssot:
   - AGENTS.md
   - docs/00-project/NORMATIVE_SOURCES.md
@@ -35,9 +36,11 @@ max_body_lines: 140
 
 # Tests system audit
 
+**Kit:** prompt 2 of `prompt.audit.generic-nine.pack`.
 Audit tests as a **regression-detection** system: which product/tech risks are
 actually checked, isolation/reproducibility, flaky/disabled zones, and what CI
 really blocks on merge/release. Do **not** invent a coverage target.
+Retries are a diagnostic signal, not a flaky fix.
 
 
 **Machine outputs:** always pair `report.md` + `findings.json` under `reports/audit/tests/`. For multi-iteration loops use `prompt.audit.orchestrator` and `reports/audit-runs/<run_id>/`.
@@ -78,14 +81,24 @@ really blocks on merge/release. Do **not** invent a coverage target.
 - [ ] Quarantine has owner + expiry (or flag as debt)
 - [ ] Focused tests (`.only`) blocked in CI if applicable
 
+## Surface score (this domain)
+
+| Score | Meaning |
+| --- | --- |
+| 3 | Critical paths covered; tests isolated/stable; CI actually blocks |
+| 2 | Solid base; local gaps or limited observability |
+| 1 | Material flaky/disabled zones, weak isolation, or optional CI |
+| 0 | Tests broken/absent on critical path, or green CI is fiction |
+
+P0: unsafe/invalid release possible. P1: critical business/security path
+unchecked. P2: flaky/perf/diagnostic debt. P3: organization.
+
 ## Output
 
-- `reports/audit/tests/report.md`
-- `reports/audit/tests/findings.json` (finding-schema)
-- optional extras listed below or in method notes
-- `surface_score` 0–3 (map any 0–5 dimensions via audit-scale)
-- findings per finding-schema; top remediations
-- `MODE=propose-patches` / write modes: only after operator approval and ALLOW flags when orchestrated
+- `reports/audit/tests/report.md` + `findings.json`
+- kit extras: `test-matrix.csv`, `coverage-evidence.json`, `flaky-tests.csv`,
+  `disabled-tests.csv`, `critical-gap-map.md` (each gap → production risk)
+- `surface_score` 0–3; remediations; `MODE=propose-patches` only with approval
 
 ## Stop
 

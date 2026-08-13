@@ -120,6 +120,20 @@ entries:
     tags: [guardrail, observability, bi, dashboard]
     summary: BI dashboard check result schema and priority mapping
 
+  - id: prompt.fragment.grafana-six-contract
+    path: fragments/grafana-six-contract.md
+    status: active
+    class: fragment
+    tags: [guardrail, observability, grafana, audit]
+    summary: Shared read-only contract for the six-prompt Grafana dashboard audit kit
+
+  - id: prompt.fragment.generic-nine-contract
+    path: fragments/generic-nine-contract.md
+    status: active
+    class: fragment
+    tags: [guardrail, audit, generic-nine]
+    summary: Shared contract for the nine-domain generic audit kit
+
   # --- active operator-paste cards ---
   - id: prompt.session.grok-bootstrap
     path: library/session/grok-bootstrap.md
@@ -210,7 +224,7 @@ entries:
     status: active
     class: operator-paste
     tags: [architecture, review, operator, audit]
-    summary: Architecture review v2.3 (hexagonal/C4/arc42) with findings.json outputs
+    summary: Architecture review v2.4 (hexagonal/C4/arc42) with findings.json outputs
 
   - id: prompt.architecture.cycle
     path: library/architecture/architecture-cycle.md
@@ -239,6 +253,64 @@ entries:
     class: operator-paste
     tags: [observability, dashboard, grafana, audit, cycle, density, typography, color, layout, render, operator]
     summary: Exhaustive cyclic Grafana audit of every panel, viewport, density, typography, color, scroll, whitespace, data, and render contract
+
+  # --- generic nine-prompt audit kit (2026-08-11 07:12 BST) ---
+  - id: prompt.audit.generic-nine.pack
+    path: library/audit/generic-nine/pack.md
+    status: active
+    class: operator-paste
+    tags: [audit, pack, generic-nine, operator]
+    summary: Pack routing for the nine-domain generic code/project audit kit
+
+  # --- grafana six-prompt read-only audit kit (2026-08-11) ---
+  - id: prompt.observability.grafana-six.pack
+    path: library/observability/grafana-six/pack.md
+    status: active
+    class: operator-paste
+    tags: [observability, grafana, audit, pack, read-only, operator]
+    summary: Pack routing for the six-prompt read-only Grafana dashboard audit
+
+  - id: prompt.observability.grafana-six.evidence
+    path: library/observability/grafana-six/evidence.md
+    status: active
+    class: operator-paste
+    tags: [observability, grafana, audit, evidence, read-only, operator]
+    summary: Read-only Grafana evidence pack — inventory, preflight, scopes, renders
+
+  - id: prompt.observability.grafana-six.visual
+    path: library/observability/grafana-six/visual.md
+    status: active
+    class: operator-paste
+    tags: [observability, grafana, audit, visual, a11y, read-only, operator]
+    summary: Read-only Grafana visual audit — palette, contrast, typography, clipping
+
+  - id: prompt.observability.grafana-six.layout
+    path: library/observability/grafana-six/layout.md
+    status: active
+    class: operator-paste
+    tags: [observability, grafana, audit, layout, ia, read-only, operator]
+    summary: Read-only Grafana layout audit — composition, IA, sizes, navigation
+
+  - id: prompt.observability.grafana-six.data
+    path: library/observability/grafana-six/data.md
+    status: active
+    class: operator-paste
+    tags: [observability, grafana, audit, data, promql, read-only, operator]
+    summary: Read-only Grafana data-fill audit — queries, semantics, zero vs no-data
+
+  - id: prompt.observability.grafana-six.consolidate
+    path: library/observability/grafana-six/consolidate.md
+    status: active
+    class: operator-paste
+    tags: [observability, grafana, audit, consolidate, read-only, operator]
+    summary: Consolidate Grafana visual/layout/data audits — dedupe and prioritize
+
+  - id: prompt.observability.grafana-six.reverify
+    path: library/observability/grafana-six/reverify.md
+    status: active
+    class: operator-paste
+    tags: [observability, grafana, audit, reverify, read-only, operator]
+    summary: Independent Grafana re-audit after fixes — before/after evidence
 
   # --- domain audit cards (generic nine-kit intake 2026-08) ---
   - id: prompt.audit.docs-content
@@ -409,7 +481,7 @@ entries:
     status: archived
     class: campaign
     tags: [audit, campaign, archive, generic-kit]
-    summary: Cleaned generic nine-domain audit kit (2026-08); prefer library/audit cards
+    summary: Cleaned generic nine-domain audit kit (2026-08); prefer prompt.audit.generic-nine.pack
 
   - id: prompt.campaign.project-audit-orchestrator-kit
     path: archive/campaigns/project-audit-orchestrator-kit-2026-08-11.md

@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.docs-content
-version: 1.1.0
+version: 1.2.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -18,6 +18,7 @@ includes:
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/shell-portability.md
+  - fragments/generic-nine-contract.md
 related_ssot:
   - AGENTS.md
   - docs/00-project/NORMATIVE_SOURCES.md
@@ -40,6 +41,7 @@ Measure completeness, freshness, consistency, and **reproducibility** of
 procedures — not file count. Re-check claims about commands, paths, config,
 API, versions, and deploy against code/config.
 
+**Kit:** prompt 1 of `prompt.audit.generic-nine.pack`.
 **Disjoint scope:** content/IA/links/commands here. Generators, MkDocs build,
 and publish pipeline → `prompt.audit.docs-pipeline`.
 
@@ -80,14 +82,24 @@ and publish pipeline → `prompt.audit.docs-pipeline`.
 - [ ] API reference vs schema/code
 - [ ] No dangerous/stale deploy/runbook steps
 
+## Surface score (this domain)
+
+| Score | Meaning |
+| --- | --- |
+| 3 | Critical user/eng scenarios described; commands checked; links/build gated |
+| 2 | Main path correct; some stale or missing sections |
+| 1 | Material docs↔code drift or mostly manual checks |
+| 0 | Critical instructions missing, unreproducible, or dangerously wrong |
+
+P0: compromise / data loss / destructive prod action. P1: wrong
+bootstrap/deploy/security/recovery. P2: large gaps/drift. P3: editorial.
+
 ## Output
 
-- `reports/audit/docs-content/report.md`
-- `reports/audit/docs-content/findings.json` (finding-schema)
-- optional extras listed below or in method notes
-- `surface_score` 0–3 (map any 0–5 dimensions via audit-scale)
-- findings per finding-schema; top remediations
-- `MODE=propose-patches` / write modes: only after operator approval and ALLOW flags when orchestrated
+- `reports/audit/docs-content/report.md` + `findings.json`
+- kit extras: `docs-inventory.csv`, `broken-links.json`, `stale-docs.csv`,
+  `docs-code-drift.csv` (CSV min: path,type,audience,owner,last_change,status,score,priority,evidence)
+- `surface_score` 0–3; remediations; `MODE=propose-patches` only with approval
 
 ## Stop
 

@@ -18,12 +18,14 @@ anti_patterns:
 
 # Generic nine-domain audit kit (archive)
 
-**Status:** archived campaign reference. Prefer short cards under
-`library/audit/*` and `library/architecture/review-assessment.md`.
+**Status:** archived campaign reference. Prefer
+`prompt.audit.generic-nine.pack` and short cards under `library/audit/*`
+plus `library/architecture/review-assessment.md`.
 
-**Intake date:** 2026-08-11. Source was operator-supplied megaprompt set;
-UI chrome (`Копировать`, `Показать код`) stripped; orthography «Промпт»
-normalized; tables partially restored.
+**Intake date:** 2026-08-11 07:12 BST. Re-verified 2026-08-13: pack +
+domain cards v1.2 (kit artifacts and per-domain scores). Source was
+operator-supplied megaprompt set; UI chrome (`Копировать`, `Показать код`)
+stripped; orthography «Промпт» normalized; tables partially restored.
 
 **BioETL note:** unknown-params defaults below are for *generic* multi-repo
 use. On this repository, apply library fragments (`debt-budget-ban`,
