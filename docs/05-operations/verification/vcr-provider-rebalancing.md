@@ -28,7 +28,7 @@ Maintain balanced VCR cassette coverage across bibliography providers.
 ## Prerequisites
 
 ```bash
-uv sync --frozen --extra dev --extra tracing
+uv sync --frozen --extra dev --extra tests --extra tracing
 ```
 
 ## Record Commands (Provider-Specific)

@@ -49,7 +49,7 @@ if (Get-Command uv -ErrorAction SilentlyContinue) {
 
     $env:VIRTUAL_ENV = $VenvDir
     $env:PATH = "$VenvDir\Scripts;$env:PATH"
-    & uv sync --active --extra dev --extra tracing
+    & uv sync --active --extra dev --extra tests --extra tracing
     if ($LASTEXITCODE -ne 0) {
         Write-Error "[setup_env_windows][error] uv sync failed."
         Write-Host "[setup_env_windows][hint] Retry with the same command; UV_HTTP_TIMEOUT defaults to $env:UV_HTTP_TIMEOUT seconds."
@@ -62,7 +62,7 @@ if (Get-Command uv -ErrorAction SilentlyContinue) {
     $InstalledExtras = @()
     $OptionalFailures = 0
     foreach ($Extra in $OptionalExtras) {
-        $SyncArgs = @("sync", "--active", "--frozen", "--no-build", "--extra", "dev", "--extra", "tracing")
+        $SyncArgs = @("sync", "--active", "--frozen", "--no-build", "--extra", "dev", "--extra", "tests", "--extra", "tracing")
         foreach ($Installed in $InstalledExtras) { $SyncArgs += @("--extra", $Installed) }
         $SyncArgs += @("--extra", $Extra)
         & uv @SyncArgs
@@ -91,7 +91,7 @@ if (Get-Command uv -ErrorAction SilentlyContinue) {
         Write-Host "[setup_env_windows][hint] Reusing existing .venv-win; refreshing editable install."
     }
 
-    Invoke-CheckedCommand -Command { & $VenvPython -m pip install -e ".[dev,tracing]" } -ErrorMessage "[setup_env_windows][error] editable install failed."
+    Invoke-CheckedCommand -Command { & $VenvPython -m pip install -e ".[dev,tests,tracing]" } -ErrorMessage "[setup_env_windows][error] editable install failed."
     $OptionalExtras = @()
     if ($AgentTools -in @("agentdebugx", "all")) { $OptionalExtras += "agentdebugx" }
     if ($AgentTools -in @("proofagent", "all")) { $OptionalExtras += "proofagent" }

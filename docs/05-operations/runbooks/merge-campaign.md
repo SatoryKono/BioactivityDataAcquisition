@@ -40,7 +40,7 @@ ______________________________________________________________________
 ```bash
 git checkout -b consolidation/<campaign> main
 git rev-parse HEAD | tee baseline.sha
-uv sync --frozen --all-extras --dev
+uv sync --frozen --extra dev --extra tests --extra tracing
 ```
 
 ### 2) Run campaign gates (pre-merge)
