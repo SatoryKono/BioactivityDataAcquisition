@@ -716,7 +716,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Confidence marker for current provider telemetry evidence. PRESENT means at least one selected-provider status series exists; missing evidence is fail-closed UNKNOWN and must never be read as healthy.",
+      "description": "Confidence marker for current provider telemetry evidence. PRESENT means at least one selected-provider status series exists; missing evidence is fail-closed UNKNOWN and must never be read as healthy. Alias mapping: PRESENT=OK.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -960,7 +960,12 @@
                   }
                 ]
               },
-              "unit": "percent"
+              "unit": "percent",
+              "custom": {
+                "cellOptions": {
+                  "type": "auto"
+                }
+              }
             },
             "overrides": []
           },
@@ -1681,7 +1686,7 @@
           ],
           "title": "Monitor Available Rate-Limit Tokens",
           "type": "bargauge",
-          "description": "Compact optional selected-range evidence: minimum provider tokens available in the active Grafana range. Lower values indicate higher rate-limit pressure; 0 means requests can be blocked. No data remains diagnostic and means no token samples were observed in range. This optional telemetry can stay empty even when current provider severity is non-OK"
+          "description": "Compact optional selected-range evidence: minimum provider tokens available in the active Grafana range. Lower values indicate higher rate-limit pressure; 0 means requests can be blocked. No data remains diagnostic and means no token samples were observed in range. This optional telemetry can stay empty even when current provider severity is non-OK Numeric token count is primary; sequential color is secondary."
         },
         {
           "datasource": {

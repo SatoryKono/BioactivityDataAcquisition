@@ -177,7 +177,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "gray",
+                "color": "green",
                 "value": null
               },
               {
@@ -2035,7 +2035,7 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto",
+            "textMode": "value",
             "dataLinks": [
               {
                 "title": "Open Runtime Troubleshooting Runbook",
@@ -2783,8 +2783,12 @@
                   "type": "value",
                   "options": {
                     "0": {
-                      "text": "0",
+                      "text": "0 blockers",
                       "color": "gray"
+                    },
+                    "1": {
+                      "text": "CRIT",
+                      "color": "red"
                     }
                   }
                 },
@@ -2836,7 +2840,7 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto",
+            "textMode": "value",
             "dataLinks": [
               {
                 "title": "Open Runtime Troubleshooting Runbook",
