@@ -38,7 +38,7 @@ This archive is **opt-in only** (Phase 3 / #8517).
 | `specialized-prompts-1-scripts-inventory.md` | same |
 | `specialized-prompts-2-coderabbit-audit.md` | `docs/03-guides/coderabbit-audit-playbook.md` |
 | `pre-library-*.md` | matching `library/**` cards |
-| `generic-nine-audit-kit-2026-08.md` (+ SOURCES) | `library/audit/*` domain cards |
+| `generic-nine-audit-kit-2026-08.md` (+ SOURCES) | `prompt.audit.generic-nine.pack` + `library/audit/*` domain cards |
 | `project-audit-orchestrator-kit-2026-08-11.md` (+ SOURCES) | `library/audit/orchestrator.md` |
 | `bi-dashboard-audit-kit-2026-08-11.md` (+ SOURCES) | `library/observability/bi-dashboard-acceptance.md` |
 

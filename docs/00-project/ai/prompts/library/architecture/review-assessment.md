@@ -1,6 +1,6 @@
 ---
 id: prompt.architecture.review
-version: 2.3.0
+version: 2.4.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -18,6 +18,7 @@ includes:
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/shell-portability.md
+  - fragments/generic-nine-contract.md
 related_ssot:
   - AGENTS.md
   - docs/00-project/RULES.md
@@ -36,12 +37,14 @@ max_body_lines: 150
 
 # Architecture review and refactoring assessment
 
+**Kit:** prompt 9 of `prompt.audit.generic-nine.pack`.
 Restore **actual** architecture from code, manifests, infra, CI, and runtime
 relationships; compare to documented architecture. Separate proven fact from
-inference. Default mode does **not** apply code changes.
+inference. Default mode does **not** apply code changes. C4 «container» is
+not Docker unless proven.
 
-Full generic megaprompts (archive):  
-`archive/campaigns/generic-nine-audit-kit-2026-08.md` (prompt 9);  
+Full generic megaprompts (archive):
+`archive/campaigns/generic-nine-audit-kit-2026-08.md` (prompt 9);
 `archive/campaigns/project-audit-orchestrator-kit-2026-08-11.md` (architecture + loop).
 
 
@@ -81,14 +84,27 @@ Full generic megaprompts (archive):
    reducing only).
 7. If `MODE=propose-patches`: minimal patches only after operator approval.
 
+## Surface score (this domain)
+
+| Score | Meaning |
+| --- | --- |
+| 3 | Boundaries clear; deps controlled; quality goals/ADR current; docs match code |
+| 2 | Consistent architecture; local drift or a few implicit contracts |
+| 1 | Cycles / hidden deps / unrecorded decisions raise change cost |
+| 0 | Critical boundaries missing, or architecture creates security/reliability/data risk |
+
+P0: broken authz / uncontrolled data ownership / catastrophic single failure.
+P1: critical coupling, unsafe deploy, migration risk, core-path cycle.
+P2: drift / change amplification. P3: incomplete diagram/ADR metadata.
+No whole-repo code-level diagram.
+
 ## Output
 
-- `reports/audit/architecture/report.md`
-- `reports/audit/architecture/findings.json` (finding-schema)
-- optional extras listed below or in method notes
-- `surface_score` 0–3 (map any 0–5 dimensions via audit-scale)
-- findings per finding-schema; top remediations
-- `MODE=propose-patches` / write modes: only after operator approval and ALLOW flags when orchestrated
+- `reports/audit/architecture/report.md` + `findings.json`
+- kit extras: `system-context.mmd`, `container-view.mmd`, machine-readable
+  dependency graph, `boundary-violations.csv`, `runtime-scenarios.md`,
+  `adr-gaps.md`, `architecture-risk-register.csv`, roadmap (quick / tactical / strategic)
+- `surface_score` 0–3; remediations; `MODE=propose-patches` only with approval
 
 ## Stop
 

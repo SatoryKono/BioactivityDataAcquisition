@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.repo-tree
-version: 1.1.0
+version: 1.2.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -18,6 +18,7 @@ includes:
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/shell-portability.md
+  - fragments/generic-nine-contract.md
 related_ssot:
   - AGENTS.md
   - .github/root-allowlist.txt
@@ -34,6 +35,7 @@ max_body_lines: 140
 
 # Repo tree / root hygiene audit
 
+**Kit:** prompt 4 of `prompt.audit.generic-nine.pack`.
 Audit the tree for ambiguity, accidental artifacts, generated noise, large
 files, and config drift. Prefer structure that matches real
 architecture/build/test boundaries. Highest priority: secrets, binaries, and
@@ -68,14 +70,24 @@ generated content wrongly under version control.
 5. Dry-run only: `git clean -ndX` / `git clean -n` — never delete in audit.
 6. Flag competing bootstraps; unclear tests/docs/scripts placement.
 
+## Surface score (this domain)
+
+| Score | Meaning |
+| --- | --- |
+| 3 | Root minimal; generated/cache excluded; tree matches real boundaries |
+| 2 | Small historical clutter without material impact |
+| 1 | Noise, duplication, source/generated mix, or unclear ownership |
+| 0 | Secrets, dangerous binaries, uncontrolled generated files, or broken reproducibility |
+
+P0: secrets/keys. P1: supply-chain/build artifacts. P2: structural
+ambiguity. P3: cosmetic. No mass moves without a migration plan.
+
 ## Output
 
-- `reports/audit/repo-tree/report.md`
-- `reports/audit/repo-tree/findings.json` (finding-schema)
-- optional extras listed below or in method notes
-- `surface_score` 0–3 (map any 0–5 dimensions via audit-scale)
-- findings per finding-schema; top remediations
-- `MODE=propose-patches` / write modes: only after operator approval and ALLOW flags when orchestrated
+- `reports/audit/repo-tree/report.md` + `findings.json`
+- kit extras: `root-inventory.csv`, `large-files.csv`, `ignore-gaps.txt`,
+  `generated-files.csv`, `current-vs-target-tree.md`
+- `surface_score` 0–3; remediations; `MODE=propose-patches` only with approval
 
 ## Stop
 
