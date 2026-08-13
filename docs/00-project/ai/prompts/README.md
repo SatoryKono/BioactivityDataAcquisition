@@ -88,6 +88,7 @@ docs/00-project/ai/prompts/
 | `prompt.observability.dashboard-panel-audit` | [library/observability/dashboard-panel-audit.md](library/observability/dashboard-panel-audit.md) | Grafana panel audit (5 phases, v1.1) |
 | `prompt.observability.bi-dashboard-acceptance` | [library/observability/bi-dashboard-acceptance.md](library/observability/bi-dashboard-acceptance.md) | BI acceptance: visual / layout / data |
 | `prompt.observability.dashboard-audit-cycle` | [library/observability/dashboard-audit-cycle.md](library/observability/dashboard-audit-cycle.md) | Exhaustive cyclic audit of every panel × viewport — density, typography, color, scroll, whitespace, data, render (v2.0) |
+| `prompt.observability.grafana-six.pack` | [library/observability/grafana-six/pack.md](library/observability/grafana-six/pack.md) | Read-only **six-prompt** Grafana kit (evidence → visual/layout/data → consolidate → reverify) |
 
 ### Domain audit cards (nine-kit intake)
 
@@ -156,6 +157,7 @@ Artifacts → `reports/audit/<domain>/` or `reports/audit-runs/<run_id>/`.
 
 | Need | Card |
 | --- | --- |
+| **Read-only** six-prompt kit (evidence → visual ∥ layout ∥ data → consolidate → reverify) | `prompt.observability.grafana-six.pack` → [grafana-six/](library/observability/grafana-six/README.md) |
 | **Cyclic** audit → issues → fix → re-verify | `prompt.observability.dashboard-audit-cycle` |
 | Per-panel render/query → issues → fix (one shot) | `prompt.observability.dashboard-panel-audit` |
 | Acceptance only: a11y, layout, data DQ | `prompt.observability.bi-dashboard-acceptance` |
