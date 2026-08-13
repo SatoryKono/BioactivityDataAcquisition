@@ -29,8 +29,11 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
+import sys
 from collections.abc import Sequence
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 import yaml
@@ -54,6 +57,95 @@ def _spec(
             else {"bioetl": "bioetl:test@sha256:expected"}
         ),
     )
+
+
+def test_direct_script_help_bootstraps_repository_imports(tmp_path: Path) -> None:
+    script = Path(runtime_manager.__file__).resolve()
+
+    result = subprocess.run(
+        [sys.executable, str(script), "--help"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=30,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "ensure-networks" in result.stdout
+
+
+def test_windows_entrypoint_uses_shared_process_local_env_loader() -> None:
+    wrapper = (
+        runtime_manager.ROOT / "scripts/ops/docker-setup.ps1"
+    ).read_text(encoding="utf-8")
+
+    assert "scripts/ai/mcp/support/load_repo_env.ps1" in wrapper
+    assert '$env:BIOETL_SKIP_ENV_LOCAL = "1"' in wrapper
+    assert "Import-BioetlRepoEnv -RepoRoot $ProjectRoot" in wrapper
+    assert '.venv-win/Scripts/python.exe' in wrapper
+    assert '"ensure-networks"' in wrapper
+    assert '"grafana-preflight"' in wrapper
+    assert "SetEnvironmentVariable" not in wrapper
+    assert "Set-Content" not in wrapper
+    assert "Add-Content" not in wrapper
+
+
+@pytest.mark.parametrize("action", ["start", "recover"])
+def test_failed_start_or_recover_prints_redacted_bounded_json_summary(
+    action: str,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    report = tmp_path / "docker-incident-main.json"
+    runtime_manager.write_report(
+        report,
+        {
+            "primary_cause": "preflight_failed",
+            "token": "ghp_abcdefghijklmnop",
+        },
+    )
+    monkeypatch.setattr(
+        runtime_manager,
+        "_materialize_report_source_identity",
+        lambda **_kwargs: None,
+    )
+    monkeypatch.setattr(
+        runtime_manager,
+        "start_or_recover",
+        lambda *_args, **_kwargs: 1,
+    )
+    args = SimpleNamespace(
+        action=action,
+        timeout=180.0,
+        max_attempts=3,
+        poll_interval=2.0,
+        stabilization_seconds=5.0,
+    )
+
+    result = runtime_manager._dispatch_action(
+        args,
+        spec=_spec(),
+        contract_path=Path("contract.yml"),
+        report_dir=tmp_path,
+        runner=lambda command, cwd, timeout: runtime_manager.CommandResult(
+            list(command), 0
+        ),
+    )
+
+    assert result == 1
+    output = capsys.readouterr().out.strip()
+    payload = json.loads(output)
+    assert payload == {
+        "action": action,
+        "ok": False,
+        "primary_cause": "preflight_failed",
+        "report": str(report),
+        "stack": "main",
+    }
+    assert "ghp_" not in output
+    assert len(output) < 1000
 
 
 def test_dashboard_runtime_environment_is_scoped_and_managed(tmp_path: Path) -> None:
