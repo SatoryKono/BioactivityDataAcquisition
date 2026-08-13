@@ -115,10 +115,28 @@ The following scripts in `scripts/engineering/dev/` are Zed-safe wrappers:
 - Automatic on save via Ruff
 - Can also trigger manually via code actions (`Ctrl+Space`)
 
-### Navigation
-- `F12` - Go to definition
-- `Shift+F12` - Find all references
-- `Alt+Left/Right` - Back/forward navigation
+### Git Graph (built-in, Zed ≥ 0.231)
+
+Git Graph is native (not a VS Code extension). It **does not poll on a timer**.
+It reloads when HEAD or the branch list changes — after `git: fetch` / pull /
+local commit, or when you reopen the tab.
+
+| Action | Shortcut |
+| --- | --- |
+| Git Panel | `Ctrl+Shift+G` |
+| Open Git Graph | `Ctrl+Alt+Shift+G` |
+| Fetch remotes (refresh graph) | `Ctrl+Alt+F` |
+| Go to line | `Ctrl+;` |
+
+Or Command Palette: `git graph: Open`, `git: Fetch`.
+
+Also: Git Panel → History / the graph button at the **bottom** of the panel.
+
+`Ctrl+G` is **not** remapped here so Zed's git chord (`ctrl-g ctrl-g` fetch,
+`ctrl-g d` diff) still works. Go-to-line is `Ctrl+;`.
+
+On this repo (`/mnt/e/...`) `git status` can be slow; if the graph spins,
+fetch from a native NTFS worktree or wait for the scan to finish.
 
 ## Troubleshooting
 

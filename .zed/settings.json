@@ -189,6 +189,23 @@
     "indent_size": 4,
     "indent_guides": true
   },
+  "git_panel": {
+    "button": true,
+    "dock": "right",
+    "tree_view": true,
+    "status_style": "icon",
+    "sort_by": "path",
+    "group_by": "status",
+    "show_count_badge": true,
+    "diff_stats": true
+  },
+  "git": {
+    "inline_blame": {
+      "enabled": true,
+      "show_commit_summary": true
+    },
+    "git_gutter": "tracked_files"
+  },
   "search": {
     "case_sensitive": false,
     "regex": false,
