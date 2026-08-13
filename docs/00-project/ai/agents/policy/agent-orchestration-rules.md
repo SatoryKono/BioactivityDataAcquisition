@@ -15,10 +15,12 @@ ______________________________________________________________________
 
 *Статус: internal-published (Internal / Extended)*
 
-*Версия: 2.1.0 | Синхронизировано с ORCHESTRATION.md v4.2 (2026-03-26)*
+*Версия: 2.2.0 | Pointer only — runtime SSOT is `.codex/agents/ORCHESTRATION.md`*
 
-Компактные правила оркестрации субагентов для Codex/Claude docs mirror.
-Полная спецификация: `docs/00-project/ai/agents/agents/ORCHESTRATION.md`.
+Компактные правила оркестрации. Этот файл — docs mirror и **не** задаёт
+поведение. Канон: `.codex/agents/ORCHESTRATION.md` и `.codex/agents/CODEX-RUNTIME.md`.
+Для Devin: `.devin/agents/ORCHESTRATION.md`. Не хардкодить version literals runtime
+ORCHESTRATION.
 
 ______________________________________________________________________
 
@@ -26,16 +28,14 @@ ______________________________________________________________________
 
 При работе с проектом BioETL используй специализированных субагентов через `Agent` tool:
 
-| `subagent_type`          | Model  | Назначение                                          | Зона записи             |
-| ------------------------ | ------ | --------------------------------------------------- | ----------------------- |
-| `py-audit-bot`           | opus   | Аудит кода, arch boundaries, code review            | read-only               |
-| `py-plan-bot`            | opus   | Планирование RF-\*, декомпозиция задач              | read-only               |
-| `py-test-bot`            | sonnet | Тесты (baseline/final/retest), coverage             | `tests/`                |
-| `py-config-bot`          | sonnet | YAML configs (pipeline/DQ/filter)                   | `configs/`              |
-| `py-debug-bot`           | opus   | RCA падений тестов, исправление ошибок              | `src/bioetl/`, `tests/` |
-| `py-doc-bot`             | sonnet | Документация, ADR, CHANGELOG, docstrings, диаграммы | `docs/`, docstrings     |
-| `py-test-bot`          | opus   | Иерархическое тестирование (L1→L2→L3)               | `tests/`, `reports/`    |
-| `py-audit-bot` | opus   | Иерархический code review (S1-S8)                   | `reports/`              |
+| `subagent_type` | Model | Назначение | Зона записи |
+| --- | --- | --- | --- |
+| `py-audit-bot` | inherit parent | Audit, review, debt, reproducibility | read-only |
+| `py-plan-bot` | inherit parent | Планирование RF-\*, декомпозиция задач | read-only |
+| `py-debug-bot` | inherit parent | RCA и remediation guidance | read-only |
+| `py-test-bot` | inherit parent | Тесты (baseline/final/retest), coverage | `tests/` |
+| `py-config-bot` | inherit parent | YAML configs (pipeline/DQ/filter) | `configs/` |
+| `py-doc-bot` | inherit parent | Документация, ADR, CHANGELOG, диаграммы | `docs/`, docstrings |
 
 > Production-код пишем напрямую (без отдельного субагента).
 

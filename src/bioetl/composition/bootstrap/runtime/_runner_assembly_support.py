@@ -77,7 +77,10 @@ class CompositeRunnerServiceInputs:
     clock: ClockPort | None = None
 
 
-CompositeRunnerFactory = Callable[..., CompositePipelineRunner]
+CompositeRunnerFactory = Callable[
+    [CompositeRunnerServiceInputs],
+    CompositePipelineRunner,
+]
 
 
 def resolve_effective_run_id(run_id: str | None) -> str:

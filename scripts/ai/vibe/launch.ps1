@@ -74,8 +74,10 @@ if ($Args.Count -eq 0) {
     wsl -e bash -c "$EnvPrelude && vibe --workdir '$WSLRepoRoot'"
 } else {
     $PromptText = $Args -join ' '
-    Write-MistralInfo "Prompt: $PromptText"
-    wsl -e bash -c "$EnvPrelude && vibe --workdir '$WSLRepoRoot' '$PromptText'"
+    Write-MistralInfo "Prompt length: $($PromptText.Length) chars"
+    $PromptB64 = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($PromptText))
+    # Base64 payload only — never interpolate raw prompt into bash -c.
+    wsl -e bash -c "$EnvPrelude && vibe --workdir '$WSLRepoRoot' \"\$(printf '%s' '$PromptB64' | base64 -d)\""
 }
 
 exit $LASTEXITCODE

@@ -35,6 +35,28 @@ from bioetl.application.services.control_plane.replay.reproducibility_score_card
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_types import (
     ScoreCardRecord as ScoreCardRecord,
 )
+<<<<<<< Updated upstream
+||||||| Stash base
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_types import (
+    string_items as string_items,
+)
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_types import (
+    supported_boundary_block_reason as supported_boundary_block_reason,
+)
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_types import (
+    bounded as bounded,
+)
+=======
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_types import (
+    bounded as bounded,
+)
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_types import (
+    string_items as string_items,
+)
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_types import (
+    supported_boundary_block_reason as supported_boundary_block_reason,
+)
+>>>>>>> Stashed changes
 
 __all__ = [
     "PROFILE_SCORE_THRESHOLDS",
