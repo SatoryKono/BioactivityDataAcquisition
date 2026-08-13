@@ -265,9 +265,11 @@ QA image, rule fixtures, and monitoring-profile pins in one reviewed change.
      `unmanaged` означает неуправляемый/stale runtime.
   1. Выполните
      `python scripts/ops/runtime/docker/runtime_manager.py status --stack main`
-     и устраните `DASHBOARD_SOURCE_MOUNT` / `DASHBOARD_SOURCE_IDENTITY`.
+     и устраните `DASHBOARD_REPORT_SOURCE_IDENTITY` /
+     `DASHBOARD_SOURCE_MOUNT` / `DASHBOARD_SOURCE_IDENTITY`.
      Эти ошибки означают, что `/app/data` или `/app/reports` читаются из
-     другого checkout.
+     другого checkout либо `reports/.bioetl-report-source.json` не совпадает с
+     managed runtime source ID.
   1. Убедитесь, что Grafana datasource **BioETL Ops HTTP** указывает на
      `http://bioetl:8000` (или `BIOETL_OPS_HTTP_URL` override).
   1. Infinity plugin must be available for HTTP panels

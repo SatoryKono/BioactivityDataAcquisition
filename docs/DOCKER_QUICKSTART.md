@@ -168,10 +168,17 @@ python scripts/ops/runtime/docker/runtime_manager.py status --stack main
 
 Readiness: `http://127.0.0.1:8000/health/ready`
 
-Readiness includes `checks.report_root` (bind-identity marker
-`reports/.bioetl-report-root`). With `BIOETL_ENFORCE_REPORT_ROOT_MARKER=1`
-(default in `docker-compose.yml`), a missing marker makes ready **unhealthy**
-so Grafana Browse Recent Runs cannot silently read an empty stale bind.
+Readiness includes `checks.report_root` with two independent checks:
+
+- tracked layout marker `reports/.bioetl-report-root`;
+- ignored machine-local source attestation
+  `reports/.bioetl-report-source.json`.
+
+With `BIOETL_ENFORCE_REPORT_ROOT_MARKER=1` (default in
+`docker-compose.yml`), either an invalid layout or a source identity that does
+not match `BIOETL_RUNTIME_SOURCE_ID` makes ready **unhealthy**. The source
+attestation is written atomically by `runtime_manager start|recover --stack
+main`; raw `docker compose up` remains unmanaged and fails closed.
 
 Verify host vs container report trees:
 
@@ -179,9 +186,11 @@ Verify host vs container report trees:
 python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay
 ```
 
-`runtime_manager.py` also binds this checkout's exact `data/` and `reports/`
-directories and injects a managed `BIOETL_RUNTIME_SOURCE_ID`. Check the
-dashboard data-plane identity with:
+`runtime_manager.py` binds the explicitly selected `data/` and `reports/`
+directories and injects a managed `BIOETL_RUNTIME_SOURCE_ID`. Absolute Windows,
+WSL (`/mnt/<drive>/...`), and Docker Desktop host path spellings normalize to
+one comparison identity; transient `docker-desktop-bind-mounts/<hash>` origins
+remain rejected. Check the dashboard data-plane identity with:
 
 ```bash
 curl http://127.0.0.1:8000/ops/control-plane/ready
@@ -189,7 +198,16 @@ curl http://127.0.0.1:8000/ops/control-plane/ready
 
 The returned `runtime_source_id` must be a 64-character SHA-256 value, not
 `null` or `unmanaged`. A raw `docker compose up` does not establish this
-identity.
+identity. `runtime_manager check|status` reports
+`DASHBOARD_REPORT_SOURCE_IDENTITY` for a missing/foreign attestation;
+`start|recover` materializes the intended identity before preflight and then
+the post-start verifier confirms it end to end.
+
+Identity resolution is deterministic and fail-closed. Precedence is computed
+runtime root → process environment → repository env loader → container
+environment → container label. Diagnostics classify the independently checked
+layout marker and identity as `missing`, `invalid`, `foreign`, or `aligned`;
+an invalid higher-precedence candidate is never replaced by a lower one.
 
 ## Monitoring stack (opt-in only)
 

@@ -162,6 +162,16 @@ def test_list_pipeline_payloads_includes_report_root_diagnostics(
     assert payload["count"] == 1
     assert payload["report_root"] == str(tmp_path.as_posix())
     assert payload["marker_status"] in {"healthy", "unhealthy"}
+    assert payload["source_identity_status"] in {"healthy", "unhealthy"}
+    assert payload["source_identity_state"] in {
+        "missing",
+        "invalid",
+        "foreign",
+        "aligned",
+    }
+    assert "source_identity_resolution_source" in payload
+    assert "source_identity_expected" in payload
+    assert "source_identity_actual" in payload
     assert payload["items"][0]["run_id"] == "run1"
 
 
