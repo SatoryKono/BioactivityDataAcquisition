@@ -38,7 +38,12 @@ def _write_executable(path: Path, content: str) -> None:
     path.chmod(0o755)
 
 
-def _run_launcher(tmp_path: Path, *args: str) -> subprocess.CompletedProcess[str]:
+def _run_launcher(
+    tmp_path: Path,
+    *args: str,
+    api_key: str | None = "test-api-key",
+    auth_status_exit: int = 0,
+) -> subprocess.CompletedProcess[str]:
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
     capture_path = tmp_path / "coderabbit-commands.txt"
@@ -61,17 +66,24 @@ fi
         """#!/usr/bin/env bash
 set -euo pipefail
 printf '%s\n' "$*" >> "$CODERABBIT_CAPTURE"
+if [[ "${1:-}" == "auth" && "${2:-}" == "status" ]]; then
+  exit "$CODERABBIT_AUTH_STATUS_EXIT"
+fi
 """,
     )
 
     env = {
         **os.environ,
         "PATH": f"{bin_dir}{os.pathsep}{os.environ.get('PATH', '')}",
-        "CODERABBIT_API_KEY": "test-api-key",
         "CODERABBIT_CAPTURE": str(capture_path),
+        "CODERABBIT_AUTH_STATUS_EXIT": str(auth_status_exit),
         "FAKE_REPO_ROOT": str(ROOT),
         "FAKE_BASE_COMMIT": FAKE_BASE_COMMIT,
     }
+    if api_key is None:
+        env.pop("CODERABBIT_API_KEY", None)
+    else:
+        env["CODERABBIT_API_KEY"] = api_key
     env.pop("CODERABBIT_BASE_COMMIT", None)
     env.pop("CODERABBIT_REVIEW_LOG_DIR", None)
 
@@ -126,6 +138,41 @@ def test_base_ref_is_normalized_in_generated_review_command(tmp_path: Path) -> N
         "auth login --api-key test-api-key",
         f"review --base-commit={FAKE_BASE_COMMIT}",
     ]
+
+
+def test_cached_credentials_are_accepted_without_api_key(tmp_path: Path) -> None:
+    result = _run_launcher(
+        tmp_path,
+        "1",
+        "--base=origin/main",
+        "--coderabbit-only",
+        "--log-dir",
+        str(tmp_path / "logs"),
+        api_key=None,
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert _captured_commands(tmp_path) == [
+        "auth status",
+        f"review --base-commit={FAKE_BASE_COMMIT}",
+    ]
+
+
+def test_absent_api_key_and_invalid_cache_abort_before_review(tmp_path: Path) -> None:
+    result = _run_launcher(
+        tmp_path,
+        "1",
+        "--base=origin/main",
+        "--coderabbit-only",
+        "--log-dir",
+        str(tmp_path / "logs"),
+        api_key=None,
+        auth_status_exit=1,
+    )
+
+    assert result.returncode == 1
+    assert "No CodeRabbit credentials" in result.stderr
+    assert _captured_commands(tmp_path) == ["auth status"]
 
 
 @pytest.mark.parametrize(

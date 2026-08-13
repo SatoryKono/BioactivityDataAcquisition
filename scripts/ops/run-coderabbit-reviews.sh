@@ -27,7 +27,7 @@ Topics:
   all) all five reviews in sequence
 
 Environment:
-  CODERABBIT_API_KEY (required for CodeRabbit review)
+  CODERABBIT_API_KEY (optional when `coderabbit auth login` credentials are cached)
 
 Examples:
   ./scripts/ops/run-coderabbit-reviews.sh 1
@@ -66,21 +66,33 @@ ensure_base() {
   BASE_COMMIT="HEAD~1"
 }
 
-run_coderabbit() {
+ensure_coderabbit_auth() {
   if [[ -n "${CODERABBIT_API_KEY:-}" ]]; then
-    command -v coderabbit >/dev/null || {
-      echo "[ERROR] coderabbit CLI not installed. Install with: curl -fsSL https://cli.coderabbit.ai/install.sh | sh" >&2
-      return 1
-    }
-  else
-    echo "[ERROR] CODERABBIT_API_KEY is not set" >&2
-    return 1
+    run_cmd "CodeRabbit auth/login" coderabbit auth login --api-key "$CODERABBIT_API_KEY"
+    return 0
   fi
+
+  # A prior `coderabbit auth login` persists credentials in ~/.coderabbit/auth.json,
+  # so an unset key is not by itself a failure.
+  if run_cmd "CodeRabbit auth/status" coderabbit auth status; then
+    return 0
+  fi
+
+  echo "[ERROR] No CodeRabbit credentials: export CODERABBIT_API_KEY or run 'coderabbit auth login'" >&2
+  return 1
+}
+
+run_coderabbit() {
+  command -v coderabbit >/dev/null || {
+    echo "[ERROR] coderabbit CLI not installed. Install with: curl -fsSL https://cli.coderabbit.ai/install.sh | sh" >&2
+    return 1
+  }
+
+  ensure_coderabbit_auth || return 1
 
   mkdir -p "$LOG_DIR"
   local log_file="$LOG_DIR/coderabbit-${TOPIC}-$(date +%Y%m%d-%H%M%S).log"
 
-  run_cmd "CodeRabbit auth/login" coderabbit auth login --api-key "$CODERABBIT_API_KEY"
   run_cmd "CodeRabbit review against $BASE_COMMIT" coderabbit review --base-commit="$BASE_COMMIT" | tee "$log_file"
 }
 
