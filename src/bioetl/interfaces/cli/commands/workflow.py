@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING
 
 import click
 
@@ -270,9 +270,7 @@ def run_workflow_command(
     Click injects option values into ``raw_options``; they are packed into
     :class:`WorkflowCommandOptions` to stay under the Sonar S107 parameter budget.
     """
-    options = WorkflowCommandOptions.from_click_kwargs(
-        cast(dict[str, Any], raw_options)  # Any: Click kwargs bag before packing
-    )
+    options = WorkflowCommandOptions.from_click_kwargs(raw_options)
     _validate_run_workflow_options(
         incremental=options.incremental,
         resume_last=options.resume_last,

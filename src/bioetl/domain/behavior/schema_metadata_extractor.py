@@ -99,7 +99,7 @@ def _extract_schema_columns(
         schema_instance = _safe_to_schema(gold_schema)
     except (AttributeError, TypeError, ValueError):
         return []
-    except Exception as exc:  # noqa: BLE001 — narrow to Pandera when present
+    except Exception as exc:
         if not _is_pandera_schema_error(exc):
             raise
         return []

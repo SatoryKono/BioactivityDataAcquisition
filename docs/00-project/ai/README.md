@@ -92,9 +92,12 @@ See [AI Runtime Mirror Ownership](agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
   (`prompt.audit.grok-cycle`, v2.2)
 - Domain audits: `prompt.audit.docs-content`, `tests-system`, `tech-debt`,
   `repo-tree`, `github-actions`, `agents-runtime`, `diagrams`, `docs-pipeline`
+- Ten-domain cyclic pack: `prompt.audit.cycle.*` in
+  [prompts/library/audit/cycle/](prompts/library/audit/cycle/README.md)
 - Orchestrated loop: `prompt.audit.orchestrator`
 - BI acceptance: `prompt.observability.bi-dashboard-acceptance`
-- Cyclic dashboards: `prompt.observability.dashboard-audit-cycle`
+- Cyclic dashboards: `prompt.audit.cycle.dashboards` (alias:
+  `prompt.observability.dashboard-audit-cycle`)
 - Cyclic testing: `prompt.tests.cycle` (see
   [prompts/README.md](prompts/README.md))
 - Install skills: `.\scripts\ai\grok\install_skills.ps1`

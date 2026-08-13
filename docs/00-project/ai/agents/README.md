@@ -33,18 +33,18 @@ ______________________________________________________________________
 Ownership and sync rules are fixed in
 [AI Runtime Mirror Ownership](policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
 
-## BioETL Core (8 активных агентов)
+## BioETL Core (6 активных агентов)
 
-| Agent                    | Role             | Primary Responsibility                       |
-| ------------------------ | ---------------- | -------------------------------------------- |
-| `py-audit-bot`           | Compliance Gate  | Code/architecture audit, RULES.md compliance |
-| `py-plan-bot`            | Architect        | Task planning, RF-\* decomposition           |
-| `py-test-bot`            | Tester           | Tests (baseline/final/retest), coverage, VCR |
-| `py-config-bot`          | Config Engineer  | YAML configs (pipeline/DQ/filter)            |
-| `py-debug-bot`           | Troubleshooter   | RCA, bug fixes, regression debugging         |
-| `py-doc-bot`             | Technical Writer | Docs, ADR, CHANGELOG, Mermaid diagrams       |
-| `py-test-swarm`          | QA Orchestrator  | Hierarchical testing (L1->L2->L3)            |
-| `py-review-orchestrator` | Review Lead      | Code review (S1-S8 stages)                   |
+Live runtime set is exactly the six `py-*` profiles in `.codex/agents/` (Junie/Devin peers). Retired names `py-test-swarm` and `py-review-orchestrator` are historical only; their duties live as `py-test-bot` campaigns and `py-audit-bot` modes `review`/`debt`.
+
+| Agent | Role | Primary Responsibility |
+| --- | --- | --- |
+| `py-audit-bot` | Compliance Gate | Code/architecture audit, review, debt, reproducibility |
+| `py-plan-bot` | Architect | Task planning, RF-\* decomposition |
+| `py-test-bot` | Tester | Tests (baseline/final/retest), coverage, VCR |
+| `py-config-bot` | Config Engineer | YAML configs (pipeline/DQ/filter) |
+| `py-debug-bot` | Troubleshooter | RCA and remediation guidance (read-only) |
+| `py-doc-bot` | Technical Writer | Docs, ADR, CHANGELOG, Mermaid diagrams |
 
 ## Related Files
 
