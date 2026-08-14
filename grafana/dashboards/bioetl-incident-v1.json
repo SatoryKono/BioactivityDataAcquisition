@@ -2,7 +2,7 @@
   "annotations": {
     "list": []
   },
-  "description": "Incident Workspace — read-only triage. Active Suspects by domain + current alerts + range alert history. Not a lifecycle/working record.",
+  "description": "Incident Workspace — read-only triage. First screen answers the highest-confidence active suspect. Current alerts, alert history, and impact notes sit in collapsed Review Alert Evidence. Not a lifecycle/working record.",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -434,249 +434,263 @@
       }
     },
     {
-      "id": 2005,
-      "type": "table",
-      "title": "Monitor Current Alerts",
-      "description": "Do not put full UUIDs into Prometheus labels. Instant ALERTS snapshot (firing/pending). Pair with Alert State History as one temporal chain. VALID_EMPTY when none",
+      "id": 2020,
+      "type": "row",
+      "title": "Review Alert Evidence",
       "gridPos": {
-        "h": 6,
+        "h": 1,
         "w": 24,
         "x": 0,
         "y": 18
       },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "targets": [
+      "collapsed": true,
+      "panels": [
         {
-          "expr": "count by (alertname, alertstate) (ALERTS{alertstate=~\"firing|pending\"})",
-          "format": "table",
-          "instant": true,
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "noValue": "None observed",
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto",
-              "wrapText": true
-            },
-            "inspect": true
+          "id": 2005,
+          "type": "table",
+          "title": "Monitor Current Alerts",
+          "description": "Do not put full UUIDs into Prometheus labels. Instant ALERTS snapshot (firing/pending). Pair with Alert State History as one temporal chain. VALID_EMPTY when none",
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 19
           },
-          "color": {
-            "mode": "thresholds"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
           },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "gray",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value)$"
-            },
-            "properties": [
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto"
-                }
-              },
-              {
-                "id": "custom.align",
-                "value": "right"
-              },
-              {
-                "id": "custom.width",
-                "value": 120
-              },
-              {
-                "id": "displayName",
-                "value": "Active Alerts"
-              }
-            ]
-          }
-        ]
-      },
-      "options": {
-        "showHeader": true,
-        "footer": {
-          "show": false
-        },
-        "cellHeight": "sm"
-      }
-    },
-    {
-      "id": 2006,
-      "type": "state-timeline",
-      "title": "Track Alert State History",
-      "description": "Range ALERTS history, not a persistent incident log. State is written in every band and row label; color is redundant. Use Current Alerts for the current verdict.",
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 24
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "targets": [
-        {
-          "expr": "ALERTS{alertstate=~\"firing|pending\"}",
-          "legendFormat": "{{alertstate}} · {{alertname}}",
-          "refId": "A",
-          "instant": false,
-          "range": true
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "noValue": "None observed",
-          "custom": {
-            "fillOpacity": 0,
-            "lineWidth": 0
-          },
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              }
-            ]
-          },
-          "mappings": [
+          "targets": [
             {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "inactive"
-                },
-                "1": {
-                  "text": "active"
-                }
-              }
+              "expr": "count by (alertname, alertstate) (ALERTS{alertstate=~\"firing|pending\"})",
+              "format": "table",
+              "instant": true,
+              "refId": "A"
             }
-          ]
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*firing.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "red"
-                }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "None observed",
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": true
+                },
+                "inspect": true
               },
-              {
-                "id": "mappings",
-                "value": [
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
                   {
-                    "type": "value",
-                    "options": {
-                      "1": {
-                        "text": "FIRING"
-                      }
+                    "color": "gray",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value)$"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto"
                     }
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "right"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 120
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Active Alerts"
                   }
                 ]
               }
             ]
           },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*pending.*"
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false
             },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "orange"
+            "cellHeight": "sm"
+          }
+        },
+        {
+          "id": 2006,
+          "type": "state-timeline",
+          "title": "Track Alert State History",
+          "description": "Range ALERTS history, not a persistent incident log. State is written in every band and row label; color is redundant. Use Current Alerts for the current verdict.",
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 25
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "ALERTS{alertstate=~\"firing|pending\"}",
+              "legendFormat": "{{alertstate}} · {{alertname}}",
+              "refId": "A",
+              "instant": false,
+              "range": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "None observed",
+              "custom": {
+                "fillOpacity": 0,
+                "lineWidth": 0
+              },
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  }
+                ]
+              },
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "inactive"
+                    },
+                    "1": {
+                      "text": "active"
+                    }
+                  }
                 }
+              ]
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": ".*firing.*"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "red"
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "1": {
+                            "text": "FIRING"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
               },
               {
-                "id": "mappings",
-                "value": [
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": ".*pending.*"
+                },
+                "properties": [
                   {
-                    "type": "value",
-                    "options": {
-                      "1": {
-                        "text": "PENDING"
-                      }
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "orange"
                     }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "1": {
+                            "text": "PENDING"
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               }
             ]
-          }
-        ]
-      },
-      "options": {
-        "mergeValues": true,
-        "showValue": "always",
-        "alignValue": "left",
-        "rowHeight": 1.0,
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
+          },
+          "options": {
+            "mergeValues": true,
+            "showValue": "always",
+            "alignValue": "left",
+            "rowHeight": 1.0,
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "maxDataPoints": 400
         },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
+        {
+          "id": 2007,
+          "type": "text",
+          "title": "Assess Impact & Confidence",
+          "description": "DSA-07 structured impact/confidence card (prose template). No owner/ack store",
+          "gridPos": {
+            "h": 4,
+            "w": 24,
+            "x": 0,
+            "y": 33
+          },
+          "options": {
+            "mode": "html",
+            "content": "<div style=\"display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:4px 8px;line-height:1.3;font-size:16px;white-space:normal\"><div><strong>Impact</strong><br>Affected pipeline/provider scope from suspects and current alerts.</div><div><strong>Confidence</strong><br>High with mapped Status + suspects; low with UNKNOWN or missing telemetry.</div><div><strong>Basis</strong><br>Domain label + alertname; read-only evidence, not AI diagnosis.</div></div>"
+          }
         }
-      },
-      "maxDataPoints": 400
-    },
-    {
-      "id": 2007,
-      "type": "text",
-      "title": "Assess Impact & Confidence",
-      "description": "DSA-07 structured impact/confidence card (prose template). No owner/ack store",
-      "gridPos": {
-        "h": 4,
-        "w": 24,
-        "x": 0,
-        "y": 32
-      },
-      "options": {
-        "mode": "html",
-        "content": "<div style=\"display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:4px 8px;line-height:1.3;font-size:16px;white-space:normal\"><div><strong>Impact</strong><br>Affected pipeline/provider scope from suspects and current alerts.</div><div><strong>Confidence</strong><br>High with mapped Status + suspects; low with UNKNOWN or missing telemetry.</div><div><strong>Basis</strong><br>Domain label + alertname; read-only evidence, not AI diagnosis.</div></div>"
-      }
+      ]
     },
     {
       "id": 2099,
@@ -686,7 +700,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 36
+        "y": 19
       },
       "collapsed": true,
       "panels": [

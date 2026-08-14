@@ -68,7 +68,10 @@ EXIT_SCREENSHOTS = 8
 EXIT_CREDENTIALS = 9
 EXIT_BIOETL_TARGET = 10
 EXIT_BIOETL_SOURCE = 11
+EXIT_OPS_HTTP_BOOTSTRAP = 12
 QUARANTINE_EXPLORER_UID = "bioetl-silver-reject-explorer"
+OPS_HTTP_DATASOURCE_UID = "bioetl-ops-http"
+GRAFANA_BOOTSTRAP_STATUS_PATH = "/var/lib/grafana/bioetl-bootstrap-status.json"
 _RUNTIME_SOURCE_ID_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 _COMMIT_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 _MIN_PANEL_BODY_FONT_PX = 16.0
@@ -968,6 +971,153 @@ def _check_screenshot_artifacts(
     )
 
 
+def classify_ops_http_bootstrap(payload: object) -> PreflightCheck:
+    """Classify Grafana bootstrap status without talking to Docker."""
+    if not isinstance(payload, dict):
+        return PreflightCheck(
+            name="ops-http-bootstrap",
+            status="error",
+            detail="Grafana bioetl-bootstrap-status.json is missing or not an object",
+        )
+    ops_http = str(payload.get("ops_http") or "").strip()
+    reason = str(payload.get("reason") or "").strip()
+    if ops_http in {"deferred", "failed"}:
+        return PreflightCheck(
+            name="ops-http-bootstrap",
+            status="error",
+            detail=(
+                f"Grafana Ops HTTP bootstrap is {ops_http} "
+                f"({reason or 'unspecified'}); panel 3010 cannot be a truthful "
+                "healthy/valid-empty render"
+            ),
+        )
+    if ops_http != "ready":
+        return PreflightCheck(
+            name="ops-http-bootstrap",
+            status="error",
+            detail=f"Grafana Ops HTTP bootstrap is {ops_http or 'missing'}",
+        )
+    return PreflightCheck(
+        name="ops-http-bootstrap",
+        status="ok",
+        detail=f"ops_http=ready ({reason or 'identity_matched'})",
+    )
+
+
+def classify_ops_http_datasource_uid(
+    *,
+    http_status: int,
+    payload: object,
+) -> PreflightCheck:
+    """Classify GET /api/datasources/uid/bioetl-ops-http without live Grafana."""
+    if http_status == 404 or http_status >= 400:
+        return PreflightCheck(
+            name="ops-http-datasource",
+            status="error",
+            detail=(
+                f"GET /api/datasources/uid/{OPS_HTTP_DATASOURCE_UID} returned "
+                f"HTTP {http_status}; panel 3010 cannot be healthy/valid-empty"
+            ),
+        )
+    if not isinstance(payload, dict):
+        return PreflightCheck(
+            name="ops-http-datasource",
+            status="error",
+            detail="datasource payload is missing or not an object",
+        )
+    uid = str(payload.get("uid") or "").strip()
+    ds_type = str(payload.get("type") or "").strip()
+    if uid != OPS_HTTP_DATASOURCE_UID:
+        return PreflightCheck(
+            name="ops-http-datasource",
+            status="error",
+            detail=f"datasource uid {uid or 'missing'} is not {OPS_HTTP_DATASOURCE_UID}",
+        )
+    return PreflightCheck(
+        name="ops-http-datasource",
+        status="ok",
+        detail=f"uid={uid} type={ds_type or 'unknown'}",
+    )
+
+
+def classify_panel_3010_terminal_contract() -> PreflightCheck:
+    """Document 3010 Playwright terminal states (no live I/O)."""
+    return PreflightCheck(
+        name="panel-3010-terminal-states",
+        status="ok",
+        detail=(
+            "3010 positive render must classify healthy; successful empty must "
+            "classify valid-empty (noValue starts with VALID EMPTY); missing "
+            "datasource or bootstrap deferred/failed must classify "
+            "explicit-error. explicit-error is not success for positive 3010 "
+            "renders. Use --fallback playwright (Grafana Render API leaves "
+            "terminal state not-checked)."
+        ),
+    )
+
+
+def _read_grafana_bootstrap_status_live() -> object:
+    """Opt-in live read; unit tests must call classify_ops_http_bootstrap."""
+    import subprocess
+
+    completed = subprocess.run(
+        [
+            "docker",
+            "exec",
+            "bioetl-grafana",
+            "cat",
+            GRAFANA_BOOTSTRAP_STATUS_PATH,
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=10.0,
+    )
+    if completed.returncode != 0:
+        return None
+    try:
+        return json.loads(completed.stdout)
+    except json.JSONDecodeError:
+        return None
+
+
+def _check_ops_http_datasource_live(
+    *,
+    grafana_base_url: str,
+    grafana_username: str,
+    grafana_password: str,
+    timeout_seconds: float,
+) -> PreflightCheck:
+    config = rerender_screenshots.RenderConfig(
+        base_url=grafana_base_url.rstrip("/"),
+        username=grafana_username,
+        password=grafana_password,
+        service_account_token=_read_env("GRAFANA_SERVICE_ACCOUNT_TOKEN", ""),
+        output_dir=DEFAULT_SCREENSHOT_DIR,
+        width=rerender_screenshots.DEFAULT_WIDTH,
+        height=rerender_screenshots.DEFAULT_HEIGHT,
+        timeout_seconds=timeout_seconds,
+        selected_uids=(),
+        fallback="auto",
+    )
+    url = f"{config.base_url}/api/datasources/uid/{OPS_HTTP_DATASOURCE_UID}"
+    try:
+        payload = rerender_screenshots._request_json(
+            url,
+            headers=rerender_screenshots._auth_headers(config),
+            timeout_seconds=timeout_seconds,
+        )
+        return classify_ops_http_datasource_uid(http_status=200, payload=payload)
+    except error.HTTPError as exc:
+        return classify_ops_http_datasource_uid(http_status=exc.code, payload=None)
+    except Exception as exc:  # pragma: no cover - exercised by callers
+        return PreflightCheck(
+            name="ops-http-datasource",
+            status="error",
+            detail=f"{url} failed: {exc}",
+        )
+
+
 def run_checks(
     *,
     grafana_base_url: str,
@@ -1003,7 +1153,21 @@ def run_checks(
                 timeout_seconds=timeout_seconds,
             )
         )
+        # Live Ops HTTP bootstrap/UID probes are opt-in with render checks
+        # (monitoring already requested). Default CI uses skip-render-checks.
+        checks.append(
+            classify_ops_http_bootstrap(_read_grafana_bootstrap_status_live())
+        )
+        checks.append(
+            _check_ops_http_datasource_live(
+                grafana_base_url=grafana_base_url,
+                grafana_username=grafana_username,
+                grafana_password=grafana_password,
+                timeout_seconds=timeout_seconds,
+            )
+        )
     if include_semantic_checks:
+        checks.append(classify_panel_3010_terminal_contract())
         checks.append(
             _check_http_json(
                 name="prometheus",
@@ -1202,6 +1366,10 @@ def _exit_code_for_checks(checks: list[PreflightCheck]) -> int:
         != "ok"
     ):
         return EXIT_BIOETL_TARGET
+    if by_name.get("ops-http-bootstrap", PreflightCheck("", "ok", "")).status != "ok":
+        return EXIT_OPS_HTTP_BOOTSTRAP
+    if by_name.get("ops-http-datasource", PreflightCheck("", "ok", "")).status != "ok":
+        return EXIT_OPS_HTTP_BOOTSTRAP
     if by_name.get("quarantine-explorer", PreflightCheck("", "ok", "")).status != "ok":
         return EXIT_QUARANTINE
     if by_name.get("screenshots", PreflightCheck("", "ok", "")).status != "ok":

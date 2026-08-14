@@ -1317,7 +1317,7 @@ def test_control_plane_identity_evidence_panels_exist() -> None:
         "Review Identity Anchors": "view=overview",
         "Review Identity Gaps": "view=gaps",
         "Compare Checkpoint Anchors": "view=checkpoint_compare",
-        "Copy Identity Values": "view=copy_values",
+        "Inspect Identity Values": "view=copy_values",
         "Review Required Replay Anchors": "view=anchors",
         "Review Additional Forensic Anchors": "view=anchors",
     }.items():

@@ -31,10 +31,16 @@ MUST NOT be treated as shipping requirements.
 
 ## 2. Terms and measurement boundaries
 
-- **First window**: top-level, non-row panels whose `gridPos.y < 28`, matching
+- **First window** (answer fold): top-level, non-row panels whose
+  `gridPos.y < FIRST_WINDOW_Y` (`18`, from
+  [`layout-budgets.yaml`](../03-guides/dashboards/contracts/layout-budgets.yaml)).
+  It is the answer-first viewport band where area fills may encode the primary
+  verdict.
+- **First-load budget window**: top-level, non-row panels whose
+  `gridPos.y < FIRST_LOAD_Y_MAX` (`28`, equal to
   [`performance-budgets.yaml`](../03-guides/dashboards/contracts/performance-budgets.yaml)
-  `first_screen_y_max`. It is the answer-first viewport band where area fills
-  may encode the primary verdict.
+  `first_screen_y_max`). It selects panels for PromQL/HTTP first-load budgets
+  only. It is not the visual fold and MUST stay distinct from `FIRST_WINDOW_Y`.
 - **Additional panel group**: a Grafana `row` and its child panels, whether the
   row is shipped collapsed or materialized for audit.
 - **Data-bearing panel**: a non-row panel with at least one enabled query target
@@ -144,6 +150,31 @@ one oversized chart from masking a prose-heavy group.
 | `DASH-PERF-002` | `maxDataPoints`, when set on a panel, MUST be a positive integer within `[1, 5000]`. |
 | `DASH-COPY-002` | Verdict severity cards MUST carry a non-empty `description` and explicit value `mappings` (state encoding; no bare numbers). |
 
+### 6.1 Geometry & purpose regression locks (added 2026-08-14)
+
+Derived from the geometry-grounded proposal
+`reports/quality/dashboard-design-fill-requirements-proposal-2026-08-14.md`. `Status` is
+`enforced` (a shipped test asserts it), `pending` (needs a listed prerequisite), or
+`blocked` (needs render calibration or a layout change).
+
+| ID | Requirement | Status |
+| --- | --- | --- |
+| `DASH-LAYOUT-003` | Every `type:"row"` header MUST have `gridPos.h == 1`. | enforced |
+| `DASH-LAYOUT-004` | Root data-bearing panels MUST meet a type-aware minimum `gridPos.h`: `table >= 5`; `timeseries`/`heatmap`/`state-timeline >= 5`; `stat`/`gauge`/`bargauge >= 3` (verdict cards SHOULD be `>= 4`); `text >= 2`. Nested children inside additional panel groups use the same floors except `table >= 4` (compact forensic tables). Exceptions live in the governed min-height allowlist. | enforced |
+| `DASH-FIT-001` | Always-visible root **non-row** panels MUST have `max(y+h) <= VIEWPORT_ROWS` (`18`, calibrated to the 1366×768 first-viewport / kiosk=tv chrome using Grafana stride 38px). Collapsed row headers MAY sit on or below the fold. | enforced |
+| `DASH-FIT-002` | No always-visible root panel may straddle the fold: `y < FIRST_WINDOW_Y < y+h` is forbidden unless governed-allowlisted. | enforced |
+| `DASH-FIT-003` | The per-dashboard canonical answer panel (§7.1) MUST be a root, non-nested panel with `gridPos.y < FIRST_WINDOW_Y` on every dashboard. | enforced |
+| `DASH-COPY-003` | Every non-row, non-`text`, non-shell content-panel title MUST start with a canonical action verb (design-system §3.1); parsing is colon-tolerant. | enforced |
+| `DASH-COPY-004` | First-window `Monitor*` panels MUST NOT use `$__range` (`Inspect + $__range` forensic panels remain allowed; `$__interval`/fixed windows are not range). | enforced |
+| `DASH-COPY-005` | Non-row content-panel titles MUST be unique within a dashboard and MUST NOT be generic placeholders. | enforced |
+| `DASH-COPY-006` | First-window verdict cards (background `stat` whose mappings encode `OK` plus `WARN`/`CRIT`) MUST state `OK`/`WARN`/`CRIT`/`UNKNOWN` in the description. Documented trust gates (`0. Trust`/`2. Pipeline Diagnostics` `9401`) MUST also state `INCOMPLETE`. Presence/coverage gates without that palette are out of scope. | enforced |
+| `DASH-COPY-007` | Data-typed panels MUST declare ≥1 live target (non-empty PromQL `expr` or Infinity `url`, `hide != true`). | enforced |
+| `DASH-PERF-003` | The answer fold (`FIRST_WINDOW_Y=18`) and the first-load budget window (`FIRST_LOAD_Y_MAX=28`) MUST stay distinct, named constants. | enforced |
+
+Named constants and governed exception allowlists (`owner + rationale + retire_when`)
+live in [`layout-budgets.yaml`](../03-guides/dashboards/contracts/layout-budgets.yaml)
+and are loaded by `tests/integration/_dashboard_layout_budgets.py`.
+
 ## 7. Per-dashboard responsibility
 
 | UID | Required answer |
@@ -155,6 +186,21 @@ one oversized chart from masking a prose-heavy group.
 | `bioetl-dq-v2` | What is the current DQ state, its evidence scope, and first action? |
 | `bioetl-incident-v1` | What is the highest-confidence active suspect? |
 | `bioetl-run-explorer-v1` | Which exact run is selected, and what does its immutable evidence show? |
+
+### 7.1 Canonical answer-panel map (`DASH-FIT-003` input)
+
+The §7 answers map to these root first-window panels. Ids are locked by
+`DASH-FIT-003` against the shipped JSON and `layout-budgets.yaml`.
+
+| UID | Answer panel (title / id) | Notes |
+| --- | --- | --- |
+| `bioetl-control-plane-v1` | `Monitor Replay Readiness` (`9401`) | evidence-aware trust verdict |
+| `bioetl-overview-v2` | `Monitor Fleet Health` (`214`) + `Review First Action` (`215`) | verdict + next route |
+| `bioetl-runtime` | `Monitor Pipeline Status` (`9401`) | trust-gated runtime verdict |
+| `bioetl-provider-health-v2` | `Monitor Fleet Severity` (`9101`) | GLOBAL provider matrix |
+| `bioetl-dq-v2` | `Monitor Current DQ Status` (`9401`) | NOW-lane verdict |
+| `bioetl-incident-v1` | `Inspect Ranked Suspects` (`2010`) | highest-confidence suspect matrix |
+| `bioetl-run-explorer-v1` | `Inspect Run Identity` (`9402`) | `Inspect Recent Runs` (`3010`) is the empty-selection utility, not the answer |
 
 ## 8. Verification contract
 
@@ -168,6 +214,7 @@ one oversized chart from masking a prose-heavy group.
 | Performance | `python -m scripts.engineering.qa check-dashboard-performance-budgets` |
 | Full release render | `python -m scripts.ops run-grafana-audit-cycle` on the supported monitoring host |
 | Structural & integrity invariants (`DASH-DATA-003/004`, `DASH-SEC-001`, `DASH-STATE-003`, `DASH-META-002`, `DASH-LAYOUT-002`, `DASH-LINK-001/002`, `DASH-VIZ-001/002`, `DASH-PERF-002`, `DASH-COPY-002`) | `tests/integration/test_dashboard_structural_invariants.py` |
+| Geometry & purpose regression locks (`DASH-LAYOUT-003/004`, `DASH-FIT-001/002/003`, `DASH-COPY-003/004/005/006/007`, `DASH-PERF-003`) | `tests/integration/test_dashboard_geometry_and_purpose_contracts.py` + [`layout-budgets.yaml`](../03-guides/dashboards/contracts/layout-budgets.yaml) |
 
 Static tests prove repository structure. They do not replace live datasource,
 render, or human usability evidence.

@@ -69,7 +69,7 @@ def _unresolved_pipeline_run_report_shell(
         run_id=run_id,
         pipeline=pipeline,
         status="unresolved_scope",
-        message="run_id not selected; pick a run from Browse Recent Runs",
+        message="run_id not selected; pick a run from Inspect Recent Runs",
     )
 
 

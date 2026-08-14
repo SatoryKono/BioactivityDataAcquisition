@@ -20,8 +20,23 @@ import subprocess
 import pytest
 
 from scripts.engineering.qa import report_debt_governance_gates as gates
+from scripts.engineering.qa import debt_governance_gate_evaluators as gate_evaluators
 
 pytestmark = pytest.mark.unit
+
+
+def _patch_both(
+    monkeypatch: pytest.MonkeyPatch, name: str, value: object
+) -> None:
+    """Patch a helper on both modules that expose it.
+
+    ``debt_governance_gate_evaluators`` re-exports the gate helpers via
+    ``from report_debt_governance_gates import *`` and resolves them in its own
+    module namespace. Patching only ``report_debt_governance_gates`` therefore
+    does not reach the evaluator functions, so we rebind both bindings.
+    """
+    monkeypatch.setattr(gates, name, value, raising=False)
+    monkeypatch.setattr(gate_evaluators, name, value, raising=False)
 
 
 def test_release_review_freshness_gate_passes_for_recent_live_review() -> None:
@@ -75,8 +90,8 @@ def test_release_gate_status_prioritizes_failures_over_warnings() -> None:
 def test_module_coverage_source_tree_hash_gate_fails_for_stale_inventory(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(
-        gates,
+    _patch_both(
+        monkeypatch,
         "_refresh_existing_inventory_source_tree",
         lambda payload, *, repo_root: {"source_tree_sha256": "live-source-hash"},
     )
@@ -95,8 +110,8 @@ def test_module_coverage_source_tree_hash_gate_fails_for_stale_inventory(
 def test_module_coverage_source_tree_hash_gate_passes_for_current_inventory(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(
-        gates,
+    _patch_both(
+        monkeypatch,
         "_refresh_existing_inventory_source_tree",
         lambda payload, *, repo_root: {"source_tree_sha256": "live-source-hash"},
     )
@@ -300,13 +315,13 @@ def test_budget_growth_increases_ignores_flat_or_lower_limits() -> None:
 def test_debt_scorecard_budget_no_growth_gate_fails_on_budget_increase(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(
-        gates,
+    _patch_both(
+        monkeypatch,
         "_load_yaml_from_git_ref",
         lambda repo_root, ref, rel_path: {"family": {"max_count": 3}},
     )
-    monkeypatch.setattr(
-        gates,
+    _patch_both(
+        monkeypatch,
         "_load_yaml",
         lambda repo_root, rel_path: {"family": {"max_count": 4}},
     )
@@ -491,25 +506,25 @@ def test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stal
     # evaluated from the live source-tree hash gate (not short-circuited).
     monkeypatch.delitem(sys.modules, "pytest", raising=False)
     monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
-    monkeypatch.setattr(
-        gates,
+    _patch_both(
+        monkeypatch,
         "_refresh_existing_inventory_source_tree",
         lambda payload, *, repo_root: {"source_tree_sha256": "stale-source-hash"},
     )
-    monkeypatch.setattr(
-        gates,
+    _patch_both(
+        monkeypatch,
         "_artifact_matches_builder",
         lambda *, repo_root, rel_path, payload_builder: True,
     )
     # Avoid full hotspot AST census / remote-main git work; this test only
     # asserts release failure from a stale module-coverage inventory hash.
-    monkeypatch.setattr(
-        gates,
+    _patch_both(
+        monkeypatch,
         "_hotspot_family_baseline_artifact_matches_builder",
         lambda *, repo_root: True,
     )
-    monkeypatch.setattr(
-        gates,
+    _patch_both(
+        monkeypatch,
         "_remote_main_baseline_artifact_matches_builder",
         lambda *, repo_root: True,
     )
@@ -532,20 +547,20 @@ def test_build_payload_tolerates_unavailable_remote_main_baseline_builder(
         gates.PROJECT_ROOT, "reports/quality/module-coverage-inventory.json"
     )
     assert isinstance(module_coverage, dict)
-    monkeypatch.setattr(
-        gates,
+    _patch_both(
+        monkeypatch,
         "_refresh_existing_inventory_source_tree",
         lambda payload, *, repo_root: {
             "source_tree_sha256": module_coverage["source_tree_sha256"]
         },
     )
-    monkeypatch.setattr(
-        gates,
+    _patch_both(
+        monkeypatch,
         "_artifact_matches_builder",
         lambda *, repo_root, rel_path, payload_builder: True,
     )
-    monkeypatch.setattr(
-        gates,
+    _patch_both(
+        monkeypatch,
         "_hotspot_family_baseline_artifact_matches_builder",
         lambda *, repo_root: True,
     )
@@ -572,19 +587,19 @@ def test_build_payload_tolerates_unavailable_remote_main_baseline_builder(
 def test_build_payload_marks_config_surface_backlog_drift_as_stale_artifact(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(
-        gates,
+    _patch_both(
+        monkeypatch,
         "_refresh_existing_inventory_source_tree",
         lambda payload, *, repo_root: {"source_tree_sha256": "live-source-hash"},
     )
-    monkeypatch.setattr(
-        gates,
+    _patch_both(
+        monkeypatch,
         "build_backlog",
         lambda: {"schema_version": "drifted-live-backlog"},
     )
     # Avoid full hotspot AST census; this test only asserts config-backlog drift.
-    monkeypatch.setattr(
-        gates,
+    _patch_both(
+        monkeypatch,
         "_hotspot_family_baseline_artifact_matches_builder",
         lambda *, repo_root: True,
     )
