@@ -98,6 +98,60 @@ def test_exit_code_mapping_is_distinct_per_failure_class() -> None:
         )
         == preflight.EXIT_BIOETL_SOURCE
     )
+    assert (
+        preflight._exit_code_for_checks(
+            [preflight.PreflightCheck("ops-http-bootstrap", "error", "deferred")]
+        )
+        == preflight.EXIT_OPS_HTTP_BOOTSTRAP
+    )
+    assert (
+        preflight._exit_code_for_checks(
+            [preflight.PreflightCheck("ops-http-datasource", "error", "404")]
+        )
+        == preflight.EXIT_OPS_HTTP_BOOTSTRAP
+    )
+
+
+def test_ops_http_bootstrap_deferred_is_error() -> None:
+    check = preflight.classify_ops_http_bootstrap(
+        {"ops_http": "deferred", "reason": "identity_mismatch"}
+    )
+    assert check.name == "ops-http-bootstrap"
+    assert check.status == "error"
+    assert "deferred" in check.detail
+
+
+def test_ops_http_bootstrap_ready_is_ok() -> None:
+    check = preflight.classify_ops_http_bootstrap(
+        {"ops_http": "ready", "reason": "identity_matched"}
+    )
+    assert check.status == "ok"
+
+
+def test_ops_http_datasource_missing_uid_is_error() -> None:
+    check = preflight.classify_ops_http_datasource_uid(http_status=404, payload=None)
+    assert check.name == "ops-http-datasource"
+    assert check.status == "error"
+    assert "404" in check.detail
+
+
+def test_ops_http_datasource_present_is_ok() -> None:
+    check = preflight.classify_ops_http_datasource_uid(
+        http_status=200,
+        payload={
+            "uid": "bioetl-ops-http",
+            "type": "yesoreyeram-infinity-datasource",
+        },
+    )
+    assert check.status == "ok"
+
+
+def test_panel_3010_terminal_contract_documents_playwright_states() -> None:
+    check = preflight.classify_panel_3010_terminal_contract()
+    assert check.status == "ok"
+    assert "valid-empty" in check.detail
+    assert "explicit-error" in check.detail
+    assert "--fallback playwright" in check.detail
 
 
 def test_bioetl_prometheus_target_check_requires_up_health(
