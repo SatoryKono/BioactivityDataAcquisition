@@ -1947,17 +1947,16 @@ def test_main_can_fail_fast_when_runtime_cardinality_review_degrades(
 
 def test_direct_module_entrypoint_json_bootstraps_without_circular_import() -> None:
     """#8774: `python -m scripts.engineering.qa.report_observability_metric_inventory`."""
-    repo_root = Path(__file__).resolve().parents[4]
     completed = subprocess.run(
         [
             sys.executable,
             "-m",
             "scripts.engineering.qa.report_observability_metric_inventory",
             "--repo-root",
-            str(repo_root),
+            str(inventory._REPO_ROOT),
             "--json",
         ],
-        cwd=repo_root,
+        cwd=inventory._REPO_ROOT,
         capture_output=True,
         text=True,
         timeout=180,
