@@ -1,6 +1,6 @@
 ---
 id: prompt.architecture.review
-version: 2.4.0
+version: 2.5.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -59,6 +59,17 @@ Full generic megaprompts (archive):
 | `LANGUAGE` | `ru` |
 | `AUDIT_MODE` | `full` \| `differential` |
 
+## Review types (reusable)
+
+| Type | Scope | Depth | Time budget |
+| --- | --- | --- | --- |
+| `quick` | one module/package | shallow static + grep | short |
+| `full` | whole SCOPE cluster | deep, all phases | long |
+| `targeted` | one concern (e.g. a boundary) | focused | medium |
+
+Tuning knobs: depth `shallow`\|`standard`\|`deep`; detail `brief`\|`detailed`;
+output `markdown`\|`json`\|`both`. State the type and knobs used.
+
 ## BioETL focus
 
 - Layer boundaries: domain / application / infrastructure / composition /
@@ -83,6 +94,31 @@ Full generic megaprompts (archive):
 6. Refactor waves: impact, risk, test plan, debt effect (budget-neutral or
    reducing only).
 7. If `MODE=propose-patches`: minimal patches only after operator approval.
+
+## Orchestration & retries
+
+- Read-only explore agents: run in parallel per independent category.
+- File-mutating agents: run sequentially; run any re-audit after the primary so it
+  sees the final state. Any file/ownership/finding overlap → sequential.
+- Soft per-phase timeouts + bounded retries (exponential backoff): facts ≤30s ×3;
+  scoring ≤60s ×2; problem ID ≤45s ×2. On timeout: log, keep partial results, continue.
+
+## Validation gates
+
+- Facts: evidence from ≥2 independent sources; confidence stated; observed facts vs
+  inference separated; contradictory evidence ≤5%.
+- Scoring: categories distinct (no overlap); scores reflect current (not target) state;
+  evidence points verified. If a weighted-category model is used, Σweights = 1.00
+  (auto-check; if off, normalize proportionally and report the deviation).
+- Problems: each has criticality + evidence + impact; prioritized.
+- Plan: decomposed; per-step Definition of Done; risks + mitigations; debt-neutral or reducing.
+
+## Error recovery
+
+- Tools unavailable → static analysis + grep + manual package walk; document limits.
+- Incomplete data → state confidence, separate proven from assumed, continue, log gaps.
+- Time-limited → prioritize high-risk zones; document the reduced scope.
+- Partial results → deliver with explicit limits, recommended next steps, and incompleteness risk.
 
 ## Surface score (this domain)
 
