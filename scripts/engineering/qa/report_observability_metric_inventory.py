@@ -14,13 +14,24 @@ The report is intentionally static and repo-local. It reconciles:
 
 from __future__ import annotations
 
+import sys
+
+# `python -m scripts.engineering.qa.report_observability_metric_inventory` loads
+# this file as ``__main__``. The scan helper imports the same module by package
+# name; alias the in-flight module so that import does not start a second copy
+# and trip the circular import with observability_metric_inventory_scan.
+if __name__ == "__main__":
+    sys.modules.setdefault(
+        "scripts.engineering.qa.report_observability_metric_inventory",
+        sys.modules[__name__],
+    )
+
 import argparse
 import ast
 import json
 import os
 import re
 import subprocess
-import sys
 import types
 from collections import defaultdict
 from collections.abc import Callable, Sequence
