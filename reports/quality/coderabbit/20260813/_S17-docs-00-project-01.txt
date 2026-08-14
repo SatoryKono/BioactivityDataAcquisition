@@ -184,6 +184,7 @@ docs/00-project/ai/prompts/library/audit/tests-cycle.md
 docs/00-project/ai/prompts/library/audit/tests-system.md
 docs/00-project/ai/prompts/library/closeout/grok-closeout.md
 docs/00-project/ai/prompts/library/docs/ai-audit-planning.md
+docs/00-project/ai/prompts/library/observability/.gitignore
 docs/00-project/ai/prompts/library/observability/README.md
 docs/00-project/ai/prompts/library/observability/bi-dashboard-acceptance.md
 docs/00-project/ai/prompts/library/observability/dashboard-audit-cycle.md
@@ -297,4 +298,3 @@ docs/00-project/ai/skills/global/py-audit-bot/SKILL.md
 docs/00-project/ai/skills/global/py-code-bot/SKILL.md
 docs/00-project/ai/skills/global/py-config-bot/SKILL.md
 docs/00-project/ai/skills/global/py-debug-bot/SKILL.md
-docs/00-project/ai/skills/global/py-doc-bot/SKILL.md

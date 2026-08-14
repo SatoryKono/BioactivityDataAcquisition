@@ -1,10 +1,10 @@
 # CodeRabbit full scope matrix — 20260813
 
-- **BASE_SHA:** `91b02403dfd077ca374a7bdb7cd0b7082e557e39`
+- **BASE_SHA:** `7f38a25f1e022e4f2cf5353fc07f08c39025b002`
 - **CodeRabbit:** `0.7.2`
 - **Cap:** ≤300 files per leaf
-- **Leaves:** 87
-- **Tracked / assigned:** 10888 / 10888
+- **Leaves:** 88
+- **Tracked / assigned:** 10978 / 10978
 - **Duplicate assignments:** 0
 - **Coverage exact:** `True`
 
@@ -50,7 +50,7 @@
 | `S08b-infra-residual` | C | 206 | `true` | src/bioetl/infrastructure |
 | `S-D-security-residual` | D | 20 | `true` | security-relevant interfaces/composition/infra/scripts plus tests/security |
 | `S17-docs-00-project-01` | E | 300 | `true` | docs/00-project |
-| `S17-docs-00-project-02` | E | 75 | `true` | docs/00-project |
+| `S17-docs-00-project-02` | E | 76 | `true` | docs/00-project |
 | `S17-docs-decisions` | E | 60 | `true` | docs/02-architecture/decisions |
 | `S18-dashboard-docs` | E | 84 | `true` | dashboard/grafana documentation |
 | `S18-grafana` | E | 104 | `true` | grafana |
@@ -86,7 +86,8 @@
 | `S-R-docs-04-reference-01` | R | 300 | `true` | residual catch-all: docs/04-reference |
 | `S-R-docs-04-reference-02` | R | 42 | `true` | residual catch-all: docs/04-reference |
 | `S-R-reports-quality-01` | R | 300 | `true` | residual catch-all: reports/quality |
-| `S-R-reports-quality-02` | R | 235 | `true` | residual catch-all: reports/quality |
+| `S-R-reports-quality-02` | R | 300 | `true` | residual catch-all: reports/quality |
+| `S-R-reports-quality-03` | R | 24 | `true` | residual catch-all: reports/quality |
 | `S-R-scripts-ai` | R | 178 | `true` | scripts/ai |
 | `S-R-scripts-diagrams` | R | 49 | `true` | scripts/diagrams |
 | `S-R-scripts-docs` | R | 50 | `true` | scripts/docs |
