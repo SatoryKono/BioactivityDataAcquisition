@@ -25,8 +25,8 @@ by the diagram router now bootstraps repository imports without external
 
 ## Gate status
 
-- Issue #8829: acceptance proven in the current checkout; pending closeout
-  mutation.
+- Issue #8829: closed as completed after acceptance was proven and pushed
+  (`4770cdfded`, generated closeout `50558b0d17`).
 - PR #8827 remains open; merge is not authorized.
 - Fresh syntax render: `ENVIRONMENT` blocker documented in
   `blocked-evidence.md`; version pin remained fail-closed.
