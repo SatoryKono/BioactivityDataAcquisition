@@ -62,9 +62,9 @@ dashboards:
         type: table
         description: Recommended first action for current state
       - id: 1000
-        title: Navigate Dashboards
+        title: Navigation
         type: text
-        description: Theme-safe wrapping navigation bus (0-4 shipped surface)
+        description: Theme-safe wrapping navigation bus (0-6 shipped surface)
     selector_variables:
       - workflow
       - pipeline
