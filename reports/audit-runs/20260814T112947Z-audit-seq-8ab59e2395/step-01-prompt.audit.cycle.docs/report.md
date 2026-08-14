@@ -90,4 +90,6 @@ or allowlist was increased to hide either failure. See `proof-verification.json`
 ## Issue gate
 
 Mandatory open-issue/open-PR duplicate search completed before creation. No
-duplicate outcomes existed. Tracking issues: #8807, #8808, #8809, #8810.
+duplicate outcomes existed. Tracking issues #8807, #8808, #8809, and #8810
+were closed after checkout-scoped evidence was posted. Candidate PR: #8813;
+not merged.
