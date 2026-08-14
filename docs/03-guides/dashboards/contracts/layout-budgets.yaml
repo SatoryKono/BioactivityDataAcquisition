@@ -1,0 +1,135 @@
+version: 1
+source: grafana/dashboards/*.json
+mode: error
+note: >-
+  Distinct fold constants for the seven shipped dashboards. Do not unify
+  first_window_y with first_load_y_max. first_load_y_max MUST stay equal to
+  performance-budgets.yaml:first_screen_y_max.
+
+# Answer band / area-fill / visual fold (DASHBOARD_REQUIREMENTS.md §2).
+first_window_y: 18
+
+# PromQL/HTTP first-load selection window. Not the visual fold.
+first_load_y_max: 28
+
+# DASH-FIT-001 no-scroll ceiling. null = not yet render-calibrated at 1366x768.
+# Expected ~16-18 after Grafana chrome + variables. Do not guess 24.
+viewport_rows: null
+
+# Regression cap on always-visible root non-nav panels (current max = 8).
+first_screen_max_panels: 8
+
+min_height:
+  root:
+    table: 5
+    timeseries: 5
+    heatmap: 5
+    state-timeline: 5
+    stat: 3
+    gauge: 3
+    bargauge: 3
+    text: 2
+  nested:
+    table: 4
+    timeseries: 5
+    heatmap: 5
+    state-timeline: 5
+    stat: 3
+    gauge: 3
+    bargauge: 3
+    text: 2
+
+canonical_action_verbs:
+  - Monitor
+  - Inspect
+  - Track
+  - Compare
+  - Review
+  - Investigate
+
+pending_action_verbs:
+  - Understand
+  - Start
+  - Assess
+  - Browse
+  - Copy
+  - Continue
+  - Explain
+  - Navigate
+
+shell_titles:
+  - Status
+  - ID
+  - Processed Records
+
+banned_title_tokens:
+  - panel
+  - panel title
+  - new panel
+  - new dashboard
+  - stat
+  - graph
+  - table
+  - text
+  - untitled
+  - row
+  - row title
+
+data_panel_types:
+  - stat
+  - gauge
+  - bargauge
+  - table
+  - timeseries
+  - heatmap
+  - state-timeline
+
+answer_panels:
+  bioetl-control-plane-v1.json:
+    - id: 9401
+      title: Monitor Replay Readiness
+  bioetl-overview-v2.json:
+    - id: 214
+      title: Monitor Fleet Health
+    - id: 215
+      title: Review First Action
+  bioetl-runtime.json:
+    - id: 9401
+      title: Monitor Pipeline Status
+  bioetl-provider-health-v2.json:
+    - id: 9101
+      title: Monitor Fleet Severity
+  bioetl-dq-v2.json:
+    - id: 9401
+      title: Monitor Current DQ Status
+  bioetl-incident-v1.json:
+    - id: 2010
+      title: Inspect Ranked Suspects
+  bioetl-run-explorer-v1.json:
+    - id: 9402
+      title: Inspect Run Identity
+
+trust_gate_panels:
+  - dashboard: bioetl-control-plane-v1.json
+    id: 9401
+  - dashboard: bioetl-runtime.json
+    id: 9401
+
+allowlists:
+  straddle:
+    - dashboard: bioetl-provider-health-v2.json
+      id: 9104
+      owner: "@bioetl-observability"
+      rationale: >-
+        Monitor Telemetry Presence (y=15, h=4, bottom=19) is the first-screen
+        trust marker for the provider severity band. Shrinking to h=3 breaks
+        REQ-DASH-002 typography; moving the band requires a first-screen relayout.
+      retire_when: provider first-screen band is re-laid out entirely below the fold
+  min_height:
+    - dashboard: bioetl-dq-v2.json
+      id: 153
+      owner: "@bioetl-observability"
+      rationale: >-
+        Track Volume-Weighted DQ Score is an intentional ultra-compact
+        timeseries (h=4) with the legend hidden.
+      retire_when: DQ score trend moves out of the compact evidence strip

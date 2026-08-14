@@ -146,7 +146,24 @@ timeseries without checking whether the panel compares multiple series.
 - `Inspect: Provider Retry Saturation [1h]`
 - `Track: Latest Successful Data Timestamp`
 
-Требование: все новые панели MUST использовать action-first заголовки с глаголом в начале (`Monitor`, `Inspect`, `Track`, `Compare`, `Review`).
+Требование: все новые панели MUST использовать action-first заголовки с глаголом в начале.
+
+Канонический набор глаголов (action-first): `Monitor`, `Inspect`, `Track`, `Compare`,
+`Review`, `Investigate` (последний — из decision matrix §4.1).
+
+Исключения из action-first (глагол не требуется):
+- `type:"row"` — заголовки-разделители;
+- `type:"text"` — навигация и пояснительные/CTA-панели;
+- shell-панели общего контекста §4.1.1: `Status`, `ID`, `Processed Records`.
+
+Разбор для автоматической проверки (`DASH-COPY-003`) MUST быть colon-tolerant: и
+`Monitor: Foo [24h]`, и `Monitor Foo` считаются валидными (первое слово до пробела/двоеточия).
+
+Pending-глаголы, встречающиеся сегодня на shipped non-text панелях и **ещё не** входящие в
+канонический набор: `Understand`, `Start`, `Assess`, `Browse`, `Copy`, `Continue`, `Explain`,
+`Navigate`. До включения `DASH-COPY-003` в enforcement каждый из них MUST быть либо явно
+добавлен в канонический набор выше, либо соответствующая панель переименована. Пока это
+решение не принято, `DASH-COPY-003` остаётся advisory (см. `DASHBOARD_REQUIREMENTS.md` §6.1).
 
 ### 3.2 Description
 

@@ -939,11 +939,13 @@ pmid → pmid → pubmed-id
 - `REQ-DASH-002`: operator-visible текст **MUST** быть не меньше `12pt`
   (`16px`), а заголовки панелей — не меньше `14pt` (`18.6667px`).
 - `REQ-DASH-003`: area fills **MUST** использоваться только в первом окне
-  (`gridPos.y < 28`, по
-  [`performance-budgets.yaml`](../03-guides/dashboards/contracts/performance-budgets.yaml)
-  `first_screen_y_max`);
+  (`gridPos.y < FIRST_WINDOW_Y` = `18`,
+  `docs/03-guides/dashboards/contracts/layout-budgets.yaml`);
   дополнительные группы и панели ниже первого окна
-  **MUST** использовать только text/line color encoding.
+  **MUST** использовать только text/line color encoding. Окно отбора
+  first-load PromQL/HTTP (`FIRST_LOAD_Y_MAX` = `28` =
+  `performance-budgets.yaml:first_screen_y_max`) — отдельная константа и
+  **MUST NOT** подменять visual fold.
 
 Static JSON checks не заменяют computed-style проверку в reproducible render.
 Monitoring остаётся opt-in и не становится обязательной local runtime

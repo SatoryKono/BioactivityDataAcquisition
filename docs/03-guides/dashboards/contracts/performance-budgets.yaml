@@ -8,6 +8,10 @@ calibration_note: >-
   Overview domain tracks moved under collapsed progressive-disclosure rows;
   timeseries maxDataPoints/interval capped; budget tightened toward ≤200 char
   first-screen expressions and ≤6 first-load PromQL (worst board).
+  first_screen_y_max is the PromQL/HTTP selection window (FIRST_LOAD_Y_MAX),
+  not the visual fold (see layout-budgets.yaml:first_window_y).
+# PromQL/HTTP first-load selection window (FIRST_LOAD_Y_MAX). Not the visual
+# fold — that is first_window_y=18 in layout-budgets.yaml.
 first_screen_y_max: 28
 budgets:
   worst_first_load_promql: 6
