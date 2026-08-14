@@ -1466,19 +1466,36 @@ def _port_owners_from_containers(
 def _mount_origin_findings(
     containers: list[dict[str, Any]],
     *,
+    contract: Mapping[str, Any],
     project_to_stack: Mapping[Any, Any],
     discouraged: tuple[Any, ...],
 ) -> list[Finding]:
+    path_policy = contract.get("path_policy")
+    discouraged_scope = (
+        str(path_policy.get("discouraged_origin_scope") or "")
+        if isinstance(path_policy, Mapping)
+        else ""
+    )
+    data_plane = contract.get("dashboard_data_plane")
+    producer_stack = ""
+    protected_targets: set[str] = set()
+    if isinstance(data_plane, Mapping):
+        producer_stack = str(data_plane.get("producer_stack") or "")
+        required_mounts = data_plane.get("required_bind_mounts")
+        if isinstance(required_mounts, Mapping):
+            protected_targets = {str(target) for target in required_mounts}
+
     findings: list[Finding] = []
     for container in containers:
         stack_name = project_to_stack.get(container.get("project"))
         if not stack_name:
             continue
-        mount_sources = [
-            str(mount.get("Source", ""))
+        bind_mounts = [
+            mount
             for mount in container.get("mounts", [])
             if isinstance(mount, dict) and mount.get("Type") == "bind"
         ]
+        mount_sources = [str(mount.get("Source", "")) for mount in bind_mounts]
         origins = {_path_origin(path) for path in mount_sources if path}
         if len(origins) > 1:
             findings.append(
@@ -1489,10 +1506,25 @@ def _mount_origin_findings(
                     {"stack": stack_name, "origins": sorted(origins)},
                 )
             )
+        # Docker Desktop represents ordinary WSL config binds with opaque cache
+        # paths. Project-origin checks cover those config-only mounts. Apply the
+        # discouraged-origin gate to the producer artifact mounts whose source
+        # alignment is independently attested and compared fail-closed.
+        data_plane_scope = (
+            discouraged_scope == "dashboard_data_plane_required_bind_mounts"
+        )
         bad_sources = [
-            path
-            for path in mount_sources
-            if _is_discouraged_bind_source(path, discouraged)
+            str(mount.get("Source", ""))
+            for mount in bind_mounts
+            if (
+                not data_plane_scope
+                or (
+                    stack_name == producer_stack
+                    and str(mount.get("Destination") or mount.get("Target") or "")
+                    in protected_targets
+                )
+            )
+            and _is_discouraged_bind_source(str(mount.get("Source", "")), discouraged)
         ]
         if bad_sources:
             findings.append(
@@ -1681,6 +1713,7 @@ def _live_observations(
     findings.extend(
         _mount_origin_findings(
             containers,
+            contract=contract,
             project_to_stack=project_to_stack,
             discouraged=discouraged,
         )
