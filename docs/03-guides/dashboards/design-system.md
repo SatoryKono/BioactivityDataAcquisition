@@ -1,6 +1,6 @@
 # Dashboard Design System (BioETL)
 
-Дата актуализации: **2026-07-28**
+Дата актуализации: **2026-08-14**
 Источник истины: `grafana/dashboards/*.json`
 
 Normative presentation floors and measurement rules are owned by
@@ -115,7 +115,7 @@ blanket rule for every plugin type.
 | Selected-range trend `stat` | `options.colorMode=value`; `options.graphMode=area`; threshold colors must match the measured operator risk. |
 | Selected-range count `stat` | `options.colorMode=value`; `options.graphMode=none`; `or vector(0)` only when missing series means zero events. |
 | Percentage, score, latency, or duration `gauge` | `options.showThresholdMarkers=true`; `options.showThresholdLabels=false` unless a panel-specific exception is documented with operator rationale. |
-| Status or route `table` column | Use `custom.cellOptions.type=color-background` **only via field override** for the status/Value field. |
+| Status or route `table` column | On the first window, `custom.cellOptions.type=color-background` MAY be used **only via field override** for the status/Value field. In additional row groups it MUST be `color-text` or neutral `auto`. |
 | Data or forensic `table` | Use `custom.cellOptions.type=auto` as the table default when an explicit default is configured; datasource/plugin defaults are allowed for HTTP-backed forensic tables. |
 
 **Forbidden:** table-wide default `color-background` without field overrides (paints Time/name/pipeline as severity).
@@ -123,7 +123,8 @@ blanket rule for every plugin type.
 | Scalar trend `timeseries` | `options.tooltip.mode=single`; `options.tooltip.sort=none` or omitted. |
 
 Allowed table `custom.cellOptions.type` values are `auto`, `color-background`,
-and `color-text`. Introducing a new table cell option type requires updating
+and `color-text`; `color-background` is confined to the first window by
+`REQ-DASH-003`. Introducing a new table cell option type requires updating
 `scripts.engineering.qa check-dashboard-visual-semantics` and this design
 system in the same change.
 
