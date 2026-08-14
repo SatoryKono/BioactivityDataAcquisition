@@ -57,12 +57,19 @@ The supported setup path depends on how you use the checkout.
 
 ### 2.1. CI / Single-OS Checkout
 
-Use the maintained uv + script bootstrap:
+Use the canonical **operator** aggregate (see [`Makefile`](../../Makefile)
+`install` / `test-deps` / `setup-plugins`):
 
 ```bash
-uv sync --extra dev --extra tests --extra tracing
-uv run python -m scripts.ops setup-plugins
+make install
+make test-deps
+make setup-plugins
 ```
+
+`make install` is the wrapper around lock-backed `uv sync` (extras are defined
+on that target, not copied here). `make setup-plugins` calls
+`python -m scripts.ops setup-plugins`
+([`scripts/ops/__main__.py`](../../scripts/ops/__main__.py)).
 
 If you use Codex or GitHub Copilot MCP, add the optional tooling setup after install:
 
@@ -73,7 +80,9 @@ uv run python -m scripts.engineering.dev setup-mcp
 If you activated `.venv` instead of using `uv`, `python -m scripts.engineering.dev setup-mcp`
 is also valid.
 
-Canonical bootstrap uses `uv sync` / `make install` / `python -m scripts.ops setup-plugins`. `scripts/engineering/dev/dev_setup.sh` was **removed** and is not a supported path.
+`scripts/engineering/dev/dev_setup.sh` is **not present**
+([`scripts/engineering/dev/README.md`](../../scripts/engineering/dev/README.md));
+do not invoke it.
 
 ### 2.2. Mixed Windows + WSL Checkout
 
@@ -121,10 +130,12 @@ py -3.13 -m venv .venv-win
 pip install -e ".[dev,tests,tracing,docs]"
 ```
 
-For the supported aggregate setup flow, run
-`uv sync --extra dev --extra tests --extra tracing` and
-`uv run python -m scripts.ops setup-plugins`. The repository-local
-`scripts/engineering/dev/dev_setup.sh` is absent; do not invoke it.
+For the supported aggregate setup flow, use `make install`, `make test-deps`,
+and `make setup-plugins`. Raw `uv sync --extra …` is the implementation of
+`make install` only. The repository-local
+`scripts/engineering/dev/dev_setup.sh` is absent
+([`scripts/engineering/dev/README.md`](../../scripts/engineering/dev/README.md));
+do not invoke it.
 
 ## 3. Configuration
 

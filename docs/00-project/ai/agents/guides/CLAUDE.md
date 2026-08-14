@@ -36,8 +36,20 @@ make run-local        # Сэмпловый pipeline-run (chembl_activity, limit=
 make lint && make test
 ```
 
-Канонический bootstrap: `uv sync --extra dev --extra tests --extra tracing` + `make install` / `python -m scripts.ops setup-plugins`. `scripts/engineering/dev/dev_setup.sh` **удалён** и не считается
-поддерживаемым onboarding path.
+Канонический **operator** bootstrap — ровно три команды
+([`Makefile`](../../../../../Makefile) `install` / `test-deps` / `setup-plugins`;
+plugins backend: [`scripts/ops/__main__.py`](../../../../../scripts/ops/__main__.py)
+`setup-plugins`):
+
+```bash
+make install
+make test-deps
+make setup-plugins
+```
+
+`uv sync --extra …` — реализация `make install`, не второй канон. Текущие extras
+см. цель `install` в `Makefile`. `scripts/engineering/dev/dev_setup.sh` **отсутствует**
+в дереве ([evidence](../../../../../scripts/engineering/dev/README.md)); не вызывать.
 
 ### Mixed Windows + WSL checkout
 

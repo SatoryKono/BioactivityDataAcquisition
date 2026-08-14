@@ -19,11 +19,15 @@ from scripts.ai.prompts.registry import (
     REPO_ROOT,
     SCHEMA_PATH,
     STATUS_ENUM,
+    PromptCard,
+    RegistryEntry,
     body_line_count,
     load_card,
     load_registry,
     resolve_include,
 )
+
+_SUMMARY_VERSION_TOKEN = re.compile(r"\bv(\d+\.\d+(?:\.\d+)?)\b", re.I)
 
 RULES_DUMP_PATTERNS = (
     re.compile(r"(?i)full\s+rules\s+dump"),
@@ -66,6 +70,46 @@ def _ssot_exists(rel: str) -> bool:
     if rel in {"AGENTS.md", "AGENT.md"}:
         return (REPO_ROOT / rel).exists()
     return False
+
+
+def _check_card_registry_contract_alignment(
+    report: CheckReport, entry: RegistryEntry, card: PromptCard
+) -> None:
+    """Fail when REGISTRY summary advertises a different contract than the card."""
+    summary = entry.summary or ""
+    summary_l = summary.lower()
+    # Version-token alignment is enforced for the cycle card that historically
+    # advertised v2.0 in README while the card stayed 1.1.0 (#8768). Other
+    # summaries may mention a sibling kit version without matching this card.
+    tokens = _SUMMARY_VERSION_TOKEN.findall(summary)
+    if tokens and card.id == "prompt.observability.dashboard-audit-cycle":
+        card_major_minor = ".".join(card.version.split(".")[:2])
+        compatible = False
+        for token in tokens:
+            token_major_minor = ".".join(token.split(".")[:2])
+            if token_major_minor == card_major_minor:
+                compatible = True
+                break
+        if not compatible:
+            report.add_error(
+                "version_summary_drift",
+                (
+                    f"registry summary version token(s) {tokens} do not match "
+                    f"card version {card.version}"
+                ),
+                entry.path,
+            )
+    param_names = {str(name).upper() for name in card.params}
+    for required in ("THEME", "ZOOM"):
+        if required in param_names and required.lower() not in summary_l:
+            report.add_error(
+                "param_summary_drift",
+                (
+                    f"card declares param {required} but registry summary omits "
+                    "that contract surface"
+                ),
+                entry.path,
+            )
 
 
 def check_registry(*, registry_path: Path | None = None) -> CheckReport:
@@ -128,6 +172,8 @@ def check_registry(*, registry_path: Path | None = None) -> CheckReport:
                 f"frontmatter id {card.id!r} != registry id {entry.id!r}",
                 entry.path,
             )
+
+        _check_card_registry_contract_alignment(report, entry, card)
 
         for rel in card.includes:
             try:

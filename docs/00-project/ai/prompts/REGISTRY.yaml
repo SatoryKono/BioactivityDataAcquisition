@@ -260,7 +260,7 @@ entries:
     status: active
     class: operator-paste
     tags: [observability, dashboard, grafana, audit, cycle, density, typography, color, layout, render, operator]
-    summary: Exhaustive cyclic Grafana audit of every panel, viewport, density, typography, color, scroll, whitespace, data, and render contract
+    summary: Exhaustive cyclic Grafana audit (v2.0) of every panel, viewport, theme, zoom (Tier-1 100% / Tier-2 200%), density, typography, color, scroll, whitespace, data, and render contract
 
   - id: prompt.observability.sequential-run
     path: library/observability/sequential-run.md
