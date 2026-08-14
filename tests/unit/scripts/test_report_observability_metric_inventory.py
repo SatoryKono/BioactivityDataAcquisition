@@ -13,7 +13,9 @@
 from __future__ import annotations
 
 from pathlib import Path
+import json
 import subprocess
+import sys
 from types import SimpleNamespace
 from urllib.error import URLError
 
@@ -1920,3 +1922,26 @@ def test_main_can_fail_fast_when_runtime_cardinality_review_degrades(
 
     assert exit_code == 1
     assert review_path.exists()
+
+
+def test_direct_module_entrypoint_bootstraps_without_circular_import() -> None:
+    """#8774: `python -m scripts.engineering.qa.report_observability_metric_inventory`."""
+    repo_root = Path(__file__).resolve().parents[3]
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.qa.report_observability_metric_inventory",
+            "--repo-root",
+            str(repo_root),
+            "--json",
+        ],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        timeout=180,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stderr[-2000:]
+    payload = json.loads(completed.stdout)
+    assert isinstance(payload, dict)
