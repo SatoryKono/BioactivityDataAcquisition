@@ -1292,7 +1292,7 @@
   "templating": {
     "list": [
       {
-        "allValue": "$__all",
+        "allValue": ".*",
         "current": {
           "selected": true,
           "text": "All",
@@ -1358,7 +1358,7 @@
         "description": "Core scope: pipeline selector for pipeline-centric dashboards; default is All pipelines on overview so the landing page renders meaningful L0 state instead of a fail-closed empty scope."
       },
       {
-        "allValue": "$__all",
+        "allValue": ".*",
         "current": {
           "selected": true,
           "text": "backfill",
