@@ -71,7 +71,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.12", "3.13"]
+        python-version: ["3.13"]
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -127,7 +127,7 @@ jobs:
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
         with:
-          python-version: "3.12"
+          python-version: "3.13"
 
       - name: Run ChemblBaseline reconciliation integration smoke
         run: |
@@ -166,7 +166,7 @@ jobs:
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
         with:
-          python-version: "3.12"
+          python-version: "3.13"
 
       - name: Validate ChemblBaseline config and workflow architecture
         run: |

@@ -314,9 +314,9 @@ class TestCiCoverageSurfaceMatrix:
         entries = {entry["job"]: entry for entry in matrix.get("lanes", [])}
 
         test_matrix = entries["test-matrix"]
-        assert test_matrix["coverage_python_versions"] == ["3.12"]
+        assert test_matrix["coverage_python_versions"] == ["3.13"]
         assert (
-            "Upload coverage shard (${{ matrix.test-group.name }} on Python 3.12)"
+            "Upload coverage shard (${{ matrix.test-group.name }} on Python 3.13)"
             in workflow
         )
-        assert "matrix.python-version == '3.12'" in workflow
+        assert "matrix.python-version == '3.13'" in workflow

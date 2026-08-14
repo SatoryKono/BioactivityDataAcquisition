@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-11'
+  Last verified: '2026-08-14'
 
 ______________________________________________________________________
 
 # GitHub Interaction Policy
 
-*Synced with RULES.md and ADR-047 | Last updated: 2026-08-11*
+*Synced with RULES.md and ADR-047 | Last updated: 2026-08-14*
 
 ______________________________________________________________________
 
@@ -97,7 +97,7 @@ from checks that run only for matching paths.
 | Workflow                        | File                | Key Jobs                                                                                                                              | What It Checks                                                                                                                                                                                                                                      |
 | ------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Lint and Architecture Gates** | `import-linter.yml` | `lint`, `c901-governance`, `arch-tests`, `checks-complete`                                                                            | Ruff lint+format, changed-file formatting enforcement, C901 baseline governance, architecture tests, import-linter, dependency boundary checks                                                                                                      |
-| **Tests**                       | `tests.yml`         | `smoke-check`, `governance-preflight`, `config-schema-preflight`, `test-fast`, `test-matrix`, `coverage-verify`, `duration-telemetry` | VCR cassettes, config validation, governance preflight, smoke tests, fast unit feedback, full test matrix (Python 3.12, 6 groups), scoped pytest/Hypothesis cache fingerprints, final combined 85% coverage gate, slow-test telemetry artifact |
+| **Tests**                       | `tests.yml`         | `smoke-check`, `governance-preflight`, `config-schema-preflight`, `test-fast`, `test-matrix`, `coverage-verify`, `duration-telemetry` | VCR cassettes, config validation, governance preflight, smoke tests, fast unit feedback, full test matrix (Python 3.13, 6 groups), scoped pytest/Hypothesis cache fingerprints, final combined 85% coverage gate, slow-test telemetry artifact |
 | **Type Checking (Strict)**      | `type-checking.yml` | `type-check`                                                                                                                          | mypy strict, NewType/Protocol verification, `Any` usage analysis                                                                                                                                                                                    |
 | **Commit Lint**                 | `commit-lint.yml`   | `commit-lint`                                                                                                                         | Conventional Commits format enforcement                                                                                                                                                                                                             |
 

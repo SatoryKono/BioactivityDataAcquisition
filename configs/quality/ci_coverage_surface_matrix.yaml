@@ -176,7 +176,7 @@ lanes:
     emits_coverage_artifact: true
     coverage_artifact: coverage-data-${matrix.test-group.name}
     coverage_python_versions:
-      - "3.12"
+      - "3.13"
     coverage_files:
       - reports/coverage/.coverage.unit-domain
       - reports/coverage/.coverage.unit-application
@@ -189,8 +189,8 @@ lanes:
     execution_confidence_role: breadth_parallel_execution
     notes: >-
       The matrix broadens execution confidence across unit, integration, and
-      security suites, but only Python 3.12 legs emit coverage shards for the
-      combined threshold.
+      security suites, but only Python 3.13 legs emit coverage shards for the
+      combined threshold. Python 3.12 is not a Tests workflow matrix version.
   - job: coverage-verify
     lane_type: hard_threshold_gate
     emits_coverage_artifact: false

@@ -1082,7 +1082,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.12"]
+        python-version: ["3.13"]
         test-group:
           - name: unit-domain
             path: tests/unit/domain/
@@ -1134,8 +1134,8 @@ jobs:
           ls -la reports/coverage/ 2>/dev/null || true
           exit $TEST_EXIT
 
-      - name: Upload coverage shard (${{ matrix.test-group.name }} on Python 3.12)
-        if: always() && matrix.python-version == '3.12'
+      - name: Upload coverage shard (${{ matrix.test-group.name }} on Python 3.13)
+        if: always() && matrix.python-version == '3.13'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: coverage-data-${{ matrix.test-group.name }}
@@ -1144,8 +1144,8 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-      - name: Upload test telemetry (${{ matrix.test-group.name }} on Python 3.12)
-        if: always() && matrix.python-version == '3.12'
+      - name: Upload test telemetry (${{ matrix.test-group.name }} on Python 3.13)
+        if: always() && matrix.python-version == '3.13'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: test-telemetry-${{ matrix.test-group.name }}
