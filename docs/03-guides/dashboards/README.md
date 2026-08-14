@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.3.0
+Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-14'
+  Last verified: '2026-08-09'
 
 ______________________________________________________________________
 
 # Dashboards Docs Index
 
-Дата сверки: **2026-08-14**
+Дата сверки: **2026-08-09**
 Источник истины: `grafana/dashboards/*.json` (7 shipped dashboards after
 monitoring surface reduction 2026-07-23)
 
