@@ -32,7 +32,7 @@
         "mode": "html",
         "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-current\" href=\"#bioetl-control-plane-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"0. Trust (Trust)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">0. Trust (current)</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview)\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$__all&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health)\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality)\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$__all&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer)\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">6. Run Explorer</a></div>"
       },
-      "title": "Navigation",
+      "title": "Navigate Dashboards",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
       "type": "text",
       "links": [
@@ -762,7 +762,7 @@
           "id": 130,
           "options": {
             "colorMode": "value",
-            "graphMode": "area",
+            "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
             "reduceOptions": {
@@ -860,7 +860,7 @@
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
               }
             ],
-            "graphMode": "area",
+            "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
             "reduceOptions": {
@@ -951,7 +951,7 @@
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
               }
             ],
-            "graphMode": "area",
+            "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
             "reduceOptions": {
@@ -1042,7 +1042,7 @@
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md"
               }
             ],
-            "graphMode": "area",
+            "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
             "reduceOptions": {
@@ -1133,7 +1133,7 @@
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md"
               }
             ],
-            "graphMode": "area",
+            "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
             "reduceOptions": {
@@ -1224,7 +1224,7 @@
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md"
               }
             ],
-            "graphMode": "area",
+            "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
             "reduceOptions": {
@@ -1315,7 +1315,7 @@
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md"
               }
             ],
-            "graphMode": "area",
+            "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
             "reduceOptions": {
@@ -1406,7 +1406,7 @@
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
               }
             ],
-            "graphMode": "area",
+            "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
             "reduceOptions": {
@@ -2002,7 +2002,7 @@
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
               }
             ],
-            "graphMode": "area",
+            "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
             "reduceOptions": {
@@ -2093,7 +2093,7 @@
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
               }
             ],
-            "graphMode": "area",
+            "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
             "reduceOptions": {
@@ -2290,7 +2290,7 @@
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
               }
             ],
-            "graphMode": "area",
+            "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
             "reduceOptions": {
@@ -2381,7 +2381,7 @@
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
               }
             ],
-            "graphMode": "area",
+            "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
             "reduceOptions": {
@@ -2550,7 +2550,7 @@
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
               }
             ],
-            "graphMode": "area",
+            "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
             "reduceOptions": {
@@ -2641,7 +2641,7 @@
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
               }
             ],
-            "graphMode": "area",
+            "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
             "reduceOptions": {
@@ -2883,7 +2883,7 @@
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/traceability-signal-ownership.md"
               }
             ],
-            "graphMode": "area",
+            "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
             "reduceOptions": {
@@ -2974,7 +2974,7 @@
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/traceability-signal-ownership.md"
               }
             ],
-            "graphMode": "area",
+            "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
             "reduceOptions": {

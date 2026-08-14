@@ -31,17 +31,19 @@ MUST NOT be treated as shipping requirements.
 
 ## 2. Terms and measurement boundaries
 
-- **First window**: top-level, non-row panels whose `gridPos.y < 18`. It is the
-  answer-first viewport band where area fills may encode the primary verdict.
+- **First window**: top-level, non-row panels whose `gridPos.y < 28`, matching
+  [`performance-budgets.yaml`](../03-guides/dashboards/contracts/performance-budgets.yaml)
+  `first_screen_y_max`. It is the answer-first viewport band where area fills
+  may encode the primary verdict.
 - **Additional panel group**: a Grafana `row` and its child panels, whether the
   row is shipped collapsed or materialized for audit.
 - **Data-bearing panel**: a non-row panel with at least one enabled query target
   (`targets[]`, where `hide != true`). Text, navigation, and empty containers do
   not count as data-bearing.
 - **Area fill**: background severity (`colorMode=background` or
-  `backgroundSolid`), table-cell `color-background`, chart/state
-  `fillOpacity > 0`, a non-`none` gradient, or an authored CSS
-  `background`/`background-color`.
+  `backgroundSolid`), stat sparkline `graphMode=area`, table-cell
+  `color-background`, chart/state `fillOpacity > 0`, a non-`none` default or
+  override gradient, or an authored CSS `background`/`background-color`.
 - **Text-only color encoding**: `colorMode=value`, table-cell `color-text`,
   threshold/series line color, or neutral `auto` table cells without an area
   fill.
@@ -59,6 +61,10 @@ CSS conversion uses the browser reference ratio `1pt = 4/3px`: `12pt = 16px`;
 | `DASH-DATA-002` | `run_id`, `manifest_id`, record identifiers, hashes, and filesystem paths MUST NOT be used as Prometheus labels or label filters. Exact-run identity belongs to Ops HTTP/control-plane evidence. |
 | `DASH-STATE-001` | Missing required evidence MUST remain `UNKNOWN`, `INCOMPLETE`, or an explicit error; it MUST NOT become a healthy zero. |
 | `DASH-ZERO-001` | Synthetic zero is allowed only for documented zero-valid event counters. Status, cause, freshness, latency, and trust panels MUST preserve absence. |
+| `DASH-DATA-003` | Removed datasources MUST stay removed (ADR-010): no panel or target MUST reference a `loki`/`tempo` datasource or the `:8081` quarantine-explorer endpoint. |
+| `DASH-DATA-004` | Every panel/target datasource MUST be an allowlisted identity — the Prometheus object/string, `BioETL Ops HTTP`, or the built-in Grafana datasource. Unknown UIDs and `${DS_*}` export artifacts are forbidden. |
+| `DASH-SEC-001` | HTML/text panels (`options.mode=html`) MUST NOT contain executable or embedding vectors (`<script>`, `<iframe>`, `<object>`, `<embed>`, `javascript:`, inline `on*=` handlers). |
+| `DASH-STATE-003` | First-screen current-status severity cards (`stat` with `colorMode=background`) MUST set `noValue` to a fail-closed `UNKNOWN…` string; contextual empty-state text (`VALID EMPTY`, `SELECT RUN`, …) belongs to non-verdict panels only. |
 
 ## 4. P1 — operator decision path
 
@@ -129,6 +135,14 @@ one oversized chart from masking a prose-heavy group.
 | `DASH-QUERY-001` | Exact and near-duplicate PromQL MUST be consolidated or explicitly justified by role. |
 | `DASH-PERF-001` | First-load query, expression-length, HTTP, refresh, panel-count, and navigation budgets MUST not regress. |
 | `DASH-RENDER-001` | Release evidence MUST distinguish healthy, valid-empty, telemetry-absent, explicit-error, incomplete, loading, and blank terminal states. |
+| `DASH-META-002` | Panel `id`s MUST be unique within a dashboard and the root `id` MUST be `null` (provisioning-safe import; dataLink/repeat/row-expansion integrity). |
+| `DASH-LAYOUT-002` | Every panel `gridPos` MUST stay inside the 24-column grid with positive extents (`x,y >= 0`, `w,h >= 1`, `x + w <= 24`). |
+| `DASH-LINK-001` | Every link URL MUST be root-relative, a canonical `github.com/SatoryKono/BioactivityDataAcquisition` URL, a `data:text/plain,` copy-handoff, or the documented local Prometheus (`http://localhost:9090/`) exception. |
+| `DASH-LINK-002` | Every internal `/d/<uid>` handoff MUST resolve to a shipped dashboard uid; dangling or removed-dashboard links are forbidden. |
+| `DASH-VIZ-001` | `options.reduceOptions.calcs`, when present, MUST be a non-empty list of deterministic reducers (`lastNotNull`, `last`, `min`/`max`/`mean`/`sum`, …). |
+| `DASH-VIZ-002` | `panel.type` MUST be an allowlisted modern plugin type; legacy `graph` and unknown/typo plugin types are forbidden. |
+| `DASH-PERF-002` | `maxDataPoints`, when set on a panel, MUST be a positive integer within `[1, 5000]`. |
+| `DASH-COPY-002` | Verdict severity cards MUST carry a non-empty `description` and explicit value `mappings` (state encoding; no bare numbers). |
 
 ## 7. Per-dashboard responsibility
 
@@ -153,6 +167,7 @@ one oversized chart from masking a prose-heavy group.
 | Query scope and duplication | `report-dashboard-promql-scope --check`; `report-dashboard-query-duplicates --check` |
 | Performance | `python -m scripts.engineering.qa check-dashboard-performance-budgets` |
 | Full release render | `python -m scripts.ops run-grafana-audit-cycle` on the supported monitoring host |
+| Structural & integrity invariants (`DASH-DATA-003/004`, `DASH-SEC-001`, `DASH-STATE-003`, `DASH-META-002`, `DASH-LAYOUT-002`, `DASH-LINK-001/002`, `DASH-VIZ-001/002`, `DASH-PERF-002`, `DASH-COPY-002`) | `tests/integration/test_dashboard_structural_invariants.py` |
 
 Static tests prove repository structure. They do not replace live datasource,
 render, or human usability evidence.

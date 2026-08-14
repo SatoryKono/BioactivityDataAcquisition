@@ -313,6 +313,12 @@ def _terminal_render_manifest(
                     "cssZoom": "1",
                     "actualKiosk": "off",
                 },
+                "typographyValidation": {
+                    "status": "ok",
+                    "bodyMinimumPx": 16.0,
+                    "panelTitleMinimumPx": 14.0 * 4.0 / 3.0,
+                    "violations": [],
+                },
                 "terminalStateValidation": {
                     "status": "ok",
                     "checkedPanelCount": 1,

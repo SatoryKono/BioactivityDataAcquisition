@@ -939,7 +939,10 @@ pmid → pmid → pubmed-id
 - `REQ-DASH-002`: operator-visible текст **MUST** быть не меньше `12pt`
   (`16px`), а заголовки панелей — не меньше `14pt` (`18.6667px`).
 - `REQ-DASH-003`: area fills **MUST** использоваться только в первом окне
-  (`gridPos.y < 18`); дополнительные группы и панели ниже первого окна
+  (`gridPos.y < 28`, по
+  [`performance-budgets.yaml`](../03-guides/dashboards/contracts/performance-budgets.yaml)
+  `first_screen_y_max`);
+  дополнительные группы и панели ниже первого окна
   **MUST** использовать только text/line color encoding.
 
 Static JSON checks не заменяют computed-style проверку в reproducible render.
