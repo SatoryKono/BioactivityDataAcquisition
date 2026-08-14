@@ -12,7 +12,7 @@
   "schema_version": 1,
   "source": "grafana/dashboards/*.json",
   "target_counts": {
-    "http": 28,
+    "http": 29,
     "loki": 0,
     "promql": 166,
     "tempo": 0,
@@ -1579,7 +1579,7 @@
       "formula": "",
       "kind": "http",
       "panel_id": 9407,
-      "panel_title": "Copy Identity Values",
+      "panel_title": "Inspect Identity Values",
       "query": "/ops/control-plane/identity-evidence?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&view=copy_values",
       "query_tokens": [
         "/ops/control-plane/identity-evidence",
@@ -4124,7 +4124,7 @@
       "formula": "",
       "kind": "http",
       "panel_id": 3010,
-      "panel_title": "Browse Recent Runs (last 20)",
+      "panel_title": "Inspect Recent Runs (last 20)",
       "query": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=20",
       "query_tokens": [
         "/ops/observability/pipeline-run-reports",
@@ -4210,6 +4210,26 @@
         "/ops/observability/pipeline-run-report",
         "pipeline",
         "run_id"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": ""
+    },
+    {
+      "dashboard_uid": "bioetl-run-explorer-v1",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "formula": "",
+      "kind": "http",
+      "panel_id": 3020,
+      "panel_title": "Inspect Recent Workflow Runs (last 20)",
+      "query": "/ops/observability/workflow-run-reports?workflow=${workflow}&limit=20",
+      "query_tokens": [
+        "/ops/observability/workflow-run-reports",
+        "workflow",
+        "limit"
       ],
       "ref_id": "A",
       "runbook_urls": [],
