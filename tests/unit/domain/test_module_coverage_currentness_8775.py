@@ -67,7 +67,9 @@ def test_aggregation_schema_helpers_cover_descriptor_shapes() -> None:
         {"provenance_tracking": "yes"},
     ],
 )
-def test_aggregation_config_rejects_typed_shape_errors(payload: dict[str, object]) -> None:
+def test_aggregation_config_rejects_typed_shape_errors(
+    payload: dict[str, object],
+) -> None:
     with pytest.raises(TypeError):
         _convert_to_aggregation_config(payload)
 
@@ -158,7 +160,9 @@ def test_composite_optional_sections_normalize_to_empty_tuples() -> None:
 def test_dq_and_validation_rule_invalid_values_are_rejected() -> None:
     with pytest.raises(ValueError, match="sample_size"):
         DQReportConfig(sample_size=-1)
-    assert FieldValidation(field="x", validation_type="range", max_value=1).max_value == 1
+    assert (
+        FieldValidation(field="x", validation_type="range", max_value=1).max_value == 1
+    )
     with pytest.raises(ValueError, match="min_value must be"):
         FieldValidation(field="x", validation_type="range", min_value=2, max_value=1)
     with pytest.raises(ValueError, match="validator name"):
