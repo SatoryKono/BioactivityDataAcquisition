@@ -6,6 +6,9 @@ const path = require("node:path");
 // required from unit tests without paying Chromium package resolve cost. On this
 // host, eager `require("playwright")` can hang for >60s (GDrive/NODE_PATH paths).
 let _playwright = null;
+const MIN_PANEL_BODY_FONT_PX = 16;
+const MIN_PANEL_TITLE_FONT_PX = (14 * 4) / 3;
+
 function playwright() {
   if (_playwright === null) {
     _playwright = require("playwright");
@@ -1242,6 +1245,114 @@ async function collectLayoutGeometry(page, dashboard) {
   }, { requiredPanels: dashboard.requiredPanels, viewport: CONFIG.viewport });
 }
 
+async function collectTypographyValidation(page, dashboard) {
+  return page.evaluate(({ requiredPanels, minBodyPx, minTitlePx }) => {
+    const round = (value) => Math.round(value * 100) / 100;
+    const visible = (element) => {
+      if (!(element instanceof Element)) return false;
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return (
+        rect.width > 0 &&
+        rect.height > 0 &&
+        style.display !== "none" &&
+        style.visibility !== "hidden"
+      );
+    };
+    const panelElement = (panel) =>
+      document.querySelector(`[data-panelid="${panel.id}"]`) ||
+      document.querySelector(`[data-viz-panel-key="panel-${panel.id}"]`) ||
+      document.querySelector(`[data-griditem-key="grid-item-${panel.id}"]`);
+    const panelTitleElement = (container) =>
+      container.querySelector('[data-testid^="data-testid Panel header"]') ||
+      container.querySelector(".panel-title") ||
+      container.querySelector("header");
+    const ownText = (element) =>
+      Array.from(element.childNodes)
+        .filter((node) => node.nodeType === Node.TEXT_NODE)
+        .map((node) => node.textContent?.trim() || "")
+        .join(" ")
+        .trim();
+
+    const panels = [];
+    const violations = [];
+    for (const panel of requiredPanels) {
+      const container = panelElement(panel);
+      if (!container) {
+        violations.push({
+          id: panel.id,
+          title: panel.title,
+          kind: "panel_missing",
+        });
+        continue;
+      }
+
+      const titleElement = panelTitleElement(container);
+      const titleFontPx = titleElement
+        ? Number.parseFloat(getComputedStyle(titleElement).fontSize)
+        : null;
+      if (!Number.isFinite(titleFontPx) || titleFontPx + 0.01 < minTitlePx) {
+        violations.push({
+          id: panel.id,
+          title: panel.title,
+          kind: "panel_title_font",
+          observedPx: Number.isFinite(titleFontPx) ? round(titleFontPx) : null,
+          minimumPx: round(minTitlePx),
+        });
+      }
+
+      const bodyFonts = Array.from(container.querySelectorAll("*"))
+        .filter((element) => {
+          if (!visible(element) || !ownText(element)) return false;
+          if (
+            titleElement &&
+            (element === titleElement || titleElement.contains(element))
+          ) {
+            return false;
+          }
+          return !element.closest("script, style, noscript");
+        })
+        .map((element) => Number.parseFloat(getComputedStyle(element).fontSize))
+        .filter(Number.isFinite);
+      const minimumBodyFontPx =
+        bodyFonts.length > 0 ? Math.min(...bodyFonts) : null;
+      if (
+        Number.isFinite(minimumBodyFontPx) &&
+        minimumBodyFontPx + 0.01 < minBodyPx
+      ) {
+        violations.push({
+          id: panel.id,
+          title: panel.title,
+          kind: "panel_body_font",
+          observedPx: round(minimumBodyFontPx),
+          minimumPx: round(minBodyPx),
+        });
+      }
+      panels.push({
+        id: panel.id,
+        title: panel.title,
+        titleFontPx: Number.isFinite(titleFontPx) ? round(titleFontPx) : null,
+        minimumBodyFontPx: Number.isFinite(minimumBodyFontPx)
+          ? round(minimumBodyFontPx)
+          : null,
+        bodyTextSampleCount: bodyFonts.length,
+      });
+    }
+    return {
+      status: violations.length === 0 ? "ok" : "error",
+      bodyMinimumPx: minBodyPx,
+      panelTitleMinimumPx: minTitlePx,
+      checkedPanelCount: panels.length,
+      panels,
+      violations,
+    };
+  }, {
+    requiredPanels: dashboard.requiredPanels,
+    minBodyPx: MIN_PANEL_BODY_FONT_PX,
+    minTitlePx: MIN_PANEL_TITLE_FONT_PX,
+  });
+}
+
 async function renderDashboard(page, dashboard, index, total) {
   const target = dashboardRenderUrl(dashboard);
   console.log(`[${index}/${total}] loading ${dashboard.uid} ...`);
@@ -1320,6 +1431,12 @@ async function renderDashboard(page, dashboard, index, total) {
     );
   }
   dashboard.layoutGeometry = await collectLayoutGeometry(page, dashboard);
+  dashboard.typographyValidation = await collectTypographyValidation(page, dashboard);
+  if (dashboard.typographyValidation.status !== "ok") {
+    throw new Error(
+      `Typography validation failed for ${dashboard.uid}: ${dashboard.typographyValidation.violations.length} violation(s)`,
+    );
+  }
   dashboard.terminalStateValidation = await validateDashboardTerminalStates(
     page,
     dashboard,

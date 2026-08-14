@@ -71,6 +71,8 @@ EXIT_BIOETL_SOURCE = 11
 QUARANTINE_EXPLORER_UID = "bioetl-silver-reject-explorer"
 _RUNTIME_SOURCE_ID_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 _COMMIT_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
+_MIN_PANEL_BODY_FONT_PX = 16.0
+_MIN_PANEL_TITLE_FONT_PX = 14.0 * 4.0 / 3.0
 
 
 @dataclass(frozen=True)
@@ -535,6 +537,30 @@ def _extract_panel_states(
     return dashboard_terminal, panel_states, None
 
 
+def _validate_dashboard_typography(
+    uid: str,
+    dashboard: dict[str, object],
+) -> str | None:
+    typography = dashboard.get("typographyValidation")
+    if not isinstance(typography, dict):
+        return f"render manifest dashboard {uid} lacks typography evidence"
+    if typography.get("status") != "ok":
+        return f"render manifest dashboard {uid} typography validation failed"
+    body_minimum = typography.get("bodyMinimumPx")
+    title_minimum = typography.get("panelTitleMinimumPx")
+    if not isinstance(body_minimum, (int, float)) or body_minimum < _MIN_PANEL_BODY_FONT_PX:
+        return f"render manifest dashboard {uid} body typography floor drift"
+    if (
+        not isinstance(title_minimum, (int, float))
+        or title_minimum + 0.01 < _MIN_PANEL_TITLE_FONT_PX
+    ):
+        return f"render manifest dashboard {uid} title typography floor drift"
+    violations = typography.get("violations")
+    if not isinstance(violations, list) or violations:
+        return f"render manifest dashboard {uid} has typography violations"
+    return None
+
+
 def _validate_panel_id_coverage(
     uid: str,
     *,
@@ -780,6 +806,10 @@ def _validate_one_dashboard_render(
     )
     if viewport_error:
         return viewport_error
+
+    typography_error = _validate_dashboard_typography(uid, dashboard)
+    if typography_error:
+        return typography_error
 
     dashboard_terminal, panel_states, panel_error = _extract_panel_states(
         uid, dashboard
