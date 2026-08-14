@@ -37,7 +37,7 @@ This archive is **opt-in only** (Phase 3 / #8517).
 | `scripts_inventory_consolidation_cleanup_prompt.md` | `scripts/engineering/repo` inventory |
 | `specialized-prompts-1-scripts-inventory.md` | same |
 | `specialized-prompts-2-coderabbit-audit.md` | `docs/03-guides/coderabbit-audit-playbook.md` |
-| `pre-library-*.md` | matching `library/**` cards |
+| `pre-library-*.md` | removed (encoding-corrupt historical copies); use `library/**` |
 | `generic-nine-audit-kit-2026-08.md` (+ SOURCES) | `prompt.audit.generic-nine.pack` + `library/audit/*` domain cards |
 | `project-audit-orchestrator-kit-2026-08-11.md` (+ SOURCES) | `library/audit/orchestrator.md` |
 | `bi-dashboard-audit-kit-2026-08-11.md` (+ SOURCES) | `library/observability/bi-dashboard-acceptance.md` |

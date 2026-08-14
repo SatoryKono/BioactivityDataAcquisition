@@ -51,6 +51,12 @@ panel defect classes in `prompt.observability.dashboard-panel-audit`.
 
 Legacy kit IDs (`VQ-01`, `V-01`, …) map into this namespace when normalizing.
 
+Scalar information density (`DASH-DENSITY-002`) is a layout-contour check
+(`BI-L-*`, `category=density`): `ρ = values/area` over `stat`/`gauge`/`bargauge`,
+and every additional panel group MUST have `ρ > ρ(first_screen)`. Exclude
+`timeseries`/`table` (runtime value counts). A large single-value stat is a
+sparse-density FAIL, not a pass merely because it is "data".
+
 ### Priority map → BioETL
 
 | Kit priority | Typical BioETL | When |

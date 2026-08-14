@@ -41,6 +41,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.audit.docs-cycle` | `library/audit/docs-cycle.md` | Cyclic documentation audit — content drift, commands, links, fix, re-verify |
 | `prompt.audit.tech-debt-cycle` | `library/audit/tech-debt-cycle.md` | Cyclic technical-debt audit — register, trend, paydown, residual re-check |
 | `prompt.audit.cyclic-pack` | `library/audit/cyclic-pack.md` | Pack of cyclic domain audits — 10-domain prompt.audit.cycle.* program |
+| `prompt.audit.sequential-run` | `library/audit/sequential-run.md` | Sequential library/audit run — 10 cycle cards, per-card issue/fix/close gates |
 | `prompt.audit.repo-tree` | `library/audit/repo-tree.md` | Repository tree and root hygiene audit against allowlist |
 | `prompt.audit.repo-tree-cycle` | `library/audit/repo-tree-cycle.md` | Cyclic repository hygiene audit — root allowlist, clutter, ignore, fix, re-verify |
 | `prompt.audit.github-actions` | `library/audit/github-actions.md` | GitHub Actions supply-chain and correctness audit |
@@ -142,6 +143,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.audit.docs-cycle` | operator-paste | active | `library/audit/docs-cycle.md` |
 | `prompt.audit.tech-debt-cycle` | operator-paste | active | `library/audit/tech-debt-cycle.md` |
 | `prompt.audit.cyclic-pack` | operator-paste | active | `library/audit/cyclic-pack.md` |
+| `prompt.audit.sequential-run` | operator-paste | active | `library/audit/sequential-run.md` |
 | `prompt.audit.repo-tree` | operator-paste | active | `library/audit/repo-tree.md` |
 | `prompt.audit.repo-tree-cycle` | operator-paste | active | `library/audit/repo-tree-cycle.md` |
 | `prompt.audit.github-actions` | operator-paste | active | `library/audit/github-actions.md` |

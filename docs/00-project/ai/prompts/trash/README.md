@@ -35,10 +35,10 @@ BioETL.
   BioETL repo structure
 - [architecture_review_and_refactoring_assessment.md](../architecture_review_and_refactoring_assessment.md)
   — working prompt for read-only architecture review and refactoring assessment
-- [test_speed_optimization_loop.md](../archive/campaigns/pre-library-test_speed_optimization_loop.md) —
-  working prompt for test-speed optimization loops
-- [test_fix_retest_loop.md](../archive/campaigns/pre-library-test_fix_retest_loop.md) — working prompt for
-  test run → fix → rerun iterative validation loop
+- [test_speed_optimization_loop.md](../library/tests/speed-optimization-loop.md) —
+  `prompt.tests.speed-optimization` (archive pre-library copy removed)
+- [test_fix_retest_loop.md](../library/tests/fix-retest-loop.md) —
+  `prompt.tests.fix-retest` (archive pre-library copy removed)
 - [COLLECTED_PROMPTS_INDEX.md](../COLLECTED_PROMPTS_INDEX.md) — discoverability
   index for repo-only collected prompt snapshots
 - Historical prompts in this folder explicitly marked `internal-only (historical prompt)` should be treated as reference material, not as current

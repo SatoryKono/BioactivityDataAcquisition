@@ -173,6 +173,11 @@ Assess **signal vs chrome** at VIEWPORT for `USER_ROLE`:
 - Filter/variable bar overload vs role (analyst vs executive)
 - Time-to-first-insight target: **5–10s** for page goal
 - Chart ink: labels/units present; avoid chartjunk; series count readable
+- Scalar density (`DASH-DENSITY-002`): for scalar panels (`stat`/`gauge`/`bargauge`)
+  compute `ρ = values/area` per surface; every collapsed group MUST out-densify the
+  first screen (`ρ_group > ρ_first`). Flag large single-value stats (a `24×6` card
+  showing one `UNKNOWN`, `ρ≈0.007`) as sparse. Exclude `timeseries`/`table`
+  (runtime value counts). Survey: `report_dashboard_scalar_density`.
 
 Tag findings `category=density`. Prefer measurable layout evidence
 (screenshot crop + panel list + fold line), not taste alone.

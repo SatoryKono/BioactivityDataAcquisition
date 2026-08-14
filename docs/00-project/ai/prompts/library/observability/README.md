@@ -51,6 +51,14 @@ map them and do **not** double-count findings:
 | `grafana-six.reverify` | grafana-audit.regression |
 | `grafana-six.pack` | this README + grafana-audit.master |
 
+## Focused cards (outside the numbered sequence)
+
+- `prompt.observability.group-scalar-density-audit` — re-measure scalar
+  information density per panel group vs first screen (`DASH-DENSITY-002`,
+  REQUIREMENTS §5.4) and rank groups that must be made denser. Static (no
+  monitoring); pairs with the `density` contour of step 7 and the survey
+  `python -m scripts.engineering.qa.report_dashboard_scalar_density`.
+
 ## Artifacts
 
 ```text

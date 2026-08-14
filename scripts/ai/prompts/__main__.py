@@ -36,6 +36,62 @@ EXIT_USAGE = 2
 EXIT_CHECK = 1
 
 
+def _set_windows_console_utf8() -> None:
+    """Best-effort ``chcp 65001`` so the console renders UTF-8 output.
+
+    ``TextIOWrapper.reconfigure`` only changes how Python encodes bytes; it does
+    not touch the Windows console code page. If the console stays on the legacy
+    OEM page (CP866/CP437) it decodes the UTF-8 bytes we write as mojibake
+    (``╨É`` / ``ΓÇô`` / ``Γëñ``). Setting the console code page to 65001
+    (``CP_UTF8``) makes Cyrillic prompt cards display correctly without the
+    operator running ``chcp 65001`` first.
+    """
+    if sys.platform != "win32":
+        return
+    try:
+        import ctypes
+
+        kernel32 = ctypes.windll.kernel32  # type: ignore[attr-defined]
+        kernel32.SetConsoleOutputCP(65001)
+        kernel32.SetConsoleCP(65001)
+    except (OSError, AttributeError, ValueError):
+        return
+
+
+def _configure_stdio() -> None:
+    """Force UTF-8 on Windows consoles so Cyrillic prompt cards survive."""
+    _set_windows_console_utf8()
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if not callable(reconfigure):
+            continue
+        try:
+            reconfigure(encoding="utf-8", errors="strict")
+        except (OSError, ValueError, UnicodeError):
+            continue
+
+
+def _write_stdout(text: str) -> None:
+    """Write Unicode to stdout even when the console/file wrapper is cp1252.
+
+    Windows PowerShell redirects inherit the OEM/ANSI code page. Prompt cards
+    contain Cyrillic and typographic characters; writing via the UTF-8 buffer
+    keeps ``> file.txt`` usable without ``chcp 65001``.
+    """
+    stream = sys.stdout
+    try:
+        stream.write(text)
+        return
+    except UnicodeEncodeError:
+        pass
+    buffer = getattr(stream, "buffer", None)
+    if buffer is not None:
+        buffer.write(text.encode("utf-8"))
+        return
+    encoding = getattr(stream, "encoding", None) or "utf-8"
+    stream.write(text.encode(encoding, errors="replace").decode(encoding))
+
+
 def _parse_params(raw: list[str] | None) -> dict[str, str]:
     params: dict[str, str] = {}
     for item in raw or []:
@@ -65,7 +121,7 @@ def cmd_list(args: argparse.Namespace) -> int:
 
 def cmd_show(args: argparse.Namespace) -> int:
     try:
-        sys.stdout.write(show_entry(args.id))
+        _write_stdout(show_entry(args.id))
     except KeyError as exc:
         print(str(exc), file=sys.stderr)
         return EXIT_USAGE
@@ -83,25 +139,35 @@ def cmd_render(args: argparse.Namespace) -> int:
         out = Path(args.output)
         if not out.is_absolute():
             out = REPO_ROOT / out
-        # confine optional writes under reports/
+        reports_root = (REPO_ROOT / "reports").resolve()
+        resolved = out.expanduser().resolve()
         try:
-            out.resolve().relative_to((REPO_ROOT / "reports").resolve())
+            resolved.relative_to(reports_root)
         except ValueError:
-            print(
-                "refusing to write outside reports/: use --output reports/...",
-                file=sys.stderr,
-            )
-            return EXIT_USAGE
-        out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(text, encoding="utf-8")
-        print(f"wrote {out.relative_to(REPO_ROOT)}", file=sys.stderr)
-    sys.stdout.write(text)
+            if not Path(args.output).expanduser().is_absolute():
+                print(
+                    "refusing relative path outside reports/: "
+                    "use --output reports/... or an absolute path",
+                    file=sys.stderr,
+                )
+                return EXIT_USAGE
+        resolved.parent.mkdir(parents=True, exist_ok=True)
+        encoding = "utf-8-sig" if sys.platform == "win32" else "utf-8"
+        resolved.write_text(text, encoding=encoding)
+        try:
+            shown = resolved.relative_to(REPO_ROOT)
+        except ValueError:
+            shown = resolved
+        print(f"wrote {shown}", file=sys.stderr)
+        if not args.stdout:
+            return EXIT_OK
+    _write_stdout(text)
     return EXIT_OK
 
 
 def cmd_check_registry(args: argparse.Namespace) -> int:
     report = check_registry()
-    sys.stdout.write(format_report(report, title="Prompt Library check-registry"))
+    _write_stdout(format_report(report, title="Prompt Library check-registry"))
     if args.artifact:
         write_quality_artifact(report, REPO_ROOT / args.artifact)
     return EXIT_OK if report.ok else EXIT_CHECK
@@ -119,7 +185,7 @@ def cmd_check(args: argparse.Namespace) -> int:
         "errors": len(reg.errors),
         "warnings": len(reg.warnings),
     }
-    sys.stdout.write(
+    _write_stdout(
         format_report(reg, title="Prompt Library check (registry + hygiene)")
     )
     artifact = args.artifact or "reports/quality/prompts/check.json"
@@ -143,7 +209,7 @@ def cmd_catalog(args: argparse.Namespace) -> int:
     out.write_text(text, encoding="utf-8")
     print(f"wrote {out}")
     if args.stdout:
-        sys.stdout.write(text)
+        _write_stdout(text)
     return EXIT_OK
 
 
@@ -240,7 +306,17 @@ def build_parser() -> argparse.ArgumentParser:
     p_render.add_argument(
         "--output",
         default=None,
-        help="Optional write path under reports/",
+        help=(
+            "Write UTF-8 text to this path (reports/... or an absolute path). "
+            "On Windows the file gets a UTF-8 BOM so Notepad/PowerShell open it "
+            "correctly. Stdout is skipped unless --stdout is also set. Prefer "
+            "this over PowerShell '>' which re-decodes as OEM/CP437."
+        ),
+    )
+    p_render.add_argument(
+        "--stdout",
+        action="store_true",
+        help="Also write the rendered card to stdout when --output is set.",
     )
     p_render.set_defaults(func=cmd_render)
 
@@ -292,6 +368,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    _configure_stdio()
     parser = build_parser()
     args = parser.parse_args(argv)
     return int(args.func(args))

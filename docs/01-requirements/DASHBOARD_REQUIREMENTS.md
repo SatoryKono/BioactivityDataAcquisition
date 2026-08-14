@@ -132,6 +132,32 @@ one oversized chart from masking a prose-heavy group.
 - No exception may be added merely to preserve a legacy screenshot. A necessary
   exception requires a documented operator rationale and a contract-test change.
 
+### 5.4 Scalar information density in additional panel groups
+
+`REQ-DASH-004` / `DASH-DENSITY-002`:
+
+- Scalar panel = `stat`, `gauge`, or `bargauge`. `timeseries`, `table`, `text`,
+  and `row` are excluded (their value count is runtime/interpretation dependent).
+- Value count is `1` for a single reduced scalar; a multi-value scalar
+  (`reduceOptions.values = true`) counts its non-hidden targets.
+- Scalar density `rho(surface) = Σ values / Σ (gridPos.w × gridPos.h)` over the
+  scalar panels of the surface.
+- First screen = root, non-row scalar panels with `gridPos.y < FIRST_WINDOW_Y`.
+- For every additional panel group (a `row`) with ≥1 scalar panel:
+  `rho(group) > rho(first_screen)` of the same dashboard. Deep evidence groups
+  MUST pack scalars more tightly than the prominent answer-first verdicts; a large
+  single-value stat buried in a drilldown is the anti-pattern this catches.
+- Groups without scalar panels, and dashboards whose first screen has no scalar
+  panel, are exempt (N/A). Justified exceptions use the governed `scalar_density`
+  allowlist (`owner + rationale + retire_when`).
+- Complementary to `DASH-DENSITY-001`: that measures data-vs-chrome area; this
+  measures values-per-area for scalars. A `24×6` stat showing one `UNKNOWN` is
+  "100% data" under `DASH-DENSITY-001` yet very sparse here (`ρ ≈ 0.007`).
+- Enforcement is opt-in per UID via `scalar_density_enforced_uids`
+  (`layout-budgets.yaml`); a dashboard is enrolled only after its scalar groups
+  out-densify its first screen. Baseline survey 2026-08-14: `0. Trust` groups
+  `902/901/903/904` were all below the first screen and await remediation.
+
 ## 6. P2 — consistency and maintainability
 
 | ID | Requirement |
@@ -170,6 +196,7 @@ Derived from the geometry-grounded proposal
 | `DASH-COPY-006` | First-window verdict cards (background `stat` whose mappings encode `OK` plus `WARN`/`CRIT`) MUST state `OK`/`WARN`/`CRIT`/`UNKNOWN` in the description. Documented trust gates (`0. Trust`/`2. Pipeline Diagnostics` `9401`) MUST also state `INCOMPLETE`. Presence/coverage gates without that palette are out of scope. | enforced |
 | `DASH-COPY-007` | Data-typed panels MUST declare ≥1 live target (non-empty PromQL `expr` or Infinity `url`, `hide != true`). | enforced |
 | `DASH-PERF-003` | The answer fold (`FIRST_WINDOW_Y=18`) and the first-load budget window (`FIRST_LOAD_Y_MAX=28`) MUST stay distinct, named constants. | enforced |
+| `DASH-DENSITY-002` | Every additional panel group with ≥1 scalar panel MUST have scalar density (values / `w×h`, `stat`/`gauge`/`bargauge` only) greater than the dashboard's first-screen scalar density (§5.4). | enforced (all 7 uids in scalar_density_enforced_uids) |
 
 Named constants and governed exception allowlists (`owner + rationale + retire_when`)
 live in [`layout-budgets.yaml`](../03-guides/dashboards/contracts/layout-budgets.yaml)
@@ -215,6 +242,7 @@ The §7 answers map to these root first-window panels. Ids are locked by
 | Full release render | `python -m scripts.ops run-grafana-audit-cycle` on the supported monitoring host |
 | Structural & integrity invariants (`DASH-DATA-003/004`, `DASH-SEC-001`, `DASH-STATE-003`, `DASH-META-002`, `DASH-LAYOUT-002`, `DASH-LINK-001/002`, `DASH-VIZ-001/002`, `DASH-PERF-002`, `DASH-COPY-002`) | `tests/integration/test_dashboard_structural_invariants.py` |
 | Geometry & purpose regression locks (`DASH-LAYOUT-003/004`, `DASH-FIT-001/002/003`, `DASH-COPY-003/004/005/006/007`, `DASH-PERF-003`) | `tests/integration/test_dashboard_geometry_and_purpose_contracts.py` + [`layout-budgets.yaml`](../03-guides/dashboards/contracts/layout-budgets.yaml) |
+| Scalar information density (`DASH-DENSITY-002`, §5.4) | `python -m scripts.engineering.qa.report_dashboard_scalar_density --check` (survey/gate) + `tests/unit/scripts/qa/test_report_dashboard_scalar_density.py` (pure) + enforced-scope gate in `tests/integration/test_dashboard_geometry_and_purpose_contracts.py` |
 
 Static tests prove repository structure. They do not replace live datasource,
 render, or human usability evidence.

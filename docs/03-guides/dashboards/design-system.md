@@ -347,6 +347,12 @@ Normative rules:
 - Audit tooling MAY expand collapsed rows to materialize and review their full
   content; that audit mode does not change the shipped progressive-disclosure
   default.
+- Scalar information density (`DASH-DENSITY-002`, REQUIREMENTS §5.4): a collapsed
+  additional panel group MUST pack its scalar panels (`stat`/`gauge`/`bargauge`)
+  more densely than the first screen — `ρ_group > ρ_first` where
+  `ρ = values / (w×h)`. A large single-value stat buried in a drilldown (e.g. a
+  `24×6` card showing one `UNKNOWN`) is the sparse anti-pattern this forbids;
+  consolidate such counters into a compact table/bargauge or shrink the cards.
 
 ## 4.4) Datasource trust semantics (обязательно)
 

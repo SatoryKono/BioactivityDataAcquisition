@@ -96,8 +96,10 @@ No finding without proof. If monitoring unavailable → `Not Verifiable` + exact
 
 Also note browser/UX defects when UI is available: `bad data`, `query error`,
 `panel error`, unexpected empty, clipped text, broken grid/height, unnecessary
-scroll inside panels. For systematic contrast/layout/data acceptance checks,
-run or hand off to `bi-dashboard-acceptance`.
+scroll inside panels, and **sparse single-value stats** (large `stat`/`gauge`
+area for one value → low scalar density, `DASH-DENSITY-002`). For systematic
+contrast/layout/data acceptance checks, run or hand off to
+`bi-dashboard-acceptance`.
 
 ## Phase 3 — GitHub tracking
 
