@@ -3134,7 +3134,7 @@
               },
               "decimals": 0,
               "unit": "none",
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run in Browse Recent Runs. UNKNOWN/QUERY ERROR if a selected run has no accounting.",
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run in Inspect Recent Runs. UNKNOWN/QUERY ERROR if a selected run has no accounting.",
               "links": [
                 {
                   "title": "Check BioETL Ops HTTP health",

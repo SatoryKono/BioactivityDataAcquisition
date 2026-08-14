@@ -138,15 +138,42 @@ def test_pfill_12_browse_explains_artifact_backing_and_backend_failure() -> None
     description = str(browse.get("description") or "")
     target = (browse.get("targets") or [])[0]
 
-    assert "No pipeline-run-report artifacts" in no_value
+    assert no_value.startswith("VALID EMPTY — no pipeline-run-report artifacts")
+    assert "pipeline '$pipeline'" in no_value
     assert "reports/run-reports/pipeline/<name>/" in no_value
     # Operator help distinguishes valid empty vs backend unavailable (#7248).
     assert "empty table is valid" in description.lower()
     assert "/health/live" in description
+    assert "not a workflow" in description.lower()
+    assert "chembl_baseline" in description
+    assert "workflow-run-reports" in description
     assert target.get("root_selector") == "items"
     assert target.get("url") == (
         "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=20"
     )
+
+
+def test_pfill_12_workflow_browser_is_not_panel_3010() -> None:
+    data = json.loads(
+        (DASH / "bioetl-run-explorer-v1.json").read_text(encoding="utf-8")
+    )
+    workflow = next(
+        panel for panel in _walk(data.get("panels")) if panel.get("id") == 3020
+    )
+    defaults = (workflow.get("fieldConfig") or {}).get("defaults") or {}
+    no_value = str(defaults.get("noValue") or "")
+    target = (workflow.get("targets") or [])[0]
+    assert workflow.get("title") == "Inspect Recent Workflow Runs (last 20)"
+    assert no_value.startswith("VALID EMPTY — no workflow-run-report artifacts")
+    assert "workflow '$workflow'" in no_value
+    assert target.get("url") == (
+        "/ops/observability/workflow-run-reports?workflow=${workflow}&limit=20"
+    )
+    # 3010 must stay pipeline-only.
+    browse = next(panel for panel in _walk(data.get("panels")) if panel.get("id") == 3010)
+    browse_url = ((browse.get("targets") or [])[0]).get("url")
+    assert "pipeline-run-reports" in str(browse_url)
+    assert "workflow-run-reports" not in str(browse_url)
 
 
 def test_pfill_11_dq_freshness_missing_series_is_explicit() -> None:

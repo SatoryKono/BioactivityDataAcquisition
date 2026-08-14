@@ -111,7 +111,7 @@ absence.
 | 9404 | Review Identity Anchors | table | BioETL Ops HTTP | Compact forensic identity anchors for the selected scope; use after ID, Replay Safety, Checkpoint Freshness, Manifest/Ledger, and Telemetry summary cards. | shared shell | Forensic handoff table. |
 | 9405 | Review Identity Gaps | table | BioETL Ops HTTP | Compact missing identity surface inventory for the selected scope. | shared shell | Gap table; no numeric threshold. |
 | 9406 | Compare Checkpoint Anchors | table | BioETL Ops HTTP | Compact side-by-side checkpoint anchor comparison. | shared shell | Comparison table; operator drilldown surface. |
-| 9407 | Copy Identity Values | table | BioETL Ops HTTP | Compact copy-ready IDs/anchors for incident handoff. | shared shell | Handoff table only. |
+| 9407 | Inspect Identity Values | table | BioETL Ops HTTP | Compact copy-ready IDs/anchors for incident handoff. | shared shell | Handoff table only. |
 | 9408 | Review Required Replay Anchors | table | BioETL Ops HTTP | Compact priority replay/evidence anchors for first-line investigation. | shared shell | Incident handoff table. |
 | 9409 | Review Additional Forensic Anchors | table | BioETL Ops HTTP | Compact secondary forensic anchors for deeper analysis. | shared shell | Incident handoff table. |
 | 139 | Review Uncovered Replay Signals | text | Static | Static reminder of residual replay-safety signals to inspect after core blockers. | shared shell | No thresholds; review checklist only. |

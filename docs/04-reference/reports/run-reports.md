@@ -120,7 +120,7 @@ runs yet”, “invalid reports tree”, and “valid tree from another checkout
 Inside the main `bioetl` container the effective root is
 `/app/reports/run-reports`. Host CLI runs and container Ops HTTP **must** see
 the same tree. Stale Docker Desktop bind caches that mount an empty path make
-Grafana **Browse Recent Runs** show empty while host `bioetl report list`
+Grafana **Inspect Recent Runs** show empty while host `bioetl report list`
 still finds artifacts.
 
 Verify:
@@ -130,7 +130,7 @@ python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay
 curl -s http://127.0.0.1:8000/health/ready | jq .checks.report_root
 ```
 
-### Preventing empty Browse Recent Runs (bind mismatch)
+### Preventing empty Inspect Recent Runs (bind mismatch)
 
 Root cause class: Docker Desktop binds `./reports` from a **stale project working_dir**
 (virtual Docker Desktop WSL bind-mount paths) so Ops HTTP sees an empty
