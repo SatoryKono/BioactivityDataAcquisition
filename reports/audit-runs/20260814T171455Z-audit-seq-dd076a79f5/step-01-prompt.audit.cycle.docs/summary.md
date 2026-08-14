@@ -19,16 +19,15 @@ Two P2 documentation-pipeline findings were proven and resolved in the isolated
 | `python -m scripts.docs check-links` | PASS |
 | `python -m scripts.docs verify --skip-build` | PASS |
 | `uv run --frozen --extra docs python -m scripts.docs build-site --strict` | PASS |
-| `pytest ... test_docs_build_site_router.py test_documentation_cleanup_inventory.py` | PASS: 3 passed, 12 artifact-cleanliness skips |
+| `pytest ... test_docs_build_site_router.py test_documentation_cleanup_inventory.py` | PASS: 17 passed after commit and base rebase |
 | `ruff check tests/architecture/test_docs_build_site_router.py` | PASS |
 | `git diff --check` | PASS |
 
-The skipped cleanup-inventory assertions explicitly require a clean committed
-artifact; the owner command itself passed. They will be rerun after commit.
-
 ## Gate status
 
-- Issues: #8824 and #8825; acceptance proven in this checkout.
+- Issues: #8824 and #8825 closed as completed after current-checkout acceptance.
+- PR: #8827 open against `main`; branch head
+  `9a5b67ab96d8af81adb0f744fdcf62187727d4cc`.
 - GitHub CLI credential: unavailable; repository connector is used for issue/PR
   mutations without exposing credentials.
 - Memory: pre-task was DEGRADED due to absent local RAG/timeline records;
