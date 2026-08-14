@@ -207,7 +207,7 @@
       "type": "table",
       "title": "Inspect Run Identity",
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 10,
         "x": 0,
         "y": 13
@@ -363,7 +363,7 @@
       "type": "table",
       "title": "Inspect Processed Records",
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 14,
         "x": 10,
         "y": 13
