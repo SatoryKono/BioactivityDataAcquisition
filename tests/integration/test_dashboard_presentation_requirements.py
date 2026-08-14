@@ -17,7 +17,7 @@ RULES_PATH = Path("docs/00-project/RULES.md")
 REQUIREMENTS_INDEX_PATH = Path("docs/01-requirements/REQUIREMENTS.md")
 DASHBOARD_DOCS_INDEX_PATH = Path("docs/03-guides/dashboards/README.md")
 
-FIRST_WINDOW_Y_EXCLUSIVE = 18
+FIRST_WINDOW_Y_EXCLUSIVE = 28
 MIN_DATA_AREA_DENSITY = 0.60
 MIN_DATA_COUNT_DENSITY = 0.50
 MIN_BODY_FONT_PX = 16.0
@@ -138,6 +138,8 @@ def _area_fill_violations(panel: dict[str, Any]) -> list[str]:
     options = panel.get("options")
     if isinstance(options, dict) and options.get("colorMode") in _AREA_COLOR_MODES:
         violations.append(f"colorMode={options['colorMode']}")
+    if isinstance(options, dict) and options.get("graphMode") == "area":
+        violations.append("graphMode=area")
 
     field_config = panel.get("fieldConfig")
     defaults = field_config.get("defaults") if isinstance(field_config, dict) else None
@@ -149,6 +151,24 @@ def _area_fill_violations(panel: dict[str, Any]) -> list[str]:
         gradient_mode = custom.get("gradientMode")
         if gradient_mode not in {None, "none"}:
             violations.append(f"gradientMode={gradient_mode}")
+
+    overrides = field_config.get("overrides") if isinstance(field_config, dict) else None
+    if isinstance(overrides, list):
+        for override in overrides:
+            properties = override.get("properties") if isinstance(override, dict) else None
+            if not isinstance(properties, list):
+                continue
+            for prop in properties:
+                if not isinstance(prop, dict):
+                    continue
+                prop_id = prop.get("id")
+                value = prop.get("value")
+                if prop_id == "custom.fillOpacity" and isinstance(
+                    value, (int, float)
+                ) and value > 0:
+                    violations.append(f"override fillOpacity={value}")
+                if prop_id == "custom.gradientMode" and value not in {None, "none"}:
+                    violations.append(f"override gradientMode={value}")
 
     if "color-background" in _cell_option_types(panel):
         violations.append("cellOptions=color-background")
@@ -173,7 +193,7 @@ def test_dashboard_requirements_are_normatively_routed() -> None:
         "D_area = A_data / A_total",
         "12pt = 16px",
         "14pt = 18.6667px",
-        "gridPos.y < 18",
+        "gridPos.y < 28",
     ):
         assert token in requirements
     for routed_doc in (rules, requirements_index, dashboard_index):
@@ -284,4 +304,22 @@ def test_contract_helpers_fail_closed_on_sparse_or_filled_examples() -> None:
             },
         }
     ) == ["cellOptions=color-background"]
+    assert _area_fill_violations(
+        {"type": "stat", "options": {"graphMode": "area"}}
+    ) == ["graphMode=area"]
+    assert _area_fill_violations(
+        {
+            "type": "timeseries",
+            "fieldConfig": {
+                "overrides": [
+                    {
+                        "properties": [
+                            {"id": "custom.fillOpacity", "value": 20},
+                            {"id": "custom.gradientMode", "value": "opacity"},
+                        ]
+                    }
+                ]
+            },
+        }
+    ) == ["override fillOpacity=20", "override gradientMode=opacity"]
     assert _font_size_px(14.0, "pt") == pytest.approx(MIN_PANEL_TITLE_FONT_PX)
