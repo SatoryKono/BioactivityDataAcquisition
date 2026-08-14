@@ -1685,6 +1685,79 @@ _STATUS_ORIGIN_CODES = frozenset(
 )
 
 
+def _status_grafana_bootstrap_findings(
+    payload: Mapping[str, Any] | None,
+    *,
+    readable: bool,
+    grafana_running: bool,
+) -> list[dict[str, Any]]:
+    """Surface Grafana Ops HTTP bootstrap deferred/failed as a status finding.
+
+    `runtime_manager status` previously ignored
+    `/var/lib/grafana/bioetl-bootstrap-status.json`, so Grafana could look
+    healthy while Infinity was never provisioned (panel 3010 query error).
+    """
+    if not grafana_running:
+        return []
+    if not readable or not isinstance(payload, Mapping):
+        return [
+            {
+                "cause": "grafana_ops_http_bootstrap",
+                "code": "GRAFANA_OPS_HTTP_BOOTSTRAP",
+                "ops_http": "missing",
+                "reason": "bootstrap_status_unreadable",
+                "message": (
+                    "Grafana is running but bioetl-bootstrap-status.json is "
+                    "missing or unreadable"
+                ),
+            }
+        ]
+    ops_http = str(payload.get("ops_http") or "").strip()
+    reason = str(payload.get("reason") or "").strip()
+    if ops_http in {"deferred", "failed"}:
+        return [
+            {
+                "cause": "grafana_ops_http_bootstrap",
+                "code": "GRAFANA_OPS_HTTP_BOOTSTRAP",
+                "ops_http": ops_http,
+                "reason": reason,
+                "message": (
+                    f"Grafana Ops HTTP bootstrap is {ops_http}"
+                    f" ({reason or 'unspecified'}); Infinity may be absent"
+                ),
+            }
+        ]
+    return []
+
+
+def _load_grafana_bootstrap_status(
+    runner: Runner,
+    *,
+    timeout: float = 10.0,
+) -> tuple[dict[str, Any] | None, bool]:
+    """Read Grafana bootstrap status without treating Docker as required in CI."""
+    result = runner(
+        [
+            "docker",
+            "exec",
+            "bioetl-grafana",
+            "cat",
+            "/var/lib/grafana/bioetl-bootstrap-status.json",
+        ],
+        ROOT,
+        timeout,
+    )
+    if result.returncode != 0:
+        return None, False
+    try:
+        payload = json.loads(result.stdout)
+    except json.JSONDecodeError:
+        return None, False
+    if not isinstance(payload, dict):
+        return None, False
+    return payload, True
+
+
 def _status_origin_findings(
     preflight_path: Path,
     preflight: CommandResult,
@@ -1885,6 +1958,22 @@ def _dispatch_action(
         snapshots, _ = collect_snapshots(spec, runner=runner, timeout=args.timeout)
         findings = readiness_findings(spec, snapshots)
         findings.extend(_status_origin_findings(preflight_path, preflight))
+        if spec.name == "monitoring":
+            grafana_running = any(
+                snapshot.state == "running"
+                and str(snapshot.service) in {"grafana", "bioetl-grafana"}
+                for snapshot in snapshots
+            )
+            bootstrap_payload, bootstrap_readable = _load_grafana_bootstrap_status(
+                runner, timeout=min(args.timeout, 10.0)
+            )
+            findings.extend(
+                _status_grafana_bootstrap_findings(
+                    bootstrap_payload,
+                    readable=bootstrap_readable,
+                    grafana_running=grafana_running,
+                )
+            )
         print(
             json.dumps(
                 {
