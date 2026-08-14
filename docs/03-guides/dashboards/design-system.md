@@ -3,6 +3,11 @@
 Дата актуализации: **2026-07-28**
 Источник истины: `grafana/dashboards/*.json`
 
+Normative presentation floors and measurement rules are owned by
+[`DASHBOARD_REQUIREMENTS.md`](../../01-requirements/DASHBOARD_REQUIREMENTS.md).
+This guide explains their application; archived DUX typography floors do not
+override the active requirements contract.
+
 **Dashboard System 2.0:** operator first-screen contract and verdict model live in
 [operator-ux-v2.md](operator-ux-v2.md) and [verdict-ontology.md](verdict-ontology.md).
 Prose-first first screens (giant Provenance / multi-paragraph First Action without
@@ -662,4 +667,9 @@ Benign export noise:
 
 ## 9) DUX5 typography & copy residual
 
-Operator reading-order, state classes, and typography floors are normative in [dux5-copy-dictionary.md](archive/audit-protocols/dux5-copy-dictionary.md). Screenshot regression protocol: [dux5-screenshot-regression-protocol.md](archive/audit-protocols/dux5-screenshot-regression-protocol.md).
+DUX5 artifacts remain historical audit evidence. Active typography floors are
+`body >= 12pt (16px)` and `panel title >= 14pt (18.6667px)` in
+[`DASHBOARD_REQUIREMENTS.md`](../../01-requirements/DASHBOARD_REQUIREMENTS.md).
+The screenshot protocol remains available at
+[dux5-screenshot-regression-protocol.md](archive/audit-protocols/dux5-screenshot-regression-protocol.md),
+but its former smaller floors are superseded.

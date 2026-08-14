@@ -262,6 +262,13 @@ entries:
     tags: [observability, dashboard, grafana, audit, cycle, density, typography, color, layout, render, operator]
     summary: Exhaustive cyclic Grafana audit of every panel, viewport, density, typography, color, scroll, whitespace, data, and render contract
 
+  - id: prompt.observability.sequential-run
+    path: library/observability/sequential-run.md
+    status: active
+    class: operator-paste
+    tags: [observability, dashboard, grafana, audit, sequential, operator]
+    summary: Sequential observability folder run — unique cards, issue/close gates, DASH-AUTO appendix
+
   - id: prompt.observability.grafana-audit.master
     path: library/observability/grafana-audit/master.md
     status: active
