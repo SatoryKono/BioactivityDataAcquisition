@@ -5,7 +5,11 @@ from __future__ import annotations
 from importlib import import_module
 from unittest.mock import patch
 
+import pytest
+
 from tests.unit.application.services.run_manifest_test_support import make_run_manifest
+
+pytestmark = pytest.mark.unit
 
 ZERO_IMPORT_MODULES = (
     "bioetl.application.services.control_plane.manifest.diagnostics.base",
