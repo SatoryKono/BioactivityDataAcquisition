@@ -167,7 +167,7 @@ def _resolve_final_value_source(
     priority_order: list[str] | None,
 ) -> str | None:
     """Select final value source honoring priority_order when available.
-    
+
     Priority order is highest-first (first item = highest priority).
     Returns the highest-priority provider that exists in source_providers.
     """

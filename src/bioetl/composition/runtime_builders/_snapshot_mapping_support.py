@@ -37,14 +37,12 @@ def normalize_snapshot(value: object) -> object:
     """Normalize snapshot values into JSON-serializable primitives."""
     if isinstance(value, Enum):
         return value.value
-    if isinstance(value, UUID):
+    if isinstance(value, (UUID, Decimal, Path)):
         return str(value)
     if isinstance(value, datetime | date | time):
         return value.isoformat()
     if isinstance(value, timedelta):
         return value.total_seconds()
-    if isinstance(value, Decimal | Path):
-        return str(value)
     if not isinstance(value, type) and is_dataclass(value):
         return normalize_snapshot(asdict(cast("DataclassInstance", value)))
     if isinstance(value, Mapping):
