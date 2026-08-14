@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.1.2
+Version: 1.1.3
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-12'
+  Last verified: '2026-08-14'
 
 ______________________________________________________________________
 
 # BioETL Project Navigator
 
-*Synced with RULES.md v6.1.9 | Last updated: 2026-08-11*
+*Synced with RULES.md v6.1.10 | Last updated: 2026-08-14*
 
 > **Documentation Update:** 2026-06-03
 >
@@ -72,6 +72,7 @@ ______________________________________________________________________
 | Browse ADR registry                | [adr-registry.md](../02-architecture/adr-registry.md)                                  |
 | Need historical context            | Repository path `docs/99-archive/README.md` *(non-canonical)*                          |
 | Browse shipped dashboards           | [dashboards/README.md](../03-guides/dashboards/README.md) (coverage matrix)            |
+| Dashboard presentation requirements | [DASHBOARD_REQUIREMENTS.md](../01-requirements/DASHBOARD_REQUIREMENTS.md) (density, typography, palette, render gates) |
 | Operator dashboard triage          | [monitoring-index.md](../03-guides/dashboards/monitoring-index.md) (incident-time navigation) |
 | Find canonical domain catalog      | [domain/README.md](../04-reference/domain/README.md)                                   |
 | Inspect runtime context surfaces   | [contexts.md](../04-reference/domain/contexts.md)                                      |

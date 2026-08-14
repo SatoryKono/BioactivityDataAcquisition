@@ -27,6 +27,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.observability.dashboard-panel-audit` | `library/observability/dashboard-panel-audit.md` | Five-phase Grafana panel audit — render, GH issues, fix, closeout (v1.1) |
 | `prompt.observability.bi-dashboard-acceptance` | `library/observability/bi-dashboard-acceptance.md` | BI dashboard acceptance — visual, layout, data contours with measurable checks |
 | `prompt.observability.dashboard-audit-cycle` | `library/observability/dashboard-audit-cycle.md` | Exhaustive cyclic Grafana audit of every panel, viewport, density, typography, color, scroll, whitespace, data, and render contract |
+| `prompt.observability.sequential-run` | `library/observability/sequential-run.md` | Sequential observability folder run — unique cards, issue/close gates, DASH-AUTO appendix |
 | `prompt.observability.grafana-audit.master` | `library/observability/grafana-audit/master.md` | Complete read-only Grafana audit across visual, layout, and data contours |
 | `prompt.observability.grafana-audit.visual` | `library/observability/grafana-audit/visual.md` | Grafana visual audit for palette, contrast, typography, and status encoding |
 | `prompt.observability.grafana-audit.layout` | `library/observability/grafana-audit/layout.md` | Grafana layout audit for hierarchy, first viewport, variables, and drill-down |
@@ -120,6 +121,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.observability.dashboard-panel-audit` | operator-paste | active | `library/observability/dashboard-panel-audit.md` |
 | `prompt.observability.bi-dashboard-acceptance` | operator-paste | active | `library/observability/bi-dashboard-acceptance.md` |
 | `prompt.observability.dashboard-audit-cycle` | operator-paste | active | `library/observability/dashboard-audit-cycle.md` |
+| `prompt.observability.sequential-run` | operator-paste | active | `library/observability/sequential-run.md` |
 | `prompt.observability.grafana-audit.master` | operator-paste | active | `library/observability/grafana-audit/master.md` |
 | `prompt.observability.grafana-audit.visual` | operator-paste | active | `library/observability/grafana-audit/visual.md` |
 | `prompt.observability.grafana-audit.layout` | operator-paste | active | `library/observability/grafana-audit/layout.md` |

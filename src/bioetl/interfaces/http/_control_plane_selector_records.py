@@ -16,7 +16,7 @@ from bioetl.domain.control_plane.run_ledger import (
 from bioetl.domain.types import RunID
 
 ALL_SCOPE = "All"
-_ALL_SCOPE_TOKENS = frozenset({ALL_SCOPE, "$__all", "__all", "*", "all"})
+_ALL_SCOPE_TOKENS = frozenset({ALL_SCOPE, "$__all", "__all", "*", "all", ".*"})
 _TERMINAL_EVENT_TYPES = frozenset(
     {RUN_FINISHED_EVENT, RUN_FAILED_EVENT, RUN_SHUTDOWN_EVENT}
 )

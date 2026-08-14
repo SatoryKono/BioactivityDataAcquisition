@@ -1,15 +1,17 @@
 # Requirements Traceability Crosswalk
 
-- snapshot_date: 2026-07-16
-- source: `docs/01-requirements/REQUIREMENTS.md` v1.12
-- canonical_rules_owner: `docs/00-project/RULES.md` v6.1.5
+- snapshot_date: 2026-08-14
+- source: `docs/01-requirements/REQUIREMENTS.md` v1.12.4
+- canonical_rules_owner: `docs/00-project/RULES.md` v6.1.10
 - artifact: `docs/01-requirements/traceability/requirements-traceability-crosswalk.csv`
-- row_count: 168
-- modality_counts: `147 MUST`, `16 MUST NOT`, `4 SHOULD`, `1 MAY`
-- status_counts: `162 confirmed`, `6 updated`, `0 conflict`, `0 follow-up`
+- row_count: 171
+- modality_counts: `150 MUST`, `16 MUST NOT`, `4 SHOULD`, `1 MAY`
+- status_counts: `165 confirmed`, `6 updated`, `0 conflict`, `0 follow-up`
 
 ## New Rows
 
+- `REQ-DASH-001..003` — density, typography, and area-fill presentation
+  requirements delegated by `RULES.md` §3.2.3 to the scoped dashboard contract.
 - `REQ-GOV-001..012` — testable projections for the 18 Qodo-reconciled
   change-set gates in `RULES.md` §4.5.
 
@@ -24,7 +26,8 @@
 
 ## Resolution Notes
 
-- The crosswalk now covers all 168 active requirements, including the 12 new
-  cross-cutting governance requirements.
+- The crosswalk now covers all 171 active requirements, including the three
+  dashboard presentation requirements and 12 cross-cutting governance
+  requirements.
 - No active `CONTRIBUTING.md` conflict required remediation in current `main`.
 - The historical `.codex/agents/CODEX-RUNTIME.md` missing-file defect remains resolved and was not reopened.

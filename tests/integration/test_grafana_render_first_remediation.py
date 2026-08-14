@@ -224,7 +224,7 @@ def test_iteration_2_active_alert_severity_is_not_overridden_by_count() -> None:
     }
     assert count_properties["displayName"] == "Active Alerts"
     assert count_properties["custom.cellOptions"] == {
-        "type": "color-background",
+        "type": "color-text",
         "applyToRow": False,
     }
 
@@ -444,7 +444,7 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
             .get("defaults", {})
             .get("noValue", "")
         )
-        assert no_value.startswith("Not resolved")
+        assert no_value.startswith("SELECT RUN")
     # Workflow overview + Alerts/SLO retired; ID-card noValue contract remains.
 
 
@@ -758,7 +758,7 @@ def test_incident_alert_count_and_dq_reason_have_honest_table_semantics() -> Non
     assert overrides["Signal"]["custom.align"] == "right"
     assert overrides["Signal"]["custom.width"] == 88
     assert overrides["Signal"]["custom.cellOptions"] == {
-        "type": "color-background",
+        "type": "color-text",
         "mode": "basic",
     }
 

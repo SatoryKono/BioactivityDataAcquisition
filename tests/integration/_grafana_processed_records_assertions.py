@@ -63,7 +63,7 @@ def assert_processed_records_field_overrides(
     assert row_status_properties["custom.width"] == 1
     assert row_status_properties["custom.align"] == "center"
     assert row_status_properties["custom.cellOptions"] == {
-        "type": "color-background",
+        "type": "color-text",
         "applyToRow": True,
     }
     assert row_status_properties["mappings"] == expected_row_status_mappings

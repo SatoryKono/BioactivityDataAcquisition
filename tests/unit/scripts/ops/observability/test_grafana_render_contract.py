@@ -57,6 +57,12 @@ def _manifest(*, classification: str = "incomplete") -> dict[str, object]:
                 "renderStatus": "rendered",
                 "actualViewport": {"width": 1024, "height": 1900},
                 "actualTheme": "light",
+                "typographyValidation": {
+                    "status": "ok",
+                    "bodyMinimumPx": 16.0,
+                    "panelTitleMinimumPx": 14.0 * 4.0 / 3.0,
+                    "violations": [],
+                },
                 "terminalStateValidation": {
                     "status": "ok",
                     "checkedPanelCount": 1,
@@ -327,6 +333,36 @@ def test_render_matrix_covers_standard_full_repeat_and_kiosk_profiles() -> None:
         "3840x2160-dark-kiosk",
         "3840x2160-light-kiosk",
     }
+
+
+def test_render_contract_rejects_missing_typography_evidence() -> None:
+    manifest = _manifest(classification="data")
+    dashboard = manifest["dashboards"][0]
+    assert isinstance(dashboard, dict)
+    dashboard.pop("typographyValidation")
+
+    problem = preflight._validate_manifest_render_contract(
+        manifest,
+        expected_uids=("bioetl-runtime",),
+    )
+
+    assert problem == "render manifest dashboard bioetl-runtime lacks typography evidence"
+
+
+def test_render_contract_rejects_title_font_floor_drift() -> None:
+    manifest = _manifest(classification="data")
+    dashboard = manifest["dashboards"][0]
+    assert isinstance(dashboard, dict)
+    typography = dashboard["typographyValidation"]
+    assert isinstance(typography, dict)
+    typography["panelTitleMinimumPx"] = 18.0
+
+    problem = preflight._validate_manifest_render_contract(
+        manifest,
+        expected_uids=("bioetl-runtime",),
+    )
+
+    assert problem == "render manifest dashboard bioetl-runtime title typography floor drift"
 
 
 def test_repeat_geometry_comparison_ignores_values_and_detects_layout_drift() -> None:
