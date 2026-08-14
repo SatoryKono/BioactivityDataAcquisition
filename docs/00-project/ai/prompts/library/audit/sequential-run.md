@@ -4,7 +4,7 @@ version: 1.0.0
 status: active
 class: operator-paste
 owner: BioETL Team
-runtimes: [grok, codex, any]
+runtimes: [grok]
 params:
   - REPO
   - BASE_BRANCH
@@ -63,20 +63,24 @@ max_body_lines: 280
 | --- | --- |
 | `REPO` | `SatoryKono/BioactivityDataAcquisition` |
 | `BASE_BRANCH` | `main` |
-| `WORK_BRANCH` | `fix/audit-seq-<shortsha>` (never main) |
+| `WORK_BRANCH` | `fix/audit-seq-<shortsha>` |
 | `LANGUAGE` | `ru` |
-| `N` | `1` (полных проходов карточки) |
+| `N` | `1` |
 | `MODE` | `full` |
 | `DEPTH` | `full` |
 | `INCLUDE_PIPELINE` | `true` |
-| `MONITORING` | `false` |
+| `MONITORING` | `true` |
 | `ALLOW_ISSUE_WRITE` | `true` |
 | `ALLOW_PUSH` | `true` |
 | `ALLOW_MERGE` | `false` |
 | `ALLOW_CLOSE` | `true` |
 | `MAX_ISSUES_PER_STEP` | `8` |
 | `REQUIRE_GH_TRACKING` | `true` |
-| `CODERABBIT` | `skip` (только шаг 10: `required-then-agent` по запросу) |
+| `CODERABBIT` | `required-then-agent` |
+
+Примечания к дефолтам: `N` — число полных проходов карточки; `WORK_BRANCH`
+никогда не `main`; `CODERABBIT=required-then-agent` действует только на шаге 10
+(сначала required-проверки CI, затем агентная проверка).
 
 ## TASK / MODE
 
