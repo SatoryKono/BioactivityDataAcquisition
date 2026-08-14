@@ -163,8 +163,8 @@ def test_control_plane_scope_resolves_unknown_exact_and_latest_paths() -> None:
         host,
         {"pipeline": "chembl_activity"},
     )
-    assert fallback_scope.resolved_via == "latest_manifest_for_scope"
-    assert fallback_scope.resolved_manifest is later
+    assert fallback_scope.resolved_via == "selection_required"
+    assert fallback_scope.resolved_manifest is None
 
     aggregate_scope = scope.resolve_control_plane_identity_scope(
         host,
@@ -176,7 +176,8 @@ def test_control_plane_scope_resolves_unknown_exact_and_latest_paths() -> None:
         host,
         {"pipeline": "missing"},
     )
-    assert missing_scope.resolved_via == "no_manifest_for_scope"
+    assert missing_scope.resolved_via == "selection_required"
+    assert missing_scope.resolved_manifest is None
 
 
 def test_control_plane_scope_uses_bounded_latest_lookup() -> None:
@@ -197,8 +198,8 @@ def test_control_plane_scope_uses_bounded_latest_lookup() -> None:
         host,
         {"pipeline": "chembl_activity", "run_type": "incremental"},
     )
-    assert resolved.resolved_via == "latest_manifest_for_scope"
-    assert resolved.resolved_manifest is selected
+    assert resolved.resolved_via == "selection_required"
+    assert resolved.resolved_manifest is None
 
 
 def test_control_plane_scope_does_not_scan_catalog_for_latest_lookup() -> None:
@@ -213,5 +214,5 @@ def test_control_plane_scope_does_not_scan_catalog_for_latest_lookup() -> None:
         {"pipeline": "chembl_activity"},
     )
 
-    assert resolved.resolved_manifest is selected
-    assert resolved.resolved_via == "latest_manifest_for_scope"
+    assert resolved.resolved_manifest is None
+    assert resolved.resolved_via == "selection_required"

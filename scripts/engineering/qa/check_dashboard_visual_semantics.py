@@ -27,8 +27,8 @@ PANEL_METRICS_EVIDENCE = "Monitor Metrics Coverage"
 PANEL_MONITOR_DQ_CURRENT_STATUS = "Monitor DQ Current Status"
 PANEL_MONITOR_DQ_THRESHOLD_STATE = "Monitor DQ Threshold State"
 PANEL_MONITOR_REPLAY_SAFETY_STATE = "Monitor Replay Safety"
-PANEL_MONITOR_MANIFEST_LEDGER_INTEGRITY = "Monitor Manifest & Ledger Failures"
-PANEL_INSPECT_TELEMETRY_MISSING = "Monitor Telemetry Coverage"
+PANEL_MONITOR_MANIFEST_LEDGER_INTEGRITY = "Monitor Manifest/Ledger"
+PANEL_INSPECT_TELEMETRY_MISSING = "Monitor Telemetry"
 UNTITLED_PANEL_TITLE = "<untitled>"
 
 EXPECTED_STEPS: list[JsonObject] = [
@@ -103,8 +103,8 @@ EXPLICIT_VALUE_MAPPING_STAT_PANELS: dict[tuple[str, str], JsonObject] = {
     },
     (DASHBOARD_RUNTIME, PANEL_METRICS_EVIDENCE): {
         "0": {"text": "SCRAPING", "color": "green"},
-        "1": {"text": "SCRAPE/RULE GAP", "color": "orange"},
-        "2": {"text": "SCRAPE+RULE GAP", "color": "red"},
+        "1": {"text": "RULE/SERIES GAP", "color": "orange"},
+        "2": {"text": "RULE+SERIES GAP", "color": "red"},
     },
     (DASHBOARD_DQ_V2, PANEL_MONITOR_DQ_CURRENT_STATUS): {
         "0": {"text": "OK", "color": "green"},

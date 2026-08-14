@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 # Infinity panels never hang forever on large control-plane trees / slow mounts.
 # Scope resolve must stay aligned with identity-evidence (no aggressive 2s cut):
 # a short resolve timeout produced ``scope_resolve_timeout`` placeholders while
-# evidence still resolved the same scope via latest_manifest_for_scope.
+# evidence still resolved the same scope.
 _IDENTITY_CHECKPOINT_LOAD_TIMEOUT_SECONDS = 1.5
 _IDENTITY_SCOPE_RESOLVE_TIMEOUT_SECONDS = 12.0
 _IDENTITY_EVIDENCE_BUILD_TIMEOUT_SECONDS = 1.5

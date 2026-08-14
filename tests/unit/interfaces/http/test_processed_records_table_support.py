@@ -102,7 +102,7 @@ def test_processed_record_selector_and_formatting_edges() -> None:
     assert support.is_deficit(total=1, minimum=2) is True
     assert support.count_text(1.25) == "1.25"
     assert support.count_text(1200.0) == "1 200"
-    assert support.padded_count_text(None, 8) == "No data"
+    assert support.padded_count_text(None, 8) == "UNKNOWN"
     assert support.padded_count_text(7, 3) == "  7"
     assert (
         support.row_status(
@@ -127,7 +127,7 @@ def test_processed_record_selector_and_formatting_edges() -> None:
             denominator="constant_100",
             percent_format="constant_100",
         )
-        == "No data"
+        == "UNKNOWN"
     )
     assert (
         support.format_percentage(
@@ -136,7 +136,7 @@ def test_processed_record_selector_and_formatting_edges() -> None:
             denominator="bronze",
             percent_format="fixed_1",
         )
-        == "No data"
+        == "UNKNOWN"
     )
     assert (
         support.format_percentage(

@@ -88,7 +88,7 @@ def is_deficit(*, total: float | None, minimum: float | None) -> bool:
 
 def _count_text(value: float | None) -> str:
     if value is None:
-        return "No data"
+        return "UNKNOWN"
     rounded = round(value)
     if math.isclose(value, rounded, abs_tol=1e-9):
         return f"{int(rounded):,}".replace(",", " ")

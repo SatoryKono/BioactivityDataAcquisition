@@ -299,8 +299,8 @@ def test_control_plane_long_first_screen_titles_keep_extra_width() -> None:
     }
 
     for panel_title in (
-        "Monitor Manifest & Ledger Failures",
-        "Monitor Telemetry Coverage",
+        "Monitor Manifest/Ledger",
+        "Monitor Telemetry",
         "Review Recovery Action",
     ):
         panel = panels.get(panel_title)
@@ -324,7 +324,7 @@ def test_control_plane_trust_panels_follow_reference_widths() -> None:
     readiness = panels["Monitor Replay Readiness"]["gridPos"]
     run_summary = panels["Review Run Summary"]["gridPos"]
     processed = panels["Review Processed Records"]["gridPos"]
-    telemetry = panels["Monitor Telemetry Coverage"]["gridPos"]
+    telemetry = panels["Monitor Telemetry"]["gridPos"]
 
     assert run_summary["w"] == scope["w"] == 18
     assert processed["w"] == telemetry["w"] == readiness["w"] == 6
@@ -335,7 +335,7 @@ def test_control_plane_trust_panels_follow_reference_widths() -> None:
     third_panels = [
         panels["Monitor Replay Safety"]["gridPos"],
         panels["Monitor Checkpoint Age"]["gridPos"],
-        panels["Monitor Manifest & Ledger Failures"]["gridPos"],
+        panels["Monitor Manifest/Ledger"]["gridPos"],
     ]
     assert [grid["w"] for grid in third_panels] == [third_width] * 3
     assert [grid["x"] for grid in third_panels] == [0, third_width, 2 * third_width]
@@ -563,7 +563,7 @@ def test_control_plane_trust_panels_preserve_missing_telemetry() -> None:
 
     for title in (
         "Monitor Replay Safety",
-        "Monitor Manifest & Ledger Failures",
+        "Monitor Manifest/Ledger",
     ):
         panel = panels.get(title)
         assert panel is not None
@@ -639,7 +639,7 @@ def test_control_plane_exposes_terminal_events_and_telemetry_gap() -> None:
     }
 
     expected = {
-        "Monitor Telemetry Coverage": ("bioetl_control_plane_telemetry_missing_5m",),
+        "Monitor Telemetry": ("bioetl_control_plane_telemetry_missing_5m",),
         "Review Terminal Run Outcomes": ("bioetl_control_plane_terminal_events_total",),
     }
     for title, tokens in expected.items():
@@ -653,7 +653,7 @@ def test_control_plane_exposes_terminal_events_and_telemetry_gap() -> None:
         for token in tokens:
             assert token in expr
 
-    telemetry = panels["Monitor Telemetry Coverage"]
+    telemetry = panels["Monitor Telemetry"]
     assert telemetry.get("fieldConfig", {}).get("defaults", {}).get("noValue") == (
         "UNKNOWN"
     )
@@ -711,8 +711,8 @@ def test_control_plane_first_screen_normalizes_workflow_pipeline_aliases() -> No
 
     for title in (
         "Monitor Replay Safety",
-        "Monitor Manifest & Ledger Failures",
-        "Monitor Telemetry Coverage",
+        "Monitor Manifest/Ledger",
+        "Monitor Telemetry",
     ):
         panel = panels.get(title)
         assert panel is not None, f"Control Plane dashboard missing {title!r}"

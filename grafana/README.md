@@ -1088,7 +1088,7 @@ mixed Docker plus host/WSL setups, prefer an explicit value over assuming
   Headline `Status` reads `bioetl_control_plane_current_status_trusted`:
   `0=OK`, `1=WARN`, `2=CRIT`, `3=INCOMPLETE`, `null=UNKNOWN`. Replay/resume
   approval requires complete replay-safety, checkpoint freshness/presence, and
-  required telemetry evidence; `Monitor Telemetry Coverage` must be `0`.
+  required telemetry evidence; `Monitor Telemetry` must be `0`.
   `Review Terminal Run Outcomes`
   stays below fold as selected-range terminal ledger evidence, while exact `run_id` /
   `manifest_id`, config/contract hashes, artifact refs, replay parentage,
@@ -1414,7 +1414,7 @@ collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 | --- | --- | --- | --- |
 | `First Action` | text CTA | n/a | n/a |
 | `Runtime Status` | `bioetl_runtime_current_status_trusted{pipeline=~"$pipeline",run_type=~"$run_type"}` | status | `0=OK`, `1=WARN`, `2=CRIT`, `3=INCOMPLETE`, `null=UNKNOWN`; a trust gap forces INCOMPLETE before dashboard filtering |
-| `Metrics Evidence` (telemetry confidence) | `bioetl_runtime_trust_gap_status_10m` | status | `0=SCRAPING/RULES OK`, `1=SCRAPE/RULE GAP`, `>=2=SCRAPE+RULE GAP`, `null=UNKNOWN` |
+| `Metrics Evidence` (telemetry confidence) | `bioetl_runtime_trust_gap_status_10m` | status | `0=SCRAPING/RULES OK`, `1=RULE/SERIES GAP`, `>=2=RULE+SERIES GAP`, `null=UNKNOWN` |
 | `Monitor Runtime Blockers` | `bioetl_runtime_current_blocker_reason_scoped{pipeline=~"$pipeline",run_type=~"$run_type"}` anchored by `bioetl_runtime_current_status_trusted == 0` | count | red `>=1`; `0` only when current status is explicitly OK; `null=UNKNOWN` |
 | `Runtime Blockers` | `topk(3, bioetl_runtime_current_blocker_reason_scoped{pipeline=~"$pipeline",run_type=~"$run_type"} > 0)` | table | reason/severity/action labels |
 
