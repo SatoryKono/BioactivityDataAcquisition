@@ -223,7 +223,7 @@
             "inspect": true
           },
           "unit": "none",
-          "noValue": "VALID EMPTY — selected run has no identity rows. If no Run ID is selected, choose one in Browse Recent Runs; backend failure renders as QUERY ERROR.",
+          "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity.",
           "links": [
             {
               "title": "Copy/Open full value (plain text)",
@@ -603,6 +603,34 @@
                 "value": {
                   "type": "color-text"
                 }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "No data": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      },
+                      "UNKNOWN": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null",
+                      "result": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           }
@@ -687,7 +715,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-        "y": 17
+            "y": 17
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -746,7 +774,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-        "y": 23
+            "y": 23
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -805,7 +833,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-        "y": 28
+            "y": 28
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -924,7 +952,7 @@
             "h": 3,
             "w": 24,
             "x": 0,
-        "y": 36
+            "y": 36
           },
           "options": {
             "mode": "html",
@@ -940,7 +968,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-        "y": 39
+            "y": 39
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -1021,7 +1049,7 @@
             "h": 4,
             "w": 24,
             "x": 0,
-        "y": 44
+            "y": 44
           },
           "options": {
             "mode": "html",
@@ -1036,7 +1064,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-        "y": 48
+            "y": 48
           },
           "options": {
             "mode": "html",

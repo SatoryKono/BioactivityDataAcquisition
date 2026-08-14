@@ -277,8 +277,8 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
         },
         "bioetl-control-plane-v1.json": {
             "Monitor Replay Safety": "bioetl_replay_safety_blockers_15m",
-            "Monitor Manifest & Ledger Failures": "bioetl_manifest_ledger_failures_15m",
-            "Monitor Telemetry Coverage": "bioetl_control_plane_telemetry_missing_5m",
+            "Monitor Manifest/Ledger": "bioetl_manifest_ledger_failures_15m",
+            "Monitor Telemetry": "bioetl_control_plane_telemetry_missing_5m",
         },
     }
 
@@ -363,7 +363,7 @@ def test_required_trust_markers_stay_visible_on_target_dashboards() -> None:
             ("evidence confidence", "inconclusive"),
         ),
         "bioetl-control-plane-v1.json": (
-            "Monitor Telemetry Coverage",
+            "Monitor Telemetry",
             ("do not trust zero blocker cards", "prometheus scrape/rules"),
         ),
     }

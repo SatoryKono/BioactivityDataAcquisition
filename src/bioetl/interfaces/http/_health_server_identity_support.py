@@ -38,6 +38,14 @@ def build_control_plane_identity_payload(
     identity_evidence_summary: dict[str, object] | None = None,
 ) -> dict[str, object]:
     """Build the Grafana identity-table payload for one control-plane scope."""
+    if resolved_via == "selection_required":
+        return {
+            "pipeline": requested_pipeline,
+            "run_type": list(selected_run_types),
+            "selected_run_id": selected_run_id,
+            "resolved_via": resolved_via,
+            "rows": [],
+        }
     return {
         "pipeline": requested_pipeline,
         "run_type": list(selected_run_types),

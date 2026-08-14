@@ -310,9 +310,9 @@ def format_percentage(
     percent_format: _PercentFormat,
 ) -> str:
     if denominator == "constant_100":
-        return "100%" if value is not None else "No data"
+        return "100%" if value is not None else "UNKNOWN"
     if value is None or bronze_value is None or bronze_value == 0:
-        return "No data"
+        return "UNKNOWN"
 
     percentage = value / bronze_value * 100
     if percent_format == "fixed_1":
