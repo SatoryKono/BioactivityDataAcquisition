@@ -187,7 +187,7 @@ class HealthServerRoutingMixin:
             return False
         # Case-insensitive match for All/all; keep exact forms for $__all tokens.
         lowered = normalized.casefold()
-        return lowered in {"all", "*"} or normalized in {"$__all", "__all"}
+        return lowered in {"all", "*"} or normalized in {"$__all", "__all", ".*"}
 
     def _read_optional_scope_param(
         self,

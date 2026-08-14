@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 import re
 
-_ALL_SCOPE_TOKENS = frozenset({"All", "$__all", "__all", "*"})
+_ALL_SCOPE_TOKENS = frozenset({"All", "$__all", "__all", "*", ".*"})
 
 
 def _selector_regex(raw: str | None) -> str:

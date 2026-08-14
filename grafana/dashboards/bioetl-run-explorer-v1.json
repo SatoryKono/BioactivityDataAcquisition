@@ -1087,7 +1087,7 @@
   "templating": {
     "list": [
       {
-        "allValue": "$__all",
+        "allValue": ".*",
         "current": {
           "selected": true,
           "text": "All",
@@ -1153,7 +1153,7 @@
         "description": "Core scope: pipeline selector from the shared overview pipeline/run_type universe. Single-select; no All scope. Unknown is the explicit fail-closed default until a source dashboard passes a pipeline or the operator selects one."
       },
       {
-        "allValue": "$__all",
+        "allValue": ".*",
         "current": {
           "selected": true,
           "text": "backfill",
