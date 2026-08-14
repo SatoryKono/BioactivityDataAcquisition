@@ -1,4 +1,4 @@
-{"finding_id":"DOCS-001","issue":8807,"url":"https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8807","acceptance":"proven_in_audit_checkout","state":"closeout_pending"}
-{"finding_id":"DOCS-002","issue":8808,"url":"https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8808","acceptance":"proven_in_audit_checkout","state":"closeout_pending"}
-{"finding_id":"DOCS-003","issue":8809,"url":"https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8809","acceptance":"proven_in_audit_checkout","state":"closeout_pending"}
-{"finding_id":"DOCS-004","issue":8810,"url":"https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8810","acceptance":"proven_in_audit_checkout","state":"closeout_pending"}
+{"finding_id":"DOCS-001","issue":8807,"url":"https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8807","acceptance":"proven_in_audit_checkout","state":"closed","pr":8813}
+{"finding_id":"DOCS-002","issue":8808,"url":"https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8808","acceptance":"proven_in_audit_checkout","state":"closed","pr":8813}
+{"finding_id":"DOCS-003","issue":8809,"url":"https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8809","acceptance":"proven_in_audit_checkout","state":"closed","pr":8813}
+{"finding_id":"DOCS-004","issue":8810,"url":"https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8810","acceptance":"proven_in_audit_checkout","state":"closed","pr":8813}
