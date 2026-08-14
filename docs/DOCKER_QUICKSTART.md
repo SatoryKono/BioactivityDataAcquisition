@@ -4,7 +4,7 @@ Version: 1.0.0
 Status: active
 Class: repo-only
 Owner: BioETL Team
-Last verified: '2026-08-04'
+Last verified: '2026-08-13'
 
 ______________________________________________________________________
 
@@ -79,6 +79,26 @@ python scripts/ops/runtime/docker/check_network_preconditions.py --stack all --e
 `ensure-stable` calls `runtime_manager ensure-networks` first; if Python is
 unavailable it falls back to `docker network create` with the same owner label
 and **exits non-zero** if create fails.
+
+**Windows PowerShell from the repository root** uses one self-contained
+entrypoint. It selects `.venv-win`, imports the root environment into the
+current process through the shared `load_repo_env.ps1` loader, and never writes
+an `.env` file. Values already present in the process take precedence over file
+values.
+
+```powershell
+.\scripts\ops\docker-setup.ps1 ensure-networks main
+.\scripts\ops\docker-setup.ps1 start main
+# monitoring remains opt-in:
+.\scripts\ops\docker-setup.ps1 start monitoring
+.\scripts\ops\docker-setup.ps1 status monitoring
+.\scripts\ops\docker-setup.ps1 grafana-preflight
+```
+
+A failed `start` or `recover` keeps its non-zero exit and prints a bounded JSON
+summary with `action`, `stack`, `primary_cause`, and the redacted incident
+`report` path. Use the report for diagnosis; credentials are never passed on
+the command line or included in that summary.
 
 Then start stacks as usual:
 
