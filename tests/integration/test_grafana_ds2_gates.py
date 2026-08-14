@@ -166,6 +166,24 @@ def test_incident_status_maps_value_three_and_null() -> None:
     assert null_text == "UNKNOWN"
 
 
+def test_operator_tables_do_not_default_color_background() -> None:
+    """Design-system §2.3: table-wide color-background is forbidden."""
+    for path in _DASHBOARDS:
+        dashboard = load_dashboard(path)
+        if dashboard.get("uid") not in _OPERATOR_UIDS:
+            continue
+        for panel in get_dashboard_panels(dashboard):
+            if panel.get("type") != "table":
+                continue
+            defaults = (panel.get("fieldConfig") or {}).get("defaults") or {}
+            custom = defaults.get("custom") or {}
+            cell = custom.get("cellOptions") or {}
+            assert cell.get("type") != "color-background", (
+                f"{path.name} table id={panel.get('id')} title={panel.get('title')!r} "
+                f"must not default color-background; got {cell.get('type')!r}"
+            )
+
+
 def test_incident_operator_tables_no_default_color_background() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-incident-v1.json"))
     for panel in get_dashboard_panels(dashboard):
