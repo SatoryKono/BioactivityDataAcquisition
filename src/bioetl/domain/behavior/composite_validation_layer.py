@@ -68,16 +68,7 @@ class CompositeValidator:
     ) -> CompositeValidationReport:
         """Run structural and deep-preflight validation for one composite config."""
         structural_result = self._run_structural_validation(config)
-        # Fail closed on non-mapping payloads: structural CMP_STR_SCHEMA_001 already
-        # recorded the blocker; skip deep preflight so .get() cannot raise.
-        if not isinstance(config.composite_config, dict):
-            deep_preflight_result = build_validation_result(
-                issues=[],
-                validation_layer=ValidationLayer.DEEP_PREFLIGHT,
-                execution_context={"pipeline_name": config.pipeline_name},
-            )
-        else:
-            deep_preflight_result = self._run_deep_preflight_validation(config)
+        deep_preflight_result = self._run_deep_preflight_validation(config)
         validation_report = CompositeValidationReport(
             structural_result=structural_result,
             deep_preflight_result=deep_preflight_result,
@@ -143,13 +134,6 @@ class CompositeValidator:
         self,
         config: CompositeValidationConfig,
     ) -> ValidationResult:
-        if not isinstance(config.composite_config, dict):
-            # Defense in depth for direct callers; public validate_composite also guards.
-            return build_validation_result(
-                issues=[],
-                validation_layer=ValidationLayer.DEEP_PREFLIGHT,
-                execution_context={"pipeline_name": config.pipeline_name},
-            )
         issues = self._deep_preflight_issues(config.composite_config)
         result: ValidationResult = build_validation_result(
             issues=issues,
