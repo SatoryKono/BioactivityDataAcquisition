@@ -15,7 +15,7 @@ def _run_step(label: str, argv: list[str]) -> int:
     return result.returncode
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--skip-links", action="store_true", help="Skip link/spec/config checks"
@@ -34,7 +34,7 @@ def main() -> int:
     parser.add_argument(
         "--skip-build", action="store_true", help="Skip strict MkDocs build"
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     steps: list[tuple[str, list[str]]] = []
     if not args.skip_links:

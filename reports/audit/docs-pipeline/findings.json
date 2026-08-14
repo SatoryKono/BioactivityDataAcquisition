@@ -1,0 +1,6 @@
+{
+  "source_run": "20260814T112947Z-audit-seq-8ab59e2395",
+  "surface_score": 0,
+  "finding_ids": ["DOCS-001", "DOCS-003"],
+  "canonical_findings": "../../audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/findings.json"
+}
