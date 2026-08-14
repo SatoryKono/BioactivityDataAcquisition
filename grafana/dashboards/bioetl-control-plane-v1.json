@@ -4897,7 +4897,7 @@
   "templating": {
     "list": [
       {
-        "allValue": "$__all",
+        "allValue": ".*",
         "current": {
           "selected": true,
           "text": "All",
@@ -4960,7 +4960,7 @@
         "description": "Core scope: pipeline selector for pipeline-centric control-plane metrics. Values come from the active control-plane pipeline/run_type universe so stale historical pipelines do not appear as selectable trust scopes. Single-select; no All scope. Default unknown is fail-closed until a source dashboard passes a pipeline or the operator selects one."
       },
       {
-        "allValue": "$__all",
+        "allValue": ".*",
         "current": {
           "selected": true,
           "text": "backfill",
