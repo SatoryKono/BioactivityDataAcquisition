@@ -17,7 +17,10 @@ HTTP_DATASOURCE_HINTS = (
     "bioetl-ops-http",
     "infinity",
 )
-EXPECTED_PANEL_COUNT = 223
+# Leaf+row across the seven shipped dashboards. Keep in lockstep with
+# dashboard-inventory.yaml / report-dashboard-inventory --check (226).
+# Do not revert to the 2026-08-07 #8269 total of 223.
+EXPECTED_PANEL_COUNT = 226
 
 
 def _iter_panels(payload: dict[str, object]) -> list[dict[str, object]]:
