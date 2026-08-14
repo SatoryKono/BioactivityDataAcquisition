@@ -176,7 +176,7 @@ def test_debt_gate_input_set_documented_and_refresh_ends_with_gates_update() -> 
     refresh_src = REFRESH_MODULE.read_text(encoding="utf-8")
     # Gates --update must appear after scorecard refresh (last quality rollup).
     scorecard_pos = refresh_src.rfind("report_architecture_quality_scorecard")
-    gates_pos = refresh_src.rfind("report_debt_governance_gates")
+    gates_pos = refresh_src.rfind("report-debt-governance-gates")
     assert scorecard_pos != -1 and gates_pos != -1
     assert gates_pos > scorecard_pos
     assert '"--update"' in refresh_src or "'--update'" in refresh_src
