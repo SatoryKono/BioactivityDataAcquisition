@@ -63,6 +63,9 @@ function defaultScreenshotConfig() {
       process.env.GRAFANA_SCREENSHOT_BROWSER_ZOOM || "100",
       10,
     ),
+    navigationOnly: /^(1|true|yes)$/i.test(
+      process.env.GRAFANA_SCREENSHOT_NAVIGATION_ONLY || "false",
+    ),
   };
 }
 
@@ -123,6 +126,10 @@ function applyScreenshotArg(config, arg, next) {
   }
   if (arg === "--no-expand-collapsed-rows") {
     config.expandCollapsedRows = false;
+    return 0;
+  }
+  if (arg === "--navigation-only") {
+    config.navigationOnly = true;
     return 0;
   }
   return 0;
@@ -411,9 +418,17 @@ function requiredNonRowPanels(panels, includeCollapsedRows) {
     if (!Number.isInteger(panel.id)) {
       continue;
     }
+    const pluginOptions =
+      panel.options && typeof panel.options === "object" ? panel.options : {};
+    const displayTitle =
+      typeof pluginOptions.bioetlDisplayTitle === "string"
+        ? pluginOptions.bioetlDisplayTitle.trim()
+        : "";
     required.push({
       id: panel.id,
-      title: typeof panel.title === "string" ? panel.title.trim() : "",
+      title:
+        displayTitle ||
+        (typeof panel.title === "string" ? panel.title.trim() : ""),
       type: typeof panel.type === "string" ? panel.type : "unknown",
     });
   }
@@ -482,7 +497,16 @@ function dashboardEntryFromPayload(payload) {
   }
   const slug = grafanaSlugify(title) || uid;
   const panels = Array.isArray(payload.panels) ? payload.panels : [];
-  const requiredPanels = requiredNonRowPanels(panels, CONFIG.expandCollapsedRows);
+  const allRequiredPanels = requiredNonRowPanels(
+    panels,
+    CONFIG.expandCollapsedRows,
+  );
+  const requiredPanels = CONFIG.navigationOnly
+    ? allRequiredPanels.filter((panel) => panel.id === 1000)
+    : allRequiredPanels;
+  if (CONFIG.navigationOnly && requiredPanels.length !== 1) {
+    throw new Error(`${uid} must expose exactly one navigation panel id=1000`);
+  }
   if (
     uid === "bioetl-silver-reject-explorer" &&
     !requiredPanels.some((panel) => panel.id === 13)
@@ -1245,6 +1269,95 @@ async function collectLayoutGeometry(page, dashboard) {
   }, { requiredPanels: dashboard.requiredPanels, viewport: CONFIG.viewport });
 }
 
+async function collectNavigationValidation(page) {
+  return page.evaluate(() => {
+    const panel =
+      document.querySelector('[data-panelid="1000"]') ||
+      document.querySelector('[data-viz-panel-key="panel-1000"]') ||
+      document.querySelector('[data-griditem-key="grid-item-1000"]');
+    const nav = panel?.querySelector(".bioetl-nav") || null;
+    const title =
+      panel?.querySelector("[data-bioetl-panel-title]") ||
+      panel?.querySelector(".bioetl-panel-title") ||
+      panel?.querySelector('[role="heading"]') ||
+      null;
+    const links = nav
+      ? Array.from(
+          nav.querySelectorAll(".bioetl-nav-link, .bioetl-nav-current"),
+        )
+      : [];
+    const panelRect = panel?.getBoundingClientRect() || null;
+    const navRect = nav?.getBoundingClientRect() || null;
+    const titleRect = title?.getBoundingClientRect() || null;
+    const linkRects = links.map((link) => link.getBoundingClientRect());
+    const tolerance = 1;
+    const rectInside = (inner, outer) =>
+      Boolean(
+        inner &&
+          outer &&
+          inner.left >= outer.left - tolerance &&
+          inner.right <= outer.right + tolerance &&
+          inner.top >= outer.top - tolerance &&
+          inner.bottom <= outer.bottom + tolerance,
+      );
+    const linksInsidePanel = linkRects.every((rect) =>
+      rectInside(rect, panelRect),
+    );
+    const contentInsidePanel =
+      rectInside(navRect, panelRect) && rectInside(titleRect, panelRect);
+    const focusTarget = nav?.querySelector('a.bioetl-nav-link[href*="/d/"]') || null;
+    focusTarget?.focus();
+    const focusStyle = focusTarget ? getComputedStyle(focusTarget) : null;
+    const focusOutlineWidthPx = Number.parseFloat(
+      focusStyle?.outlineWidth || "0",
+    );
+    const focusBoxShadow = (focusStyle?.boxShadow || "").trim().toLowerCase();
+    const focusIndicatorVisible = Boolean(
+      focusTarget &&
+        document.activeElement === focusTarget &&
+        ((focusStyle?.outlineStyle || "").toLowerCase() !== "none" &&
+          Number.isFinite(focusOutlineWidthPx) &&
+          focusOutlineWidthPx > 0 ||
+          focusBoxShadow &&
+            focusBoxShadow !== "none" &&
+            focusBoxShadow !== "rgba(0, 0, 0, 0) 0px 0px 0px 0px"),
+    );
+    const evidence = {
+      panelFound: Boolean(panel),
+      navigationFound: Boolean(nav),
+      titleFound: Boolean(title),
+      linkCount: links.length,
+      contentInsidePanel,
+      linksInsidePanel,
+      focusTargetFound: Boolean(focusTarget),
+      focusInsideNavigation: Boolean(focusTarget?.closest(".bioetl-nav")),
+      focusIndicatorVisible,
+      focusOutlineStyle: focusStyle?.outlineStyle || null,
+      focusOutlineWidthPx: Number.isFinite(focusOutlineWidthPx)
+        ? focusOutlineWidthPx
+        : null,
+      focusBoxShadow: focusStyle?.boxShadow || null,
+      panelHeightPx: panelRect?.height ?? null,
+      navigationHeightPx: navRect?.height ?? null,
+    };
+    return {
+      status:
+        evidence.panelFound &&
+        evidence.navigationFound &&
+        evidence.titleFound &&
+        evidence.linkCount === 7 &&
+        evidence.contentInsidePanel &&
+        evidence.linksInsidePanel &&
+        evidence.focusTargetFound &&
+        evidence.focusInsideNavigation &&
+        evidence.focusIndicatorVisible
+          ? "ok"
+          : "error",
+      ...evidence,
+    };
+  });
+}
+
 async function collectTypographyValidation(page, dashboard) {
   return page.evaluate(({ requiredPanels, minBodyPx, minTitlePx }) => {
     const round = (value) => Math.round(value * 100) / 100;
@@ -1264,9 +1377,20 @@ async function collectTypographyValidation(page, dashboard) {
       document.querySelector(`[data-viz-panel-key="panel-${panel.id}"]`) ||
       document.querySelector(`[data-griditem-key="grid-item-${panel.id}"]`);
     const panelTitleElement = (container) =>
+      container.querySelector("[data-bioetl-panel-title]") ||
+      container.querySelector(".bioetl-panel-title") ||
+      container.querySelector('[role="heading"]') ||
+      container.querySelector('[data-testid="title-items-container"]') ||
       container.querySelector('[data-testid^="data-testid Panel header"]') ||
       container.querySelector(".panel-title") ||
       container.querySelector("header");
+    const panelBodyRoot = (container) =>
+      container.querySelector(".bioetl-nav") ||
+      container.querySelector('[data-testid="data-testid panel content"]') ||
+      container.querySelector('[data-testid="panel content"]') ||
+      container.querySelector('[data-testid$="panel content"]') ||
+      container.querySelector(".panel-content") ||
+      container;
     const ownText = (element) =>
       Array.from(element.childNodes)
         .filter((node) => node.nodeType === Node.TEXT_NODE)
@@ -1301,7 +1425,9 @@ async function collectTypographyValidation(page, dashboard) {
         });
       }
 
-      const bodyFonts = Array.from(container.querySelectorAll("*"))
+      const bodyRoot = panelBodyRoot(container);
+      const navigationRoot = container.querySelector(".bioetl-nav");
+      const bodyFonts = [bodyRoot, ...Array.from(bodyRoot.querySelectorAll("*"))]
         .filter((element) => {
           if (!visible(element) || !ownText(element)) return false;
           if (
@@ -1316,6 +1442,17 @@ async function collectTypographyValidation(page, dashboard) {
         .filter(Number.isFinite);
       const minimumBodyFontPx =
         bodyFonts.length > 0 ? Math.min(...bodyFonts) : null;
+      const populatedNavigation = Boolean(
+        container.querySelector('.bioetl-nav a[href*="/d/"]'),
+      );
+      if (populatedNavigation && bodyFonts.length === 0) {
+        violations.push({
+          id: panel.id,
+          title: panel.title,
+          kind: "panel_body_font_missing",
+          minimumPx: round(minBodyPx),
+        });
+      }
       if (
         Number.isFinite(minimumBodyFontPx) &&
         minimumBodyFontPx + 0.01 < minBodyPx
@@ -1331,6 +1468,18 @@ async function collectTypographyValidation(page, dashboard) {
       panels.push({
         id: panel.id,
         title: panel.title,
+        measuredTitleText: titleElement?.textContent?.trim().slice(0, 80) || "",
+        measuredTitleTag: titleElement?.tagName || null,
+        measuredTitleClass: titleElement?.className || null,
+        navigationClassFound: Boolean(navigationRoot),
+        navigationFirstChildTag: navigationRoot?.firstElementChild?.tagName || null,
+        navigationFirstChildFontPx: navigationRoot?.firstElementChild
+          ? round(
+              Number.parseFloat(
+                getComputedStyle(navigationRoot.firstElementChild).fontSize,
+              ),
+            )
+          : null,
         titleFontPx: Number.isFinite(titleFontPx) ? round(titleFontPx) : null,
         minimumBodyFontPx: Number.isFinite(minimumBodyFontPx)
           ? round(minimumBodyFontPx)
@@ -1437,12 +1586,27 @@ async function renderDashboard(page, dashboard, index, total) {
       `Typography validation failed for ${dashboard.uid}: ${dashboard.typographyValidation.violations.length} violation(s)`,
     );
   }
-  dashboard.terminalStateValidation = await validateDashboardTerminalStates(
-    page,
-    dashboard,
-    index,
-    total,
-  );
+  dashboard.navigationValidation = await collectNavigationValidation(page);
+  if (CONFIG.navigationOnly && dashboard.navigationValidation.status !== "ok") {
+    throw new Error(
+      `Navigation validation failed for ${dashboard.uid}: ${JSON.stringify(dashboard.navigationValidation)}`,
+    );
+  }
+  if (CONFIG.navigationOnly) {
+    dashboard.terminalStateValidation = {
+      status: "ok",
+      mode: "navigation-only",
+      checkedPanelCount: 0,
+      panels: [],
+    };
+  } else {
+    dashboard.terminalStateValidation = await validateDashboardTerminalStates(
+      page,
+      dashboard,
+      index,
+      total,
+    );
+  }
   if (dashboard.terminalStateValidation.status !== "ok") {
     throw new Error(
       `Terminal-state validation failed for ${dashboard.uid}: ${describeTerminalStateFailure(dashboard)}`,
@@ -1509,6 +1673,7 @@ async function writeManifest(dashboards) {
     timeout_ms: CONFIG.timeoutMs,
     capture_timeout_ms: CONFIG.captureTimeoutMs,
     expand_collapsed_rows: CONFIG.expandCollapsedRows,
+    navigation_only: CONFIG.navigationOnly,
     requested: {
       viewport: CONFIG.viewport,
       theme: CONFIG.theme,

@@ -1339,6 +1339,8 @@ _OPTIONAL_VISUAL_NAV_TITLES = (
 )
 
 _SANITIZER_SAFE_NAV_TOKENS = (
+    'data-bioetl-panel-title="Navigate Dashboards"',
+    "font-size:19px",
     "display:flex",
     "flex-wrap:wrap",
     "overflow:visible",
@@ -1379,6 +1381,10 @@ def _assert_visual_bus_base_content(
         assert token in content, (
             f"{dashboard_name} navigation must define sanitizer-safe {token}"
         )
+    options = panel.get("options")
+    assert isinstance(options, dict)
+    assert options.get("bioetlDisplayTitle") == "Navigate Dashboards"
+    assert panel.get("title") == ""
     description = str(panel.get("description", ""))
     assert "Sanitizer-compatible" in description
     assert "native keyboard focus" in description

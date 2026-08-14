@@ -40,6 +40,15 @@ def _walk_panels(panels: object) -> Iterator[dict[str, Any]]:
         yield from _walk_panels(panel.get("panels"))
 
 
+def _display_title(panel: dict[str, Any]) -> str:
+    options = panel.get("options")
+    if isinstance(options, dict):
+        custom_title = options.get("bioetlDisplayTitle")
+        if isinstance(custom_title, str) and custom_title.strip():
+            return custom_title.strip()
+    return str(panel.get("title") or "")
+
+
 def _targets(panel: dict[str, Any]) -> list[dict[str, Any]]:
     targets = panel.get("targets")
     if not isinstance(targets, list):
@@ -115,7 +124,7 @@ def build_payload() -> dict[str, object]:
                 {
                     "dashboard_uid": uid,
                     "panel_id": panel_id,
-                    "panel_title": str(panel.get("title") or ""),
+                    "panel_title": _display_title(panel),
                     "route": route["slug"],
                     "component": (
                         route["decisionObjects"][0]

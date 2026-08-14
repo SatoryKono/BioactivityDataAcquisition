@@ -11,16 +11,17 @@
     {
       "id": 1000,
       "type": "text",
-      "title": "Navigate Dashboards",
+      "title": "",
       "gridPos": {
-        "h": 2,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 0
       },
       "options": {
         "mode": "html",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview)\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$__all&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health)\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality)\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$__all&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">5. Incident Workspace</a><a class=\"bioetl-nav-current\" href=\"#bioetl-run-explorer-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"6. Run Explorer (Run Explorer)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">6. Run Explorer (current)</a></div>"
+        "bioetlDisplayTitle": "Navigate Dashboards",
+        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1.3;margin:0 6px 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:2px 6px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview)\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$__all&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health)\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality)\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$__all&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">5. Incident Workspace</a><a class=\"bioetl-nav-current\" href=\"#bioetl-run-explorer-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"6. Run Explorer (Run Explorer)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">6. Run Explorer (current)</a></div>"
       },
       "links": [
         {
@@ -58,7 +59,7 @@
         },
         {
           "title": "3. Provider Health",
-          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-provider=unknown&var-pipeline_context=$pipeline&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -100,7 +101,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 2
+        "y": 4
       },
       "options": {
         "mode": "html",
@@ -117,7 +118,7 @@
         "h": 5,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 8
       },
       "datasource": "BioETL Ops HTTP",
       "fieldConfig": {
@@ -209,7 +210,7 @@
         "h": 6,
         "w": 10,
         "x": 0,
-        "y": 11
+        "y": 13
       },
       "datasource": "BioETL Ops HTTP",
       "description": "Selected run: Exact identity for the selected run, including run, manifest, provider entity, contract, execution, replay, and checkpoint evidence. Selection required when no run ID is set. Valid empty means no matching identity was found for that run. Backend failure renders as QUERY ERROR; verify /health/live. Use existing Open/Copy actions for full values.",
@@ -365,7 +366,7 @@
         "h": 6,
         "w": 14,
         "x": 10,
-        "y": 11
+        "y": 13
       },
       "datasource": "BioETL Ops HTTP",
       "description": "Selected run: Bronze, Silver, and Gold stage/outcome accounting for the selected run. Zero-valued outcomes are evidence and must not be presented as success by themselves. Selection required when no run ID is set. Valid empty means no matching accounting rows exist; unexpected empty or errors require an Ops HTTP /health/live check.",
@@ -703,7 +704,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 19
       },
       "panels": [
         {
@@ -715,7 +716,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 17
+            "y": 19
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -774,7 +775,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 23
+            "y": 25
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -833,7 +834,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 28
+            "y": 30
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -952,7 +953,7 @@
             "h": 3,
             "w": 24,
             "x": 0,
-            "y": 36
+            "y": 38
           },
           "options": {
             "mode": "html",
@@ -968,7 +969,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 39
+            "y": 41
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -1049,7 +1050,7 @@
             "h": 4,
             "w": 24,
             "x": 0,
-            "y": 44
+            "y": 46
           },
           "options": {
             "mode": "html",
@@ -1064,7 +1065,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 48
+            "y": 50
           },
           "options": {
             "mode": "html",
@@ -1085,7 +1086,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 56
+        "y": 58
       },
       "panels": [
         {
@@ -1097,7 +1098,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 56
+            "y": 58
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {

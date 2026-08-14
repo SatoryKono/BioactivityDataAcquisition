@@ -99,6 +99,7 @@ def test_rerender_config_uses_env_defaults(monkeypatch: Any, tmp_path: Path) -> 
             "light",
             "--uids",
             "bioetl-dq-v2",
+            "--navigation-only",
         ]
     )
 
@@ -113,6 +114,7 @@ def test_rerender_config_uses_env_defaults(monkeypatch: Any, tmp_path: Path) -> 
     assert config.height == 1800
     assert config.theme == "light"
     assert config.expand_collapsed_rows is True
+    assert config.navigation_only is True
 
     collapsed_config = rerender_subject._parse_args(["--no-expand-collapsed-rows"])
     assert collapsed_config.expand_collapsed_rows is False
@@ -584,6 +586,7 @@ def test_rerender_builds_playwright_env(tmp_path: Path) -> None:
     assert env["GRAFANA_SCREENSHOT_CAPTURE_TIMEOUT_MS"] == "180000"
     assert env["GRAFANA_SCREENSHOT_SETTLE_MS"] == "12000"
     assert env["GRAFANA_SCREENSHOT_UIDS"] == "bioetl-control-plane-v1"
+    assert env["GRAFANA_SCREENSHOT_NAVIGATION_ONLY"] == "false"
 
 
 def test_rerender_builds_playwright_env_with_sidecar_node_modules(
@@ -757,6 +760,10 @@ def test_playwright_screenshot_script_uses_multiple_panel_readiness_selectors() 
         in script
     )
     assert "requiredNonRowPanels" in script
+    assert "bioetlDisplayTitle" in script
+    assert "[data-bioetl-panel-title]" in script
+    assert "panel_body_font_missing" in script
+    assert "focusIndicatorVisible" in script
     assert "validateDashboardTerminalStates" in script
     assert "terminalStateValidation" in script
     assert "requiredTerminalPanelIds" in script
