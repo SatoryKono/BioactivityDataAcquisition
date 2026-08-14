@@ -1,16 +1,16 @@
 {
   "campaign": "CR-FULL-20260813",
-  "base_ref": "origin/main",
-  "base_sha": "91b02403dfd077ca374a7bdb7cd0b7082e557e39",
-  "created_utc": "2026-08-13T19:41:04.101823+00:00",
+  "base_ref": "7f38a25f1e022e4f2cf5353fc07f08c39025b002",
+  "base_sha": "7f38a25f1e022e4f2cf5353fc07f08c39025b002",
+  "created_utc": "2026-08-13T19:47:05.238641+00:00",
   "coderabbit": "0.7.2",
   "cap": 300,
-  "tracked_files": 10888,
-  "assigned_files": 10888,
+  "tracked_files": 10978,
+  "assigned_files": 10978,
   "duplicate_assignments": 0,
   "missing_files": [],
   "coverage_ok": true,
-  "leaf_count": 87,
+  "leaf_count": 88,
   "leaves": [
     {
       "id": "S-D-security-residual",
@@ -335,7 +335,7 @@
     {
       "id": "S17-docs-00-project-02",
       "wave": "E",
-      "files": 75,
+      "files": 76,
       "under_cap": true,
       "selection": "docs/00-project",
       "file_list": "reports/quality/coderabbit/20260813/_S17-docs-00-project-02.txt"
@@ -679,10 +679,18 @@
     {
       "id": "S-R-reports-quality-02",
       "wave": "R",
-      "files": 235,
+      "files": 300,
       "under_cap": true,
       "selection": "residual catch-all: reports/quality",
       "file_list": "reports/quality/coderabbit/20260813/_S-R-reports-quality-02.txt"
+    },
+    {
+      "id": "S-R-reports-quality-03",
+      "wave": "R",
+      "files": 24,
+      "under_cap": true,
+      "selection": "residual catch-all: reports/quality",
+      "file_list": "reports/quality/coderabbit/20260813/_S-R-reports-quality-03.txt"
     },
     {
       "id": "S-R-catchall-06",

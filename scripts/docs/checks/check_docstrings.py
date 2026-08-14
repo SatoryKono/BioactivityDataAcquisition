@@ -223,7 +223,7 @@ def check_thresholds(
     return violations
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     """Run the docstring coverage checker."""
     parser = argparse.ArgumentParser(
         description="Check docstring coverage for src/bioetl/",
@@ -251,7 +251,7 @@ def main() -> int:
         default=SRC_DIR,
         help="Source directory to scan (default: src/bioetl)",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     stats = collect_stats(args.src)
 

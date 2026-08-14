@@ -127,3 +127,24 @@ def main() -> int:
     monkeypatch.syspath_prepend(str(tmp_path))
 
     assert run_command(module_command(target), []) == 9
+
+
+def test_docs_check_drift_and_docstrings_accept_documented_flags(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """#8756: documented sliced flags must reach argparse, not dispatcher rc=2."""
+    drift_rc = run_command(
+        module_command("scripts.docs.checks.check_drift"),
+        ["--help"],
+    )
+    docstrings_rc = run_command(
+        module_command("scripts.docs.checks.check_docstrings"),
+        ["--help"],
+    )
+    captured = capsys.readouterr()
+
+    assert drift_rc == 0
+    assert docstrings_rc == 0
+    assert "does not accept command arguments" not in captured.err
+    assert "--ports" in captured.out
+    assert "--summary" in captured.out

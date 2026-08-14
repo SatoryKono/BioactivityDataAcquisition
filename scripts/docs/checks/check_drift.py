@@ -13,13 +13,13 @@ exist in the codebase.  Catches common drift scenarios:
   7. Freshness/version markers in active docs disagree with canonical runtime docs
 
 Usage:
-    python scripts/check_doc_drift.py              # Full drift check
-    python scripts/check_doc_drift.py --ports       # Only port drift
-    python scripts/check_doc_drift.py --classes     # Only class drift
-    python scripts/check_doc_drift.py --modules     # Only module path drift
-    python scripts/check_doc_drift.py --runtime-mirrors
-    python scripts/check_doc_drift.py --freshness
-    python scripts/check_doc_drift.py --json        # Machine-readable JSON output
+    python -m scripts.docs check-drift              # Full drift check
+    python -m scripts.docs check-drift --ports      # Only port drift
+    python -m scripts.docs check-drift --classes    # Only class drift
+    python -m scripts.docs check-drift --modules    # Only module path drift
+    python -m scripts.docs check-drift --runtime-mirrors
+    python -m scripts.docs check-drift --freshness
+    python -m scripts.docs check-drift --json       # Machine-readable JSON output
 
 Exit code: 0 = no drift, 1 = drift detected
 
@@ -1841,7 +1841,7 @@ def _run_checks(
         check_glossary(report)
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     """Run documentation drift detection."""
     parser = argparse.ArgumentParser(
         description="Detect documentation drift in BioETL",
@@ -1872,7 +1872,7 @@ def main() -> int:
         dest="json_output",
         help="Output machine-readable JSON",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     report = DriftReport()
 

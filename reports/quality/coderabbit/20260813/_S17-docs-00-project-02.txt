@@ -1,3 +1,4 @@
+docs/00-project/ai/skills/global/py-doc-bot/SKILL.md
 docs/00-project/ai/skills/global/py-plan-bot/SKILL.md
 docs/00-project/ai/skills/global/py-test-bot/SKILL.md
 docs/00-project/ai/skills/global/vcr-record/SKILL.md
