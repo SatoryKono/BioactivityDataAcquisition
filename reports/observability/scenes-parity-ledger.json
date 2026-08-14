@@ -25,7 +25,7 @@
     "bioetl-incident-v1": "eb8ee01ff2778d85a19d2bfe2fbbd42a3ca4476e3739178e23c76ee8eb44ff4a",
     "bioetl-overview-v2": "7baaaf2356050df6eca5cf6b92edaf37ea0b526910270eab8d836561119a99af",
     "bioetl-provider-health-v2": "eb7a1e84ce9e51d80badc7d97f8f6ba9a036f565aaafecf981ea66d0ba16c101",
-    "bioetl-run-explorer-v1": "cf2de14619a6e8a9c6555637f00023395aedf467439556041f365a2ae26f30fb",
+    "bioetl-run-explorer-v1": "3c580a280b7d4483a0a6d0659f0b26d4844d8680d1211defdfdd5e51f8a0d717",
     "bioetl-runtime": "4036d8db0d53be72d3463a7277806dc5754be3a4a4e99c8f1147aae7820b2917"
   },
   "panels": [
@@ -3053,6 +3053,25 @@
     {
       "basis": "preserved-from-json",
       "component": "JSON fallback",
+      "dashboard_uid": "bioetl-run-explorer-v1",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-run-explorer-v1",
+      "panel_id": 3020,
+      "panel_title": "Inspect Recent Workflow Runs (last 20)",
+      "route": "run-explorer",
+      "source": {
+        "datasource_type": null,
+        "datasource_uid": null,
+        "expressions": [
+          "/ops/observability/workflow-run-reports?workflow=${workflow}&limit=20"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
       "dashboard_uid": "bioetl-runtime",
       "disposition": "fallback-only",
       "empty_semantics": "preserved-from-json",
@@ -3743,7 +3762,7 @@
     "dashboard_uid_count": 7,
     "hidden_datasources": [],
     "missing_dashboard_uids": [],
-    "panel_disposition_count": 197,
+    "panel_disposition_count": 198,
     "parity_status": "pass",
     "route_count": 6,
     "run_id_prometheus_violations": [],
