@@ -97,7 +97,7 @@ if (Get-Command uv -ErrorAction SilentlyContinue) {
     if ($AgentTools -in @("proofagent", "all")) { $OptionalExtras += "proofagent" }
     $OptionalFailures = 0
     foreach ($Extra in $OptionalExtras) {
-        & $VenvPython -m pip install --only-binary=:all: -e ".[dev,tracing,$Extra]"
+        & $VenvPython -m pip install --only-binary=:all: -e ".[dev,tests,tracing,$Extra]"
         if ($LASTEXITCODE -eq 0) {
             Write-Host "[setup_env_windows][ok] Optional tool installed: $Extra"
         } else {

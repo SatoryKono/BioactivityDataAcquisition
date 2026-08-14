@@ -148,8 +148,20 @@ make setup-plugins
 uv run python -m scripts.engineering.dev setup-mcp
 ```
 
-Канонический bootstrap: `uv sync --extra dev --extra tests --extra tracing` + `make install` / `python -m scripts.ops setup-plugins`. `scripts/engineering/dev/dev_setup.sh` **удалён** и не считается
-поддерживаемым onboarding path.
+Канонический **operator** bootstrap — ровно три команды
+([`Makefile`](../../../../../Makefile) `install` / `test-deps` / `setup-plugins`;
+plugins backend: [`scripts/ops/__main__.py`](../../../../../scripts/ops/__main__.py)
+`setup-plugins`):
+
+```bash
+make install
+make test-deps
+make setup-plugins
+```
+
+`uv sync --extra …` — реализация `make install`, не второй канон. Текущие extras
+см. цель `install` в `Makefile`. `scripts/engineering/dev/dev_setup.sh` **отсутствует**
+в дереве ([evidence](../../../../../scripts/engineering/dev/README.md)); не вызывать.
 
 Если один и тот же checkout используется из Windows PowerShell и WSL, не
 дели одну `.venv` между ОС. Используй:
@@ -182,8 +194,7 @@ bash scripts/engineering/dev/run_mypy.sh
 | 3   | Проверяет runtime dependencies (`make test-deps`)                                       |
 | 4   | Настраивает локальные pytest/pre-commit plugins                                         |
 
-Поддерживаемый aggregate flow: `make install`, `make test-deps`,
-`make setup-plugins`.
+Это тот же aggregate flow, что в TL;DR: не дублируй его через сырой `uv sync`.
 
 ______________________________________________________________________
 

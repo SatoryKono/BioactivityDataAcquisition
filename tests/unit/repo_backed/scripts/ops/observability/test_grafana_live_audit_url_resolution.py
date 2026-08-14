@@ -54,16 +54,22 @@ def test_live_audit_resolves_zero_bind_backend_when_localhost_is_unreachable(
         lambda *_args, **_kwargs: None,
     )
 
-    def fake_fetch_json(url: str, *, timeout_seconds: float) -> object:
-        assert timeout_seconds == config.request_timeout_seconds
+    expected_timeout = config.request_timeout_seconds
+
+    def fake_fetch_json_with_optional_auth(
+        url: str, *, config: object, timeout_seconds: float
+    ) -> object:
+        _ = config
+        assert timeout_seconds == expected_timeout
         if url == "http://0.0.0.0:8081/health/live":
             return {"status": "ok"}
         raise OSError(url)
 
-    monkeypatch.setattr(audit_subject, "_fetch_json", fake_fetch_json)
+    # Probe path uses _fetch_json_with_optional_auth, not bare _fetch_json.
     monkeypatch.setattr(
         audit_subject,
-        "_request_json",
-        lambda *args, **kwargs: (_ for _ in ()).throw(OSError("proxy down")),
+        "_fetch_json_with_optional_auth",
+        fake_fetch_json_with_optional_auth,
     )
+    assert "http://0.0.0.0:8081" in audit_subject._candidate_app_base_urls(config)
     assert audit_subject._resolve_app_base_url(config) == "http://0.0.0.0:8081"

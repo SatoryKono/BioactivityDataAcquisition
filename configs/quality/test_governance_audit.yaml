@@ -1052,6 +1052,9 @@ repo_backed_unit_test_exceptions:
     - path: tests/unit/repo_backed/application/composite/test_non_chembl_join_key_normalization.py
       target_lane: repo-backed-unit
       protected_surface: tests/fixtures/normalization/non_chembl_identifier_cases.yaml + configs/composites/{molecule,target}.yaml
+    - path: tests/unit/repo_backed/scripts/test_report_observability_metric_inventory.py
+      target_lane: repo-backed-unit
+      protected_surface: scripts/engineering/qa/report_observability_metric_inventory.py observability metric inventory report contract (module `-m` entrypoint + collect_metric_inventory over checked-in src/docs/grafana artifacts)
     - path: tests/unit/repo_backed/application/services/test_config_dq_service.py
       target_lane: repo-backed-unit
       protected_surface: src/bioetl/application/services/config_dq_service.py

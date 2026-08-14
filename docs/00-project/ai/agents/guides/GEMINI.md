@@ -56,7 +56,10 @@ make test-deps
 make setup-plugins
 ```
 
-Canonical bootstrap: `uv sync --extra dev --extra tests --extra tracing`, `make install` / `python -m scripts.ops setup-plugins` (optional `python -m scripts.engineering.dev setup-mcp`). `scripts/engineering/dev/dev_setup.sh` was **removed** and is not the
+Canonical operator bootstrap is `make install`, `make test-deps`,
+`make setup-plugins` (see `Makefile` and `scripts/ops/__main__.py`).
+`uv sync --extra …` is the implementation of `make install`, not a second
+canonical path. `scripts/engineering/dev/dev_setup.sh` was **removed** and is not the
 supported onboarding path.
 
 ### Verification (Run frequently)

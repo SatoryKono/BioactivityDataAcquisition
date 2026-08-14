@@ -100,7 +100,7 @@ else
     [[ "$AGENT_TOOLS" == "proofagent" || "$AGENT_TOOLS" == "all" ]] && OPTIONAL_EXTRAS+=("proofagent")
     OPTIONAL_FAILURES=0
     for EXTRA in "${OPTIONAL_EXTRAS[@]}"; do
-        if "$VENV_PYTHON" -m pip install --only-binary=:all: -e ".[dev,tracing,$EXTRA]"; then
+        if "$VENV_PYTHON" -m pip install --only-binary=:all: -e ".[dev,tests,tracing,$EXTRA]"; then
             echo "[setup_env_wsl][ok] Optional tool installed: $EXTRA"
         else
             OPTIONAL_FAILURES=1
