@@ -26,7 +26,7 @@ Two P2 documentation-pipeline findings were proven and resolved in the isolated
 ## Gate status
 
 - Issues: #8824 and #8825 closed as completed after current-checkout acceptance.
-- PR: #8827 open against `main`; branch head
+- PR: #8827 open against `main`; acceptance commit
   `9a5b67ab96d8af81adb0f744fdcf62187727d4cc`.
 - GitHub CLI credential: unavailable; repository connector is used for issue/PR
   mutations without exposing credentials.
