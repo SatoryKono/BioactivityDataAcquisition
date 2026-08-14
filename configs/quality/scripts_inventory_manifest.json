@@ -1,11 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-14T18:37:30.184235+00:00",
+  "generated_at": "2026-08-14T18:42:40.849881+00:00",
   "summary": {
-    "total_scripts": 601,
+    "total_scripts": 600,
     "status_counts": {
       "active": 339,
-      "orphan": 1,
       "supporting": 261
     },
     "reference_group_coverage": {
@@ -11995,7 +11994,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 341,
+      "reference_count": 338,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -12046,14 +12045,6 @@
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-xwalk-missing-backlog \\"
         }
       ]
-    },
-    {
-      "path": "scripts/engineering/qa/_write_obs_seq_run.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
     },
     {
       "path": "scripts/engineering/qa/analyze_duplicate_functions.py",
@@ -14649,7 +14640,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -14662,18 +14653,6 @@
           "line": 184,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_dashboard_panel_audit_matrix\""
-        },
-        {
-          "path": "scripts/engineering/qa/_write_obs_seq_run.py",
-          "line": 130,
-          "source_group": "scripts",
-          "text": "\"path\": \"scripts/engineering/qa/report_dashboard_panel_audit_matrix.py\","
-        },
-        {
-          "path": "scripts/engineering/qa/_write_obs_seq_run.py",
-          "line": 151,
-          "source_group": "scripts",
-          "text": "\"path\": \"scripts/engineering/qa/report_dashboard_panel_audit_matrix.py\","
         },
         {
           "path": "tests/integration/test_dashboard_panel_audit_matrix_contract.py",

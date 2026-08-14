@@ -57,6 +57,12 @@ class FileCompositeCheckpointWriter:
             raise CheckpointPathError(
                 f"Checkpoint path must be relative to checkpoint root: {path!r}"
             )
+        # Lexical ``is_relative_to`` does not collapse ``..``, so reject
+        # traversal segments before joining (same rule as ``list_glob``).
+        if ".." in Path(path).parts:
+            raise CheckpointPathError(
+                f"Checkpoint path escapes checkpoint root: {path!r}"
+            )
         candidate = self._checkpoint_dir / path
         root_posix = PurePosixPath(self._checkpoint_dir.as_posix())
         candidate_posix = PurePosixPath(candidate.as_posix())
