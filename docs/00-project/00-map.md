@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.1.2
+Version: 1.1.3
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-12'
+  Last verified: '2026-08-14'
 
 ______________________________________________________________________
 
 # BioETL Project Navigator
 
-*Synced with RULES.md v6.1.9 | Last updated: 2026-08-11*
+*Synced with RULES.md v6.1.10 | Last updated: 2026-08-14*
 
 > **Documentation Update:** 2026-06-03
 >
