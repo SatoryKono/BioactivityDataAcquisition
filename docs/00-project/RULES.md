@@ -1,7 +1,7 @@
 ______________________________________________________________________
 
-Version: 6.1.9
-Last verified: 2026-08-10
+Version: 6.1.10
+Last verified: 2026-08-14
 Status: active
 Class: published
 Owner: BioETL Team
@@ -926,6 +926,25 @@ pmid → pmid → pubmed-id
   значения схлопываются в `other`
 
 **Реализация:** См. `src/bioetl/infrastructure/observability/metrics.py` и `prometheus_metrics.py`.
+
+### 3.2.3. Dashboard Presentation Contract
+
+Подробный проверяемый контракт для семи shipped Grafana dashboards закреплён в
+[`DASHBOARD_REQUIREMENTS.md`](../01-requirements/DASHBOARD_REQUIREMENTS.md) и
+остаётся подчинён ADR-010/ADR-053 и правилам observability этого раздела.
+
+- `REQ-DASH-001`: дополнительные `row`-группы **MUST** иметь area-weighted
+  data density не ниже `0.60` и count density не ниже `0.50` по формуле из
+  dashboard requirements.
+- `REQ-DASH-002`: operator-visible текст **MUST** быть не меньше `12pt`
+  (`16px`), а заголовки панелей — не меньше `14pt` (`18.6667px`).
+- `REQ-DASH-003`: area fills **MUST** использоваться только в первом окне
+  (`gridPos.y < 18`); дополнительные группы и панели ниже первого окна
+  **MUST** использовать только text/line color encoding.
+
+Static JSON checks не заменяют computed-style проверку в reproducible render.
+Monitoring остаётся opt-in и не становится обязательной local runtime
+зависимостью.
 
 ### 3.3. Конкурентность и Блокировки
 
@@ -2136,6 +2155,10 @@ fields:
 
 ## История Изменений (Changelog)
 
+- **6.1.10** (2026-08-14): добавлен scoped Dashboard Presentation Contract:
+  измеримая плотность дополнительных panel groups, typography floors 12pt/14pt
+  и запрет area fills вне первого окна; требования связаны с executable
+  dashboard/render tests без увеличения quality budgets.
 - **6.1.9** (2026-08-10): ADR Registry Governance Sync. Приложение F
   синхронизировано через ADR-057 (deterministic runtime config authority and
   versioned identity); precedence, provider transport SSOT и replay-compatible

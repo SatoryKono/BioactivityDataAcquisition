@@ -72,6 +72,7 @@ ______________________________________________________________________
 | Browse ADR registry                | [adr-registry.md](../02-architecture/adr-registry.md)                                  |
 | Need historical context            | Repository path `docs/99-archive/README.md` *(non-canonical)*                          |
 | Browse shipped dashboards           | [dashboards/README.md](../03-guides/dashboards/README.md) (coverage matrix)            |
+| Dashboard presentation requirements | [DASHBOARD_REQUIREMENTS.md](../01-requirements/DASHBOARD_REQUIREMENTS.md) (density, typography, palette, render gates) |
 | Operator dashboard triage          | [monitoring-index.md](../03-guides/dashboards/monitoring-index.md) (incident-time navigation) |
 | Find canonical domain catalog      | [domain/README.md](../04-reference/domain/README.md)                                   |
 | Inspect runtime context surfaces   | [contexts.md](../04-reference/domain/contexts.md)                                      |

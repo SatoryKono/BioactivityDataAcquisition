@@ -82,7 +82,7 @@ CURRENT_STYLE = (
 )
 CONTAINER_STYLE = (
     "display:flex;gap:6px;flex-wrap:wrap;align-items:center;"
-    "padding:4px 6px;overflow:visible;white-space:normal;font-size:12px"
+    "padding:4px 6px;overflow:visible;white-space:normal;font-size:16px"
 )
 
 NAV_DESCRIPTION = (

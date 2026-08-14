@@ -38,6 +38,10 @@ guides. Do not treat `v3.0/` as a shipping contract.
 
 ### Dashboard System 2.0 (current stable shipped)
 
+- **Normative requirements:**
+  [`DASHBOARD_REQUIREMENTS.md`](../../01-requirements/DASHBOARD_REQUIREMENTS.md)
+  — shipping, evidence, density, typography, palette, and render-verification
+  contract. Active guides below are explanatory mirrors for that contract.
 - **Phase-1 (done):** epic #6800 — first-screen surgery, full nav bus, thin Incident/Run.
 - **Phase-2 residual (active):** epic #6828 — see
   `dashboard-system-2.0-phase2-residual.md` (execution SSOT). Greenfield
