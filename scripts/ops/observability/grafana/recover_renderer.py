@@ -8,7 +8,7 @@ Tertiary failure mode on 32 GiB Desktop hosts:
 Contract:
   - Grafana UI MUST stay up (no force-recreate grafana).
   - Renderer is optional (ADR-010); recovery is explicit and bounded.
-  - Pair with GF_RENDERING_RENDERING_TIMEOUT (default 20s) fail-fast.
+  - Pair with GF_RENDERING_RENDERING_TIMEOUT (default 60s) bounded wait.
 
 Usage::
 
