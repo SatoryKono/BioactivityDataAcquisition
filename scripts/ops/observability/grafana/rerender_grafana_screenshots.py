@@ -84,6 +84,7 @@ class RenderConfig:
     kiosk_mode: str = "off"
     browser_zoom: int = 100
     variables: tuple[tuple[str, str], ...] = ()
+    navigation_only: bool = False
 
 
 @dataclass(frozen=True)
@@ -521,6 +522,15 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
         metavar="PERCENT",
         help="Browser zoom percentage recorded and applied by Playwright.",
     )
+    parser.add_argument(
+        "--navigation-only",
+        action="store_true",
+        help=(
+            "Render and validate only navigation panel id=1000. This keeps "
+            "navigation geometry and typography evidence independent from "
+            "optional datasource availability."
+        ),
+    )
     args = parser.parse_args(argv)
     variables = _deduplicate_dashboard_variables(args.variables, parser=parser)
     return RenderConfig(
@@ -546,6 +556,7 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
         kiosk_mode=str(args.kiosk_mode),
         browser_zoom=int(args.browser_zoom),
         variables=variables,
+        navigation_only=bool(args.navigation_only),
     )
 
 
@@ -979,6 +990,9 @@ def _playwright_env(config: RenderConfig) -> dict[str, str]:
     env["GRAFANA_SCREENSHOT_CAPTURE_SURFACE"] = config.capture_surface
     env["GRAFANA_SCREENSHOT_KIOSK_MODE"] = config.kiosk_mode
     env["GRAFANA_SCREENSHOT_BROWSER_ZOOM"] = str(config.browser_zoom)
+    env["GRAFANA_SCREENSHOT_NAVIGATION_ONLY"] = (
+        "true" if config.navigation_only else "false"
+    )
     if config.selected_uids:
         env["GRAFANA_SCREENSHOT_UIDS"] = ",".join(config.selected_uids)
     scope_query = urlencode(_scope_query_params(config))
@@ -1017,6 +1031,8 @@ def _run_playwright_process(config: RenderConfig) -> int:
             str(config.browser_zoom),
         ]
     )
+    if config.navigation_only:
+        node_command.append("--navigation-only")
     scope_query = urlencode(_scope_query_params(config))
     if scope_query:
         node_command.extend(["--scope-query", scope_query])
@@ -1124,6 +1140,7 @@ def _write_merged_playwright_manifest(
             },
         },
         "expand_collapsed_rows": config.expand_collapsed_rows,
+        "navigation_only": config.navigation_only,
         "backend_applicability": {
             "quarantine_explorer": {
                 "state": "NOT_APPLICABLE",

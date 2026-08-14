@@ -196,6 +196,8 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-run-explorer-v1.json | 3013 | Inspect Run Artifacts |
 | bioetl-run-explorer-v1.json | 3014 | Inspect Timings & Failure |
 | bioetl-run-explorer-v1.json | 3001 | Continue Run Investigation |
+| bioetl-run-explorer-v1.json | 3098 | Browse Workflow Runs |
+| bioetl-run-explorer-v1.json | 3020 | Inspect Recent Workflow Runs (last 20) |
 | bioetl-runtime.json | 1000 | Navigate Dashboards |
 | bioetl-runtime.json | 9400 | Understand Pipeline Scope |
 | bioetl-runtime.json | 9401 | Monitor Pipeline Status |

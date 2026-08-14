@@ -361,7 +361,11 @@ def _key_panel_field_mismatches(
 ) -> list[str]:
     messages: list[str] = []
     expected_title = panel_contract.get("title")
-    actual_title = actual_panel.get("title")
+    options = actual_panel.get("options")
+    custom_title = (
+        options.get("bioetlDisplayTitle") if isinstance(options, dict) else None
+    )
+    actual_title = custom_title or actual_panel.get("title")
     if expected_title != actual_title:
         messages.append(
             f"dashboard-inventory: {uid} key_panel id={panel_id} "
