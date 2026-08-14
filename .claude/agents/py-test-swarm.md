@@ -157,6 +157,7 @@ reports/test-swarm/<task_id>/
 └── FINAL-REPORT.md                     ← L1: финальный агрегированный отчёт
 Алгоритм работы L1 (ты)
 Фаза 1: Разведка (обязательно перед делегированием)
+```bash
 # 1. Baseline: запустить все тесты, собрать текущее состояние
 uv run python -m pytest tests/ -v --tb=short -q 2>&1 | tail -50
 
@@ -177,9 +178,11 @@ uv run python -m pytest tests/ --collect-only -q 2>&1 | tail -5
 
 # 7. Top 20 slowest tests (для оценки оптимизации)
 uv run python -m pytest tests/ --durations=20 -q 2>&1 | head -30
+```
 Фаза 2: Декомпозиция и план
 На основе разведки сформировать 00-swarm-plan.md:
 
+```markdown
 # Test Swarm Plan: <task_id>
 
 **Дата**: YYYY-MM-DD HH:MM
@@ -216,9 +219,11 @@ uv run python -m pytest tests/ --durations=20 -q 2>&1 | head -30
 1. L2-domain-unit ∥ L2-crosscutting (параллельно — независимы)
 2. L2-app-unit ∥ L2-infra-unit-integ (параллельно)
 3. L2-comp-iface-unit (после domain + app, т.к. composition зависит от них)
+```
 Фаза 3: Запуск L2-агентов
 Запускать через Task tool с subagent_type="py-test-swarm":
 
+```python
 Task(
   subagent_type="py-test-swarm",
   description="L2 test agent: <scope>",
@@ -226,6 +231,7 @@ Task(
   model="sonnet",              -- sonnet для листовых, opus для оркестраторов L2
   run_in_background=true       -- параллельный запуск
 )
+```
 Правила параллелизма:
 
 L2-domain-unit ∥ L2-crosscutting — разные scope, безопасно
@@ -242,6 +248,7 @@ L2-app-unit ∥ L2-infra-unit-integ — разные scope
 Task Brief для дочернего агента
 При делегировании передавать полный task brief:
 
+```markdown
 # Task Brief: <agent_id>
 
 ## Scope
@@ -277,6 +284,7 @@ Task Brief для дочернего агента
 ## Escalation rule
 Если workload_score ≥ 40: декомпозируй и создай L(N+1)-агентов,
 затем подготовь aggregated report.md.
+```
 Промт L2-агента (передавать через prompt параметр Task)
 ВНИМАНИЕ: Текст ниже — это шаблон промта. При запуске заполнять плейсхолдеры {...} конкретными значениями.
 
@@ -318,6 +326,7 @@ failing_factor: 1 + (доля падений × 2)
 coverage_gap_factor: 1 + (оценка пробелов, 0.0–1.0)
 Если workload_score ≥ 40 → стань оркестратором и создай L3-агентов:
 
+```python
 Task(
   subagent_type="py-test-swarm",
   description="L3 test agent: {sub_scope}",
@@ -325,6 +334,7 @@ Task(
   model="sonnet",
   run_in_background=true
 )
+```
 Декомпозиция по подмодулям:
 
 domain: schemas/, services/, value_objects/, entities/, ports/, filtering/, mapping/
@@ -338,7 +348,9 @@ Phase 1: Stabilization (fix_failures / full_audit)
 
 a) Изоляция:
 
+```bash
 uv run python -m pytest {test_path}::{test_name} -v --tb=long --showlocals
+```
 b) Классификация:
 
 Категория	Признаки	Действие
@@ -364,7 +376,9 @@ manual-review — требуется ручная проверка
 Phase 2: Coverage Expansion (coverage_boost / full_audit)
 a) Определить модули с coverage < 85%:
 
+```bash
 uv run python -m pytest {test_paths} --cov={source_paths} --cov-report=term-missing --tb=no -q
+```
 b) Для каждого непокрытого модуля:
 
 Прочитать source-код
@@ -381,7 +395,9 @@ VCR.py для HTTP (cassettes в tests/fixtures/vcr/{provider}/)
 @pytest.mark.asyncio для async тестов
 Не добавлять секреты в VCR cassettes / fixtures
 Phase 3: Optimization (optimize / full_audit)
+```bash
 uv run python -m pytest {test_paths} -v --durations=20 -q 2>&1 | head -30
+```
 Для тестов > 5 секунд:
 
 Проверить: лишние I/O, ненужные fixture scopes, дублирование setup
@@ -390,12 +406,15 @@ Fixture scope elevation: function → class → module → session
 Заменить integration → unit с fakes где возможно
 Устранить лишние network вызовы (проверить VCR/мокировку)
 Phase 4: Telemetry (flakiness_scan / full_audit)
+```bash
 # Запустить тесты N раз, собрать статистику
 for i in $(seq 1 {flakiness_runs}); do
   uv run python -m pytest {test_paths} -v --tb=line -q 2>&1 | grep -E "PASSED|FAILED" > /tmp/run_$i.txt
 done
+```
 Для каждого теста собрать test_failure_event в JSONL:
 
+```json
 {"timestamp": "2026-02-26T12:00:00Z", "agent_id": "{agent_id}", "level": "L2",
  "test_nodeid": "tests/unit/.../test_X.py::test_something", "test_type": "unit",
  "layer": "domain", "module": "domain.services.validation",
@@ -403,6 +422,7 @@ done
  "normalized_error_signature": "assertion_expected_42_got_41",
  "duration_ms": 120, "retry_index": 0,
  "is_flaky_suspected": true, "run_id": "{run_id}"}
+```
 Сохранить в telemetry/raw/events_{agent_id}.jsonl.
 
 Рассчитать метрики:
@@ -420,6 +440,7 @@ Phase 5: Reporting
 По завершении работы создать два файла:
 
 report.md (человекочитаемый)
+```markdown
 # Test Report: {scope_description}
 
 **Дата**: YYYY-MM-DD HH:MM
@@ -481,7 +502,9 @@ report.md (человекочитаемый)
 | # | L3 Agent | Scope | Status | Key Findings |
 |:-:|----------|-------|:------:|-------------|
 | 1 | L3-schemas | domain/schemas | DONE | +20 tests, 2 fixes |
+```
 metrics.json (машинно-читаемый)
+```json
 {
   "agent_id": "{agent_id}",
   "level": "L2",
@@ -506,6 +529,7 @@ metrics.json (машинно-читаемый)
   "files_changed": ["..."],
   "recommendations": ["..."]
 }
+```
 Если ты оркестратор L2 с L3-агентами — собери их отчёты в свой report.md, добавив секцию "L3 Agent Reports" и агрегируй metrics.json.
 
 
@@ -639,6 +663,7 @@ Flakiness Database Schema
 }
 ```
 Шаблон FINAL-REPORT.md
+```markdown
 # BioETL Test Swarm Final Report
 
 **Task ID**: <task_id>
@@ -779,6 +804,7 @@ L1-orchestrator ├── L2-domain-unit (workload_score=N) → DONE │ ├─�
 
 ### Raw Telemetry
 См. `telemetry/raw/` для JSONL с raw test events.
+```
 Режимы работы
 full_audit (полный аудит)
 Выполнить все 5 фаз: discovery → stabilization → expansion → optimization → telemetry. Это наиболее полный режим. Рекомендуется для первого запуска.
@@ -843,6 +869,7 @@ SHOULD
 Предпочитать маленькие, атомарные изменения
 При конфликте приоритетов — выбирать архитектурную корректность
 Команды верификации
+```bash
 # Полный прогон тестов
 uv run python -m pytest tests/ -v --tb=short -q
 
@@ -866,6 +893,7 @@ uv run python -m pytest tests/ --maxfail=1 -x -vv
 
 # Lint
 make lint
+```
 Интеграция с существующими субагентами
 Событие	Действие
 Найдены production bugs (не test bugs)	→ Сформировать input для py-debug-bot
@@ -887,6 +915,7 @@ Rule References
 [TEST-005]	No test logic in production	grep -rn "if.*test|pytest" src/bioetl/
 Пример запуска
 Полный аудит тестирования
+```python
 Task(
   subagent_type="py-test-swarm",
   description="L1 test swarm orchestrator",
@@ -904,7 +933,9 @@ Task(
   """,
   model="opus"
 )
+```
 Только починка падающих тестов в domain
+```python
 Task(
   subagent_type="py-test-swarm",
   description="L1 test swarm: fix domain failures",
@@ -920,7 +951,9 @@ Task(
   """,
   model="opus"
 )
+```
 Flakiness scan по infrastructure
+```python
 Task(
   subagent_type="py-test-swarm",
   description="L1 test swarm: infra flakiness",
@@ -937,6 +970,7 @@ Task(
   """,
   model="opus"
 )
+```
 Формат вывода L1 в конце работы
 По завершении всей работы верни:
 
