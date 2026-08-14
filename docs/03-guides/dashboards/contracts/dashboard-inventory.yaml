@@ -212,7 +212,7 @@ dashboards:
     data_sources:
       - Prometheus
       - BioETL Ops HTTP
-    panel_count: 12
+    panel_count: 13
     key_panels:
       - id: 9402
         title: Inspect Run Identity
@@ -223,9 +223,13 @@ dashboards:
         type: table
         description: Bronze/Silver/Gold accounting hub via Ops HTTP
       - id: 3010
-        title: Browse Recent Runs (last 20)
+        title: Inspect Recent Runs (last 20)
         type: table
         description: pipeline-run-reports index (empty-selection utility)
+      - id: 3020
+        title: Inspect Recent Workflow Runs (last 20)
+        type: table
+        description: below-fold workflow-run-reports index (not first-screen)
       - id: 3011
         title: Inspect Stage Funnel
         type: table

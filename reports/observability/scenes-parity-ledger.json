@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "0851953bf54d9a6f915ee0231afd0b4403ffa2ac1313a162c83e47c5e1c95c88",
-    "bioetl-dq-v2": "a3570c52c9c4211e3ee217668781885e315fdd74ec7e80ed5488e5cad55087ee",
-    "bioetl-incident-v1": "89dc903689eb6c499b193e21581134e4e913d3e5a4ce7f0b615a6d4795eb09f8",
-    "bioetl-overview-v2": "7e7a1ca6417e84e3aa02c9b60b641969ca20e6be47341ef262c22b0a71d1caa1",
-    "bioetl-provider-health-v2": "7cd65f6862f9f2ffba0f775f7cf06676ec057a3b388a120ce23b4acba9b96d93",
-    "bioetl-run-explorer-v1": "c8aa039d58d62f3e935b1b6f554f0e284289d867d9fa773683a21da6ffce27d6",
-    "bioetl-runtime": "f988446de36e97b49caf38b55951207921007969285eb48d16edb9e39439489e"
+    "bioetl-control-plane-v1": "501bdddc9fff1720291165be1caf6f329d2f3c5a80e0cc81f62b002967d3795f",
+    "bioetl-dq-v2": "7775d6d83e8b4c6c8f1aeec652c38240775dd8a4561695e04b272350c715a088",
+    "bioetl-incident-v1": "eb8ee01ff2778d85a19d2bfe2fbbd42a3ca4476e3739178e23c76ee8eb44ff4a",
+    "bioetl-overview-v2": "7baaaf2356050df6eca5cf6b92edaf37ea0b526910270eab8d836561119a99af",
+    "bioetl-provider-health-v2": "eb7a1e84ce9e51d80badc7d97f8f6ba9a036f565aaafecf981ea66d0ba16c101",
+    "bioetl-run-explorer-v1": "cf2de14619a6e8a9c6555637f00023395aedf467439556041f365a2ae26f30fb",
+    "bioetl-runtime": "4036d8db0d53be72d3463a7277806dc5754be3a4a4e99c8f1147aae7820b2917"
   },
   "panels": [
     {
@@ -913,7 +913,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
       "panel_id": 9407,
-      "panel_title": "Copy Identity Values",
+      "panel_title": "Inspect Identity Values",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": null,
@@ -2874,7 +2874,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-run-explorer-v1",
       "panel_id": 3010,
-      "panel_title": "Browse Recent Runs (last 20)",
+      "panel_title": "Inspect Recent Runs (last 20)",
       "route": "run-explorer",
       "source": {
         "datasource_type": null,

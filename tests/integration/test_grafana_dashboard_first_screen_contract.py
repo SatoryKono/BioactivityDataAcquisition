@@ -683,3 +683,19 @@ def test_incident_domain_suspect_row_is_collapsed() -> None:
     assert row.get("collapsed") is True
     nested_ids = {child.get("id") for child in (row.get("panels") or [])}
     assert {2002, 2003, 2004} <= nested_ids
+
+
+def test_incident_alert_evidence_is_collapsed_below_the_fold() -> None:
+    """Always-visible Incident first screen ends at ranked suspects (DASH-FIT-001)."""
+    dashboard = load_dashboard(_DASHBOARD_DIR / "bioetl-incident-v1.json")
+    root = [panel for panel in dashboard.get("panels", []) if isinstance(panel, dict)]
+    root_ids = {panel.get("id") for panel in root}
+    assert 2005 not in root_ids
+    assert 2006 not in root_ids
+    assert 2007 not in root_ids
+    row = next(panel for panel in root if panel.get("id") == 2020)
+    assert row.get("type") == "row"
+    assert row.get("collapsed") is True
+    assert row.get("gridPos", {}).get("y") == 18
+    nested_ids = {child.get("id") for child in (row.get("panels") or [])}
+    assert nested_ids == {2005, 2006, 2007}
