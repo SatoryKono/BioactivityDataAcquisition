@@ -66,7 +66,10 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
 
     COMPRESSION_CHUNK_SIZE = 256 * 1024
     COMPRESSION_LEVEL = 3
-    COMPRESSION_THREADS = -1
+    # Single-thread only. `threads=-1` (all cores) allocates a large zstd CCTX
+    # per worker and OOMs publication bronze batches on Windows:
+    # "zstd compress error: Allocation error : not enough memory".
+    COMPRESSION_THREADS = 0
     BRONZE_PATH_FORMAT = "{provider}/{entity}/{date}/{filename}"
     BRONZE_FILE_SUFFIX = ".jsonl.zst"
     # Keep required Bronze lineage metadata keys explicit in this facade module

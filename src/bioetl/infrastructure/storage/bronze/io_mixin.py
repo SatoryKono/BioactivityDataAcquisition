@@ -38,6 +38,31 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
         Any, None
     )  # Any: host attr default (PD6)
 
+    def _effective_compression_threads(self) -> int:
+        """Return a memory-safe zstd thread count.
+
+        Negative values mean "all cores" in python-zstandard. Multi-thread
+        compression allocates a large CCTX per worker and has OOM'd Windows
+        publication bronze writes (`Allocation error : not enough memory`).
+        """
+        threads = int(self.COMPRESSION_THREADS)
+        if threads < 0:
+            return 0
+        return threads
+
+    def _build_stream_compressor(self) -> zstd.ZstdCompressor:
+        """Build a streaming compressor that does not pledge content size.
+
+        `write_content_size=True` is for known-length frames. On
+        ``stream_writer`` the size is unknown, and pledging it can force
+        extra buffering on top of the already-resident batch payload.
+        """
+        return zstd.ZstdCompressor(
+            level=self.COMPRESSION_LEVEL,
+            threads=self._effective_compression_threads(),
+            write_content_size=False,
+        )
+
     def _finalize_atomic_stream_write(
         self,
         *,
@@ -82,11 +107,7 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
         chunk_buffer = bytearray()
         try:
             try:
-                compressor = zstd.ZstdCompressor(
-                    level=self.COMPRESSION_LEVEL,
-                    threads=self.COMPRESSION_THREADS,
-                    write_content_size=True,
-                )
+                compressor = self._build_stream_compressor()
             except BRONZE_WRITE_ERRORS:
                 os.close(fd)
                 fd_owned = False
@@ -104,11 +125,11 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
                     uncompressed_size += len(record)
 
                     if len(chunk_buffer) >= self.COMPRESSION_CHUNK_SIZE:
-                        writer.write(chunk_buffer)
+                        writer.write(bytes(chunk_buffer))
                         chunk_buffer.clear()
 
                 if chunk_buffer:
-                    writer.write(chunk_buffer)
+                    writer.write(bytes(chunk_buffer))
                     chunk_buffer.clear()
             return self._finalize_atomic_stream_write(
                 target_path=target_path,
