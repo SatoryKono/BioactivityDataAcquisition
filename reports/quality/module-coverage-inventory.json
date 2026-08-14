@@ -48390,7 +48390,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-14",
-  "source_tree_sha256": "abc7b54c9e395f5ad369cee88e8c6aca435380c09270935eeb44a1fd965e3707",
+  "source_tree_sha256": "634abbe00797adc41d01475be5e24a18c14d7bb941e010bb72ef982702e1edc6",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

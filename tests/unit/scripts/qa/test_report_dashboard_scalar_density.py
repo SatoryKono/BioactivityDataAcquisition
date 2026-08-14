@@ -6,9 +6,15 @@ from typing import Any
 
 import pytest
 
+from scripts.engineering.qa import __main__ as qa_router
 from scripts.engineering.qa import report_dashboard_scalar_density as density
 
 pytestmark = pytest.mark.unit
+
+
+def test_scalar_density_is_routed_through_unified_qa_cli() -> None:
+    spec = qa_router.COMMAND_SPECS["report-dashboard-scalar-density"]
+    assert spec.target == "scripts.engineering.qa.report_dashboard_scalar_density"
 
 
 def _stat(
@@ -49,7 +55,10 @@ def test_scalar_density_excludes_timeseries_table_and_text() -> None:
 
 
 def test_scalar_density_is_none_without_scalars() -> None:
-    assert density.scalar_density([{"type": "table", "gridPos": {"w": 24, "h": 6}}]) is None
+    assert (
+        density.scalar_density([{"type": "table", "gridPos": {"w": 24, "h": 6}}])
+        is None
+    )
     assert density.scalar_density([]) is None
 
 
@@ -129,7 +138,9 @@ def test_survey_group_without_scalars_is_exempt() -> None:
                 "id": 900,
                 "title": "G",
                 "gridPos": {"w": 24, "h": 1, "x": 0, "y": 13},
-                "panels": [{"type": "table", "gridPos": {"w": 24, "h": 6, "x": 0, "y": 14}}],
+                "panels": [
+                    {"type": "table", "gridPos": {"w": 24, "h": 6, "x": 0, "y": 14}}
+                ],
             },
         ],
     }
