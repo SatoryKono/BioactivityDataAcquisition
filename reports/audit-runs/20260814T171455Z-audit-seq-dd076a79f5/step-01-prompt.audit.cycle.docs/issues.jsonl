@@ -1,2 +1,2 @@
-{"issue":8824,"url":"https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8824","finding_ids":["DOCS-SEQ-001"],"status":"open"}
-{"issue":8825,"url":"https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8825","finding_ids":["DOCS-SEQ-002"],"status":"open"}
+{"issue":8824,"url":"https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8824","finding_ids":["DOCS-SEQ-001"],"status":"closed","state_reason":"completed","acceptance_commit":"9a5b67ab96d8af81adb0f744fdcf62187727d4cc"}
+{"issue":8825,"url":"https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8825","finding_ids":["DOCS-SEQ-002"],"status":"closed","state_reason":"completed","acceptance_commit":"9a5b67ab96d8af81adb0f744fdcf62187727d4cc"}
