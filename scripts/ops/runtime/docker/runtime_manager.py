@@ -25,12 +25,6 @@ from typing import Any
 
 import yaml
 
-if __package__ in {None, ""}:
-    repo_root = Path(__file__).resolve().parents[4]
-    repo_root_str = str(repo_root)
-    if repo_root_str not in sys.path:
-        sys.path.insert(0, repo_root_str)
-
 from scripts.ops.runtime.docker import docker_runtime_preflight as runtime_preflight
 
 ROOT = Path(__file__).resolve().parents[4]
@@ -1711,33 +1705,6 @@ def _status_origin_findings(
     ]
 
 
-def _print_lifecycle_failure_summary(
-    *,
-    action: str,
-    spec: StackSpec,
-    report_dir: Path,
-) -> None:
-    """Print one bounded, redacted pointer to a failed start/recover report."""
-    report_path = report_dir / f"docker-incident-{spec.name}.json"
-    cause = "unknown"
-    try:
-        payload = json.loads(report_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        payload = {}
-    if isinstance(payload, Mapping):
-        candidate = payload.get("primary_cause")
-        if candidate:
-            cause = _bounded(str(candidate), 200)
-    summary = {
-        "ok": False,
-        "action": action,
-        "stack": spec.name,
-        "primary_cause": cause,
-        "report": str(report_path),
-    }
-    print(json.dumps(_redact(summary), sort_keys=True))
-
-
 def _dispatch_action(
     args: argparse.Namespace,
     *,
@@ -1825,7 +1792,7 @@ def _dispatch_action(
             spec=spec,
             contract_path=contract_path,
         )
-        result = start_or_recover(
+        return start_or_recover(
             spec,
             contract_path,
             report_dir,
@@ -1836,13 +1803,6 @@ def _dispatch_action(
             poll_interval=max(0.1, args.poll_interval),
             stabilization_seconds=max(0.0, args.stabilization_seconds),
         )
-        if result != 0:
-            _print_lifecycle_failure_summary(
-                action=args.action,
-                spec=spec,
-                report_dir=report_dir,
-            )
-        return result
     if args.action == "stop":
         return runner(
             _compose(spec, "down", "--remove-orphans"), ROOT, args.timeout
