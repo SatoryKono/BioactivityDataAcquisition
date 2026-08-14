@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3001 |
-| Tracked doc-like files | 3001 |
+| Doc-like files | 3010 |
+| Tracked doc-like files | 3010 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 9 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3001 |
+| tracked | 3010 |
 
 ## Lifecycle Counts
 
@@ -42,7 +42,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 21 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 490 |
+| working_report | 499 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -63,7 +63,7 @@
 | Canonical | 70 |
 | Deprecated | 8 |
 | Generated | 1054 |
-| Working | 961 |
+| Working | 970 |
 
 ## Surface Families
 
@@ -74,14 +74,14 @@
 | canonical | 70 |
 | duplicate | 8 |
 | generated | 1054 |
-| working | 961 |
+| working | 970 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 320 |
-| archive-after-migration | 495 |
+| archive-after-migration | 504 |
 | generate-automatically | 1054 |
 | keep | 1120 |
 | reconcile-with-github-state | 4 |
@@ -141,6 +141,15 @@
 | `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/report.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/source-of-truth-map.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/summary.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/run.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/docs-kpi.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/docs-kpi.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/findings.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/link-report.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/plan.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/preflight.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/report.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/summary.md` | Working | 0 | archive-after-migration |
 | `reports/audit/docs-content/findings.json` | Working | 0 | archive-after-migration |
 | `reports/audit/docs-content/report.md` | Working | 0 | archive-after-migration |
 | `reports/audit/docs-pipeline/findings.json` | Working | 0 | archive-after-migration |
@@ -162,15 +171,6 @@
 | `reports/grafana/cycle-3loop-20260805-r2/iteration-3/dashboards/render-manifest.json` | Working | 0 | archive-after-migration |
 | `reports/grafana/cycle-3loop-20260805-r2/iteration-3/reports/iteration-3-report.md` | Working | 0 | archive-after-migration |
 | `reports/grafana/cycle-3loop-20260805-r2/traceability.json` | Working | 0 | archive-after-migration |
-| `reports/observability/audit-20260727-live-operator-truth/CLOSEOUT.md` | Working | 0 | archive-after-migration |
-| `reports/observability/audit-20260727-live-operator-truth/grafana-live-snapshot.json` | Working | 0 | archive-after-migration |
-| `reports/observability/audit-20260727-live-operator-truth/live-validation-matrix.json` | Working | 0 | archive-after-migration |
-| `reports/observability/grafana/rfa-00-20260805/CLOSEOUT.md` | Working | 0 | archive-after-migration |
-| `reports/observability/grafana/selector-audit-2026-07-20/selector-audit-report.md` | Working | 0 | archive-after-migration |
-| `reports/observability/grafana/selector-audit-2026-07-20/selector-evidence.json` | Working | 0 | archive-after-migration |
-| `reports/observability/runtime_cardinality_allowlist_review_5574.json` | Working | 0 | archive-after-migration |
-| `reports/observability/runtime_cardinality_review.json` | Working | 0 | archive-after-migration |
-| `reports/plans/obs-program-6247-6268/04-refactoring-log.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
