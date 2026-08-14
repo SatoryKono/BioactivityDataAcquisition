@@ -88,7 +88,7 @@ def _host_report_root(repo: Path) -> Path:
     env = os.environ.get("BIOETL_REPORT_ROOT", "").strip()
     if env and not _looks_like_container_path(env):
         return Path(env).expanduser().resolve()
-    return (repo / "reports" / "run-reports").resolve()
+    return (_host_reports_mount(repo) / "run-reports").resolve()
 
 
 def _host_reports_mount(repo: Path) -> Path:
