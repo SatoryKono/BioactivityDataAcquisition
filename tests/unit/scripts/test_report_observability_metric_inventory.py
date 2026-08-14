@@ -23,7 +23,10 @@ import pytest
 
 from scripts.engineering.qa import report_observability_metric_inventory as inventory
 
-pytestmark = pytest.mark.unit
+# Repo-backed lane: two entrypoint tests spawn the module via subprocess with
+# cwd=repo_root over the real checkout (see governance
+# repo_backed_unit_test_exceptions in configs/quality/test_governance_audit.yaml).
+pytestmark = pytest.mark.repo_backed
 
 
 def test_direct_module_entrypoint_help_bootstraps_without_circular_import() -> None:
@@ -1867,7 +1870,6 @@ def test_main_writes_runtime_cardinality_review_artifacts_and_step_summary(
     )
 
 
-@pytest.mark.unit
 def test_main_can_fail_fast_when_runtime_cardinality_review_degrades(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -1945,7 +1947,7 @@ def test_main_can_fail_fast_when_runtime_cardinality_review_degrades(
 
 def test_direct_module_entrypoint_json_bootstraps_without_circular_import() -> None:
     """#8774: `python -m scripts.engineering.qa.report_observability_metric_inventory`."""
-    repo_root = Path(__file__).resolve().parents[3]
+    repo_root = Path(__file__).resolve().parents[4]
     completed = subprocess.run(
         [
             sys.executable,
