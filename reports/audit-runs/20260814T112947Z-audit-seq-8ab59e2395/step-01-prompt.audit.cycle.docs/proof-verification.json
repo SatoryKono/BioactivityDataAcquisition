@@ -1,0 +1,17 @@
+{
+  "bundle": "reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/proof-bundle.json",
+  "bundle_digest": "6d8f3a7bac8c6363445f6d6470f2c13ed6e934bcdf72562631940636b8582da7",
+  "claim": "done",
+  "claim_qualified": false,
+  "degradations": [
+    "trust_tier:local_single_host"
+  ],
+  "errors": [
+    "failed_receipt:debt",
+    "failed_receipt:governance"
+  ],
+  "exit_code": 2,
+  "outcome": "STOP",
+  "run_id": "20260814T112947Z-audit-seq-8ab59e2395-step-01",
+  "schema_version": 1
+}

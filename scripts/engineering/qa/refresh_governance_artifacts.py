@@ -245,10 +245,10 @@ def _run_refresh() -> None:
         [
             sys.executable,
             "-m",
-            "scripts.engineering.qa.report_debt_governance_gates",
+            "scripts.engineering.qa",
+            "report-debt-governance-gates",
             "--update",
-        ],
-        check=False,
+        ]
     )
 
     print("REFRESH complete. Recommended verification:")

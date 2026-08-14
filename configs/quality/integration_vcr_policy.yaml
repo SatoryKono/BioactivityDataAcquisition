@@ -151,6 +151,7 @@ tracked_suite_inventory:
     - tests/integration/test_dashboard_critical_panels_have_actionable_links.py
     - tests/integration/test_dashboard_cross_scope_titles.py
     - tests/integration/test_dashboard_first_screen.py
+    - tests/integration/test_dashboard_geometry_and_purpose_contracts.py
     - tests/integration/test_dashboard_json_metadata_contract.py
     - tests/integration/test_dashboard_no_data_policy.py
     - tests/integration/test_dashboard_panel_audit_matrix_contract.py

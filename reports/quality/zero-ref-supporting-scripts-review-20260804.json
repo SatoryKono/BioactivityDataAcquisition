@@ -13,7 +13,7 @@
   "schema_version": "zero-ref-supporting-scripts-review-v1",
   "scripts": [],
   "summary": {
-    "delete_count": 4,
+    "delete_count": 0,
     "promote_candidates": [],
     "retain_count": 0,
     "script_count": 0,

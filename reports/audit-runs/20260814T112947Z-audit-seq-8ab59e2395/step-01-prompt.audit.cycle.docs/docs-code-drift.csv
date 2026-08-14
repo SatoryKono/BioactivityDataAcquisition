@@ -1,0 +1,5 @@
+path,claim,source,status,evidence
+docs/00-project/index.md:132,RULES governance baseline,docs/00-project/RULES.md:3,drift,6.1.9-vs-6.1.10
+docs/03-guides/docs-verification.md:155,verify accepts skip flags,scripts/docs/checks/verify.py:18 and cli_dispatch.py:55,drift,router-rc2
+.github/workflows/tests.yml:1746,docs evidence producer runs verify skip-build,scripts/docs/__main__.py and cli_dispatch.py,drift,router-rc2
+.github/workflows/docs-kpi-weekly.yml:30,weekly KPI accepts workflow flags,scripts/docs/checks/report_docs_kpi.py:421 and cli_dispatch.py:55,drift,router-rc2

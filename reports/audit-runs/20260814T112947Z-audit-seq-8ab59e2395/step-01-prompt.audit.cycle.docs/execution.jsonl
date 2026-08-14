@@ -1,0 +1,7 @@
+{"phase":"preflight","status":"pass","branch":"fix/audit-seq-8ab59e2395","base_sha":"8ab59e239589bb22bde0da54f4646a51b65feeab","memory":"pre-task-completed-degraded-retrieval"}
+{"phase":"audit","status":"pass","proven_findings":4,"p0":0,"p1":2,"p2":2,"p3":0}
+{"phase":"issue_gate","status":"pass","created":[8807,8808,8809,8810],"duplicates":0,"deferred":0}
+{"phase":"implement","status":"pass","resolved":["DOCS-001","DOCS-002","DOCS-003","DOCS-004"]}
+{"phase":"targeted_validation","status":"pass","docs_verify":true,"strict_mkdocs":true,"tests":true,"ruff":true,"diff_check":true}
+{"phase":"proof_or_stop","status":"stop","errors":["failed_receipt:governance","failed_receipt:debt"],"scope":"repository_baseline_outside_docs_diff"}
+{"phase":"closeout_gate","status":"pass","issues_closed":[8807,8808,8809,8810],"pr":8813,"origin_main_changed":false,"sequence":"stopped_before_step_02"}
