@@ -7,11 +7,13 @@ services:
       - "127.0.0.1:9093:9093"
     volumes:
       # This helper compose file lives below scripts/ops/runtime/docker/compose.
-      # Resolve the bind from that directory back to the tracked root config.
-      - ../../../../../grafana/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      # Bind the tracked config directory, not one file. Docker Desktop proxies
+      # WSL file binds through an opaque cache path, which makes an otherwise
+      # single-origin runtime fail the mount-origin gate.
+      - ../../../../../grafana:/etc/bioetl-grafana:ro
       - alertmanager-data:/alertmanager
     command:
-      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--config.file=/etc/bioetl-grafana/alertmanager.yml'
       - '--storage.path=/alertmanager'
       - '--web.external-url=http://localhost:9093'
     networks:
