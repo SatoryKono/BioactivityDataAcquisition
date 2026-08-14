@@ -46,6 +46,18 @@ def _iter_panels(panels: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return discovered
 
 
+def _display_title(panel: dict[str, Any]) -> str:
+    options = panel.get("options")
+    if isinstance(options, dict):
+        custom_title = options.get("bioetlDisplayTitle")
+        if isinstance(custom_title, str) and custom_title.strip():
+            return custom_title.strip()
+    title = panel.get("title")
+    if isinstance(title, str) and title.strip():
+        return title.strip()
+    return f"({panel.get('type', 'panel')})"
+
+
 def _collect_rows() -> list[str]:
     rows: list[str] = []
     for path in sorted(DASHBOARDS_DIR.glob("*.json")):
@@ -54,12 +66,7 @@ def _collect_rows() -> list[str]:
             panel_id = panel.get("id")
             if panel_id is None:
                 continue
-            title = panel.get("title")
-            if title:
-                display_title = str(title)
-            else:
-                panel_type = panel.get("type", "panel")
-                display_title = f"({panel_type})"
+            display_title = _display_title(panel)
             rows.append(f"| {path.name} | {panel_id} | {display_title} |")
     return rows
 

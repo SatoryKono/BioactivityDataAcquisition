@@ -444,7 +444,13 @@ def test_control_plane_provider_health_handoff_omits_adapter_fallback() -> None:
     provider_nav_url = str(provider_nav.get("url", ""))
     assert "var-provider=unknown" in provider_nav_url
     assert "var-pipeline_context=" in provider_nav_url
-    assert "var-adapter=All" not in provider_nav_url
+    assert "var-adapter=" not in provider_nav_url
+
+    for dashboard_path in Path("grafana/dashboards").glob("*.json"):
+        dashboard_text = dashboard_path.read_text(encoding="utf-8")
+        assert "var-adapter=unknown" not in dashboard_text, (
+            f"{dashboard_path.name} must omit synthetic adapter context"
+        )
 
     overview = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     first_action = next(
@@ -462,10 +468,7 @@ def test_control_plane_provider_health_handoff_omits_adapter_fallback() -> None:
     url = str(link.get("url", ""))
     assert "var-provider=unknown" in url
     assert "var-pipeline_context=$pipeline" in url
-    # Fail-closed adapter default is allowed; All/blank adapter is not.
-    assert "var-adapter=All" not in url
-    if "var-adapter=" in url:
-        assert "var-adapter=unknown" in url
+    assert "var-adapter=" not in url
 
 
 def test_control_plane_first_screen_stat_panels_do_not_duplicate_runbook_ctas() -> None:
@@ -1076,5 +1079,3 @@ def test_dq_first_action_cta_contract() -> None:
         f"DQ First Action panel missing required CTAs. "
         f"Required: {required_titles}, Got: {link_titles}"
     )
-
-
