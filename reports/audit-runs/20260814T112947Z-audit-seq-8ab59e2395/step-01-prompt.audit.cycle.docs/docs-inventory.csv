@@ -1,0 +1,9 @@
+path,type,audience,owner,last_change,status,score,priority,evidence
+README.md,entrypoint,users-and-contributors,BioETL Team,tracked,current,3,P3,links-and-command-entrypoints-sampled
+docs/00-project/index.md,published-hub,contributors,BioETL Team,tracked,drift,1,P1,governance-version-mismatch
+docs/00-project/RULES.md,normative,all-contributors,BioETL Team,2026-08-14,current,3,P3,header-version-6.1.10
+docs/00-project/00-map.md,navigation,contributors,BioETL Team,tracked,current,2,P3,links-pass
+docs/03-guides/docs-verification.md,guide,contributors,BioETL Team,2026-08-13,command-drift,1,P1,router-rejects-documented-verify-flags
+docs/00-project/ai/prompts/library/audit/cycle/README.md,repo-library,operators,BioETL Team,2026-08-13,nav-drift,1,P2,not-in-nav-growth
+docs/reports/generated/documentation-cleanup-inventory.json,generated-inventory,maintainers,BioETL Team,generated,drift,0,P2,canonical-check-rc1
+mkdocs.yml,publication-config,maintainers,BioETL Team,tracked,partial,1,P2,new-library-not-fully-classified

@@ -84,6 +84,12 @@ ______________________________________________________________________
 - Published guidance: `docs/00-05/**`
 - Repo-only drafts and working notes: repository paths such as `docs/D-*.md`,
   `docs/plans/**`, `docs/reports/**`, `reports/**`
+- Retained governance working plan:
+  [documentation-update-plan.md](governance/documentation-update-plan.md)
+- Retained repo-only analyses:
+  [devin-optimization-analysis.md](../devin-optimization-analysis.md),
+  [docs-folder-analysis.md](../docs-folder-analysis.md), and
+  [reports-migration-analysis.md](../reports-migration-analysis.md)
 - Historical material: repository path `docs/99-archive/**`
 - Code-navigation-only package maps: `src/**/README.md`
 
