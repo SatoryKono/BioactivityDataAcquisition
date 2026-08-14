@@ -1,9 +1,9 @@
 """Application-level orchestration service for PipelineRun lifecycle.
 
 Migration note (P2-9):
-    Application/composition should prefer this service for PipelineRun lifecycle
-    orchestration. Domain aggregate lifecycle methods remain as the domain API
-    surface and are not scheduled for removal by a calendar sunset in this note.
+    Domain aggregate methods remain for compatibility, but application/composition
+    should prefer this service for lifecycle orchestration. Legacy direct
+    orchestration from domain call-sites is targeted for removal by 2026-06-30.
 """
 
 from __future__ import annotations

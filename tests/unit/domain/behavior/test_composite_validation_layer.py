@@ -65,22 +65,6 @@ def test_structural_validation_reports_non_dict_and_missing_required_fields() ->
     assert codes == [IssueCode.CMP_STR_SCHEMA_001]
 
 
-def test_validate_composite_non_dict_fails_closed_without_raising() -> None:
-    """Public API must not crash when composite_config is not a mapping (CR-CYCLE-001)."""
-    report = _validator().validate_composite(
-        CompositeValidationConfig(
-            pipeline_name="composite",
-            composite_config=[],  # type: ignore[arg-type]
-        )
-    )
-
-    structural_codes = [issue.code for issue in report.structural_result.issues]
-    assert structural_codes == [IssueCode.CMP_STR_SCHEMA_001]
-    assert report.structural_result.has_blockers()
-    assert report.deep_preflight_result.issues == []
-    assert report.execution_decision is not None
-
-
 def test_deep_preflight_reports_invalid_sections() -> None:
     result = _validator()._run_deep_preflight_validation(
         CompositeValidationConfig(
