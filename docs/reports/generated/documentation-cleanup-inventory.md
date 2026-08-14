@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3010 |
-| Tracked doc-like files | 3010 |
+| Doc-like files | 3011 |
+| Tracked doc-like files | 3011 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 9 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3010 |
+| tracked | 3011 |
 
 ## Lifecycle Counts
 
@@ -62,7 +62,7 @@
 | Archived | 169 |
 | Canonical | 70 |
 | Deprecated | 8 |
-| Generated | 1054 |
+| Generated | 1055 |
 | Working | 970 |
 
 ## Surface Families
@@ -73,7 +73,7 @@
 | archive | 169 |
 | canonical | 70 |
 | duplicate | 8 |
-| generated | 1054 |
+| generated | 1055 |
 | working | 970 |
 
 ## Recommended Actions
@@ -82,7 +82,7 @@
 | --- | --- |
 | archive-after-github-state-check | 320 |
 | archive-after-migration | 504 |
-| generate-automatically | 1054 |
+| generate-automatically | 1055 |
 | keep | 1120 |
 | reconcile-with-github-state | 4 |
 | replace-with-link | 8 |
@@ -251,11 +251,11 @@
 | `docs/00-project/ai/prompts/archive/mirrors/skills-2-verify-architecture.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/archive/mirrors/workflows-1-master.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/archive/mirrors/workflows-2-post-change.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/dashboard-audit-full-cycle.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/docs_ai_audit_planning_codex_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/fragments/audit-scale.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/fragments/bi-check-schema.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/fragments/coderabbit-dual-pass.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/fragments/debt-budget-ban.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 
 ## GitHub Issue Evidence Examples
 
