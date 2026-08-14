@@ -193,6 +193,7 @@ def test_grafana_uses_remote_renderer_sidecar() -> None:
         if str(item).startswith("BROWSER_FLAGS=")
     )
     assert "--disable-dev-shm-usage" not in flags
+    assert "--disable-software-rasterizer" not in flags
     assert renderer["healthcheck"]["test"] == [
         "CMD",
         "grafana-image-renderer",

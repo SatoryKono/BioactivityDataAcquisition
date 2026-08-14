@@ -725,9 +725,9 @@ curl -sS 'http://localhost:9090/api/v1/targets' | python -c "import sys,json; ts
 | `GF_RENDERING_RENDERER_TOKEN`                  | обязательная          | Общий secret для Grafana и renderer `AUTH_TOKEN`; задаётся локально до запуска |
 | `GRAFANA_IMAGE_RENDERER_GOMEMLIMIT`            | `1GiB`                | Go memory soft limit for the remote image renderer (local budget) |
 | `GRAFANA_IMAGE_RENDERER_MAX_CONCURRENCY`       | `1`                   | Parallel Chromium renders; keep `1` on ≤32 GiB hosts (was `2`) |
-| `GRAFANA_IMAGE_RENDERER_BROWSER_FLAGS`         | no-sandbox, no-gpu, js heap 512 | Default **without** `--disable-dev-shm-usage` (pairs with `shm_size: 512mb`) |
+| `GRAFANA_IMAGE_RENDERER_BROWSER_FLAGS`         | no-sandbox, no-gpu, js heap 512 | Default **without** `--disable-dev-shm-usage` (pairs with `shm_size: 512mb`) and **without** `--disable-software-rasterizer` (needs a raster backend when GPU is off) |
 | `GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT`     | `120s`                | Maximum wait for heavy dashboard pages before the remote renderer returns a timeout |
-| `GRAFANA_IMAGE_RENDERER_WS_URL_READ_TIMEOUT`   | `45s`                 | Chromedp websocket URL read; avoids 20s default `websocket url timeout reached` |
+| `GRAFANA_IMAGE_RENDERER_WS_URL_READ_TIMEOUT`   | `90s`                 | Chromedp websocket URL read; avoids 20s default `websocket url timeout reached` |
 | `GRAFANA_IMAGE_RENDERER_DISABLE_NETWORK_WAIT`  | `true`                | Do not wait for Grafana Live / Infinity sockets to go idle before capture |
 | `GRAFANA_IMAGE_RENDERER_GIVE_UP_ON_ALL_QUERIES`| `12s`                 | Capture after first paint if queries keep running (table d-solo) |
 | `GF_RENDERING_RENDERING_TIMEOUT`               | `60s`                 | Grafana client timeout toward renderer (was 20s; aborted table d-solo) |
