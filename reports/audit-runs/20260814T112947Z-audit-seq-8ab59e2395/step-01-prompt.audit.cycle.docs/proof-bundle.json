@@ -1,0 +1,178 @@
+{
+  "acceptance": {
+    "require_full_trust": false,
+    "required_evidence": [
+      "tests",
+      "governance",
+      "docs_runtime",
+      "debt"
+    ]
+  },
+  "actor": "codex",
+  "bundle_digest": "6d8f3a7bac8c6363445f6d6470f2c13ed6e934bcdf72562631940636b8582da7",
+  "claim": "done",
+  "receipts": [
+    {
+      "argv": [],
+      "command": "python -m pytest",
+      "cwd": "/tmp/bioetl-audit-seq-8ab59e2395",
+      "duration_ms": 0,
+      "evidence_kind": "tests",
+      "execution_attestation": "digest_only",
+      "exit_code": 0,
+      "follow_up": null,
+      "output_digest": "ac3d4863cb4e270012a886a0671b814c3c9e32c15ba776d2f300471562794f22",
+      "producer": "test_health",
+      "receipt_digest": "14338aa2e056c47ce406659069ec84e870593fdab4cb68e90a148e600de04745",
+      "receipt_id": "test-health-local",
+      "repository": {
+        "branch": "fix/audit-seq-8ab59e2395",
+        "ci_run_id": null,
+        "repo_id": "bioactivitydataacquisition",
+        "worktree_id": "fc8d85151d157e79"
+      },
+      "skip_reason": null,
+      "source": {
+        "command_set_hash": "d50b6232fb3154072b51234ce6d0f542d138962f704deed7476d5efc0e771511",
+        "dirty": true,
+        "head_sha": "8ab59e239589bb22bde0da54f4646a51b65feeab",
+        "material_hash": "4b1dbc51790ee890c73511279a4cd6f951b5936a476d7ebfd9c10fd7f0c74d0f",
+        "policy_hash": "6b7db7a66e009098489c583447d6dcdf901150ca973c0d9f8f0a1919c2f0dd9d",
+        "task_diff_hash": "27c79c95582bc8e3ebe0c10677034cee439022fe55ca1abdbba71542a0abd803",
+        "untracked_paths": [
+          "src/memory/episodic/tasks/bioactivitydataacquisition/fc8d85151d157e79/fix-audit-seq-8ab59e2395/e06f0dc14fe63747/audit-seq-8ab59e2395-step-01-docs/session.md"
+        ]
+      },
+      "started_at": "2026-08-14T13:56:30.363484+00:00",
+      "status": "pass",
+      "task_id": "audit-seq-8ab59e2395-step-01-docs"
+    },
+    {
+      "argv": [],
+      "command": "python -m scripts.docs verify",
+      "cwd": "/tmp/bioetl-audit-seq-8ab59e2395",
+      "duration_ms": 0,
+      "evidence_kind": "docs_runtime",
+      "execution_attestation": "digest_only",
+      "exit_code": 0,
+      "follow_up": null,
+      "output_digest": "9c51e57658df86796ef91ea7cea1b1709573d1ace62d4e68162c390ed565373e",
+      "producer": "docs_runtime_checks",
+      "receipt_digest": "06c800dcf5e0d27d782e97c9e924e21dc3f9d1ca7927c3d6df2c15168783e181",
+      "receipt_id": "docs-runtime-local",
+      "repository": {
+        "branch": "fix/audit-seq-8ab59e2395",
+        "ci_run_id": null,
+        "repo_id": "bioactivitydataacquisition",
+        "worktree_id": "fc8d85151d157e79"
+      },
+      "skip_reason": null,
+      "source": {
+        "command_set_hash": "d50b6232fb3154072b51234ce6d0f542d138962f704deed7476d5efc0e771511",
+        "dirty": true,
+        "head_sha": "8ab59e239589bb22bde0da54f4646a51b65feeab",
+        "material_hash": "4b1dbc51790ee890c73511279a4cd6f951b5936a476d7ebfd9c10fd7f0c74d0f",
+        "policy_hash": "6b7db7a66e009098489c583447d6dcdf901150ca973c0d9f8f0a1919c2f0dd9d",
+        "task_diff_hash": "27c79c95582bc8e3ebe0c10677034cee439022fe55ca1abdbba71542a0abd803",
+        "untracked_paths": [
+          "src/memory/episodic/tasks/bioactivitydataacquisition/fc8d85151d157e79/fix-audit-seq-8ab59e2395/e06f0dc14fe63747/audit-seq-8ab59e2395-step-01-docs/session.md"
+        ]
+      },
+      "started_at": "2026-08-14T13:56:30.245497+00:00",
+      "status": "pass",
+      "task_id": "audit-seq-8ab59e2395-step-01-docs"
+    },
+    {
+      "argv": [],
+      "command": "bash scripts/engineering/dev/pretest_guardrails.sh",
+      "cwd": "/tmp/bioetl-audit-seq-8ab59e2395",
+      "duration_ms": 0,
+      "evidence_kind": "governance",
+      "execution_attestation": "digest_only",
+      "exit_code": 1,
+      "follow_up": null,
+      "output_digest": "375a07598b7f2cc6cca272d924f83a55110aea24dbb064e18803238cd74e7d2f",
+      "producer": "pretest_guardrails",
+      "receipt_digest": "5be8d7eae7ba49dd5df436b38066636056367607d4b6839082f3f7db160d71da",
+      "receipt_id": "pretest-guardrails-local",
+      "repository": {
+        "branch": "fix/audit-seq-8ab59e2395",
+        "ci_run_id": null,
+        "repo_id": "bioactivitydataacquisition",
+        "worktree_id": "fc8d85151d157e79"
+      },
+      "skip_reason": null,
+      "source": {
+        "command_set_hash": "d50b6232fb3154072b51234ce6d0f542d138962f704deed7476d5efc0e771511",
+        "dirty": true,
+        "head_sha": "8ab59e239589bb22bde0da54f4646a51b65feeab",
+        "material_hash": "4b1dbc51790ee890c73511279a4cd6f951b5936a476d7ebfd9c10fd7f0c74d0f",
+        "policy_hash": "6b7db7a66e009098489c583447d6dcdf901150ca973c0d9f8f0a1919c2f0dd9d",
+        "task_diff_hash": "27c79c95582bc8e3ebe0c10677034cee439022fe55ca1abdbba71542a0abd803",
+        "untracked_paths": [
+          "src/memory/episodic/tasks/bioactivitydataacquisition/fc8d85151d157e79/fix-audit-seq-8ab59e2395/e06f0dc14fe63747/audit-seq-8ab59e2395-step-01-docs/session.md"
+        ]
+      },
+      "started_at": "2026-08-14T13:56:30.245937+00:00",
+      "status": "fail",
+      "task_id": "audit-seq-8ab59e2395-step-01-docs"
+    },
+    {
+      "argv": [],
+      "command": "python -m scripts.engineering.qa report-debt-governance-gates",
+      "cwd": "/tmp/bioetl-audit-seq-8ab59e2395",
+      "duration_ms": 0,
+      "evidence_kind": "debt",
+      "execution_attestation": "digest_only",
+      "exit_code": 1,
+      "follow_up": null,
+      "output_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "producer": "debt_governance_gates",
+      "receipt_digest": "5ee6d394461009756a1b4940536ff48957461d03420c7d64954c0304f09790c1",
+      "receipt_id": "debt-governance-local",
+      "repository": {
+        "branch": "fix/audit-seq-8ab59e2395",
+        "ci_run_id": null,
+        "repo_id": "bioactivitydataacquisition",
+        "worktree_id": "fc8d85151d157e79"
+      },
+      "skip_reason": null,
+      "source": {
+        "command_set_hash": "d50b6232fb3154072b51234ce6d0f542d138962f704deed7476d5efc0e771511",
+        "dirty": true,
+        "head_sha": "8ab59e239589bb22bde0da54f4646a51b65feeab",
+        "material_hash": "4b1dbc51790ee890c73511279a4cd6f951b5936a476d7ebfd9c10fd7f0c74d0f",
+        "policy_hash": "6b7db7a66e009098489c583447d6dcdf901150ca973c0d9f8f0a1919c2f0dd9d",
+        "task_diff_hash": "27c79c95582bc8e3ebe0c10677034cee439022fe55ca1abdbba71542a0abd803",
+        "untracked_paths": [
+          "src/memory/episodic/tasks/bioactivitydataacquisition/fc8d85151d157e79/fix-audit-seq-8ab59e2395/e06f0dc14fe63747/audit-seq-8ab59e2395-step-01-docs/session.md"
+        ]
+      },
+      "started_at": "2026-08-14T13:56:30.398546+00:00",
+      "status": "fail",
+      "task_id": "audit-seq-8ab59e2395-step-01-docs"
+    }
+  ],
+  "repository": {
+    "branch": "fix/audit-seq-8ab59e2395",
+    "ci_run_id": null,
+    "repo_id": "bioactivitydataacquisition",
+    "worktree_id": "fc8d85151d157e79"
+  },
+  "run_id": "20260814T112947Z-audit-seq-8ab59e2395-step-01",
+  "runtime": "codex",
+  "schema_version": 1,
+  "source": {
+    "command_set_hash": "d50b6232fb3154072b51234ce6d0f542d138962f704deed7476d5efc0e771511",
+    "dirty": true,
+    "head_sha": "8ab59e239589bb22bde0da54f4646a51b65feeab",
+    "material_hash": "4b1dbc51790ee890c73511279a4cd6f951b5936a476d7ebfd9c10fd7f0c74d0f",
+    "policy_hash": "6b7db7a66e009098489c583447d6dcdf901150ca973c0d9f8f0a1919c2f0dd9d",
+    "task_diff_hash": "27c79c95582bc8e3ebe0c10677034cee439022fe55ca1abdbba71542a0abd803",
+    "untracked_paths": [
+      "src/memory/episodic/tasks/bioactivitydataacquisition/fc8d85151d157e79/fix-audit-seq-8ab59e2395/e06f0dc14fe63747/audit-seq-8ab59e2395-step-01-docs/session.md"
+    ]
+  },
+  "task_id": "audit-seq-8ab59e2395-step-01-docs",
+  "trust_tier": "local_single_host"
+}

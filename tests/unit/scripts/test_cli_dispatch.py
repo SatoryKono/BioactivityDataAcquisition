@@ -148,3 +148,60 @@ def test_docs_check_drift_and_docstrings_accept_documented_flags(
     assert "does not accept command arguments" not in captured.err
     assert "--ports" in captured.out
     assert "--summary" in captured.out
+
+
+def test_docs_verify_and_kpi_accept_workflow_flags(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Exact docs workflow flags must reach argparse instead of router rc=2."""
+    from scripts.docs.checks import report_docs_kpi, verify
+
+    monkeypatch.setattr(verify, "_run_step", lambda _label, _argv: 0)
+    metrics = report_docs_kpi.DocsKpiMetrics(
+        generated_at_utc="2026-08-14T00:00:00+00:00",
+        total_docs=1,
+        in_nav=1,
+        not_in_nav=0,
+        orphan_candidates=0,
+        baseline_not_in_nav=0,
+        baseline_exists=True,
+        not_in_nav_top_level={},
+        orphan_top_level={},
+        target_not_in_nav=120,
+        hard_limit_not_in_nav=135,
+        max_orphans=0,
+        target_deadline="2026-12-31",
+        deadline_days_remaining=139,
+        status="on_track",
+        breaches=[],
+    )
+    monkeypatch.setattr(
+        report_docs_kpi,
+        "compute_metrics",
+        lambda **_kwargs: metrics,
+    )
+
+    verify_rc = run_command(
+        module_command("scripts.docs.checks.verify"),
+        ["--skip-build"],
+    )
+    kpi_rc = run_command(
+        module_command("scripts.docs.checks.report_docs_kpi"),
+        [
+            "--kpi-target-not-in-nav",
+            "120",
+            "--hard-limit-not-in-nav",
+            "135",
+            "--max-orphans",
+            "0",
+            "--target-deadline",
+            "2026-12-31",
+            "--fail-on-breach",
+        ],
+    )
+    captured = capsys.readouterr()
+
+    assert verify_rc == 0
+    assert kpi_rc == 0
+    assert "does not accept command arguments" not in captured.err

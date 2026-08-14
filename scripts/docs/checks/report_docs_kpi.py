@@ -31,12 +31,12 @@ else:
 
 ensure_repo_imports()
 
-from scripts.docs.common.markdown import (  # noqa: E402
+from scripts.docs.common.markdown import (
     INLINE_CODE_RE,
     MD_LINK_RE,
     load_nav_docs,
 )
-from scripts.docs.common.paths import (  # noqa: E402
+from scripts.docs.common.paths import (
     DOCS_DIR,
     MKDOCS_FILE,
     PROJECT_ROOT,
@@ -373,7 +373,7 @@ def render_markdown(metrics: DocsKpiMetrics) -> str:
     return "\n".join(lines) + "\n"
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse CLI arguments."""
     parser = argparse.ArgumentParser(description="Generate documentation KPI report.")
     parser.add_argument(
@@ -415,12 +415,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Return non-zero exit code when KPI breaches are detected.",
     )
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     """CLI entrypoint."""
-    args = parse_args()
+    args = parse_args(argv)
     target_deadline = date.fromisoformat(args.target_deadline)
     baseline_file = (PROJECT_ROOT / args.baseline_file).resolve()
 
