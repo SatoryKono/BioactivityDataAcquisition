@@ -81,6 +81,10 @@ def test_contract_preserves_adr010_and_stability_slo() -> None:
     }
     assert contract["hardening_targets"]["implementation_issue"] == 6293
     assert contract["path_policy"]["mixed_origin_for_same_project_forbidden"] is True
+    assert (
+        contract["path_policy"]["discouraged_origin_scope"]
+        == "dashboard_data_plane_required_bind_mounts"
+    )
     source_identity = contract["dashboard_data_plane"]["source_identity"]
     assert source_identity["report_marker_name"] == ".bioetl-report-source.json"
     assert source_identity["report_marker_schema_version"] == "bioetl-report-source-v1"
@@ -347,6 +351,72 @@ def test_live_project_origin_and_foreign_port_are_gate_errors(tmp_path: Path) ->
     )
     assert preflight._is_discouraged_bind_source("/host_mnt/e/repo", ("/mnt/e",))
     assert not preflight._is_discouraged_bind_source("/home/user/repo", ("/mnt/e",))
+
+
+def test_mount_origin_proxy_gate_is_scoped_to_dashboard_artifacts() -> None:
+    preflight = _load_preflight()
+    proxy = "/run/desktop/mnt/host/wsl/docker-desktop-bind-mounts/Ubuntu/" + "a" * 64
+    contract = {
+        "path_policy": {
+            "discouraged_origin_scope": ("dashboard_data_plane_required_bind_mounts")
+        },
+        "dashboard_data_plane": {
+            "producer_stack": "main",
+            "required_bind_mounts": {
+                "/app/data": {},
+                "/app/reports": {},
+            },
+        },
+    }
+    project_to_stack = {
+        "bioetl-main": "main",
+        "bioetl-monitoring": "monitoring",
+    }
+    config_only = [
+        {
+            "project": "bioetl-monitoring",
+            "mounts": [
+                {
+                    "Type": "bind",
+                    "Source": proxy,
+                    "Destination": "/var/lib/grafana/dashboards",
+                }
+            ],
+        }
+    ]
+
+    assert (
+        preflight._mount_origin_findings(
+            config_only,
+            contract=contract,
+            project_to_stack=project_to_stack,
+            discouraged=("/run/desktop/mnt/host/wsl/docker-desktop-bind-mounts",),
+        )
+        == []
+    )
+
+    producer_reports = [
+        {
+            "project": "bioetl-main",
+            "mounts": [
+                {
+                    "Type": "bind",
+                    "Source": proxy,
+                    "Destination": "/app/reports",
+                }
+            ],
+        }
+    ]
+    findings = preflight._mount_origin_findings(
+        producer_reports,
+        contract=contract,
+        project_to_stack=project_to_stack,
+        discouraged=("/run/desktop/mnt/host/wsl/docker-desktop-bind-mounts",),
+    )
+
+    assert len(findings) == 1
+    assert findings[0].code == "MOUNT_ORIGIN"
+    assert findings[0].evidence["stack"] == "main"
 
 
 def test_dashboard_data_plane_rejects_healthy_producer_from_stale_checkout(
