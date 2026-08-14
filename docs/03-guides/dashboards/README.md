@@ -179,6 +179,17 @@ is `6. Run Explorer` and alert triage lives in Incident Workspace.
   `scripts/ops/observability/grafana/render_nav_bus.py`). The current dashboard
   renders as a disabled high-contrast item; machine-readable `panel.links`
   keep the omit-self contract.
+- Grafana 12 does not expose a dashboard-JSON option for native panel-title
+  typography. Navigation panels therefore suppress the empty native title and
+  render the operator-visible `Navigate Dashboards` heading inside the
+  sanitizer-safe Text panel at `19px`. `options.bioetlDisplayTitle` preserves
+  the machine-readable title for inventories and render tooling; link text is
+  fixed at the `16px` body floor.
+- Use `rerender-grafana --navigation-only --no-expand-collapsed-rows` for a
+  datasource-independent live gate. It fails closed unless panel `1000`
+  exposes all seven items, keeps title/body text at `19px`/`16px`, contains all
+  content within its grid rectangle, and paints a non-zero keyboard-focus
+  indicator.
 - Root `dashboard.links[]` must not duplicate the same bus next to Grafana variables.
 - Duplicate dashboard-to-dashboard links from one board to the same target are forbidden.
 - Theme-safe solid tokens, visible hover/focus, `flex-wrap: wrap` at `1024px`.

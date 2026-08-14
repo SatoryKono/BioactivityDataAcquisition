@@ -63,7 +63,23 @@ def _root_empty_segments(panels: list[dict[str, object]]) -> list[tuple[int, int
         h = int(grid_pos.get("h", 0))
         if h <= 0:
             continue
-        spans.append((y, y + h - 1))
+        end = y + h - 1
+        nested = panel.get("panels")
+        if panel.get("type") == "row" and isinstance(nested, list):
+            nested_ends = []
+            for child in nested:
+                if not isinstance(child, dict):
+                    continue
+                child_grid = child.get("gridPos")
+                if not isinstance(child_grid, dict):
+                    continue
+                child_y = int(child_grid.get("y", 0))
+                child_h = int(child_grid.get("h", 0))
+                if child_h > 0:
+                    nested_ends.append(child_y + child_h - 1)
+            if nested_ends:
+                end = max(end, max(nested_ends))
+        spans.append((y, end))
 
     if not spans:
         return []
@@ -117,7 +133,8 @@ def test_design_system_defines_first_screen_decision_matrix() -> None:
 
 def test_primary_dashboards_expose_common_context_header_panels() -> None:
     """Primary dashboards keep Status shell on first paint; Run context is lazy (#6573/DRM-R)."""
-    # Contract (not frozen pixels): context band near top; evidence may start by y<=8.
+    # Contract (not frozen pixels): context band follows the four-unit
+    # navigation surface required by the 19px/16px typography contract.
     header_ids = (9400, 9401)
     lazy_shell_ids = (9402, 9403)
     dashboard_names = {
@@ -140,8 +157,8 @@ def test_primary_dashboards_expose_common_context_header_panels() -> None:
                 f"{dashboard_name} must expose common panel id={panel_id}"
             )
             grid_pos = panel.get("gridPos", {})
-            assert grid_pos.get("y", 999) <= 3, (
-                f"{dashboard_name}:id={panel_id} must stay in compact context band (y<=3)"
+            assert grid_pos.get("y", 999) <= 4, (
+                f"{dashboard_name}:id={panel_id} must stay in compact context band (y<=4)"
             )
             assert grid_pos.get("h", 99) <= 4, (
                 f"{dashboard_name}:id={panel_id} context band height must stay compact"
@@ -578,12 +595,6 @@ def test_navigation_bus_panels_document_handoff_policy() -> None:
                 candidate
                 for candidate in get_dashboard_panels(dashboard)
                 if candidate.get("id") == 1000
-                and candidate.get("title")
-                in {
-                    "Review Dashboard Navigation",
-                    "Navigation",
-                    "Navigate Dashboards",
-                }
             ),
             None,
         )
@@ -661,25 +672,27 @@ def test_run_explorer_identity_is_on_the_first_screen() -> None:
     identity = panels[9402]
     records = panels[9403]
     assert browse.get("gridPos", {}).get("h", 99) <= 5
-    assert identity.get("gridPos", {}).get("y", 999) <= 12
-    assert records.get("gridPos", {}).get("y", 999) <= 12
+    assert identity.get("gridPos", {}).get("y", 999) <= 13
+    assert records.get("gridPos", {}).get("y", 999) <= 13
     assert "last 20" in str(browse.get("title", "")).lower()
 
 
 def test_overview_alerts_row_is_collapsed() -> None:
     """#8745: Inspect Alerts is T3, not a second first-screen question."""
     dashboard = load_dashboard(_DASHBOARD_DIR / "bioetl-overview-v2.json")
-    row = next(panel for panel in dashboard.get("panels", []) if panel.get("id") == 9600)
-    assert row.get("collapsed") is True
-    assert any(
-        child.get("id") == 9601 for child in (row.get("panels") or [])
+    row = next(
+        panel for panel in dashboard.get("panels", []) if panel.get("id") == 9600
     )
+    assert row.get("collapsed") is True
+    assert any(child.get("id") == 9601 for child in (row.get("panels") or []))
 
 
 def test_incident_domain_suspect_row_is_collapsed() -> None:
     """#8752: Domain Suspect Details stays T4 until ranked-suspect triage needs it."""
     dashboard = load_dashboard(_DASHBOARD_DIR / "bioetl-incident-v1.json")
-    row = next(panel for panel in dashboard.get("panels", []) if panel.get("id") == 2099)
+    row = next(
+        panel for panel in dashboard.get("panels", []) if panel.get("id") == 2099
+    )
     assert row.get("collapsed") is True
     nested_ids = {child.get("id") for child in (row.get("panels") or [])}
     assert {2002, 2003, 2004} <= nested_ids
@@ -696,6 +709,6 @@ def test_incident_alert_evidence_is_collapsed_below_the_fold() -> None:
     row = next(panel for panel in root if panel.get("id") == 2020)
     assert row.get("type") == "row"
     assert row.get("collapsed") is True
-    assert row.get("gridPos", {}).get("y") == 18
+    assert row.get("gridPos", {}).get("y") == 19
     nested_ids = {child.get("id") for child in (row.get("panels") or [])}
     assert nested_ids == {2005, 2006, 2007}

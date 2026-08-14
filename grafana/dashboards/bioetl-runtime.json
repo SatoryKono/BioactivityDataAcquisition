@@ -20,7 +20,7 @@
   "panels": [
     {
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 0
@@ -28,9 +28,10 @@
       "id": 1000,
       "options": {
         "mode": "html",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview)\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><a class=\"bioetl-nav-current\" href=\"#bioetl-runtime\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">2. Pipeline Diagnostics (current)</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health)\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality)\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$__all&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer)\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">6. Run Explorer</a></div>"
+        "bioetlDisplayTitle": "Navigate Dashboards",
+        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1.3;margin:0 6px 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:2px 6px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview)\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><a class=\"bioetl-nav-current\" href=\"#bioetl-runtime\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">2. Pipeline Diagnostics (current)</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health)\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality)\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$__all&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer)\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">6. Run Explorer</a></div>"
       },
-      "title": "Navigate Dashboards",
+      "title": "",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
       "type": "text",
       "links": [
@@ -58,7 +59,7 @@
         },
         {
           "title": "3. Provider Health",
-          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-provider=unknown&var-pipeline_context=$pipeline&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -110,7 +111,7 @@
         "h": 4,
         "w": 16,
         "x": 0,
-        "y": 3
+        "y": 4
       },
       "description": "Distinguishes CURRENT Prometheus state, SELECTED RUN HTTP evidence, and selected-range history for Pipeline and Run Type. Run ID never filters Prometheus; Stage and collection states are context, not delivery proof. UNKNOWN means evidence is incomplete",
       "options": {
@@ -126,7 +127,7 @@
         "h": 4,
         "w": 8,
         "x": 16,
-        "y": 3
+        "y": 4
       },
       "datasource": {
         "type": "prometheus",
@@ -245,7 +246,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 8
       },
       "options": {
         "mode": "html",
@@ -374,7 +375,7 @@
         "h": 5,
         "w": 16,
         "x": 0,
-        "y": 9
+        "y": 10
       },
       "id": 9101,
       "options": {
@@ -497,7 +498,7 @@
         "h": 5,
         "w": 8,
         "x": 16,
-        "y": 9
+        "y": 10
       },
       "id": 9102,
       "options": {
@@ -540,7 +541,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 15
       },
       "panels": [
         {
@@ -588,7 +589,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 20,
+            "y": 21,
             "w": 12,
             "h": 6
           },
@@ -662,7 +663,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 20,
+            "y": 21,
             "w": 12,
             "h": 6
           },
@@ -746,7 +747,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 26,
+            "y": 27,
             "w": 24,
             "h": 6
           },
@@ -905,7 +906,7 @@
           "description": "Shows selected-range stage lag in seconds for Pipeline, Run Type, and Stage. No data means no emitted lag samples or unavailable telemetry, never zero lag. Use Worst Stage Lag and current blockers for severity",
           "gridPos": {
             "x": 0,
-            "y": 32,
+            "y": 33,
             "w": 24,
             "h": 5
           },
@@ -1115,7 +1116,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 37,
+            "y": 38,
             "w": 24,
             "h": 5
           },
@@ -1227,9 +1228,10 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 42,
+            "y": 43,
             "w": 8,
             "h": 4
+
           },
           "id": 220,
           "options": {
@@ -1267,7 +1269,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 16
       },
       "panels": [
         {
@@ -1315,7 +1317,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 48,
+            "y": 49,
             "w": 12,
             "h": 6
           },
@@ -1399,7 +1401,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 48,
+            "y": 49,
             "w": 12,
             "h": 6
           },
@@ -1563,7 +1565,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 54,
+            "y": 55,
             "w": 12,
             "h": 6
           },
@@ -1712,7 +1714,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 54,
+            "y": 55,
             "w": 12,
             "h": 6
           },
@@ -1769,7 +1771,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 17
       },
       "panels": [
         {
@@ -1778,7 +1780,7 @@
           "title": "Review Runtime Escalation",
           "gridPos": {
             "x": 0,
-            "y": 61,
+            "y": 62,
             "w": 24,
             "h": 3
           },
@@ -1836,9 +1838,10 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 64,
+            "y": 65,
             "w": 6,
             "h": 4
+
           },
           "id": 230,
           "options": {
@@ -1923,9 +1926,10 @@
           },
           "gridPos": {
             "x": 6,
-            "y": 64,
+            "y": 65,
             "w": 6,
             "h": 4
+
           },
           "id": 236,
           "options": {
@@ -2026,9 +2030,10 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 64,
+            "y": 65,
             "w": 6,
             "h": 4
+
           },
           "id": 21,
           "options": {
@@ -2067,7 +2072,8 @@
           "title": "Review Cross-Domain Handoffs",
           "gridPos": {
             "x": 0,
-            "y": 68,
+            "y": 69,
+
             "w": 24,
             "h": 2
           },
@@ -2125,9 +2131,10 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 70,
+            "y": 71,
             "w": 6,
             "h": 4
+
           },
           "id": 4,
           "options": {
@@ -2212,9 +2219,10 @@
           },
           "gridPos": {
             "x": 6,
-            "y": 70,
+            "y": 71,
             "w": 6,
             "h": 4
+
           },
           "id": 5,
           "options": {
@@ -2293,9 +2301,10 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 70,
+            "y": 71,
             "w": 6,
             "h": 4
+
           },
           "id": 6,
           "options": {
@@ -2318,7 +2327,7 @@
               },
               {
                 "title": "Open 3. Provider Health",
-                "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+                "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
                 "targetBlank": false,
                 "includeVars": false,
                 "tooltip": "Context mapping: provider=unknown, pipeline_context=$pipeline, adapter=unknown. Provider alert query may scope by $provider_hint when validated."
@@ -2381,9 +2390,10 @@
           },
           "gridPos": {
             "x": 18,
-            "y": 70,
+            "y": 71,
             "w": 6,
             "h": 4
+
           },
           "id": 259,
           "options": {
@@ -2406,7 +2416,7 @@
               },
               {
                 "title": "Open 3. Provider Health",
-                "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+                "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
                 "targetBlank": false,
                 "includeVars": false,
                 "tooltip": "Context mapping: provider=unknown, pipeline_context=$pipeline, adapter=unknown. GLOBAL card sums cluster-wide adapter latency and rate-limiter wait conditions."
@@ -2470,9 +2480,10 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 74,
+            "y": 75,
             "w": 6,
             "h": 4
+
           },
           "id": 7,
           "options": {
@@ -2516,7 +2527,8 @@
           "title": "Review Global Process Signals",
           "gridPos": {
             "x": 0,
-            "y": 78,
+            "y": 79,
+
             "w": 24,
             "h": 2
           },
@@ -2571,7 +2583,8 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 80,
+            "y": 81,
+
             "w": 12,
             "h": 6
           },
@@ -2650,7 +2663,8 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 80,
+            "y": 81,
+
             "w": 12,
             "h": 6
           },
@@ -2696,7 +2710,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 18
       },
       "id": 9992,
       "panels": [
@@ -2747,9 +2761,10 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 115,
+            "y": 116,
             "w": 6,
             "h": 4
+
           },
           "id": 237,
           "options": {
@@ -2831,9 +2846,10 @@
           },
           "gridPos": {
             "x": 6,
-            "y": 115,
+            "y": 116,
             "w": 6,
             "h": 4
+
           },
           "id": 16,
           "options": {
@@ -2912,9 +2928,10 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 115,
+            "y": 116,
             "w": 6,
             "h": 4
+
           },
           "id": 205,
           "options": {
@@ -2957,7 +2974,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 19
       },
       "id": 9993,
       "panels": [
@@ -2967,7 +2984,7 @@
           "title": "Inspect Pipeline Identity",
           "gridPos": {
             "x": 0,
-            "y": 127,
+            "y": 128,
             "w": 12,
             "h": 6
           },
@@ -3123,7 +3140,7 @@
           "title": "Inspect Processed Records",
           "gridPos": {
             "x": 12,
-            "y": 127,
+            "y": 128,
             "w": 12,
             "h": 6
           },
@@ -3403,7 +3420,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 20
       },
       "id": 9994,
       "panels": [
@@ -3463,9 +3480,10 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 134,
+            "y": 135,
             "w": 6,
             "h": 4
+
           },
           "id": 9996,
           "options": {
@@ -3548,9 +3566,10 @@
           },
           "gridPos": {
             "x": 6,
-            "y": 134,
+            "y": 135,
             "w": 6,
             "h": 4
+
           },
           "id": 9997,
           "options": {

@@ -199,6 +199,88 @@ def measure_contrast(tokens: dict[str, str]) -> list[ContrastSample]:
     return out
 
 
+def _focus_style_is_visible(
+    *, outline_style: str, outline_width: str, box_shadow: str
+) -> bool:
+    """Return whether computed focus styles contain a visible indicator."""
+    width_match = re.search(r"([0-9]+(?:\.[0-9]+)?)px", outline_width)
+    outline_pixels = float(width_match.group(1)) if width_match else 0.0
+    outline_visible = (
+        outline_style.strip().lower() not in {"", "none", "hidden"}
+        and outline_pixels > 0
+    )
+    normalized_shadow = box_shadow.strip().lower()
+    shadow_visible = normalized_shadow not in {
+        "",
+        "none",
+        "rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    }
+    return outline_visible or shadow_visible
+
+
+def _navigation_render_pass(evidence: dict[str, Any]) -> bool:
+    """Evaluate the scoped navigation typography and containment contract."""
+    return bool(
+        evidence.get("found")
+        and evidence.get("titleText") == "Navigate Dashboards"
+        and float(evidence.get("titleFontPx") or 0) >= (14 * 4) / 3
+        and float(evidence.get("minimumLinkFontPx") or 0) >= 16
+        and int(evidence.get("linkCount") or 0) == 7
+        and evidence.get("contentFitsPanel") is True
+        and evidence.get("allLinksFitPanel") is True
+    )
+
+
+def navigation_render_check(page: Any) -> dict[str, Any]:
+    """Collect one live navigation typography and clipping measurement."""
+    evidence = page.evaluate(
+        """() => {
+          const nav = document.querySelector('.bioetl-nav, [aria-label="BioETL dashboards"]');
+          const title = document.querySelector(
+            '[data-bioetl-panel-title], .bioetl-panel-title, [role="heading"]'
+          );
+          if (!nav || !title) return {found:false};
+          const panel = nav.closest(
+            '[data-panelid="1000"], [data-viz-panel-key="panel-1000"], '
+              + '[data-griditem-key="grid-item-1000"], .react-grid-item'
+          );
+          if (!panel) return {found:false};
+          const links = [
+            ...nav.querySelectorAll('.bioetl-nav-link, .bioetl-nav-current')
+          ];
+          const panelRect = panel.getBoundingClientRect();
+          const navRect = nav.getBoundingClientRect();
+          const titleRect = title.getBoundingClientRect();
+          const tolerance = 1;
+          const linkFonts = links.map((link) =>
+            Number.parseFloat(getComputedStyle(link).fontSize)
+          ).filter(Number.isFinite);
+          const allLinksFitPanel = links.every((link) => {
+            const rect = link.getBoundingClientRect();
+            return rect.left >= panelRect.left - tolerance
+              && rect.right <= panelRect.right + tolerance
+              && rect.top >= panelRect.top - tolerance
+              && rect.bottom <= panelRect.bottom + tolerance;
+          });
+          return {
+            found: true,
+            titleText: (title.textContent || '').trim(),
+            titleFontPx: Number.parseFloat(getComputedStyle(title).fontSize),
+            minimumLinkFontPx: linkFonts.length ? Math.min(...linkFonts) : null,
+            bodyTextSampleCount: linkFonts.length,
+            linkCount: links.length,
+            panelHeightPx: panelRect.height,
+            contentHeightPx: Math.max(navRect.bottom, titleRect.bottom) - panelRect.top,
+            contentFitsPanel: titleRect.top >= panelRect.top - tolerance
+              && Math.max(navRect.bottom, titleRect.bottom) <= panelRect.bottom + tolerance,
+            allLinksFitPanel,
+          };
+        }"""
+    )
+    evidence["pass"] = _navigation_render_pass(evidence)
+    return evidence
+
+
 def keyboard_nav_check(page: Any) -> dict[str, Any]:
     """Keyboard/nav a11y checks for the shared bioetl-nav bus."""
     result: dict[str, Any] = {
@@ -208,6 +290,10 @@ def keyboard_nav_check(page: Any) -> dict[str, Any]:
         "focusable_nav_links": 0,
         "tab_reached_nav": False,
         "focus_outline_nonzero": False,
+        "nav_found": False,
+        "focus_evidence": None,
+        "classification": "RENDER_ENVIRONMENT_BLOCKED",
+        "pass": False,
         "notes": [],
     }
     # Wait for text panel HTML to materialize
@@ -242,6 +328,7 @@ def keyboard_nav_check(page: Any) -> dict[str, Any]:
             "nav bus not found in DOM (kiosk/text panel may lazy-render)"
         )
         return result
+    result["nav_found"] = True
     result["aria_current_present"] = bool(info.get("aria_current"))
     result["data_current_present"] = bool(info.get("data_current"))
     result["focusable_nav_links"] = int(info.get("link_count") or 0)
@@ -258,7 +345,9 @@ def keyboard_nav_check(page: Any) -> dict[str, Any]:
           return {
             tag: el.tagName,
             text: (el.textContent || '').trim().slice(0,80),
-            outline: cs.outlineStyle + ' ' + cs.outlineWidth,
+            outlineStyle: cs.outlineStyle,
+            outlineWidth: cs.outlineWidth,
+            outlineColor: cs.outlineColor,
             boxShadow: cs.boxShadow,
             inNav: !!(el.closest && el.closest('[aria-label="BioETL dashboards"], .bioetl-nav')),
           };
@@ -266,19 +355,18 @@ def keyboard_nav_check(page: Any) -> dict[str, Any]:
     )
     if focused and focused.get("inNav"):
         result["tab_reached_nav"] = True
-        outline = str(focused.get("outline") or "")
-        shadow = str(focused.get("boxShadow") or "")
-        result["focus_outline_nonzero"] = (
-            (
-                ("none" not in outline and "0px" not in outline)
-                or (shadow and shadow != "none")
-            )
-            or True
-        )  # programmatic focus may not paint outline; presence of focusable link counts
+        result["focus_evidence"] = focused
+        result["focus_outline_nonzero"] = _focus_style_is_visible(
+            outline_style=str(focused.get("outlineStyle") or ""),
+            outline_width=str(focused.get("outlineWidth") or ""),
+            box_shadow=str(focused.get("boxShadow") or ""),
+        )
     if not result["aria_current_present"] and not result["data_current_present"]:
         result["notes"].append("missing current-workspace marker on nav chip")
     if result["focusable_nav_links"] < 5:
         result["notes"].append("expected >=5 focusable nav links on full bus")
+    if result["tab_reached_nav"] and not result["focus_outline_nonzero"]:
+        result["notes"].append("focused navigation link has no visible focus style")
     # Active state: marker + underline/border (not color-only)
     result["active_state_not_color_only"] = bool(
         (result["aria_current_present"] or result["data_current_present"])
@@ -289,7 +377,9 @@ def keyboard_nav_check(page: Any) -> dict[str, Any]:
         and result["focusable_nav_links"] >= 5
         and result["active_state_not_color_only"]
         and result["tab_reached_nav"]
+        and result["focus_outline_nonzero"]
     )
+    result["classification"] = "PASS" if result["pass"] else "DASHBOARD_DEFECT"
     return result
 
 
@@ -414,6 +504,8 @@ def main() -> int:
                     try:
                         page.goto(url, wait_until="networkidle", timeout=120000)
                         page.wait_for_timeout(2000)
+                        entry["navigation"] = navigation_render_check(page)
+                        entry["navigation_ok"] = bool(entry["navigation"].get("pass"))
                         page.screenshot(path=str(dest), full_page=True)
                         entry["ok"] = dest.exists() and dest.stat().st_size > 10_000
                         entry["bytes"] = dest.stat().st_size if dest.exists() else 0
@@ -446,6 +538,7 @@ def main() -> int:
     kb = dark.get("keyboard") or {}
     shots_ok = sum(1 for s in report["screenshots"] if s.get("ok"))
     shots_total = len(report["screenshots"])
+    navigation_ok = sum(1 for s in report["screenshots"] if s.get("navigation_ok"))
 
     # Light is supported when body+link chips AA and screenshots captured.
     # Nav uses dark-safe slate chips intentionally (readable on light bg).
@@ -475,6 +568,9 @@ def main() -> int:
         "light_contrast_aa_pass": light_contrast_pass,
         "screenshots_ok": shots_ok,
         "screenshots_total": shots_total,
+        "navigation_checks_ok": navigation_ok,
+        "navigation_checks_total": shots_total,
+        "navigation_contract_pass": navigation_ok == shots_total and shots_total > 0,
         "copy_affordance": "ID/copyable panels use data:text/plain links (apply_dux7_live_residual)",
         "items": {
             "1_wcag_contrast": "pass" if dark_contrast_pass else "fail",
@@ -505,6 +601,7 @@ def main() -> int:
         f"- Keyboard/nav a11y: **{'PASS' if kb.get('pass') else 'FAIL/PARTIAL'}**",
         f"- Light theme decision: **{light_decision}**",
         f"- Screenshots: **{shots_ok}/{shots_total}**",
+        f"- Navigation typography/containment: **{navigation_ok}/{shots_total}**",
         f"- Copy affordance: `{report['summary']['copy_affordance']}`",
         "",
         "## Dark contrast samples",
@@ -539,7 +636,14 @@ def main() -> int:
     )
     print(json.dumps(report["summary"], indent=2))
     print(f"wrote {out / 'dux7-live-residual-report.json'}")
-    return 0 if shots_ok > 0 else 1
+    return (
+        0
+        if shots_ok > 0
+        and kb.get("pass")
+        and navigation_ok == shots_total
+        and shots_total > 0
+        else 1
+    )
 
 
 if __name__ == "__main__":

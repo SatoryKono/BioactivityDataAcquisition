@@ -22,7 +22,7 @@
   "panels": [
     {
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 0
@@ -30,9 +30,10 @@
       "id": 1000,
       "options": {
         "mode": "html",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-current\" href=\"#bioetl-control-plane-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"0. Trust (Trust)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">0. Trust (current)</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview)\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$__all&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health)\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality)\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$__all&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer)\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">6. Run Explorer</a></div>"
+        "bioetlDisplayTitle": "Navigate Dashboards",
+        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1.3;margin:0 6px 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:2px 6px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-current\" href=\"#bioetl-control-plane-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"0. Trust (Trust)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">0. Trust (current)</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview)\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$__all&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health)\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality)\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$__all&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer)\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">6. Run Explorer</a></div>"
       },
-      "title": "Navigate Dashboards",
+      "title": "",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
       "type": "text",
       "links": [
@@ -60,7 +61,7 @@
         },
         {
           "title": "3. Provider Health",
-          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-provider=unknown&var-pipeline_context=$pipeline&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -112,7 +113,7 @@
         "h": 4,
         "w": 18,
         "x": 0,
-        "y": 3
+        "y": 4
       },
       "description": "Distinguishes CURRENT Prometheus state, SELECTED RUN persisted HTTP evidence, TIME RANGE history, and UNKNOWN missing/stale evidence. Pipeline and Run Type affect CURRENT and TIME RANGE evidence; run_id never filters Prometheus. UNKNOWN means missing or stale evidence, never healthy.",
       "options": {
@@ -128,7 +129,7 @@
         "h": 4,
         "w": 6,
         "x": 18,
-        "y": 3
+        "y": 4
       },
       "datasource": {
         "type": "prometheus",
@@ -239,7 +240,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 11
+        "y": 12
       },
       "options": {
         "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:16px;overflow:hidden\"><strong>First recovery action</strong>: 1) Check readiness and replay/checkpoint evidence · 2) For UNKNOWN or INCOMPLETE, verify the Prometheus scrape · 3) Open blocker details · 4) Confirm identity in Run Explorer</div>",
@@ -322,7 +323,7 @@
         "h": 4,
         "w": 6,
         "x": 0,
-        "y": 7
+        "y": 8
       },
       "id": 891,
       "options": {
@@ -414,7 +415,7 @@
         "h": 4,
         "w": 6,
         "x": 6,
-        "y": 7
+        "y": 8
       },
       "id": 892,
       "options": {
@@ -533,7 +534,7 @@
         "h": 4,
         "w": 6,
         "x": 12,
-        "y": 7
+        "y": 8
       },
       "id": 893,
       "options": {
@@ -634,7 +635,7 @@
         "h": 4,
         "w": 6,
         "x": 18,
-        "y": 7
+        "y": 8
       },
       "id": 907,
       "options": {
@@ -675,7 +676,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 14
       },
       "id": 902,
       "title": "Inspect Replay & Checkpoint Evidence",
@@ -686,7 +687,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 14
+            "y": 15
           },
           "id": 894,
           "options": {
@@ -757,7 +758,7 @@
             "h": 3,
             "w": 6,
             "x": 0,
-            "y": 19
+            "y": 20
           },
           "id": 130,
           "options": {
@@ -848,7 +849,8 @@
             "h": 3,
             "w": 6,
             "x": 6,
-            "y": 19
+            "y": 20
+
           },
           "id": 3,
           "options": {
@@ -939,7 +941,8 @@
             "h": 3,
             "w": 6,
             "x": 12,
-            "y": 19
+            "y": 20
+
           },
           "id": 104,
           "options": {
@@ -1030,7 +1033,8 @@
             "h": 3,
             "w": 6,
             "x": 18,
-            "y": 19
+            "y": 20
+
           },
           "id": 120,
           "options": {
@@ -1121,7 +1125,8 @@
             "h": 3,
             "w": 6,
             "x": 0,
-            "y": 22
+            "y": 23
+
           },
           "id": 101,
           "options": {
@@ -1212,7 +1217,8 @@
             "h": 3,
             "w": 6,
             "x": 6,
-            "y": 22
+            "y": 23
+
           },
           "id": 102,
           "options": {
@@ -1303,7 +1309,8 @@
             "h": 3,
             "w": 6,
             "x": 12,
-            "y": 22
+            "y": 23
+
           },
           "id": 103,
           "options": {
@@ -1394,7 +1401,8 @@
             "h": 3,
             "w": 6,
             "x": 18,
-            "y": 22
+            "y": 23
+
           },
           "id": 121,
           "options": {
@@ -1456,7 +1464,8 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 25
+            "y": 26
+
           },
           "id": 5,
           "options": {
@@ -1523,7 +1532,8 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 31
+            "y": 32
+
           },
           "id": 134,
           "options": {
@@ -1593,7 +1603,8 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 31
+            "y": 32
+
           },
           "id": 135,
           "options": {
@@ -1664,7 +1675,8 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 37
+            "y": 38
+
           },
           "id": 105,
           "options": {
@@ -1746,7 +1758,8 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 44
+            "y": 45
+
           },
           "id": 106,
           "options": {
@@ -1817,7 +1830,8 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 51
+            "y": 52
+
           },
           "id": 9413,
           "options": {
@@ -1855,7 +1869,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 15
       },
       "id": 901,
       "title": "Inspect Manifest & Ledger Evidence",
@@ -1899,7 +1913,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 75,
+            "y": 76,
             "w": 24,
             "h": 6
           },
@@ -1988,9 +2002,10 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 81,
+            "y": 82,
             "w": 6,
             "h": 3
+
           },
           "id": 2,
           "options": {
@@ -2079,9 +2094,10 @@
           },
           "gridPos": {
             "x": 6,
-            "y": 81,
+            "y": 82,
             "w": 6,
             "h": 3
+
           },
           "id": 1,
           "options": {
@@ -2141,7 +2157,8 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 84,
+            "y": 85,
+
             "w": 24,
             "h": 7
           },
@@ -2194,7 +2211,8 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 91,
+            "y": 92,
+
             "w": 24,
             "h": 7
           },
@@ -2276,9 +2294,10 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 81,
+            "y": 82,
             "w": 6,
             "h": 3
+
           },
           "id": 132,
           "options": {
@@ -2367,9 +2386,10 @@
           },
           "gridPos": {
             "x": 18,
-            "y": 81,
+            "y": 82,
             "w": 6,
             "h": 3
+
           },
           "id": 133,
           "options": {
@@ -2436,7 +2456,8 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 110,
+            "y": 111,
+
             "w": 24,
             "h": 6
           },
@@ -2476,7 +2497,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 16
       },
       "id": 903,
       "title": "Inspect Global Store Reliability",
@@ -2536,9 +2557,10 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 120,
+            "y": 121,
             "w": 6,
             "h": 3
+
           },
           "id": 4,
           "options": {
@@ -2627,9 +2649,10 @@
           },
           "gridPos": {
             "x": 6,
-            "y": 120,
+            "y": 121,
             "w": 6,
             "h": 3
+
           },
           "id": 136,
           "options": {
@@ -2689,7 +2712,8 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 123,
+            "y": 124,
+
             "w": 24,
             "h": 6
           },
@@ -2760,7 +2784,8 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 129,
+            "y": 130,
+
             "w": 24,
             "h": 7
           },
@@ -2808,7 +2833,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 17
       },
       "id": 904,
       "title": "Inspect Audit & Lineage Evidence",
@@ -2869,9 +2894,10 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 140,
+            "y": 141,
             "w": 6,
             "h": 3
+
           },
           "id": 122,
           "options": {
@@ -2960,9 +2986,10 @@
           },
           "gridPos": {
             "x": 6,
-            "y": 140,
+            "y": 141,
             "w": 6,
             "h": 3
+
           },
           "id": 137,
           "options": {
@@ -3069,7 +3096,8 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 143,
+            "y": 144,
+
             "w": 24,
             "h": 6
           },
@@ -3129,7 +3157,8 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 149,
+            "y": 150,
+
             "w": 24,
             "h": 7
           },
@@ -3182,7 +3211,8 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 156,
+            "y": 157,
+
             "w": 24,
             "h": 7
           },
@@ -3253,7 +3283,8 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 163,
+            "y": 164,
+
             "w": 24,
             "h": 7
           },
@@ -3334,7 +3365,8 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 170,
+            "y": 171,
+
             "w": 24,
             "h": 7
           },
@@ -3397,7 +3429,8 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 177,
+            "y": 178,
+
             "w": 12,
             "h": 6
           },
@@ -3457,7 +3490,8 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 183,
+            "y": 184,
+
             "w": 24,
             "h": 6
           },
@@ -3520,7 +3554,8 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 189,
+            "y": 190,
+
             "w": 24,
             "h": 6
           },
@@ -3560,7 +3595,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 18
       },
       "id": 905,
       "title": "Inspect Run Identity Evidence",
@@ -3624,7 +3659,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 205,
+            "y": 206,
             "w": 24,
             "h": 4
           },
@@ -3803,7 +3838,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 209,
+            "y": 210,
             "w": 24,
             "h": 4
           },
@@ -3848,7 +3883,7 @@
           "description": "Shown when no identity rows are returned. This can mean no matching run, unresolved scope, or an unavailable backend; it is not a critical verdict by itself.",
           "gridPos": {
             "x": 0,
-            "y": 213,
+            "y": 214,
             "w": 12,
             "h": 4
           },
@@ -3877,7 +3912,7 @@
           "description": "Shown when no processed-record rows are returned. This can mean no activity, a run that has not started, unresolved scope, or an unavailable backend.",
           "gridPos": {
             "x": 12,
-            "y": 213,
+            "y": 214,
             "w": 12,
             "h": 4
           },
@@ -3952,7 +3987,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 217,
+            "y": 218,
             "w": 12,
             "h": 4
           },
@@ -4041,7 +4076,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 217,
+            "y": 218,
             "w": 12,
             "h": 4
           },
@@ -4130,7 +4165,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 221,
+            "y": 222,
             "w": 12,
             "h": 4
           },
@@ -4219,7 +4254,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 221,
+            "y": 222,
             "w": 12,
             "h": 4
           },
@@ -4253,7 +4288,7 @@
         {
           "gridPos": {
             "x": 0,
-            "y": 225,
+            "y": 226,
             "w": 24,
             "h": 4
           },
@@ -4277,7 +4312,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 19
       },
       "id": 9412,
       "description": "Expand for HTTP-backed run details. Run Explorer remains the canonical exact-run workspace.",
@@ -4288,7 +4323,7 @@
           "title": "Review Run Summary",
           "gridPos": {
             "x": 0,
-            "y": 230,
+            "y": 231,
             "w": 18,
             "h": 6
           },
@@ -4444,7 +4479,7 @@
           "title": "Review Processed Records",
           "gridPos": {
             "x": 18,
-            "y": 230,
+            "y": 231,
             "w": 6,
             "h": 6
           },
@@ -4847,7 +4882,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 236,
+            "y": 237,
             "w": 24,
             "h": 6
           },

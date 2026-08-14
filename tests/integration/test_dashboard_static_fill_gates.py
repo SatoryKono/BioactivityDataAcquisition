@@ -124,9 +124,7 @@ def test_include_all_query_variables_use_promql_safe_all_value() -> None:
             name = variable.get("name")
             all_value = variable.get("allValue")
             if all_value not in _SAFE_ALL_VALUES:
-                offenders.append(
-                    f"{path.name}:${name} allValue={all_value!r}"
-                )
+                offenders.append(f"{path.name}:${name} allValue={all_value!r}")
     assert not offenders, (
         "includeAll variables must set allValue to '.*' or '$__all':\n"
         + "\n".join(offenders)
@@ -151,8 +149,8 @@ def test_panel_target_ref_ids_are_unique() -> None:
                     f"{path.name}:id={panel.get('id')} title={panel.get('title')!r} "
                     f"duplicates={duplicates}"
                 )
-    assert not offenders, (
-        "panel targets must use unique refId values:\n" + "\n".join(offenders)
+    assert not offenders, "panel targets must use unique refId values:\n" + "\n".join(
+        offenders
     )
 
 
@@ -167,9 +165,7 @@ def test_dashboard_handoff_urls_preserve_time_window() -> None:
             if not url.startswith("/d/"):
                 continue
             if not _preserves_time_window(url):
-                offenders.append(
-                    f"{path.name}:{link.get('title')!r} -> {url}"
-                )
+                offenders.append(f"{path.name}:{link.get('title')!r} -> {url}")
     assert not offenders, (
         "/d/ handoffs must include ${__url_time_range} or from=/to=:\n"
         + "\n".join(offenders)
@@ -193,15 +189,11 @@ def test_ops_http_targets_use_allowlisted_ops_paths() -> None:
                     continue
                 url = _target_url(target)
                 if url is None:
-                    offenders.append(
-                        f"{path.name}:id={panel.get('id')} missing url"
-                    )
+                    offenders.append(f"{path.name}:id={panel.get('id')} missing url")
                     continue
                 scanned += 1
                 if not _ops_path_allowed(url):
-                    offenders.append(
-                        f"{path.name}:id={panel.get('id')} url={url}"
-                    )
+                    offenders.append(f"{path.name}:id={panel.get('id')} url={url}")
         for variable in dashboard.get("templating", {}).get("list", []):
             if not isinstance(variable, dict):
                 continue
@@ -216,9 +208,7 @@ def test_ops_http_targets_use_allowlisted_ops_paths() -> None:
                 continue
             scanned += 1
             if not _ops_path_allowed(url):
-                offenders.append(
-                    f"{path.name}:var=${variable.get('name')} url={url}"
-                )
+                offenders.append(f"{path.name}:var=${variable.get('name')} url={url}")
     assert scanned > 0, "expected at least one Ops HTTP / Infinity target"
     assert not offenders, (
         "Ops HTTP / Infinity URLs must stay on /ops/ allowlist:\n"
@@ -259,9 +249,19 @@ def test_navigation_bus_uses_full_width_short_band() -> None:
         assert grid.get("w") == 24, (
             f"{path.name}:id=1000 must use w=24, got {grid.get('w')}"
         )
-        assert isinstance(grid.get("h"), int) and grid["h"] <= 3, (
-            f"{path.name}:id=1000 must use h<=3, got {grid.get('h')}"
+        assert grid.get("h") == 4, (
+            f"{path.name}:id=1000 must use h=4 for title + wrapped bus, "
+            f"got {grid.get('h')}"
         )
+        options = buses[0].get("options") or {}
+        assert buses[0].get("title") == "", (
+            f"{path.name}:id=1000 must suppress the 14px Grafana native title"
+        )
+        assert options.get("bioetlDisplayTitle") == "Navigate Dashboards"
+        content = str(options.get("content", ""))
+        assert 'data-bioetl-panel-title="Navigate Dashboards"' in content
+        assert "font-size:19px" in content
+        assert "font-size:16px" in content
 
 
 def test_static_fill_helpers_fail_closed() -> None:

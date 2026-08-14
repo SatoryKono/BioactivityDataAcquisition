@@ -9,6 +9,7 @@ dashboard. Run from repo root:
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -64,9 +65,12 @@ FILE_BY_UID = {
     "bioetl-run-explorer-v1": "bioetl-run-explorer-v1.json",
 }
 
+NAV_DISPLAY_TITLE = "Navigate Dashboards"
+NAV_HEIGHT = 4
+NAV_TITLE_STYLE = "font-size:19px;font-weight:600;line-height:1.3;margin:0 6px 2px"
 CHIP_BASE = (
-    "box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;"
-    "border-radius:3px;font-weight:600;line-height:1.35"
+    "box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;"
+    "border-radius:3px;font-weight:600;line-height:1.25"
 )
 # Theme-safe chips: slate link surface works on dark and light Grafana themes.
 LINK_STYLE = (
@@ -82,7 +86,7 @@ CURRENT_STYLE = (
 )
 CONTAINER_STYLE = (
     "display:flex;gap:6px;flex-wrap:wrap;align-items:center;"
-    "padding:4px 6px;overflow:visible;white-space:normal;font-size:16px"
+    "padding:2px 6px;overflow:visible;white-space:normal;font-size:16px"
 )
 
 NAV_DESCRIPTION = (
@@ -128,7 +132,7 @@ def _url_for(target: dict[str, str], *, source_uid: str) -> str:
         return (
             f"{base}?var-pipeline={pipe}&var-run_type={dollar}run_type"
             f"&var-provider=unknown&var-pipeline_context={pipe}"
-            f"&var-adapter=unknown&{dollar}{{__url_time_range}}"
+            f"&{dollar}{{__url_time_range}}"
             f"&var-workflow={dollar}workflow&var-run_id={dollar}run_id"
         )
     if uid in {"bioetl-incident-v1", "bioetl-run-explorer-v1"}:
@@ -174,8 +178,11 @@ def render_html(*, current_uid: str) -> str:
     primary = BUS[:5]
     adjunct = BUS[5:]
     parts: list[str] = [
+        f'<div class="bioetl-panel-title" role="heading" aria-level="2" '
+        f'data-bioetl-panel-title="{NAV_DISPLAY_TITLE}" '
+        f'style="{NAV_TITLE_STYLE}">{NAV_DISPLAY_TITLE}</div>',
         f'<div class="bioetl-nav" role="navigation" '
-        f'aria-label="BioETL dashboards" style="{CONTAINER_STYLE}">'
+        f'aria-label="BioETL dashboards" style="{CONTAINER_STYLE}">',
     ]
     for item in primary:
         parts.append(_chip_html(item, current_uid=current_uid, source_uid=current_uid))
@@ -211,7 +218,21 @@ def render_links(*, current_uid: str) -> list[dict[str, object]]:
     return links
 
 
-def apply_to_dashboard(path: Path, *, current_uid: str) -> None:
+def _walk_panels(panels: list[object]) -> list[dict[str, object]]:
+    discovered: list[dict[str, object]] = []
+    stack = list(panels)
+    while stack:
+        panel = stack.pop(0)
+        if not isinstance(panel, dict):
+            continue
+        discovered.append(panel)
+        nested = panel.get("panels")
+        if isinstance(nested, list):
+            stack[0:0] = nested
+    return discovered
+
+
+def apply_to_dashboard(path: Path, *, current_uid: str, check: bool = False) -> bool:
     from scripts.engineering.common.repo_paths import ensure_path_within_root
 
     safe_path = ensure_path_within_root(path, DASH_DIR)
@@ -223,16 +244,33 @@ def apply_to_dashboard(path: Path, *, current_uid: str) -> None:
     if nav is None:
         raise SystemExit(f"{safe_path.name}: missing panel id=1000")
 
-    nav["title"] = "Navigate Dashboards"
+    # Grafana 12 renders native panel headers at 14px and exposes no dashboard
+    # JSON option for overriding that typography. Keep the native title empty
+    # and render the operator-visible, accessible 19px title inside the
+    # sanitizer-safe Text panel. Tooling reads bioetlDisplayTitle as metadata.
+    nav["title"] = ""
     nav["type"] = "text"
     nav["description"] = NAV_DESCRIPTION
     nav.setdefault("gridPos", {})
-    # Preserve the reviewed per-dashboard height: most boards need three grid
-    # units for the 16px bus, while compact Run Explorer uses two. The generator
-    # owns horizontal placement but must not introduce a gap or overlap below it.
+    old_height = nav["gridPos"].get("h")
+    if isinstance(old_height, int) and old_height < NAV_HEIGHT:
+        delta = NAV_HEIGHT - old_height
+        old_bottom = int(nav["gridPos"].get("y", 0)) + old_height
+        for panel in _walk_panels(panels):
+            if panel is nav or not isinstance(panel, dict):
+                continue
+            grid = panel.get("gridPos")
+            if isinstance(grid, dict) and isinstance(grid.get("y"), int):
+                if grid["y"] >= old_bottom:
+                    grid["y"] += delta
+    # The inline 19px title plus the wrapped 16px bus require four grid units at
+    # the normative 1366px viewport. Live geometry validation guards clipping.
+    # Normalize all dashboards so content containment is an executable contract.
+    nav["gridPos"]["h"] = NAV_HEIGHT
     nav["gridPos"].update({"w": 24, "x": 0, "y": 0})
     nav["options"] = {
         "mode": "html",
+        "bioetlDisplayTitle": NAV_DISPLAY_TITLE,
         "content": render_html(current_uid=current_uid),
     }
     nav["links"] = render_links(current_uid=current_uid)
@@ -240,25 +278,44 @@ def apply_to_dashboard(path: Path, *, current_uid: str) -> None:
     nav.pop("transparent", None)
 
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
+    current = safe_path.read_text(encoding="utf-8")
+    if check:
+        if current != serialized:
+            print(f"drift {safe_path.name} current={current_uid!r}")
+            return False
+        print(f"ok {safe_path.name} current={current_uid!r}")
+        return True
     write_path = ensure_path_within_root(safe_path, DASH_DIR)
     write_path.write_text(  # NOSONAR - write_path confined under DASH_DIR
         serialized,
         encoding="utf-8",
     )
+    return True
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> int:
     from scripts.engineering.common.repo_paths import ensure_path_within_root
 
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Exit non-zero when generated navigation differs without writing files",
+    )
+    args = parser.parse_args(argv)
+    ok = True
     for item in BUS:
         uid = item["uid"]
         filename = FILE_BY_UID[uid]
         path = ensure_path_within_root(DASH_DIR / filename, DASH_DIR)
         if not path.exists():
             raise SystemExit(f"missing dashboard file: {path}")
-        apply_to_dashboard(path, current_uid=uid)
-        print(f"updated {filename} current={item['title']!r}")
+        current_ok = apply_to_dashboard(path, current_uid=uid, check=args.check)
+        ok = current_ok and ok
+        if not args.check:
+            print(f"updated {filename} current={item['title']!r}")
+    return 0 if ok else 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
