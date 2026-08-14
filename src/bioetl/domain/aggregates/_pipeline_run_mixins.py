@@ -49,8 +49,8 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
 
         Compatibility path (P2-9):
             Prefer application.services.PipelineRunLifecycleService for orchestration
-            call-sites. Domain aggregate API remains temporarily stable through
-            2026-06-30 for migration safety.
+            call-sites. Domain aggregate methods remain the domain API surface;
+            application/composition should route lifecycle through the service.
 
         Args:
             stage: Name of the pipeline stage being started (e.g., 'bronze', 'silver').
@@ -78,8 +78,8 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
 
         Compatibility path (P2-9):
             Prefer application.services.PipelineRunLifecycleService for orchestration
-            call-sites. Domain aggregate API remains temporarily stable through
-            2026-06-30 for migration safety.
+            call-sites. Domain aggregate methods remain the domain API surface;
+            application/composition should route lifecycle through the service.
 
         Args:
             stage: Name of the pipeline stage that succeeded.
@@ -134,8 +134,8 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
 
         Compatibility path (P2-9):
             Prefer application.services.PipelineRunLifecycleService for orchestration
-            call-sites. Domain aggregate API remains temporarily stable through
-            2026-06-30 for migration safety.
+            call-sites. Domain aggregate methods remain the domain API surface;
+            application/composition should route lifecycle through the service.
 
         Args:
             stage: Name of the pipeline stage that failed.
