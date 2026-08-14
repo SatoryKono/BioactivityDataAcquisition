@@ -143,15 +143,17 @@ def test_published_ports_are_localhost_bound_and_have_one_owner() -> None:
     assert actual == expected
 
 
-def test_alertmanager_helper_binds_the_tracked_root_config() -> None:
+def test_alertmanager_helper_binds_the_tracked_root_config_directory() -> None:
     compose_path = ROOT / "scripts/ops/runtime/docker/compose/alertmanager.yml"
     compose = _load_yaml(compose_path)
-    mount = compose["services"]["alertmanager"]["volumes"][0]
+    service = compose["services"]["alertmanager"]
+    mount = service["volumes"][0]
     source = mount.split(":", maxsplit=1)[0]
 
     resolved = (compose_path.parent / source).resolve()
-    assert resolved == (ROOT / "grafana/alertmanager.yml").resolve()
-    assert resolved.is_file()
+    assert resolved == (ROOT / "grafana").resolve()
+    assert resolved.is_dir()
+    assert "--config.file=/etc/bioetl-grafana/alertmanager.yml" in service["command"]
 
 
 def test_explicit_container_names_are_unique_and_justified() -> None:
