@@ -10,7 +10,7 @@
     3) Probe renderer /healthz (or healthcheck) and Grafana /api/health.
 
   Pair with compose fail-fast:
-    GF_RENDERING_RENDERING_TIMEOUT (default 20s) so dead renderer does not
+    GF_RENDERING_RENDERING_TIMEOUT (default 60s) so dead renderer does not
     block Grafana workers indefinitely.
 
 .EXAMPLE

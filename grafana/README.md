@@ -727,6 +727,10 @@ curl -sS 'http://localhost:9090/api/v1/targets' | python -c "import sys,json; ts
 | `GRAFANA_IMAGE_RENDERER_MAX_CONCURRENCY`       | `1`                   | Parallel Chromium renders; keep `1` on ≤32 GiB hosts (was `2`) |
 | `GRAFANA_IMAGE_RENDERER_BROWSER_FLAGS`         | no-sandbox, no-gpu, js heap 512 | Default **without** `--disable-dev-shm-usage` (pairs with `shm_size: 512mb`) |
 | `GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT`     | `120s`                | Maximum wait for heavy dashboard pages before the remote renderer returns a timeout |
+| `GRAFANA_IMAGE_RENDERER_WS_URL_READ_TIMEOUT`   | `45s`                 | Chromedp websocket URL read; avoids 20s default `websocket url timeout reached` |
+| `GRAFANA_IMAGE_RENDERER_DISABLE_NETWORK_WAIT`  | `true`                | Do not wait for Grafana Live / Infinity sockets to go idle before capture |
+| `GRAFANA_IMAGE_RENDERER_GIVE_UP_ON_ALL_QUERIES`| `12s`                 | Capture after first paint if queries keep running (table d-solo) |
+| `GF_RENDERING_RENDERING_TIMEOUT`               | `60s`                 | Grafana client timeout toward renderer (was 20s; aborted table d-solo) |
 | `BIOETL_ENABLE_TRACING_DATASOURCES`            | `auto`                | Авто-подключать Loki/Tempo datasource в Grafana provisioning по live reachability (`true`/`false` override доступны) |
 | `BIOETL_OBSERVABILITY__TRACING_ENABLED`        | `false`               | Включить OpenTelemetry spans и log-trace correlation    |
 | `BIOETL_OBSERVABILITY__DQ_MONITOR_ENABLED`     | `true`                | Включить DQ anomaly monitor для всех pipeline runs       |
@@ -1088,7 +1092,7 @@ mixed Docker plus host/WSL setups, prefer an explicit value over assuming
   Headline `Status` reads `bioetl_control_plane_current_status_trusted`:
   `0=OK`, `1=WARN`, `2=CRIT`, `3=INCOMPLETE`, `null=UNKNOWN`. Replay/resume
   approval requires complete replay-safety, checkpoint freshness/presence, and
-  required telemetry evidence; `Monitor Telemetry` must be `0`.
+  required telemetry evidence; `Monitor Telemetry Coverage` must be `0`.
   `Review Terminal Run Outcomes`
   stays below fold as selected-range terminal ledger evidence, while exact `run_id` /
   `manifest_id`, config/contract hashes, artifact refs, replay parentage,
@@ -1414,7 +1418,7 @@ collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 | --- | --- | --- | --- |
 | `First Action` | text CTA | n/a | n/a |
 | `Runtime Status` | `bioetl_runtime_current_status_trusted{pipeline=~"$pipeline",run_type=~"$run_type"}` | status | `0=OK`, `1=WARN`, `2=CRIT`, `3=INCOMPLETE`, `null=UNKNOWN`; a trust gap forces INCOMPLETE before dashboard filtering |
-| `Metrics Evidence` (telemetry confidence) | `bioetl_runtime_trust_gap_status_10m` | status | `0=SCRAPING/RULES OK`, `1=RULE/SERIES GAP`, `>=2=RULE+SERIES GAP`, `null=UNKNOWN` |
+| `Metrics Evidence` (telemetry confidence) | `bioetl_runtime_trust_gap_status_10m` | status | `0=SCRAPING/RULES OK`, `1=SCRAPE/RULE GAP`, `>=2=SCRAPE+RULE GAP`, `null=UNKNOWN` |
 | `Monitor Runtime Blockers` | `bioetl_runtime_current_blocker_reason_scoped{pipeline=~"$pipeline",run_type=~"$run_type"}` anchored by `bioetl_runtime_current_status_trusted == 0` | count | red `>=1`; `0` only when current status is explicitly OK; `null=UNKNOWN` |
 | `Runtime Blockers` | `topk(3, bioetl_runtime_current_blocker_reason_scoped{pipeline=~"$pipeline",run_type=~"$run_type"} > 0)` | table | reason/severity/action labels |
 

@@ -360,7 +360,9 @@ Rules:
 - Do not thrash `--force-recreate` / multi-stack rebuild under low free RAM.
 - Grafana UI does **not** wait for renderer (screenshots are best-effort).
 - **Renderer failure recovery** (tertiary cause: dependency without recovery):
-  1. Screenshots fail-fast via `GF_RENDERING_RENDERING_TIMEOUT` (default **20s**).
+  1. Screenshots are bounded via `GF_RENDERING_RENDERING_TIMEOUT` (default **60s**).
+     Renderer skips network-idle wait and gives up on lingering queries after **12s**
+     so table `d-solo` does not hang on Grafana Live.
   2. Explicit recovery SSOT (never restarts Grafana):
      ```bash
      export PYTHONPATH=.
