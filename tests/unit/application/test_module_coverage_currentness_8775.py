@@ -28,16 +28,22 @@ pytestmark = pytest.mark.unit
 
 @pytest.mark.asyncio
 async def test_batch_state_flow_skips_disallowed_process_command() -> None:
+    assembled_state = object()
     host = SimpleNamespace(
         _fsm=MagicMock(
             advance=MagicMock(
-                return_value=SimpleNamespace(new_state=object(), commands=frozenset())
+                return_value=SimpleNamespace(
+                    new_state=assembled_state, commands=frozenset()
+                )
             )
         ),
         _fsm_state=object(),
     )
 
     await process_stateful_batch(host, [], 0)
+
+    host._fsm.advance.assert_called_once()
+    assert host._fsm_state is assembled_state
 
 
 def test_replay_refresh_returns_summary_without_snapshot_payloads() -> None:
