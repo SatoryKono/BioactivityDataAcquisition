@@ -898,12 +898,26 @@ def _grafana_http_datasource_proxy_url(config: AuditConfig) -> str:
     return f"{config.grafana_base_url}/api/datasources/proxy/uid/bioetl-ops-http"
 
 
+def _with_zero_bind_fallbacks(candidates: list[str]) -> tuple[str, ...]:
+    """Append 0.0.0.0 aliases for localhost/127.0.0.1 and drop duplicates."""
+    expanded = list(candidates)
+    for candidate in tuple(candidates):
+        zero_bind_url = _zero_bind_access_url(candidate)
+        if zero_bind_url:
+            expanded.append(zero_bind_url)
+    deduped: list[str] = []
+    for candidate in expanded:
+        if candidate and candidate not in deduped:
+            deduped.append(candidate)
+    return tuple(deduped)
+
+
 def _candidate_app_base_urls(config: AuditConfig) -> tuple[str, ...]:
     candidates: list[str] = [config.app_base_url.rstrip("/")]
     if config.app_base_url.rstrip("/") != DEFAULT_APP_BASE_URL:
         if "/api/datasources/proxy/uid/" not in config.app_base_url:
             candidates.append(_grafana_http_datasource_proxy_url(config))
-        return tuple(candidates)
+        return _with_zero_bind_fallbacks(candidates)
 
     try:
         datasource_url = _discover_http_datasource_url(config)
@@ -915,17 +929,7 @@ def _candidate_app_base_urls(config: AuditConfig) -> tuple[str, ...]:
         if normalized != datasource_url:
             candidates.append(normalized)
     candidates.append(_grafana_http_datasource_proxy_url(config))
-
-    for candidate in tuple(candidates):
-        zero_bind_url = _zero_bind_access_url(candidate)
-        if zero_bind_url:
-            candidates.append(zero_bind_url)
-
-    deduped: list[str] = []
-    for candidate in candidates:
-        if candidate and candidate not in deduped:
-            deduped.append(candidate)
-    return tuple(deduped)
+    return _with_zero_bind_fallbacks(candidates)
 
 
 def _probe_app_health(

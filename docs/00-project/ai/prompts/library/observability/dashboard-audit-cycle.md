@@ -1,6 +1,6 @@
 ---
 id: prompt.observability.dashboard-audit-cycle
-version: 1.1.0
+version: 2.0.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -16,6 +16,8 @@ params:
   - AUDIT_MODE
   - CONTOURS
   - VIEWPORT
+  - THEME
+  - ZOOM
   - USER_ROLE
   - MONITORING
   - INCLUDE_PIPELINE
@@ -59,8 +61,8 @@ anti_patterns:
   - One GitHub issue per cosmetic nit when same root cause
   - Full WCAG matrix dump when DEPTH=quick
 tags: [observability, dashboard, grafana, audit, cycle, density, render, operator]
-summary: Cyclic dashboard audit N loops — render, density, fill, visual/layout/data, fix, re-verify
-max_body_lines: 200
+summary: Cyclic dashboard audit N loops — render, density, fill, visual/layout/data, theme/zoom matrix, fix, re-verify
+max_body_lines: 230
 ---
 
 # Cyclic dashboard audit (render · density · fill · acceptance)
@@ -99,6 +101,8 @@ PROVEN P0/P1 и без regression.
 | `AUDIT_MODE` | `full` \| `differential` |
 | `CONTOURS` | `render,density,fill,visual,layout,data` |
 | `VIEWPORT` | `1366x768` (record actual if different) |
+| `THEME` | `dark` (also record `light` when Grafana theme toggle is available) |
+| `ZOOM` | `100` (browser zoom percent; see matrix below) |
 | `USER_ROLE` | `analyst` (or `manager` / `executive` / list) |
 | `MONITORING` | `true` until UI needed; set `true` only with operator approval |
 | `INCLUDE_PIPELINE` | `true` (render scripts, scenes ledger, CI dashboard gates if any) |
@@ -188,7 +192,22 @@ Tag findings `category=fill`.
 ### 4) `visual` — BI-V-* (from bi-dashboard-acceptance)
 
 Contrast (WCAG AA when measurable), color-not-sole-status, type hierarchy
-title→KPI→chart→label, units/number formats.
+title→KPI→chart→label, units/number formats. Apply the **theme/zoom matrix**
+below; do not treat a single 100%/dark screenshot as full visual coverage.
+
+## Theme / zoom matrix (v2 contract)
+
+Record actual `VIEWPORT`, `THEME`, and `ZOOM` on every render artifact.
+Screenshots with different theme or zoom are not comparable.
+
+| Tier | When | Theme | Zoom | Required checks |
+| --- | --- | --- | --- | --- |
+| **1** | every cycle, every SCOPE dashboard | `dark` (default) + `light` if toggle exists | `100` | first-screen readable; no clip/overlap; status not color-only |
+| **2** | `DEPTH=detailed\|full` **or** first-screen / nav / filter defects at Tier-1 | same as Tier-1 | `200` | no clip/overlap of titles, filters, KPIs, table headers; controls stay usable |
+
+No UI/monitoring → matrix cells `Not Verifiable` + blocker (not FAIL).
+Do not invent a second render engine; use `--fallback playwright` when the
+Grafana Render API leaves terminal state `not-checked`.
 
 ### 5) `layout` — BI-L-*
 
