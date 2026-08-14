@@ -217,8 +217,21 @@ def test_grafana_renderer_fail_fast_and_recovery_contract() -> None:
     renderer = monitoring["services"]["renderer"]
 
     assert (
-        "GF_RENDERING_RENDERING_TIMEOUT=${GF_RENDERING_RENDERING_TIMEOUT:-20s}"
+        "GF_RENDERING_RENDERING_TIMEOUT=${GF_RENDERING_RENDERING_TIMEOUT:-60s}"
         in grafana_env
+    )
+    renderer_env = renderer["environment"]
+    assert any(
+        str(item).startswith("BROWSER_READINESS_DISABLE_NETWORK_WAIT=")
+        for item in renderer_env
+    )
+    assert any(
+        str(item).startswith("BROWSER_READINESS_GIVE_UP_ON_ALL_QUERIES=")
+        for item in renderer_env
+    )
+    assert any(
+        str(item).startswith("BROWSER_WS_URL_READ_TIMEOUT=")
+        for item in renderer_env
     )
     assert (
         "GF_RENDERING_CONCURRENT_RENDER_REQUEST_LIMIT="
