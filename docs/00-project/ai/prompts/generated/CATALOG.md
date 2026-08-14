@@ -26,7 +26,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.architecture.cycle` | `library/architecture/architecture-cycle.md` | Cyclic architecture audit — 10-category scorecard, improvement plan, implement waves |
 | `prompt.observability.dashboard-panel-audit` | `library/observability/dashboard-panel-audit.md` | Five-phase Grafana panel audit — render, GH issues, fix, closeout (v1.1) |
 | `prompt.observability.bi-dashboard-acceptance` | `library/observability/bi-dashboard-acceptance.md` | BI dashboard acceptance — visual, layout, data contours with measurable checks |
-| `prompt.observability.dashboard-audit-cycle` | `library/observability/dashboard-audit-cycle.md` | Exhaustive cyclic Grafana audit of every panel, viewport, density, typography, color, scroll, whitespace, data, and render contract |
+| `prompt.observability.dashboard-audit-cycle` | `library/observability/dashboard-audit-cycle.md` | Exhaustive cyclic Grafana audit (v2.0) of every panel, viewport, theme, zoom (Tier-1 100% / Tier-2 200%), density, typography, color, scroll, whitespace, data, and render contract |
 | `prompt.observability.sequential-run` | `library/observability/sequential-run.md` | Sequential observability folder run — unique cards, issue/close gates, DASH-AUTO appendix |
 | `prompt.observability.grafana-audit.master` | `library/observability/grafana-audit/master.md` | Complete read-only Grafana audit across visual, layout, and data contours |
 | `prompt.observability.grafana-audit.visual` | `library/observability/grafana-audit/visual.md` | Grafana visual audit for palette, contrast, typography, and status encoding |

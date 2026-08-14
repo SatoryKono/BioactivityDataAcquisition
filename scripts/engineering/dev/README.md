@@ -14,7 +14,13 @@ make precommit-install  # hook-only reinstall via the same maintained hook insta
 python -m scripts.engineering.dev setup-mcp  # optional MCP tooling via canonical backend
 ```
 
-`python -m scripts.engineering.dev setup` is a retained legacy command that now fails fast with guidance to use `make install` or `setup-mcp`. `dev_setup.sh` is **not present** in the tree; treat any remaining doc mentions as historical only.
+`make setup-plugins` is the operator alias for `python -m scripts.ops setup-plugins`
+(see `scripts/ops/__main__.py`). `python -m scripts.engineering.dev setup` is a
+retained legacy command that now fails fast with guidance to use `make install`
+or `setup-mcp`. `scripts/engineering/dev/dev_setup.sh` is **not present** in the
+tree (this README is the evidence anchor); treat any remaining mentions as
+historical only. Low-level `uv sync --extra …` is what `make install` runs —
+not a second canonical sequence.
 
 ## Stable Dual-OS Environments
 

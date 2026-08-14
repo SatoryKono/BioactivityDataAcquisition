@@ -72,6 +72,19 @@ def test_check_registry_ok() -> None:
     assert report.ok, format_errors(report)
 
 
+def test_dashboard_audit_cycle_registry_advertises_v2_theme_zoom() -> None:
+    entry = find_entry(load_registry(), "prompt.observability.dashboard-audit-cycle")
+    card = load_card(entry.absolute_path)
+    assert card.version.startswith("2.0")
+    params = {str(name).upper() for name in card.params}
+    assert {"THEME", "ZOOM", "VIEWPORT"} <= params
+    summary = entry.summary.lower()
+    assert "v2.0" in entry.summary
+    assert "theme" in summary
+    assert "zoom" in summary
+    assert "200" in summary
+
+
 def test_check_hygiene_ok() -> None:
     report = check_hygiene()
     assert report.ok, format_errors(report)

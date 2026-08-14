@@ -1,6 +1,6 @@
 # BioETL local-first Makefile
 
-.PHONY: help install test lint test-fast test-cov-fast-stable test-coverage test-architecture test-unit test-integration test-ci-local test-confidence-local test-confidence-unit test-confidence-contract test-profile test-deps run-local sync-windsurf-rules devin devin-setup devin-check devin-mcp-start devin-fix-bug devin-add-feature devin-update-docs devin-audit-config devin-workflows devin-select-profile devin-mcp-start-minimal devin-mcp-start-standard devin-mcp-start-full deepwiki-backup deepwiki-update deepwiki-validate
+.PHONY: help install test lint test-fast test-cov-fast-stable test-coverage test-architecture test-unit test-integration test-ci-local test-confidence-local test-confidence-unit test-confidence-contract test-profile test-deps setup-plugins run-local sync-windsurf-rules devin devin-setup devin-check devin-mcp-start devin-fix-bug devin-add-feature devin-update-docs devin-audit-config devin-workflows devin-select-profile devin-mcp-start-minimal devin-mcp-start-standard devin-mcp-start-full deepwiki-backup deepwiki-update deepwiki-validate
 .PHONY: docker-check docker-build docker-start docker-stop docker-logs docker-health docker-clean docker-compose-check
 .PHONY: clean clean-all clean-local-artifacts clean-preflight precommit-install qa-arch-fast qa-debt security-check quarantine-inspect quarantine-replay quarantine-purge release-lock
 
@@ -20,7 +20,9 @@ help:
 	@echo "BioETL Local-First Commands"
 	@echo ""
 	@echo "Local development:"
-	@echo "  make install               Sync local development dependencies"
+	@echo "  make install               Sync local development dependencies
+	@echo "  make test-deps             Verify test extras import"
+	@echo "  make setup-plugins         Install local pytest/pre-commit plugins""
 	@echo "  make test                  Run stable local tests with coverage"
 	@echo "  make lint                  Run ruff and mypy checks"
 	@echo "  make test-fast             Run fast non-slow tests"
@@ -98,6 +100,9 @@ install:
 
 test-deps:
 	$(RUN) python -c "import pytest, pytest_cov, pytest_asyncio, hypothesis, vcr; print('test dependencies available')"
+
+setup-plugins:
+	$(RUN) python -m scripts.ops setup-plugins
 
 lint:
 	$(RUN) ruff check src tests scripts
