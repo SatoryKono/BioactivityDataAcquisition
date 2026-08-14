@@ -36,6 +36,9 @@ Render:
 
 Порядок прогона: 1→10. `#8` перед `#9`. `#10` замыкает dual-pass.
 
+Исчерпывающий прогон всей папки с ISSUE/FIX/CLOSE после каждой карточки:
+`prompt.audit.sequential-run` ([../sequential-run.md](../sequential-run.md)).
+
 Смежные one-shot / старые циклы остаются в `library/audit/`,
 `library/architecture/`, `library/observability/`. Эта папка — канонический
 набор из 10 полных циклических текстов.

@@ -83,6 +83,25 @@ data_panel_types:
   - heatmap
   - state-timeline
 
+# DASH-DENSITY-002 scalar information density (values / w*h). Only scalar panels
+# count; timeseries/table/text/row are excluded (runtime-dependent value counts).
+# MUST equal report_dashboard_scalar_density.SCALAR_TYPES (locked by a test).
+scalar_density_types:
+  - stat
+  - gauge
+  - bargauge
+
+# UIDs where DASH-DENSITY-002 is ENFORCED. Enrolled 2026-08-14 after compacting
+# FAIL-group single-value cards (survey DENS-001..012).
+scalar_density_enforced_uids:
+  - bioetl-control-plane-v1
+  - bioetl-dq-v2
+  - bioetl-incident-v1
+  - bioetl-overview-v2
+  - bioetl-provider-health-v2
+  - bioetl-run-explorer-v1
+  - bioetl-runtime
+
 answer_panels:
   bioetl-control-plane-v1.json:
     - id: 9401
@@ -132,3 +151,5 @@ allowlists:
         Track Volume-Weighted DQ Score is an intentional ultra-compact
         timeseries (h=4) with the legend hidden.
       retire_when: DQ score trend moves out of the compact evidence strip
+  # DASH-DENSITY-002 governed exceptions keyed by (dashboard, row id).
+  scalar_density: []

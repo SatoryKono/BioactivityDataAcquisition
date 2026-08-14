@@ -108,6 +108,11 @@ DATA_PANEL_TYPES = _string_set(_PAYLOAD, "data_panel_types")
 STRADDLE_ALLOWLIST = _allowlist(_PAYLOAD, "straddle")
 MIN_HEIGHT_ALLOWLIST = _allowlist(_PAYLOAD, "min_height")
 
+# DASH-DENSITY-002: scalar information density (values/area).
+SCALAR_DENSITY_TYPES = _string_set(_PAYLOAD, "scalar_density_types")
+SCALAR_DENSITY_ENFORCED_UIDS = _string_set(_PAYLOAD, "scalar_density_enforced_uids")
+SCALAR_DENSITY_ALLOWLIST = _allowlist(_PAYLOAD, "scalar_density")
+
 
 def min_height_for(panel_type: str, *, nested: bool) -> int | None:
     floors = _PAYLOAD.get("min_height")

@@ -93,6 +93,9 @@ needs measurable evidence (see bi-check-schema).
 - Page goal clear in 5–10s; main KPI + explaining view above the fold
 - No duplicate panels without new analytic function; filter overload vs role
 - Overview → driver → detail path; key insight not only in hover/drill
+- Scalar density (`DASH-DENSITY-002`): scalar panels (`stat`/`gauge`/`bargauge`)
+  `ρ = values/area`; each group `ρ > ρ(first_screen)`. Large single-value stats
+  are sparse FAILs (exclude `timeseries`/`table`)
 
 ### Data (correctness)
 

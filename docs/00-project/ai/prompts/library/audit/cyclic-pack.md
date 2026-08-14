@@ -62,13 +62,25 @@ above **explicitly** enables mutations. `INCLUDE_PIPELINE` applies to **docs-cyc
 
 ## How to run
 
-### A. Single-agent cyclic (default)
+### A. Sequential folder run (issues → fix → close after each card)
 
-1. Open the domain card (tests-cycle / docs-cycle / tech-debt-cycle / …).
+```text
+Use prompt.audit.sequential-run with:
+  N=1
+  MODE=full
+  ALLOW_ISSUE_WRITE=true
+  ALLOW_PUSH=true
+  ALLOW_MERGE=false
+  ALLOW_CLOSE=true
+```
+
+### B. Single-agent cyclic (one domain)
+
+1. Open the domain card (`prompt.audit.cycle.docs` / …).
 2. Paste into agent with params filled (for mutations set ALLOW_* true).
 3. Agent may open issues, push PRs, merge, and close when acceptance is met.
 
-### B. Orchestrator + domain method
+### C. Orchestrator + domain method
 
 ```text
 Use prompt.audit.orchestrator with:
@@ -84,7 +96,7 @@ Use prompt.audit.orchestrator with:
   ALLOW_CLOSE=true
 ```
 
-### C. Dual-agent (A/B + CodeRabbit + peer review)
+### D. Dual-agent (A/B + CodeRabbit + peer review)
 
 ```text
 Use prompt.audit.dual-agent-cycle with:
@@ -100,7 +112,7 @@ Use prompt.audit.dual-agent-cycle with:
   ALLOW_CLOSE=true
 ```
 
-### D. Exhaustive project + CodeRabbit
+### E. Exhaustive project + CodeRabbit
 
 ```text
 Use prompt.audit.coderabbit-project-cycle with:
@@ -127,6 +139,7 @@ Use prompt.audit.coderabbit-project-cycle with:
 | `prompt.audit.coderabbit-project-cycle` | **Exhaustive** project cyclic audit + CodeRabbit dual-pass |
 | `prompt.audit.grok-cycle` | Generic one-cycle meta audit (any SCOPE) |
 | `prompt.audit.orchestrator` | Generic N-loop shell (needs AUDIT_PROMPT_SOURCE) |
+| `prompt.audit.sequential-run` | Sequential 1→10 cycle cards + issue/fix/close after each |
 
 ## Policy
 

@@ -419,6 +419,13 @@ entries:
     tags: [audit, cycle, pack, operator]
     summary: Pack of cyclic domain audits — 10-domain prompt.audit.cycle.* program
 
+  - id: prompt.audit.sequential-run
+    path: library/audit/sequential-run.md
+    status: active
+    class: operator-paste
+    tags: [audit, sequential, cycle, github, operator]
+    summary: Sequential library/audit run — 10 cycle cards, per-card issue/fix/close gates
+
   - id: prompt.audit.repo-tree
     path: library/audit/repo-tree.md
     status: active

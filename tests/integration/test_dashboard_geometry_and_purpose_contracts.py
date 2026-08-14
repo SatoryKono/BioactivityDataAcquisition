@@ -31,6 +31,9 @@ from tests.integration._dashboard_layout_budgets import (
     MIN_HEIGHT_ALLOWLIST,
     PENDING_ACTION_VERBS,
     PERFORMANCE_BUDGETS_PATH,
+    SCALAR_DENSITY_ALLOWLIST,
+    SCALAR_DENSITY_ENFORCED_UIDS,
+    SCALAR_DENSITY_TYPES,
     SHELL_TITLES,
     STRADDLE_ALLOWLIST,
     VIEWPORT_ROWS,
@@ -46,6 +49,8 @@ from tests.integration._grafana_test_support import (
     load_dashboard,
     panel_base_title,
 )
+
+from scripts.engineering.qa import report_dashboard_scalar_density as scalar_report
 
 pytestmark = pytest.mark.integration
 
@@ -408,3 +413,56 @@ def test_allowlists_carry_governance_metadata() -> None:
         for key, meta in allowlist.items():
             for field in ("owner", "rationale", "retire_when"):
                 assert meta.get(field, "").strip(), f"{name} {key} missing {field}"
+
+
+# --- DASH-DENSITY-002: scalar information density (values/area) -------------
+
+
+def test_scalar_density_types_match_contract() -> None:
+    """The survey tool and the layout contract must agree on scalar types + fold."""
+    assert scalar_report.SCALAR_TYPES == SCALAR_DENSITY_TYPES
+    assert scalar_report.FIRST_WINDOW_Y == FIRST_WINDOW_Y
+
+
+def test_scalar_density_survey_runs_on_shipped_dashboards() -> None:
+    """Report-only smoke: DASH-DENSITY-002 machinery runs on the real suite."""
+    surveyed = 0
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        result = scalar_report.survey_dashboard(dashboard)
+        assert isinstance(result.get("groups"), list)
+        surveyed += 1
+    assert surveyed >= 7
+
+
+def test_group_scalar_density_exceeds_first_screen_where_enforced() -> None:
+    """DASH-DENSITY-002 gate. Enforced per-uid (opt-in) after scalar remediation.
+
+    The enforced set is intentionally empty until a dashboard's scalar groups are
+    remediated to out-densify its first screen (see layout-budgets.yaml and
+    ``report_dashboard_scalar_density --check``); the mechanism ships now.
+    """
+    shipped = {load_dashboard(path).get("uid") for path in get_dashboard_files()}
+    assert SCALAR_DENSITY_ENFORCED_UIDS <= shipped, (
+        "scalar_density_enforced_uids must reference shipped dashboards"
+    )
+    violations: list[str] = []
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        uid = dashboard.get("uid")
+        if uid not in SCALAR_DENSITY_ENFORCED_UIDS:
+            continue
+        result = scalar_report.survey_dashboard(dashboard)
+        for group in result["groups"]:
+            if group["passes"] is False and (
+                dashboard_path.name,
+                group["row_id"],
+            ) not in SCALAR_DENSITY_ALLOWLIST:
+                violations.append(
+                    f"{uid}::{group['row_title']} rho={group['density']} "
+                    f"<= first-screen {result['first_screen_density']}"
+                )
+    assert not violations, (
+        "DASH-DENSITY-002 group scalar density below first screen:\n"
+        + "\n".join(violations)
+    )

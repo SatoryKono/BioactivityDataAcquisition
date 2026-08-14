@@ -286,7 +286,8 @@ def test_control_plane_first_evidence_panel_stays_close_to_answer_row() -> None:
     row_panel = panels["Inspect Replay & Checkpoint Evidence"]
     grid_pos = panel.get("gridPos", {})
     assert grid_pos.get("y") > row_panel.get("gridPos", {}).get("y", 0)
-    assert grid_pos.get("w", 0) == 24
+    assert grid_pos.get("w", 0) == 6
+    assert grid_pos.get("h", 0) == 3
 
 
 def test_control_plane_long_first_screen_titles_keep_extra_width() -> None:
@@ -375,15 +376,19 @@ def test_control_plane_manifest_evidence_top_band_uses_full_row_width() -> None:
     failure_panels = [
         panels["Track Manifest Write Failures"],
         panels["Track Ledger Append Failures"],
+        panels["Monitor Manifest Failures (30m)"],
+        panels["Monitor Ledger Failures (30m)"],
     ]
-    assert {panel.get("gridPos", {}).get("x") for panel in failure_panels} == {
-        0,
-        12,
-    }
-    assert {panel.get("gridPos", {}).get("w") for panel in failure_panels} == {12}
-    assert {panel.get("gridPos", {}).get("h") for panel in failure_panels} == {6}
+    assert {panel.get("gridPos", {}).get("w") for panel in failure_panels} == {6}
+    assert {panel.get("gridPos", {}).get("h") for panel in failure_panels} == {3}
     assert {panel.get("gridPos", {}).get("y") for panel in failure_panels} == {
         terminal_grid["y"] + terminal_grid["h"]
+    }
+    assert {panel.get("gridPos", {}).get("x") for panel in failure_panels} == {
+        0,
+        6,
+        12,
+        18,
     }
     _assert_panels_stay_in_grid_without_overlap(
         child_panels, context="Control Plane manifest/ledger disclosure"
@@ -414,21 +419,21 @@ def test_control_plane_replay_safety_detail_top_bands_use_full_row_width() -> No
 
     blocker_grid = panels[130].get("gridPos", {})
     assert blocker_grid.get("x") == 0
-    assert blocker_grid.get("w") == 24
+    assert blocker_grid.get("w") == 6
+    assert blocker_grid.get("h") == 3
     assert blocker_grid.get("y") == blind_spots_grid.get("y") + blind_spots_grid.get(
         "h"
     )
-    for left_id, right_id in ((3, 104), (120, 101)):
-        pair = [panels[left_id], panels[right_id]]
-        assert {panel.get("gridPos", {}).get("x") for panel in pair} == {0, 12}
-        assert {panel.get("gridPos", {}).get("w") for panel in pair} == {12}
-        assert len({panel.get("gridPos", {}).get("y") for panel in pair}) == 1
-    assert panels[3].get("gridPos", {}).get("y") == blocker_grid.get(
-        "y"
-    ) + blocker_grid.get("h")
-    assert panels[120].get("gridPos", {}).get("y") == panels[3].get("gridPos", {}).get(
-        "y"
-    ) + panels[3].get("gridPos", {}).get("h")
+    first_band = [panels[panel_id] for panel_id in (130, 3, 104, 120)]
+    assert {panel.get("gridPos", {}).get("y") for panel in first_band} == {
+        blocker_grid["y"]
+    }
+    assert {panel.get("gridPos", {}).get("w") for panel in first_band} == {6}
+    assert {panel.get("gridPos", {}).get("h") for panel in first_band} == {3}
+    second_band = [panels[panel_id] for panel_id in (101, 102, 103, 121)]
+    assert {panel.get("gridPos", {}).get("y") for panel in second_band} == {
+        blocker_grid["y"] + blocker_grid["h"]
+    }
     _assert_panels_stay_in_grid_without_overlap(
         child_panels, context="Control Plane replay-safety disclosure"
     )
@@ -451,7 +456,8 @@ def test_control_plane_lineage_top_band_uses_full_row_width() -> None:
     grid_pos = panel.get("gridPos", {})
     assert grid_pos.get("x") == 0
     assert grid_pos.get("y", 0) > row_panel.get("gridPos", {}).get("y", 0)
-    assert grid_pos.get("w") == 24
+    assert grid_pos.get("w") == 6
+    assert grid_pos.get("h") == 3
 
 
 def test_overview_current_panels_stay_out_of_selected_range_semantics() -> None:

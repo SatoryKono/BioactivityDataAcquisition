@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from scripts.ai.prompts.check import check_hygiene, check_registry
@@ -72,6 +74,15 @@ def test_check_registry_ok() -> None:
     assert report.ok, format_errors(report)
 
 
+def test_audit_sequential_run_is_registered() -> None:
+    entry = find_entry(load_registry(), "prompt.audit.sequential-run")
+    card = load_card(entry.absolute_path)
+    assert card.version.startswith("1.0")
+    assert "prompt.audit.cycle.docs" in card.body
+    assert "ISSUE GATE" in card.body
+    assert "CLOSEOUT GATE" in card.body
+
+
 def test_dashboard_audit_cycle_registry_advertises_v2_theme_zoom() -> None:
     entry = find_entry(load_registry(), "prompt.observability.dashboard-audit-cycle")
     card = load_card(entry.absolute_path)
@@ -111,6 +122,74 @@ def test_cli_render(capsys: pytest.CaptureFixture[str]) -> None:
     assert code == 0
     out = capsys.readouterr().out
     assert "prompt-id: prompt.tests.fix-retest" in out
+
+
+@pytest.mark.parametrize(
+    ("prompt_id", "marker"),
+    [
+        ("prompt.audit.sequential-run", "prompt.audit.sequential-run"),
+        (
+            "prompt.observability.sequential-run",
+            "prompt.observability.sequential-run",
+        ),
+    ],
+)
+def test_cli_render_survives_legacy_stdout_encoding(
+    monkeypatch: pytest.MonkeyPatch,
+    prompt_id: str,
+    marker: str,
+) -> None:
+    import io
+    import sys
+
+    class _Cp1252Stdout:
+        encoding = "cp1252"
+
+        def __init__(self) -> None:
+            self.buffer = io.BytesIO()
+
+        def write(self, text: str) -> int:
+            text.encode("cp1252")
+            return len(text)
+
+    fake = _Cp1252Stdout()
+    monkeypatch.setattr(sys, "stdout", fake)
+    code = prompts_main(
+        [
+            "render",
+            prompt_id,
+            "--param",
+            "LANGUAGE=ru",
+        ]
+    )
+    assert code == 0
+    payload = fake.buffer.getvalue()
+    assert marker.encode("utf-8") in payload
+    assert "последовательн".encode("utf-8") in payload
+
+
+def test_cli_render_output_skips_stdout_and_keeps_cyrillic(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    target = tmp_path / "observability-sequential-run.txt"
+    code = prompts_main(
+        [
+            "render",
+            "prompt.observability.sequential-run",
+            "--param",
+            "LANGUAGE=ru",
+            "--output",
+            str(target),
+        ]
+    )
+    assert code == 0
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    text = target.read_text(encoding="utf-8-sig")
+    assert "prompt.observability.sequential-run" in text
+    assert "последовательный запуск" in text
+    assert "ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ" in text
+    assert "╨┐╨╛╤ü" not in text
 
 
 def test_cli_check_registry(capsys: pytest.CaptureFixture[str]) -> None:
