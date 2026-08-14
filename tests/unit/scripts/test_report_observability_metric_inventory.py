@@ -14,6 +14,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import subprocess
+import sys
 from types import SimpleNamespace
 from urllib.error import URLError
 
@@ -22,6 +23,25 @@ import pytest
 from scripts.engineering.qa import report_observability_metric_inventory as inventory
 
 pytestmark = pytest.mark.unit
+
+
+def test_direct_module_entrypoint_bootstraps_without_circular_import() -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.qa.report_observability_metric_inventory",
+            "--help",
+        ],
+        cwd=inventory._REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "observability metric inventory" in result.stdout
 
 
 def test_hidden_windows_subprocess_kwargs_hide_console() -> None:

@@ -277,7 +277,11 @@ _EXPORTED_PROMETHEUS_METRIC_NAME_BINDINGS: Final[dict[str, str]] = {
     )
 }
 
-
+if __name__ == "__main__":
+    sys.modules.setdefault(
+        "scripts.engineering.qa.report_observability_metric_inventory",
+        sys.modules[__name__],
+    )
 
 from scripts.engineering.qa import observability_metric_inventory_scan as _metric_scan
 from scripts.engineering.qa.observability_metric_inventory_scan import (
