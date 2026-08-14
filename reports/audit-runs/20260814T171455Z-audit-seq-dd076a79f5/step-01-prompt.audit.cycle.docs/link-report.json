@@ -1,0 +1,56 @@
+{
+  "timestamp": "2026-08-14T17:17:09.409598+00:00",
+  "status": "pass",
+  "total_violations": 0,
+  "checks_run": [
+    {
+      "check": "links",
+      "status": "pass",
+      "violations": 0
+    },
+    {
+      "check": "specs",
+      "status": "pass",
+      "violations": 0
+    },
+    {
+      "check": "configs",
+      "status": "pass",
+      "violations": 0
+    },
+    {
+      "check": "contracts_index",
+      "status": "pass",
+      "violations": 0
+    },
+    {
+      "check": "workflow_inventory",
+      "status": "pass",
+      "violations": 0
+    },
+    {
+      "check": "provider_overview",
+      "status": "pass",
+      "violations": 0
+    },
+    {
+      "check": "doc_governance",
+      "status": "pass",
+      "violations": 0
+    },
+    {
+      "check": "not_in_nav_growth",
+      "status": "pass",
+      "violations": 0
+    },
+    {
+      "check": "legacy_paths",
+      "status": "pass",
+      "violations": 0
+    }
+  ],
+  "failure_policy": {
+    "exit_code_0": "All selected checks passed",
+    "exit_code_1": "One or more selected checks reported violations"
+  }
+}
