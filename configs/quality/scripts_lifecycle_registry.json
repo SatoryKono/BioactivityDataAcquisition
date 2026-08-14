@@ -589,6 +589,30 @@
       "owner": "@bioetl-docs",
       "review_by": "2026-09-30"
     },
+    "scripts/docs/matrix/normalization_matrix_builder.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the row-construction implementation imported by generate_pipeline_normalization_matrix.py; keep contributor execution on the canonical generator entrypoint.",
+      "owner": "@bioetl-docs",
+      "review_by": "2026-10-31"
+    },
+    "scripts/docs/matrix/normalization_matrix_catalog.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the static registry and runtime-binding module behind generate_pipeline_normalization_matrix.py; do not expose it as a separate CLI.",
+      "owner": "@bioetl-docs",
+      "review_by": "2026-10-31"
+    },
+    "scripts/docs/matrix/normalization_matrix_control_plane.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the control-plane KPI helper imported by generate_pipeline_normalization_matrix.py; keep the canonical generator as the active surface.",
+      "owner": "@bioetl-docs",
+      "review_by": "2026-10-31"
+    },
+    "scripts/docs/matrix/normalization_matrix_report.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the rendering and persistence module behind generate_pipeline_normalization_matrix.py; keep contributor execution routed through the canonical generator.",
+      "owner": "@bioetl-docs",
+      "review_by": "2026-10-31"
+    },
     "scripts/docs/matrix/normalize_values.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint.",
@@ -906,6 +930,60 @@
       "next_step": "Retain as a bounded manual artifact-duplication audit utility while architecture governance tests and generated quality artifacts still depend on this exact surface; promote it into the canonical scripts.engineering.qa reporting lane or retire it after duplication governance consolidates elsewhere.",
       "owner": "@bioetl-platform",
       "review_by": "2026-07-15"
+    },
+    "scripts/engineering/qa/report_basedpyright_suppression_inventory.py": {
+      "decision": "legacy_manual_utility",
+      "next_step": "Retain as the documented shrink-only basedpyright suppression ledger command; route it through the canonical QA dispatcher or retire the direct module surface when Project Diagnostics governance is consolidated.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-09-30"
+    },
+    "scripts/engineering/qa/debt_governance_gate_evaluators.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the policy-evaluator module behind report_debt_governance_gates.py; keep the routed report-debt-governance-gates command as the active entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-10-31"
+    },
+    "scripts/engineering/qa/debt_governance_gate_report.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the rendering and persistence module behind report_debt_governance_gates.py; do not expose it as an independent reporting surface.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-10-31"
+    },
+    "scripts/engineering/qa/observability_closure_campaign_cli.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the CLI orchestration implementation imported by run_observability_closure_campaign.py; keep the routed campaign command as the active surface.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-10-31"
+    },
+    "scripts/engineering/qa/observability_closure_campaign_validation.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the validation and evidence-scoring seam behind run_observability_closure_campaign.py; do not expose it as a separate command.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-10-31"
+    },
+    "scripts/engineering/qa/observability_metric_inventory_cli.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the CLI implementation behind report_observability_metric_inventory.py; keep report-observability-metric-inventory as the active routed entrypoint.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-10-31"
+    },
+    "scripts/engineering/qa/observability_metric_inventory_report.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the typed target analysis and report helper behind report_observability_metric_inventory.py; do not count it as an independent CLI.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-10-31"
+    },
+    "scripts/engineering/qa/observability_metric_inventory_runtime.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the runtime-event and cardinality review implementation behind report_observability_metric_inventory.py; keep the routed report command as the active surface.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-10-31"
+    },
+    "scripts/engineering/qa/observability_metric_inventory_scan.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the source-discovery and AST scanning implementation behind report_observability_metric_inventory.py; do not expose it as a standalone command.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-10-31"
     },
     "scripts/engineering/qa/report_config_surface_backlog.py": {
       "decision": "legacy_manual_utility",
@@ -1482,12 +1560,6 @@
       "next_step": "Retain only as the legacy root shell launcher while canonical Docker helper lifecycle management moves to scripts/ops/docker-setup.sh; keep it supporting and do not expand its fixed-delay startup behavior.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
-    },
-    "scripts/engineering/dev/setup_bioetl_wsl.ps1": {
-      "decision": "active_operator_entrypoint",
-      "next_step": "Canonical Windows→WSL BioETL setup entrypoint after retirement of setup_bioetl_wsl_fixed.ps1 (#8708).",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-12-31"
     }
   },
   "schema_version": "1.0"

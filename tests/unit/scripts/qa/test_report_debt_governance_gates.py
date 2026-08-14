@@ -25,9 +25,7 @@ from scripts.engineering.qa import debt_governance_gate_evaluators as gate_evalu
 pytestmark = pytest.mark.unit
 
 
-def _patch_both(
-    monkeypatch: pytest.MonkeyPatch, name: str, value: object
-) -> None:
+def _patch_both(monkeypatch: pytest.MonkeyPatch, name: str, value: object) -> None:
     """Patch a helper on both modules that expose it.
 
     ``debt_governance_gate_evaluators`` re-exports the gate helpers via
@@ -619,20 +617,20 @@ def test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact(
         gates.PROJECT_ROOT,
         "reports/quality/module-coverage-inventory.json",
     )
-    monkeypatch.setattr(
-        gates,
+    _patch_both(
+        monkeypatch,
         "_refresh_existing_inventory_source_tree",
         lambda payload, *, repo_root: {
             "source_tree_sha256": module_coverage["source_tree_sha256"]
         },
     )
-    monkeypatch.setattr(
-        gates,
+    _patch_both(
+        monkeypatch,
         "_artifact_matches_builder",
         lambda *, repo_root, rel_path, payload_builder: True,
     )
-    monkeypatch.setattr(
-        gates,
+    _patch_both(
+        monkeypatch,
         "_hotspot_family_baseline_artifact_matches_builder",
         lambda *, repo_root: False,
     )
@@ -655,7 +653,7 @@ def test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact(
         forced["summary"] = summary
         return forced
 
-    monkeypatch.setattr(gates, "_load_json", _load_json_in_budget_hotspot)
+    _patch_both(monkeypatch, "_load_json", _load_json_in_budget_hotspot)
 
     payload = gates.build_payload(repo_root=gates.PROJECT_ROOT)
     summary = payload["summary"]
