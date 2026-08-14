@@ -202,9 +202,11 @@ services:
       - HTTP_HOST=0.0.0.0
       - AUTH_TOKEN=${GF_RENDERING_RENDERER_TOKEN:?GF_RENDERING_RENDERER_TOKEN is required}
       # No --disable-dev-shm-usage: matches shm_size above (single-tab local budget).
-      - BROWSER_FLAGS=${GRAFANA_IMAGE_RENDERER_BROWSER_FLAGS:---no-sandbox,--disable-gpu,--disable-software-rasterizer,--js-flags=--max-old-space-size=512}
-      # chromedp default 20s caused "websocket url timeout reached" after recreate.
-      - BROWSER_WS_URL_READ_TIMEOUT=${GRAFANA_IMAGE_RENDERER_WS_URL_READ_TIMEOUT:-45s}
+      # Do not pair --disable-gpu with --disable-software-rasterizer: Chromium then
+      # has no raster backend and chromedp dies with "websocket url timeout reached".
+      - BROWSER_FLAGS=${GRAFANA_IMAGE_RENDERER_BROWSER_FLAGS:---no-sandbox,--disable-gpu,--js-flags=--max-old-space-size=512}
+      # chromedp default 20s is too short after renderer recreate on Desktop.
+      - BROWSER_WS_URL_READ_TIMEOUT=${GRAFANA_IMAGE_RENDERER_WS_URL_READ_TIMEOUT:-90s}
       - BROWSER_READINESS_TIMEOUT=${GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT:-120s}
       # Table d-solo never reaches network-idle (Grafana Live / Infinity). Skip
       # that wait; cap query-ready so capture happens after first data paint.
