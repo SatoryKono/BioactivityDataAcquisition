@@ -26,6 +26,25 @@ from scripts.engineering.qa import report_observability_metric_inventory as inve
 pytestmark = pytest.mark.unit
 
 
+def test_direct_module_entrypoint_bootstraps_without_circular_import() -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.qa.report_observability_metric_inventory",
+            "--help",
+        ],
+        cwd=inventory._REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "observability metric inventory" in result.stdout
+
+
 def test_hidden_windows_subprocess_kwargs_hide_console() -> None:
     startupinfo = SimpleNamespace(dwFlags=0, wShowWindow=5)
     fake_subprocess = SimpleNamespace(

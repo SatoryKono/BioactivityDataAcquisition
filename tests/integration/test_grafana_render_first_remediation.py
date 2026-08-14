@@ -444,7 +444,7 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
             .get("defaults", {})
             .get("noValue", "")
         )
-        assert no_value.startswith("Not resolved")
+        assert no_value.startswith("SELECT RUN")
     # Workflow overview + Alerts/SLO retired; ID-card noValue contract remains.
 
 

@@ -212,7 +212,7 @@
         "y": 11
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "Selected run: Exact identity for the selected run, including run, manifest, provider entity, contract, execution, replay, and checkpoint evidence. Selection required when no run ID is set. Valid empty means no matching identity was found for that run. On errors or unexpected emptiness, verify /health/live. Use existing Open/Copy actions for full values.",
+      "description": "Selected run: Exact identity for the selected run, including run, manifest, provider entity, contract, execution, replay, and checkpoint evidence. Selection required when no run ID is set. Valid empty means no matching identity was found for that run. Backend failure renders as QUERY ERROR; verify /health/live. Use existing Open/Copy actions for full values.",
       "fieldConfig": {
         "defaults": {
           "custom": {
