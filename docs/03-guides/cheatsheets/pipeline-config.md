@@ -17,7 +17,7 @@ Quick reference for creating and reviewing BioETL pipeline YAML configs.
 ## Table of contents
 
 - [Config hierarchy](#config-hierarchy)
-- [Required fields (ADR-025 / ADR-039)](#required-fields-adr-025--adr-039)
+- [Required fields (ADR-025 / ADR-039)](#required-fields-adr-025-adr-039)
 - [ADR compliance checklist](#adr-compliance-checklist)
 - [Common patterns](#common-patterns)
 - [Validation commands](#validation-commands)

@@ -48,7 +48,7 @@ stateDiagram-v2
 
 **Runtime Location:**
 - Source: `src/bioetl/domain/aggregates/batch.py`
-- Reference: [Domain Invariants - Batch](../../04-reference/domain/invariants.md#batch-aggregate)
+- Reference: [Domain Invariants - Batch](../../04-reference/domain/invariants.md#aggregate-invariants)
 
 ### PipelineRun Aggregate
 
@@ -89,7 +89,7 @@ stateDiagram-v2
 
 **Runtime Location:**
 - Source: `src/bioetl/domain/aggregates/pipeline_run.py`
-- Reference: [Domain Invariants - PipelineRun](../../04-reference/domain/invariants.md#pipelinerun-aggregate)
+- Reference: [Domain Invariants - PipelineRun](../../04-reference/domain/invariants.md#aggregate-invariants)
 
 ### QuarantineEntry Aggregate
 
@@ -135,7 +135,7 @@ stateDiagram-v2
 
 **Runtime Location:**
 - Source: `src/bioetl/domain/aggregates/quarantine_entry.py`
-- Reference: [Domain Invariants - QuarantineEntry](../../04-reference/domain/invariants.md#quarantineentry-aggregate)
+- Reference: [Domain Invariants - QuarantineEntry](../../04-reference/domain/invariants.md#aggregate-invariants)
 
 ## Cross-Aggregate Invariants
 

@@ -133,7 +133,8 @@ ______________________________________________________________________
 | `dataset`                    | `DATASET`     |
 | `other`                      | `OTHER`       |
 
-> **Note**: Internal type mapping is part of [Internal/Extended Material](#internalextended-material)
+> **Note**: Internal type mapping is part of
+> [Internal/Extended Material](../../internalextended/internal-type-mappings.md).
 
 ### Entity ID
 
