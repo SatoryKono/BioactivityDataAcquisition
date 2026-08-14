@@ -53,11 +53,12 @@ def test_chembl_baseline_smoke_workflow_pins_runner_permissions_and_concurrency(
     assert all(job["runs-on"] == "ubuntu-24.04" for job in jobs.values())
 
 
-def test_chembl_baseline_smoke_workflow_covers_python_312_and_313() -> None:
+def test_chembl_baseline_smoke_workflow_covers_python_313() -> None:
     payload = _load_workflow()
     matrix = payload["jobs"]["baseline-cli-runner-smoke"]["strategy"]["matrix"]
 
-    assert matrix["python-version"] == ["3.12", "3.13"]
+    assert matrix["python-version"] == ["3.13"]
+    assert "3.12" not in matrix["python-version"]
 
 
 def test_chembl_baseline_smoke_workflow_uses_pinned_artifacts_and_summary() -> None:

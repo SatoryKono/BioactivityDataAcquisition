@@ -72,7 +72,7 @@ Baselines are measured using `pytest-benchmark` with:
 
 - Minimum 5 rounds per test
 - Statistical outlier detection
-- CI environment: Ubuntu Latest, Python 3.12 (test matrix baseline; release build may use 3.13 — see `.github/workflows/tests.yml` / `release.yml`)
+- CI environment: Ubuntu Latest, Python 3.13 (test matrix baseline; release build uses 3.13 — see `.github/workflows/tests.yml` / `release.yml`)
 
 ## Running Benchmarks
 

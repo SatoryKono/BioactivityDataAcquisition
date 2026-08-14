@@ -96,10 +96,10 @@ def test_github_policy_python_version_claims_match_workflows() -> None:
     release_matrix = release_workflow["jobs"]["test-install"]["strategy"]["matrix"]
     policy_doc = GITHUB_POLICY.read_text(encoding="utf-8")
 
-    assert test_matrix["python-version"] == ["3.12"]
+    assert test_matrix["python-version"] == ["3.13"]
     assert len(test_matrix["test-group"]) == 6
     assert release_matrix["python-version"] == ["3.13"]
-    assert "full test matrix (Python 3.12, 6 groups)" in policy_doc
+    assert "full test matrix (Python 3.13, 6 groups)" in policy_doc
     assert "Build and test on Python 3.13" in policy_doc
     assert "2. Test Install  → Python 3.13" in policy_doc
 
