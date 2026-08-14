@@ -112,7 +112,7 @@ blanket rule for every plugin type.
 | Panel role | Required visualization settings |
 | --- | --- |
 | Current-status `stat` | `fieldConfig.defaults.color.mode=thresholds`; `options.colorMode=background` for designated first-screen severity cards; `null -> UNKNOWN` mapping where the panel is fail-closed. |
-| Selected-range trend `stat` | `options.colorMode=value`; `options.graphMode=area`; threshold colors must match the measured operator risk. |
+| Selected-range trend `stat` | `options.colorMode=value`; `options.graphMode=area` is allowed only in the first window, otherwise `none`; threshold colors must match the measured operator risk. |
 | Selected-range count `stat` | `options.colorMode=value`; `options.graphMode=none`; `or vector(0)` only when missing series means zero events. |
 | Percentage, score, latency, or duration `gauge` | `options.showThresholdMarkers=true`; `options.showThresholdLabels=false` unless a panel-specific exception is documented with operator rationale. |
 | Status or route `table` column | On the first window, `custom.cellOptions.type=color-background` MAY be used **only via field override** for the status/Value field. In additional row groups it MUST be `color-text` or neutral `auto`. |
@@ -673,4 +673,6 @@ DUX5 artifacts remain historical audit evidence. Active typography floors are
 [`DASHBOARD_REQUIREMENTS.md`](../../01-requirements/DASHBOARD_REQUIREMENTS.md).
 The screenshot protocol remains available at
 [dux5-screenshot-regression-protocol.md](archive/audit-protocols/dux5-screenshot-regression-protocol.md),
+and the historical copy dictionary remains at
+[dux5-copy-dictionary.md](archive/audit-protocols/dux5-copy-dictionary.md),
 but its former smaller floors are superseded.

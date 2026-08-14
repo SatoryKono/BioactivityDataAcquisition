@@ -11,9 +11,9 @@
     {
       "id": 1000,
       "type": "text",
-      "title": "Navigation",
+      "title": "Navigate Dashboards",
       "gridPos": {
-        "h": 3,
+        "h": 2,
         "w": 24,
         "x": 0,
         "y": 0
@@ -540,7 +540,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background",
+                  "type": "color-text",
                   "applyToRow": true
                 }
               },

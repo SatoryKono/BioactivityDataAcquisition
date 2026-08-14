@@ -12,9 +12,11 @@
 
 These tests lock in JSON-structural, datasource, link, visualization, and
 fail-closed invariants that are cheap to verify statically and were previously
-uncovered by the existing dashboard test surface. See the normative section
-"Структурные и целостностные инварианты" in
-``docs/03-guides/dashboards/design-system.md``.
+uncovered by the existing dashboard test surface. They enforce the normative
+contract in ``docs/01-requirements/DASHBOARD_REQUIREMENTS.md``:
+``DASH-DATA-003``/``DASH-DATA-004``, ``DASH-SEC-001``, ``DASH-STATE-003``,
+``DASH-META-002``, ``DASH-LAYOUT-002``, ``DASH-LINK-001``/``DASH-LINK-002``,
+``DASH-VIZ-001``/``DASH-VIZ-002``, ``DASH-PERF-002``, and ``DASH-COPY-002``.
 
 Scope note: assertions are calibrated against the currently shipped dashboards
 so they encode known-good behaviour and act as regression guards (not
@@ -116,15 +118,13 @@ def _panel_datasources(panel: dict[str, Any]):
             yield target.get("datasource")
 
 
-def _datasource_token(datasource: Any) -> tuple[str, str]:
-    """Return (kind, value) describing a datasource for allowlist checks."""
-    if datasource is None:
-        return ("none", "")
+def _datasource_probe(datasource: Any) -> str:
+    """Lowercased type|uid|string probe used for removed-datasource checks."""
     if isinstance(datasource, str):
-        return ("string", datasource)
+        return datasource.lower()
     if isinstance(datasource, dict):
-        return ("type", str(datasource.get("type") or ""))
-    return ("other", repr(datasource))
+        return f"{datasource.get('type', '')}|{datasource.get('uid', '')}".lower()
+    return ""
 
 
 def _shipped_uids() -> set[str]:
@@ -206,21 +206,23 @@ def test_panel_datasources_use_allowed_identities() -> None:
         dashboard = load_dashboard(dashboard_path)
         for panel in get_dashboard_panels(dashboard):
             for datasource in _panel_datasources(panel):
-                kind, value = _datasource_token(datasource)
                 ident = (
                     f"{dashboard_path.name}:id={panel.get('id')} "
                     f"{panel.get('title')!r} datasource={datasource!r}"
                 )
-                if kind == "none":
+                if datasource is None:
                     continue
-                if kind == "string":
-                    assert value in ALLOWED_DATASOURCE_STRINGS, (
+                if isinstance(datasource, str):
+                    assert datasource in ALLOWED_DATASOURCE_STRINGS, (
                         f"{ident} uses an unknown datasource string"
                     )
-                elif kind == "type":
-                    assert value in ALLOWED_DATASOURCE_TYPES, (
-                        f"{ident} uses an unknown datasource type"
-                    )
+                elif isinstance(datasource, dict):
+                    ds_type = str(datasource.get("type") or "")
+                    ds_uid = str(datasource.get("uid") or "")
+                    assert (
+                        ds_type in ALLOWED_DATASOURCE_TYPES
+                        or ds_uid in {"prometheus", "grafana"}
+                    ), f"{ident} uses an unknown datasource identity"
                 else:
                     pytest.fail(f"{ident} has a malformed datasource reference")
 
@@ -234,9 +236,8 @@ def test_no_removed_loki_tempo_or_quarantine_datasources() -> None:
         dashboard = load_dashboard(dashboard_path)
         for panel in get_dashboard_panels(dashboard):
             for datasource in _panel_datasources(panel):
-                kind, value = _datasource_token(datasource)
-                lowered = value.lower()
-                assert "loki" not in lowered and "tempo" not in lowered, (
+                probe = _datasource_probe(datasource)
+                assert "loki" not in probe and "tempo" not in probe, (
                     f"{dashboard_path.name}:id={panel.get('id')} references removed "
                     f"datasource {datasource!r}"
                 )
