@@ -360,6 +360,36 @@ def test_status_origin_findings_exposes_dashboard_source_drift(
     ]
 
 
+def test_status_grafana_bootstrap_deferred_is_finding() -> None:
+    findings = runtime_manager._status_grafana_bootstrap_findings(
+        {"ops_http": "deferred", "reason": "identity_mismatch"},
+        readable=True,
+        grafana_running=True,
+    )
+    assert findings
+    assert findings[0]["ops_http"] == "deferred"
+    assert findings[0]["reason"] == "identity_mismatch"
+    assert findings[0]["code"] == "GRAFANA_OPS_HTTP_BOOTSTRAP"
+
+
+def test_status_grafana_bootstrap_ready_has_no_finding() -> None:
+    findings = runtime_manager._status_grafana_bootstrap_findings(
+        {"ops_http": "ready", "reason": "identity_matched"},
+        readable=True,
+        grafana_running=True,
+    )
+    assert findings == []
+
+
+def test_status_grafana_bootstrap_ignored_when_grafana_stopped() -> None:
+    findings = runtime_manager._status_grafana_bootstrap_findings(
+        {"ops_http": "deferred", "reason": "identity_mismatch"},
+        readable=True,
+        grafana_running=False,
+    )
+    assert findings == []
+
+
 def test_readiness_fails_on_restart_oom_and_image_drift() -> None:
     snapshot = runtime_manager.ServiceSnapshot(
         service="bioetl",

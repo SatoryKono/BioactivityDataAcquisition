@@ -146,7 +146,23 @@ timeseries without checking whether the panel compares multiple series.
 - `Inspect: Provider Retry Saturation [1h]`
 - `Track: Latest Successful Data Timestamp`
 
-Требование: все новые панели MUST использовать action-first заголовки с глаголом в начале (`Monitor`, `Inspect`, `Track`, `Compare`, `Review`).
+Требование: все новые панели MUST использовать action-first заголовки с глаголом в начале.
+
+Канонический набор глаголов (action-first): `Monitor`, `Inspect`, `Track`, `Compare`,
+`Review`, `Investigate` (последний — из decision matrix §4.1).
+
+Исключения из action-first (глагол не требуется):
+- `type:"row"` — заголовки-разделители;
+- `type:"text"` — навигация и пояснительные/CTA-панели;
+- shell-панели общего контекста §4.1.1: `Status`, `ID`, `Processed Records`.
+
+Разбор для автоматической проверки (`DASH-COPY-003`) MUST быть colon-tolerant: и
+`Monitor: Foo [24h]`, и `Monitor Foo` считаются валидными (первое слово до пробела/двоеточия).
+
+`DASH-COPY-003` is exclusive for non-row, non-text, non-shell content panels.
+Text/row/shell titles MAY keep `Navigate` / `Understand` / `Start` / `Assess` /
+`Explain` / `Continue`. Former pending data-panel titles were renamed to
+`Inspect Recent Runs (last 20)` and `Inspect Identity Values`.
 
 ### 3.2 Description
 

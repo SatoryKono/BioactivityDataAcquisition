@@ -65,7 +65,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 9416 | Review Retention Compliance |
 | bioetl-control-plane-v1.json | 905 | Inspect Run Identity Evidence |
 | bioetl-control-plane-v1.json | 9404 | Review Identity Anchors |
-| bioetl-control-plane-v1.json | 9407 | Copy Identity Values |
+| bioetl-control-plane-v1.json | 9407 | Inspect Identity Values |
 | bioetl-control-plane-v1.json | 9410 | Explain Missing Identity Data |
 | bioetl-control-plane-v1.json | 9411 | Explain Missing Record Counts |
 | bioetl-control-plane-v1.json | 9405 | Review Identity Gaps |
@@ -118,6 +118,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-incident-v1.json | 9401 | Monitor Incident Status |
 | bioetl-incident-v1.json | 2001 | Start Incident Triage |
 | bioetl-incident-v1.json | 2010 | Inspect Ranked Suspects |
+| bioetl-incident-v1.json | 2020 | Review Alert Evidence |
 | bioetl-incident-v1.json | 2005 | Monitor Current Alerts |
 | bioetl-incident-v1.json | 2006 | Track Alert State History |
 | bioetl-incident-v1.json | 2007 | Assess Impact & Confidence |
@@ -184,7 +185,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-provider-health-v2.json | 9403 | Inspect Processed Records |
 | bioetl-run-explorer-v1.json | 1000 | Navigate Dashboards |
 | bioetl-run-explorer-v1.json | 1 | Understand Run Scope |
-| bioetl-run-explorer-v1.json | 3010 | Browse Recent Runs (last 20) |
+| bioetl-run-explorer-v1.json | 3010 | Inspect Recent Runs (last 20) |
 | bioetl-run-explorer-v1.json | 9402 | Inspect Run Identity |
 | bioetl-run-explorer-v1.json | 9403 | Inspect Processed Records |
 | bioetl-run-explorer-v1.json | 3099 | Selected Run Details |

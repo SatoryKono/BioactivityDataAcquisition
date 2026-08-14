@@ -510,7 +510,7 @@ def test_control_plane_identity_evidence_uses_http_not_prometheus_labels() -> No
         panels["Review Identity Anchors"],
         panels["Review Identity Gaps"],
         panels["Compare Checkpoint Anchors"],
-        panels["Copy Identity Values"],
+        panels["Inspect Identity Values"],
         panels["Review Required Replay Anchors"],
         panels["Review Additional Forensic Anchors"],
     ]

@@ -9,6 +9,8 @@ from typing import Any
 
 import pytest
 
+from tests.integration._dashboard_layout_budgets import FIRST_WINDOW_Y
+
 pytestmark = pytest.mark.integration
 
 DASHBOARD_DIR = Path("grafana/dashboards")
@@ -17,7 +19,7 @@ RULES_PATH = Path("docs/00-project/RULES.md")
 REQUIREMENTS_INDEX_PATH = Path("docs/01-requirements/REQUIREMENTS.md")
 DASHBOARD_DOCS_INDEX_PATH = Path("docs/03-guides/dashboards/README.md")
 
-FIRST_WINDOW_Y_EXCLUSIVE = 28
+FIRST_WINDOW_Y_EXCLUSIVE = FIRST_WINDOW_Y
 MIN_DATA_AREA_DENSITY = 0.60
 MIN_DATA_COUNT_DENSITY = 0.50
 MIN_BODY_FONT_PX = 16.0
@@ -193,7 +195,8 @@ def test_dashboard_requirements_are_normatively_routed() -> None:
         "D_area = A_data / A_total",
         "12pt = 16px",
         "14pt = 18.6667px",
-        "gridPos.y < 28",
+        "FIRST_WINDOW_Y",
+        "FIRST_LOAD_Y_MAX",
     ):
         assert token in requirements
     for routed_doc in (rules, requirements_index, dashboard_index):

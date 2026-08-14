@@ -26,7 +26,7 @@ from scripts.engineering.qa import report_observability_metric_inventory as inve
 pytestmark = pytest.mark.unit
 
 
-def test_direct_module_entrypoint_bootstraps_without_circular_import() -> None:
+def test_direct_module_entrypoint_help_bootstraps_without_circular_import() -> None:
     result = subprocess.run(
         [
             sys.executable,
@@ -1943,7 +1943,7 @@ def test_main_can_fail_fast_when_runtime_cardinality_review_degrades(
     assert review_path.exists()
 
 
-def test_direct_module_entrypoint_bootstraps_without_circular_import() -> None:
+def test_direct_module_entrypoint_json_bootstraps_without_circular_import() -> None:
     """#8774: `python -m scripts.engineering.qa.report_observability_metric_inventory`."""
     repo_root = Path(__file__).resolve().parents[3]
     completed = subprocess.run(

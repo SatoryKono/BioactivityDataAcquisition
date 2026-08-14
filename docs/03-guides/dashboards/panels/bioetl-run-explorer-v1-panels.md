@@ -37,7 +37,7 @@ collapsed progressive-disclosure row. `run_id` is never a Prometheus label.
   distinct operator states.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/processed-records` (not Prometheus).
 
-### 5. Browse Recent Runs (last 20)
+### 5. Inspect Recent Runs (last 20)
 - **Type:** Table (compact first-screen index)
 - **Purpose:** Last 20 pipeline-run reports for the selected pipeline; pick a
   row to set `run_id` and open exact-run identity/accounting above the fold.

@@ -20,7 +20,7 @@ also: `docs/reports/dashboard-ux-checks/2026-07-28.md`; canonical baseline:
 
 ## Run Explorer Completed timestamp format (2026-08-05)
 
-- `Browse Recent Runs` formats `completed_at` with
+- `Inspect Recent Runs` formats `completed_at` with
   `unit=dateTimeAsIso`, so the `Completed` column uses the canonical
   dashboard timestamp presentation.
 - The BioETL Ops HTTP query, field value, run-selection flow, navigation, and
@@ -165,7 +165,7 @@ row, and CLI `bioetl quarantine inspect` respectively.
 - `bioetl-provider-health-v2`: `id=9400..9403`, `9002`, `9100..9103`,
   `1`, `2`, `7`, `31`, `32`, `102`, `104..114`
 - `bioetl-incident-v1`: triage panels under shared shell + `$provider`
-- `bioetl-run-explorer-v1`: Browse Recent Runs + canonical ID/Processed hub
+- `bioetl-run-explorer-v1`: Inspect Recent Runs + canonical ID/Processed hub
 - ~~`bioetl-workflow-overview`~~ (**retired** — historical panel ids only)
 
 ## 2026-05-19 remediation set

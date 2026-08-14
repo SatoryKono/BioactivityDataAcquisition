@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "0851953bf54d9a6f915ee0231afd0b4403ffa2ac1313a162c83e47c5e1c95c88",
-    "bioetl-dq-v2": "a3570c52c9c4211e3ee217668781885e315fdd74ec7e80ed5488e5cad55087ee",
-    "bioetl-incident-v1": "89dc903689eb6c499b193e21581134e4e913d3e5a4ce7f0b615a6d4795eb09f8",
-    "bioetl-overview-v2": "7e7a1ca6417e84e3aa02c9b60b641969ca20e6be47341ef262c22b0a71d1caa1",
-    "bioetl-provider-health-v2": "7cd65f6862f9f2ffba0f775f7cf06676ec057a3b388a120ce23b4acba9b96d93",
-    "bioetl-run-explorer-v1": "12558c7d33527a661521c367181ed938d37f4be9442819e3a474ccb7ba4992cf",
-    "bioetl-runtime": "f988446de36e97b49caf38b55951207921007969285eb48d16edb9e39439489e"
+    "bioetl-control-plane-v1": "170eeabd6e8b955bee178b26528ba97047f0a4b6c5a2330470c39d8b9aa08f51",
+    "bioetl-dq-v2": "1a81fb6ac9c2cef6ec0e1c8e5941af4fb6ed863c2e07598babf58b0aa6063f1d",
+    "bioetl-incident-v1": "eb8ee01ff2778d85a19d2bfe2fbbd42a3ca4476e3739178e23c76ee8eb44ff4a",
+    "bioetl-overview-v2": "99d200cd34eda2aec97775de42038395bdf3320c816ec0ee34d0620e5bb94053",
+    "bioetl-provider-health-v2": "639d56e4909a23d9c0a3afe7d3652d6bd9c2ac1ef5c3c7d9b187e8c8c19c3648",
+    "bioetl-run-explorer-v1": "830436cdb152559db796c2352f44ecf5cd2458c2ec2ac6ed1897e48012bdaeca",
+    "bioetl-runtime": "789b0e05e4b111518b7614bd41b88fbe6954e8fc665d5a3158298765da96dd9a"
   },
   "panels": [
     {
@@ -913,7 +913,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-control-plane-v1",
       "panel_id": 9407,
-      "panel_title": "Copy Identity Values",
+      "panel_title": "Inspect Identity Values",
       "route": "data-trust-recovery",
       "source": {
         "datasource_type": null,
@@ -2874,7 +2874,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-run-explorer-v1",
       "panel_id": 3010,
-      "panel_title": "Browse Recent Runs (last 20)",
+      "panel_title": "Inspect Recent Runs (last 20)",
       "route": "run-explorer",
       "source": {
         "datasource_type": null,
@@ -3048,6 +3048,25 @@
         "datasource_uid": null,
         "expressions": [],
         "target_count": 0
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-run-explorer-v1",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-run-explorer-v1",
+      "panel_id": 3020,
+      "panel_title": "Inspect Recent Workflow Runs (last 20)",
+      "route": "run-explorer",
+      "source": {
+        "datasource_type": null,
+        "datasource_uid": null,
+        "expressions": [
+          "/ops/observability/workflow-run-reports?workflow=${workflow}&limit=20"
+        ],
+        "target_count": 1
       }
     },
     {
@@ -3743,7 +3762,7 @@
     "dashboard_uid_count": 7,
     "hidden_datasources": [],
     "missing_dashboard_uids": [],
-    "panel_disposition_count": 197,
+    "panel_disposition_count": 198,
     "parity_status": "pass",
     "route_count": 6,
     "run_id_prometheus_violations": [],

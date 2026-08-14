@@ -111,8 +111,8 @@
     {
       "id": 3010,
       "type": "table",
-      "title": "Browse Recent Runs (last 20)",
-      "description": "Browse mode: Recent pipeline-run reports found on disk for the selected pipeline. Choose a row to set the run ID and open exact-run evidence. An empty table is valid when no matching reports exist. If reports are expected, treat backend unavailable as a distinct failure state and verify BioETL Ops HTTP at /health/live. Empty table: no matching reports under reports/run-reports/pipeline/<name>/. Has reports: chembl_assay, chembl_target, chembl_publication. chembl_activity may appear in run_id (control-plane) but has no report artifacts yet. If the host has reports and this is empty: bind mismatch — python -m scripts.ops.runtime.docker.verify_report_bind Index is bounded to the last 20 pipeline-run-report artifacts (limit=20). Older runs are omitted by design; they are not a missing backend.",
+      "title": "Inspect Recent Runs (last 20)",
+      "description": "Browse mode: Recent pipeline-run reports found on disk for the selected pipeline. $pipeline is a pipeline name (chembl_assay, chembl_target, chembl_publication), not a workflow (chembl_baseline). Workflow artifacts live under reports/run-reports/workflow/<name>/ and GET /ops/observability/workflow-run-reports. Choose a row to set the run ID and open exact-run evidence. An empty table is valid when no matching reports exist. If reports are expected, treat backend unavailable as a distinct failure state and verify BioETL Ops HTTP at /health/live. Empty table: no matching reports under reports/run-reports/pipeline/<name>/. Has reports: chembl_assay, chembl_target, chembl_publication. chembl_activity may appear in run_id (control-plane) but has no report artifacts yet. If the host has reports and this is empty: bind mismatch — python -m scripts.ops.runtime.docker.verify_report_bind Index is bounded to the last 20 pipeline-run-report artifacts (limit=20). Older runs are omitted by design; they are not a missing backend.",
       "gridPos": {
         "h": 5,
         "w": 24,
@@ -126,7 +126,7 @@
             "align": "left",
             "inspect": true
           },
-          "noValue": "No pipeline-run-report artifacts under reports/run-reports/pipeline/<name>/ (index is last 20)."
+          "noValue": "VALID EMPTY — no pipeline-run-report artifacts for pipeline '$pipeline' under reports/run-reports/pipeline/<name>/ (index is last 20)."
         },
         "overrides": [
           {
@@ -1075,6 +1075,87 @@
         }
       ],
       "description": ""
+    },
+    {
+      "id": 3098,
+      "type": "row",
+      "title": "Browse Workflow Runs",
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 56
+      },
+      "panels": [
+        {
+          "id": 3020,
+          "type": "table",
+          "title": "Inspect Recent Workflow Runs (last 20)",
+          "description": "Browse mode for workflow-run reports. $workflow is a workflow name (e.g. chembl_baseline), not a pipeline. This panel calls GET /ops/observability/workflow-run-reports?workflow=${workflow}&limit=20. Panel 3010 remains pipeline-only. An empty table is valid when no matching workflow reports exist. Backend unavailable is a distinct failure — verify BioETL Ops HTTP at /health/live.",
+          "gridPos": {
+            "h": 5,
+            "w": 24,
+            "x": 0,
+            "y": 56
+          },
+          "datasource": "BioETL Ops HTTP",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "inspect": true
+              },
+              "noValue": "VALID EMPTY — no workflow-run-report artifacts for workflow '$workflow' under reports/run-reports/workflow/<name>/ (index is last 20)."
+            },
+            "overrides": []
+          },
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false
+            },
+            "cellHeight": "sm"
+          },
+          "targets": [
+            {
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "items",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/observability/workflow-run-reports?workflow=${workflow}&limit=20",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              },
+              "expr": ""
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "json_path": true,
+                  "markdown_path": true,
+                  "path": true,
+                  "report_path": true,
+                  "artifact_path": true
+                },
+                "renameByName": {
+                  "completed_at": "Completed",
+                  "run_id": "Run",
+                  "workflow": "Workflow",
+                  "status": "Status"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "description": "Optional below-fold workflow-run-reports browser. Not first-screen. Does not change panel 3010."
     }
   ],
   "refresh": "60s",
