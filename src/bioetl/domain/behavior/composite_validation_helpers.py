@@ -110,17 +110,13 @@ def _convert_to_cross_validation_config(config: JsonDict) -> CrossValidationConf
     """
     pairs_raw = config.get("pairs", [])
     rules_raw = config.get("rules", {})
-    if not isinstance(pairs_raw, list):
-        raise TypeError(f"pairs must be a list, got {type(pairs_raw).__name__}")
-    if not all(isinstance(item, dict) for item in pairs_raw):
-        raise TypeError("pairs entries must be dictionaries")
+    if not isinstance(pairs_raw, list) or not all(isinstance(item, dict) for item in pairs_raw):
+        raise TypeError(f"pairs must be a list of dictionaries, got {type(pairs_raw).__name__}")
     if not isinstance(rules_raw, dict):
         raise TypeError(f"rules must be a mapping, got {type(rules_raw).__name__}")
     for rule_key, rule_value in rules_raw.items():
-        if not isinstance(rule_key, str):
-            raise TypeError("rules keys must be strings")
-        if not isinstance(rule_value, str):
-            raise TypeError(f"rules[{rule_key!r}] must be a string")
+        if not isinstance(rule_key, str) or not isinstance(rule_value, str):
+            raise TypeError("rules keys and values must be strings")
     strict_mode = config.get("strict_mode", True)
     if not isinstance(strict_mode, bool):
         raise TypeError("strict_mode must be a boolean")

@@ -340,7 +340,7 @@ Task(
 domain: schemas/, services/, value_objects/, entities/, ports/, filtering/, mapping/
 application: pipelines/chembl, pipelines/pubmed, pipelines/crossref, pipelines/openalex, pipelines/semanticscholar, pipelines/uniprot, core/, composite/, services/
 infrastructure: adapters/chembl, adapters/pubmed, adapters/crossref, adapters/openalex, adapters/pubchem, adapters/semanticscholar, adapters/uniprot, storage/, observability/, config/, checkpoint/, serialization/, locking/, quarantine/
-Функциональные зоны (cross-cut): DQ checks, circuit breaker/retry, checkpoint/heartbeat
+Функциона Zones (cross-cut): DQ checks, circuit breaker/retry, checkpoint/heartbeat
 Если workload_score < 40 → выполнять работу самостоятельно.
 
 Phase 1: Stabilization (fix_failures / full_audit)
