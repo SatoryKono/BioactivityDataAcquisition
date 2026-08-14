@@ -12,12 +12,41 @@
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
+import subprocess
+import sys
+
 import pytest
 
-from pathlib import Path
-
-
 pytestmark = pytest.mark.architecture
+
+ROUTER_IMPORT_COMMANDS = (
+    "check-quality-gates",
+    "check-padding",
+    "fix-svg-styles",
+    "fix-pagebreaks",
+    "render-desc-indexes",
+)
+
+
+@pytest.mark.parametrize("command", ROUTER_IMPORT_COMMANDS)
+def test_diagram_router_commands_bootstrap_repository_imports(command: str) -> None:
+    root = Path(__file__).resolve().parents[2]
+    env = os.environ.copy()
+    env.pop("PYTHONPATH", None)
+
+    result = subprocess.run(
+        [sys.executable, "-m", "scripts.diagrams", command, "--help"],
+        cwd=root,
+        env=env,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
 
 
 def test_docs_workflow_includes_quality_gates_step() -> None:

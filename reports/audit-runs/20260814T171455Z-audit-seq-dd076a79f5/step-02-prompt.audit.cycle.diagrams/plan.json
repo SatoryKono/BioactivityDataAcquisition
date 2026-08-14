@@ -1,0 +1,41 @@
+{
+  "step": 2,
+  "card": "prompt.audit.cycle.diagrams",
+  "waves": [
+    {
+      "id": "W1",
+      "priority": "P1",
+      "issue": 8829,
+      "finding_ids": ["DIAGRAM-SEQ-001"],
+      "goal": "Make every diagram router target importable without external PYTHONPATH.",
+      "debt_effect": "decrease",
+      "risk": "low",
+      "files": [
+        "scripts/diagrams/check/check_diagram_quality_gates.py",
+        "scripts/diagrams/check/report_diagram_padding.py",
+        "scripts/diagrams/fix/fix_svg_styles.py",
+        "scripts/diagrams/render/fix_pagebreaks_in_bundles.py",
+        "scripts/diagrams/render/generate_description_indexes.py",
+        "tests/architecture/test_diagram_regression_workflow.py"
+      ],
+      "test_plan": [
+        "Subprocess router help sweep with PYTHONPATH removed",
+        "pytest -q tests/architecture/test_diagram_regression_workflow.py",
+        "python -m scripts.diagrams check-quality-gates"
+      ],
+      "acceptance": [
+        "All 30 router commands reach --help successfully.",
+        "Quality gates still report zero hard failures.",
+        "No debt or quality budget is raised."
+      ],
+      "rollback": "Revert the diagram bootstrap commit."
+    }
+  ],
+  "deferred": [
+    {
+      "item": "Fresh full-corpus Mermaid syntax render",
+      "reason": "ENVIRONMENT: host mmdc 11.12.0 does not match pinned 10.6.1; fail-closed behavior retained."
+    }
+  ],
+  "rejected_policy": []
+}

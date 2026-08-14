@@ -1,0 +1,1760 @@
+{
+  "files_checked": 441,
+  "files_passed": 441,
+  "files_failed": 0,
+  "has_errors": false,
+  "issues": [
+    {
+      "file": "docs/02-architecture/diagrams/architecture/01-high-level-hexagonal.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-003",
+      "message": "@nodes=46 > 35, but decomposed sibling views are present (01a/01b/... pattern)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/01-high-level-hexagonal.mmd",
+      "severity": "WARNING",
+      "rule": "LABEL-001",
+      "message": "Long node label line(s) detected (>42 chars): L63:55:'(DataSourcePort, Bronze/Silver/G...'"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/03-medallion-data-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-003",
+      "message": "@nodes=36 > 35, but decomposed sibling views are present (01a/01b/... pattern)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/05-provider-adapter-hierarchy.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=27 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/06-storage-layer.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 148 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/06-storage-layer.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=23 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/06-storage-layer.mmd",
+      "severity": "WARNING",
+      "rule": "LABEL-001",
+      "message": "Long node label line(s) detected (>42 chars): L64:63:'bronze/&#123;provider&#125;/&#12...', L65:46:'silver/&#123;provider&#125;_&#12...', L66:44:'gold/&#123;provider&#125;_&#123;...'"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/06a-storage-writers.mmd",
+      "severity": "WARNING",
+      "rule": "LABEL-001",
+      "message": "Long node label line(s) detected (>42 chars): L46:57:'&#123;provider&#125;/&#123;entit...', L47:51:'&#123;provider&#125;_&#123;entit...', L48:51:'&#123;provider&#125;_&#123;entit...'"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/06b-storage-support.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 148 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/07-dq-system.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=22 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/08-composite-pipeline.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=33 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/09-observability-stack.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 124 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/09-observability-stack.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=24 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/09a-observability-app.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 124 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/09b-observability-infra.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 124 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/11-configuration-system.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/11-configuration-system.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=31 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/12-bootstrap-di-container.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/12-bootstrap-di-container.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=25 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/12-bootstrap-di-container.mmd",
+      "severity": "WARNING",
+      "rule": "LABEL-001",
+      "message": "Long node label line(s) detected (>42 chars): L28:46:'execution_api / control_plane_ap...', L41:48:'settings + yaml + runtime/filter...'"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/12a-bootstrap-factories.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 143 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/12b-bootstrap-wiring.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/12b-bootstrap-wiring.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=23 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/12b-bootstrap-wiring.mmd",
+      "severity": "WARNING",
+      "rule": "LABEL-001",
+      "message": "Long node label line(s) detected (>42 chars): L27:46:'execution_api / control_plane_ap...'"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/13-port-protocol-contracts.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/13-port-protocol-contracts.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-003",
+      "message": "@nodes=48 > 35, but decomposed sibling views are present (01a/01b/... pattern)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/13a-data-storage-ports.mmd",
+      "severity": "WARNING",
+      "rule": "LABEL-001",
+      "message": "Long node label line(s) detected (>42 chars): L27:52:'fa:fa-database Bronze/Silver/Gol...'"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/13b-operational-ports.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=25 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/13b-port-contracts-storage.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 148 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/13c-port-contracts-observability.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 124 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/13d-port-contracts-services.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/13d-port-contracts-services.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=22 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/13e-operational-ports-domain.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/13f-operational-ports-infra.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/14-cli-interface-layer.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/14a-cli-commands.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/14a-cli-commands.mmd",
+      "severity": "WARNING",
+      "rule": "LABEL-001",
+      "message": "Long node label line(s) detected (>42 chars): L35:50:'Main CLI builds a fresh explicit...'"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/14b-cli-routing.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/14b-cli-routing.mmd",
+      "severity": "WARNING",
+      "rule": "LABEL-001",
+      "message": "Long node label line(s) detected (>42 chars): L26:45:'checkpoint / config / dq / lock ...'"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/15-batch-executor-internals.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 143 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/16-transformer-hierarchy.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 148 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/16-transformer-hierarchy.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=27 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/16b-transformer-pub-other.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 148 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/18-lock-checkpoint-shutdown.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/18-lock-checkpoint-shutdown.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=22 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/18-lock-checkpoint-shutdown.mmd",
+      "severity": "WARNING",
+      "rule": "LABEL-001",
+      "message": "Long node label line(s) detected (>42 chars): L67:45:'and does not use LockRuntimeServ...'"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/18b-checkpoint-shutdown.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/18b-checkpoint-shutdown.mmd",
+      "severity": "WARNING",
+      "rule": "LABEL-001",
+      "message": "Long node label line(s) detected (>42 chars): L45:45:'Composite resume may load curren...'"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/19-control-plane-artifacts.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 134 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/19-control-plane-artifacts.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=24 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/20-data-traceability-runtime.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/21-idempotent-processing-guards.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/22-data-operations-observability.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/23-reproducible-run-contract.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 134 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/23-reproducible-run-contract.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=23 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/24-control-plane-artifact-publication-pipeline.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/25-effective-execution-config-resolution-and-artifact-hashing.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/26-reproducible-run-contract-across-manifest-ledger-and-output-metadata.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/27-composite-preflight-field-priority-and-normalization-compatibility-resolution.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/28-historical-replay-universe-inventory-and-closure-report.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/29-provider-registry-loading-to-data-source-creation.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/30-postrun-retention-deduplication-and-vacuum-warning-path.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/31-workflow-control-plane-manifest-and-ledger-publication.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/32-lock-heartbeat-checkpoint-and-shutdown-collaboration.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/33-pipeline-service-bundle-and-runner-dependencies.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/34-pipelinerun-aggregate-stage-result-and-terminal-transition-model.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/35-batch-aggregate-seal-write-commit-failure-lifecycle.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/37-observability-bootstrap-bundle-from-settings-to-ports.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/38-chembl-bronze-activity-extraction-to-artifact-publication.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/39-crossref-search-fallback-and-batch-doi-fetch-publications.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/40-pubmed-search-fetch-xml-parse-and-publication-mapping.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/41-openalex-cursor-pagination-and-response-mapping-path.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/42-semanticscholar-search-fallback-and-batch-request-flow.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/43-uniprot-mapping-job-to-protein-fetch-enrichment.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/44-pubchem-fetch-strategy-resolution-for-compounds.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/45-dq-contract-config-loading-and-policy-resolution.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/46-filter-config-resolution-and-column-filter-evaluation.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/47-run-manifest-domain-model-and-serialization-surface.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/architecture/48-effective-config-artifact-domain-model.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 94 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/01-domain-ports.mmd",
+      "severity": "WARNING",
+      "rule": "CLASS-003",
+      "message": "Overlong method signature may wrap poorly in SVG/PDF (>88 chars): L46:107(write_bronze)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/01a-domain-ports-method-catalog.mmd",
+      "severity": "WARNING",
+      "rule": "CLASS-003",
+      "message": "Overlong method signature may wrap poorly in SVG/PDF (>88 chars): L37:107(write_bronze)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/07-application-core-services-frontmatter-sandbox.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/07-application-core-services.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 143 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/09-transformers.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 148 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/11-storage.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 148 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/15-extractors.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 148 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-checkpoint.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-runner-pkg-part1.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-runner-pkg-part1.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=30 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-runner-pkg-part2.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-base-transformer.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-batch-execution.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-lifecycle.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-postrun.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-preflight.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-application-observability.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-application-pipelines-chembl.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-application-pipelines-chembl.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=29 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-application-pipelines-common.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-application-pipelines-pubmed.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-application-pipelines-uniprot-extractors.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-application-pipelines-uniprot.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-application-services-dq.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-composition-bootstrap-runtime.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-composition-factories-datasource.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-composition-factories-services.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-composition-factories-storage.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-composition-providers.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-composition-providers.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=21 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-composition-runtime-builders.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-composition.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-aggregates.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-aggregates.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=30 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-composite-part1.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-composite-part1.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=29 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-composite-part2.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-contracts-gold.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-contracts-gold.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=26 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-control-plane.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 134 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-control-plane.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=25 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-exceptions-infrastructure.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-exceptions-network.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-filtering.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-lineage.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-models.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-models.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=29 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-ports-config.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-ports-metadata.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-ports-noop.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-ports-observability.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-ports-quality.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-ports-runtime.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-ports-runtime.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=22 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-ports-storage.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-schemas-chembl.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-schemas-pubchem.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain-schemas-uniprot.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-domain.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=24 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-adapters-chembl-part1.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-adapters-chembl-part1.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=30 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-adapters-chembl-part2.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-adapters-common.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-adapters-crossref.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-adapters-crossref.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=26 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-adapters-http.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-adapters-openalex.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-adapters-pubchem.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-adapters-pubmed.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-adapters-pubmed.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=21 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-adapters-semanticscholar.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-adapters-uniprot-part1.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-adapters-uniprot-part1.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=30 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-adapters-uniprot-part2.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-config.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-config.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=21 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-control-plane.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 134 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-export.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-observability-anomaly.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-schemas-part1.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-schemas-part1.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=29 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-schemas-part2.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-schemas-part2.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=26 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-schemas-part3.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-schemas-part3.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=25 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-storage-bronze.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-storage-delta.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-storage-gold-part1.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-storage-gold-part1.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=29 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-storage-gold-part2.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-storage-metadata.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-storage-silver-part1.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-storage-silver-part1.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=29 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-storage-silver-part2.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-storage-support.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-validation.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-interfaces-cli-commands-domains-quarantine.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-interfaces-cli-commands-domains-run-all.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-interfaces-cli-commands-domains-run.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/class-diagrams/90-pkg-interfaces-http.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 140 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/01-full-system-component.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/01-full-system-component.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/01-full-system-component.mmd",
+      "severity": "WARNING",
+      "rule": "LABEL-001",
+      "message": "Long node label line(s) detected (>42 chars): L75:43:'FileRunManifestStore / FileRunLe...'"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/02-full-medallion-data-flow.mmd",
+      "severity": "WARNING",
+      "rule": "LABEL-001",
+      "message": "Long node label line(s) detected (>42 chars): L37:72:'path: bronze/v1/&#123;provider&#...'"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/03-pipeline-execution-happy-path.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 143 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/04-domain-layer-class-diagram.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=26 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/04-error-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/05-layers-interaction.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 143 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/05-layers-interaction.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=21 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/06-application-layer-class-diagram.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/06-application-layer-class-diagram.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=25 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/06-pipeline-execution.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 143 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/08-complete-etl-workflow.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 143 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/08-complete-etl-workflow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=25 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/08-domain-ddd.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=24 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/10-infrastructure-layer-class-diagram.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 148 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/13-domain-models-relationship.mmd",
+      "severity": "WARNING",
+      "rule": "LABEL-001",
+      "message": "Long node label line(s) detected (>42 chars): L428:62:'States: NEW -> UNDER_REVIEW -> I...'"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/15-dq-check-workflow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=26 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/18-bronze-write-sequence.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 143 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/19-delta-lake-write-sequence.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 143 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/21-activity-entity-data-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=31 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/22-client-api-request-sequence.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 143 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/23-silver-writer-class.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 148 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/26-hexagonal-ports-adapters.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/28-composition-root-di-graph.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/28-composition-root-di-graph.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=23 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/29-composite-pipeline-workflow.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 134 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/29-composite-pipeline-workflow.mmd",
+      "severity": "WARNING",
+      "rule": "LABEL-001",
+      "message": "Long node label line(s) detected (>42 chars): L132:45:'Checkpoint compatibility + ledge...', L133:44:'Snapshot checkpoint persisted be...', L134:46:'Control-plane events recorded al...'"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/30-port-adapter-mapping.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/32-single-record-journey.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 143 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/33-cli-run-interaction.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 148 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/34-batch-processing-flow.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 143 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/35-bootstrap-sequence.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 143 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/35-bootstrap-sequence.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=28 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/35-bootstrap-sequence.mmd",
+      "severity": "WARNING",
+      "rule": "LABEL-001",
+      "message": "Long node label line(s) detected (>42 chars): L75:45:'GenericPipelineFactory.create_wi...'"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/37-cli-entry-full-chain.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/37-cli-entry-full-chain.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=23 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/37-cli-entry-full-chain.mmd",
+      "severity": "WARNING",
+      "rule": "LABEL-001",
+      "message": "Long node label line(s) detected (>42 chars): L28:48:'bioetl checkpoint / health / exp...', L50:49:'registry + config + observabilit...', L58:47:'LineageInspectionService.show / ...'"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/38-runtime-assembly-sequence.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/39-medallion-invariants.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=23 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/40-application-core-collaboration.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 143 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/41-error-classification-tree.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=22 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/42-pipeline-runner-class.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 143 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/46-yaml-config-resolution.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 134 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/46-yaml-config-resolution.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=23 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/46-yaml-config-resolution.mmd",
+      "severity": "WARNING",
+      "rule": "LABEL-001",
+      "message": "Long node label line(s) detected (>42 chars): L21:43:'configs/providers/&#123;provider...', L22:61:'configs/entities/&#123;provider&...', L23:43:'configs/providers/&#123;provider...'"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/48-composite-phase-lifecycle.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 134 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/49-composite-runner-class.mmd",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/foundation/50-exception-hierarchy.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/chembl/01-api-integration-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/chembl/01-api-integration-flow.mmd",
+      "severity": "WARNING",
+      "rule": "LINK-001",
+      "message": "Flowchart has 53 edge(s) but only one arrow semantic style. Use a semantic mix (--> runtime, -.-> DI/implements, ==> critical data path)."
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/chembl/02-data-transformation-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/chembl/02-data-transformation-flow.mmd",
+      "severity": "WARNING",
+      "rule": "LINK-001",
+      "message": "Flowchart has 51 edge(s) but only one arrow semantic style. Use a semantic mix (--> runtime, -.-> DI/implements, ==> critical data path)."
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/chembl/03-medallion-layer-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/chembl/03-medallion-layer-flow.mmd",
+      "severity": "WARNING",
+      "rule": "LINK-001",
+      "message": "Flowchart has 44 edge(s) but only one arrow semantic style. Use a semantic mix (--> runtime, -.-> DI/implements, ==> critical data path)."
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/chembl/04-error-handling-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/chembl/04-error-handling-flow.mmd",
+      "severity": "WARNING",
+      "rule": "LINK-001",
+      "message": "Flowchart has 100 edge(s) but only one arrow semantic style. Use a semantic mix (--> runtime, -.-> DI/implements, ==> critical data path)."
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/crossref/01-api-integration-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/crossref/01-api-integration-flow.mmd",
+      "severity": "WARNING",
+      "rule": "LINK-001",
+      "message": "Flowchart has 16 edge(s) but only one arrow semantic style. Use a semantic mix (--> runtime, -.-> DI/implements, ==> critical data path)."
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/crossref/02-data-transformation-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/crossref/02-data-transformation-flow.mmd",
+      "severity": "WARNING",
+      "rule": "LINK-001",
+      "message": "Flowchart has 10 edge(s) but only one arrow semantic style. Use a semantic mix (--> runtime, -.-> DI/implements, ==> critical data path)."
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/crossref/03-medallion-layer-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/crossref/04-error-handling-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/crossref/04-error-handling-flow.mmd",
+      "severity": "WARNING",
+      "rule": "LINK-001",
+      "message": "Flowchart has 11 edge(s) but only one arrow semantic style. Use a semantic mix (--> runtime, -.-> DI/implements, ==> critical data path)."
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/openalex/01-api-integration-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/openalex/01-api-integration-flow.mmd",
+      "severity": "WARNING",
+      "rule": "LINK-001",
+      "message": "Flowchart has 16 edge(s) but only one arrow semantic style. Use a semantic mix (--> runtime, -.-> DI/implements, ==> critical data path)."
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/openalex/02-data-transformation-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/openalex/02-data-transformation-flow.mmd",
+      "severity": "WARNING",
+      "rule": "LINK-001",
+      "message": "Flowchart has 10 edge(s) but only one arrow semantic style. Use a semantic mix (--> runtime, -.-> DI/implements, ==> critical data path)."
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/openalex/03-medallion-layer-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/openalex/04-error-handling-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/openalex/04-error-handling-flow.mmd",
+      "severity": "WARNING",
+      "rule": "LINK-001",
+      "message": "Flowchart has 11 edge(s) but only one arrow semantic style. Use a semantic mix (--> runtime, -.-> DI/implements, ==> critical data path)."
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/pubchem/01-api-integration-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/pubchem/01-api-integration-flow.mmd",
+      "severity": "WARNING",
+      "rule": "LINK-001",
+      "message": "Flowchart has 16 edge(s) but only one arrow semantic style. Use a semantic mix (--> runtime, -.-> DI/implements, ==> critical data path)."
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/pubchem/02-data-transformation-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/pubchem/02-data-transformation-flow.mmd",
+      "severity": "WARNING",
+      "rule": "LINK-001",
+      "message": "Flowchart has 10 edge(s) but only one arrow semantic style. Use a semantic mix (--> runtime, -.-> DI/implements, ==> critical data path)."
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/pubchem/03-medallion-layer-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/pubchem/04-error-handling-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/pubchem/04-error-handling-flow.mmd",
+      "severity": "WARNING",
+      "rule": "LINK-001",
+      "message": "Flowchart has 11 edge(s) but only one arrow semantic style. Use a semantic mix (--> runtime, -.-> DI/implements, ==> critical data path)."
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/pubmed/01-api-integration-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/pubmed/01-api-integration-flow.mmd",
+      "severity": "WARNING",
+      "rule": "LINK-001",
+      "message": "Flowchart has 16 edge(s) but only one arrow semantic style. Use a semantic mix (--> runtime, -.-> DI/implements, ==> critical data path)."
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/pubmed/02-data-transformation-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/pubmed/02-data-transformation-flow.mmd",
+      "severity": "WARNING",
+      "rule": "LINK-001",
+      "message": "Flowchart has 10 edge(s) but only one arrow semantic style. Use a semantic mix (--> runtime, -.-> DI/implements, ==> critical data path)."
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/pubmed/03-medallion-layer-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/pubmed/04-error-handling-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/pubmed/04-error-handling-flow.mmd",
+      "severity": "WARNING",
+      "rule": "LINK-001",
+      "message": "Flowchart has 11 edge(s) but only one arrow semantic style. Use a semantic mix (--> runtime, -.-> DI/implements, ==> critical data path)."
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/semanticscholar/01-api-integration-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/semanticscholar/01-api-integration-flow.mmd",
+      "severity": "WARNING",
+      "rule": "LINK-001",
+      "message": "Flowchart has 16 edge(s) but only one arrow semantic style. Use a semantic mix (--> runtime, -.-> DI/implements, ==> critical data path)."
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/semanticscholar/02-data-transformation-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/semanticscholar/02-data-transformation-flow.mmd",
+      "severity": "WARNING",
+      "rule": "LINK-001",
+      "message": "Flowchart has 10 edge(s) but only one arrow semantic style. Use a semantic mix (--> runtime, -.-> DI/implements, ==> critical data path)."
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/semanticscholar/03-medallion-layer-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/semanticscholar/04-error-handling-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/semanticscholar/04-error-handling-flow.mmd",
+      "severity": "WARNING",
+      "rule": "LINK-001",
+      "message": "Flowchart has 11 edge(s) but only one arrow semantic style. Use a semantic mix (--> runtime, -.-> DI/implements, ==> critical data path)."
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/uniprot/01-api-integration-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/uniprot/01-api-integration-flow.mmd",
+      "severity": "WARNING",
+      "rule": "LINK-001",
+      "message": "Flowchart has 16 edge(s) but only one arrow semantic style. Use a semantic mix (--> runtime, -.-> DI/implements, ==> critical data path)."
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/uniprot/02-data-transformation-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/uniprot/02-data-transformation-flow.mmd",
+      "severity": "WARNING",
+      "rule": "LINK-001",
+      "message": "Flowchart has 10 edge(s) but only one arrow semantic style. Use a semantic mix (--> runtime, -.-> DI/implements, ==> critical data path)."
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/uniprot/03-medallion-layer-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/uniprot/04-error-handling-flow.mmd",
+      "severity": "WARNING",
+      "rule": "SIZE-002",
+      "message": "@nodes=35 > 20"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/providers/uniprot/04-error-handling-flow.mmd",
+      "severity": "WARNING",
+      "rule": "LINK-001",
+      "message": "Flowchart has 11 edge(s) but only one arrow semantic style. Use a semantic mix (--> runtime, -.-> DI/implements, ==> critical data path)."
+    },
+    {
+      "file": "docs/02-architecture/diagrams/views/01-full-system-component-full.mermaid",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/views/05-layers-interaction-full.mermaid",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 143 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/views/06-application-layer-class-diagram-full.mermaid",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/views/08-complete-etl-workflow-full.mermaid",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 143 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/views/10-infrastructure-layer-class-diagram-full.mermaid",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 148 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/views/28-composition-root-di-graph-full.mermaid",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 139 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/views/29-composite-pipeline-workflow-full.mermaid",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 134 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/views/32-single-record-journey-full.mermaid",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 143 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/views/33-cli-run-interaction-full.mermaid",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 148 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/views/34-batch-processing-flow-full.mermaid",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 143 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/views/35-bootstrap-sequence-full.mermaid",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 143 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/views/46-yaml-config-resolution-full.mermaid",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 134 days old (>90d threshold)"
+    },
+    {
+      "file": "docs/02-architecture/diagrams/views/48-composite-phase-lifecycle-full.mermaid",
+      "severity": "WARNING",
+      "rule": "STALE-002",
+      "message": "Diagram is 134 days old (>90d threshold)"
+    }
+  ]
+}

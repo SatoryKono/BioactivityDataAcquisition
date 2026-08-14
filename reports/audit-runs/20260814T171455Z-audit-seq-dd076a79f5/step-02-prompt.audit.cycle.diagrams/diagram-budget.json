@@ -1,0 +1,39 @@
+{
+  "mode": "pr",
+  "failed_checks": 0,
+  "passed": true,
+  "checks": [
+    {
+      "metric": "quality.hard_failures",
+      "value": 0,
+      "limit": 0,
+      "passed": true,
+      "source": "check_diagram_quality_gates",
+      "message": "hard quality-gate failures exceed budget"
+    },
+    {
+      "metric": "quality.DIAG-T022",
+      "value": 0,
+      "limit": 0,
+      "passed": true,
+      "source": "check_diagram_quality_gates",
+      "message": "label-length warnings (DIAG-T022) exceed budget"
+    },
+    {
+      "metric": "quality.DIAG-T023",
+      "value": 0,
+      "limit": 0,
+      "passed": true,
+      "source": "check_diagram_quality_gates",
+      "message": "multi-line label warnings (DIAG-T023) exceed budget"
+    },
+    {
+      "metric": "lint.errors",
+      "value": 0,
+      "limit": 0,
+      "passed": true,
+      "source": "lint_diagrams",
+      "message": "diagram lint errors exceed budget"
+    }
+  ]
+}

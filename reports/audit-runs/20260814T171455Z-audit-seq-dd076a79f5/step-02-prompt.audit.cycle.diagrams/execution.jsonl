@@ -1,0 +1,1 @@
+{"wave":"W1","issue":8829,"finding":"DIAGRAM-SEQ-001","outcome":"resolved","changes":"repository-root import bootstrap added to five direct-script targets; subprocess regression added","validation":"30/30 router commands reach --help; 133 diagram tests pass; DIAG-T018..T023 pass"}
