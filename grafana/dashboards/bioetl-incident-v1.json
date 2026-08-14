@@ -234,7 +234,7 @@
       "title": "Inspect Ranked Suspects",
       "description": "Selected pipeline may differ from row pipeline (blast radius). Single ranked suspect matrix across Runtime/Provider/DQ. Domain label identifies source; row links preserve scope. VALID_EMPTY when no active suspects. Primary evidence before domain forensics",
       "gridPos": {
-        "h": 8,
+        "h": 7,
         "w": 24,
         "x": 0,
         "y": 11
