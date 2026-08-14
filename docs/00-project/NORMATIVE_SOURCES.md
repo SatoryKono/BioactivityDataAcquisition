@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.1.0
+Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-28'
+  Last verified: '2026-08-14'
 
 ______________________________________________________________________
 
@@ -29,6 +29,9 @@ BioETL не использует один монолитный файл «все
 
 Дополнительные индексы (не заменяют RULES):
 
+- [DASHBOARD_REQUIREMENTS.md](../01-requirements/DASHBOARD_REQUIREMENTS.md) —
+  scoped testable dashboard presentation contract delegated by `RULES.md`
+  §3.2.3
 - [rules-summary.md](rules-summary.md) — краткая выжимка RULES
 - [00-map.md](00-map.md) — навигатор документации
 - [architecture-index.md](architecture-index.md) — архитектурные entry points

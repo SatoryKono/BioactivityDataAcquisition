@@ -42,7 +42,11 @@ Human family guide: [selector-architecture.md](selector-architecture.md)
 - `$run_id` is HTTP-backed control-plane identity context for Ops HTTP `ID` /
   Processed Records tables. It is preserved between primary dashboards and
   MUST NOT become a Prometheus label.
-- `$stage` defaults to **All** (`$__all`) on Runtime and DQ.
+- `$stage` defaults to **All** (`$__all` UI marker) on Runtime and DQ.
+- PromQL-scoped `includeAll` variables use `allValue: ".*"` so All expands to a
+  match-all regex. The saved `current.value: "$__all"` remains the Grafana
+  All-selected marker; HTTP handoff URLs may still pass literal `var-*=$__all`,
+  and Ops HTTP treats both `$__all` and `.*` as all-scope tokens.
 - `$provider` defaults to `unknown` and is derived from pipeline/workflow when
   set (see Provider Health / Incident JSON).
 

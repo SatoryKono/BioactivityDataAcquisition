@@ -78,7 +78,7 @@ def _normalize_list_owner(name: str | None) -> str | None:
     if not text:
         return None
     lowered = text.casefold()
-    if lowered in {"all", "*"} or text in {"$__all", "__all", "All"}:
+    if lowered in {"all", "*"} or text in {"$__all", "__all", "All", ".*"}:
         return None
     return text
 

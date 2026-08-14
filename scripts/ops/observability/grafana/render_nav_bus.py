@@ -82,7 +82,7 @@ CURRENT_STYLE = (
 )
 CONTAINER_STYLE = (
     "display:flex;gap:6px;flex-wrap:wrap;align-items:center;"
-    "padding:4px 6px;overflow:visible;white-space:normal;font-size:12px"
+    "padding:4px 6px;overflow:visible;white-space:normal;font-size:16px"
 )
 
 NAV_DESCRIPTION = (
@@ -223,11 +223,14 @@ def apply_to_dashboard(path: Path, *, current_uid: str) -> None:
     if nav is None:
         raise SystemExit(f"{safe_path.name}: missing panel id=1000")
 
-    nav["title"] = "Navigation"
+    nav["title"] = "Navigate Dashboards"
     nav["type"] = "text"
     nav["description"] = NAV_DESCRIPTION
     nav.setdefault("gridPos", {})
-    nav["gridPos"].update({"h": 3, "w": 24, "x": 0, "y": 0})
+    # Preserve the reviewed per-dashboard height: most boards need three grid
+    # units for the 16px bus, while compact Run Explorer uses two. The generator
+    # owns horizontal placement but must not introduce a gap or overlap below it.
+    nav["gridPos"].update({"w": 24, "x": 0, "y": 0})
     nav["options"] = {
         "mode": "html",
         "content": render_html(current_uid=current_uid),

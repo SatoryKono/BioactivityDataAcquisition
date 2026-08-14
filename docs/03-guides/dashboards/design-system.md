@@ -1,7 +1,12 @@
 # Dashboard Design System (BioETL)
 
-Дата актуализации: **2026-07-28**
+Дата актуализации: **2026-08-14**
 Источник истины: `grafana/dashboards/*.json`
+
+Normative presentation floors and measurement rules are owned by
+[`DASHBOARD_REQUIREMENTS.md`](../../01-requirements/DASHBOARD_REQUIREMENTS.md).
+This guide explains their application; archived DUX typography floors do not
+override the active requirements contract.
 
 **Dashboard System 2.0:** operator first-screen contract and verdict model live in
 [operator-ux-v2.md](operator-ux-v2.md) and [verdict-ontology.md](verdict-ontology.md).
@@ -107,10 +112,10 @@ blanket rule for every plugin type.
 | Panel role | Required visualization settings |
 | --- | --- |
 | Current-status `stat` | `fieldConfig.defaults.color.mode=thresholds`; `options.colorMode=background` for designated first-screen severity cards; `null -> UNKNOWN` mapping where the panel is fail-closed. |
-| Selected-range trend `stat` | `options.colorMode=value`; `options.graphMode=area`; threshold colors must match the measured operator risk. |
+| Selected-range trend `stat` | `options.colorMode=value`; `options.graphMode=area` is allowed only in the first window, otherwise `none`; threshold colors must match the measured operator risk. |
 | Selected-range count `stat` | `options.colorMode=value`; `options.graphMode=none`; `or vector(0)` only when missing series means zero events. |
 | Percentage, score, latency, or duration `gauge` | `options.showThresholdMarkers=true`; `options.showThresholdLabels=false` unless a panel-specific exception is documented with operator rationale. |
-| Status or route `table` column | Use `custom.cellOptions.type=color-background` **only via field override** for the status/Value field. |
+| Status or route `table` column | On the first window, `custom.cellOptions.type=color-background` MAY be used **only via field override** for the status/Value field. In additional row groups it MUST be `color-text` or neutral `auto`. |
 | Data or forensic `table` | Use `custom.cellOptions.type=auto` as the table default when an explicit default is configured; datasource/plugin defaults are allowed for HTTP-backed forensic tables. |
 
 **Forbidden:** table-wide default `color-background` without field overrides (paints Time/name/pipeline as severity).
@@ -118,7 +123,8 @@ blanket rule for every plugin type.
 | Scalar trend `timeseries` | `options.tooltip.mode=single`; `options.tooltip.sort=none` or omitted. |
 
 Allowed table `custom.cellOptions.type` values are `auto`, `color-background`,
-and `color-text`. Introducing a new table cell option type requires updating
+and `color-text`; `color-background` is confined to the first window by
+`REQ-DASH-003`. Introducing a new table cell option type requires updating
 `scripts.engineering.qa check-dashboard-visual-semantics` and this design
 system in the same change.
 
@@ -678,4 +684,11 @@ Benign export noise:
 
 ## 9) DUX5 typography & copy residual
 
-Operator reading-order, state classes, and typography floors are normative in [dux5-copy-dictionary.md](archive/audit-protocols/dux5-copy-dictionary.md). Screenshot regression protocol: [dux5-screenshot-regression-protocol.md](archive/audit-protocols/dux5-screenshot-regression-protocol.md).
+DUX5 artifacts remain historical audit evidence. Active typography floors are
+`body >= 12pt (16px)` and `panel title >= 14pt (18.6667px)` in
+[`DASHBOARD_REQUIREMENTS.md`](../../01-requirements/DASHBOARD_REQUIREMENTS.md).
+The screenshot protocol remains available at
+[dux5-screenshot-regression-protocol.md](archive/audit-protocols/dux5-screenshot-regression-protocol.md),
+and the historical copy dictionary remains at
+[dux5-copy-dictionary.md](archive/audit-protocols/dux5-copy-dictionary.md),
+but its former smaller floors are superseded.
