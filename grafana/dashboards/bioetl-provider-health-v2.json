@@ -1868,6 +1868,23 @@
               "decimals": 0,
               "mappings": [
                 {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "CLOSED",
+                      "color": "green"
+                    },
+                    "1": {
+                      "text": "HALF-OPEN",
+                      "color": "orange"
+                    },
+                    "2": {
+                      "text": "OPEN",
+                      "color": "red"
+                    }
+                  }
+                },
+                {
                   "type": "special",
                   "options": {
                     "match": "null",
@@ -3046,7 +3063,7 @@
   "templating": {
     "list": [
       {
-        "allValue": "$__all",
+        "allValue": ".*",
         "current": {
           "selected": true,
           "text": "All",
@@ -3112,7 +3129,7 @@
         "useTags": false
       },
       {
-        "allValue": "$__all",
+        "allValue": ".*",
         "current": {
           "selected": true,
           "text": "backfill",
@@ -3241,7 +3258,7 @@
         "type": "textbox"
       },
       {
-        "allValue": null,
+        "allValue": ".*",
         "current": {},
         "datasource": {
           "type": "prometheus",

@@ -3589,7 +3589,7 @@
   "templating": {
     "list": [
       {
-        "allValue": "$__all",
+        "allValue": ".*",
         "current": {
           "selected": true,
           "text": "All",
@@ -3652,7 +3652,7 @@
         "description": "Core scope: pipeline selector from canonical runtime pipeline/run_type universe, including runs that emitted no records. Single-select; no All scope. Unknown is the explicit fail-closed default."
       },
       {
-        "allValue": "$__all",
+        "allValue": ".*",
         "current": {
           "selected": true,
           "text": "backfill",
@@ -3730,7 +3730,7 @@
         "useTags": false
       },
       {
-        "allValue": null,
+        "allValue": ".*",
         "current": {
           "selected": true,
           "text": "All",

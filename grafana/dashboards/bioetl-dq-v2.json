@@ -3067,7 +3067,7 @@
   "templating": {
     "list": [
       {
-        "allValue": "$__all",
+        "allValue": ".*",
         "current": {
           "selected": true,
           "text": "All",
@@ -3130,7 +3130,7 @@
         "description": "Core scope: pipeline selector for pipeline-centric dashboards. Single-select; no All scope. Unknown is the explicit fail-closed default when source scope is absent or the operator has not selected a concrete pipeline."
       },
       {
-        "allValue": "$__all",
+        "allValue": ".*",
         "current": {
           "selected": true,
           "text": "backfill",
@@ -3208,7 +3208,7 @@
         "useTags": false
       },
       {
-        "allValue": null,
+        "allValue": ".*",
         "current": {
           "selected": true,
           "text": "All",
