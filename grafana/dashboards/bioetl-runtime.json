@@ -294,8 +294,7 @@
           "custom": {
             "align": "auto",
             "cellOptions": {
-              "type": "color-background",
-              "mode": "basic"
+              "type": "auto"
             },
             "inspect": false
           },
@@ -359,6 +358,13 @@
               {
                 "id": "displayName",
                 "value": "Count"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
               }
             ]
           }
