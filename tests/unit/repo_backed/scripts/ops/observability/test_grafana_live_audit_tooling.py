@@ -885,7 +885,7 @@ def test_dashboard_json_has_no_backup_artifacts_in_active_dashboard_tree() -> No
     assert backup_files == []
 
 
-def test_alerts_slo_dashboard_is_not_in_shipping_surface() -> None:
+def test_alerts_slo_dashboard_is_absent_from_active_dashboard_tree() -> None:
     """Retired epic #6647: bioetl-alerts-slo.json must stay off the shipped set."""
     dashboard_path = Path("grafana/dashboards/bioetl-alerts-slo.json")
     assert not dashboard_path.is_file(), (

@@ -157,9 +157,12 @@ tracked_suite_inventory:
     - tests/integration/test_dashboard_panel_descriptions.py
     - tests/integration/test_dashboard_panel_titles.py
     - tests/integration/test_dashboard_panel_visualization_standards.py
+    - tests/integration/test_dashboard_presentation_requirements.py
     - tests/integration/test_dashboard_provider_context_mapping.py
     - tests/integration/test_dashboard_required_panel_links.py
     - tests/integration/test_dashboard_scope_reset_tooltips.py
+    - tests/integration/test_dashboard_static_fill_gates.py
+    - tests/integration/test_dashboard_structural_invariants.py
     - tests/integration/test_dashboard_units_decimals.py
     - tests/integration/test_dashboard_variable_dependencies.py
     - tests/integration/test_dashboard_visual_semantics.py

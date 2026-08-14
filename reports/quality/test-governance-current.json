@@ -160,6 +160,13 @@
     },
     {
       "category": "intentional_no_exception_contract",
+      "line": "30",
+      "path": "tests/unit/application/test_module_coverage_currentness_8775.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_batch_state_flow_skips_disallowed_process_command"
+    },
+    {
+      "category": "intentional_no_exception_contract",
       "line": "48",
       "path": "tests/unit/application/core/test_batch_metrics_accounting.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -744,7 +751,7 @@
     "architecture_helper_guard": 16,
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
-    "intentional_no_exception_contract": 85,
+    "intentional_no_exception_contract": 86,
     "weak_no_value": 0
   },
   "assertless_examples": [
@@ -766,13 +773,13 @@
     "tests/architecture/test_quality_debt_scorecard.py:1127",
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
     "tests/integration/infrastructure/storage/test_delta_reader.py:586",
+    "tests/unit/application/test_module_coverage_currentness_8775.py:30",
     "tests/unit/application/core/test_batch_metrics_accounting.py:48",
     "tests/unit/application/core/test_batch_tracing.py:137",
     "tests/unit/application/core/test_batch_writer_tracing_mixin.py:106",
     "tests/unit/application/core/test_batch_writer_tracing_mixin.py:282",
     "tests/unit/application/core/test_dq_metrics.py:60",
-    "tests/unit/application/core/test_otel_spans.py:586",
-    "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:129"
+    "tests/unit/application/core/test_otel_spans.py:586"
   ],
   "assertless_families": {
     "tests/architecture/test_antipatterns.py": {
@@ -878,6 +885,12 @@
       }
     },
     "tests/unit/application/services/test_checkpoint_telemetry_helpers.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/application/test_module_coverage_currentness_8775.py": {
       "assertless_tests": 1,
       "categories": {
         "intentional_no_exception_contract": 1
@@ -1076,7 +1089,7 @@
       }
     }
   },
-  "assertless_total_candidates": 101,
+  "assertless_total_candidates": 102,
   "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
@@ -1250,7 +1263,7 @@
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 85,
+  "intentional_no_exception_contract": 86,
   "markerless_examples": [],
   "markerless_test_functions": 0,
   "parse_errors": [],
@@ -1423,6 +1436,13 @@
         "path": "tests/integration/infrastructure/storage/test_delta_reader.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_aclose_is_noop"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "30",
+        "path": "tests/unit/application/test_module_coverage_currentness_8775.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_batch_state_flow_skips_disallowed_process_command"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -2010,7 +2030,7 @@
       "architecture_helper_guard": 16,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
-      "intentional_no_exception_contract": 85,
+      "intentional_no_exception_contract": 86,
       "weak_no_value": 0
     },
     "assertless_examples": [
@@ -2032,15 +2052,15 @@
       "tests/architecture/test_quality_debt_scorecard.py:1127",
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
       "tests/integration/infrastructure/storage/test_delta_reader.py:586",
+      "tests/unit/application/test_module_coverage_currentness_8775.py:30",
       "tests/unit/application/core/test_batch_metrics_accounting.py:48",
       "tests/unit/application/core/test_batch_tracing.py:137",
       "tests/unit/application/core/test_batch_writer_tracing_mixin.py:106",
       "tests/unit/application/core/test_batch_writer_tracing_mixin.py:282",
       "tests/unit/application/core/test_dq_metrics.py:60",
-      "tests/unit/application/core/test_otel_spans.py:586",
-      "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:129"
+      "tests/unit/application/core/test_otel_spans.py:586"
     ],
-    "assertless_total_candidates": 101,
+    "assertless_total_candidates": 102,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -2232,8 +2252,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2282,
-      "test_python_file_count": 2509,
+      "test_glob_file_count": 2293,
+      "test_python_file_count": 2518,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2272,21 +2292,21 @@
       "top_level_directory_count_including_pycache": 15
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2282,
-    "total_test_functions": 24108,
+    "total_test_files": 2293,
+    "total_test_functions": 24185,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "43c06183572d7099f4a52bd13ece7c89a3aeb678dcc5f351443ec7741dfc19a2",
+  "source_tree_sha256": "aa81b2b007d5ae493b196f8556ee5b6d87fc39aff2540e2dbb3639ef5beb5bb2",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 101,
+    "assertless_total_candidates": 102,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
-    "intentional_no_exception_contract": 85,
+    "intentional_no_exception_contract": 86,
     "markerless_examples": [],
     "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
@@ -2298,8 +2318,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2282,
-    "test_python_file_count": 2509,
+    "test_glob_file_count": 2293,
+    "test_python_file_count": 2518,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2338,8 +2358,8 @@
     "top_level_directory_count_including_pycache": 15
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2282,
-  "total_test_functions": 24108,
+  "total_test_files": 2293,
+  "total_test_functions": 24185,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
