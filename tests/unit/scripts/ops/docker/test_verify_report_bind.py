@@ -47,6 +47,16 @@ def test_host_report_root_ignores_container_bioetl_report_root(
     assert mod._looks_like_container_path(str(tmp_path / "reports")) is False
 
 
+def test_host_report_root_follows_dashboard_report_override(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    active_reports = tmp_path / "active-checkout" / "reports"
+    monkeypatch.setenv("BIOETL_REPORT_ROOT", "/app/reports/run-reports")
+    monkeypatch.setenv("BIOETL_DASHBOARD_REPORT_ROOT", str(active_reports))
+
+    assert mod._host_report_root(tmp_path) == (active_reports / "run-reports").resolve()
+
+
 def test_compose_host_bind_path_uses_drive_letter_forward_slashes(
     tmp_path: Path,
 ) -> None:

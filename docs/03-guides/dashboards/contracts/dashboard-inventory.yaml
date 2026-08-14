@@ -62,7 +62,7 @@ dashboards:
         type: table
         description: Recommended first action for current state
       - id: 1000
-        title: Navigation
+        title: Navigate Dashboards
         type: text
         description: Theme-safe wrapping navigation bus (0-6 shipped surface)
     selector_variables:

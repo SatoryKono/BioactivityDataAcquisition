@@ -96,7 +96,9 @@ def test_http_config_uses_bounded_fallback_without_registry_config(
 ) -> None:
     registry = MagicMock()
     registry.get_http_config.return_value = None
-    monkeypatch.setattr(http_client, "_resolve_provider_registry", lambda _r=None: registry)
+    monkeypatch.setattr(
+        http_client, "_resolve_provider_registry", lambda _r=None: registry
+    )
 
     def missing_source(_provider: str) -> object:
         raise ValueError("not configured")
