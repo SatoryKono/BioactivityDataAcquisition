@@ -1183,6 +1183,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/ops/maintenance/github/remove_required_status_check.sh": {
+      "decision": "legacy_manual_utility",
+      "next_step": "Retain only as a bounded manual GitHub branch-protection utility for stripping a stale required status-check context after an external app is disconnected; do not promote it to an active ops command or evaluate_active.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-09-30"
+    },
     "scripts/ops/maintenance/github/update_github_issue.sh": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain only as a bounded manual GitHub issue update utility after removing the scripts.ops router command; prefer the governed issue lifecycle workflow or GitHub API client paths before re-exposing it as an active ops command.",
