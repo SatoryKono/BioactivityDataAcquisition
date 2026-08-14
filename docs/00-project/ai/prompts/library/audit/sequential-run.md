@@ -69,7 +69,7 @@ max_body_lines: 280
 | `MODE` | `full` |
 | `DEPTH` | `full` |
 | `INCLUDE_PIPELINE` | `true` |
-| `MONITORING` | `true` |
+| `MONITORING` | `false` |
 | `ALLOW_ISSUE_WRITE` | `true` |
 | `ALLOW_PUSH` | `true` |
 | `ALLOW_MERGE` | `false` |
