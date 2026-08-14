@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2980 |
-| Tracked doc-like files | 2980 |
+| Doc-like files | 3005 |
+| Tracked doc-like files | 3005 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 9 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 2980 |
+| tracked | 3005 |
 
 ## Lifecycle Counts
 
@@ -26,7 +26,7 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_draft | 270 |
-| active_quality_baseline | 54 |
+| active_quality_baseline | 55 |
 | closeout_evidence | 87 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 3 |
@@ -42,7 +42,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 21 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 466 |
+| working_report | 490 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -63,7 +63,7 @@
 | Canonical | 70 |
 | Deprecated | 8 |
 | Generated | 1058 |
-| Working | 936 |
+| Working | 961 |
 
 ## Surface Families
 
@@ -74,16 +74,16 @@
 | canonical | 70 |
 | duplicate | 8 |
 | generated | 1058 |
-| working | 936 |
+| working | 961 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 320 |
-| archive-after-migration | 471 |
+| archive-after-migration | 495 |
 | generate-automatically | 1058 |
-| keep | 1119 |
+| keep | 1120 |
 | reconcile-with-github-state | 4 |
 | replace-with-link | 8 |
 
@@ -121,6 +121,30 @@
 | `reports/ai/issue-7348-comprehensive-skills-analysis-20260731.md` | Working | 0 | archive-after-migration |
 | `reports/ai/memory-audit-20260804/FINAL-REPORT.md` | Working | 0 | archive-after-migration |
 | `reports/ai/memory-audit-20260804/execution-ledger.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/run.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/docs-code-drift.csv` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/docs-kpi-after.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/docs-kpi-after.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/docs-kpi.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/docs-kpi.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/docs-pipeline.csv` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/findings.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/issue-DOCS-001.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/issue-DOCS-002.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/issue-DOCS-003.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/issue-DOCS-004.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/link-report-after.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/link-report.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/proof-bundle.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/proof-plan.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/proof-verification.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/report.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/source-of-truth-map.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/summary.md` | Working | 0 | archive-after-migration |
+| `reports/audit/docs-content/findings.json` | Working | 0 | archive-after-migration |
+| `reports/audit/docs-content/report.md` | Working | 0 | archive-after-migration |
+| `reports/audit/docs-pipeline/findings.json` | Working | 0 | archive-after-migration |
+| `reports/audit/docs-pipeline/report.md` | Working | 0 | archive-after-migration |
 | `reports/docs-evidence/README.md` | Working | 2 | archive-after-migration |
 | `reports/grafana/cycle-3loop-20260804/CONSOLIDATED_REPORT.md` | Working | 0 | archive-after-migration |
 | `reports/grafana/cycle-3loop-20260804/iteration-3/dashboards-after/render-manifest.json` | Working | 0 | archive-after-migration |
@@ -147,30 +171,6 @@
 | `reports/observability/runtime_cardinality_allowlist_review_5574.json` | Working | 0 | archive-after-migration |
 | `reports/observability/runtime_cardinality_review.json` | Working | 0 | archive-after-migration |
 | `reports/plans/obs-program-6247-6268/04-refactoring-log.md` | Working | 0 | archive-after-migration |
-| `reports/plans/sonar-remediation-plan-2026-07-28/01-plan-initial.md` | Working | 0 | archive-after-migration |
-| `reports/quality/adr-enforcement-matrix.json` | Working | 0 | archive-after-migration |
-| `reports/quality/adr-enforcement-matrix.md` | Working | 0 | archive-after-migration |
-| `reports/quality/architecture-coderabbit-2026-07-28-issue-publish.json` | Working | 0 | archive-after-migration |
-| `reports/quality/architecture-coderabbit-2026-07-29-issue-publish.json` | Working | 0 | archive-after-migration |
-| `reports/quality/architecture-quality-scorecard.json` | Working | 0 | archive-after-migration |
-| `reports/quality/architecture-refactoring-2026-07-28-issue-publish.json` | Working | 0 | archive-after-migration |
-| `reports/quality/architecture-residual-2026-07-27-issue-publish.json` | Working | 0 | archive-after-migration |
-| `reports/quality/architecture_debt_execution_plan_2026-06-26-15-51.json` | Working | 0 | archive-after-migration |
-| `reports/quality/architecture_debt_execution_plan_2026-07-12-12-34.json` | Working | 0 | archive-after-migration |
-| `reports/quality/branch-coverage-gap-report.json` | Working | 0 | archive-after-migration |
-| `reports/quality/branch-coverage-gap-report.md` | Working | 0 | archive-after-migration |
-| `reports/quality/branch-coverage-gate-evidence.json` | Working | 0 | archive-after-migration |
-| `reports/quality/branch-coverage-tail-owner-map.json` | Working | 0 | archive-after-migration |
-| `reports/quality/branch-coverage-tail-owner-map.md` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260805/00-preflight.md` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260805/01-scope-matrix.md` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/00-preflight.md` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/01-scope-matrix.json` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/01-scope-matrix.md` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/BLOCKER_8215_CLOSEOUT.json` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/BLOCKER_8215_CLOSEOUT.md` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/CAMPAIGN_STATUS.md` | Working | 0 | archive-after-migration |
-| `reports/quality/coderabbit/20260806-full/_S00-src-bioetl-residual.txt` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
