@@ -1,7 +1,7 @@
 # Multi-stage build for bioetl: dependencies → runtime
 # Stage 1: Builder (install dependencies with uv)
 # docker:S8431 — pin by digest only (no tag+digest).
-FROM python@sha256:c3d81d25b3154142b0b42eb1e61300024426268edeb5b5a26dd7ddf64d9daf28 AS builder
+FROM python@sha256:4fad23465a06cc5149a541fbec6f87e234a64dc0550f6bfdd2d290d8f03240df AS builder
 
 WORKDIR /app
 
@@ -61,7 +61,7 @@ print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")" \
 
 # Stage 2: Runtime (minimal image)
 # docker:S8431 — pin by digest only (no tag+digest).
-FROM python@sha256:c3d81d25b3154142b0b42eb1e61300024426268edeb5b5a26dd7ddf64d9daf28
+FROM python@sha256:4fad23465a06cc5149a541fbec6f87e234a64dc0550f6bfdd2d290d8f03240df
 
 WORKDIR /app
 
