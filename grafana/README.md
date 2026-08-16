@@ -123,10 +123,14 @@ ______________________________________________________________________
 > 1440×900, and 1920×1080 first viewports in Dark and Light, one expanded
 > full-surface group, a repeated 1440×900 Dark group for geometry consistency,
 > and verified 2560×1440/3840×2160 kiosk groups in both themes. Browser
-> manifests record the requested and actual theme, viewport, kiosk state,
-> 100% zoom, panel terminal states, horizontal overflow, and stable panel
-> geometry. Live values and timestamps are excluded from consistency
-> comparison.
+> manifests record the requested and actual theme, physical viewport, CSS
+> layout viewport, kiosk state, zoom, panel terminal states, horizontal
+> overflow, and stable panel geometry. The 200% accessibility profile halves
+> the CSS layout viewport and uses a matching device scale so Grafana reflows
+> into the same physical output size; root-document CSS `zoom` is forbidden.
+> Typography evidence distinguishes BioETL-authored copy (19px/16px) from
+> Grafana-managed theme text (14px/12px plus the 200% reflow gate). Live values
+> and timestamps are excluded from consistency comparison.
 > Playwright mode additionally requires the local `playwright` npm dependency,
 > downloaded browser runtime, and the usual headless Chromium shared libraries
 > (`libnspr4`, `libnss3`, `libasound2`/`libasound2t64`, etc.) on the host.

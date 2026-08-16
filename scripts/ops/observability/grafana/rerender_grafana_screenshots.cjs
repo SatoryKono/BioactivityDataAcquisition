@@ -6,8 +6,30 @@ const path = require("node:path");
 // required from unit tests without paying Chromium package resolve cost. On this
 // host, eager `require("playwright")` can hang for >60s (GDrive/NODE_PATH paths).
 let _playwright = null;
-const MIN_PANEL_BODY_FONT_PX = 16;
-const MIN_PANEL_TITLE_FONT_PX = (14 * 4) / 3;
+const MIN_AUTHORED_BODY_FONT_PX = 16;
+const MIN_AUTHORED_TITLE_FONT_PX = (14 * 4) / 3;
+const MIN_GRAFANA_BODY_FONT_PX = 12;
+const MIN_GRAFANA_TITLE_FONT_PX = 14;
+
+function zoomScale(zoomPercent) {
+  return zoomPercent / 100;
+}
+
+function layoutViewportForZoom(viewport, zoomPercent) {
+  const scale = zoomScale(zoomPercent);
+  return {
+    width: Math.max(1, Math.floor(viewport.width / scale)),
+    height: Math.max(1, Math.floor(viewport.height / scale)),
+  };
+}
+
+function physicalViewportFromLayout(viewport, zoomPercent) {
+  const scale = zoomScale(zoomPercent);
+  return {
+    width: Math.round(viewport.width * scale),
+    height: Math.round(viewport.height * scale),
+  };
+}
 
 function playwright() {
   if (_playwright === null) {
@@ -448,11 +470,14 @@ async function createAuthenticatedApiContext() {
 }
 
 async function createBrowserContext(browser) {
+  const zoomContext = {
+    viewport: layoutViewportForZoom(CONFIG.viewport, CONFIG.browserZoom),
+    deviceScaleFactor: zoomScale(CONFIG.browserZoom),
+  };
   if (CONFIG.serviceAccountToken) {
     return {
       context: await browser.newContext({
-        viewport: CONFIG.viewport,
-        deviceScaleFactor: 1,
+        ...zoomContext,
         extraHTTPHeaders: {
           Authorization: `Bearer ${CONFIG.serviceAccountToken}`,
         },
@@ -469,8 +494,7 @@ async function createBrowserContext(browser) {
     );
     return {
       context: await browser.newContext({
-        viewport: CONFIG.viewport,
-        deviceScaleFactor: 1,
+        ...zoomContext,
       }),
       api: null,
     };
@@ -479,8 +503,7 @@ async function createBrowserContext(browser) {
   return {
     context: await browser.newContext({
       storageState,
-      viewport: CONFIG.viewport,
-      deviceScaleFactor: 1,
+      ...zoomContext,
     }),
     api,
   };
@@ -1102,20 +1125,28 @@ async function prepareDashboardForCapture(page, dashboard, index, total) {
   const metrics = await dashboardCaptureMetrics(page);
   const measuredBottom =
     metrics.panelBottom > 0 ? metrics.panelBottom : metrics.scrollBottom;
-  const desiredHeight = Math.min(
-    MAX_CAPTURE_VIEWPORT_HEIGHT,
-    Math.max(900, Math.ceil(measuredBottom || CONFIG.viewport.height) + 32),
+  const scale = zoomScale(CONFIG.browserZoom);
+  const requestedLayoutViewport = layoutViewportForZoom(
+    CONFIG.viewport,
+    CONFIG.browserZoom,
   );
-  dashboard.captureHeight = desiredHeight;
-  const currentViewport = page.viewportSize() || CONFIG.viewport;
+  const desiredLayoutHeight = Math.min(
+    Math.floor(MAX_CAPTURE_VIEWPORT_HEIGHT / scale),
+    Math.max(
+      Math.ceil(900 / scale),
+      Math.ceil(measuredBottom || requestedLayoutViewport.height) + 32,
+    ),
+  );
+  dashboard.captureHeight = Math.round(desiredLayoutHeight * scale);
+  const currentViewport = page.viewportSize() || requestedLayoutViewport;
   let viewportChanged = false;
-  if (desiredHeight > currentViewport.height + 4) {
+  if (desiredLayoutHeight > currentViewport.height + 4) {
     console.log(
-      `[${index}/${total}] setting capture viewport for ${dashboard.uid} to ${CONFIG.viewport.width}x${desiredHeight} based on ${metrics.markerCount} panel marker(s) ...`,
+      `[${index}/${total}] setting capture layout viewport for ${dashboard.uid} to ${requestedLayoutViewport.width}x${desiredLayoutHeight} based on ${metrics.markerCount} panel marker(s) ...`,
     );
     await page.setViewportSize({
-      width: CONFIG.viewport.width,
-      height: desiredHeight,
+      width: requestedLayoutViewport.width,
+      height: desiredLayoutHeight,
     });
     viewportChanged = true;
     await page.waitForTimeout(Math.max(250, Math.min(1000, CONFIG.settleMs)));
@@ -1136,7 +1167,8 @@ async function settleDashboardAfterViewportChange(page, dashboard, index, total)
 
 async function materializeLazyPanels(page, dashboard, index, total) {
   const scrollDelayMs = Math.max(250, Math.min(1000, Math.floor(CONFIG.settleMs / 3)));
-  const step = Math.max(500, Math.floor(CONFIG.viewport.height * 0.75));
+  const layoutViewport = layoutViewportForZoom(CONFIG.viewport, CONFIG.browserZoom);
+  const step = Math.max(250, Math.floor(layoutViewport.height * 0.75));
   let previousScrollHeight = 0;
   console.log(`[${index}/${total}] materializing lazy panels for ${dashboard.uid} ...`);
 
@@ -1145,9 +1177,9 @@ async function materializeLazyPanels(page, dashboard, index, total) {
     const scrollHeight = Math.max(
       metrics.scrollBottom,
       metrics.panelBottom,
-      CONFIG.viewport.height,
+      layoutViewport.height,
     );
-    if (scrollHeight <= CONFIG.viewport.height && pass > 1) {
+    if (scrollHeight <= layoutViewport.height && pass > 1) {
       break;
     }
     for (let y = 0; y <= scrollHeight; y += step) {
@@ -1192,13 +1224,16 @@ function dashboardRenderUrl(dashboard) {
 }
 
 async function applyBrowserZoom(page) {
-  await page.evaluate((zoomPercent) => {
-    document.documentElement.style.zoom = `${zoomPercent}%`;
-  }, CONFIG.browserZoom);
+  // Browser zoom reduces the CSS layout viewport while retaining the physical
+  // output surface. The context combines a reduced viewport with matching DPR;
+  // root CSS zoom would magnify a desktop layout and manufacture overflow.
+  await page.evaluate(() => {
+    document.documentElement.style.removeProperty("zoom");
+  });
 }
 
 async function detectBrowserAndKioskState(page) {
-  return page.evaluate(({ requestedZoom, requestedKiosk }) => {
+  return page.evaluate(({ requestedZoom, requestedKiosk, physicalViewport }) => {
     const visible = (element) => {
       if (!element) return false;
       const rect = element.getBoundingClientRect();
@@ -1230,16 +1265,23 @@ async function detectBrowserAndKioskState(page) {
       cssZoom: getComputedStyle(document.documentElement).zoom || "1",
       visualViewportScale: window.visualViewport?.scale || 1,
       devicePixelRatio: window.devicePixelRatio,
+      layoutViewport: { width: window.innerWidth, height: window.innerHeight },
+      physicalViewport,
+      zoomEmulation: "layout-viewport-and-device-scale-factor",
       requestedKiosk,
       actualKiosk,
       kioskParam,
       visibleGrafanaChrome: visibleChrome,
     };
-  }, { requestedZoom: CONFIG.browserZoom, requestedKiosk: CONFIG.kioskMode });
+  }, {
+    requestedZoom: CONFIG.browserZoom,
+    requestedKiosk: CONFIG.kioskMode,
+    physicalViewport: CONFIG.viewport,
+  });
 }
 
 async function collectLayoutGeometry(page, dashboard) {
-  return page.evaluate(({ requiredPanels, viewport }) => {
+  return page.evaluate(({ requiredPanels, physicalViewport }) => {
     const round = (value) => Math.round(value * 10) / 10;
     const panelGeometry = {};
     for (const panel of requiredPanels) {
@@ -1260,13 +1302,18 @@ async function collectLayoutGeometry(page, dashboard) {
       document.documentElement.scrollWidth,
       document.body?.scrollWidth || 0,
     );
+    const layoutViewport = {
+      width: document.documentElement.clientWidth || window.innerWidth,
+      height: document.documentElement.clientHeight || window.innerHeight,
+    };
     return {
-      viewport,
+      physicalViewport,
+      layoutViewport,
       documentWidth,
-      horizontalOverflow: documentWidth > viewport.width + 2,
+      horizontalOverflow: documentWidth > layoutViewport.width + 2,
       panelGeometry,
     };
-  }, { requiredPanels: dashboard.requiredPanels, viewport: CONFIG.viewport });
+  }, { requiredPanels: dashboard.requiredPanels, physicalViewport: CONFIG.viewport });
 }
 
 async function collectNavigationValidation(page) {
@@ -1359,7 +1406,13 @@ async function collectNavigationValidation(page) {
 }
 
 async function collectTypographyValidation(page, dashboard) {
-  return page.evaluate(({ requiredPanels, minBodyPx, minTitlePx }) => {
+  return page.evaluate(({
+    requiredPanels,
+    minAuthoredBodyPx,
+    minAuthoredTitlePx,
+    minGrafanaBodyPx,
+    minGrafanaTitlePx,
+  }) => {
     const round = (value) => Math.round(value * 100) / 100;
     const visible = (element) => {
       if (!(element instanceof Element)) return false;
@@ -1412,22 +1465,34 @@ async function collectTypographyValidation(page, dashboard) {
       }
 
       const titleElement = panelTitleElement(container);
+      const authoredTitle = Boolean(
+        titleElement?.matches(
+          "[data-bioetl-panel-title], .bioetl-panel-title",
+        ),
+      );
+      const titleMinimumPx = authoredTitle
+        ? minAuthoredTitlePx
+        : minGrafanaTitlePx;
       const titleFontPx = titleElement
         ? Number.parseFloat(getComputedStyle(titleElement).fontSize)
         : null;
-      if (!Number.isFinite(titleFontPx) || titleFontPx + 0.01 < minTitlePx) {
+      if (!Number.isFinite(titleFontPx) || titleFontPx + 0.01 < titleMinimumPx) {
         violations.push({
           id: panel.id,
           title: panel.title,
           kind: "panel_title_font",
           observedPx: Number.isFinite(titleFontPx) ? round(titleFontPx) : null,
-          minimumPx: round(minTitlePx),
+          minimumPx: round(titleMinimumPx),
+          surface: authoredTitle ? "authored" : "grafana-managed",
         });
       }
 
       const bodyRoot = panelBodyRoot(container);
+      const bodyMinimumPx = panel.type === "text"
+        ? minAuthoredBodyPx
+        : minGrafanaBodyPx;
       const navigationRoot = container.querySelector(".bioetl-nav");
-      const bodyFonts = [bodyRoot, ...Array.from(bodyRoot.querySelectorAll("*"))]
+      const bodyFontSamples = [bodyRoot, ...Array.from(bodyRoot.querySelectorAll("*"))]
         .filter((element) => {
           if (!visible(element) || !ownText(element)) return false;
           if (
@@ -1438,10 +1503,19 @@ async function collectTypographyValidation(page, dashboard) {
           }
           return !element.closest("script, style, noscript");
         })
-        .map((element) => Number.parseFloat(getComputedStyle(element).fontSize))
-        .filter(Number.isFinite);
+        .map((element) => ({
+          fontPx: Number.parseFloat(getComputedStyle(element).fontSize),
+          tag: element.tagName,
+          className: String(element.className || "").slice(0, 120),
+          text: ownText(element).slice(0, 120),
+        }))
+        .filter((sample) => Number.isFinite(sample.fontPx));
+      const bodyFonts = bodyFontSamples.map((sample) => sample.fontPx);
       const minimumBodyFontPx =
         bodyFonts.length > 0 ? Math.min(...bodyFonts) : null;
+      const minimumBodyFontSample = bodyFontSamples.find(
+        (sample) => sample.fontPx === minimumBodyFontPx,
+      );
       const populatedNavigation = Boolean(
         container.querySelector('.bioetl-nav a[href*="/d/"]'),
       );
@@ -1450,19 +1524,21 @@ async function collectTypographyValidation(page, dashboard) {
           id: panel.id,
           title: panel.title,
           kind: "panel_body_font_missing",
-          minimumPx: round(minBodyPx),
+          minimumPx: round(bodyMinimumPx),
+          surface: panel.type === "text" ? "authored" : "grafana-managed",
         });
       }
       if (
         Number.isFinite(minimumBodyFontPx) &&
-        minimumBodyFontPx + 0.01 < minBodyPx
+        minimumBodyFontPx + 0.01 < bodyMinimumPx
       ) {
         violations.push({
           id: panel.id,
           title: panel.title,
           kind: "panel_body_font",
           observedPx: round(minimumBodyFontPx),
-          minimumPx: round(minBodyPx),
+          minimumPx: round(bodyMinimumPx),
+          surface: panel.type === "text" ? "authored" : "grafana-managed",
         });
       }
       panels.push({
@@ -1481,24 +1557,35 @@ async function collectTypographyValidation(page, dashboard) {
             )
           : null,
         titleFontPx: Number.isFinite(titleFontPx) ? round(titleFontPx) : null,
+        titleSurface: authoredTitle ? "authored" : "grafana-managed",
+        titleMinimumPx: round(titleMinimumPx),
         minimumBodyFontPx: Number.isFinite(minimumBodyFontPx)
           ? round(minimumBodyFontPx)
           : null,
+        bodySurface: panel.type === "text" ? "authored" : "grafana-managed",
+        bodyMinimumPx: round(bodyMinimumPx),
         bodyTextSampleCount: bodyFonts.length,
+        minimumBodyFontTag: minimumBodyFontSample?.tag || null,
+        minimumBodyFontClass: minimumBodyFontSample?.className || null,
+        minimumBodyFontText: minimumBodyFontSample?.text || null,
       });
     }
     return {
       status: violations.length === 0 ? "ok" : "error",
-      bodyMinimumPx: minBodyPx,
-      panelTitleMinimumPx: minTitlePx,
+      bodyMinimumPx: minAuthoredBodyPx,
+      panelTitleMinimumPx: minAuthoredTitlePx,
+      grafanaBodyMinimumPx: minGrafanaBodyPx,
+      grafanaPanelTitleMinimumPx: minGrafanaTitlePx,
       checkedPanelCount: panels.length,
       panels,
       violations,
     };
   }, {
     requiredPanels: dashboard.requiredPanels,
-    minBodyPx: MIN_PANEL_BODY_FONT_PX,
-    minTitlePx: MIN_PANEL_TITLE_FONT_PX,
+    minAuthoredBodyPx: MIN_AUTHORED_BODY_FONT_PX,
+    minAuthoredTitlePx: MIN_AUTHORED_TITLE_FONT_PX,
+    minGrafanaBodyPx: MIN_GRAFANA_BODY_FONT_PX,
+    minGrafanaTitlePx: MIN_GRAFANA_TITLE_FONT_PX,
   });
 }
 
@@ -1508,11 +1595,13 @@ async function renderDashboard(page, dashboard, index, total) {
   // Start full-surface audits with enough vertical space for expanded rows.
   // Shrinking/resizing only after queries settle makes Grafana re-run every
   // panel and can strand Infinity/HTTP panels in a loading state.
-  const auditViewport =
+  const auditPhysicalViewport =
     CONFIG.captureSurface === "full" && CONFIG.expandCollapsedRows
-    ? { width: CONFIG.viewport.width, height: MAX_CAPTURE_VIEWPORT_HEIGHT }
-    : CONFIG.viewport;
-  await page.setViewportSize(auditViewport);
+      ? { width: CONFIG.viewport.width, height: MAX_CAPTURE_VIEWPORT_HEIGHT }
+      : CONFIG.viewport;
+  await page.setViewportSize(
+    layoutViewportForZoom(auditPhysicalViewport, CONFIG.browserZoom),
+  );
   console.log(`[${index}/${total}] goto ${dashboard.uid} -> ${target}`);
   await page.goto(target, {
     timeout: CONFIG.timeoutMs,
@@ -1565,7 +1654,12 @@ async function renderDashboard(page, dashboard, index, total) {
     await settleDashboardAfterViewportChange(page, dashboard, index, total);
   }
   dashboard.requestedViewport = { ...CONFIG.viewport };
-  dashboard.actualViewport = page.viewportSize() || { ...CONFIG.viewport };
+  dashboard.layoutViewport = page.viewportSize() ||
+    layoutViewportForZoom(CONFIG.viewport, CONFIG.browserZoom);
+  dashboard.actualViewport = physicalViewportFromLayout(
+    dashboard.layoutViewport,
+    CONFIG.browserZoom,
+  );
   dashboard.requestedTheme = CONFIG.theme;
   dashboard.actualTheme = await detectActualTheme(page);
   if (dashboard.actualTheme !== CONFIG.theme) {
@@ -1580,6 +1674,11 @@ async function renderDashboard(page, dashboard, index, total) {
     );
   }
   dashboard.layoutGeometry = await collectLayoutGeometry(page, dashboard);
+  if (dashboard.layoutGeometry.horizontalOverflow) {
+    throw new Error(
+      `Layout validation failed for ${dashboard.uid}: documentWidth=${dashboard.layoutGeometry.documentWidth} layoutViewportWidth=${dashboard.layoutGeometry.layoutViewport.width}`,
+    );
+  }
   dashboard.typographyValidation = await collectTypographyValidation(page, dashboard);
   if (dashboard.typographyValidation.status !== "ok") {
     throw new Error(
@@ -1786,5 +1885,7 @@ if (require.main === module) {
 
 module.exports = {
   classifyPanelTerminalEvidence,
+  layoutViewportForZoom,
+  physicalViewportFromLayout,
   pngEvidence,
 };

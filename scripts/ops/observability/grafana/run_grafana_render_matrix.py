@@ -37,6 +37,7 @@ class RenderProfile:
     capture_surface: str = "viewport"
     kiosk_mode: str = "off"
     expand_collapsed_rows: bool = False
+    browser_zoom: int = 100
 
 
 def build_profiles(*, include_kiosk: bool = True) -> tuple[RenderProfile, ...]:
@@ -60,6 +61,16 @@ def build_profiles(*, include_kiosk: bool = True) -> tuple[RenderProfile, ...]:
             capture_surface="full",
             expand_collapsed_rows=True,
         )
+    )
+    profiles.extend(
+        RenderProfile(
+            name=f"1366x768-{theme}-zoom-200",
+            width=1366,
+            height=768,
+            theme=theme,
+            browser_zoom=200,
+        )
+        for theme in THEMES
     )
     profiles.append(
         RenderProfile(
@@ -109,7 +120,7 @@ def _profile_argv(
         "--kiosk-mode",
         profile.kiosk_mode,
         "--browser-zoom",
-        "100",
+        str(profile.browser_zoom),
     ]
     argv.append(
         "--expand-collapsed-rows"
