@@ -2,12 +2,27 @@
 
 from __future__ import annotations
 
-from scripts.engineering.qa.report_observability_metric_inventory import (
-    Any,
+import ast
+import json
+import re
+from collections import defaultdict
+from pathlib import Path
+from typing import Any
+
+from bioetl.infrastructure.observability.prometheus_metric_registries import (
     COUNTERS,
     GAUGES,
     HISTOGRAMS,
-    Path,
+)
+from scripts.engineering.qa.observability_metric_inventory_scan import (
+    _as_repo_relative,
+    _import_from_nodes,
+    _load_declared_metric_definitions,
+    _normalize_mapping_lists,
+    _scan_canonical_metric_mentions,
+    _scan_registered_metric_names,
+)
+from scripts.engineering.qa.report_observability_metric_inventory import (
     _CANONICAL_METRIC_RE,
     _DOC_SCAN_ROOTS,
     _EXPORTED_PROMETHEUS_METRIC_NAME_BINDINGS,
@@ -18,17 +33,7 @@ from scripts.engineering.qa.report_observability_metric_inventory import (
     _REPO_ROOT,
     _RULE_SCAN_ROOT,
     _TEXT_SUFFIXES,
-    _as_repo_relative,
-    _import_from_nodes,
     _iter_text_files,
-    _load_declared_metric_definitions,
-    _normalize_mapping_lists,
-    _scan_canonical_metric_mentions,
-    _scan_registered_metric_names,
-    ast,
-    defaultdict,
-    json,
-    re,
 )
 
 def _coerce_int(value: object, *, default: int = -1) -> int:

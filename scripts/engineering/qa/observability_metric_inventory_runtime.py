@@ -2,42 +2,46 @@
 
 from __future__ import annotations
 
-from scripts.engineering.qa.report_observability_metric_inventory import (
-    Any,
+import ast
+import json
+import os
+import re
+import subprocess
+from collections import defaultdict
+from collections.abc import Sequence
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
+
+from bioetl.domain.events import (
+    ORDINARY_PIPELINE_STAGE_NAMES,
+    PipelineEvent,
+)
+from bioetl.infrastructure.observability.prometheus_metric_registries import (
     COUNTERS,
     GAUGES,
     HISTOGRAMS,
-    HTTPError,
-    MetricInventoryReport,
-    ORDINARY_PIPELINE_STAGE_NAMES,
-    Path,
-    PipelineEvent,
-    REGISTERED_PROMETHEUS_METRIC_LABELS,
-    Request,
-    Sequence,
-    URLError,
-    UTC,
-    _CANONICAL_METRIC_RE,
-    _DEFAULT_DRIFT_ALLOWLIST,
-    _DEFAULT_OBSERVABILITY_GOVERNANCE,
-    _PROMETHEUS_BASE_URL_ENV_VAR,
-    _PROMETHEUS_BEARER_TOKEN_ENV_VAR,
-    _PROMETHEUS_QUERY_TIMEOUT_SECONDS,
+)
+from scripts.engineering.qa.observability_metric_inventory_scan import (
     _as_repo_relative,
     _call_method_name,
     _call_nodes,
     _iter_runtime_event_candidate_paths,
     _normalize_mapping_lists,
     _read_runtime_event_candidate_text,
-    ast,
-    datetime,
-    defaultdict,
-    json,
-    os,
-    re,
-    subprocess,
-    urlencode,
-    urlopen,
+)
+from scripts.engineering.qa.report_observability_metric_inventory import (
+    REGISTERED_PROMETHEUS_METRIC_LABELS as REGISTERED_PROMETHEUS_METRIC_LABELS,
+    MetricInventoryReport,
+    _CANONICAL_METRIC_RE,
+    _DEFAULT_DRIFT_ALLOWLIST,
+    _DEFAULT_OBSERVABILITY_GOVERNANCE,
+    _PROMETHEUS_BASE_URL_ENV_VAR,
+    _PROMETHEUS_BEARER_TOKEN_ENV_VAR,
+    _PROMETHEUS_QUERY_TIMEOUT_SECONDS,
 )
 
 def _declared_pipeline_event_names() -> set[str]:

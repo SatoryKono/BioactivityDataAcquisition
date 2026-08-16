@@ -481,16 +481,36 @@ _build_runtime_cardinality_review_summary_impl = (
 )
 
 
-def _query_prometheus_scalar(**kwargs: object) -> int:
+def _query_prometheus_scalar(
+    *,
+    prometheus_base_url: str,
+    query: str,
+    bearer_token: str,
+) -> int:
     """Compatibility wrapper preserving module-level ``urlopen`` patching."""
     _metric_runtime.urlopen = urlopen
-    return _query_prometheus_scalar_impl(**kwargs)
+    return _query_prometheus_scalar_impl(
+        prometheus_base_url=prometheus_base_url,
+        query=query,
+        bearer_token=bearer_token,
+    )
 
 
-def _query_prometheus_label_values(**kwargs: object) -> dict[str, list[str]]:
+def _query_prometheus_label_values(
+    *,
+    prometheus_base_url: str,
+    metric_name: str,
+    label_names: frozenset[str],
+    bearer_token: str,
+) -> dict[str, list[str]]:
     """Compatibility wrapper preserving module-level ``urlopen`` patching."""
     _metric_runtime.urlopen = urlopen
-    return _query_prometheus_label_values_impl(**kwargs)
+    return _query_prometheus_label_values_impl(
+        prometheus_base_url=prometheus_base_url,
+        metric_name=metric_name,
+        label_names=label_names,
+        bearer_token=bearer_token,
+    )
 
 
 def _build_runtime_cardinality_review_summary(
@@ -705,7 +725,7 @@ def _risky_label_review_fields(
     }
 
 
-def collect_metric_inventory(
+def _collect_metric_inventory_impl(
     repo_root: Path,
 ) -> MetricInventoryReport:
     repo_root = repo_root.resolve()
@@ -900,9 +920,6 @@ def _combine_metric_emitters(
     return dict(combined)
 
 
-_collect_metric_inventory_impl = collect_metric_inventory
-
-
 def collect_metric_inventory(repo_root: Path) -> MetricInventoryReport:
     """Collect the inventory after syncing compatibility overrides."""
     _sync_metric_scan_compatibility_seams()
@@ -916,7 +933,7 @@ from scripts.engineering.qa.observability_metric_inventory_cli import (
     _parse_allowlist_metric_name,
     _validate_allowlist_review_date,
     _load_drift_allowlist,
-    validate_metric_inventory,
+    validate_metric_inventory as validate_metric_inventory,
     _render_text,
     _write_evidence_report,
     _resolved_allowlist_path,
