@@ -14,7 +14,8 @@ from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
-from urllib.request import Request, urlopen
+from urllib.request import Request
+from urllib.request import urlopen as urlopen
 
 from bioetl.domain.events import (
     ORDINARY_PIPELINE_STAGE_NAMES,
