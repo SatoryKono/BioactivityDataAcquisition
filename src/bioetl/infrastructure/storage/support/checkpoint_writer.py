@@ -10,7 +10,7 @@ from __future__ import annotations
 import contextlib
 import os
 import tempfile
-from pathlib import Path, PurePosixPath
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 # Bound checkpoint I/O to protect operators from oversized / runaway listings.
 _DEFAULT_MAX_CHECKPOINT_BYTES = 16 * 1024 * 1024  # 16 MiB
@@ -39,40 +39,44 @@ class FileCompositeCheckpointWriter:
         max_checkpoint_bytes: int = _DEFAULT_MAX_CHECKPOINT_BYTES,
         max_glob_matches: int = _DEFAULT_MAX_GLOB_MATCHES,
     ) -> None:
-        candidate = Path(checkpoint_dir)
-        # POSIX-absolute roots (``/custom/...``) must not pick up a Windows drive.
-        if candidate.as_posix().startswith("/") and not candidate.drive:
-            self._checkpoint_dir = candidate
-        else:
-            self._checkpoint_dir = candidate.resolve()
+        self._checkpoint_dir = Path(checkpoint_dir).resolve(strict=False)
         self._max_checkpoint_bytes = max_checkpoint_bytes
         self._max_glob_matches = max_glob_matches
 
+    @staticmethod
+    def _relative_path(path: str, *, kind: str = "path") -> Path:
+        """Return a normalized relative path or reject cross-platform escapes."""
+        normalized = path.replace("\\", "/")
+        posix_path = PurePosixPath(normalized)
+        windows_path = PureWindowsPath(path)
+        if (
+            not path
+            or posix_path.is_absolute()
+            or bool(windows_path.drive)
+            or bool(windows_path.root)
+        ):
+            raise CheckpointPathError(
+                f"Checkpoint {kind} must be relative to checkpoint root: {path!r}"
+            )
+        if ".." in posix_path.parts or ".." in windows_path.parts:
+            raise CheckpointPathError(
+                f"Checkpoint {kind} escapes checkpoint root: {path!r}"
+            )
+        return Path(*posix_path.parts)
+
+    def _ensure_contained(self, candidate: Path, *, source: str) -> Path:
+        """Resolve ``candidate`` and require it to remain under the resolved root."""
+        resolved = candidate.resolve(strict=False)
+        if not resolved.is_relative_to(self._checkpoint_dir):
+            raise CheckpointPathError(
+                f"Checkpoint path escapes checkpoint root: {source!r}"
+            )
+        return resolved
+
     def _resolve_path(self, path: str) -> Path:
         """Resolve ``path`` under the checkpoint root; reject traversal escapes."""
-        # Reject absolute / drive-qualified inputs (user-supplied relative only).
-        if (
-            not path or path.startswith(("/", "\\")) or ":" in path.split("/", 1)[0]
-        ) and Path(path).is_absolute():
-            raise CheckpointPathError(
-                f"Checkpoint path must be relative to checkpoint root: {path!r}"
-            )
-        # Lexical ``is_relative_to`` does not collapse ``..``, so reject
-        # traversal segments before joining (same rule as ``list_glob``).
-        if ".." in Path(path).parts:
-            raise CheckpointPathError(
-                f"Checkpoint path escapes checkpoint root: {path!r}"
-            )
-        candidate = self._checkpoint_dir / path
-        root_posix = PurePosixPath(self._checkpoint_dir.as_posix())
-        candidate_posix = PurePosixPath(candidate.as_posix())
-        if not candidate_posix.is_relative_to(root_posix):
-            raise CheckpointPathError(
-                f"Checkpoint path escapes checkpoint root: {path!r}"
-            )
-        if self._checkpoint_dir.drive:
-            return candidate.resolve()
-        return candidate
+        relative = self._relative_path(path)
+        return self._ensure_contained(self._checkpoint_dir / relative, source=path)
 
     def read(self, path: str) -> str | None:
         """Read checkpoint file content.
@@ -80,14 +84,17 @@ class FileCompositeCheckpointWriter:
         Returns None if file does not exist or cannot be read.
         """
         full = self._resolve_path(path)
+        full = self._ensure_contained(full, source=path)
         if not full.exists():
             return None
+        full = self._ensure_contained(full, source=path)
         size = full.stat().st_size
         if size > self._max_checkpoint_bytes:
             raise CheckpointSizeError(
                 f"Checkpoint file exceeds max size "
                 f"({size} > {self._max_checkpoint_bytes}): {path!r}"
             )
+        full = self._ensure_contained(full, source=path)
         return full.read_text(encoding="utf-8")
 
     def write_atomic(self, path: str, content: str) -> None:
@@ -101,25 +108,32 @@ class FileCompositeCheckpointWriter:
         self._checkpoint_dir.mkdir(parents=True, exist_ok=True)
         full = self._resolve_path(path)
         full.parent.mkdir(parents=True, exist_ok=True)
+        full = self._ensure_contained(full, source=path)
+        parent = self._ensure_contained(full.parent, source=path)
         fd, temp_path_str = tempfile.mkstemp(
             suffix=".tmp",
             prefix=f".{full.stem}_",
-            dir=full.parent,
+            dir=parent,
         )
         temp = Path(temp_path_str)
         try:
             with os.fdopen(fd, "w", encoding="utf-8") as handle:
                 handle.write(content)
+            temp = self._ensure_contained(temp, source=path)
+            full = self._ensure_contained(full, source=path)
             temp.replace(full)
         finally:
-            if temp.exists():
-                with contextlib.suppress(OSError):
+            with contextlib.suppress(OSError, CheckpointPathError):
+                temp = self._ensure_contained(temp, source=path)
+                if temp.exists():
                     temp.unlink()
 
     def delete(self, path: str) -> bool:
         """Delete checkpoint file. Returns True if existed."""
         full = self._resolve_path(path)
+        full = self._ensure_contained(full, source=path)
         if full.exists():
+            full = self._ensure_contained(full, source=path)
             full.unlink()
             return True
         return False
@@ -128,17 +142,16 @@ class FileCompositeCheckpointWriter:
         """List files matching glob, lexical descending by filename."""
         if not self._checkpoint_dir.exists():
             return []
-        # Reject patterns that would escape via path segments.
-        if ".." in Path(pattern).parts:
-            raise CheckpointPathError(
-                f"Checkpoint glob pattern must not contain '..': {pattern!r}"
-            )
-        matches = list(self._checkpoint_dir.glob(pattern))
+        relative_pattern = self._relative_path(pattern, kind="glob pattern")
+        matches = list(self._checkpoint_dir.glob(relative_pattern.as_posix()))
         if len(matches) > self._max_glob_matches:
             raise CheckpointSizeError(
                 f"Checkpoint glob matched {len(matches)} paths "
                 f"(max {self._max_glob_matches}): {pattern!r}"
             )
+        matches = [
+            self._ensure_contained(match, source=pattern) for match in matches
+        ]
         matches.sort(
             key=lambda p: p.name, reverse=True
         )  # deterministic lexical, not mtime
@@ -146,4 +159,5 @@ class FileCompositeCheckpointWriter:
 
     def exists(self, path: str) -> bool:
         """Check if checkpoint file exists."""
-        return self._resolve_path(path).exists()
+        full = self._resolve_path(path)
+        return self._ensure_contained(full, source=path).exists()
