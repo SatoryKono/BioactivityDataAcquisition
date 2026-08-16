@@ -280,7 +280,10 @@ def test_reject_transient_origin_blocks_issue_worktree(
     assert canonical is None
 
 
-def test_transient_origin_is_not_recoverable_for_main(tmp_path: Path) -> None:
+def test_live_transient_origin_is_recoverable_from_canonical_start(
+    tmp_path: Path,
+) -> None:
+    """Live leftover compose must not block start from the canonical checkout."""
     report = tmp_path / "preflight.json"
     report.write_text(
         json.dumps(
@@ -297,8 +300,10 @@ def test_transient_origin_is_not_recoverable_for_main(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     assert (
-        runtime_manager._preflight_errors_are_recoverable(report, stack="main") is False
+        runtime_manager._preflight_errors_are_recoverable(report, stack="main") is True
     )
+    spec = _spec()
+    assert runtime_manager._preflight_requires_force_recreate(report, spec) is True
 
 
 def test_post_start_source_gate_failure_cannot_report_success(

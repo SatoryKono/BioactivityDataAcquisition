@@ -904,6 +904,10 @@ _RECOVERABLE_PREFLIGHT_CODES = frozenset(
         # flags them as discouraged, but absolute bind env + force-recreate clears
         # the empty Desktop virtual-bind class of Browse Recent Runs failures.
         "MOUNT_ORIGIN",
+        # Live leftover /tmp/bioetl-issues* compose is healed by start from the
+        # canonical checkout. Start from the leftover ROOT is still blocked by
+        # _reject_transient_origin.
+        "TRANSIENT_ORIGIN",
     }
 )
 _CROSS_STACK_IGNORABLE_PREFLIGHT_CODES = frozenset(
@@ -1017,6 +1021,7 @@ def _preflight_requires_force_recreate(
         "DASHBOARD_SOURCE_IDENTITY",
         "MOUNT_ORIGIN",
         "PROJECT_ORIGIN",
+        "TRANSIENT_ORIGIN",
     }
     return any(
         finding.get("severity") == "error"

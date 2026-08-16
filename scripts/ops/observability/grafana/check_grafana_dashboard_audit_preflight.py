@@ -1069,11 +1069,13 @@ def classify_panel_3010_terminal_contract() -> PreflightCheck:
         status="ok",
         detail=(
             "3010 positive render must classify healthy; successful empty must "
-            "classify valid-empty (noValue starts with VALID EMPTY); missing "
-            "datasource or bootstrap deferred/failed must classify "
-            "explicit-error. explicit-error is not success for positive 3010 "
-            "renders. Use --fallback playwright (Grafana Render API leaves "
-            "terminal state not-checked)."
+            "classify valid-empty (noValue starts with VALID EMPTY); a visible "
+            "TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is a "
+            "healthy fail-closed bind/origin state (HTTP 200), not "
+            "explicit-error. Missing datasource or bootstrap deferred/failed "
+            "must classify explicit-error. explicit-error is not success for "
+            "positive 3010 renders. Use --fallback playwright (Grafana Render "
+            "API leaves terminal state not-checked)."
         ),
     )
 
