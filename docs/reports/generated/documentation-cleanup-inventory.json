@@ -44929,7 +44929,7 @@
       "generator": "scripts/diagrams/render/generate_pipeline_dataflows.py",
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 2,
+      "inbound_links": 1,
       "lifecycle": null,
       "outbound_links": 9,
       "owner": "BioETL Team",
@@ -47871,7 +47871,7 @@
       "github_issue_url": null,
       "inbound_links": 3,
       "lifecycle": null,
-      "outbound_links": 8,
+      "outbound_links": 7,
       "owner": "BioETL Team",
       "path": "docs/03-guides/pipeline-dataflow-documentation.md",
       "recommended_action": "keep",
@@ -79642,6 +79642,7 @@
       "diagram_kind": null,
       "duplicate_group": null,
       "duplicate_resolution": null,
+<<<<<<< HEAD
       "extension": ".json",
       "freshness": "review-required",
       "generated_route": null,
@@ -79670,6 +79671,9 @@
       "diagram_kind": null,
       "duplicate_group": null,
       "duplicate_resolution": null,
+||||||| 64ea579d59
+=======
+>>>>>>> codex/full-suite-green-20260816
       "extension": ".md",
       "freshness": "review-required",
       "generated_route": null,
@@ -88376,11 +88380,23 @@
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 21,
       "reports_workspace_entrypoint": 1,
+<<<<<<< HEAD
       "working_report": 608
+||||||| 64ea579d59
+      "working_report": 515
+=======
+      "working_report": 607
+>>>>>>> codex/full-suite-green-20260816
     },
     "by_recommended_action": {
       "archive-after-github-state-check": 321,
+<<<<<<< HEAD
       "archive-after-migration": 619,
+||||||| 64ea579d59
+      "archive-after-migration": 520,
+=======
+      "archive-after-migration": 612,
+>>>>>>> codex/full-suite-green-20260816
       "generate-automatically": 1055,
       "keep": 1121,
       "reconcile-with-github-state": 4,
@@ -88412,7 +88428,13 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
+<<<<<<< HEAD
       "reports": 795,
+||||||| 64ea579d59
+      "reports": 696,
+=======
+      "reports": 788,
+>>>>>>> codex/full-suite-green-20260816
       "reports-migration-analysis.md": 1,
       "security": 2
     },
@@ -88422,7 +88444,13 @@
       "Canonical": 70,
       "Deprecated": 8,
       "Generated": 1055,
+<<<<<<< HEAD
       "Working": 1087
+||||||| 64ea579d59
+      "Working": 988
+=======
+      "Working": 1080
+>>>>>>> codex/full-suite-green-20260816
     },
     "by_surface_family": {
       "active": 739,
@@ -88430,11 +88458,23 @@
       "canonical": 70,
       "duplicate": 8,
       "generated": 1055,
+<<<<<<< HEAD
       "working": 1087
+||||||| 64ea579d59
+      "working": 988
+=======
+      "working": 1080
+>>>>>>> codex/full-suite-green-20260816
     },
     "by_tracking_state": {
+<<<<<<< HEAD
       "ignored_local": 5,
       "tracked": 3123
+||||||| 64ea579d59
+      "tracked": 3029
+=======
+      "tracked": 3121
+>>>>>>> codex/full-suite-green-20260816
     },
     "docs_reports_local_count": 39,
     "duplicate_group_count": 9,
@@ -88450,8 +88490,18 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
+<<<<<<< HEAD
     "total_doc_like": 3128,
     "total_doc_like_ignored_local": 5,
     "total_doc_like_tracked": 3123
+||||||| 64ea579d59
+    "total_doc_like": 3029,
+    "total_doc_like_ignored_local": 0,
+    "total_doc_like_tracked": 3029
+=======
+    "total_doc_like": 3121,
+    "total_doc_like_ignored_local": 0,
+    "total_doc_like_tracked": 3121
+>>>>>>> codex/full-suite-green-20260816
   }
 }

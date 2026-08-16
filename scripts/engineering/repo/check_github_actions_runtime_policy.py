@@ -31,16 +31,16 @@ ALLOWED_USES: dict[str, set[str]] = {
     },
     "aquasecurity/trivy-action": {"57a97c7e7821a5776cebc9bb87c984fa69cba8f1"},
     "docker/build-push-action": {"ca052bb54ab0790a636c9b5f226502c73d547a25"},
-    "docker/login-action": {"c94ce9fb468520275223c153574b00df6fe4bcc9"},
-    "docker/setup-buildx-action": {"4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd"},
+    "docker/login-action": {"dbcb813823bdd20940b903addbd779551569679f"},
+    "docker/setup-buildx-action": {"bb05f3f5519dd87d3ba754cc423b652a5edd6d2c"},
     "github/codeql-action/upload-sarif": {
         "8dca8a82e2fa1a2c8908956f711300f9c4a4f4f6",
     },
-    "hadolint/hadolint-action": {"2332a7b74a6de0dda2e2221d575162eba76ba5e5"},
+    "hadolint/hadolint-action": {"2a66e89f53d0771bb131a7fa31f3136336094aa6"},
     "pypa/gh-action-pypi-publish": {
-        "cef221092ed1bacb1cc03d23a2d87d1d172e277b",
+        "dc37677b2e1c63e2034f94d8a5b11f265b73ba33",
     },
-    "softprops/action-gh-release": {"3bb12739c298aeb8a4eeaf626c5b8d85266b0e65"},
+    "softprops/action-gh-release": {"3d0d9888cb7fd7b750713d6e236d1fcb99157228"},
     "wagoid/commitlint-github-action": {
         "f133a0d95090ef2609192b4a21f54e20af819ea9",
     },

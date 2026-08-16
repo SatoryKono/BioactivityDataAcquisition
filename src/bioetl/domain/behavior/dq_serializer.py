@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Mapping
 from dataclasses import fields, is_dataclass
 from datetime import date, datetime
@@ -10,7 +11,6 @@ from enum import Enum
 from typing import Any, cast  # Any: needed for _serialize_value recursive return
 
 import orjson
-import yaml
 
 from bioetl.domain.behavior._dq_serializer_html import (
     format_detail_value,
@@ -27,6 +27,44 @@ from bioetl.domain.value_objects.dq_report import (
     GoldDQReport,
     SilverDQReport,
 )
+
+_PLAIN_YAML_STRING = re.compile(r"[A-Za-z_][A-Za-z0-9_.-]*")
+_YAML_RESERVED_STRINGS = frozenset(
+    {
+        "false",
+        "n",
+        "no",
+        "null",
+        "off",
+        "on",
+        "true",
+        "y",
+        "yes",
+        "~",
+    }
+)
+
+
+def _format_yaml_string(value: str) -> str:
+    """Return a deterministic YAML-safe representation of a string scalar."""
+    if _PLAIN_YAML_STRING.fullmatch(value) and value.casefold() not in (
+        _YAML_RESERVED_STRINGS
+    ):
+        return value
+    return orjson.dumps(value).decode("utf-8")
+
+
+def _format_yaml_scalar(value: object) -> str:
+    """Return a YAML-safe scalar without coupling Domain to a YAML runtime."""
+    if value is None:
+        return "null"
+    if isinstance(value, bool):
+        return str(value).lower()
+    if isinstance(value, (int, float)):
+        return str(value)
+    if isinstance(value, str):
+        return _format_yaml_string(value)
+    return _format_yaml_string(str(value))
 
 
 def to_dict(obj: object) -> JsonDict:
@@ -170,15 +208,8 @@ class DQReportSerializer:
         return result
 
     def _to_yaml(self, report: BronzeDQReport | SilverDQReport | GoldDQReport) -> str:
-        """Serialize to YAML via safe_dump for correct scalar quoting."""
-        data = to_dict(report)
-        dumped = yaml.safe_dump(
-            data,
-            default_flow_style=False,
-            allow_unicode=True,
-            sort_keys=True,
-        )
-        return cast(str, dumped).rstrip("\n")
+        """Serialize to deterministic YAML without infrastructure dependencies."""
+        return self._dict_to_yaml(to_dict(report))
 
     def _to_html(self, report: BronzeDQReport | SilverDQReport | GoldDQReport) -> str:
         """Serialize to HTML report with styling."""
@@ -263,17 +294,11 @@ class DQReportSerializer:
         ]
 
     def _yaml_value(self, value: object) -> str:
-        """Format a single value for YAML using safe_dump scalar form."""
-        dumped = yaml.safe_dump(
-            value,
-            default_flow_style=True,
-            allow_unicode=True,
-        )
-        # Remove trailing '...' and whitespace from yaml.safe_dump output
-        return cast(str, dumped).strip().replace('...', '').strip()
+        """Format a single YAML scalar deterministically."""
+        return _format_yaml_scalar(value)
 
     def _quote_yaml_string(self, value: str) -> str:
-        """Quote YAML string with full escaping via safe_dump."""
+        """Quote a YAML string when plain-scalar syntax would be ambiguous."""
         return self._yaml_value(value)
 
     def _generate_html(
