@@ -4,10 +4,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 import zstandard as zstd
 
 from bioetl.infrastructure.storage.bronze.io_mixin import BronzeWriterIOMixin
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+
+
+pytestmark = pytest.mark.unit
 
 
 class _ThreadProbeMixin(BronzeWriterIOMixin):

@@ -4,11 +4,16 @@ from __future__ import annotations
 
 from typing import Any
 
+import pytest
+
 from scripts.ops.observability.grafana.run_dux7_live_residual import (
     _focus_style_is_visible,
     _navigation_render_pass,
     keyboard_nav_check,
 )
+
+
+pytestmark = pytest.mark.unit
 
 
 class _FakePage:
