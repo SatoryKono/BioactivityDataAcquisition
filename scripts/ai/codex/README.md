@@ -193,7 +193,26 @@ an explicit `.json` path under `reports/quality`, for example
 python3 scripts/ai/codex/mcp_profile_contract.py --check
 python3 scripts/ai/codex/doctor.py static --no-write
 python3 scripts/ai/codex/setup_mcp.py --check
+python3 scripts/ai/codex/setup_mcp.py --check-local
 ```
+
+`setup_mcp.py --check` validates the full tracked portable/Devin inventory;
+`--check-local` validates generated local surfaces against the persisted
+profile without starting services. The daily recovery sequence is:
+
+```bash
+python3 scripts/ai/codex/setup_mcp.py \
+  --profile stable --transport-mode shared \
+  --persist-local-profile --skip-codex-validation
+bash scripts/ai/codex/run-codex.sh mcp-setup
+# Restart MCP clients that were already running.
+bash scripts/ai/codex/run-codex.sh mcp-static
+bash scripts/ai/codex/run-codex.sh mcp-check --profile stable \
+  --timeout 1 --overall-timeout 10 --no-write
+```
+
+The shared-plane start is bounded by `CODEX_MCP_SHARED_START_TIMEOUT` inside
+the MCP ensure helper; setup does not impose a smaller outer timeout.
 
 ## Runtime ownership
 

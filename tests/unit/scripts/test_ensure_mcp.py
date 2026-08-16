@@ -38,40 +38,30 @@ def _to_bash_path(path: Path) -> str:
 SCRIPT = _to_bash_path(ROOT / "scripts" / "ai" / "codex" / "helper" / "ensure-mcp.sh")
 
 
-def _prepare_workspace(root: Path) -> None:
-    full = setup_mcp._canonical_servers(
-        root, portable_workspace_paths=True, profile="full"
-    )
-    shared = setup_mcp._apply_shared_transport(
-        setup_mcp._canonical_servers(
-            root, portable_workspace_paths=True, profile="shared"
-        ),
-        transport_mode="shared",
-    )
-    for relative_path in (
-        ".mcp.json",
-        "scripts/ai/.mcp.json",
-        ".zed/mcp.json",
-    ):
-        path = root / relative_path
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(
-            json.dumps({"mcpServers": full}, indent=2) + "\n", encoding="utf-8"
+def _prepare_workspace(root: Path, home: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(setup_mcp.Path, "home", lambda: home)
+    assert (
+        setup_mcp.main(
+            [
+                "--root",
+                str(root),
+                "--workspace-root",
+                str(root),
+                "--profile",
+                "stable",
+                "--transport-mode",
+                "shared",
+                "--persist-local-profile",
+                "--skip-codex-validation",
+            ]
         )
-    projections = {
-        ".vscode/mcp.json": {"servers": shared},
-        ".qodo/mcp.json": {"mcpServers": shared},
-        ".devin/mcp_config.json": {"mcpServers": shared},
-    }
-    for relative_path, payload in projections.items():
-        path = root / relative_path
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        == 0
+    )
 
 
 def _write_codex_config(home: Path, workspace: Path, *, valid: bool) -> Path:
     config_path = home / ".codex" / "config.toml"
-    config_path.parent.mkdir(parents=True)
+    config_path.parent.mkdir(parents=True, exist_ok=True)
     if valid:
         # Must match ensure-mcp.sh / DEFAULT_LOCAL_* (stable + shared transport).
         rendered = setup_mcp._render_codex_mcp_toml(
@@ -91,7 +81,11 @@ args = ["{workspace}"]
 
 
 def _run_helper(
-    workspace: Path, home: Path, mode: str
+    workspace: Path,
+    home: Path,
+    mode: str,
+    *,
+    env_updates: dict[str, str] | None = None,
 ) -> subprocess.CompletedProcess[str]:
     env = os.environ.copy()
     env.update(
@@ -101,6 +95,8 @@ def _run_helper(
             "CODEX_VALIDATE_MCP_LIST": "0",
         }
     )
+    if env_updates:
+        env.update(env_updates)
     return subprocess.run(
         ["bash", SCRIPT, mode],
         cwd=workspace,
@@ -124,8 +120,7 @@ def test_ensure_keeps_valid_persisted_config_unchanged(
     home = tmp_path / "home"
     workspace.mkdir()
     home.mkdir()
-    monkeypatch.setattr(setup_mcp.Path, "home", lambda: home)
-    _prepare_workspace(workspace)
+    _prepare_workspace(workspace, home, monkeypatch)
     config_path = _write_codex_config(home, workspace, valid=True)
     fixed_mtime_ns = 946_684_800_000_000_000
     os.utime(config_path, ns=(fixed_mtime_ns, fixed_mtime_ns))
@@ -145,12 +140,14 @@ def test_ensure_keeps_valid_persisted_config_unchanged(
 @pytest.mark.skipif(
     sys.platform == "win32", reason="bash helper is exercised in the WSL runtime"
 )
-def test_ensure_repairs_stale_persisted_config(tmp_path: Path) -> None:
+def test_ensure_repairs_stale_persisted_config(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     workspace = tmp_path / "workspace"
     home = tmp_path / "home"
     workspace.mkdir()
     home.mkdir()
-    _prepare_workspace(workspace)
+    _prepare_workspace(workspace, home, monkeypatch)
     config_path = _write_codex_config(home, workspace, valid=False)
 
     result = _run_helper(workspace, home, "--ensure")
@@ -161,3 +158,98 @@ def test_ensure_repairs_stale_persisted_config(tmp_path: Path) -> None:
     assert "# === BEGIN MANAGED MCP SERVERS ===" in rendered
     assert "[mcp_servers.filesystem]" in rendered
     assert setup_mcp.MCP_SHARED_SERVER_ENDPOINTS["filesystem"] in rendered
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="bash helper is exercised in the WSL runtime"
+)
+def test_check_rejects_stale_full_local_projection(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    workspace = tmp_path / "workspace"
+    home = tmp_path / "home"
+    workspace.mkdir()
+    home.mkdir()
+    _prepare_workspace(workspace, home, monkeypatch)
+
+    vscode_path = workspace / ".vscode" / "mcp.json"
+    vscode = json.loads(vscode_path.read_text(encoding="utf-8"))
+    vscode["servers"]["docker"] = setup_mcp._local_http_server(
+        setup_mcp.MCP_SHARED_SERVER_ENDPOINTS["docker"]
+    )
+    vscode_path.write_text(json.dumps(vscode, indent=2) + "\n", encoding="utf-8")
+
+    result = _run_helper(workspace, home, "--check")
+
+    assert result.returncode != 0
+    assert "local MCP projections do not match stable/shared" in result.stdout
+    assert ".vscode/mcp.json" in result.stdout
+    assert "extra=['docker']" in result.stdout
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="bash helper is exercised in the WSL runtime"
+)
+def test_ensure_propagates_governed_timeout_and_reuses_healthy_plane(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    workspace = tmp_path / "workspace"
+    home = tmp_path / "home"
+    workspace.mkdir()
+    home.mkdir()
+    _prepare_workspace(workspace, home, monkeypatch)
+
+    runtime_dir = workspace / "scripts" / "ops" / "runtime" / "mcp"
+    runtime_dir.mkdir(parents=True, exist_ok=True)
+    health = runtime_dir / "health-shared.sh"
+    health.write_text(
+        """#!/usr/bin/env bash
+set -eu
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
+[[ -f "${root}/.fake-shared-ready" ]]
+""",
+        encoding="utf-8",
+    )
+    launcher = runtime_dir / "start-shared.sh"
+    launcher.write_text(
+        """#!/usr/bin/env bash
+set -eu
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
+printf 'start\n' >>"${root}/.fake-shared-starts"
+: >"${root}/.fake-shared-ready"
+""",
+        encoding="utf-8",
+    )
+    for script in (health, launcher):
+        script.chmod(0o755)
+    matrix = workspace / "scripts" / "ai" / "codex" / "mcp_profile_contract.py"
+    matrix.parent.mkdir(parents=True, exist_ok=True)
+    matrix.write_text("print('memory')\n", encoding="utf-8")
+
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    timeout_capture = tmp_path / "timeout.txt"
+    fake_timeout = fake_bin / "timeout"
+    fake_timeout.write_text(
+        """#!/usr/bin/env bash
+set -eu
+printf '%s\n' "$1" >>"${BIOETL_TEST_CAPTURE:?}"
+shift
+exec "$@"
+""",
+        encoding="utf-8",
+    )
+    fake_timeout.chmod(0o755)
+    updates = {
+        "PATH": f"{fake_bin}:{os.environ['PATH']}",
+        "BIOETL_TEST_CAPTURE": str(timeout_capture),
+        "CODEX_MCP_SHARED_START_TIMEOUT": "47",
+    }
+
+    first = _run_helper(workspace, home, "--ensure", env_updates=updates)
+    second = _run_helper(workspace, home, "--ensure", env_updates=updates)
+
+    assert first.returncode == 0, first.stderr
+    assert second.returncode == 0, second.stderr
+    assert timeout_capture.read_text(encoding="utf-8").splitlines() == ["47"]
+    assert (workspace / ".fake-shared-starts").read_text(encoding="utf-8") == "start\n"

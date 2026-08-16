@@ -179,6 +179,24 @@ def test_environment_check_invokes_tracked_non_executable_helpers_via_bash() -> 
     assert "bash -c" not in helper
 
 
+def test_setup_delegates_shared_start_timeout_to_mcp_ensure() -> None:
+    """Cold shared startup has one profile-aware timeout owner."""
+    root = _project_root()
+    setup_helper = (
+        root / "scripts" / "ai" / "codex" / "helper" / "setup-env.sh"
+    ).read_text(encoding="utf-8")
+    ensure_helper = (
+        root / "scripts" / "ai" / "codex" / "helper" / "ensure-mcp.sh"
+    ).read_text(encoding="utf-8")
+
+    assert 'bash "${ENSURE_MCP_SCRIPT}" --ensure' in setup_helper
+    assert "timeout 30 bash -c" not in setup_helper
+    assert "CODEX_MCP_SHARED_START_TIMEOUT:-360" in ensure_helper
+    assert 'timeout "${timeout_seconds}" bash "${launcher}"' in ensure_helper
+    assert "Shared-plane start phase failed" in ensure_helper
+    assert "Shared-plane health verification phase failed" in ensure_helper
+
+
 def test_powershell_codex_launcher_is_thin_transport_to_canonical_wsl_entrypoint() -> (
     None
 ):

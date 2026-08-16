@@ -25,32 +25,44 @@ Server ports, wrappers, state models and launch modes:
 | 8826–8827 | memory, filesystem |
 | 8828–8831 | code-analyzer, mcp-code-interpreter, mutmut, github-actions |
 
-## Operator flow
+## Canonical daily recovery
 
-```powershell
-# 1) Start shared plane (host processes via mcp-proxy)
-# Daily = all local servers except optional neo4j-*
-.\scripts\ops\runtime\mcp\start-shared.ps1 -Daily
-# Optional: .\scripts\ops\runtime\mcp\watchdog-shared.ps1 -Daily
+The daily local contract is `stable/shared`: ten selected client entries,
+nine required localhost endpoints, and remote/auth-managed `ref`. Tracked
+portable manifests and the tracked Devin projection remain the full 21-server
+inventory.
 
-# 2) Materialize local IDE projections to HTTP URLs
-$env:PYTHONPATH = (Resolve-Path .).Path
-python scripts/ai/codex/setup_mcp.py --profile shared --transport-mode shared --skip-codex-validation
-# Optional: rewrite tracked workspace MCP JSON files onto shared HTTP URLs
-# (does not start the plane; do not commit the rewritten local files).
-python scripts/ops/runtime/mcp/_materialize_shared_http_configs.py
-# Rewrites BOTH ~/.grok/config.toml and repo .grok/config.toml when present
-# (project stdio was a common dual-spawn source next to user HTTP).
-.\scripts\ops\runtime\mcp\apply-shared-to-grok.ps1 -DisableDockerGateways
+```bash
+# 1) Materialize and persist the daily local projection. This does not edit .env.
+python3 scripts/ai/codex/setup_mcp.py \
+  --profile stable --transport-mode shared \
+  --persist-local-profile --skip-codex-validation
 
-# 3) Restart AI clients once (required; Grok: /mcps then r)
+# 2) Reconcile singleton endpoints under the governed startup timeout.
+bash scripts/ai/codex/run-codex.sh mcp-setup
 
-# 4) Health
-.\scripts\ops\runtime\mcp\health-shared.ps1
+# 3) Restart clients that cache MCP config, then run static and bounded checks.
+bash scripts/ai/codex/run-codex.sh mcp-static
+python3 scripts/ai/codex/setup_mcp.py --check
+python3 scripts/ai/codex/setup_mcp.py --check-local
+bash scripts/ai/codex/run-codex.sh mcp-check \
+  --profile stable --timeout 1 --overall-timeout 10 --no-write
+codex mcp list
 
-# Stop
-.\scripts\ops\runtime\mcp\stop-shared.ps1
+# Stop the host-process plane when explicitly needed.
+bash scripts/ops/runtime/mcp/stop-shared.sh
 ```
+
+`setup_mcp.py` persists an operator choice only with
+`--persist-local-profile`. After generation, restart Codex, Cursor, VS Code,
+Qodo, Gemini, or Grok if that client was already running. Static checks are
+read-only and do not start services. Live readiness does not start Docker
+Compose or optional monitoring stacks.
+
+For Windows-native optional/heavy profiles, use `start-shared.ps1` and
+`health-shared.ps1`; `apply-shared-to-grok.ps1` remains the explicit Grok
+projection path. Those commands do not change the daily `stable/shared`
+selection unless an operator explicitly persists another profile.
 
 `start-shared.sh --all` is the full acceptance path. A repeated invocation must
 reuse the same managed PID for every endpoint.
@@ -68,8 +80,10 @@ Subset start:
 
 Fallback (stdio only):
 
-```powershell
-python scripts/ai/codex/setup_mcp.py --profile stable --transport-mode stdio --skip-codex-validation
+```bash
+python3 scripts/ai/codex/setup_mcp.py \
+  --profile stable --transport-mode stdio \
+  --persist-local-profile --skip-codex-validation
 ```
 
 ## Safety

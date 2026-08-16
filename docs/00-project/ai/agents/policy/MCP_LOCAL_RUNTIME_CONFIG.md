@@ -121,7 +121,18 @@ entire selection. Static CI validates the matrix without starting services:
 
 ```bash
 python3 scripts/ai/codex/doctor.py static --no-write
+python3 scripts/ai/codex/setup_mcp.py --check
+python3 scripts/ai/codex/setup_mcp.py --check-local
 ```
+
+`--check` owns the tracked full portable/Devin contract. `--check-local` owns
+the generated profile-filtered surfaces: workspace Codex, VS Code, Cursor,
+Qodo, optional Gemini, and (through `mcp-static`) the managed Codex user block.
+When profile flags are omitted, `--check-local` reads the persisted
+`.codex/mcp-profile.json`; if that file is absent, it uses the daily
+`stable/shared` defaults. The check is read-only, starts no process, reports
+bounded `missing`, `extra`, `transport_drift`, and `server_drift` names, and
+ignores custom non-BioETL Gemini servers.
 
 The bounded local live probe is explicit and never starts Docker Compose or a
 monitoring stack:
@@ -147,14 +158,38 @@ compose bug.
 ### Generator
 
 ```bash
-# Daily / Docker-stable (recommended on this host class):
-python scripts/ai/codex/setup_mcp.py --profile stable --skip-codex-validation
-
-# Default generator profile (stable):
-python scripts/ai/codex/setup_mcp.py --profile stable --skip-codex-validation
+# Daily local state: ten selected entries, nine localhost endpoints + Ref.
+python3 scripts/ai/codex/setup_mcp.py \
+  --profile stable --transport-mode shared \
+  --persist-local-profile --skip-codex-validation
 
 # Full local enablement:
-python scripts/ai/codex/setup_mcp.py --profile full --skip-codex-validation
+python3 scripts/ai/codex/setup_mcp.py \
+  --profile full --transport-mode shared \
+  --persist-local-profile --skip-codex-validation
+```
+
+Direct `setup_mcp.py` calls change the generated projection for that call only.
+They change future launcher behavior only with `--persist-local-profile`.
+Generation updates all local editor projections, including Gemini when that
+surface is present, while preserving custom Gemini servers. Restart clients
+that cache MCP configuration after materialization.
+
+Canonical recovery and verification does not create or modify `.env`:
+
+```bash
+python3 scripts/ai/codex/setup_mcp.py \
+  --profile stable --transport-mode shared \
+  --persist-local-profile --skip-codex-validation
+bash scripts/ai/codex/run-codex.sh mcp-setup
+
+# Restart Codex/Cursor/VS Code/Qodo/Gemini, then verify.
+bash scripts/ai/codex/run-codex.sh mcp-static
+python3 scripts/ai/codex/setup_mcp.py --check
+python3 scripts/ai/codex/setup_mcp.py --check-local
+bash scripts/ai/codex/run-codex.sh mcp-check --profile stable \
+  --timeout 1 --overall-timeout 10 --no-write
+codex mcp list
 ```
 
 One-shot host apply (profile + orphan cleanup + ensure-stable):
@@ -173,8 +208,9 @@ Rules:
 2. Tracked `.devin/mcp_config.json` keeps the **full** sanctioned set (shared
    HTTP). `.devin/mcp_config.local.json` may disable optional servers for daily
    use. Profiles filter **local IDE** projections (`.cursor/mcp.json`,
-   `.vscode/mcp.json`, workspace `.codex/settings.json`). Generator defaults
-   are **`stable`** profile and **`shared`** transport.
+   `.vscode/mcp.json`, `.qodo/mcp.json`, workspace `.codex/settings.json`, and
+   optional `.gemini/settings.json`). Generator defaults are **`stable`**
+   profile and **`shared`** transport.
 3. Retired servers in `REMOVED_MCP_SERVER_NAMES` must never reappear.
 4. Do not increase tech-debt budgets to paper over privilege sprawl.
 5. Prefer **one** AI client with a heavy **stdio**/Docker MCP profile at a time;
