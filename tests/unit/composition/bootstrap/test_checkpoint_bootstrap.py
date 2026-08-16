@@ -186,7 +186,9 @@ class TestBootstrapCompositeCheckpointPort:
             )
             result = bootstrap_composite_checkpoint_writer()
 
-        assert result._checkpoint_dir == Path("/custom/output/checkpoints/composite")
+        assert result._checkpoint_dir == Path(
+            "/custom/output/checkpoints/composite"
+        ).resolve(strict=False)
 
 
 @pytest.mark.unit
