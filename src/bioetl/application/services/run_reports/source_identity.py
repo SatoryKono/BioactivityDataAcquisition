@@ -55,7 +55,7 @@ _DOCKER_DESKTOP_WSL_PATTERN = re.compile(
 
 
 @dataclass(frozen=True)
-class RuntimeSourceIdentityResolution:
+class RuntimeSourceIdentityResolutionResult:
     """One precedence-bound identity resolution without secret-bearing data."""
 
     value: str | None
@@ -96,7 +96,7 @@ class RuntimeSourceIdentityResolution:
 
 
 @dataclass(frozen=True)
-class RuntimeSourceIdentityComparison:
+class RuntimeSourceIdentityComparisonResult:
     """Comparison state for one expected/actual source identity pair."""
 
     state: str
@@ -244,7 +244,7 @@ def resolve_runtime_source_identity(
     container_labels: Mapping[str, object] | None = None,
     environment_name: str = RUNTIME_SOURCE_ID_ENV,
     label_name: str = RUNTIME_SOURCE_ID_LABEL,
-) -> RuntimeSourceIdentityResolution:
+) -> RuntimeSourceIdentityResolutionResult:
     """Resolve one identity using the canonical fail-closed precedence.
 
     Precedence is computed runtime root, process environment, repository env
@@ -297,7 +297,7 @@ def resolve_runtime_source_identity(
         elif normalized != selected_value:
             conflicts.append(source)
 
-    return RuntimeSourceIdentityResolution(
+    return RuntimeSourceIdentityResolutionResult(
         value=selected_value,
         source=selected_source,
         status=selected_status,
@@ -310,31 +310,31 @@ def compare_runtime_source_identity(
     *,
     expected: object | None,
     actual: object | None,
-) -> RuntimeSourceIdentityComparison:
+) -> RuntimeSourceIdentityComparisonResult:
     """Classify an independently observed source identity."""
     expected_text = str(expected or "").strip()
     actual_text = str(actual or "").strip()
     normalized_expected = normalize_source_id(expected_text)
     normalized_actual = normalize_source_id(actual_text)
     if not expected_text or not actual_text:
-        return RuntimeSourceIdentityComparison(
+        return RuntimeSourceIdentityComparisonResult(
             state=IDENTITY_STATE_MISSING,
             expected=normalized_expected,
             actual=normalized_actual,
         )
     if normalized_expected is None or normalized_actual is None:
-        return RuntimeSourceIdentityComparison(
+        return RuntimeSourceIdentityComparisonResult(
             state=IDENTITY_STATE_INVALID,
             expected=normalized_expected,
             actual=normalized_actual,
         )
     if normalized_expected != normalized_actual:
-        return RuntimeSourceIdentityComparison(
+        return RuntimeSourceIdentityComparisonResult(
             state=IDENTITY_STATE_FOREIGN,
             expected=normalized_expected,
             actual=normalized_actual,
         )
-    return RuntimeSourceIdentityComparison(
+    return RuntimeSourceIdentityComparisonResult(
         state=IDENTITY_STATE_ALIGNED,
         expected=normalized_expected,
         actual=normalized_actual,

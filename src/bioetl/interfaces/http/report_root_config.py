@@ -16,7 +16,7 @@ from bioetl.application.services.run_reports.paths import (
 )
 from bioetl.application.services.run_reports.source_identity import (
     RUNTIME_SOURCE_ID_ENV,
-    RuntimeSourceIdentityResolution,
+    RuntimeSourceIdentityResolutionResult,
     load_repository_source_environment,
     resolve_runtime_source_identity,
 )
@@ -56,7 +56,7 @@ def enforce_report_root_marker() -> bool:
     return load_settings().enforce_report_root_marker
 
 
-def runtime_source_identity_resolution() -> RuntimeSourceIdentityResolution:
+def runtime_source_identity_resolution() -> RuntimeSourceIdentityResolutionResult:
     """Resolve Ops HTTP identity with the canonical cross-runtime precedence."""
     repository_environment = load_repository_source_environment(
         _repository_root(),
