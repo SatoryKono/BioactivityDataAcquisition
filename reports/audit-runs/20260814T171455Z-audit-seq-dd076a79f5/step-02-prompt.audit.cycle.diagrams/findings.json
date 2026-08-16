@@ -1,0 +1,71 @@
+{
+  "findings": [
+    {
+      "id": "DIAGRAM-SEQ-001",
+      "path": "scripts/diagrams/check/check_diagram_quality_gates.py:18",
+      "observation": "Five commands exposed by the canonical scripts.diagrams router cannot import the repository scripts package unless PYTHONPATH is supplied externally.",
+      "method": "Run each command as documented: .venv/bin/python -m scripts.diagrams <command> --help with PYTHONPATH unset.",
+      "expected": "Every command advertised by python -m scripts.diagrams --help reaches its argparse help and exits 0 from the repository root.",
+      "actual": "check-quality-gates, check-padding, fix-svg-styles, fix-pagebreaks, and render-desc-indexes exit 1 with ModuleNotFoundError: No module named 'scripts'. The other 25 advertised commands reach help successfully.",
+      "impact": "The documented quality-gate route and direct CI-style script invocation can fail before evaluating diagram correctness, leaving a release-integrity control unavailable.",
+      "confidence": "high",
+      "confidence_score": 1.0,
+      "status": "PROVEN",
+      "priority": "P1",
+      "severity": "High",
+      "category": "diagram-tooling",
+      "evidence": [
+        {
+          "path": "scripts/diagrams/__main__.py",
+          "line": 71,
+          "command": ".venv/bin/python -m scripts.diagrams check-quality-gates --help",
+          "observation": "The router dispatches the quality-gate target as a direct Python script; the child exits 1."
+        },
+        {
+          "path": "scripts/diagrams/check/check_diagram_quality_gates.py",
+          "line": 18,
+          "command": "UV_CACHE_DIR=/tmp/bioetl-audit-uv-cache uv run --frozen python -m scripts.diagrams check-quality-gates --help",
+          "observation": "SCRIPT_DIR is added to sys.path, but repository root is not; importing scripts.diagrams.core fails."
+        },
+        {
+          "path": "scripts/diagrams/check/report_diagram_padding.py",
+          "line": 10,
+          "command": ".venv/bin/python -m scripts.diagrams check-padding --help",
+          "observation": "The direct child import fails with ModuleNotFoundError."
+        },
+        {
+          "path": "scripts/diagrams/fix/fix_svg_styles.py",
+          "line": 37,
+          "command": ".venv/bin/python -m scripts.diagrams fix-svg-styles --help",
+          "observation": "The direct child import fails with ModuleNotFoundError."
+        },
+        {
+          "path": "scripts/diagrams/render/fix_pagebreaks_in_bundles.py",
+          "line": 18,
+          "command": ".venv/bin/python -m scripts.diagrams fix-pagebreaks --help",
+          "observation": "The direct child import fails with ModuleNotFoundError."
+        },
+        {
+          "path": "scripts/diagrams/render/generate_description_indexes.py",
+          "line": 11,
+          "command": ".venv/bin/python -m scripts.diagrams render-desc-indexes --help",
+          "observation": "The direct child import fails with ModuleNotFoundError."
+        }
+      ],
+      "root_cause": "The five direct-script targets import the repository package before putting the repository root on sys.path; their ImportError fallbacks repeat the same failing import.",
+      "remediation": "Bootstrap repository-root imports consistently in the five script targets and add a subprocess regression test with PYTHONPATH removed.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        ".venv/bin/python -m scripts.diagrams check-quality-gates --help",
+        ".venv/bin/python -m scripts.diagrams check-padding --help",
+        ".venv/bin/python -m scripts.diagrams fix-svg-styles --help",
+        ".venv/bin/python -m scripts.diagrams fix-pagebreaks --help",
+        ".venv/bin/python -m scripts.diagrams render-desc-indexes --help",
+        "pytest -q tests/architecture/test_diagram_regression_workflow.py"
+      ],
+      "automation": "Subprocess architecture test for router targets with PYTHONPATH absent.",
+      "automated_fix_possible": true
+    }
+  ]
+}

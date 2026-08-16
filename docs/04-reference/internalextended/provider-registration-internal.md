@@ -80,6 +80,6 @@ class ProviderRegistrationContext:
 
 ## Related Documentation
 
-- [Provider Registration API Reference](../api/composition.md#providers)
+- [Provider Registration API Reference](../api/composition.md#providers-compositionproviders)
 - [Adding New Providers](../../03-guides/add-new-source.md)
 - [Internal/Extended Index](index.md)

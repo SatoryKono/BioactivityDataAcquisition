@@ -12,10 +12,11 @@
 
 from __future__ import annotations
 
-import pytest
-
 import importlib
 from pathlib import Path
+
+import pytest
+import yaml
 
 
 pytestmark = pytest.mark.architecture
@@ -37,3 +38,11 @@ def test_build_site_router_targets_importable_backend() -> None:
 
     module = importlib.import_module("scripts.docs.build.mkdocs_build")
     assert hasattr(module, "main")
+
+
+def test_strict_docs_build_enforces_heading_anchors() -> None:
+    root = Path(__file__).resolve().parents[2]
+    config = yaml.safe_load((root / "mkdocs.yml").read_text(encoding="utf-8"))
+
+    assert config["validation"]["links"]["anchors"] in {"warn", "error"}
+    assert "attr_list" in config["markdown_extensions"]

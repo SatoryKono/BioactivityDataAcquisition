@@ -123,7 +123,7 @@ Manager-style names such as `CheckpointManager`, `CheckpointManagerService`, `Qu
 - **`FilteredDataSource`** (`filtered_data_source.py`) — Filter wrapper для data sources
 - **`IDMappingDataSource`** (`idmapping_data_source.py`) — ID mapping wrapper
 
-Подробнее о компонентах исполнения пайплайнов см. [раздел 2.4](#24-core--%D1%8F%D0%B4%D1%80%D0%BE-%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F-%D0%BF%D0%B0%D0%B9%D0%BF%D0%BB%D0%B0%D0%B9%D0%BD%D0%BE%D0%B2).
+Подробнее о компонентах исполнения пайплайнов см. [раздел 2.4](#24-core).
 
 ### 2.3. Трансформеры (Transformer DI)
 
