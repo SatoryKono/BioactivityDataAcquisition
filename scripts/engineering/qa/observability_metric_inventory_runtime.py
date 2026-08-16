@@ -45,6 +45,7 @@ from scripts.engineering.qa.report_observability_metric_inventory import (
     _PROMETHEUS_QUERY_TIMEOUT_SECONDS,
 )
 
+
 def _declared_pipeline_event_names() -> set[str]:
     declared: set[str] = set()
     for attribute_name in dir(PipelineEvent):
@@ -812,4 +813,3 @@ def _build_runtime_cardinality_review_summary(
         degraded_reasons=degraded_reasons,
         live_threshold_violations=live_threshold_violations,
     )
-

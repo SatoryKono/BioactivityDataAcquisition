@@ -156,7 +156,9 @@ class SilverWriterMetadataFacade:
         )
         if series.dtype in numeric_dtypes:
             return ColumnStats(
-                null_rate=(series.null_count() / valid_records) if valid_records else 0.0,
+                null_rate=(series.null_count() / valid_records)
+                if valid_records
+                else 0.0,
                 unique_count=series.n_unique(),
                 min_value=SilverWriterMetadataFacade._as_optional_float(series.min()),
                 max_value=SilverWriterMetadataFacade._as_optional_float(series.max()),
@@ -164,7 +166,9 @@ class SilverWriterMetadataFacade:
             )
         else:
             return ColumnStats(
-                null_rate=(series.null_count() / valid_records) if valid_records else 0.0,
+                null_rate=(series.null_count() / valid_records)
+                if valid_records
+                else 0.0,
                 unique_count=series.n_unique(),
                 min_value=None,
                 max_value=None,

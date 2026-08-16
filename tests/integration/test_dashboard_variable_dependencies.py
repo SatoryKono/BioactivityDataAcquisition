@@ -199,5 +199,3 @@ def test_provider_derivation_queries_are_re2_compatible_and_in_sync():
     }
     for case, (pipeline, workflow, expected) in cases.items():
         assert _derive_provider(pipeline, workflow) == expected, case
-
-

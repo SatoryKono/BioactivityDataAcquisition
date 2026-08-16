@@ -36,6 +36,7 @@ from scripts.engineering.qa.report_observability_metric_inventory import (
     _iter_text_files,
 )
 
+
 def _coerce_int(value: object, *, default: int = -1) -> int:
     if isinstance(value, int):
         return value

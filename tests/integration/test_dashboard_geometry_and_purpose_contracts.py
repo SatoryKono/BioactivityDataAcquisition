@@ -73,9 +73,7 @@ def _has_live_target(panel: dict[str, Any]) -> bool:
     return False
 
 
-def _walk_with_parent(
-    panels: list[Any], parent: dict[str, Any] | None = None
-):
+def _walk_with_parent(panels: list[Any], parent: dict[str, Any] | None = None):
     for panel in panels or []:
         if not isinstance(panel, dict):
             continue
@@ -289,9 +287,7 @@ def test_first_window_monitor_panels_do_not_use_grafana_range() -> None:
                     f"{dashboard_path.name}: {title!r} (id={panel.get('id')}) "
                     "is a first-window Monitor panel and must not use $__range"
                 )
-    assert not violations, "Monitor+$__range on first window:\n" + "\n".join(
-        violations
-    )
+    assert not violations, "Monitor+$__range on first window:\n" + "\n".join(violations)
 
 
 # --- DASH-COPY-006: first-window verdict cards state the palette ------------
@@ -354,9 +350,7 @@ def test_always_visible_nonrow_stack_fits_viewport() -> None:
                 f"{dashboard_path.name}: always-visible non-row bottom "
                 f"{bottom} > VIEWPORT_ROWS={VIEWPORT_ROWS}"
             )
-    assert not violations, "DASH-FIT-001 viewport overflows:\n" + "\n".join(
-        violations
-    )
+    assert not violations, "DASH-FIT-001 viewport overflows:\n" + "\n".join(violations)
 
 
 # --- DASH-COPY-003 exclusive: canonical action-first verbs ------------------
@@ -454,10 +448,14 @@ def test_group_scalar_density_exceeds_first_screen_where_enforced() -> None:
             continue
         result = scalar_report.survey_dashboard(dashboard)
         for group in result["groups"]:
-            if group["passes"] is False and (
-                dashboard_path.name,
-                group["row_id"],
-            ) not in SCALAR_DENSITY_ALLOWLIST:
+            if (
+                group["passes"] is False
+                and (
+                    dashboard_path.name,
+                    group["row_id"],
+                )
+                not in SCALAR_DENSITY_ALLOWLIST
+            ):
                 violations.append(
                     f"{uid}::{group['row_title']} rho={group['density']} "
                     f"<= first-screen {result['first_screen_density']}"

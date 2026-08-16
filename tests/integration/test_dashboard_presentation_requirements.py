@@ -233,9 +233,7 @@ def test_authored_text_font_sizes_meet_body_floor() -> None:
                     violations.append(
                         f"{path.name}:{panel.get('id')}:{panel.get('title')}={size:g}px"
                     )
-    assert not violations, "authored text below 12pt/16px:\n" + "\n".join(
-        violations
-    )
+    assert not violations, "authored text below 12pt/16px:\n" + "\n".join(violations)
 
 
 def test_area_fills_are_confined_to_first_window() -> None:
@@ -262,9 +260,7 @@ def test_area_fills_are_confined_to_first_window() -> None:
                 continue
             for violation in _area_fill_violations(panel):
                 violations.append(f"{path.name}:{panel.get('id')} {violation}")
-    assert not violations, "area fills outside first window:\n" + "\n".join(
-        violations
-    )
+    assert not violations, "area fills outside first window:\n" + "\n".join(violations)
 
 
 def test_contract_helpers_fail_closed_on_sparse_or_filled_examples() -> None:

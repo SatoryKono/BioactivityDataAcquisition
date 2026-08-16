@@ -1656,7 +1656,6 @@ def _source_revision(repo_root: Path) -> str:
     return str(_source_provenance(repo_root)["revision"])
 
 
-
 # Evidence validation is isolated from runtime execution and orchestration.
 from scripts.engineering.qa.observability_closure_campaign_validation import (
     _parse_generated_at,
@@ -1718,6 +1717,7 @@ from scripts.engineering.qa.observability_closure_campaign_validation import (
     _load_finalize_report,
     _core_campaign_gates_satisfied,
 )
+
 
 def _finalize_campaign(
     *,
@@ -1813,7 +1813,6 @@ def _bootstrap_campaign_context(
     return evidence, source_provenance, registered_pipelines, registry_completed
 
 
-
 from scripts.engineering.qa import observability_closure_campaign_cli as _campaign_cli
 from scripts.engineering.qa.observability_closure_campaign_cli import (
     _planned_payload,
@@ -1828,7 +1827,18 @@ from scripts.engineering.qa.observability_closure_campaign_cli import (
 
 def main(argv: list[str] | None = None) -> int:
     """Run the CLI while preserving the historical module patch surface."""
-    for name in ["_run_attempt","_run_phase_command","_stage_standalone_fixture_cache","_stage_workflow_fixture","_workflow_baseline_command","_workflow_failure_command","_dq_hard_failure_test_command","_source_revision","_registry_pipeline_command","_discover_chembl_pipelines"]:
+    for name in [
+        "_run_attempt",
+        "_run_phase_command",
+        "_stage_standalone_fixture_cache",
+        "_stage_workflow_fixture",
+        "_workflow_baseline_command",
+        "_workflow_failure_command",
+        "_dq_hard_failure_test_command",
+        "_source_revision",
+        "_registry_pipeline_command",
+        "_discover_chembl_pipelines",
+    ]:
         setattr(_campaign_cli, name, globals()[name])
     return _campaign_cli.main(argv)
 

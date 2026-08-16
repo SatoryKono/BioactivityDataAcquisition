@@ -22,9 +22,7 @@ from typing import Any
 
 import yaml
 
-LAYOUT_BUDGETS_PATH = Path(
-    "docs/03-guides/dashboards/contracts/layout-budgets.yaml"
-)
+LAYOUT_BUDGETS_PATH = Path("docs/03-guides/dashboards/contracts/layout-budgets.yaml")
 PERFORMANCE_BUDGETS_PATH = Path(
     "docs/03-guides/dashboards/contracts/performance-budgets.yaml"
 )
@@ -63,7 +61,9 @@ def _string_set(payload: dict[str, Any], key: str) -> frozenset[str]:
     return frozenset(value)
 
 
-def _allowlist(payload: dict[str, Any], key: str) -> dict[tuple[str, int], dict[str, str]]:
+def _allowlist(
+    payload: dict[str, Any], key: str
+) -> dict[tuple[str, int], dict[str, str]]:
     allowlists = payload.get("allowlists")
     if not isinstance(allowlists, dict):
         raise ValueError(f"{LAYOUT_BUDGETS_PATH}:allowlists must be a mapping")
@@ -73,7 +73,9 @@ def _allowlist(payload: dict[str, Any], key: str) -> dict[tuple[str, int], dict[
     out: dict[tuple[str, int], dict[str, str]] = {}
     for entry in entries:
         if not isinstance(entry, dict):
-            raise ValueError(f"{LAYOUT_BUDGETS_PATH}:allowlists.{key} entries must be maps")
+            raise ValueError(
+                f"{LAYOUT_BUDGETS_PATH}:allowlists.{key} entries must be maps"
+            )
         dashboard = entry.get("dashboard")
         panel_id = entry.get("id")
         if not isinstance(dashboard, str) or not isinstance(panel_id, int):

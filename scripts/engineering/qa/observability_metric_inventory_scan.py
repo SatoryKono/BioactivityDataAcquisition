@@ -43,6 +43,8 @@ from scripts.engineering.qa.report_observability_metric_inventory import (
 )
 
 REGISTERED_PROMETHEUS_METRIC_LABELS: dict[str, frozenset[str]] = {}
+
+
 def _iter_text_files(root: Path) -> list[Path]:
     cache_key = root.as_posix()
     cached = _TEXT_FILE_DISCOVERY_CACHE.get(cache_key)

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-16T21:43:23.066401+00:00",
+  "generated_at": "2026-08-16T22:37:07.214731+00:00",
   "summary": {
     "total_scripts": 601,
     "status_counts": {
@@ -228,7 +228,7 @@
       "references": [
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 290,
+          "line": 286,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.bat\").exists()"
         }
@@ -249,7 +249,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 289,
+          "line": 285,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.ps1\").exists()"
         }
@@ -288,19 +288,19 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 285,
+          "line": 281,
           "source_group": "tests",
           "text": "assert \"../ai/codex/diagnose_wsl.sh\" in ops_router"
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 288,
+          "line": 284,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.sh\").exists()"
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 303,
+          "line": 299,
           "source_group": "tests",
           "text": "assert 'bash \"${SCRIPT_DIR}/diagnose_wsl.sh\"' in launcher"
         }
@@ -380,7 +380,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 302,
+          "line": 298,
           "source_group": "tests",
           "text": "assert 'python3 \"${SCRIPT_DIR}/efficiency_baseline.py\"' in launcher"
         },
@@ -440,7 +440,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 311,
+          "line": 307,
           "source_group": "tests",
           "text": "headless = (root / \"scripts/ai/codex/headless.sh\").read_text(encoding=\"utf-8\")"
         }
@@ -498,7 +498,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 323,
+          "line": 319,
           "source_group": "tests",
           "text": "helper = (root / \"scripts/ai/codex/helper/check-env.sh\").read_text(encoding=\"utf-8\")"
         }
@@ -1145,7 +1145,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 318,
+          "line": 314,
           "source_group": "tests",
           "text": "assert 'local_state_audit.py\" audit' in launcher"
         },
@@ -9998,7 +9998,7 @@
         },
         {
           "path": "scripts/engineering/qa/debt_governance_gate_evaluators.py",
-          "line": 901,
+          "line": 902,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py::\""
         },
@@ -13058,7 +13058,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/report_debt_governance_gates.py",
-          "line": 225,
+          "line": 224,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.debt_governance_gate_evaluators import ("
         },
@@ -13083,7 +13083,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/report_debt_governance_gates.py",
-          "line": 475,
+          "line": 474,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.debt_governance_gate_report import ("
         }
@@ -14073,13 +14073,13 @@
       "references": [
         {
           "path": "scripts/engineering/qa/run_observability_closure_campaign.py",
-          "line": 1817,
+          "line": 1816,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa import observability_closure_campaign_cli as _campaign_cli"
         },
         {
           "path": "scripts/engineering/qa/run_observability_closure_campaign.py",
-          "line": 1818,
+          "line": 1817,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_closure_campaign_cli import ("
         }
@@ -14098,7 +14098,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/run_observability_closure_campaign.py",
-          "line": 1661,
+          "line": 1660,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_closure_campaign_validation import ("
         }
@@ -14148,7 +14148,7 @@
         },
         {
           "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 398,
+          "line": 396,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_report import ("
         }
@@ -14173,9 +14173,9 @@
         },
         {
           "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 441,
+          "line": 439,
           "source_group": "scripts",
-          "text": "from scripts.engineering.qa import observability_metric_inventory_runtime as _metric_runtime"
+          "text": "from scripts.engineering.qa import ("
         },
         {
           "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
@@ -19461,7 +19461,7 @@
         },
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 244,
+          "line": 241,
           "source_group": "tests",
           "text": "recover_ps1 = Path(\"scripts/ops/observability/grafana/recover_renderer.ps1\")"
         }
@@ -19504,7 +19504,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 2013,
+          "line": 2011,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import recover_renderer as rr"
         },
@@ -19529,7 +19529,7 @@
       "references": [
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 245,
+          "line": 242,
           "source_group": "tests",
           "text": "recover_sh = Path(\"scripts/ops/observability/grafana/recover_renderer.sh\")"
         }
@@ -20415,7 +20415,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1092,
+          "line": 1098,
           "source_group": "tests",
           "text": "probe = (ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\").read_text("
         },
@@ -22541,7 +22541,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1029,
+          "line": 1035,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -22609,7 +22609,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1029,
+          "line": 1035,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },

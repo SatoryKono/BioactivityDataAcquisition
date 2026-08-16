@@ -7,6 +7,7 @@ from __future__ import annotations
 from scripts.engineering.qa.report_debt_governance_gates import *
 from scripts.engineering.qa.report_debt_governance_gates import _parse_args
 
+
 def render_markdown(payload: dict[str, object]) -> str:
     summary = payload["summary"]
     assert isinstance(summary, dict)
@@ -190,4 +191,3 @@ def main(argv: list[str] | None = None) -> int:
 
     print(json.dumps(payload, indent=2, sort_keys=True))
     return 0
-

@@ -62,9 +62,7 @@ def build_composite_run_command_input(
         ),
         debug=option_bool_get(options, "debug", False),
         health_server=option_bool_get(options, "health_server", True),
-        health_port=option_int_get(
-            options, "health_port", DEFAULT_HEALTH_SERVER_PORT
-        ),
+        health_port=option_int_get(options, "health_port", DEFAULT_HEALTH_SERVER_PORT),
         ensure_observability_backend=option_bool_get(
             options, "ensure_observability_backend", False
         ),

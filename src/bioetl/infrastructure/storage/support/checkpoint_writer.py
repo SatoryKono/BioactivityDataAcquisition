@@ -149,9 +149,7 @@ class FileCompositeCheckpointWriter:
                 f"Checkpoint glob matched {len(matches)} paths "
                 f"(max {self._max_glob_matches}): {pattern!r}"
             )
-        matches = [
-            self._ensure_contained(match, source=pattern) for match in matches
-        ]
+        matches = [self._ensure_contained(match, source=pattern) for match in matches]
         matches.sort(
             key=lambda p: p.name, reverse=True
         )  # deterministic lexical, not mtime

@@ -188,7 +188,9 @@ def test_pfill_12_workflow_browser_is_not_panel_3010() -> None:
     )
     assert "tree_missing" in str(workflow.get("description") or "").lower()
     # 3010 must stay pipeline-only.
-    browse = next(panel for panel in _walk(data.get("panels")) if panel.get("id") == 3010)
+    browse = next(
+        panel for panel in _walk(data.get("panels")) if panel.get("id") == 3010
+    )
     browse_url = ((browse.get("targets") or [])[0]).get("url")
     assert "pipeline-run-reports" in str(browse_url)
     assert "workflow-run-reports" not in str(browse_url)

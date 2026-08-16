@@ -111,7 +111,9 @@ def _optional_str_tuple(
     size: int,
 ) -> tuple[str | None, ...]:
     if not isinstance(value, tuple) or len(value) != size:
-        raise TypeError(f"expected tuple[{size} x str | None], got {type(value).__name__}")
+        raise TypeError(
+            f"expected tuple[{size} x str | None], got {type(value).__name__}"
+        )
     return tuple(_optional_str(item) for item in value)
 
 

@@ -51,9 +51,7 @@ def test_managed_e2e_data_dir_binds_and_restores_all_runtime_paths(
         assert prepared == sandbox_data_dir
         assert os.environ["BIOETL_DATA_DIR"] == str(sandbox_data_dir)
         assert (
-            os.environ[
-                "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE"
-            ]
+            os.environ["BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE"]
             == "degraded_observable"
         )
         for relative in (
@@ -67,9 +65,7 @@ def test_managed_e2e_data_dir_binds_and_restores_all_runtime_paths(
 
     assert os.environ["BIOETL_DATA_DIR"] == str(original_data_dir)
     assert (
-        os.environ[
-            "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE"
-        ]
+        os.environ["BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE"]
         == "durable_local"
     )
     assert cache_clears == ["clear", "clear"]

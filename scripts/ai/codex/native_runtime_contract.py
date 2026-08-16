@@ -65,9 +65,7 @@ STALE_RUNTIME_PATTERNS = {
     "retired role name": re.compile(
         r"py-review-orchestrator|py-architecture-debt-bot|py-test-swarm"
     ),
-    "stale catalog count": re.compile(
-        r"\b(?:nine|девять|9 активн)\b", re.I
-    ),
+    "stale catalog count": re.compile(r"\b(?:nine|девять|9 активн)\b", re.I),
 }
 
 GENERATED_MARKER = "<!-- generated-by: scripts.ai.codex.native_runtime_contract -->"
