@@ -77,6 +77,7 @@ def build_historical_certified_identity_payload(
 
 
 __all__ = [
+    "HistoricalReplayRunIdentity",
     "build_historical_certification_payload",
     "build_historical_certified_identity_payload",
     "build_historical_certified_identity_payload_from_record",

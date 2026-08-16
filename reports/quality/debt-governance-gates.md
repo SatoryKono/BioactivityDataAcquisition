@@ -19,6 +19,7 @@
 | `debt_scorecard_budget_no_growth` | `pass` | `budget_increase_count` | `not_evaluated_without_changed_from_ref` | `0` | `configs/quality/debt_scorecard.yaml` |
 | `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `36ef7c535a46caf4c6404bf0e4c4f0ad364c3f90936c11919c711104fc6a6c13` | `36ef7c535a46caf4c6404bf0e4c4f0ad364c3f90936c11919c711104fc6a6c13` | `reports/quality/module-coverage-inventory.json` |
 | `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2419, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '36ef7c535a46caf4c6404bf0e4c4f0ad364c3f90936c11919c711104fc6a6c13'}` | `{'source_module_count': 2419, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '36ef7c535a46caf4c6404bf0e4c4f0ad364c3f90936c11919c711104fc6a6c13'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
+
 | `module_coverage_unmeasured_modules` | `pass` | `unmeasured_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `module_coverage_uncovered_modules` | `pass` | `uncovered_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `hotspot_family_baseline_budget_warnings` | `pass` | `budget_warnings` | `0` | `0` | `reports/quality/hotspot-family-baseline.json` |
@@ -56,4 +57,5 @@
 | `observability_touched_metric_review_freshness` | `pass` | `changed_metric_surface_count` | `0` | `0` | `reports/observability/runtime_cardinality_review.json` |
 | `adr_enforcement_blocking_gaps` | `pass` | `blocking_gap_count` | `0` | `0` | `reports/quality/adr-enforcement-matrix.json` |
 | `remote_main_architecture_debt_baseline` | `pass` | `baseline_artifact_fingerprint` | `65b82ae4a7dd8fa1c301ec6f97bd250e0cf40ab999f885e75d273b9f438a01b6` | `clean remote-main artifact blobs` | `reports/quality/architecture-debt-remote-main-baseline.json` |
+
 | `generated_artifact_drift` | `pass` | `stale_artifact_count` | `{'count': 0, 'artifacts': []}` | `0` | `reports/quality/*.json` |
