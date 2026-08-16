@@ -173,7 +173,7 @@ class CompositeValidator:
                 issues.extend(
                     self._validate_aggregation_config(aggregation, output_schema)
                 )
-        if "cross_validation" in composite_config:
+        if composite_config.get("cross_validation") is not None:
             cross_validation_config = composite_config["cross_validation"]
             source_names, source_issues = self._as_source_names(
                 composite_config.get("sources", [])

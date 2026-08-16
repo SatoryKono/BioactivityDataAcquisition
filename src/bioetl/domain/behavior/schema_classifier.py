@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 
 from bioetl.domain.behavior.schema_classifier_helpers import (
     added_field_changes,
@@ -15,7 +16,9 @@ from bioetl.domain.types import JsonDict
 from bioetl.domain.types.schema_policy import (
     ChangeClassification,
     SchemaChangeClassification,
+    SchemaChange,
     SchemaChangeExplanation,
+    SchemaChangeType,
     SchemaCompatibilityPolicy,
     SchemaDiff,
 )
@@ -46,8 +49,22 @@ class SchemaClassifier:
 
     def _calculate_diff(self, old_schema: JsonDict, new_schema: JsonDict) -> SchemaDiff:
         """Calculate detailed diff between two schemas."""
-        old_properties = old_schema.get("properties", {})
-        new_properties = new_schema.get("properties", {})
+        old_properties = _as_properties(old_schema.get("properties", {}))
+        new_properties = _as_properties(new_schema.get("properties", {}))
+        if old_properties is None or new_properties is None:
+            return SchemaDiff(
+                breaking_changes=[],
+                non_breaking_changes=[],
+                unknown_changes=[
+                    SchemaChange(
+                        change_type=SchemaChangeType.OBJECT_STRUCTURE_CHANGED,
+                        field_path="properties",
+                        old_value=old_schema.get("properties"),
+                        new_value=new_schema.get("properties"),
+                        classification=ChangeClassification.MANUAL_REVIEW,
+                    )
+                ],
+            )
         breaking_changes = removed_field_changes(old_properties, new_properties)
         non_breaking_changes = added_field_changes(old_properties, new_properties)
         changed_breaking, changed_non_breaking = changed_field_changes(
@@ -66,6 +83,13 @@ class SchemaClassifier:
             non_breaking_changes=non_breaking_changes,
             unknown_changes=[],
         )
+
+
+def _as_properties(value: object) -> JsonDict | None:
+    """Copy a properties mapping, or flag malformed schema structure."""
+    if not isinstance(value, Mapping):
+        return None
+    return {str(key): item for key, item in value.items()}
 
     def _apply_policy_rules(self, diff: SchemaDiff) -> SchemaChangeClassification:
         """Apply policy rules to diff results."""
