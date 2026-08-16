@@ -85748,14 +85748,7 @@
     },
     "by_recommended_action": {
       "archive-after-github-state-check": 321,
-<<<<<<< HEAD
       "archive-after-migration": 525,
-||||||| c27610f935
-      "archive-after-github-state-check": 320,
-      "archive-after-migration": 520,
-=======
-      "archive-after-migration": 520,
->>>>>>> agent/issues-8854-8856
       "generate-automatically": 1055,
       "keep": 1121,
       "reconcile-with-github-state": 4,
@@ -85797,13 +85790,7 @@
       "Canonical": 70,
       "Deprecated": 8,
       "Generated": 1055,
-<<<<<<< HEAD
       "Working": 993
-||||||| c27610f935
-      "Working": 987
-=======
-      "Working": 988
->>>>>>> agent/issues-8854-8856
     },
     "by_surface_family": {
       "active": 739,
@@ -85811,21 +85798,10 @@
       "canonical": 70,
       "duplicate": 8,
       "generated": 1055,
-<<<<<<< HEAD
       "working": 993
-||||||| c27610f935
-      "working": 987
-=======
-      "working": 988
->>>>>>> agent/issues-8854-8856
     },
     "by_tracking_state": {
-<<<<<<< HEAD
       "ignored_local": 5,
-||||||| c27610f935
-      "tracked": 3028
-=======
->>>>>>> agent/issues-8854-8856
       "tracked": 3029
     },
     "docs_reports_local_count": 38,
@@ -85842,17 +85818,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-<<<<<<< HEAD
     "total_doc_like": 3034,
     "total_doc_like_ignored_local": 5,
-||||||| c27610f935
-    "total_doc_like": 3028,
-    "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3028
-=======
-    "total_doc_like": 3029,
-    "total_doc_like_ignored_local": 0,
->>>>>>> agent/issues-8854-8856
     "total_doc_like_tracked": 3029
   }
 }
