@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-16T17:33:50.521025+00:00",
+  "generated_at": "2026-08-16T17:58:50.995553+00:00",
   "summary": {
     "total_scripts": 601,
     "status_counts": {
@@ -15,7 +15,7 @@
       "other": 76,
       "scripts": 499,
       "skills": 11,
-      "tests": 389
+      "tests": 390
     }
   },
   "scripts": [
@@ -17652,7 +17652,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": ".github/ISSUES/CODERABBIT-FULL-2026-08-ISSUE-PACK.md",
@@ -17665,6 +17665,12 @@
           "line": 8,
           "source_group": "scripts",
           "text": "| `run_leaves.py` | Sequential leaf runner (logs under reports; requires API key) |"
+        },
+        {
+          "path": "tests/unit/scripts/ops/test_coderabbit_run_leaves.py",
+          "line": 9,
+          "source_group": "tests",
+          "text": "from scripts.ops.coderabbit.run_leaves import ("
         }
       ],
       "owner": "@bioetl-platform",
@@ -19254,7 +19260,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 165,
+          "line": 169,
           "source_group": "other",
           "text": "> `bash scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh`."
         }
@@ -19273,7 +19279,7 @@
       "references": [
         {
           "path": "docs/01-requirements/DASHBOARD_REQUIREMENTS.md",
-          "line": 237,
+          "line": 256,
           "source_group": "docs",
           "text": "| Computed title/body font floors | `scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs` plus `check_grafana_dashboard_audit_preflight.py` and their unit tests |"
         },
@@ -19498,7 +19504,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 1872,
+          "line": 1953,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import recover_renderer as rr"
         },
@@ -19542,7 +19548,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 167,
+          "line": 171,
           "source_group": "other",
           "text": "> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1`."
         }
@@ -19740,7 +19746,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
-          "line": 922,
+          "line": 924,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/run_grafana_dashboard_audit_cycle.py\","
         }
@@ -19830,7 +19836,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 151,
+          "line": 155,
           "source_group": "other",
           "text": "> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1`."
         },
@@ -19873,7 +19879,7 @@
         },
         {
           "path": "grafana/README.md",
-          "line": 142,
+          "line": 146,
           "source_group": "other",
           "text": "> `bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh`."
         },
@@ -20336,7 +20342,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 16,
       "references": [
         {
           "path": "docs/05-operations/runbooks/docker-compose-project-migration.md",
@@ -20370,7 +20376,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 544,
+          "line": 549,
           "source_group": "scripts",
           "text": "str(ROOT / \"scripts/ops/runtime/docker/docker_runtime_preflight.py\"),"
         },
@@ -20601,7 +20607,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 15,
       "references": [
         {
           "path": "docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md",
@@ -20759,13 +20765,13 @@
         },
         {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 1495,
+          "line": 1569,
           "source_group": "scripts",
           "text": "from scripts.ops.runtime.docker import verify_report_bind as bind_verify"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
-          "line": 250,
+          "line": 251,
           "source_group": "tests",
           "text": "from scripts.ops.runtime.docker import verify_report_bind"
         }
