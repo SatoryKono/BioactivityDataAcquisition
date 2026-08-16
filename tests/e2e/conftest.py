@@ -192,6 +192,9 @@ _E2E_VCR_CASSETTE_NAME_OVERRIDES: dict[str, str] = {
     "TestChEMBLPipelineE2E.test_chembl_activity_full_run": (
         "test_chembl_activity_full_run"
     ),
+    "test_full_pipeline__pipeline_idempotency__e17c8c60": (
+        "test_pipeline_idempotency"
+    ),
 }
 _E2E_RUN_ID_NAMESPACE = UUID("f42c4f5c-1b2c-4db0-8f58-bc97f92a5f2f")
 E2E_FIXED_RUN_ID = UUID("81acb12e-f7f9-4d27-9d2d-d5f541c8ee88")

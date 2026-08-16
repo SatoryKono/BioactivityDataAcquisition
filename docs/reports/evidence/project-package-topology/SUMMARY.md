@@ -18,12 +18,17 @@ tracked coverage measurements.
 Current-baseline note (2026-08-11): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current source baseline is
-`source_module_count=2413` with
-`source_tree_sha256=afdf09bf4fddf6faa49075e7bad7663e1aafd719520b8c85043d5a5f9c7b3f6a`.
+`source_module_count=2419` with
+`source_tree_sha256=37701b71dc22edcb381272ba4e9908655eda8a73f7e550ebfdcb1931c3440fbd`.
 Raw files dated before `2026-07-19` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence. Refresh (2026-08-05) followed the #4343 composite facade narrowing
 and related module-coverage inventory hash-only reconcile.
+
+Refresh note (2026-08-16): remeasured after the run-reports source-identity
+merge. Source baseline moved to `source_module_count=2419` with the updated
+`source_tree_sha256` above; layer file counts and the module-coverage
+inventory were reconciled from the live working tree.
 
 Pandera bootstrap ownership remains reconciled with the current runtime:
 `apply_runtime_compatibility_patches` is a no-op compatibility seam, while the
@@ -58,10 +63,10 @@ Collected: `6`
   for source, config, tests, scripts, docs, and reports.
 - `src/bioetl/` reflects the intended layered architecture through distinct
   first-order package groups.
-- Current Python file count under `src/bioetl` is `2413`, including two
+- Current Python file count under `src/bioetl` is `2419`, including two
   top-level package modules outside the five first-order architecture layers.
-- Current layer file counts are: `domain=601`, `application=748`,
-  `infrastructure=625`, `composition=282`, `interfaces=155`.
+- Current layer file counts are: `domain=602`, `application=750`,
+  `infrastructure=626`, `composition=282`, `interfaces=157`.
 - Current first-order package counts are: `domain=22`, `application=6`,
   `infrastructure=20`, `composition=5`, `interfaces=2`.
 - `application` and `infrastructure` remain the broadest package surfaces by
@@ -80,6 +85,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `afdf09bf4fddf6faa49075e7bad7663e1aafd719520b8c85043d5a5f9c7b3f6a`
+- source_tree_sha256: `37701b71dc22edcb381272ba4e9908655eda8a73f7e550ebfdcb1931c3440fbd`
 
-`source_module_count=2413`
+`source_module_count=2419`
