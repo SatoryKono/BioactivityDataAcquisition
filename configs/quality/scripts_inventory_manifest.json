@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-16T15:48:09.172238+00:00",
+  "generated_at": "2026-08-16T17:14:14.486310+00:00",
   "summary": {
     "total_scripts": 601,
     "status_counts": {
@@ -15757,7 +15757,7 @@
         },
         {
           "path": "tests/unit/scripts/qa/test_run_architecture_audit_read_only.py",
-          "line": 17,
+          "line": 20,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import run_architecture_audit_read_only as audit_lane"
         }
@@ -15831,7 +15831,7 @@
         },
         {
           "path": "tests/architecture/test_reproducibility_docs_contract_drift.py",
-          "line": 294,
+          "line": 296,
           "source_group": "tests",
           "text": "assert \"run_historical_replay_closure_campaign.py\" in runbook"
         }
@@ -15882,13 +15882,13 @@
         },
         {
           "path": "tests/architecture/test_reproducibility_docs_contract_drift.py",
-          "line": 208,
+          "line": 210,
           "source_group": "tests",
           "text": "assert \"run_historical_replay_universe_campaign.py\" in text"
         },
         {
           "path": "tests/architecture/test_reproducibility_docs_contract_drift.py",
-          "line": 337,
+          "line": 339,
           "source_group": "tests",
           "text": "assert \"run_historical_replay_universe_campaign.py\" in runbook"
         }

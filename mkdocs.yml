@@ -88,7 +88,7 @@ not_in_nav: |
 # (render-diagrams job). Downgrade missing-file severity so
 # `mkdocs build --strict` does not abort on temporarily missing image targets.
 # Heading anchors remain warnings, which makes missing fragments fail strict
-# builds; file-level integrity is also enforced by `scripts.docs check-links`.
+# builds; file-level integrity is also enforced by `python -m scripts.docs check-links`.
 validation:
   links:
     not_found: info

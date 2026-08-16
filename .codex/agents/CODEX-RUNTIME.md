@@ -4,6 +4,7 @@
 
 - Runtime contract and precedence: `AGENTS.md`
 - Normative source index: `docs/00-project/NORMATIVE_SOURCES.md`
+- Accepted architecture decisions: `docs/02-architecture/decisions/`
 
 Load only the role- and risk-relevant sources selected by those contracts.
 
