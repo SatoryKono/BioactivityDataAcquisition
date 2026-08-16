@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 from collections.abc import Callable
 from pathlib import Path
 
@@ -26,6 +27,52 @@ class _ImmediateExecutorLoop:
         except BaseException as exc:  # pragma: no cover - defensive helper
             future.set_exception(exc)
         return future
+
+
+def test_managed_e2e_data_dir_binds_and_restores_all_runtime_paths(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    original_data_dir = tmp_path / "original"
+    sandbox_data_dir = tmp_path / "sandbox"
+    cache_clears: list[str] = []
+    monkeypatch.setenv("BIOETL_DATA_DIR", str(original_data_dir))
+    monkeypatch.setenv(
+        "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE",
+        "durable_local",
+    )
+    monkeypatch.setattr(
+        e2e_conftest,
+        "_clear_runtime_config_caches",
+        lambda: cache_clears.append("clear"),
+    )
+
+    with e2e_conftest.managed_e2e_data_dir(sandbox_data_dir) as prepared:
+        assert prepared == sandbox_data_dir
+        assert os.environ["BIOETL_DATA_DIR"] == str(sandbox_data_dir)
+        assert (
+            os.environ[
+                "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE"
+            ]
+            == "degraded_observable"
+        )
+        for relative in (
+            "output/bronze",
+            "output/silver",
+            "output/gold",
+            "checkpoints",
+            "quarantine",
+        ):
+            assert (sandbox_data_dir / relative).is_dir()
+
+    assert os.environ["BIOETL_DATA_DIR"] == str(original_data_dir)
+    assert (
+        os.environ[
+            "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE"
+        ]
+        == "durable_local"
+    )
+    assert cache_clears == ["clear", "clear"]
 
 
 def test_read_delta_records_uses_shared_delta_reader(

@@ -50,6 +50,7 @@ from bioetl.infrastructure.storage.silver.delta_request_models import (
 )
 from bioetl.infrastructure.storage.silver.delta_write_execution import (
     _await_blocking_deltalake_call,
+    _evolve_delta_schema_with_empty_append,
     _run_plain_delta_write_subprocess,
     _write_plain_delta_request,
 )
@@ -146,6 +147,35 @@ async def test_inline_plain_write_does_not_fail_after_successful_slow_write() ->
     )
 
     assert len(calls) == 1
+
+
+@pytest.mark.asyncio
+async def test_local_schema_evolution_reuses_inline_plain_write_path() -> None:
+    """Local pre-evolution must not move delta-rs onto a second worker thread."""
+    request = _make_request()
+    caller_thread = threading.get_ident()
+    calls: list[tuple[int, dict[str, object]]] = []
+
+    def _write(**kwargs: object) -> None:
+        calls.append((threading.get_ident(), dict(kwargs)))
+
+    module = SimpleNamespace(
+        __name__="bioetl.infrastructure.storage.silver_writer",
+        write_deltalake=_write,
+    )
+
+    evolved_request = await _evolve_delta_schema_with_empty_append(
+        load_module=lambda: module,
+        request=request,
+    )
+
+    assert len(calls) == 1
+    worker_thread, kwargs = calls[0]
+    assert worker_thread == caller_thread
+    assert kwargs["mode"] == "append"
+    assert kwargs["schema_mode"] == "merge"
+    assert len(kwargs["data"]) == 0
+    assert evolved_request.merge_schema is False
 
 
 @pytest.mark.asyncio
