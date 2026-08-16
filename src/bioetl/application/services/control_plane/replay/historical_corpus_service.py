@@ -51,8 +51,8 @@ __all__ = [
     "HistoricalReplayBulkCertificationSpec",
     "HistoricalReplayCertifiabilityInventory",
     "HistoricalReplayCertifiabilityRecord",
-    "HistoricalReplaySnapshotCertification",
     "HistoricalReplayCorpusService",
+    "HistoricalReplaySnapshotCertification",
 ]
 
 

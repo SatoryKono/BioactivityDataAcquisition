@@ -3,10 +3,8 @@
 from __future__ import annotations
 
 from bioetl.application.services.control_plane.replay._historical_certification_models import (
-    build_diagnostics_summary,
-)
-from bioetl.application.services.control_plane.replay._historical_certification_models import (
     HistoricalReplayCertificationProtocol,
+    build_diagnostics_summary,
 )
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort

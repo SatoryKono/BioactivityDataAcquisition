@@ -4,7 +4,11 @@ from __future__ import annotations
 
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_types import (
     ScoreCardRecord as ScoreCardRecord,
+)
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_types import (
     build_score_card_record as build_score_card_record,
+)
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_types import (
     string_items as string_items,
 )
 from bioetl.domain.control_plane.reproducibility_policy import (

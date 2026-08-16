@@ -165,7 +165,7 @@ def test_cli_render_survives_legacy_stdout_encoding(
     assert code == 0
     payload = fake.buffer.getvalue()
     assert marker.encode("utf-8") in payload
-    assert "последовательн".encode("utf-8") in payload
+    assert "последовательн".encode() in payload
 
 
 def test_cli_render_output_skips_stdout_and_keeps_cyrillic(

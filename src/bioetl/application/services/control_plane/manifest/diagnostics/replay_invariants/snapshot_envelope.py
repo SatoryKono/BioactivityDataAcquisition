@@ -5,6 +5,8 @@ from __future__ import annotations
 from bioetl.application.services.control_plane.replay.historical_certification import (
     HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED,
     HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
+)
+from bioetl.application.services.control_plane.replay.historical_certification import (
     LIVE_CAPTURE_SNAPSHOT_MATERIALIZED as LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunManifest

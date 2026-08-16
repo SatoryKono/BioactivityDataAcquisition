@@ -6,8 +6,6 @@ from dataclasses import dataclass
 
 from bioetl.application.services.control_plane.replay._bundle_descriptor_payloads import (
     RunManifestInspectionResult,
-)
-from bioetl.application.services.control_plane.replay._bundle_descriptor_payloads import (
     build_replay_bundle,
     dict_or_empty,
     optional_string,

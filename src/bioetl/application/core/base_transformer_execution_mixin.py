@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.core._base_transformer_execution_support import (
     TransformerExecutionOwner,
+    _ClosableSpan,
     handle_transformation_error,
     handle_validation_error,
     record_metrics_and_close_span,
@@ -24,7 +25,6 @@ from bioetl.application.core.base_transformer.errors import (
 from bioetl.application.core.base_transformer_helpers_mixin import (
     _BaseTransformerRecordHelpersMixin,
 )
-from bioetl.application.core._base_transformer_execution_support import _ClosableSpan
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
