@@ -1,7 +1,11 @@
 {
   "campaign": "CR-FULL-20260816",
   "base_sha": "6a2c8abe8ac5501bae3fef69667c3ff09280e46c",
-  "started_utc": "2026-08-16T17:50:03.641281+00:00",
+  "updated_utc": "2026-08-16T21:23:42.713987+00:00",
+  "counts": {
+    "ok": 7,
+    "rate_limit": 1
+  },
   "results": {
     "S01-domain-aggregates": {
       "id": "S01-domain-aggregates",
@@ -195,6 +199,5 @@
         "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
       ]
     }
-  },
-  "updated_utc": "2026-08-16T21:23:42.706838+00:00"
+  }
 }
