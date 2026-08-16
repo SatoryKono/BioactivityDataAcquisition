@@ -20,12 +20,24 @@ class MergedFieldExplanation:
     """Explanation for a single merged field."""
 
     field_name: str
-    source_providers: list[str]
+    source_providers: tuple[str, ...]
     merge_strategy: str
-    priority_order: list[str] | None = None
+    priority_order: tuple[str, ...] | None = None
     final_value_source: str | None = None
     conflict_resolution: str | None = None
-    enrichment_applied: list[str] | None = None
+    enrichment_applied: tuple[str, ...] | None = None
+
+    def __post_init__(self) -> None:
+        """Freeze all nested collections supplied by callers."""
+        object.__setattr__(self, "source_providers", tuple(self.source_providers))
+        if self.priority_order is not None:
+            object.__setattr__(self, "priority_order", tuple(self.priority_order))
+        if self.enrichment_applied is not None:
+            object.__setattr__(
+                self,
+                "enrichment_applied",
+                tuple(self.enrichment_applied),
+            )
 
 
 @dataclass(frozen=True)
@@ -34,11 +46,16 @@ class MergedRecordExplanation:
 
     record_id: str
     composite_run_id: str
-    source_providers: list[str]
-    field_explanations: list[MergedFieldExplanation]
+    source_providers: tuple[str, ...]
+    field_explanations: tuple[MergedFieldExplanation, ...]
     merge_strategy: str
     conflict_count: int = 0
     enrichment_count: int = 0
+
+    def __post_init__(self) -> None:
+        """Freeze all nested collections supplied by callers."""
+        object.__setattr__(self, "source_providers", tuple(self.source_providers))
+        object.__setattr__(self, "field_explanations", tuple(self.field_explanations))
 
 
 class MergedMetadataExplainer:
@@ -53,7 +70,7 @@ class MergedMetadataExplainer:
         merge_strategy: str = "prioritize",
     ) -> MergedFieldExplanation:
         """Describe how one merged field was selected and enriched."""
-        source_providers = list(composite_metadata.source_providers or [])
+        source_providers = tuple(composite_metadata.source_providers or ())
         priority_order = _resolve_priority_order(field_name, field_priorities)
         final_value_source = _resolve_final_value_source(
             source_providers=source_providers,
@@ -78,7 +95,7 @@ class MergedMetadataExplainer:
         merge_strategy: str = "prioritize",
     ) -> MergedRecordExplanation:
         """Build explainability details for one merged output record."""
-        field_explanations = [
+        field_explanations = tuple(
             self.generate_field_explanation(
                 field_name,
                 record_data,
@@ -87,14 +104,14 @@ class MergedMetadataExplainer:
                 merge_strategy,
             )
             for field_name in _public_field_names(record_data)
-        ]
+        )
         conflict_count, enrichment_count = _count_conflicts_and_enrichments(
             field_explanations
         )
         return MergedRecordExplanation(
             record_id=record_id,
             composite_run_id=composite_metadata.composite_run_id or "unknown",
-            source_providers=list(composite_metadata.source_providers or []),
+            source_providers=tuple(composite_metadata.source_providers or ()),
             field_explanations=field_explanations,
             merge_strategy=merge_strategy,
             conflict_count=conflict_count,
@@ -152,19 +169,19 @@ class MergedMetadataExplainer:
 def _resolve_priority_order(
     field_name: str,
     field_priorities: dict[str, JsonDict] | None,
-) -> list[str] | None:
+) -> tuple[str, ...] | None:
     if not field_priorities or field_name not in field_priorities:
         return None
     priority = field_priorities[field_name].get("priority")
     if not isinstance(priority, list):
-        return []
-    return [str(item) for item in priority]
+        return ()
+    return tuple(str(item) for item in priority)
 
 
 def _resolve_final_value_source(
     *,
-    source_providers: list[str],
-    priority_order: list[str] | None,
+    source_providers: tuple[str, ...],
+    priority_order: tuple[str, ...] | None,
 ) -> str | None:
     """Select final value source honoring priority_order when available.
 
@@ -184,7 +201,7 @@ def _resolve_final_value_source(
 
 def _extract_applied_enrichments(
     composite_metadata: CompositeOutputExt,
-) -> list[str] | None:
+) -> tuple[str, ...] | None:
     if not composite_metadata.enrichment_status:
         return None
     applied = [
@@ -192,7 +209,7 @@ def _extract_applied_enrichments(
         for enricher, status in composite_metadata.enrichment_status.items()
         if status == "applied"
     ]
-    return applied or None
+    return tuple(applied) or None
 
 
 def _public_field_names(record_data: JsonDict) -> list[str]:
@@ -200,7 +217,7 @@ def _public_field_names(record_data: JsonDict) -> list[str]:
 
 
 def _count_conflicts_and_enrichments(
-    field_explanations: list[MergedFieldExplanation],
+    field_explanations: tuple[MergedFieldExplanation, ...],
 ) -> tuple[int, int]:
     conflict_count = sum(1 for exp in field_explanations if exp.conflict_resolution)
     # Count distinct enrichers once per record, not once per field.
@@ -214,24 +231,26 @@ def _count_conflicts_and_enrichments(
 def _resolve_record_id(record: JsonDict) -> str:
     """Resolve a stable record id, preserving valid falsy identifiers."""
     for key in ("_record_id", "id", "molecule_id"):
-        if key in record:
+        if key in record and record[key] is not None:
             return str(record[key])
     return _deterministic_record_id(record)
 
 
 def _deterministic_record_id(record: JsonDict) -> str:
     """Produce a deterministic id even for non-JSON-native supported values."""
-    try:
-        payload = json.dumps(
-            record,
-            sort_keys=True,
-            separators=(",", ":"),
-            ensure_ascii=False,
-            default=_json_fallback,
-        )
-    except (TypeError, ValueError):
-        payload = repr(sorted(record.items(), key=lambda item: str(item[0])))
+    payload = _canonical_json_text(record)
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _canonical_json_text(value: object) -> str:
+    """Serialize supported values without identity-bearing repr fallbacks."""
+    return json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        default=_json_fallback,
+    )
 
 
 def _json_fallback(value: object) -> object:
@@ -240,10 +259,17 @@ def _json_fallback(value: object) -> object:
     if isinstance(value, Decimal):
         return str(value)
     if isinstance(value, (set, frozenset)):
-        return sorted(value, key=lambda item: repr(item))
+        return _canonical_set_members(value)
     if isinstance(value, bytes):
         return value.hex()
-    return repr(value)
+    raise TypeError(
+        f"Unsupported value for deterministic record identity: {type(value).__name__}"
+    )
+
+
+def _canonical_set_members(value: set[object] | frozenset[object]) -> list[object]:
+    canonical_items = sorted(_canonical_json_text(item) for item in value)
+    return [json.loads(item) for item in canonical_items]
 
 
 def _empty_explainability_summary() -> JsonDict:
@@ -324,16 +350,16 @@ def _enrichment_summary(
     explanations: list[MergedRecordExplanation],
     totals: dict[str, int],
 ) -> JsonDict:
-    # enrichment_count is now distinct enrichers per record; rate uses records.
+    records_with_enrichments = sum(
+        1 for exp in explanations if exp.enrichment_count > 0
+    )
     return {
         "total_enrichments": totals["total_enrichments"],
         "enrichment_rate": _safe_ratio(
-            totals["total_enrichments"],
+            records_with_enrichments,
             totals["total_records"],
         ),
-        "records_with_enrichments": sum(
-            1 for exp in explanations if exp.enrichment_count > 0
-        ),
+        "records_with_enrichments": records_with_enrichments,
     }
 
 

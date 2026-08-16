@@ -112,18 +112,23 @@ def _build_enricher_configs[ConfigT](
 
 def _parse_field_priorities(raw: object) -> dict[str, tuple[str, ...]]:
     priorities_raw = str_key_mapping(raw, "merge.field_priorities")
-    return {
-        key: tuple(str(item) for item in value)
-        if isinstance(value, list | tuple)
-        else (str(value),)
-        for key, value in priorities_raw.items()
-    }
+    priorities: dict[str, tuple[str, ...]] = {}
+    for key, value in priorities_raw.items():
+        if isinstance(value, str):
+            values: object = (value,)
+        else:
+            values = value
+        priorities[key] = require_str_tuple(
+            values,
+            f"merge.field_priorities[{key!r}]",
+        )
+    return priorities
 
 
 def _optional_column_groups(raw: object) -> object:
-    if raw in (None, ()):
+    if raw is None:
         return ()
-    return require_object_dict_sequence(raw or (), "merge.column_groups")
+    return require_object_dict_sequence(raw, "merge.column_groups")
 
 
 def _build_merge_config[ConfigT](
@@ -180,9 +185,9 @@ def _attach_optional_section(
     key: str,
     builder: Callable[[dict[str, object]], object],
 ) -> None:
-    raw = data.get(key)
-    if isinstance(raw, dict):
-        kwargs[key] = builder(require_object_dict(raw, key))
+    if key not in data:
+        return
+    kwargs[key] = builder(require_object_dict(data[key], key))
 
 
 def _attach_optional_composite_sections(

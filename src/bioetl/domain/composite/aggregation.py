@@ -8,6 +8,7 @@ See ADR-026 for architectural decisions.
 
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass
 from enum import StrEnum
 
@@ -154,6 +155,10 @@ class AggregationFieldSpec:
     def _validate(self) -> None:
         """Validate field specification."""
         require_non_empty(self.source_field, "aggregation source_field")
+        if self.output_field is not None:
+            normalized_output_field = self.output_field.strip()
+            require_non_empty(normalized_output_field, "aggregation output_field")
+            object.__setattr__(self, "output_field", normalized_output_field)
         if self.filter_condition is not None:
             _validate_aggregation_filter_condition(self.filter_condition)
 
@@ -216,6 +221,17 @@ class AggregationConfig:
         if not self.fields:
             raise ValueError("aggregation.fields cannot be empty")
         _require_field_specs(self.fields)
+        duplicates = _duplicate_output_fields(self.fields)
+        if duplicates:
+            raise ValueError(
+                "aggregation.fields contain duplicate output fields: "
+                + ", ".join(duplicates)
+            )
+
+
+def _duplicate_output_fields(fields: tuple[AggregationFieldSpec, ...]) -> list[str]:
+    counts = Counter(field.effective_output_field for field in fields)
+    return sorted(field for field, count in counts.items() if count > 1)
 
 
 __all__ = [
