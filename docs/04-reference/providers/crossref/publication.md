@@ -111,7 +111,8 @@ doi = normalize_doi("10.1234/ABC.DEF")  # → "10.1234/abc.def"
 | `book-chapter`        | `PUBLICATION` |
 | `dissertation`        | `PUBLICATION` |
 
-> **Note**: Internal type mapping is part of [Internal/Extended Material](#internalextended-material)
+> **Note**: Internal type mapping is part of
+> [Internal/Extended Material](../../internalextended/internal-type-mappings.md).
 
 ### Entity ID
 

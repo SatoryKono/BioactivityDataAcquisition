@@ -108,7 +108,7 @@ This document provides a consolidated reference for all BIOETL_* environment var
 
 ## Related Documentation
 
-- [Getting Started Guide](../03-guides/getting-started.md#configuration)
-- [Quick Start](../03-guides/quick-start.md#setup)
+- [Getting Started Guide](../03-guides/getting-started.md#3-configuration)
+- [Quick Start](../03-guides/quick-start.md#setup-3-minutes)
 - [Security Policy](../../.github/SECURITY.md)
 - [Docker Quick Start](../DOCKER_QUICKSTART.md)

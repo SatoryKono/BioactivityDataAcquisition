@@ -19,13 +19,13 @@ ______________________________________________________________________
 **Дата обновления:** 2026-07-28 (#6535)
 
 **Оглавление:**
-- [Core Make / setup](#core-make--setup) — install, test, lint, architecture
+- [Core Make / setup](#core-make-setup) — install, test, lint, architecture
 - [BioETL Application CLI](#bioetl-application-cli) — команды запуска пайплайнов
 - [Unified script entry points](#unified-script-entry-points) — `python -m scripts.*`
 - [OS-specific wrappers](#os-specific-wrappers) — Windows / WSL helpers
 - [Memory workflow](#memory-workflow) — pre-task / post-task
-- [Build & Test CLI](#build--test-cli) — команды сборки и тестирования
-- [См. также](#см-также)
+- [Build & Test CLI](#build-test-cli) — команды сборки и тестирования
+- [См. также](#see-also)
 
 ______________________________________________________________________
 
@@ -836,7 +836,7 @@ Memory notes never outrank runtime code, configs, accepted ADRs, or runbooks ([A
 
 ______________________________________________________________________
 
-## См. также
+## См. также { #see-also }
 
 - [CLI Reference](../../04-reference/cli.md) — полная документация по CLI
 - [Running Pipelines](../running-pipelines.md) — руководство по запуску

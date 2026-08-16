@@ -66,7 +66,7 @@ Maps issue #6543 required diagram themes to **existing** ADR-040-governed source
 
 ### 5. Sequence diagrams (core five)
 
-Documented in [README.md](README.md#sequence-diagrams-5-core):
+Documented in [README.md](README.md#sequence-diagrams-5-core-issue-6544):
 
 1. `sequence/01-pipeline-execution-sequence.mmd`
 2. `sequence/02-composite-pipeline-sequence.mmd`

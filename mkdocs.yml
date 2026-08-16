@@ -85,13 +85,14 @@ not_in_nav: |
   04-reference/templates/runbook-template.md
   05-operations/deployment/mcp-neo4j-memory-final-summary.md
 # Rendered SVG/PNG diagram images may be generated locally or in CI
-# (render-diagrams job). Downgrade broken-link severity so `mkdocs build --strict`
-# does not abort on temporarily missing image targets. Real doc-link integrity is
-# enforced by `python -m scripts.docs check-links` (runs in the same CI job
-# before the build step).
+# (render-diagrams job). Downgrade missing-file severity so
+# `mkdocs build --strict` does not abort on temporarily missing image targets.
+# Heading anchors remain warnings, which makes missing fragments fail strict
+# builds; file-level integrity is also enforced by `scripts.docs check-links`.
 validation:
   links:
     not_found: info
+    anchors: warn
 
 theme:
   name: material
@@ -137,6 +138,7 @@ markdown_extensions:
         - name: mermaid
           class: mermaid
   - admonition
+  - attr_list
   - toc:
       permalink: true
 

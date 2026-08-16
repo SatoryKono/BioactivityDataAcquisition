@@ -1,0 +1,47 @@
+{
+  "step": 1,
+  "card": "prompt.audit.cycle.docs",
+  "waves": [
+    {
+      "id": "W1",
+      "priority": "P2",
+      "issue": 8824,
+      "finding_ids": ["DOCS-SEQ-001"],
+      "goal": "Regenerate the documentation cleanup inventory through its owner command.",
+      "debt_effect": "flat",
+      "risk": "low",
+      "files": [
+        "docs/reports/generated/documentation-cleanup-inventory.json",
+        "docs/reports/generated/documentation-cleanup-inventory.md"
+      ],
+      "test_plan": [
+        "python -m scripts.docs generate-cleanup-inventory --check",
+        "python -m scripts.docs verify --skip-build"
+      ],
+      "acceptance": ["Both owner-generated artifacts are current."],
+      "rollback": "Revert the generated-artifact commit."
+    },
+    {
+      "id": "W2",
+      "priority": "P2",
+      "issue": 8825,
+      "finding_ids": ["DOCS-SEQ-002"],
+      "goal": "Make missing heading anchors fail strict builds and repair current violations.",
+      "debt_effect": "decrease",
+      "risk": "medium",
+      "files": ["mkdocs.yml", "docs/**/*.md", "tests/architecture/test_docs_build_site_router.py"],
+      "test_plan": [
+        "uv run --frozen --extra docs python -m scripts.docs build-site --strict",
+        "python -m pytest -q tests/architecture/test_docs_build_site_router.py",
+        "python -m scripts.docs check-links"
+      ],
+      "acceptance": [
+        "Strict build emits no missing-anchor messages.",
+        "MkDocs anchor validation is warning-or-higher."
+      ],
+      "rollback": "Revert the anchor-policy and link-repair commit."
+    }
+  ],
+  "deferred": [],
+  "rejected_policy": []
+}

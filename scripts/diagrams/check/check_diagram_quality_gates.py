@@ -16,8 +16,10 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-if str(SCRIPT_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPT_DIR))
+REPO_ROOT_IMPORT = SCRIPT_DIR.parents[2]
+for import_root in (REPO_ROOT_IMPORT, SCRIPT_DIR):
+    if str(import_root) not in sys.path:
+        sys.path.insert(0, str(import_root))
 
 try:
     from scripts.diagrams.core.diagram_paths import (
