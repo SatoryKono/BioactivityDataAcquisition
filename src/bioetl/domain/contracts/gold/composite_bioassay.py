@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -187,6 +189,12 @@ class CompositeTargetGoldSchema(CompositeLookupLineageSchema):
         coerce=True,
         description="Count of unique informative canonical L1 protein classes.",
     )
+
+    @pa.check("top_level_count", name="top_level_count_integer")
+    def top_level_count_integer(cls, series: Series[float]) -> Series[bool]:
+        """Require nullable aggregate counts to be whole numbers."""
+        return cast(Series[bool], series.isna() | series.mod(1).eq(0))
+
     canonical_top_levels: Series[str] = pa.Field(
         nullable=True,
         description="JSON array of unique canonical L1 values observed for the target.",

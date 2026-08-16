@@ -150,9 +150,7 @@ def _require_bool(value: object, field_name: str) -> bool:
 
 def _cross_validation_pairs(value: object) -> list[dict[str, object]]:
     """Validate and copy cross-validation pair definitions."""
-    if not isinstance(value, list) or not all(
-        isinstance(item, dict) for item in value
-    ):
+    if not isinstance(value, list) or not all(isinstance(item, dict) for item in value):
         raise TypeError(
             f"pairs must be a list of dictionaries, got {type(value).__name__}"
         )
@@ -164,8 +162,7 @@ def _string_rules(value: object) -> dict[str, str]:
     if not isinstance(value, dict):
         raise TypeError(f"rules must be a mapping, got {type(value).__name__}")
     if not all(
-        isinstance(key, str) and isinstance(item, str)
-        for key, item in value.items()
+        isinstance(key, str) and isinstance(item, str) for key, item in value.items()
     ):
         raise TypeError("rules keys and values must be strings")
     return cast(dict[str, str], dict(value))

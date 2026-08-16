@@ -207,7 +207,6 @@ class CompositeValidator:
         )
         return issues
 
-
     def _as_output_schema(
         self, raw: object
     ) -> tuple[JsonDict | None, list[ValidationIssue]]:

@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -36,6 +38,17 @@ class PubMedPublicationGoldSchema(PublicationGoldCommonSchema):
     publisher_id: Series[str] = pa.Field(nullable=True)
     pub_month: Series[float] = pa.Field(nullable=True, coerce=True, ge=1, le=12)
     pub_day: Series[float] = pa.Field(nullable=True, coerce=True, ge=1, le=31)
+
+    @pa.check("pub_month", name="pub_month_integer")
+    def pub_month_integer(cls, series: Series[float]) -> Series[bool]:
+        """Require nullable publication months to be whole numbers."""
+        return cast(Series[bool], series.isna() | series.mod(1).eq(0))
+
+    @pa.check("pub_day", name="pub_day_integer")
+    def pub_day_integer(cls, series: Series[float]) -> Series[bool]:
+        """Require nullable publication days to be whole numbers."""
+        return cast(Series[bool], series.isna() | series.mod(1).eq(0))
+
     date_completed: Series[str] = pa.Field(nullable=True)
     date_revised: Series[str] = pa.Field(nullable=True)
     publication_status: Series[str] = pa.Field(nullable=True)

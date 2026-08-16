@@ -220,10 +220,14 @@ class AggregationConfig:
         if not self.fields:
             raise ValueError("aggregation.fields cannot be empty")
         _require_field_specs(self.fields)
-        output_fields = [field.effective_output_field for field in self.fields]
-        duplicates = sorted(
-            {field for field in output_fields if output_fields.count(field) > 1}
-        )
+        seen_output_fields: set[str] = set()
+        duplicate_output_fields: set[str] = set()
+        for field in self.fields:
+            output_field = field.effective_output_field
+            if output_field in seen_output_fields:
+                duplicate_output_fields.add(output_field)
+            seen_output_fields.add(output_field)
+        duplicates = sorted(duplicate_output_fields)
         if duplicates:
             raise ValueError(
                 "aggregation.fields contain duplicate output fields: "
