@@ -869,6 +869,46 @@ async def test_filtered_stats_deadline_returns_typed_504(
 
 
 @pytest.mark.asyncio
+async def test_processed_records_requires_run_id_before_backend(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    host = _RoutingHost()
+    host._run_ledger_port = None
+    writer = _Writer()
+    backend_calls: list[dict[str, object]] = []
+
+    def unexpected_backend(**kwargs: object) -> dict[str, object]:
+        backend_calls.append(kwargs)
+        return {"contract": "processed_records_table_v1", "rows": [1]}
+
+    monkeypatch.setattr(
+        observability_routing,
+        "build_processed_records_table_payload_from_prometheus",
+        unexpected_backend,
+    )
+
+    await observability_routing.dispatch_observability_request(
+        host,
+        writer=writer,
+        path="/ops/observability/processed-records",
+        query={"pipeline": "chembl_activity", "run_type": "backfill"},
+    )
+
+    assert backend_calls == []
+    assert host.sent[-1] == (
+        "payload",
+        200,
+        {
+            "contract": "processed_records_table_v1",
+            "pipeline": "chembl_activity",
+            "run_type": ["backfill"],
+            "selection": "required",
+            "rows": [],
+        },
+    )
+
+
+@pytest.mark.asyncio
 async def test_processed_records_distinguishes_empty_and_backend_unavailable(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -882,10 +922,16 @@ async def test_processed_records_distinguishes_empty_and_backend_unavailable(
         "run_id": "00000000-0000-0000-0000-000000000001",
     }
     empty_payload = {"contract": "processed_records_table_v1", "rows": []}
+    backend_calls: list[str] = []
+
+    def empty(**_kwargs: object) -> dict[str, object]:
+        backend_calls.append("empty")
+        return empty_payload
+
     monkeypatch.setattr(
         observability_routing,
         "build_processed_records_table_payload_from_prometheus",
-        lambda **_kwargs: empty_payload,
+        empty,
     )
 
     await observability_routing.dispatch_observability_request(
@@ -895,8 +941,10 @@ async def test_processed_records_distinguishes_empty_and_backend_unavailable(
         query=query,
     )
     assert host.sent[-1] == ("payload", 200, empty_payload)
+    assert backend_calls == ["empty"]
 
     def unavailable(**_kwargs: object) -> dict[str, object]:
+        backend_calls.append("unavailable")
         raise RuntimeError("Prometheus unavailable")
 
     monkeypatch.setattr(
@@ -921,6 +969,7 @@ async def test_processed_records_distinguishes_empty_and_backend_unavailable(
             "retryable": True,
         },
     )
+    assert backend_calls == ["empty", "unavailable"]
 
 
 @pytest.mark.asyncio
