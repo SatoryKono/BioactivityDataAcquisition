@@ -817,6 +817,18 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-07-15"
     },
+    "scripts/engineering/qa/debt_governance_gate_evaluators.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the policy-evaluator module behind report_debt_governance_gates.py; keep the routed report-debt-governance-gates command as the active entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-10-31"
+    },
+    "scripts/engineering/qa/debt_governance_gate_report.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the rendering and persistence module behind report_debt_governance_gates.py; do not expose it as an independent reporting surface.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-10-31"
+    },
     "scripts/engineering/qa/docker_stability_campaign/commands.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the bounded command and observation adapter behind the opt-in Docker stability campaign; keep it supporting and preserve hard timeouts, bounded output, and redaction.",
@@ -901,6 +913,42 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-07-15"
     },
+    "scripts/engineering/qa/observability_closure_campaign_cli.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the CLI orchestration implementation imported by run_observability_closure_campaign.py; keep the routed campaign command as the active surface.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-10-31"
+    },
+    "scripts/engineering/qa/observability_closure_campaign_validation.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the validation and evidence-scoring seam behind run_observability_closure_campaign.py; do not expose it as a separate command.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-10-31"
+    },
+    "scripts/engineering/qa/observability_metric_inventory_cli.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the CLI implementation behind report_observability_metric_inventory.py; keep report-observability-metric-inventory as the active routed entrypoint.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-10-31"
+    },
+    "scripts/engineering/qa/observability_metric_inventory_report.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the typed target analysis and report helper behind report_observability_metric_inventory.py; do not count it as an independent CLI.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-10-31"
+    },
+    "scripts/engineering/qa/observability_metric_inventory_runtime.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the runtime-event and cardinality review implementation behind report_observability_metric_inventory.py; keep the routed report command as the active surface.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-10-31"
+    },
+    "scripts/engineering/qa/observability_metric_inventory_scan.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the source-discovery and AST scanning implementation behind report_observability_metric_inventory.py; do not expose it as a standalone command.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-10-31"
+    },
     "scripts/engineering/qa/refresh_test_governance_baseline.py": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain as a bounded cached refresh helper for test-governance baseline artifacts while pretest guardrails and review workflows still need a dedicated warm-path entrypoint; consolidate it into the canonical report command if the caching path stops being independently useful.",
@@ -942,54 +990,6 @@
       "next_step": "Retain as the documented shrink-only basedpyright suppression ledger command; route it through the canonical QA dispatcher or retire the direct module surface when Project Diagnostics governance is consolidated.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
-    },
-    "scripts/engineering/qa/debt_governance_gate_evaluators.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the policy-evaluator module behind report_debt_governance_gates.py; keep the routed report-debt-governance-gates command as the active entrypoint.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-10-31"
-    },
-    "scripts/engineering/qa/debt_governance_gate_report.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the rendering and persistence module behind report_debt_governance_gates.py; do not expose it as an independent reporting surface.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-10-31"
-    },
-    "scripts/engineering/qa/observability_closure_campaign_cli.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the CLI orchestration implementation imported by run_observability_closure_campaign.py; keep the routed campaign command as the active surface.",
-      "owner": "@bioetl-observability",
-      "review_by": "2026-10-31"
-    },
-    "scripts/engineering/qa/observability_closure_campaign_validation.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the validation and evidence-scoring seam behind run_observability_closure_campaign.py; do not expose it as a separate command.",
-      "owner": "@bioetl-observability",
-      "review_by": "2026-10-31"
-    },
-    "scripts/engineering/qa/observability_metric_inventory_cli.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the CLI implementation behind report_observability_metric_inventory.py; keep report-observability-metric-inventory as the active routed entrypoint.",
-      "owner": "@bioetl-observability",
-      "review_by": "2026-10-31"
-    },
-    "scripts/engineering/qa/observability_metric_inventory_report.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the typed target analysis and report helper behind report_observability_metric_inventory.py; do not count it as an independent CLI.",
-      "owner": "@bioetl-observability",
-      "review_by": "2026-10-31"
-    },
-    "scripts/engineering/qa/observability_metric_inventory_runtime.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the runtime-event and cardinality review implementation behind report_observability_metric_inventory.py; keep the routed report command as the active surface.",
-      "owner": "@bioetl-observability",
-      "review_by": "2026-10-31"
-    },
-    "scripts/engineering/qa/observability_metric_inventory_scan.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the source-discovery and AST scanning implementation behind report_observability_metric_inventory.py; do not expose it as a standalone command.",
-      "owner": "@bioetl-observability",
-      "review_by": "2026-10-31"
     },
     "scripts/engineering/qa/report_config_surface_backlog.py": {
       "decision": "legacy_manual_utility",
