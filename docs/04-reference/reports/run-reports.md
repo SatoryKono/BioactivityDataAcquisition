@@ -99,13 +99,21 @@ bioetl report prune --kind pipeline --owner chembl_assay --max-count 50 --apply
 - `GET /ops/observability/workflow-run-reports?workflow=…&limit=20`
 
 Missing artifact → structured 404 (`status=not_found`), not invented zeros.
-An empty list is a successful artifact-index response
-(`status=ok`, `count=0`, `items=[]`); it is distinct from the bounded forensic
+An empty index is a successful artifact-index response
+(`status=ok`, `count=0`). `index_state=valid_empty` keeps `items=[]`;
+`tree_missing` / layout or identity failure adds one diagnostic row so Grafana
+does not look like VALID EMPTY. This is distinct from the bounded forensic
 endpoint timeout response (`504`, `contract=forensic_endpoint_error_v1`).
 List responses also expose the backward-compatible `report_root`, `marker`, and
-`marker_status` fields plus bounded `source_identity*` diagnostics. The layout
-marker and source identity are independent, so operators can distinguish “no
-runs yet”, “invalid reports tree”, and “valid tree from another checkout”.
+`marker_status` fields plus bounded `source_identity*` diagnostics and
+`index_state` (`ok`, `valid_empty`, `tree_missing`, `layout_unhealthy`,
+`identity_unhealthy`). Grafana **Inspect Recent Runs** shows `VALID EMPTY` only
+for `valid_empty`. A `TREE_MISSING` row means the container has no
+`run-reports/<kind>/` tree — not a selector miss. `/health/ready` green is
+intra-container consistency only; it does not prove the bind matches this
+checkout. The layout marker and source identity are independent, so operators
+can distinguish “no runs yet”, “invalid reports tree”, and “valid tree from
+another checkout”.
 
 ## Report root and Docker bind
 

@@ -155,6 +155,19 @@ def test_pfill_12_browse_explains_artifact_backing_and_backend_failure() -> None
     assert target.get("url") == (
         "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=20"
     )
+    status_override = next(
+        item
+        for item in (browse.get("fieldConfig") or {}).get("overrides") or []
+        if (item.get("matcher") or {}).get("options") == "status"
+    )
+    mapped = {
+        key
+        for prop in status_override.get("properties") or []
+        if prop.get("id") == "mappings"
+        for entry in prop.get("value") or []
+        for key in (entry.get("options") or {})
+    }
+    assert {"TREE_MISSING", "LAYOUT_UNHEALTHY", "IDENTITY_UNHEALTHY"} <= mapped
 
 
 def test_pfill_12_workflow_browser_is_not_panel_3010() -> None:

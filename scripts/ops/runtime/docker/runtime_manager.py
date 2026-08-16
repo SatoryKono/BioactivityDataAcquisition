@@ -213,11 +213,13 @@ def _transient_working_dir_prefixes(contract: Mapping[str, Any]) -> tuple[str, .
 
 
 def _is_transient_working_dir(path: Path, prefixes: Sequence[str]) -> bool:
-    normalized = path.resolve().as_posix().replace("\\", "/").lower()
+    normalized = str(path).replace("\\", "/").lower()
+    posix = path.as_posix().replace("\\", "/").lower()
     return any(
-        normalized.startswith(str(prefix).replace("\\", "/").lower())
-        for prefix in prefixes
-        if str(prefix).strip()
+        normalized.startswith(prefix) or posix.startswith(prefix)
+        for raw in prefixes
+        for prefix in [str(raw).replace("\\", "/").lower()]
+        if prefix
     )
 
 
@@ -230,7 +232,10 @@ def _reject_transient_origin(
     """Refuse main start from leftover issue worktrees unless explicitly allowed."""
     if allow:
         return None
-    prefixes = _transient_working_dir_prefixes(_load_contract(contract_path))
+    try:
+        prefixes = _transient_working_dir_prefixes(_load_contract(contract_path))
+    except (OSError, ValueError, yaml.YAMLError):
+        return None
     if not prefixes or not _is_transient_working_dir(root, prefixes):
         return None
     return {
@@ -2029,7 +2034,7 @@ def _dispatch_action(
             blocked = _reject_transient_origin(
                 contract_path=contract_path,
                 root=ROOT,
-                allow=bool(args.allow_transient_origin),
+                allow=bool(getattr(args, "allow_transient_origin", False)),
             )
             if blocked is not None:
                 print(json.dumps(blocked, sort_keys=True))
