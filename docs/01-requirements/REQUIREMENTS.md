@@ -1,6 +1,6 @@
 # BioETL Requirements
 
-Version: 1.12.4
+Version: 1.12.5
 Status: active
 Aligned with: RULES.md v6.1.10 ([source](../00-project/RULES.md); architecture stamp re-check 2026-08-14)
 Last verified: 2026-08-14
@@ -118,6 +118,9 @@ increased as a documentation remedy.
 
 ## Version history
 
+- v1.12.5 (2026-08-16): corrected normative mirror metadata to the current
+  `RULES.md` v6.1.10 Dashboard Presentation Contract; requirement semantics and
+  counts are unchanged.
 - v1.12.4 (2026-08-14): added `REQ-DASH-001..003` and the scoped dashboard
   presentation contract for data density, typography floors, and fill
   placement.
