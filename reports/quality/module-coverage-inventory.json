@@ -48390,19 +48390,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-14",
-<<<<<<< HEAD
-  "source_tree_sha256": "1c6326b0d58d591f911b512dff84e03a485cffd2da42b409e06a70936be694a9",
-||||||| 77efae2314
-<<<<<<< HEAD
-  "source_tree_sha256": "9c9294bb482e86a7f36cffdd15bd983c96d96583eba3789e2e92c7c12b7e1fd8",
-||||||| 64ea579d59
-  "source_tree_sha256": "37701b71dc22edcb381272ba4e9908655eda8a73f7e550ebfdcb1931c3440fbd",
-=======
-  "source_tree_sha256": "a57230bbf9f496c53f1a96ada081df7544a9434361162e9c0d7fa77c87914687",
->>>>>>> codex/full-suite-green-20260816
-=======
-  "source_tree_sha256": "181ad34bc20cf2c0e135aadb81b07783c116a79d3030be6b9607fe3dbc56a15e",
->>>>>>> agent/issues-8857-8859
+  "source_tree_sha256": "09a18b1015edfea6c4da52fcb927488775460c93575ff8b4d6dad6e4f84de7b3",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
