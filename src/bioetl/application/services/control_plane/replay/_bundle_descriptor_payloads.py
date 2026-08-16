@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from importlib import import_module
 
 from bioetl.application.services.control_plane.manifest.inspection_result_model import (
-    RunManifestInspectionResult,
+    RunManifestInspectionResult as RunManifestInspectionResult,
 )
 
 

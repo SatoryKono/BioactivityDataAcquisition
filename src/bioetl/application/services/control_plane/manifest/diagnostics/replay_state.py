@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_blockers import (
-    _collect_append_mode_semantic_sinks,
+    _collect_append_mode_semantic_sinks as _collect_append_mode_semantic_sinks,
     _requires_resume_without_snapshot_reason,
     _resolve_exact_replay_blockers,
 )

@@ -43,7 +43,9 @@ from bioetl.domain.models._metadata_gold import (
     GoldMetadata,
     GoldOutputExt,
     SCDMetadata,
+    SchemaColumnInspection,
     SchemaColumnMetadata,
+    SchemaInspectionResult,
     SchemaMetadata,
 )
 from bioetl.domain.models._metadata_silver import (
@@ -80,8 +82,10 @@ __all__ = [
     "RunTypeEnum",
     "RuntimeMetadata",
     "SCDMetadata",
+    "SchemaColumnInspection",
     "SchemaColumnMetadata",
     "SchemaDrift",
+    "SchemaInspectionResult",
     "SchemaMetadata",
     "SilverMetadata",
     "SilverOutputExt",

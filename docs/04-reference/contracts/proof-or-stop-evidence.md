@@ -40,6 +40,11 @@ runtime, and trust tier. The source identity contains:
 - the proof policy hash;
 - the claim-specific command-set hash.
 
+Full-worktree Git diff operations use the bounded
+`source_binding.git_diff_timeout_seconds` value from the proof policy. This
+keeps source binding reliable on mounted worktrees without changing evidence
+requirements or quality thresholds.
+
 Each receipt records the producer, evidence kind, command and argv, cwd,
 timestamps/duration, exit code, output digest, source identity, and one of
 `pass`, `fail`, `skip`, or `unavailable`. A skip or unavailable receipt must

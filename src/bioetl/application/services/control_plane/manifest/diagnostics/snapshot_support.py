@@ -41,6 +41,7 @@ __all__ = [
     "collect_input_snapshot_refs",
     "collect_ledger_input_snapshot_refs",
     "compute_input_snapshot_identity_fingerprint",
+    "lookup_mapping_path",
     "merge_ledger_input_snapshots_into_summary",
     "resolve_post_manifest_input_snapshot_materialization_mode",
 ]

@@ -563,7 +563,7 @@ class TestSchemaNode:
     def test_schema_node_basic(self):
         """Test basic schema node building."""
         input_data = MagicMock()
-        input_data.gold_schema = None
+        input_data.schema_inspection = None
 
         result = schema_node(input_data)
 

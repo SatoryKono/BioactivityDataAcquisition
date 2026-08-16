@@ -42,6 +42,17 @@ from bioetl.infrastructure.storage.gold.metadata_payloads import (
 )
 
 
+class _FakeGoldSchema:
+    class Config:
+        version = "2.0"
+        strict = True
+
+    @classmethod
+    def to_schema(cls) -> object:
+        column = MagicMock(dtype="pandera.dtypes.String", nullable=False)
+        return MagicMock(columns={"entity_id": column})
+
+
 @pytest.mark.unit
 class TestBuildGoldMetadataInput:
     """Tests for Gold coordinator input payload construction."""
@@ -61,7 +72,7 @@ class TestBuildGoldMetadataInput:
             scd_config=None,
             completed_at=None,
             silver_refs=[silver_ref],
-            gold_schema=None,
+            gold_schema=_FakeGoldSchema,
             transform_version="2.0.0",
             transform_steps=("normalize", "enrich"),
         )
@@ -72,6 +83,9 @@ class TestBuildGoldMetadataInput:
         assert len(result.silver_refs) == 1
         assert result.silver_refs[0].table_name == "chembl.activity"
         assert result.silver_refs[0].delta_version == 7
+        assert result.schema_inspection is not None
+        assert result.schema_inspection.version == "2.0"
+        assert result.schema_inspection.columns[0].name == "entity_id"
 
 
 @pytest.mark.unit

@@ -34,6 +34,10 @@ import pytest
 from bioetl.domain.lineage._shared import mapping_to_plain
 from bioetl.domain.lineage import LineageEdgeType, LineageNodeType
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
+from bioetl.domain.models.metadata import (
+    SchemaColumnInspection,
+    SchemaInspectionResult,
+)
 from bioetl.domain.ports import GoldMetadataInput, SilverMetadataInput, SilverRef
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
@@ -46,21 +50,16 @@ from tests.unit.application.services.test_metadata_coordinator import _FIXED_TIM
 class TestLineageFragments:
     """Tests for canonical lineage fragment assembly."""
 
-    class _FakeGoldSchema:
-        class Config:
-            version = "7.0"
-            strict = True
-
-        @staticmethod
-        def to_schema() -> object:
-            class _Column:
-                dtype = "string"
-                nullable = False
-
-            class _Schema:
-                columns = {"compound_id": _Column()}
-
-            return _Schema()
+    _SCHEMA_INSPECTION = SchemaInspectionResult(
+        version="7.0",
+        columns=(
+            SchemaColumnInspection(
+                name="compound_id",
+                dtype="string",
+                nullable=False,
+            ),
+        ),
+    )
 
     def test_bronze_fragment_links_source_request_run_and_batch(self) -> None:
         context = RunContext.create(
@@ -367,7 +366,7 @@ class TestLineageFragments:
             records=[{"id": 1}],
             mode=GoldWriteMode.OVERWRITE,
             silver_refs=[silver_ref],
-            gold_schema=self._FakeGoldSchema,
+            schema_inspection=self._SCHEMA_INSPECTION,
         )
 
         fragment = coordinator.build_gold_lineage_fragment(input_data)
@@ -406,7 +405,7 @@ class TestLineageFragments:
                     delta_version=9,
                 )
             ],
-            gold_schema=self._FakeGoldSchema,
+            schema_inspection=self._SCHEMA_INSPECTION,
         )
         fragment_first = MetadataCoordinator(
             RunContext.create(
@@ -560,7 +559,7 @@ class TestLineageFragments:
                 )
             ],
             transform_steps=("merge",),
-            gold_schema=self._FakeGoldSchema,
+            schema_inspection=self._SCHEMA_INSPECTION,
         )
 
         bundle = coordinator.create_gold_metadata_bundle(input_data)

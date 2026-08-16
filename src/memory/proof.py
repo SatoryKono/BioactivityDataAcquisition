@@ -18,6 +18,8 @@ DEFAULT_POLICY_PATH = ROOT / "configs" / "quality" / "proof_or_stop_policy.yaml"
 DEFAULT_SCHEMA_PATH = ROOT / "configs" / "quality" / "proof_or_stop_bundle.schema.json"
 PROOF_REPORT_PREFIX = "reports/quality/proof-or-stop/"
 OUTCOME_EXIT_CODES = {"ADMIT": 0, "STOP": 2, "DEGRADED": 3}
+DEFAULT_GIT_TIMEOUT_SECONDS = 20.0
+MAX_GIT_DIFF_TIMEOUT_SECONDS = 300.0
 
 
 class ProofError(ValueError):
@@ -89,7 +91,11 @@ def load_schema(path: Path = DEFAULT_SCHEMA_PATH) -> dict[str, Any]:
     return payload
 
 
-def _git(repo_root: Path, *args: str, timeout: float = 20.0) -> bytes:
+def _git(
+    repo_root: Path,
+    *args: str,
+    timeout: float = DEFAULT_GIT_TIMEOUT_SECONDS,
+) -> bytes:
     completed = subprocess.run(
         ["git", "-C", str(repo_root), *args],
         check=False,
@@ -102,8 +108,34 @@ def _git(repo_root: Path, *args: str, timeout: float = 20.0) -> bytes:
     return completed.stdout
 
 
-def _git_text(repo_root: Path, *args: str) -> str:
-    return _git(repo_root, *args).decode("utf-8", errors="replace").strip()
+def _git_text(
+    repo_root: Path,
+    *args: str,
+    timeout: float = DEFAULT_GIT_TIMEOUT_SECONDS,
+) -> str:
+    return (
+        _git(repo_root, *args, timeout=timeout)
+        .decode("utf-8", errors="replace")
+        .strip()
+    )
+
+
+def _git_diff_timeout(policy: dict[str, Any]) -> float:
+    source_binding = policy.get("source_binding", {})
+    if not isinstance(source_binding, dict):
+        raise ProofError("policy source_binding must be a mapping")
+    configured = source_binding.get(
+        "git_diff_timeout_seconds", DEFAULT_GIT_TIMEOUT_SECONDS
+    )
+    if isinstance(configured, bool) or not isinstance(configured, (int, float)):
+        raise ProofError("source_binding.git_diff_timeout_seconds must be a number")
+    timeout = float(configured)
+    if not 1.0 <= timeout <= MAX_GIT_DIFF_TIMEOUT_SECONDS:
+        raise ProofError(
+            "source_binding.git_diff_timeout_seconds must be between "
+            f"1 and {MAX_GIT_DIFF_TIMEOUT_SECONDS:g}"
+        )
+    return timeout
 
 
 def _excluded(path: str, policy: dict[str, Any]) -> bool:
@@ -159,6 +191,8 @@ def _task_diff_hash(
     repo_root: Path,
     policy: dict[str, Any],
     untracked_paths: list[str],
+    *,
+    timeout: float,
 ) -> str:
     digest = hashlib.sha256()
     digest.update(
@@ -169,6 +203,7 @@ def _task_diff_hash(
             "--no-ext-diff",
             "HEAD",
             "--",
+            timeout=timeout,
         )
     )
     digest.update(b"\0untracked\0")
@@ -211,6 +246,7 @@ def discover_context(
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Discover repository and source identity without network access."""
     root = Path(_git_text(repo_root, "rev-parse", "--show-toplevel")).resolve()
+    git_diff_timeout = _git_diff_timeout(policy)
     untracked = _untracked_paths(root, policy)
     paths = _repository_paths(root, policy)
     worktree_id = hashlib.sha256(str(root).encode("utf-8")).hexdigest()[:16]
@@ -223,11 +259,21 @@ def discover_context(
     source = {
         "head_sha": _git_text(root, "rev-parse", "HEAD"),
         "material_hash": _hash_paths(root, paths),
-        "task_diff_hash": _task_diff_hash(root, policy, untracked),
+        "task_diff_hash": _task_diff_hash(
+            root, policy, untracked, timeout=git_diff_timeout
+        ),
         "policy_hash": canonical_digest(policy),
         "command_set_hash": command_set_hash(policy, claim),
         "dirty": bool(
-            _git_text(root, "diff", "--name-only", "--no-ext-diff", "HEAD", "--")
+            _git_text(
+                root,
+                "diff",
+                "--name-only",
+                "--no-ext-diff",
+                "HEAD",
+                "--",
+                timeout=git_diff_timeout,
+            )
             or untracked
         ),
         "untracked_paths": untracked,

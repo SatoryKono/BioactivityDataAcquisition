@@ -17,7 +17,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_invar
     _collect_append_mode_semantic_sinks,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_parentage import (
-    _build_replay_parentage,
+    _build_replay_parentage as _build_replay_parentage,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context import (
     _build_replay_projection_bundle,

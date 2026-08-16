@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from bioetl.application.services.control_plane.manifest.models import (
-    RunManifestCreateSpec,
+    RunManifestCreateSpec as RunManifestCreateSpec,
 )
 from bioetl.application.services.control_plane.manifest.validation_provenance import (
     _validate_canonical_config_identity,

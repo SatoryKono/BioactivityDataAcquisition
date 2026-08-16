@@ -148,7 +148,7 @@ def silver_source_nodes(input_data: GoldMetadataInput) -> list[LineageNodeRef]:
 
 def schema_node(input_data: GoldMetadataInput) -> LineageNodeRef | None:
     """Build schema node when Gold schema metadata is available."""
-    schema_info = extract_schema_metadata(input_data.gold_schema)
+    schema_info = extract_schema_metadata(input_data.schema_inspection)
     if schema_info.contract_path is None and not schema_info.columns:
         return None
     return SchemaRef(

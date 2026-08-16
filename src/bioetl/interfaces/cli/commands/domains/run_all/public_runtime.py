@@ -55,12 +55,6 @@ from bioetl.interfaces.cli.commands.domains.run_all.support import (
 from bioetl.interfaces.cli.commands.domains.run_all.support import (
     handle_destructive_confirmation as handle_destructive_confirmation_impl,
 )
-from bioetl.interfaces.cli.commands.domains.shared.option_mapping import (
-    option_bool,
-    option_int,
-    option_optional_int,
-    option_str,
-)
 
 if TYPE_CHECKING:
     from bioetl.application.services.execution.pipeline_runner_service import (

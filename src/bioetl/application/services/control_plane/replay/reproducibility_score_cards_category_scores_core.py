@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_types import (
-    ScoreCardRecord,
-    build_score_card_record,
-    string_items,
+    ScoreCardRecord as ScoreCardRecord,
+    build_score_card_record as build_score_card_record,
+    string_items as string_items,
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,

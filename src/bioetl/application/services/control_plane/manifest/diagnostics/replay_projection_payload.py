@@ -24,9 +24,9 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_state
     _resolve_replay_mode,
 )
 from bioetl.application.services.control_plane.manifest.replay_taxonomy import (
+    build_replay_taxonomy_projection as build_replay_taxonomy_projection,
     resolve_replay_next_action,
     resolve_replay_resume_rebuild_verdict,
-    build_replay_taxonomy_projection,
 )
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (

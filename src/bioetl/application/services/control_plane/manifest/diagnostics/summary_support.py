@@ -5,9 +5,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.services.control_plane.manifest.diagnostics.artifact_support import (
+    build_produced_artifact_trace as build_produced_artifact_trace,
     sorted_text_items,
-    build_produced_artifact_trace,
-    build_produced_artifact_trace as _build_produced_artifact_trace,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.persistence import (
     build_alert_signals,

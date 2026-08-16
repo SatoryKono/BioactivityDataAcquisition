@@ -15,12 +15,12 @@ from bioetl.application.services.control_plane.replay._historical_snapshot_certi
     HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
 )
 from bioetl.application.services.control_plane.replay.historical_corpus_models import (
+    HistoricalReplayBulkCertificationRecord as HistoricalReplayBulkCertificationRecord,
+    HistoricalReplayBulkCertificationResult as HistoricalReplayBulkCertificationResult,
+    HistoricalReplayBulkCertificationSpec as HistoricalReplayBulkCertificationSpec,
+    HistoricalReplayCertifiabilityInventory as HistoricalReplayCertifiabilityInventory,
+    HistoricalReplayCertifiabilityRecord as HistoricalReplayCertifiabilityRecord,
     HistoricalReplaySnapshotCertification,
-    HistoricalReplayBulkCertificationRecord,
-    HistoricalReplayBulkCertificationResult,
-    HistoricalReplayBulkCertificationSpec,
-    HistoricalReplayCertifiabilityInventory,
-    HistoricalReplayCertifiabilityRecord,
 )
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 from bioetl.domain.types import RunID

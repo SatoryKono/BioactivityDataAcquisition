@@ -28,13 +28,13 @@ from bioetl.application.services.control_plane.manifest.inspection_models import
     parse_run_id as parse_run_id,
 )
 from bioetl.application.services.control_plane.manifest.inspection_models import (
+    _RUN_MANIFEST_INSPECTION_MODEL_EXPORTS as _RUN_MANIFEST_INSPECTION_MODEL_EXPORTS,
+    RunManifestDiffEntry as RunManifestDiffEntry,
+    RunManifestDiffResult as RunManifestDiffResult,
+    RunManifestInspectionCorruptionError as RunManifestInspectionCorruptionError,
+    RunManifestInspectionResult as RunManifestInspectionResult,
+    RunManifestVerifyResult as RunManifestVerifyResult,
     resolve_verify_verdict as resolve_verify_verdict,
-    _RUN_MANIFEST_INSPECTION_MODEL_EXPORTS,
-    RunManifestDiffEntry,
-    RunManifestDiffResult,
-    RunManifestInspectionCorruptionError,
-    RunManifestInspectionResult,
-    RunManifestVerifyResult,
 )
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.types import RunID

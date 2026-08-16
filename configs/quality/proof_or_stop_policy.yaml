@@ -93,6 +93,7 @@ trust_tiers:
     maximum_outcome: STOP
 
 source_binding:
+  git_diff_timeout_seconds: 180
   required:
     - head_sha
     - material_hash
@@ -107,4 +108,3 @@ evidence_store:
   require_memory_mode: read-write
   require_actor_identity: true
   create_decision_records: false
-

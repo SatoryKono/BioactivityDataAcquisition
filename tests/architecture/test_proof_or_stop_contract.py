@@ -21,6 +21,7 @@ def test_proof_or_stop_policy_reuses_existing_gate_thresholds() -> None:
 
     assert policy["evidence_store"]["automatic_ci_ingestion"] is False
     assert policy["evidence_store"]["create_decision_records"] is False
+    assert policy["source_binding"]["git_diff_timeout_seconds"] == 180
     assert not any(key in policy for key in ("budgets", "thresholds", "exemptions"))
 
 
