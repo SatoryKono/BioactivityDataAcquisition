@@ -19,6 +19,7 @@
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 5 |
+
 | tracked | 3123 |
 
 ## Lifecycle Counts
