@@ -498,6 +498,24 @@ def test_grafana_audit_preflight_screenshot_check_enforces_terminal_manifest(
     assert "non-terminal or contradictory" in result.detail
 
 
+def _stub_ops_http_live_checks(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Keep the opt-in live Ops HTTP render probes hermetic (no docker/HTTP I/O)."""
+    monkeypatch.setattr(
+        preflight_subject,
+        "_read_grafana_bootstrap_status_live",
+        lambda *_args, **_kwargs: {"ops_http": "ready", "reason": "identity_matched"},
+    )
+    monkeypatch.setattr(
+        preflight_subject,
+        "_check_ops_http_datasource_live",
+        lambda **_kwargs: preflight_subject.PreflightCheck(
+            name="ops-http-datasource",
+            status="ok",
+            detail="uid=bioetl-ops-http type=marcusolsson-json-datasource",
+        ),
+    )
+
+
 def test_grafana_audit_preflight_run_checks_collects_ok_results(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -542,6 +560,7 @@ def test_grafana_audit_preflight_run_checks_collects_ok_results(
             detail="screens current",
         ),
     )
+    _stub_ops_http_live_checks(monkeypatch)
 
     checks = preflight_subject.run_checks(
         grafana_base_url="http://localhost:3000",
@@ -556,6 +575,9 @@ def test_grafana_audit_preflight_run_checks_collects_ok_results(
     assert [check.name for check in checks] == [
         "grafana",
         "grafana-render-auth",
+        "ops-http-bootstrap",
+        "ops-http-datasource",
+        "panel-3010-terminal-states",
         "prometheus",
         "playwright-runtime",
         "expanded-row-capture",
@@ -620,6 +642,7 @@ def test_grafana_audit_preflight_can_skip_screenshot_check(
         "_check_screenshot_artifacts",
         fake_screenshot_check,
     )
+    _stub_ops_http_live_checks(monkeypatch)
 
     checks = preflight_subject.run_checks(
         grafana_base_url="http://localhost:3000",
@@ -635,6 +658,9 @@ def test_grafana_audit_preflight_can_skip_screenshot_check(
     assert [check.name for check in checks] == [
         "grafana",
         "grafana-render-auth",
+        "ops-http-bootstrap",
+        "ops-http-datasource",
+        "panel-3010-terminal-states",
         "prometheus",
         "playwright-runtime",
         "expanded-row-capture",
@@ -683,6 +709,7 @@ def test_grafana_audit_preflight_can_run_semantic_checks_without_render_runtime(
 
     assert [check.name for check in checks] == [
         "grafana",
+        "panel-3010-terminal-states",
         "prometheus",
         "quarantine-explorer",
     ]
@@ -726,6 +753,7 @@ def test_preflight_can_run_render_checks_without_semantic_checks(
             "semantic backend discovery must be skipped"
         ),
     )
+    _stub_ops_http_live_checks(monkeypatch)
 
     checks = preflight_subject.run_checks(
         grafana_base_url="http://localhost:3000",
@@ -742,6 +770,8 @@ def test_preflight_can_run_render_checks_without_semantic_checks(
     assert [check.name for check in checks] == [
         "grafana",
         "grafana-render-auth",
+        "ops-http-bootstrap",
+        "ops-http-datasource",
         "playwright-runtime",
         "expanded-row-capture",
     ]
