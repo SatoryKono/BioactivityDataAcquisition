@@ -18,3 +18,11 @@ Each entry requires GitHub reconciliation before closeout.
 - Detail: CodeRabbit rate limit
 - GitHub issue: pending reconciliation
 
+## S01-domain-exceptions — rate_limit
+
+- UTC: `2026-08-16T23:43:17.086097+00:00`
+- Wave: `A`
+- Files: `24`
+- Detail: CodeRabbit rate limit
+- GitHub issue: pending reconciliation
+

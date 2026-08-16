@@ -174,42 +174,47 @@ def _validate_comparison_sources(
     source_name: object,
     valid_sources: set[str],
 ) -> list[ValidationIssue]:
-    if (
-        isinstance(source_name, str)
-        and comparison_sources
-        and set(comparison_sources) == {source_name}
-    ):
+    if _is_self_only_comparison(comparison_sources, source_name):
+        comparison_source = comparison_sources[0]
         return [
             _create_issue(
                 IssueCode.CMP_PF_CV_007,
                 ValidationSeverity.BLOCKER,
-                f"Cross-validation source '{source_name}' cannot compare only to itself",
-                {
-                    "comparison_source": source_name,
-                    "source_name": source_name,
-                    "available_sources": sorted(valid_sources),
-                },
-            )
-        ]
-    issues: list[ValidationIssue] = []
-    for comparison_source in comparison_sources:
-        if comparison_source == source_name:
-            continue
-        if comparison_source in valid_sources:
-            continue
-        issues.append(
-            _create_issue(
-                IssueCode.CMP_PF_CV_007,
-                ValidationSeverity.BLOCKER,
-                f"Comparison source '{comparison_source}' not found in pipeline sources",
+                f"Comparison source '{comparison_source}' cannot compare to itself",
                 {
                     "comparison_source": comparison_source,
                     "source_name": source_name,
-                    "available_sources": sorted(valid_sources),
                 },
             )
-        )
-    return issues
+        ]
+    return [
+        _unknown_comparison_source_issue(comparison_source, source_name, valid_sources)
+        for comparison_source in comparison_sources
+        if comparison_source != source_name and comparison_source not in valid_sources
+    ]
+
+
+def _is_self_only_comparison(
+    comparison_sources: list[str], source_name: object
+) -> bool:
+    return bool(comparison_sources) and set(comparison_sources) == {source_name}
+
+
+def _unknown_comparison_source_issue(
+    comparison_source: str,
+    source_name: object,
+    valid_sources: set[str],
+) -> ValidationIssue:
+    return _create_issue(
+        IssueCode.CMP_PF_CV_007,
+        ValidationSeverity.BLOCKER,
+        f"Comparison source '{comparison_source}' not found in pipeline sources",
+        {
+            "comparison_source": comparison_source,
+            "source_name": source_name,
+            "available_sources": sorted(valid_sources),
+        },
+    )
 
 
 def _validate_rules(rules: dict[str, str]) -> list[ValidationIssue]:
@@ -311,12 +316,29 @@ def _validate_coverage(
 def _collect_covered_sources(pairs: list[dict[str, object]]) -> set[str]:
     covered_sources: set[str] = set()
     for pair in pairs:
-        if not isinstance(pair, dict):
-            continue
-        for source_name, comparison_sources in pair.items():
-            normalized = _comparison_source_list(comparison_sources)
-            valid_comparisons = {item for item in normalized if item != source_name}
-            if isinstance(source_name, str) and valid_comparisons:
-                covered_sources.add(source_name)
-            covered_sources.update(valid_comparisons)
+        covered_sources.update(_covered_sources_for_pair(pair))
     return covered_sources
+
+
+def _covered_sources_for_pair(pair: object) -> set[str]:
+    if not isinstance(pair, dict):
+        return set()
+    covered_sources: set[str] = set()
+    for source_name, comparison_sources in pair.items():
+        covered_sources.update(
+            _covered_sources_for_mapping(source_name, comparison_sources)
+        )
+    return covered_sources
+
+
+def _covered_sources_for_mapping(
+    source_name: object, comparison_sources: object
+) -> set[str]:
+    normalized_sources = _comparison_source_list(comparison_sources)
+    non_self_sources = {
+        source for source in normalized_sources if source != source_name
+    }
+    source = (
+        {source_name} if isinstance(source_name, str) and non_self_sources else set()
+    )
+    return source | non_self_sources
