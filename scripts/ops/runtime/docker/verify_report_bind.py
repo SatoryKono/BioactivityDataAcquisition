@@ -50,7 +50,7 @@ from bioetl.application.services.run_reports.query import (
 )
 from bioetl.application.services.run_reports.source_identity import (
     IDENTITY_STATE_ALIGNED,
-    RuntimeSourceIdentityResolution,
+    RuntimeSourceIdentityResolutionResult,
     compare_runtime_source_identity,
     resolve_runtime_source_identity,
 )
@@ -136,7 +136,7 @@ def _docker_inspect_mounts(container: str) -> list[dict[str, Any]] | None:
 
 def _docker_inspect_source_identity(
     container: str,
-) -> RuntimeSourceIdentityResolution | None:
+) -> RuntimeSourceIdentityResolutionResult | None:
     """Resolve the producer identity from container env, then its label."""
     try:
         completed = subprocess.run(
@@ -186,10 +186,10 @@ def _docker_inspect_source_identity(
 
 
 def _coerce_container_source_resolution(
-    value: RuntimeSourceIdentityResolution | str | None,
-) -> RuntimeSourceIdentityResolution | None:
+    value: RuntimeSourceIdentityResolutionResult | str | None,
+) -> RuntimeSourceIdentityResolutionResult | None:
     """Keep tests/callers using the historical digest-only seam compatible."""
-    if value is None or isinstance(value, RuntimeSourceIdentityResolution):
+    if value is None or isinstance(value, RuntimeSourceIdentityResolutionResult):
         return value
     return resolve_runtime_source_identity(
         container_environment={"BIOETL_RUNTIME_SOURCE_ID": value}
