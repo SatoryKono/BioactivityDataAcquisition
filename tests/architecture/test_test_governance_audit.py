@@ -1089,6 +1089,48 @@ def test_preflight_reports_timed_out_git_status_as_strict_reproducibility_blocke
 
 
 @pytest.mark.architecture
+def test_preflight_uses_windows_git_fallback_for_timed_out_vcr_status(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    timed_out_args = (
+        "status",
+        "--short",
+        "--untracked-files=all",
+        "--",
+        "tests/fixtures/vcr",
+    )
+
+    def fake_git_runner(args: list[str]) -> subprocess.CompletedProcess[str]:
+        if tuple(args) == timed_out_args:
+            raise subprocess.TimeoutExpired(cmd=["git", *args], timeout=5.0)
+        return subprocess.CompletedProcess(args, 0, "", "")
+
+    fallback = {
+        "ok": True,
+        "stdout": "",
+        "stderr": "",
+        "returncode": 0,
+        "timed_out": False,
+        "fallback": "git.exe",
+    }
+    monkeypatch.setattr(
+        preflight,
+        "_windows_git_status",
+        lambda _root, *, status_args=None: fallback,
+    )
+
+    _git_status, vcr_git_status = preflight._collect_git_status_surfaces(
+        git_runner=fake_git_runner,
+        lfs_available=True,
+        using_default_runner=True,
+        root=tmp_path,
+    )
+
+    assert vcr_git_status is fallback
+
+
+@pytest.mark.architecture
 def test_preflight_reports_lfs_pointer_files_as_strict_reproducibility_blocker(
     tmp_path: Path,
 ) -> None:

@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import sys
 import time
+from collections.abc import Mapping
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -284,6 +285,24 @@ def _run_check(
     )
 
 
+def _audit_environment(
+    repo_root: Path,
+    *,
+    environ: Mapping[str, str] | None = None,
+) -> dict[str, str]:
+    """Return a caller-preserving environment with the src layout importable."""
+    env = dict(os.environ if environ is None else environ)
+    src_path = str((repo_root / "src").resolve())
+    existing_pythonpath = env.get("PYTHONPATH")
+    env["PYTHONPATH"] = (
+        os.pathsep.join((src_path, existing_pythonpath))
+        if existing_pythonpath
+        else src_path
+    )
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    return env
+
+
 def run_architecture_audit_read_only(
     *,
     repo_root: Path = PROJECT_ROOT,
@@ -291,8 +310,7 @@ def run_architecture_audit_read_only(
 ) -> dict[str, object]:
     """Run architecture evidence checks and fail if tracked files mutate."""
     repo_root = repo_root.resolve()
-    env = os.environ.copy()
-    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    env = _audit_environment(repo_root)
 
     before_status = _git_tracked_status(repo_root)
     results = [
