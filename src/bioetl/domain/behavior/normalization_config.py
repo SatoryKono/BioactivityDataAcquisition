@@ -18,6 +18,8 @@ __all__ = [
     "PChemblRangeConfig",
 ]
 
+_VALID_AGGREGATION_METHODS = frozenset({"mean", "median", "geometric_mean"})
+
 
 @dataclass(frozen=True, slots=True)
 class ConcentrationRangeConfig:
@@ -119,12 +121,21 @@ class NormalizationConfig:
 
     def __post_init__(self) -> None:
         """Validate configuration."""
+        self._validate_threshold_order()
+        self._validate_threshold_bounds()
+        self._validate_aggregation_method()
+
+    def _validate_threshold_order(self) -> None:
+        """Validate potency thresholds are non-negative and ordered."""
         if self.potency_threshold < 0:
             raise ValueError("potency_threshold cannot be negative")
         if self.high_potency_threshold < 0:
             raise ValueError("high_potency_threshold cannot be negative")
         if self.high_potency_threshold < self.potency_threshold:
             raise ValueError("high_potency_threshold must be >= potency_threshold")
+
+    def _validate_threshold_bounds(self) -> None:
+        """Validate potency thresholds against the configured pChEMBL maximum."""
         pchembl_max = self.pchembl_range.max_value
         if self.potency_threshold > pchembl_max:
             raise ValueError(
@@ -135,8 +146,10 @@ class NormalizationConfig:
                 "high_potency_threshold cannot exceed pChEMBL max_value "
                 f"({pchembl_max})"
             )
-        valid_methods = {"mean", "median", "geometric_mean"}
-        if self.default_aggregation_method not in valid_methods:
+
+    def _validate_aggregation_method(self) -> None:
+        """Validate the configured aggregation method."""
+        if self.default_aggregation_method not in _VALID_AGGREGATION_METHODS:
             raise ValueError(
                 f"Invalid aggregation method: {self.default_aggregation_method}"
             )

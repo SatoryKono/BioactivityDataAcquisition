@@ -183,32 +183,14 @@ class AggregationValidator:
     @staticmethod
     def _field_names_from_list(fields_node: list[object]) -> set[str]:
         """Extract field names from string entries or dict descriptors."""
-        names: set[str] = set()
-        for entry in fields_node:
-            if isinstance(entry, str):
-                names.add(entry)
-                continue
-            if isinstance(entry, dict):
-                name = entry.get("name")
-                if isinstance(name, str) and name:
-                    names.add(name)
-        return names
+        names = (_field_name_from_descriptor(entry) for entry in fields_node)
+        return {name for name in names if name is not None}
 
     @staticmethod
     def _collect_fallback_fields(source_schema: JsonDict) -> set[str]:
         """Collect field names from explicit schema shapes only."""
-        fields: set[str] = set()
-        columns = source_schema.get("columns")
-        if isinstance(columns, list):
-            fields.update(str(item) for item in columns if not isinstance(item, dict))
-            for item in columns:
-                if isinstance(item, dict):
-                    name = item.get("name")
-                    if isinstance(name, str) and name:
-                        fields.add(name)
-        names = source_schema.get("field_names")
-        if isinstance(names, list):
-            fields.update(str(item) for item in names)
+        fields = _column_names(source_schema.get("columns"))
+        fields.update(_explicit_field_names(source_schema.get("field_names")))
         return fields
 
     def validate_post_aggregation_uniqueness(
@@ -336,3 +318,35 @@ class AggregationValidator:
                 )
             )
         return provenance
+
+
+def _field_name_from_descriptor(entry: object) -> str | None:
+    """Return a field name from a string or mapping descriptor."""
+    if isinstance(entry, str):
+        return entry
+    if not isinstance(entry, dict):
+        return None
+    name = entry.get("name")
+    return name if isinstance(name, str) and name else None
+
+
+def _column_name(entry: object) -> str | None:
+    """Preserve fallback column coercion while validating mapping descriptors."""
+    if isinstance(entry, dict):
+        return _field_name_from_descriptor(entry)
+    return str(entry)
+
+
+def _column_names(columns: object) -> set[str]:
+    """Return names from the fallback ``columns`` schema shape."""
+    if not isinstance(columns, list):
+        return set()
+    names = (_column_name(entry) for entry in columns)
+    return {name for name in names if name is not None}
+
+
+def _explicit_field_names(names: object) -> set[str]:
+    """Return string-coerced names from the fallback ``field_names`` shape."""
+    if not isinstance(names, list):
+        return set()
+    return {str(item) for item in names}
