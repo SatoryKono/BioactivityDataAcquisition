@@ -154,6 +154,12 @@ class AggregationFieldSpec:
     def _validate(self) -> None:
         """Validate field specification."""
         require_non_empty(self.source_field, "aggregation source_field")
+        if self.output_field is not None:
+            if not isinstance(self.output_field, str):
+                raise ValueError("aggregation output_field must be a string")
+            normalized_output_field = self.output_field.strip()
+            require_non_empty(normalized_output_field, "aggregation output_field")
+            object.__setattr__(self, "output_field", normalized_output_field)
         if self.filter_condition is not None:
             _validate_aggregation_filter_condition(self.filter_condition)
 
@@ -216,6 +222,17 @@ class AggregationConfig:
         if not self.fields:
             raise ValueError("aggregation.fields cannot be empty")
         _require_field_specs(self.fields)
+        _require_unique_output_fields(self.fields)
+
+
+def _require_unique_output_fields(fields: tuple[AggregationFieldSpec, ...]) -> None:
+    output_fields = [field.effective_output_field for field in fields]
+    duplicate_output_fields = {
+        field for field in output_fields if output_fields.count(field) > 1
+    }
+    if duplicate_output_fields:
+        duplicates = ", ".join(sorted(duplicate_output_fields))
+        raise ValueError(f"aggregation.fields duplicate output field: {duplicates}")
 
 
 __all__ = [

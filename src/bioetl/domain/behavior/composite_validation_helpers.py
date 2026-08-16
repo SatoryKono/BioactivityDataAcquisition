@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from typing import cast
 
 from bioetl.domain.behavior.aggregation_validator import AggregationConfig
@@ -149,9 +150,7 @@ def _require_bool(value: object, field_name: str) -> bool:
 
 def _cross_validation_pairs(value: object) -> list[dict[str, object]]:
     """Validate and copy cross-validation pair definitions."""
-    if not isinstance(value, list) or not all(
-        isinstance(item, dict) for item in value
-    ):
+    if not isinstance(value, list) or not all(isinstance(item, dict) for item in value):
         raise TypeError(
             f"pairs must be a list of dictionaries, got {type(value).__name__}"
         )
@@ -163,8 +162,7 @@ def _string_rules(value: object) -> dict[str, str]:
     if not isinstance(value, dict):
         raise TypeError(f"rules must be a mapping, got {type(value).__name__}")
     if not all(
-        isinstance(key, str) and isinstance(item, str)
-        for key, item in value.items()
+        isinstance(key, str) and isinstance(item, str) for key, item in value.items()
     ):
         raise TypeError("rules keys and values must be strings")
     return cast(dict[str, str], dict(value))
@@ -174,11 +172,20 @@ def _optional_unit_interval(value: object, field_name: str) -> float | None:
     """Validate an optional numeric threshold in the inclusive unit interval."""
     if value is None:
         return None
-    if not isinstance(value, (int, float)):
-        raise TypeError(f"{field_name} must be a number or null")
-    if value < 0 or value > 1:
+    normalized = _finite_number(value, field_name)
+    if normalized < 0 or normalized > 1:
         raise ValueError(f"{field_name} must be in [0, 1]")
-    return float(value)
+    return normalized
+
+
+def _finite_number(value: object, field_name: str) -> float:
+    """Return a finite non-boolean number or fail closed."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise TypeError(f"{field_name} must be a number or null")
+    normalized = float(value)
+    if not math.isfinite(normalized):
+        raise ValueError(f"{field_name} must be in [0, 1]")
+    return normalized
 
 
 def _is_valid_field_priorities(priorities: JsonDict) -> bool:

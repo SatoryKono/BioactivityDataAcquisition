@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import dataclasses
+import json
 from dataclasses import dataclass
 
 from bioetl.domain.behavior.validation_result_envelopes import (
@@ -257,7 +258,7 @@ class AggregationValidator:
             if value is None:
                 components.append(("present", "NoneType", "null"))
             else:
-                components.append(("present", type_name, repr(value)))
+                components.append(("present", type_name, _canonical_group_value(value)))
         return tuple(components)
 
     def _build_uniqueness_issues(
@@ -292,9 +293,7 @@ class AggregationValidator:
         return [
             {
                 "index": duplicate["index"],
-                "group_key": [
-                    list(component) for component in duplicate["group_key"]
-                ],
+                "group_key": [list(component) for component in duplicate["group_key"]],
             }
             for duplicate in duplicate_groups[:5]
         ]
@@ -331,10 +330,10 @@ def _field_name_from_descriptor(entry: object) -> str | None:
 
 
 def _column_name(entry: object) -> str | None:
-    """Preserve fallback column coercion while validating mapping descriptors."""
+    """Return only explicit string names from fallback column descriptors."""
     if isinstance(entry, dict):
         return _field_name_from_descriptor(entry)
-    return str(entry)
+    return entry if isinstance(entry, str) else None
 
 
 def _column_names(columns: object) -> set[str]:
@@ -346,7 +345,23 @@ def _column_names(columns: object) -> set[str]:
 
 
 def _explicit_field_names(names: object) -> set[str]:
-    """Return string-coerced names from the fallback ``field_names`` shape."""
+    """Return explicit string names from the fallback ``field_names`` shape."""
     if not isinstance(names, list):
         return set()
-    return {str(item) for item in names}
+    return {item for item in names if isinstance(item, str)}
+
+
+def _canonical_group_value(value: object) -> str:
+    """Serialize supported group values without order- or address-sensitive repr."""
+    try:
+        return json.dumps(
+            value,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+            allow_nan=False,
+        )
+    except (TypeError, ValueError) as exc:
+        raise TypeError(
+            "aggregation group-by values must be JSON-serializable and finite"
+        ) from exc

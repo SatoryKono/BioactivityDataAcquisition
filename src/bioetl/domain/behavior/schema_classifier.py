@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 
 from bioetl.domain.behavior.schema_classifier_helpers import (
     added_field_changes,
@@ -14,8 +15,10 @@ from bioetl.domain.behavior.schema_classifier_helpers import (
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.schema_policy import (
     ChangeClassification,
+    SchemaChange,
     SchemaChangeClassification,
     SchemaChangeExplanation,
+    SchemaChangeType,
     SchemaCompatibilityPolicy,
     SchemaDiff,
 )
@@ -46,8 +49,26 @@ class SchemaClassifier:
 
     def _calculate_diff(self, old_schema: JsonDict, new_schema: JsonDict) -> SchemaDiff:
         """Calculate detailed diff between two schemas."""
-        old_properties = old_schema.get("properties", {})
-        new_properties = new_schema.get("properties", {})
+        old_properties, old_properties_valid = _as_properties(
+            old_schema.get("properties", {})
+        )
+        new_properties, new_properties_valid = _as_properties(
+            new_schema.get("properties", {})
+        )
+        if not old_properties_valid or not new_properties_valid:
+            return SchemaDiff(
+                breaking_changes=[],
+                non_breaking_changes=[],
+                unknown_changes=[
+                    SchemaChange(
+                        change_type=SchemaChangeType.OBJECT_STRUCTURE_CHANGED,
+                        field_path="properties",
+                        old_value=old_schema.get("properties"),
+                        new_value=new_schema.get("properties"),
+                        classification=ChangeClassification.MANUAL_REVIEW,
+                    )
+                ],
+            )
         breaking_changes = removed_field_changes(old_properties, new_properties)
         non_breaking_changes = added_field_changes(old_properties, new_properties)
         changed_breaking, changed_non_breaking = changed_field_changes(
@@ -95,8 +116,13 @@ class SchemaClassifier:
             )
 
         if diff.unknown_changes:
-            return SchemaChangeClassification.manual_review(
-                explanation="Unknown changes require manual review"
+            return SchemaChangeClassification(
+                classification=ChangeClassification.MANUAL_REVIEW,
+                explanation="Unknown changes require manual review",
+                requires_manual_review=True,
+                breaking_changes=diff.breaking_changes,
+                non_breaking_changes=diff.non_breaking_changes,
+                unknown_changes=diff.unknown_changes,
             )
 
         return SchemaChangeClassification(
@@ -156,3 +182,10 @@ def create_schema_classifier(
 ) -> SchemaClassifier:
     """Factory function for SchemaClassifier."""
     return SchemaClassifier(policy)
+
+
+def _as_properties(value: object) -> tuple[JsonDict, bool]:
+    """Normalize properties while retaining evidence of malformed shapes."""
+    if not isinstance(value, Mapping):
+        return {}, False
+    return dict(value), True

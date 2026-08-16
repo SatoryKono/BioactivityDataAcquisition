@@ -109,10 +109,10 @@ class TestMergedMetadataExplainer:
 
         assert isinstance(result, MergedFieldExplanation)
         assert result.field_name == "activity_value"
-        assert result.source_providers == ["chembl", "pubchem"]
+        assert result.source_providers == ("chembl", "pubchem")
         assert result.merge_strategy == "prioritize"
         assert result.final_value_source == "chembl"
-        assert result.enrichment_applied == ["uniprot"]
+        assert result.enrichment_applied == ("uniprot",)
 
     def test_generate_field_explanation_with_priorities(
         self,
@@ -129,7 +129,7 @@ class TestMergedMetadataExplainer:
             field_priorities,
         )
 
-        assert result.priority_order == ["chembl", "pubchem"]
+        assert result.priority_order == ("chembl", "pubchem")
         assert result.conflict_resolution == "priority_based"
 
     def test_generate_field_explanation_no_enrichments(
@@ -174,7 +174,7 @@ class TestMergedMetadataExplainer:
         assert isinstance(result, MergedRecordExplanation)
         assert result.record_id == "mol123"
         assert result.composite_run_id == "test_run_123"
-        assert result.source_providers == ["chembl", "pubchem"]
+        assert result.source_providers == ("chembl", "pubchem")
         assert (
             len(result.field_explanations) == 4
         )  # activity_value, assay_type, source, molecule_id
@@ -208,7 +208,7 @@ class TestMergedMetadataExplainer:
         )
 
         assert activity_explanation is not None
-        assert activity_explanation.priority_order == ["chembl", "pubchem"]
+        assert activity_explanation.priority_order == ("chembl", "pubchem")
 
     def test_generate_record_explanation_empty_record(
         self,
