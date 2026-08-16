@@ -13,6 +13,7 @@ from bioetl.domain.composite.cross_validation import (
 from .config_cross_validation import CrossValidationConfig
 from .config_dq import CompositeDQConfig, DQOverrideConfig
 from .config_parsing import (
+    optional_bool,
     optional_float,
     optional_str_tuple,
     require_float,
@@ -80,7 +81,11 @@ def build_execution_config(execution_data: dict[str, object]) -> ExecutionConfig
         max_concurrency=require_int(
             execution_data.get("max_concurrency"), "execution.max_concurrency", 4
         ),
-        checkpoint_enabled=bool(execution_data.get("checkpoint_enabled", True)),
+        checkpoint_enabled=optional_bool(
+            execution_data.get("checkpoint_enabled"),
+            True,
+            "execution.checkpoint_enabled",
+        ),
         retry_max_attempts=require_int(
             execution_data.get("retry_max_attempts"),
             "execution.retry_max_attempts",
@@ -117,9 +122,21 @@ def build_lineage_config(lineage_data: dict[str, object]) -> LineageConfig:
         "lineage.track_source_for_fields",
     )
     return LineageConfig(
-        track_field_sources=bool(lineage_data.get("track_field_sources", True)),
-        track_timestamps=bool(lineage_data.get("track_timestamps", True)),
-        track_status=bool(lineage_data.get("track_status", True)),
+        track_field_sources=optional_bool(
+            lineage_data.get("track_field_sources"),
+            True,
+            "lineage.track_field_sources",
+        ),
+        track_timestamps=optional_bool(
+            lineage_data.get("track_timestamps"),
+            True,
+            "lineage.track_timestamps",
+        ),
+        track_status=optional_bool(
+            lineage_data.get("track_status"),
+            True,
+            "lineage.track_status",
+        ),
         provider_lookup_fields=lookup,
         track_source_for_fields=track_fields or (),
     )
@@ -187,12 +204,32 @@ def build_cross_validation_config(
     cv_data: dict[str, object],
 ) -> CrossValidationConfig:
     return CrossValidationConfig(
-        enabled=bool(cv_data.get("enabled", True)),
-        warning_threshold=int(str(cv_data.get("warning_threshold", 1))),
-        error_threshold=int(str(cv_data.get("error_threshold", 2))),
-        quarantine_threshold=int(str(cv_data.get("quarantine_threshold", 2))),
-        fuzzy_threshold=float(str(cv_data.get("fuzzy_threshold", 0.8))),
-        numeric_tolerance=float(str(cv_data.get("numeric_tolerance", 0.10))),
+        enabled=optional_bool(cv_data.get("enabled"), True, "cross_validation.enabled"),
+        warning_threshold=require_int(
+            cv_data.get("warning_threshold"),
+            "cross_validation.warning_threshold",
+            1,
+        ),
+        error_threshold=require_int(
+            cv_data.get("error_threshold"),
+            "cross_validation.error_threshold",
+            2,
+        ),
+        quarantine_threshold=require_int(
+            cv_data.get("quarantine_threshold"),
+            "cross_validation.quarantine_threshold",
+            2,
+        ),
+        fuzzy_threshold=require_float(
+            cv_data.get("fuzzy_threshold"),
+            "cross_validation.fuzzy_threshold",
+            0.8,
+        ),
+        numeric_tolerance=require_float(
+            cv_data.get("numeric_tolerance"),
+            "cross_validation.numeric_tolerance",
+            0.10,
+        ),
         enricher_pairings=_enricher_field_pairings(
             cv_data.get("enricher_pairings") or ()
         ),

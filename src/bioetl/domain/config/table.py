@@ -103,6 +103,17 @@ class TableConfig:
             "gold_idempotency_contract",
             _normalize_idempotency_contract(self.gold_idempotency_contract),
         )
+        partition_contract = (
+            IdempotencyContract.PARTITION_APPEND_WITH_STABLE_PARTITION_KEY
+        )
+        if (
+            self.silver_idempotency_contract == partition_contract
+            or self.gold_idempotency_contract == partition_contract
+        ) and not self.partition_cols:
+            raise ValueError(
+                "partition_cols must be non-empty for "
+                "partition_append_with_stable_partition_key"
+            )
 
 
 def _normalize_idempotency_contract(

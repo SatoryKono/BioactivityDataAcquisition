@@ -91,7 +91,7 @@ class DQMetricsCalculator:
         Returns:
             SchemaDriftInfo if drift detected, None otherwise.
         """
-        if not existing_fields or not records:
+        if existing_fields is None or not records:
             return None
 
         incoming_fields = self._extract_incoming_fields(records)

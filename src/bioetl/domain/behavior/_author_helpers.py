@@ -278,11 +278,10 @@ def normalize_to_surname_initial(name: str) -> str | None:
 
 def _collect_affiliation_values(aff_data: object) -> list[str]:
     """Extract affiliation strings from a single author's affiliation field."""
-    if isinstance(aff_data, list):
-        return [str(a) for a in aff_data if a]
-    if isinstance(aff_data, str):
-        return [aff_data]
-    return []
+    if not isinstance(aff_data, list | str):
+        return []
+    items = aff_data if isinstance(aff_data, list) else [aff_data]
+    return extract_affiliation_strings(items)
 
 
 def collect_affiliations_from_authors(

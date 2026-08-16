@@ -7,6 +7,7 @@ import re
 _FILTER_FIELD_RE = re.compile(
     r"^[A-Za-z_]\w*$"
 )  # NOSONAR - requires non-digit first char, \w+ alone is insufficient
+_QUOTED_LITERAL_RE = re.compile(r"""(?:'(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*")""")
 
 
 def _require_filter_field(field: str) -> None:
@@ -19,15 +20,19 @@ def _require_filter_field(field: str) -> None:
 def _validate_null_filter(text: str, upper: str, token: str) -> bool:
     if token not in upper:
         return False
-    field = text[: upper.find(token)].strip()
+    token_start = upper.find(token)
+    suffix = text[token_start + len(token) :].strip()
+    if suffix:
+        raise ValueError(
+            "aggregation filter_condition null check must not contain trailing text"
+        )
+    field = text[:token_start].strip()
     _require_filter_field(field)
     return True
 
 
 def _is_quoted_literal(value: str) -> bool:
-    return (value.startswith("'") and value.endswith("'")) or (
-        value.startswith('"') and value.endswith('"')
-    )
+    return _QUOTED_LITERAL_RE.fullmatch(value) is not None
 
 
 def _rhs_contains_nested_operators(rhs: str) -> bool:

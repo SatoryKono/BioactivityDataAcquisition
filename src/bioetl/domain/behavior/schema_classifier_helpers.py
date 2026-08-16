@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.schema_policy import (
@@ -105,8 +105,8 @@ def changed_field_changes(
     """Return (breaking, non-breaking) changes for common and newly required fields."""
     breaking_changes: list[SchemaChange] = []
     non_breaking_changes: list[SchemaChange] = []
-    old_required = set(old_schema.get("required", []))
-    new_required = set(new_schema.get("required", []))
+    old_required = _required_names(old_schema.get("required"))
+    new_required = _required_names(new_schema.get("required"))
     required_changes = _required_change_target(
         breaking_changes,
         non_breaking_changes,
@@ -132,6 +132,13 @@ def changed_field_changes(
     )
 
     return breaking_changes, non_breaking_changes
+
+
+def _required_names(value: object) -> set[str]:
+    """Return strings from a valid required-field collection."""
+    if isinstance(value, str | bytes | Mapping) or not isinstance(value, Iterable):
+        return set()
+    return {item for item in value if isinstance(item, str)}
 
 
 def _required_change_target(
