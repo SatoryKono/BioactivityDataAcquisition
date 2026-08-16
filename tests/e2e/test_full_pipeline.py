@@ -151,9 +151,9 @@ class TestChEMBLPipelineE2E:
     """E2E tests for ChEMBL Activity pipeline."""
 
     @pytest.fixture
-    def storage_paths(self, e2e_temp_storage):
-        """Get storage paths from E2E temp storage."""
-        return e2e_temp_storage
+    def storage_paths(self, e2e_data_dir: Path) -> dict[str, Path]:
+        """Bind Medallion and control-plane paths to one E2E sandbox."""
+        return _storage_paths_from_data_dir(e2e_data_dir)
 
     @pytest.fixture
     def storage_context(self, storage_paths):
@@ -206,7 +206,7 @@ class TestChEMBLPipelineE2E:
 @pytest.mark.vcr
 @pytest.mark.serial
 async def test_pubchem_compound_pipeline(
-    e2e_temp_storage,
+    e2e_data_dir: Path,
     e2e_redis_client,
     e2e_minio_client,
     e2e_pipeline_limit,
@@ -218,7 +218,8 @@ async def test_pubchem_compound_pipeline(
     - Write to Bronze layer
     - Transform to Silver layer
     """
-    storage_context = _create_test_storage_context(e2e_temp_storage)
+    storage_paths = _storage_paths_from_data_dir(e2e_data_dir)
+    storage_context = _create_test_storage_context(storage_paths)
     await _run_pipeline_with_test_storage(
         storage_context,
         "pubchem_compound",
@@ -227,11 +228,11 @@ async def test_pubchem_compound_pipeline(
     )
 
     # Verify Bronze files created
-    bronze_files = list(e2e_temp_storage["bronze"].rglob("*.jsonl*"))
+    bronze_files = list(storage_paths["bronze"].rglob("*.jsonl*"))
     assert len(bronze_files) > 0, "No Bronze files created for PubChem"
 
     # Verify Silver Delta Lake
-    silver_parquet = list(e2e_temp_storage["silver"].rglob("*.parquet"))
+    silver_parquet = list(storage_paths["silver"].rglob("*.parquet"))
     assert len(silver_parquet) > 0, "No Silver parquet files for PubChem"
 
     # Verify locks released
@@ -317,7 +318,7 @@ async def test_pipeline_resume_after_failure(
 @pytest.mark.vcr
 @pytest.mark.asyncio
 async def test_full_pipeline__pipeline_idempotency__e17c8c60(
-    e2e_temp_storage,
+    e2e_data_dir: Path,
     e2e_redis_client,
     e2e_minio_client,
 ):
@@ -327,7 +328,8 @@ async def test_full_pipeline__pipeline_idempotency__e17c8c60(
     strict merge-idempotency check. It verifies that a second run completes and
     does not grow beyond the expected two-batch envelope.
     """
-    storage_context = _create_test_storage_context(e2e_temp_storage)
+    storage_paths = _storage_paths_from_data_dir(e2e_data_dir)
+    storage_context = _create_test_storage_context(storage_paths)
 
     # Run 1: Initial load
     await _run_pipeline_with_test_storage(
@@ -339,7 +341,7 @@ async def test_full_pipeline__pipeline_idempotency__e17c8c60(
     # Count records after first run
     import polars as pl
 
-    silver_path = e2e_temp_storage["silver"]
+    silver_path = storage_paths["silver"]
     # Find the actual Delta table directory
     delta_tables = [d for d in silver_path.rglob("*") if (d / "_delta_log").exists()]
 
