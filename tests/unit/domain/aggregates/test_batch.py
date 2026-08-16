@@ -218,6 +218,34 @@ class TestBatchStateTransitions:
         assert events[0].valid_count == 2
         assert events[0].quarantined_count == 1
 
+    def test_mark_committed_uses_sealed_valid_count(
+        self,
+        run_id: RunID,
+    ) -> None:
+        """CR-20260816-A-S01-domain-aggregates-014: commit uses seal counts."""
+        batch = Batch.open_with_id(
+            batch_id=BatchID(deterministic_uuid_value("unit.batch.seal_commit")),
+            run_id=run_id,
+            records=[{"id": "1"}, {"id": "2"}, {"id": "3"}],
+            created_at=_ts(0),
+        )
+        batch.collect_events()
+        batch.seal_with_counts(
+            record_count=3,
+            valid_count=2,
+            quarantined_count=1,
+            sealed_at=_ts(10),
+        )
+        batch.mark_writing()
+        batch.collect_events()
+
+        batch.mark_committed(Layer.SILVER, _ts(20))
+
+        events = batch.collect_events()
+        assert batch.valid_count == 3
+        assert events[0].__class__.__name__ == "BatchWritten"
+        assert events[0].record_count == 2
+
     def test_cannot_seal_already_sealed(self, batch: Batch) -> None:
         """Invariant: Cannot seal an already sealed batch."""
         batch.add_record({"id": "1"})
