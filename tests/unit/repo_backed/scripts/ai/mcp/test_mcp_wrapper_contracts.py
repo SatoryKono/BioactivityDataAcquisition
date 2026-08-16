@@ -61,6 +61,7 @@ MUTMUT_PS1 = MCP_DIR / "mcp_mutmut_wrapper.ps1"
 ADR_ANALYSIS_PS1 = MCP_DIR / "mcp_adr_analysis_wrapper.ps1"
 CONTEXT7_SH = MCP_DIR / "mcp_context7_wrapper.sh"
 CONTEXT7_PS1 = MCP_DIR / "mcp_context7_wrapper.ps1"
+AST_GREP_SH = MCP_DIR / "mcp_ast_grep_wrapper.sh"
 MCP_GOVERNANCE = ROOT / "docs" / "00-project" / "ai" / "mcp-governance.md"
 
 
@@ -1312,3 +1313,63 @@ def test_context7_wrappers_pin_package_and_never_include_api_key_argv() -> None:
         assert CONTEXT7_PACKAGE in source
         assert "@latest" not in source
         assert "--api-key" not in source
+
+
+@BASH_MARK
+def test_ast_grep_validate_only_is_offline_and_does_not_execute_npx(
+    tmp_path: Path,
+) -> None:
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    fake_npx = fake_bin / "npx"
+    capture_file = tmp_path / "ast-grep-args.txt"
+    _write_bash_launcher(fake_npx)
+    env = _clean_env(
+        PATH=f"{fake_bin}:/usr/bin:/bin",
+        BIOETL_MCP_VALIDATE_ONLY="1",
+        BIOETL_TEST_CAPTURE=str(capture_file),
+    )
+
+    result = _run_bash(f"bash {shlex.quote(_bash_lf_script(AST_GREP_SH))}", env=env)
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "[OK] ast-grep MCP wrapper validation completed\n"
+    assert result.stderr == ""
+    assert not capture_file.exists()
+
+
+@BASH_MARK
+def test_ast_grep_normal_launch_preserves_primary_and_fallback_dispatch(
+    tmp_path: Path,
+) -> None:
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    fake_npx = fake_bin / "npx"
+    capture_file = tmp_path / "ast-grep-args.txt"
+    fake_npx.write_text(
+        """#!/usr/bin/env bash
+set -eu
+printf '%s\n' "$*" >>"${BIOETL_TEST_CAPTURE:?}"
+if [[ "$*" == *"@notprolands/ast-grep-mcp"* ]]; then
+  exit 17
+fi
+exit 0
+""",
+        encoding="utf-8",
+    )
+    fake_npx.chmod(0o755)
+    env = _clean_env(
+        PATH=f"{fake_bin}:/usr/bin:/bin",
+        BIOETL_TEST_CAPTURE=str(capture_file),
+    )
+
+    result = _run_bash(
+        f"bash {shlex.quote(_bash_lf_script(AST_GREP_SH))} --example", env=env
+    )
+
+    assert result.returncode == 0, result.stderr
+    calls = capture_file.read_text(encoding="utf-8").splitlines()
+    assert calls == [
+        "-y @notprolands/ast-grep-mcp --stdio --example",
+        "-y @chousyn/ast-grep-mcp --stdio --example",
+    ]

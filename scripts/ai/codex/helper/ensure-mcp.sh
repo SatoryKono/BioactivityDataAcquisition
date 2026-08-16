@@ -275,6 +275,21 @@ PY
     return 0
 }
 
+check_local_profile_parity() {
+    local check_args=(
+        --root "${REPO_ROOT}"
+        --workspace-root "${REPO_ROOT}"
+        --check-local
+    )
+    if [[ -n "${CODEX_MCP_PROFILE:-}" ]]; then
+        check_args+=(--profile "${CODEX_MCP_PROFILE}")
+    fi
+    if [[ -n "${CODEX_MCP_TRANSPORT_MODE:-}" ]]; then
+        check_args+=(--transport-mode "${CODEX_MCP_TRANSPORT_MODE}")
+    fi
+    python3 "${SETUP_MCP}" "${check_args[@]}"
+}
+
 validate_codex_mcp_list() {
     if [[ "${CODEX_VALIDATE_MCP_LIST:-0}" != "1" ]]; then
         return 0
@@ -321,9 +336,9 @@ ensure_shared_plane() {
     fi
     local timeout_seconds="${CODEX_MCP_SHARED_START_TIMEOUT:-360}"
     timeout "${timeout_seconds}" bash "${launcher}" "${required_servers[@]}" || \
-        fail "Required MCP servers for profile ${profile} failed to become ready"
+        fail "Shared-plane start phase failed for profile ${profile} within ${timeout_seconds}s; inspect ${REPO_ROOT}/logs/mcp-shared/status.json and per-server *.err.log files"
     bash "${health}" --profile "${profile}" --no-write >/dev/null || \
-        fail "MCP profile ${profile} health check failed after start"
+        fail "Shared-plane health verification phase failed for profile ${profile}; inspect ${REPO_ROOT}/logs/mcp-shared/status.json"
 }
 
 current_config_is_ready() {
@@ -342,6 +357,7 @@ current_config_is_ready() {
         check_workspace_mcp_config "${REPO_ROOT}/.qodo/mcp.json"
         check_workspace_mcp_config "${REPO_ROOT}/.zed/mcp.json"
         check_workspace_mcp_config "${REPO_ROOT}/.devin/mcp_config.json"
+        check_local_profile_parity
         check_codex_config
     ) >/dev/null 2>&1
 }
@@ -409,9 +425,8 @@ PY
         --workspace-root "${REPO_ROOT}" \
         --profile "${local_profile}" \
         --transport-mode "${local_transport}" \
-        --skip-codex-validation \
-        --skip-gemini-settings >/dev/null 2>&1 || \
-        warn "MCP setup timed out or failed; config may be incomplete"
+        --skip-codex-validation >/dev/null 2>&1 || \
+        fail "MCP config materialization phase failed or timed out after ${local_setup_timeout}s"
 fi
 
 check_workspace_mcp_config "${REPO_ROOT}/.mcp.json"
@@ -423,6 +438,7 @@ fi
 check_workspace_mcp_config "${REPO_ROOT}/.qodo/mcp.json"
 check_workspace_mcp_config "${REPO_ROOT}/.zed/mcp.json"
 check_workspace_mcp_config "${REPO_ROOT}/.devin/mcp_config.json"
+check_local_profile_parity
 check_codex_config
 if [[ "${MODE}" == "ensure" || "${MODE}" == "refresh" ]]; then
     ensure_shared_plane

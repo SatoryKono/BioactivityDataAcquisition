@@ -78,7 +78,7 @@ Classes:
 | Codex | Yes (url in config.toml / settings) | Workspace + `~/.codex` |
 | Grok | Yes when projection loaded | Restart client after materialize |
 | Qodo | Yes (mcp.json) | Local profile |
-| Devin | Yes (`type: http` + URL) | Active projection follows the selected local profile |
+| Devin | Yes (`type: http` + URL) | Tracked projection remains the full sanctioned inventory |
 
 ## Shared endpoints (v4)
 
@@ -108,17 +108,46 @@ a second endpoint map.
 ## Generator contract
 
 ```bash
-python scripts/ai/codex/setup_mcp.py --profile shared --transport-mode shared --skip-codex-validation
+python3 scripts/ai/codex/setup_mcp.py \
+  --profile stable --transport-mode shared \
+  --persist-local-profile --skip-codex-validation
 ```
 
 | Surface | Behavior |
 | --- | --- |
 | Tracked `.mcp.json` / `scripts/ai/.mcp.json` / `.zed` | Always **full portable stdio** (+ remote HTTP T4) |
-| Active `.devin` + local `.cursor` / `.vscode` / `.qodo` / workspace codex / gemini | Profile + **transport-mode** |
+| Tracked `.devin/mcp_config.json` | Always full sanctioned shared-HTTP inventory with Devin header syntax |
+| Local `.cursor` / `.vscode` / `.qodo` / workspace Codex / optional Gemini | Persisted profile + **transport-mode** |
 | `--transport-mode stdio` | Explicit single-client fallback; wrappers only |
 | `--transport-mode shared` | Default; shared-capable servers become `type: http` localhost URLs |
 | `--transport-mode hybrid` | Same as shared for catalog servers; others stay stdio |
 | Profile `shared` | Every sanctioned local MCP through the shared plane + remote HTTP MCP |
+
+The daily selection is profile `stable` with transport `shared`: exactly ten
+client entries, of which nine are required localhost endpoints and `ref` is
+remote/auth-managed.
+
+## Deterministic cold start and offline preflight
+
+`scripts/ai/codex/helper/ensure-mcp.sh` is the sole owner of the shared-plane
+start timeout. `CODEX_MCP_SHARED_START_TIMEOUT` defaults to 360 seconds and
+bounds `start-shared.sh`; callers must not wrap ensure with a smaller
+undocumented timeout. Configuration materialization has its separate bounded
+`CODEX_MCP_SETUP_TIMEOUT` phase. Failures identify materialization, plane start,
+or post-start health verification and point to `logs/mcp-shared/status.json`
+and per-server `*.err.log` files.
+
+Healthy endpoints are checked before launch. Repeated ensure calls reuse the
+managed singleton listeners and do not create competing processes. Static
+validation never starts services. Stable POSIX wrappers support
+`BIOETL_MCP_VALIDATE_ONLY=1`; this mode checks local prerequisites and exits
+before package execution or registry access.
+
+```bash
+BIOETL_MCP_VALIDATE_ONLY=1 \
+  bash scripts/ai/mcp/mcp_ast_grep_wrapper.sh
+bash scripts/ai/codex/run-codex.sh mcp-static
+```
 
 ## Compose Mode B (optional — not default)
 

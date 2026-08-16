@@ -147,10 +147,10 @@ if [[ ! -x "${ENSURE_MCP_SCRIPT}" ]]; then
     exit 1
 fi
 
-if timeout 30 bash -c "CODEX_BIN='${CODEX_BIN}' '${ENSURE_MCP_SCRIPT}' --ensure --codex-bin '${CODEX_BIN}'" >/dev/null 2>&1; then
+if CODEX_BIN="${CODEX_BIN}" bash "${ENSURE_MCP_SCRIPT}" --ensure --codex-bin "${CODEX_BIN}" >/dev/null 2>&1; then
     log_success "MCP configuration synchronized"
 else
-    log_error "MCP configuration failed or timed out"
+    log_error "MCP configuration or governed shared-plane startup failed"
     exit 1
 fi
 

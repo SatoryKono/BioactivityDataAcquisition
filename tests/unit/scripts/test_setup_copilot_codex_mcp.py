@@ -882,6 +882,159 @@ def test_setup_mcp_check_mode_is_read_only_and_detects_drift(
     assert setup_mcp.main(check_args) == 1
 
 
+def test_local_check_enforces_persisted_stable_shared_across_surfaces(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Local parity is exact while tracked full inventory and custom Gemini survive."""
+    workspace_root = tmp_path / "workspace"
+    fake_home = tmp_path / "home"
+    workspace_root.mkdir()
+    fake_home.mkdir()
+    monkeypatch.setattr(setup_mcp.Path, "home", lambda: fake_home)
+    monkeypatch.setenv("REF_TOOL_API_KEY", "example-secret-must-not-render")
+    gemini_path = workspace_root / ".gemini" / "settings.json"
+    gemini_path.parent.mkdir(parents=True)
+    gemini_path.write_text(
+        json.dumps(
+            {
+                "theme": "keep-me",
+                "mcpServers": {"custom-local": {"command": "custom-mcp", "args": []}},
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    generate_args = [
+        "--root",
+        str(workspace_root),
+        "--workspace-root",
+        str(workspace_root),
+        "--profile",
+        "stable",
+        "--transport-mode",
+        "shared",
+        "--persist-local-profile",
+        "--skip-codex",
+    ]
+    assert setup_mcp.main(generate_args) == 0
+
+    check_args = [
+        "--root",
+        str(workspace_root),
+        "--workspace-root",
+        str(workspace_root),
+        "--check-local",
+    ]
+    before = {
+        path: path.read_text(encoding="utf-8")
+        for path in (
+            workspace_root / ".codex" / "settings.json",
+            workspace_root / ".vscode" / "mcp.json",
+            workspace_root / ".cursor" / "mcp.json",
+            workspace_root / ".qodo" / "mcp.json",
+            gemini_path,
+        )
+    }
+    assert setup_mcp.main(check_args) == 0
+    assert {path: path.read_text(encoding="utf-8") for path in before} == before
+
+    local_payloads = (
+        json.loads((workspace_root / ".codex/settings.json").read_text())["mcpServers"],
+        json.loads((workspace_root / ".vscode/mcp.json").read_text())["servers"],
+        json.loads((workspace_root / ".cursor/mcp.json").read_text())["mcpServers"],
+        json.loads((workspace_root / ".qodo/mcp.json").read_text())["mcpServers"],
+    )
+    assert all(
+        set(payload) == set(setup_mcp.MCP_PROFILE_STABLE) for payload in local_payloads
+    )
+    tracked = json.loads((workspace_root / ".mcp.json").read_text())["mcpServers"]
+    devin = json.loads((workspace_root / ".devin/mcp_config.json").read_text())[
+        "mcpServers"
+    ]
+    assert set(tracked) == EXPECTED_FULL_PROFILE_SERVERS
+    assert set(devin) == EXPECTED_FULL_PROFILE_SERVERS
+    gemini = json.loads(gemini_path.read_text(encoding="utf-8"))
+    assert gemini["theme"] == "keep-me"
+    assert "custom-local" in gemini["mcpServers"]
+    assert "example-secret-must-not-render" not in "\n".join(before.values())
+
+
+def test_local_check_reports_membership_and_transport_drift(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    workspace_root = tmp_path / "workspace"
+    fake_home = tmp_path / "home"
+    workspace_root.mkdir()
+    fake_home.mkdir()
+    monkeypatch.setattr(setup_mcp.Path, "home", lambda: fake_home)
+    assert (
+        setup_mcp.main(
+            [
+                "--root",
+                str(workspace_root),
+                "--workspace-root",
+                str(workspace_root),
+                "--profile",
+                "stable",
+                "--transport-mode",
+                "shared",
+                "--persist-local-profile",
+                "--skip-codex",
+            ]
+        )
+        == 0
+    )
+    capsys.readouterr()
+
+    vscode_path = workspace_root / ".vscode/mcp.json"
+    vscode = json.loads(vscode_path.read_text(encoding="utf-8"))
+    vscode["servers"].pop("ref")
+    vscode_path.write_text(json.dumps(vscode, indent=2) + "\n", encoding="utf-8")
+    cursor_path = workspace_root / ".cursor/mcp.json"
+    cursor = json.loads(cursor_path.read_text(encoding="utf-8"))
+    cursor["mcpServers"]["filesystem"] = {"command": "bash", "args": []}
+    cursor["mcpServers"]["docker"] = {
+        "type": "http",
+        "url": "http://127.0.0.1:8817/mcp",
+    }
+    cursor_path.write_text(json.dumps(cursor, indent=2) + "\n", encoding="utf-8")
+
+    assert (
+        setup_mcp.main(
+            [
+                "--root",
+                str(workspace_root),
+                "--workspace-root",
+                str(workspace_root),
+                "--check-local",
+            ]
+        )
+        == 1
+    )
+    output = capsys.readouterr().out
+    assert ".vscode/mcp.json" in output
+    assert "missing=['ref']" in output
+    assert ".cursor/mcp.json" in output
+    assert "extra=['docker']" in output
+    assert "transport_drift=['filesystem']" in output
+    assert (
+        setup_mcp.main(
+            [
+                "--root",
+                str(workspace_root),
+                "--workspace-root",
+                str(workspace_root),
+                "--check",
+            ]
+        )
+        == 0
+    )
+
+
 def test_setup_mcp_reuses_current_config_and_repairs_drift(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

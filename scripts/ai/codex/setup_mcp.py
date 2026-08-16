@@ -955,6 +955,7 @@ def _run_codex_validation(workspace_root: Path) -> None:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    raw_argv = list(argv) if argv is not None else sys.argv[1:]
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--root",
@@ -1057,15 +1058,32 @@ def main(argv: Sequence[str] | None = None) -> int:
             "bounded diff summary otherwise. Performs no writes."
         ),
     )
-    args = parser.parse_args(list(argv) if argv is not None else None)
+    parser.add_argument(
+        "--check-local",
+        action="store_true",
+        help=(
+            "Read-only exact-parity check for profile-filtered local MCP "
+            "projections. Uses .codex/mcp-profile.json when profile/transport "
+            "are not supplied explicitly, preserves custom Gemini servers, "
+            "and performs no writes or service startup."
+        ),
+    )
+    args = parser.parse_args(raw_argv)
     _apply_setup_mcp_flag_shortcuts(args)
     output_root = args.root.absolute()
     workspace_root = args.workspace_root.absolute()
+    if args.check and args.check_local:
+        parser.error("--check and --check-local are mutually exclusive")
     if args.codex_only:
-        if args.check or args.qodo_only or args.persist_local_profile:
+        if (
+            args.check
+            or args.check_local
+            or args.qodo_only
+            or args.persist_local_profile
+        ):
             parser.error(
-                "--codex-only cannot be combined with --check, --qodo-only, "
-                "or --persist-local-profile"
+                "--codex-only cannot be combined with --check, --check-local, "
+                "--qodo-only, or --persist-local-profile"
             )
         if args.skip_codex or args.skip_codex_config:
             parser.error("--codex-only cannot be combined with Codex skip flags")
@@ -1083,6 +1101,25 @@ def main(argv: Sequence[str] | None = None) -> int:
             output_root,
             workspace_root,
             qodo_only=args.qodo_only,
+        )
+    if args.check_local:
+        if args.qodo_only or args.persist_local_profile:
+            parser.error(
+                "--check-local cannot be combined with --qodo-only or "
+                "--persist-local-profile"
+            )
+        profile, transport_mode = _resolve_local_check_selection(
+            output_root,
+            profile=args.profile,
+            transport_mode=args.transport_mode,
+            profile_explicit=_cli_option_was_provided(raw_argv, "--profile"),
+            transport_explicit=_cli_option_was_provided(raw_argv, "--transport-mode"),
+        )
+        return _check_local_profile_projections(
+            output_root,
+            workspace_root,
+            profile=profile,
+            transport_mode=transport_mode,
         )
     written_paths = _write_configs(
         output_root,
@@ -1112,6 +1149,50 @@ def _apply_setup_mcp_flag_shortcuts(args: argparse.Namespace) -> None:
         args.skip_gemini_settings = True
     if args.skip_codex:
         args.skip_codex_config = True
+
+
+def _cli_option_was_provided(argv: Sequence[str], option: str) -> bool:
+    """Return whether an argparse option was supplied in split or ``=`` form."""
+    return any(
+        argument == option or argument.startswith(f"{option}=") for argument in argv
+    )
+
+
+def _resolve_local_check_selection(
+    output_root: Path,
+    *,
+    profile: str,
+    transport_mode: str,
+    profile_explicit: bool,
+    transport_explicit: bool,
+) -> tuple[str, str]:
+    """Resolve check selection from explicit flags, then persisted local state."""
+    state_path = output_root / ".codex" / "mcp-profile.json"
+    if (profile_explicit and transport_explicit) or not state_path.is_file():
+        return profile, transport_mode
+
+    try:
+        payload = json.loads(state_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"Invalid persisted MCP profile state: {state_path}") from exc
+    if not isinstance(payload, dict):
+        raise ValueError(f"Persisted MCP profile state must be an object: {state_path}")
+
+    resolved_profile = profile if profile_explicit else payload.get("profile", profile)
+    resolved_transport = (
+        transport_mode
+        if transport_explicit
+        else payload.get("transport_mode", transport_mode)
+    )
+    if resolved_profile not in MCP_PROFILES:
+        raise ValueError(
+            f"Invalid persisted MCP profile {resolved_profile!r}: {state_path}"
+        )
+    if resolved_transport not in TRANSPORT_MODES:
+        raise ValueError(
+            f"Invalid persisted MCP transport {resolved_transport!r}: {state_path}"
+        )
+    return str(resolved_profile), str(resolved_transport)
 
 
 def _render_portable_mcp_payload(workspace_root: Path) -> dict[str, Any]:
@@ -1257,6 +1338,184 @@ def _check_tracked_portable_projections(
     print(
         "Recovery: re-run Generate: MCP tracked manifests "
         "(scripts/ai/codex/setup_mcp.py --skip-codex --skip-gemini-settings)"
+    )
+    return 1
+
+
+def _transport_signature(server: Any, *, gemini: bool = False) -> tuple[str, str]:
+    """Return a secret-free transport signature for bounded drift reporting."""
+    if not isinstance(server, dict):
+        return ("invalid", "")
+    url_key = "httpUrl" if gemini else "url"
+    if server.get(url_key):
+        return ("http", str(server[url_key]))
+    if server.get("url"):
+        return ("http", str(server["url"]))
+    return ("stdio", str(server.get("command") or ""))
+
+
+def _local_surface_mismatch(
+    *,
+    relative: Path,
+    actual: dict[str, Any],
+    expected: dict[str, Any],
+    gemini: bool = False,
+    managed_names: set[str] | None = None,
+) -> str | None:
+    """Return a bounded membership/transport delta for one local surface."""
+    compared_actual = actual
+    if managed_names is not None:
+        compared_actual = {
+            name: server for name, server in actual.items() if name in managed_names
+        }
+
+    actual_names = set(compared_actual)
+    expected_names = set(expected)
+    missing = sorted(expected_names - actual_names)
+    extra = sorted(actual_names - expected_names)
+    shared_names = actual_names & expected_names
+    transport_drift = sorted(
+        name
+        for name in shared_names
+        if _transport_signature(compared_actual[name], gemini=gemini)
+        != _transport_signature(expected[name], gemini=gemini)
+    )
+    server_drift = sorted(
+        name
+        for name in shared_names
+        if compared_actual[name] != expected[name] and name not in transport_drift
+    )
+    if not (missing or extra or transport_drift or server_drift):
+        return None
+
+    details = [f"stale: {relative.as_posix()}"]
+    if missing:
+        details.append(f"missing={missing[:12]}")
+    if extra:
+        details.append(f"extra={extra[:12]}")
+    if transport_drift:
+        details.append(f"transport_drift={transport_drift[:12]}")
+    if server_drift:
+        details.append(f"server_drift={server_drift[:12]}")
+    return "; ".join(details)
+
+
+def _read_local_server_mapping(
+    path: Path,
+    *,
+    relative: Path,
+    key: str,
+) -> tuple[dict[str, Any] | None, str | None]:
+    """Load one local JSON projection without exposing its values on failure."""
+    if not path.is_file():
+        return None, f"missing: {relative.as_posix()}"
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None, f"invalid_json: {relative.as_posix()}"
+    if not isinstance(payload, dict) or not isinstance(payload.get(key), dict):
+        return None, f"invalid_mapping: {relative.as_posix()} key={key}"
+    return payload[key], None
+
+
+def _check_local_profile_projections(
+    output_root: Path,
+    workspace_root: Path,
+    *,
+    profile: str,
+    transport_mode: str,
+) -> int:
+    """Check exact local profile/transport parity without writes or startup."""
+    portable_expected = _apply_shared_transport(
+        _canonical_servers(
+            workspace_root,
+            portable_workspace_paths=True,
+            profile=profile,
+        ),
+        transport_mode=transport_mode,
+    )
+    codex_expected = _codex_runtime_servers(
+        workspace_root,
+        profile=profile,
+        transport_mode=transport_mode,
+    )
+    gemini_expected = {
+        name: _gemini_server_config(server)
+        for name, server in _apply_shared_transport(
+            _canonical_servers(workspace_root, profile=profile),
+            transport_mode=transport_mode,
+        ).items()
+    }
+    managed_gemini_names = set(
+        _canonical_servers(workspace_root, profile="full")
+    ) | set(REMOVED_MCP_SERVER_NAMES)
+
+    surfaces = (
+        (Path(".codex/settings.json"), "mcpServers", codex_expected),
+        (Path(".vscode/mcp.json"), "servers", portable_expected),
+        (Path(".cursor/mcp.json"), "mcpServers", portable_expected),
+        (Path(".qodo/mcp.json"), "mcpServers", portable_expected),
+    )
+    mismatches: list[str] = []
+    checked: list[Path] = []
+    for relative, key, expected in surfaces:
+        actual, load_error = _read_local_server_mapping(
+            output_root / relative,
+            relative=relative,
+            key=key,
+        )
+        if load_error is not None:
+            mismatches.append(load_error)
+            continue
+        assert actual is not None
+        checked.append(relative)
+        mismatch = _local_surface_mismatch(
+            relative=relative,
+            actual=actual,
+            expected=expected,
+        )
+        if mismatch is not None:
+            mismatches.append(mismatch)
+
+    gemini_relative = Path(".gemini/settings.json")
+    gemini_path = output_root / gemini_relative
+    if gemini_path.exists():
+        actual, load_error = _read_local_server_mapping(
+            gemini_path,
+            relative=gemini_relative,
+            key="mcpServers",
+        )
+        if load_error is not None:
+            mismatches.append(load_error)
+        else:
+            assert actual is not None
+            checked.append(gemini_relative)
+            mismatch = _local_surface_mismatch(
+                relative=gemini_relative,
+                actual=actual,
+                expected=gemini_expected,
+                gemini=True,
+                managed_names=managed_gemini_names,
+            )
+            if mismatch is not None:
+                mismatches.append(mismatch)
+
+    selection = f"{profile}/{transport_mode}"
+    if not mismatches:
+        print(f"[setup_mcp --check-local] ok: local MCP projections match {selection}")
+        for relative in checked:
+            print(f"  ok {relative.as_posix()}")
+        return 0
+
+    print(
+        "[setup_mcp --check-local] FAIL: local MCP projections do not match "
+        f"{selection}"
+    )
+    for item in mismatches[:12]:
+        print(f"  - {item}")
+    print(
+        "Recovery: re-run setup_mcp.py with the persisted --profile and "
+        "--transport-mode, then restart clients that cache MCP configuration"
     )
     return 1
 
