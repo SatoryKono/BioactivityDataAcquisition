@@ -201,7 +201,7 @@
       "runtime_checkable": true
     },
     {
-      "line": 213,
+      "line": 211,
       "name": "MetadataCoordinatorPort",
       "path": "src/bioetl/domain/ports/metadata/coordinator.py",
       "runtime_checkable": true
