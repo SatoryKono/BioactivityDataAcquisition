@@ -18,10 +18,16 @@ from bioetl.application.services.control_plane.manifest.diagnostics.resume_contr
     _build_resume_contract,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
-    collect_input_snapshot_content_hashes,
-    collect_input_snapshot_ids,
+    collect_input_snapshot_content_hashes as collect_input_snapshot_content_hashes,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
+    collect_input_snapshot_ids as collect_input_snapshot_ids,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
     collect_input_snapshot_refs as _collect_input_snapshot_refs,
-    compute_input_snapshot_identity_fingerprint,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
+    compute_input_snapshot_identity_fingerprint as compute_input_snapshot_identity_fingerprint,
 )
 from bioetl.application.services.control_plane.manifest.replay_family_contract_payload import (
     build_replay_family_contract_payload,
@@ -127,4 +133,7 @@ def _resolve_base_summary_replay_context(
 __all__ = [
     "_BaseSummaryReplayContext",
     "_resolve_base_summary_replay_context",
+    "collect_input_snapshot_content_hashes",
+    "collect_input_snapshot_ids",
+    "compute_input_snapshot_identity_fingerprint",
 ]

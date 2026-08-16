@@ -15,17 +15,32 @@ from bioetl.application.services.control_plane.replay._historical_snapshot_certi
     HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
 )
 from bioetl.application.services.control_plane.replay.historical_corpus_models import (
-    HistoricalReplayBulkCertificationRecord,
-    HistoricalReplayBulkCertificationResult,
-    HistoricalReplayBulkCertificationSpec,
-    HistoricalReplayCertifiabilityInventory,
-    HistoricalReplayCertifiabilityRecord,
+    HistoricalReplayBulkCertificationRecord as HistoricalReplayBulkCertificationRecord,
+)
+from bioetl.application.services.control_plane.replay.historical_corpus_models import (
+    HistoricalReplayBulkCertificationResult as HistoricalReplayBulkCertificationResult,
+)
+from bioetl.application.services.control_plane.replay.historical_corpus_models import (
+    HistoricalReplayBulkCertificationSpec as HistoricalReplayBulkCertificationSpec,
+)
+from bioetl.application.services.control_plane.replay.historical_corpus_models import (
+    HistoricalReplayCertifiabilityInventory as HistoricalReplayCertifiabilityInventory,
+)
+from bioetl.application.services.control_plane.replay.historical_corpus_models import (
+    HistoricalReplayCertifiabilityRecord as HistoricalReplayCertifiabilityRecord,
+)
+from bioetl.application.services.control_plane.replay.historical_corpus_models import (
     HistoricalReplaySnapshotCertification,
 )
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 from bioetl.domain.types import RunID
 
 __all__ = [
+    "HistoricalReplayBulkCertificationRecord",
+    "HistoricalReplayBulkCertificationResult",
+    "HistoricalReplayBulkCertificationSpec",
+    "HistoricalReplayCertifiabilityInventory",
+    "HistoricalReplayCertifiabilityRecord",
     "HistoricalReplayCertificationResult",
     "HistoricalReplayCertificationService",
     "HistoricalReplaySnapshotCertification",
