@@ -125,8 +125,11 @@ def score_checkpoint_safety(summary: JsonDict) -> ScoreCardRecord:
 
 
 __all__ = [
+    "ScoreCardRecord",
+    "build_score_card_record",
     "score_checkpoint_safety",
     "score_determinism",
     "score_idempotency",
     "score_run_identity",
+    "string_items",
 ]

@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from bioetl.application.services.control_plane.manifest.diagnostics import (
+    snapshot_support as _snapshot_support,
+)
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context import (
     ReplayFamilyContext,
     build_replay_family_context,
@@ -17,18 +20,6 @@ from bioetl.application.services.control_plane.manifest.diagnostics.reproducibil
 from bioetl.application.services.control_plane.manifest.diagnostics.resume_contract import (
     _build_resume_contract,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
-    collect_input_snapshot_content_hashes as collect_input_snapshot_content_hashes,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
-    collect_input_snapshot_ids as collect_input_snapshot_ids,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
-    collect_input_snapshot_refs as _collect_input_snapshot_refs,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
-    compute_input_snapshot_identity_fingerprint as compute_input_snapshot_identity_fingerprint,
-)
 from bioetl.application.services.control_plane.manifest.replay_family_contract_payload import (
     build_replay_family_contract_payload,
 )
@@ -38,6 +29,14 @@ from bioetl.domain.control_plane.reproducibility_policy import (
 )
 
 _build_replay_family_contract_payload = build_replay_family_contract_payload
+_collect_input_snapshot_content_hashes = (
+    _snapshot_support.collect_input_snapshot_content_hashes
+)
+_collect_input_snapshot_ids = _snapshot_support.collect_input_snapshot_ids
+_collect_input_snapshot_refs = _snapshot_support.collect_input_snapshot_refs
+_compute_input_snapshot_identity_fingerprint = (
+    _snapshot_support.compute_input_snapshot_identity_fingerprint
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -133,7 +132,4 @@ def _resolve_base_summary_replay_context(
 __all__ = [
     "_BaseSummaryReplayContext",
     "_resolve_base_summary_replay_context",
-    "collect_input_snapshot_content_hashes",
-    "collect_input_snapshot_ids",
-    "compute_input_snapshot_identity_fingerprint",
 ]
