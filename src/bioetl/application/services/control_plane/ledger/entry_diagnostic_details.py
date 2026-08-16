@@ -25,20 +25,15 @@ def _apply_optional_diagnostic_anchor(
     value: str | None,
 ) -> None:
     """Attach one non-empty correlation anchor to diagnostic payload."""
-    if value is None:
-        return
-    if not value.strip():
-        return
-    diagnostic[field_name] = value
+    if value is not None and value.strip():
+        diagnostic[field_name] = value
 
 
 def build_run_ledger_diagnostic_details(
     request: _RunLedgerDiagnosticRequest,
 ) -> dict[str, object]:
     """Attach stable diagnostic metadata contract for ledger tooling."""
-    normalized_details: dict[str, object] = {}
-    if request.details:
-        normalized_details.update(request.details)
+    normalized_details: dict[str, object] = dict(request.details or {})
 
     diagnostic: dict[str, object] = {
         "diagnostic_contract_version": LEDGER_DIAGNOSTIC_CONTRACT_VERSION,
@@ -116,4 +111,8 @@ def build_run_ledger_diagnostic_details(
     return normalized_details
 
 
-__all__ = ["build_run_ledger_diagnostic_details"]
+__all__ = [
+    "RunLedgerCorrelationFieldsProtocol",
+    "build_run_ledger_diagnostic_details",
+    "build_run_ledger_diagnostic_request",
+]
