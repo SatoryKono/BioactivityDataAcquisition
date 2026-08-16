@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-16T20:51:43.056972+00:00",
+  "generated_at": "2026-08-16T21:03:43.182589+00:00",
   "summary": {
     "total_scripts": 601,
     "status_counts": {
@@ -19703,7 +19703,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_run_dux7_live_residual.py",
-          "line": 7,
+          "line": 9,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana.run_dux7_live_residual import ("
         }

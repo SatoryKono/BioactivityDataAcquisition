@@ -12,7 +12,6 @@ import json
 import os
 import tempfile
 from pathlib import Path
-from typing import Any
 
 from bioetl.application.services.run_reports.source_identity import (
     IDENTITY_STATE_ALIGNED,
@@ -22,6 +21,7 @@ from bioetl.application.services.run_reports.source_identity import (
     compare_runtime_source_identity,
     normalize_source_id,
 )
+from bioetl.domain.types import JsonDict
 
 # Relative default under the process CWD. In the main Docker service this is
 # ``/app/reports/run-reports`` when CWD is ``/app`` and the host ``reports/``
@@ -112,12 +112,12 @@ def write_report_root_source_identity(
 
 
 def _source_identity_failure(
-    payload: dict[str, Any],
+    payload: JsonDict,
     *,
     reason: str,
     state: str,
     message: str,
-) -> dict[str, Any]:
+) -> JsonDict:
     payload.update(
         {
             "source_identity_status": "unhealthy",
@@ -131,7 +131,7 @@ def _source_identity_failure(
 
 def _read_source_identity_payload(
     marker: Path,
-) -> tuple[dict[str, Any] | None, tuple[str, str] | None]:
+) -> tuple[JsonDict | None, tuple[str, str] | None]:
     if not marker.is_file():
         return None, (
             "missing",
@@ -149,11 +149,11 @@ def _read_source_identity_payload(
 
 
 def _evaluate_source_identity_payload(
-    payload: dict[str, Any],
+    payload: JsonDict,
     *,
-    raw: dict[str, Any],
+    raw: JsonDict,
     expected: str,
-) -> dict[str, Any]:
+) -> JsonDict:
     actual_schema = str(raw.get("schema_version") or "")[:120]
     actual_raw = str(raw.get("runtime_source_id") or "")
     actual = normalize_source_id(actual_raw)
@@ -196,12 +196,12 @@ def inspect_report_root_source_identity(
     *,
     report_root: Path | None = None,
     expected_source_id: str | None,
-) -> dict[str, Any]:
+) -> JsonDict:
     """Inspect source attestation and compare it with the managed runtime ID."""
     resolved = resolve_report_root(root=report_root)
     marker = report_root_source_identity_path(report_root=resolved)
     expected = normalize_source_id(expected_source_id)
-    payload: dict[str, Any] = {
+    payload: JsonDict = {
         "source_identity_path": str(marker.as_posix()),
         "source_identity_schema_expected": REPORT_ROOT_SOURCE_IDENTITY_SCHEMA,
         "source_identity_expected": expected,
@@ -238,7 +238,7 @@ def inspect_report_root_source_identity(
 def inspect_report_root_marker(
     *,
     report_root: Path | None = None,
-) -> dict[str, Any]:  # Any: health diagnostic payload is JSON-heterogeneous
+) -> JsonDict:
     """Inspect the bind-identity marker without raising.
 
     Returns a JSON-friendly diagnostic payload suitable for ``/health/ready``
@@ -246,7 +246,7 @@ def inspect_report_root_marker(
     """
     resolved = resolve_report_root(root=report_root)
     marker = report_root_marker_path(report_root=resolved)
-    payload: dict[str, Any] = {  # Any: health diagnostic payload is JSON-heterogeneous
+    payload: JsonDict = {
         "report_root": str(resolved.as_posix()),
         "marker_path": str(marker.as_posix()),
         "marker_token_expected": REPORT_ROOT_MARKER_VALUE,

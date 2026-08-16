@@ -41,7 +41,7 @@ class SilverDQAnalyzeRequest:
 
 
 def _record_silver_dq_field(
-    field: Field[Any],
+    field: Field[Any],  # Any: dataclasses.fields exposes heterogeneous Field values
     *,
     positional: list[str],
     required: list[str],
