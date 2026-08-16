@@ -187,29 +187,28 @@ def _hash_paths(repo_root: Path, paths: list[str]) -> str:
     return digest.hexdigest()
 
 
-def _task_diff_hash(
+def _task_diff_state(
     repo_root: Path,
     policy: dict[str, Any],
     untracked_paths: list[str],
     *,
     timeout: float,
-) -> str:
-    digest = hashlib.sha256()
-    digest.update(
-        _git(
-            repo_root,
-            "diff",
-            "--binary",
-            "--no-ext-diff",
-            "HEAD",
-            "--",
-            timeout=timeout,
-        )
+) -> tuple[str, bool]:
+    tracked_diff = _git(
+        repo_root,
+        "diff",
+        "--binary",
+        "--no-ext-diff",
+        "HEAD",
+        "--",
+        timeout=timeout,
     )
+    digest = hashlib.sha256()
+    digest.update(tracked_diff)
     digest.update(b"\0untracked\0")
     digest.update(_hash_paths(repo_root, untracked_paths).encode("ascii"))
     digest.update(canonical_digest(policy).encode("ascii"))
-    return digest.hexdigest()
+    return digest.hexdigest(), bool(tracked_diff)
 
 
 def _repo_id(repo_root: Path) -> str:
@@ -256,26 +255,16 @@ def discover_context(
         "worktree_id": worktree_id,
         "ci_run_id": ci_run_id,
     }
+    task_diff_hash, tracked_dirty = _task_diff_state(
+        root, policy, untracked, timeout=git_diff_timeout
+    )
     source = {
         "head_sha": _git_text(root, "rev-parse", "HEAD"),
         "material_hash": _hash_paths(root, paths),
-        "task_diff_hash": _task_diff_hash(
-            root, policy, untracked, timeout=git_diff_timeout
-        ),
+        "task_diff_hash": task_diff_hash,
         "policy_hash": canonical_digest(policy),
         "command_set_hash": command_set_hash(policy, claim),
-        "dirty": bool(
-            _git_text(
-                root,
-                "diff",
-                "--name-only",
-                "--no-ext-diff",
-                "HEAD",
-                "--",
-                timeout=git_diff_timeout,
-            )
-            or untracked
-        ),
+        "dirty": tracked_dirty or bool(untracked),
         "untracked_paths": untracked,
     }
     return repository, source
