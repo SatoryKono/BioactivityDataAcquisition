@@ -163,11 +163,15 @@ class TestOpenTelemetryTracerWithOTEL:
         else:
             pytest.skip("OpenTelemetry is not available")
 
-    def test_sets_service_name_resource_attribute(self) -> None:
+    def test_sets_service_name_resource_attribute(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
         """Tracer provider should publish a stable service.name resource."""
         from bioetl.infrastructure.observability import tracing
 
         if tracing.otel_available:
+            monkeypatch.delenv("OTEL_SERVICE_NAME", raising=False)
             tracer = tracing.OpenTelemetryTracer("bioetl")
             try:
                 assert (

@@ -466,6 +466,34 @@
       "github_issue_number": null,
       "github_issue_url": null,
       "inbound_links": 0,
+      "lifecycle": "issue_pack",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": ".github/ISSUES/AUD-RF-2026-08-16-ISSUE-PACK.md",
+      "recommended_action": "archive-after-github-state-check",
+      "root_doc_kind": null,
+      "section": ".github",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
       "lifecycle": "active_draft",
       "outbound_links": 0,
       "owner": "BioETL Team",
@@ -85571,7 +85599,7 @@
       "generated_test_run_evidence": 4,
       "guide": 4,
       "index": 4,
-      "issue_pack": 50,
+      "issue_pack": 51,
       "live_issue_mirror": 4,
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 21,
@@ -85579,7 +85607,7 @@
       "working_report": 515
     },
     "by_recommended_action": {
-      "archive-after-github-state-check": 320,
+      "archive-after-github-state-check": 321,
       "archive-after-migration": 520,
       "generate-automatically": 1055,
       "keep": 1121,
@@ -85587,7 +85615,7 @@
       "replace-with-link": 8
     },
     "by_section": {
-      ".github": 332,
+      ".github": 333,
       "00-project": 332,
       "01-requirements": 4,
       "02-architecture": 937,
@@ -85622,7 +85650,7 @@
       "Canonical": 70,
       "Deprecated": 8,
       "Generated": 1055,
-      "Working": 987
+      "Working": 988
     },
     "by_surface_family": {
       "active": 739,
@@ -85630,10 +85658,10 @@
       "canonical": 70,
       "duplicate": 8,
       "generated": 1055,
-      "working": 987
+      "working": 988
     },
     "by_tracking_state": {
-      "tracked": 3028
+      "tracked": 3029
     },
     "docs_reports_local_count": 33,
     "duplicate_group_count": 9,
@@ -85644,13 +85672,13 @@
       "active_draft": 270,
       "guide": 4,
       "index": 4,
-      "issue_pack": 50,
+      "issue_pack": 51,
       "live_issue_mirror": 4
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3028,
+    "total_doc_like": 3029,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3028
+    "total_doc_like_tracked": 3029
   }
 }

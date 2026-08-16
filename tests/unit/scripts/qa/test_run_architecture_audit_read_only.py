@@ -12,6 +12,9 @@
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
+
 import pytest
 
 from scripts.engineering.qa import run_architecture_audit_read_only as audit_lane
@@ -58,6 +61,22 @@ def test_runtime_scc_check_disables_pytest_cacheprovider() -> None:
     assert "tests/architecture/test_runtime_import_scc.py" in runtime_scc
 
 
+def test_lint_imports_uses_active_venv_when_worktree_has_no_venv(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    active_venv = tmp_path / "active-venv" / "bin"
+    active_venv.mkdir(parents=True)
+    python = active_venv / "python"
+    lint_imports = active_venv / "lint-imports"
+    lint_imports.touch()
+    monkeypatch.setattr(audit_lane.sys, "executable", str(python))
+
+    command = audit_lane._lint_imports_command(tmp_path / "worktree")
+
+    assert command == (str(lint_imports), "--config", ".importlinter")
+
+
 def test_mutation_guard_scope_is_limited_to_tracked_governance_surfaces() -> None:
     assert audit_lane.MUTATION_GUARD_PATHS == (
         ".github",
@@ -85,3 +104,22 @@ def test_mutation_guard_git_status_disables_lfs_filters() -> None:
     assert "filter.lfs.process=" in command
     assert "filter.lfs.required=false" in command
     assert command[-3:] == ("--", "src/bioetl", "tests")
+
+
+def test_audit_environment_prepends_repo_src_and_preserves_caller_env(
+    tmp_path: Path,
+) -> None:
+    caller = {
+        "KEEP_ME": "yes",
+        "PYTHONPATH": "/caller/pythonpath",
+        "PYTHONDONTWRITEBYTECODE": "0",
+    }
+
+    env = audit_lane._architecture_audit_environment(tmp_path, environ=caller)
+
+    assert env["KEEP_ME"] == "yes"
+    assert env["PYTHONPATH"] == (
+        f"{(tmp_path / 'src').resolve()}{os.pathsep}/caller/pythonpath"
+    )
+    assert env["PYTHONDONTWRITEBYTECODE"] == "1"
+    assert caller["PYTHONPATH"] == "/caller/pythonpath"

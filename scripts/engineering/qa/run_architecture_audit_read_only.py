@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import sys
 import time
+from collections.abc import Mapping
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -67,6 +68,9 @@ def _lint_imports_command(repo_root: Path) -> tuple[str, ...]:
     venv_candidate = repo_root / ".venv" / "bin" / "lint-imports"
     if venv_candidate.exists():
         return (str(venv_candidate), "--config", ".importlinter")
+    active_venv_candidate = Path(sys.executable).with_name("lint-imports")
+    if active_venv_candidate.exists():
+        return (str(active_venv_candidate), "--config", ".importlinter")
     discovered = shutil.which("lint-imports") or "lint-imports"
     return (discovered, "--config", ".importlinter")
 
@@ -284,6 +288,22 @@ def _run_check(
     )
 
 
+def _architecture_audit_environment(
+    repo_root: Path,
+    *,
+    environ: Mapping[str, str] | None = None,
+) -> dict[str, str]:
+    """Build a src-layout child environment without discarding caller settings."""
+    env = dict(os.environ if environ is None else environ)
+    src_path = str((repo_root / "src").resolve())
+    caller_pythonpath = env.get("PYTHONPATH")
+    env["PYTHONPATH"] = (
+        f"{src_path}{os.pathsep}{caller_pythonpath}" if caller_pythonpath else src_path
+    )
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    return env
+
+
 def run_architecture_audit_read_only(
     *,
     repo_root: Path = PROJECT_ROOT,
@@ -291,8 +311,7 @@ def run_architecture_audit_read_only(
 ) -> dict[str, object]:
     """Run architecture evidence checks and fail if tracked files mutate."""
     repo_root = repo_root.resolve()
-    env = os.environ.copy()
-    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    env = _architecture_audit_environment(repo_root)
 
     before_status = _git_tracked_status(repo_root)
     results = [
