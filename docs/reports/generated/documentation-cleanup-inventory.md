@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3033 |
+| Doc-like files | 3028 |
 | Tracked doc-like files | 3028 |
-| Ignored local docs/reports files | 5 |
+| Ignored local docs/reports files | 0 |
 | Duplicate groups | 9 |
 | Generated without route or exception | 0 |
 | Generated routes | 70 |
@@ -18,7 +18,6 @@
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 5 |
 | tracked | 3028 |
 
 ## Lifecycle Counts
@@ -30,7 +29,7 @@
 | active_quality_baseline | 56 |
 | closeout_evidence | 87 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 8 |
+| docs_reports_curated_or_historical_report | 3 |
 | docs_reports_generated_or_route_owned | 7 |
 | docs_reports_retention_sensitive_evidence | 21 |
 | generated_skill_license_mirror | 5 |
@@ -64,7 +63,7 @@
 | Canonical | 70 |
 | Deprecated | 8 |
 | Generated | 1055 |
-| Working | 992 |
+| Working | 987 |
 
 ## Surface Families
 
@@ -75,14 +74,14 @@
 | canonical | 70 |
 | duplicate | 8 |
 | generated | 1055 |
-| working | 992 |
+| working | 987 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 320 |
-| archive-after-migration | 525 |
+| archive-after-migration | 520 |
 | generate-automatically | 1055 |
 | keep | 1121 |
 | reconcile-with-github-state | 4 |
@@ -115,11 +114,6 @@
 | `docs/reports/dashboard-ux-checks/2026-08-05.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-11.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/ai-consolidation-issue.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/diagrams-refactoring-issue.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/docs-consolidation-issue.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/memory-consolidation-issue.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/schema-refactoring-issue.md` | Working | 0 | archive-after-migration |
 | `reports/ai/agent-tools/RF005-CLOSEOUT-2026-08-09.md` | Working | 0 | archive-after-migration |
 | `reports/ai/agent-tools/compatibility/rf005-platform-matrix-2026-08-09.json` | Working | 0 | archive-after-migration |
 | `reports/ai/agent-tools/evaluation/rf005-utility-pilot-2026-08-09.json` | Working | 0 | archive-after-migration |
@@ -172,6 +166,11 @@
 | `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/visual-smoke.json` | Working | 0 | archive-after-migration |
 | `reports/audit/diagrams/findings.json` | Working | 0 | archive-after-migration |
 | `reports/audit/diagrams/report.md` | Working | 0 | archive-after-migration |
+| `reports/audit/docs-content/findings.json` | Working | 0 | archive-after-migration |
+| `reports/audit/docs-content/report.md` | Working | 0 | archive-after-migration |
+| `reports/audit/docs-pipeline/findings.json` | Working | 0 | archive-after-migration |
+| `reports/audit/docs-pipeline/report.md` | Working | 0 | archive-after-migration |
+| `reports/docs-evidence/README.md` | Working | 2 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -339,11 +338,6 @@
 | `docs/reports/generated/pipeline_normalization_field_matrix/non_chembl_normalization_field_matrix.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.csv` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
-| `docs/reports/gh-issues/ai-consolidation-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/gh-issues/diagrams-refactoring-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/gh-issues/docs-consolidation-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/gh-issues/memory-consolidation-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/gh-issues/schema-refactoring-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/index.md` | tracked | docs_reports_curated_entrypoint | keep |
 
 ## Generated Route Registry
