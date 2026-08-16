@@ -5,18 +5,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.application.services.control_plane.manifest import (
+    execution_identity_support as _execution_identity_support,
+)
 from bioetl.application.services.control_plane.manifest._service_hydration import (
     RunManifestHydrationMixin as RunManifestHydrationMixin,
-)
-from bioetl.application.services.control_plane.manifest.execution_identity_support import (
-    build_code_provenance_dict,
-    build_execution_identity_payload_from_code_provenance,
-)
-from bioetl.application.services.control_plane.manifest.execution_identity_support import (
-    build_degraded_runtime_anchor_payload as build_degraded_runtime_anchor_payload,
-)
-from bioetl.application.services.control_plane.manifest.execution_identity_support import (
-    build_identity_graph_core as build_identity_graph_core,
 )
 from bioetl.application.services.control_plane.manifest.snapshot_payloads import (
     source_refs_payload,
@@ -30,6 +23,14 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.manifest.models import (
         RunManifestCreateSpec,
     )
+
+build_degraded_runtime_anchor_payload = (
+    _execution_identity_support.build_degraded_runtime_anchor_payload
+)
+build_execution_identity_payload_from_code_provenance = (
+    _execution_identity_support.build_execution_identity_payload_from_code_provenance
+)
+build_identity_graph_core = _execution_identity_support.build_identity_graph_core
 
 
 class RunManifestPayloadMixin:
@@ -87,7 +88,7 @@ class RunManifestPayloadMixin:
             "replay_of_run_id": request.replay_of_run_id,
             "replay_of_manifest_id": request.replay_of_manifest_id,
             "replay_capability": request.replay_capability.value,
-            "code_provenance": build_code_provenance_dict(
+            "code_provenance": _execution_identity_support.build_code_provenance_dict(
                 code_provenance,
                 include_execution_anchors=True,
             ),
@@ -97,12 +98,3 @@ class RunManifestPayloadMixin:
                 for item in request.planned_artifacts
             ],
         }
-
-
-__all__ = [
-    "RunManifestHydrationMixin",
-    "RunManifestPayloadMixin",
-    "build_degraded_runtime_anchor_payload",
-    "build_execution_identity_payload_from_code_provenance",
-    "build_identity_graph_core",
-]
