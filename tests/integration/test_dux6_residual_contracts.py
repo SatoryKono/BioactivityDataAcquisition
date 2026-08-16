@@ -124,6 +124,7 @@ def test_browse_hides_raw_path_columns() -> None:
     exclude = (organize.get("options") or {}).get("excludeByName") or {}
     assert exclude.get("json_path") is True
     assert exclude.get("markdown_path") is True
+    assert exclude.get("row_kind") is True
 
 
 def test_pfill_12_browse_explains_artifact_backing_and_backend_failure() -> None:
@@ -141,8 +142,11 @@ def test_pfill_12_browse_explains_artifact_backing_and_backend_failure() -> None
     assert no_value.startswith("VALID EMPTY — no pipeline-run-report artifacts")
     assert "pipeline '$pipeline'" in no_value
     assert "reports/run-reports/pipeline/<name>/" in no_value
-    # Operator help distinguishes valid empty vs backend unavailable (#7248).
+    # Operator help distinguishes valid empty vs backend unavailable (#7248)
+    # and bind/origin TREE_MISSING from a selector miss.
     assert "empty table is valid" in description.lower()
+    assert "tree_missing" in description.lower()
+    assert "verify_report_bind.py" in description
     assert "/health/live" in description
     assert "not a workflow" in description.lower()
     assert "chembl_baseline" in description
@@ -169,6 +173,7 @@ def test_pfill_12_workflow_browser_is_not_panel_3010() -> None:
     assert target.get("url") == (
         "/ops/observability/workflow-run-reports?workflow=${workflow}&limit=20"
     )
+    assert "tree_missing" in str(workflow.get("description") or "").lower()
     # 3010 must stay pipeline-only.
     browse = next(panel for panel in _walk(data.get("panels")) if panel.get("id") == 3010)
     browse_url = ((browse.get("targets") or [])[0]).get("url")

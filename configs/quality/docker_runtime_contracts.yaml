@@ -78,6 +78,8 @@ path_policy:
   preferred_repository_origin: explicit_absolute_bind
   discouraged_origins:
     - /run/desktop/mnt/host/wsl/docker-desktop-bind-mounts
+  discouraged_compose_working_dir_prefixes:
+    - /tmp/bioetl-issues
   discouraged_origin_scope: dashboard_data_plane_required_bind_mounts
   mixed_origin_for_same_project_forbidden: true
 
