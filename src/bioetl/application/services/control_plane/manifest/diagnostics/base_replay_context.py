@@ -31,7 +31,6 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     ReproducibilityPolicyAssessment,
 )
 
-_build_replay_family_contract_payload = build_replay_family_contract_payload
 _collect_input_snapshot_content_hashes = (
     _snapshot_support.collect_input_snapshot_content_hashes
 )
@@ -40,7 +39,6 @@ _collect_input_snapshot_refs = _snapshot_support.collect_input_snapshot_refs
 _compute_input_snapshot_identity_fingerprint = (
     _snapshot_support.compute_input_snapshot_identity_fingerprint
 )
-
 
 
 @dataclass(frozen=True, slots=True)
