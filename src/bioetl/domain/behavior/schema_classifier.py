@@ -176,13 +176,6 @@ class SchemaClassifier:
         return self.classify_changes(old_schema, new_schema)
 
 
-def _as_properties(value: object) -> JsonDict | None:
-    """Copy a properties mapping, or flag malformed schema structure."""
-    if not isinstance(value, Mapping):
-        return None
-    return {str(key): item for key, item in value.items()}
-
-
 def create_schema_classifier(
     policy: SchemaCompatibilityPolicy | None = None,
 ) -> SchemaClassifier:
