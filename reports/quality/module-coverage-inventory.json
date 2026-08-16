@@ -48390,13 +48390,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-14",
-<<<<<<< HEAD
   "source_tree_sha256": "18bc66af40af4bf197137592891645d156b56972adfd2a4296e3d4d878e42dc7",
-||||||| 52f6cee3e3
-  "source_tree_sha256": "abc7b54c9e395f5ad369cee88e8c6aca435380c09270935eeb44a1fd965e3707",
-=======
-  "source_tree_sha256": "634abbe00797adc41d01475be5e24a18c14d7bb941e010bb72ef982702e1edc6",
->>>>>>> fix/proof-blockers-postmerge-dd076a79f5
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
