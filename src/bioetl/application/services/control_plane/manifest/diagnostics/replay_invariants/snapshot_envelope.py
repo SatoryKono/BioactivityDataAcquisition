@@ -5,11 +5,11 @@ from __future__ import annotations
 from bioetl.application.services.control_plane.replay.historical_certification import (
     HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED,
     HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
-    LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,
+)
+from bioetl.application.services.control_plane.replay.historical_certification import (
+    LIVE_CAPTURE_SNAPSHOT_MATERIALIZED as LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
-
-_LIVE_CAPTURE_SNAPSHOT_MATERIALIZED = "live_capture_snapshot_materialized"
 
 
 def _has_partial_input_snapshot_envelope(snapshot_envelope: object) -> bool:
@@ -53,7 +53,7 @@ def _has_live_capture_materialized_snapshots(
 ) -> bool:
     return any(
         _resolve_snapshot_materialization_mode(snapshot)
-        == _LIVE_CAPTURE_SNAPSHOT_MATERIALIZED
+        == LIVE_CAPTURE_SNAPSHOT_MATERIALIZED
         for snapshot in input_snapshots
     )
 
@@ -74,6 +74,7 @@ def _resolve_exact_replay_supported_reason(
 
 
 __all__ = [
+    "LIVE_CAPTURE_SNAPSHOT_MATERIALIZED",
     "_has_historical_composite_certified_snapshots",
     "_has_historical_source_certified_snapshots",
     "_has_live_capture_materialized_snapshots",

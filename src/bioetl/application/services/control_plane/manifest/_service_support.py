@@ -10,9 +10,13 @@ from bioetl.application.services.control_plane.manifest._service_hydration impor
 )
 from bioetl.application.services.control_plane.manifest.execution_identity_support import (
     build_code_provenance_dict,
-    build_degraded_runtime_anchor_payload,
     build_execution_identity_payload_from_code_provenance,
-    build_identity_graph_core,
+)
+from bioetl.application.services.control_plane.manifest.execution_identity_support import (
+    build_degraded_runtime_anchor_payload as build_degraded_runtime_anchor_payload,
+)
+from bioetl.application.services.control_plane.manifest.execution_identity_support import (
+    build_identity_graph_core as build_identity_graph_core,
 )
 from bioetl.application.services.control_plane.manifest.snapshot_payloads import (
     source_refs_payload,
@@ -93,3 +97,12 @@ class RunManifestPayloadMixin:
                 for item in request.planned_artifacts
             ],
         }
+
+
+__all__ = [
+    "RunManifestHydrationMixin",
+    "RunManifestPayloadMixin",
+    "build_degraded_runtime_anchor_payload",
+    "build_execution_identity_payload_from_code_provenance",
+    "build_identity_graph_core",
+]
