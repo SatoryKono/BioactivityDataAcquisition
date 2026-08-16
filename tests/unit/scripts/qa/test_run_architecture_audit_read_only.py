@@ -106,20 +106,16 @@ def test_mutation_guard_git_status_disables_lfs_filters() -> None:
     assert command[-3:] == ("--", "src/bioetl", "tests")
 
 
-def test_audit_environment_prepends_repo_src_and_preserves_caller_env(
-    tmp_path: Path,
-) -> None:
-    caller = {
-        "KEEP_ME": "yes",
-        "PYTHONPATH": "/caller/pythonpath",
-        "PYTHONDONTWRITEBYTECODE": "0",
-    }
+def test_audit_environment_prepends_src_and_preserves_caller_values() -> None:
+    repo_root = Path("/workspace/repo")
 
-    env = audit_lane._architecture_audit_environment(tmp_path, environ=caller)
-
-    assert env["KEEP_ME"] == "yes"
-    assert env["PYTHONPATH"] == (
-        f"{(tmp_path / 'src').resolve()}{os.pathsep}/caller/pythonpath"
+    env = audit_lane._audit_environment(
+        repo_root,
+        environ={"PYTHONPATH": "caller-path", "CALLER_FLAG": "kept"},
     )
+
+    assert env["PYTHONPATH"] == os.pathsep.join(
+        (str((repo_root / "src").resolve()), "caller-path")
+    )
+    assert env["CALLER_FLAG"] == "kept"
     assert env["PYTHONDONTWRITEBYTECODE"] == "1"
-    assert caller["PYTHONPATH"] == "/caller/pythonpath"
