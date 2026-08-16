@@ -12,6 +12,9 @@
 
 from __future__ import annotations
 
+import os
+import subprocess
+
 import pytest
 
 from pathlib import Path
@@ -108,16 +111,104 @@ def test_wsl_setup_uses_local_update_path() -> None:
     setup_sh = (
         root / "scripts" / "ai" / "codex" / "helper" / "setup-wsl.sh"
     ).read_text(encoding="utf-8")
+    complete_setup_sh = (
+        root / "scripts" / "ai" / "codex" / "helper" / "setup-wsl-complete.sh"
+    ).read_text(encoding="utf-8")
     verify_sh = (
         root / "scripts" / "ai" / "codex" / "helper" / "verify-setup.sh"
     ).read_text(encoding="utf-8")
 
     assert "ensure-codex-cli.sh" in setup_sh
     assert "--update" in setup_sh
+    assert "--install-command-shim" in setup_sh
     assert "npm install -g @openai/codex" not in setup_sh
+
+    assert "--install-command-shim" in complete_setup_sh
 
     assert "ensure-codex-cli.sh" in verify_sh
     assert "--no-install --print-bin" in verify_sh
+
+
+def test_setup_installs_managed_direct_codex_command() -> None:
+    """Canonical setup should install the PATH shim that loads Ref auth."""
+    root = _project_root()
+    setup_helper = (
+        root / "scripts" / "ai" / "codex" / "helper" / "setup-env.sh"
+    ).read_text(encoding="utf-8")
+    ensure_helper = (
+        root / "scripts" / "ai" / "codex" / "helper" / "ensure-codex-cli.sh"
+    ).read_text(encoding="utf-8")
+
+    assert '"${ENSURE_SCRIPT}" --install-command-shim' in setup_helper
+    assert "--install-command-shim" in ensure_helper
+    assert "BIOETL_CODEX_COMMAND_SHIM_DIR" in ensure_helper
+    assert "run-codex.sh" in ensure_helper
+
+
+def test_direct_codex_command_installer_is_bounded_and_secret_free(
+    tmp_path: Path,
+) -> None:
+    """The local PATH shim delegates without copying credentials."""
+    root = _project_root()
+    ensure_helper = (
+        root / "scripts" / "ai" / "codex" / "helper" / "ensure-codex-cli.sh"
+    )
+    shim_dir = tmp_path / "bin"
+    env = {
+        **os.environ,
+        "BIOETL_CODEX_COMMAND_SHIM_DIR": str(shim_dir),
+    }
+
+    completed = subprocess.run(
+        ["bash", str(ensure_helper), "--install-command-shim"],
+        cwd=root,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=10,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    shim = shim_dir / "codex"
+    content = shim.read_text(encoding="utf-8")
+    assert "Managed by BioETL Codex launcher setup" in content
+    assert "scripts/ai/codex/run-codex.sh" in content
+    assert "REPO_ROOT=" in content
+    assert '"$@"' in content
+    assert "REF_TOOL_API_KEY" not in content
+
+
+def test_direct_codex_command_installer_preserves_foreign_command(
+    tmp_path: Path,
+) -> None:
+    """Installing the shim must not overwrite an unrelated user command."""
+    root = _project_root()
+    ensure_helper = (
+        root / "scripts" / "ai" / "codex" / "helper" / "ensure-codex-cli.sh"
+    )
+    shim_dir = tmp_path / "bin"
+    shim_dir.mkdir()
+    shim = shim_dir / "codex"
+    shim.write_text("#!/usr/bin/env bash\necho foreign\n", encoding="utf-8")
+    env = {
+        **os.environ,
+        "BIOETL_CODEX_COMMAND_SHIM_DIR": str(shim_dir),
+    }
+
+    completed = subprocess.run(
+        ["bash", str(ensure_helper), "--install-command-shim"],
+        cwd=root,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=10,
+    )
+
+    assert completed.returncode != 0
+    assert "Refusing to overwrite non-BioETL command" in completed.stderr
+    assert shim.read_text(encoding="utf-8") == "#!/usr/bin/env bash\necho foreign\n"
 
 
 def test_removed_thin_wrappers_are_absent_and_router_uses_canonical_targets() -> None:
