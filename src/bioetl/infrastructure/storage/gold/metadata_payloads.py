@@ -13,6 +13,9 @@ from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.lineage_persistence import (
     resolve_metadata_and_lineage_fragment,
 )
+from bioetl.infrastructure.storage.metadata.schema_metadata_adapter import (
+    inspect_schema_metadata,
+)
 
 if TYPE_CHECKING:
     from pandera.polars import DataFrameSchema
@@ -65,7 +68,7 @@ def build_gold_metadata_input(
         silver_refs=converted_refs,
         transform_version=transform_version,
         transform_steps=transform_steps,
-        gold_schema=gold_schema,
+        schema_inspection=inspect_schema_metadata(gold_schema),
         composite_run_id=composite_run_id,
         lineage_created_at=lineage_created_at,
     )

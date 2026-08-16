@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Protocol
 
 from bioetl.application.services.control_plane.manifest.diagnostics import (
-    build_diagnostics_summary,
+    build_diagnostics_summary as build_diagnostics_summary,
 )
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.ports import RunLedgerPort

@@ -26,6 +26,10 @@ from bioetl.domain.composite.config_composite_section_decoders import (
 )
 from bioetl.domain.config.dq import DQReportConfig
 from bioetl.domain.config.validation_rules import FieldValidation
+from bioetl.domain.models.metadata import (
+    SchemaColumnInspection,
+    SchemaInspectionResult,
+)
 from bioetl.domain.types.validation_severity import ValidationSeverity
 from bioetl.domain.value_objects._run_context_create_support import (
     _coerce_transform_step_sequence,
@@ -122,34 +126,24 @@ def test_normalization_rejects_negative_high_potency_threshold() -> None:
         NormalizationConfig(high_potency_threshold=-1)
 
 
-def test_schema_metadata_exception_classification(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setattr(
-        schema_metadata_extractor.inspect,
-        "getmodule",
-        lambda _value: (_ for _ in ()).throw(TypeError("bad module")),
+def test_schema_metadata_normalizes_neutral_inspection() -> None:
+    metadata = schema_metadata_extractor.extract_schema_metadata(
+        SchemaInspectionResult(
+            columns=(
+                SchemaColumnInspection(
+                    name="entity_id",
+                    dtype="pandera.dtypes.String",
+                    nullable=False,
+                ),
+            )
+        )
     )
-    assert schema_metadata_extractor._extract_contract_path(object()) is None
-
-    monkeypatch.setattr(
-        schema_metadata_extractor,
-        "_safe_to_schema",
-        lambda _value: (_ for _ in ()).throw(RuntimeError("not pandera")),
-    )
-    with pytest.raises(RuntimeError, match="not pandera"):
-        schema_metadata_extractor._extract_schema_columns(object())
-
-    from pandera.errors import SchemaDefinitionError
-
-    assert schema_metadata_extractor._is_pandera_schema_error(
-        SchemaDefinitionError("invalid schema")
-    )
+    assert metadata.columns[0].type == "String"
+    assert metadata.columns[0].nullable is False
 
 
 def test_schema_metadata_handles_missing_schema_surface() -> None:
-    assert schema_metadata_extractor._extract_schema_columns(object()) == []
-    assert schema_metadata_extractor._safe_to_schema(object()) is not None
+    assert schema_metadata_extractor.extract_schema_metadata(None).columns == []
 
 
 def test_composite_optional_sections_normalize_to_empty_tuples() -> None:

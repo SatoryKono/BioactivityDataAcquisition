@@ -127,16 +127,40 @@ class SilverWriterMetadataFacade:
         )
 
     @staticmethod
+    def _as_optional_float(value: object) -> float | None:
+        """Coerce one Polars scalar aggregate to a checked ``float | None``."""
+        if value is None:
+            return None
+        if isinstance(value, bool):
+            return float(value)
+        if isinstance(value, (int, float)):
+            return float(value)
+        return None
+
+    @staticmethod
     def _compute_column_stats(series: pl.Series, valid_records: int) -> ColumnStats:
         """Compute bounded DQ stats for one Silver metadata column."""
         import polars as pl
-        if series.dtype in (pl.Float32, pl.Float64, pl.Int8, pl.Int16, pl.Int32, pl.Int64, pl.UInt8, pl.UInt16, pl.UInt32, pl.UInt64):
+
+        numeric_dtypes = (
+            pl.Float32,
+            pl.Float64,
+            pl.Int8,
+            pl.Int16,
+            pl.Int32,
+            pl.Int64,
+            pl.UInt8,
+            pl.UInt16,
+            pl.UInt32,
+            pl.UInt64,
+        )
+        if series.dtype in numeric_dtypes:
             return ColumnStats(
                 null_rate=(series.null_count() / valid_records) if valid_records else 0.0,
                 unique_count=series.n_unique(),
-                min_value=series.min(),
-                max_value=series.max(),
-                mean_value=series.mean(),
+                min_value=SilverWriterMetadataFacade._as_optional_float(series.min()),
+                max_value=SilverWriterMetadataFacade._as_optional_float(series.max()),
+                mean_value=SilverWriterMetadataFacade._as_optional_float(series.mean()),
             )
         else:
             return ColumnStats(

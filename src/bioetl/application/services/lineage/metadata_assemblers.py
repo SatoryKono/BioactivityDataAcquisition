@@ -194,7 +194,7 @@ class GoldMetadataService:
         )
         scd = _build_gold_scd(input_data)
 
-        schema_info = extract_schema_metadata(input_data.gold_schema)
+        schema_info = extract_schema_metadata(input_data.schema_inspection)
         return GoldMetadata(
             runtime=self.runtime_metadata_builder(
                 completed_at=input_data.completed_at,

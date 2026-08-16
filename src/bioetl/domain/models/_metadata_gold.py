@@ -7,6 +7,7 @@ and the complete GoldMetadata aggregate for sidecar files.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Literal
 
@@ -29,7 +30,9 @@ __all__ = [
     "GoldMetadata",
     "GoldOutputExt",
     "SCDMetadata",
+    "SchemaColumnInspection",
     "SchemaColumnMetadata",
+    "SchemaInspectionResult",
     "SchemaMetadata",
 ]
 
@@ -123,6 +126,25 @@ class SchemaColumnMetadata(BaseModel):
     name: str = Field(description="Column name")
     type: str = Field(description="Data type")
     nullable: bool = Field(default=True, description="Nullable")
+
+
+@dataclass(frozen=True, slots=True)
+class SchemaColumnInspection:
+    """Framework-neutral inspection data for one schema column."""
+
+    name: str
+    dtype: str
+    nullable: bool = True
+
+
+@dataclass(frozen=True, slots=True)
+class SchemaInspectionResult:
+    """Framework-neutral result produced by a schema adapter."""
+
+    contract_path: str | None = None
+    version: str = "1.0"
+    validation: Literal["strict", "lenient"] = "strict"
+    columns: tuple[SchemaColumnInspection, ...] = ()
 
 
 class SchemaMetadata(BaseModel):

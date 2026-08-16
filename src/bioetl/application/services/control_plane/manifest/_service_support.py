@@ -10,9 +10,9 @@ from bioetl.application.services.control_plane.manifest._service_hydration impor
 )
 from bioetl.application.services.control_plane.manifest.execution_identity_support import (
     build_code_provenance_dict,
-    build_execution_identity_payload_from_code_provenance,
-    build_degraded_runtime_anchor_payload,
-    build_identity_graph_core,
+    build_degraded_runtime_anchor_payload as build_degraded_runtime_anchor_payload,
+    build_execution_identity_payload_from_code_provenance as build_execution_identity_payload_from_code_provenance,
+    build_identity_graph_core as build_identity_graph_core,
 )
 from bioetl.application.services.control_plane.manifest.snapshot_payloads import (
     source_refs_payload,

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-16T13:23:58.369362+00:00",
+  "generated_at": "2026-08-16T15:13:22.243328+00:00",
   "summary": {
     "total_scripts": 601,
     "status_counts": {
@@ -228,7 +228,7 @@
       "references": [
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 140,
+          "line": 290,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.bat\").exists()"
         }
@@ -249,7 +249,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 139,
+          "line": 289,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.ps1\").exists()"
         }
@@ -288,19 +288,19 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 135,
+          "line": 285,
           "source_group": "tests",
           "text": "assert \"../ai/codex/diagnose_wsl.sh\" in ops_router"
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 138,
+          "line": 288,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.sh\").exists()"
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 153,
+          "line": 303,
           "source_group": "tests",
           "text": "assert 'bash \"${SCRIPT_DIR}/diagnose_wsl.sh\"' in launcher"
         }
@@ -380,7 +380,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 152,
+          "line": 302,
           "source_group": "tests",
           "text": "assert 'python3 \"${SCRIPT_DIR}/efficiency_baseline.py\"' in launcher"
         },
@@ -401,7 +401,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 155,
+          "line": 165,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/headless.ps1` — PowerShell transport for headless mode;"
         }
@@ -416,7 +416,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 166,
+          "line": 176,
           "source_group": "scripts",
           "text": "bash scripts/ai/codex/headless.sh exec \"run a bounded task\""
         },
@@ -440,7 +440,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 161,
+          "line": 311,
           "source_group": "tests",
           "text": "headless = (root / \"scripts/ai/codex/headless.sh\").read_text(encoding=\"utf-8\")"
         }
@@ -498,7 +498,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 173,
+          "line": 323,
           "source_group": "tests",
           "text": "helper = (root / \"scripts/ai/codex/helper/check-env.sh\").read_text(encoding=\"utf-8\")"
         }
@@ -574,7 +574,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 156,
+          "line": 166,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/helper/diagnose-hang.ps1` — setup-hang diagnostics;"
         },
@@ -591,7 +591,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 19,
       "references": [
         {
           "path": "scripts/ai/codex/helper/README.md",
@@ -713,7 +713,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 14,
       "references": [
         {
           "path": "docs/03-guides/development/codex-paths.md",
@@ -746,6 +746,12 @@
           "text": "# Called by: run-codex-impl.sh, other WSL launchers"
         },
         {
+          "path": "scripts/ai/codex/helper/ensure-codex-cli.sh",
+          "line": 37,
+          "source_group": "scripts",
+          "text": "DIRECT_LAUNCHER=\"${REPO_ROOT}/scripts/ai/codex/helper/run-codex-impl.sh\""
+        },
+        {
           "path": "scripts/ai/codex/helper/ensure-mcp.sh",
           "line": 3,
           "source_group": "scripts",
@@ -756,12 +762,6 @@
           "line": 232,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-codex-impl.sh\" \"$@\""
-        },
-        {
-          "path": "scripts/ai/codex/run-codex.sh",
-          "line": 240,
-          "source_group": "scripts",
-          "text": "bash \"${HELPER_DIR}/run-codex-impl.sh\" exec --full-auto \"$@\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -842,7 +842,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 11,
       "references": [
         {
           "path": "docs/05-operations/verification/root-hygiene-refactoring-plan-2026-07-08.md",
@@ -852,7 +852,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 246,
+          "line": 256,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/helper/setup-wsl-complete.sh` for Bash setup;"
         },
@@ -881,14 +881,14 @@
           "text": "\"%WSL_EXE%\" -- bash \"%REPO_WSL%/scripts/ai/codex/helper/setup-wsl-complete.sh\""
         },
         {
-          "path": "tests/architecture/test_root_hygiene_issues_5992_5999_closeout.py",
-          "line": 68,
+          "path": "tests/architecture/test_codex_launcher_bootstrap.py",
+          "line": 130,
           "source_group": "tests",
-          "text": "\"setup-codex-wsl.sh\": \"scripts/ai/codex/helper/setup-wsl-complete.sh\","
+          "text": "root / \"scripts\" / \"ai\" / \"codex\" / \"helper\" / \"setup-wsl-complete.sh\""
         },
         {
-          "path": "tests/architecture/test_root_hygiene_review_registry.py",
-          "line": 526,
+          "path": "tests/architecture/test_root_hygiene_issues_5992_5999_closeout.py",
+          "line": 68,
           "source_group": "tests",
           "text": "\"setup-codex-wsl.sh\": \"scripts/ai/codex/helper/setup-wsl-complete.sh\","
         }
@@ -909,25 +909,25 @@
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 275,
+          "line": 280,
           "source_group": "docs",
           "text": "**Layer 1: Codex WSL bootstrap** (`scripts/ai/codex/helper/setup-wsl.sh`)"
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 288,
+          "line": 293,
           "source_group": "docs",
           "text": "bash \"$BIOETL_DIR/scripts/ai/codex/helper/setup-wsl.sh\""
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 314,
+          "line": 319,
           "source_group": "docs",
           "text": "bash \"$BIOETL_DIR/scripts/ai/codex/helper/setup-wsl.sh\" 2>/dev/null"
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 370,
+          "line": 375,
           "source_group": "docs",
           "text": "bash \"$BIOETL_DIR/scripts/ai/codex/helper/setup-wsl.sh\""
         },
@@ -1075,13 +1075,13 @@
         },
         {
           "path": "scripts/ai/codex/helper/setup-wsl-complete.sh",
-          "line": 191,
+          "line": 192,
           "source_group": "scripts",
           "text": "if grep -q \"wsl_proxy_env.sh\" \"${BASHRC}\" 2>/dev/null; then"
         },
         {
           "path": "scripts/ai/codex/helper/setup-wsl.sh",
-          "line": 89,
+          "line": 90,
           "source_group": "scripts",
           "text": "if ! grep -q \"wsl_proxy_env.sh\" \"$BASHRC\" 2>/dev/null; then"
         }
@@ -1133,7 +1133,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 110,
+          "line": 120,
           "source_group": "scripts",
           "text": "Remediation is a separate explicit command in `local_state_audit.py`; it"
         },
@@ -1145,7 +1145,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 168,
+          "line": 318,
           "source_group": "tests",
           "text": "assert 'local_state_audit.py\" audit' in launcher"
         },
@@ -1193,7 +1193,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 193,
+          "line": 203,
           "source_group": "scripts",
           "text": "python3 scripts/ai/codex/mcp_profile_contract.py --check"
         },
@@ -1275,7 +1275,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 121,
+          "line": 131,
           "source_group": "scripts",
           "text": "python3 scripts/ai/codex/profile_benchmark.py \\"
         },
@@ -1302,19 +1302,19 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 142,
+          "line": 152,
           "source_group": "scripts",
           "text": "python3 scripts/ai/codex/profile_config.py audit"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 143,
+          "line": 153,
           "source_group": "scripts",
           "text": "python3 scripts/ai/codex/profile_config.py apply --confirm \\"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 145,
+          "line": 155,
           "source_group": "scripts",
           "text": "python3 scripts/ai/codex/profile_config.py restore --confirm \\"
         },
@@ -1455,7 +1455,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 245,
+          "line": 255,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/setup-codex-wsl.bat` for Windows setup;"
         },
@@ -1506,7 +1506,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 157,
+          "line": 167,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/setup-windows-dns.ps1` — explicit Windows DNS repair;"
         }
@@ -1521,7 +1521,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 158,
+          "line": 168,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/setup-wsl-dns.sh` — explicit WSL DNS repair;"
         }
@@ -1733,7 +1733,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 231,
+          "line": 241,
           "source_group": "scripts",
           "text": "bash scripts/ai/codex/setup_skills.sh --check"
         },
@@ -10382,13 +10382,13 @@
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 295,
+          "line": 300,
           "source_group": "docs",
           "text": "environment variables (set by `scripts/engineering/dev/bash/.wsl_proxy_env.sh`)."
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 318,
+          "line": 323,
           "source_group": "docs",
           "text": "source \"$BIOETL_DIR/scripts/engineering/dev/bash/.wsl_proxy_env.sh\" 2>/dev/null"
         },
@@ -18159,7 +18159,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 159,
+          "line": 169,
           "source_group": "scripts",
           "text": "- `scripts/ops/install-codex-cmd.bat` — optional Windows CMD installation."
         }
@@ -18398,7 +18398,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 111,
+      "reference_count": 110,
       "references": [
         {
           "path": "docs/03-guides/development/codex-paths.md",
@@ -18534,7 +18534,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 79,
+          "line": 97,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"start-codex.bat\""
         }
@@ -18549,7 +18549,7 @@
       "references": [
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 82,
+          "line": 100,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"verify-setup.bat\""
         }
@@ -18564,7 +18564,7 @@
       "references": [
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 85,
+          "line": 103,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"verify-setup.ps1\""
         }
@@ -21433,7 +21433,7 @@
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 348,
+          "line": 353,
           "source_group": "docs",
           "text": "If not listening, run `scripts\\ops\\start-wsl-proxy.bat`."
         },
@@ -21496,7 +21496,7 @@
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 291,
+          "line": 296,
           "source_group": "docs",
           "text": "**Layer 2: Proxy** (`scripts/ops/runtime/wsl/wsl_proxy.py`)"
         },

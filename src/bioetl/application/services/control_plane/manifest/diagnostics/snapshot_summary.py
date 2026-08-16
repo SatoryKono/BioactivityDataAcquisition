@@ -8,7 +8,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_led
     collect_ledger_input_snapshot_refs,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_materialization import (
-    resolve_post_manifest_input_snapshot_materialization_mode,
+    resolve_post_manifest_input_snapshot_materialization_mode as resolve_post_manifest_input_snapshot_materialization_mode,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_refs import (
     collect_input_snapshot_content_hashes,

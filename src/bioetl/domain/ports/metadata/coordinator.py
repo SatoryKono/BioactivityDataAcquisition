@@ -22,6 +22,7 @@ if TYPE_CHECKING:
         GoldMetadata,
         GovernanceMetadata,
         InputSnapshotRef,
+        SchemaInspectionResult,
         SilverMetadata,
         SourceMetadata,
     )
@@ -157,8 +158,7 @@ class GoldMetadataInput:
         silver_refs: List of Silver source references for lineage tracking.
         transform_version: Optional semver version of transform applied.
         transform_steps: Optional list of transform step names applied.
-        gold_schema: Optional Pandera schema class for extracting schema metadata
-                    (contract_path, version, columns).
+        schema_inspection: Optional framework-neutral schema inspection result.
         governance: Optional governance metadata from pipeline config.
         total_bytes: Total size in bytes (ADR-029).
         partition_count: Number of partitions (ADR-029).
@@ -184,9 +184,7 @@ class GoldMetadataInput:
     transform_version: str | None = None
     transform_steps: tuple[str, ...] | None = None
     dq_report_path: str | None = None
-    gold_schema: object | None = (
-        None  # object: Pandera DataFrameModel class, only stored/forwarded
-    )
+    schema_inspection: SchemaInspectionResult | None = None
     governance: GovernanceMetadata | None = None
     total_bytes: int = 0  # ADR-029: Total size in bytes
     partition_count: int = 0  # ADR-029: Number of partitions

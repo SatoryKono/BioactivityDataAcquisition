@@ -30,47 +30,16 @@
 
 from __future__ import annotations
 
-from types import SimpleNamespace
-
 import pytest
 
 from bioetl.domain.behavior.schema_metadata_extractor import extract_schema_metadata
+from bioetl.domain.models.metadata import (
+    SchemaColumnInspection,
+    SchemaInspectionResult,
+)
 
 
 pytestmark = pytest.mark.unit
-
-
-class _FakeColumn:
-    def __init__(self, dtype: object, nullable: bool) -> None:
-        self.dtype = dtype
-        self.nullable = nullable
-
-
-class _FakeSchemaInstance:
-    columns = {
-        "entity_id": _FakeColumn(dtype="pandera.dtypes.String", nullable=False),
-        "score": _FakeColumn(dtype="pandera.dtypes.Float64", nullable=True),
-    }
-
-
-class _FakeSchemaWithColumns:
-    class Config:
-        version = 2
-        strict = False
-
-    @classmethod
-    def to_schema(cls) -> _FakeSchemaInstance:
-        return _FakeSchemaInstance()
-
-
-class _FakeSchemaExtractionError:
-    class Config:
-        version = "3.1.0"
-        strict = True
-
-    @classmethod
-    def to_schema(cls) -> _FakeSchemaInstance:
-        raise ValueError("broken schema")
 
 
 def test_extract_schema_metadata_none_returns_defaults() -> None:
@@ -82,7 +51,24 @@ def test_extract_schema_metadata_none_returns_defaults() -> None:
 
 
 def test_extract_schema_metadata_from_schema_with_columns() -> None:
-    metadata = extract_schema_metadata(_FakeSchemaWithColumns)
+    metadata = extract_schema_metadata(
+        SchemaInspectionResult(
+            version="2",
+            validation="lenient",
+            columns=(
+                SchemaColumnInspection(
+                    name="entity_id",
+                    dtype="pandera.dtypes.String",
+                    nullable=False,
+                ),
+                SchemaColumnInspection(
+                    name="score",
+                    dtype="pandera.dtypes.Float64",
+                    nullable=True,
+                ),
+            ),
+        )
+    )
 
     assert metadata.version == "2"
     assert metadata.validation == "lenient"
@@ -95,22 +81,19 @@ def test_extract_schema_metadata_from_schema_with_columns() -> None:
     assert metadata.columns[1].nullable is True
 
 
-def test_extract_schema_metadata_handles_schema_extraction_error() -> None:
-    metadata = extract_schema_metadata(_FakeSchemaExtractionError)
+def test_extract_schema_metadata_handles_empty_inspection_columns() -> None:
+    metadata = extract_schema_metadata(
+        SchemaInspectionResult(version="3.1.0", validation="strict")
+    )
     assert metadata.version == "3.1.0"
     assert metadata.validation == "strict"
     assert metadata.columns == []
 
 
-def test_extract_schema_metadata_contract_path_vector(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    import bioetl.domain.behavior.schema_metadata_extractor as extractor_module
-
-    fake_module = SimpleNamespace(
-        __file__="/workspace/src/bioetl/domain/contracts/gold/fake_schema.py"
+def test_extract_schema_metadata_contract_path_vector() -> None:
+    metadata = extract_schema_metadata(
+        SchemaInspectionResult(
+            contract_path="src/bioetl/domain/contracts/gold/fake_schema.py"
+        )
     )
-    monkeypatch.setattr(extractor_module.inspect, "getmodule", lambda _: fake_module)
-
-    metadata = extract_schema_metadata(_FakeSchemaWithColumns)
     assert metadata.contract_path == "src/bioetl/domain/contracts/gold/fake_schema.py"

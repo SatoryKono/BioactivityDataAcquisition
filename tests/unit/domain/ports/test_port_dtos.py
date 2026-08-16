@@ -246,3 +246,4 @@ class TestMetadataCoordinatorDataClasses:
         assert inp.partition_count == 0
         assert inp.schema_validation_enabled is False
         assert inp.schema_validation_strict is None
+        assert inp.schema_inspection is None

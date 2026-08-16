@@ -8,11 +8,14 @@ from pathlib import Path
 
 import pytest
 
+import memory.proof as proof
 from memory.proof import (
     DEFAULT_SCHEMA_PATH,
+    ProofError,
     assemble_bundle,
     build_receipt,
     canonical_digest,
+    discover_context,
     emit_receipt_from_environment,
     load_policy,
     load_schema,
@@ -112,6 +115,40 @@ def test_local_digest_only_receipt_is_degraded(proof_repo: Path) -> None:
 
     assert result.outcome == "DEGRADED"
     assert result.claim_qualified is False
+
+
+def test_discover_context_uses_policy_timeout_for_full_diffs(
+    proof_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    policy = load_policy()
+    observed: list[float] = []
+    original_git = proof._git
+
+    def recording_git(
+        repo_root: Path,
+        *args: str,
+        timeout: float = proof.DEFAULT_GIT_TIMEOUT_SECONDS,
+    ) -> bytes:
+        if args and args[0] == "diff":
+            observed.append(timeout)
+        return original_git(repo_root, *args, timeout=timeout)
+
+    monkeypatch.setattr(proof, "_git", recording_git)
+
+    discover_context(proof_repo, policy=policy, claim="tested")
+
+    assert observed == [180.0, 180.0]
+
+
+@pytest.mark.parametrize("configured", [True, "180", 0, 301])
+def test_discover_context_rejects_invalid_git_diff_timeout(
+    proof_repo: Path, configured: object
+) -> None:
+    policy = load_policy()
+    policy["source_binding"]["git_diff_timeout_seconds"] = configured
+
+    with pytest.raises(ProofError, match="git_diff_timeout_seconds"):
+        discover_context(proof_repo, policy=policy, claim="tested")
 
 
 def test_failed_result_cannot_be_reported_as_pass(proof_repo: Path) -> None:
