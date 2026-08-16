@@ -62,6 +62,29 @@ def test_classify_output_requires_review_completed() -> None:
     assert "review_completed" in reason
 
 
+def test_classify_output_ignores_rate_limit_text_inside_completed_review() -> None:
+    output = "\n".join(
+        (
+            json.dumps({"type": "finding", "fileName": "network_rate_limit_helpers.py"}),
+            json.dumps(
+                {
+                    "type": "finding",
+                    "codegenInstructions": "Rate limit exceeded for provider",
+                }
+            ),
+            json.dumps(
+                {
+                    "type": "complete",
+                    "status": "review_completed",
+                    "findings": 2,
+                    "reviewedFiles": ["network_rate_limit_helpers.py"],
+                }
+            ),
+        )
+    )
+    assert classify_output(0, output) == ("ok", "")
+
+
 def test_has_review_completion_detects_terminal_event() -> None:
     output = "\n".join(
         (
