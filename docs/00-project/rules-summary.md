@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.0.1
+Version: 1.0.2
 Status: active
 Class: published
 Owner: BioETL Team
@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 # Rules Summary
 
-*Синхронизировано с RULES.md v6.1.10 (2026-08-14; ADR-053–057 + architecture stamps)*
+*Синхронизировано с RULES.md v6.1.10 (2026-08-14; ADR-053–057 + Dashboard Presentation Contract + architecture stamps)*
 
 > **Note**: Этот документ — выжимка из `docs/00-project/RULES.md`. Канонический источник правил — `RULES.md`.
 

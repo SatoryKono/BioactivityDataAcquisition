@@ -68,6 +68,9 @@ def _lint_imports_command(repo_root: Path) -> tuple[str, ...]:
     venv_candidate = repo_root / ".venv" / "bin" / "lint-imports"
     if venv_candidate.exists():
         return (str(venv_candidate), "--config", ".importlinter")
+    active_venv_candidate = Path(sys.executable).with_name("lint-imports")
+    if active_venv_candidate.exists():
+        return (str(active_venv_candidate), "--config", ".importlinter")
     discovered = shutil.which("lint-imports") or "lint-imports"
     return (discovered, "--config", ".importlinter")
 
@@ -285,19 +288,17 @@ def _run_check(
     )
 
 
-def _audit_environment(
+def _architecture_audit_environment(
     repo_root: Path,
     *,
     environ: Mapping[str, str] | None = None,
 ) -> dict[str, str]:
-    """Return a caller-preserving environment with the src layout importable."""
+    """Build a src-layout child environment without discarding caller settings."""
     env = dict(os.environ if environ is None else environ)
     src_path = str((repo_root / "src").resolve())
-    existing_pythonpath = env.get("PYTHONPATH")
+    caller_pythonpath = env.get("PYTHONPATH")
     env["PYTHONPATH"] = (
-        os.pathsep.join((src_path, existing_pythonpath))
-        if existing_pythonpath
-        else src_path
+        f"{src_path}{os.pathsep}{caller_pythonpath}" if caller_pythonpath else src_path
     )
     env["PYTHONDONTWRITEBYTECODE"] = "1"
     return env
@@ -310,7 +311,7 @@ def run_architecture_audit_read_only(
 ) -> dict[str, object]:
     """Run architecture evidence checks and fail if tracked files mutate."""
     repo_root = repo_root.resolve()
-    env = _audit_environment(repo_root)
+    env = _architecture_audit_environment(repo_root)
 
     before_status = _git_tracked_status(repo_root)
     results = [
