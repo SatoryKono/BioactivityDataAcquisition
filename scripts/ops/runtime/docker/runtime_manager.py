@@ -1011,9 +1011,7 @@ def _preflight_finding_applies_to_spec(
     return True
 
 
-def _preflight_requires_force_recreate(
-    preflight_path: Path, spec: StackSpec
-) -> bool:
+def _preflight_requires_force_recreate(preflight_path: Path, spec: StackSpec) -> bool:
     """True when selected-stack origin/bind drift requires Compose recreation."""
     recreate_codes = {
         "DASHBOARD_REPORT_SOURCE_IDENTITY",

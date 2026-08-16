@@ -778,9 +778,7 @@ def test_prometheus_routes_alerts_to_the_optional_alertmanager_helper() -> None:
     prometheus_config = _load_prometheus_config()
     alertmanagers = prometheus_config.get("alerting", {}).get("alertmanagers", [])
 
-    assert alertmanagers == [
-        {"static_configs": [{"targets": ["alertmanager:9093"]}]}
-    ]
+    assert alertmanagers == [{"static_configs": [{"targets": ["alertmanager:9093"]}]}]
 
 
 def test_pushgateway_default_target_has_bounded_replace_and_cleanup_lifecycle() -> None:

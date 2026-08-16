@@ -963,11 +963,17 @@ def test_readiness_and_build_tools_fail_closed() -> None:
         encoding="utf-8"
     )
     assert "uv==0.11.26" in dockerfile
-    assert dockerfile.count(
-        "python@sha256:a116514e19457bcb7af7efe9c3dd0b9b71e85b317694e7882a1c52aa15a78134"
-    ) == 2
+    assert (
+        dockerfile.count(
+            "python@sha256:a116514e19457bcb7af7efe9c3dd0b9b71e85b317694e7882a1c52aa15a78134"
+        )
+        == 2
+    )
     assert "python:3.12-slim-bookworm" in dockerfile
-    assert "4fad23465a06cc5149a541fbec6f87e234a64dc0550f6bfdd2d290d8f03240df" not in dockerfile
+    assert (
+        "4fad23465a06cc5149a541fbec6f87e234a64dc0550f6bfdd2d290d8f03240df"
+        not in dockerfile
+    )
     assert "uv==0.11.26" in operations_dockerfile
     assert "sys.exit(0)" not in dockerfile
     assert "/health/ready" in dockerfile

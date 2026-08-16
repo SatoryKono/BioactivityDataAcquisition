@@ -12,6 +12,7 @@ import pytest
 
 pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
+
 def _repo_root() -> Path:
     here = Path(__file__).resolve()
     for candidate in (here, *here.parents):

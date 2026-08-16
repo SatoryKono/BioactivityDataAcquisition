@@ -766,7 +766,7 @@ def test_playwright_screenshot_script_uses_multiple_panel_readiness_selectors() 
     assert "focusIndicatorVisible" in script
     assert "layoutViewportForZoom" in script
     assert "layout-viewport-and-device-scale-factor" in script
-    assert 'document.documentElement.style.zoom =' not in script
+    assert "document.documentElement.style.zoom =" not in script
     assert "grafanaPanelTitleMinimumPx" in script
     assert "validateDashboardTerminalStates" in script
     assert "terminalStateValidation" in script

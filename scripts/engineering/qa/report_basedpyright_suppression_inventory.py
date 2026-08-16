@@ -60,7 +60,11 @@ def collect(root: Path) -> dict[str, object]:
         "product_root": root.as_posix(),
         "files": len(files_with_suppressions),
         "total_rules": total_rules,
-        "by_rule": dict(sorted({**rule_counts, **mode_counts}.items(), key=lambda kv: (-kv[1], kv[0]))),
+        "by_rule": dict(
+            sorted(
+                {**rule_counts, **mode_counts}.items(), key=lambda kv: (-kv[1], kv[0])
+            )
+        ),
         "files_list": sorted(files_with_suppressions),
     }
 
@@ -85,7 +89,10 @@ def _as_int_map(obj: object) -> dict[str, int]:
 def check(current: dict[str, object], baseline: dict[str, object]) -> list[str]:
     problems: list[str] = []
     cur_files, base_files = int(str(current["files"])), int(str(baseline["files"]))
-    cur_rules_total, base_rules_total = int(str(current["total_rules"])), int(str(baseline["total_rules"]))
+    cur_rules_total, base_rules_total = (
+        int(str(current["total_rules"])),
+        int(str(baseline["total_rules"])),
+    )
     if cur_files > base_files:
         problems.append(f"files grew: {base_files} -> {cur_files}")
     if cur_rules_total > base_rules_total:
@@ -102,8 +109,12 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=PRODUCT_ROOT)
     parser.add_argument("--baseline", type=Path, default=DEFAULT_BASELINE)
-    parser.add_argument("--update", action="store_true", help="write current inventory as baseline")
-    parser.add_argument("--check", action="store_true", help="fail if suppressions grew vs baseline")
+    parser.add_argument(
+        "--update", action="store_true", help="write current inventory as baseline"
+    )
+    parser.add_argument(
+        "--check", action="store_true", help="fail if suppressions grew vs baseline"
+    )
     args = parser.parse_args(argv)
 
     if not args.root.exists():
@@ -136,7 +147,10 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     # default: report only
-    _atomic_write(args.baseline.with_name("basedpyright-suppression-inventory.latest.json"), _dump(current))
+    _atomic_write(
+        args.baseline.with_name("basedpyright-suppression-inventory.latest.json"),
+        _dump(current),
+    )
     return 0
 
 

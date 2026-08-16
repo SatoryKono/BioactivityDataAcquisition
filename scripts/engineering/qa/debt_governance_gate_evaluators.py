@@ -16,6 +16,7 @@ from scripts.engineering.qa.report_debt_governance_gates import (
     _refresh_existing_inventory_source_tree,
 )
 
+
 def _count(value: object) -> int:
     if isinstance(value, int):
         return value
@@ -1409,4 +1410,3 @@ def _collect_stale_artifacts(
         "remote_main_baseline": remote_main_baseline_stale,
         "dq_contract_registry_diagnostics": False,
     }
-

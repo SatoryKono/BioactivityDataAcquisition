@@ -77,7 +77,11 @@ def test_dq_v2_silver_reject_mismatch_is_background_stat() -> None:
     )
     assert panel is not None
     assert panel.get("type") == "stat"
-    assert panel.get("options", {}).get("colorMode") in {"background", "backgroundSolid", "value"}
+    assert panel.get("options", {}).get("colorMode") in {
+        "background",
+        "backgroundSolid",
+        "value",
+    }
 
 
 def test_dq_v2_json_is_parseable_and_has_stable_uid() -> None:

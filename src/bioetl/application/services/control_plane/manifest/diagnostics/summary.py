@@ -37,6 +37,7 @@ if TYPE_CHECKING:
         DQDetailsSummary,
     )
 
+
 @dataclass(frozen=True, slots=True)
 class _FinalSummaryRequest:
     """Structured input for final manifest diagnostics summary assembly."""
@@ -69,9 +70,7 @@ class _RuntimeViewsRequest:
     cross_validation_signal_present: bool
 
 
-def _build_final_summary(
-    request: _FinalSummaryRequest,
-) -> dict[str, object]:
+def _build_final_summary(request: _FinalSummaryRequest) -> dict[str, object]:
     """Build final summary with all processed data."""
     exact_replay_anchors = _build_exact_replay_anchors(
         manifest=request.manifest,

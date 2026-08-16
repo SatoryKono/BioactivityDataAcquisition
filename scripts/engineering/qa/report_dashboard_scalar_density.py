@@ -80,7 +80,11 @@ def first_screen_scalar_panels(dashboard: dict[str, Any]) -> list[dict[str, Any]
         if not isinstance(panel, dict) or panel.get("type") == "row":
             continue
         y = (panel.get("gridPos") or {}).get("y", 999)
-        if isinstance(y, int) and y < FIRST_WINDOW_Y and panel.get("type") in SCALAR_TYPES:
+        if (
+            isinstance(y, int)
+            and y < FIRST_WINDOW_Y
+            and panel.get("type") in SCALAR_TYPES
+        ):
             out.append(panel)
     return out
 
@@ -185,7 +189,9 @@ def main(argv: list[str] | None = None) -> int:
     results = survey_repo(dashboard_dir)
     allow = _load_allowlist(args.allowlist)
 
-    _atomic_write(args.out_json, json.dumps(results, indent=2, ensure_ascii=False) + "\n")
+    _atomic_write(
+        args.out_json, json.dumps(results, indent=2, ensure_ascii=False) + "\n"
+    )
     _atomic_write(args.out_md, _render_markdown(results))
 
     failures = [

@@ -269,7 +269,9 @@ async def handle_processed_records_table(
             return {
                 "contract": "processed_records_table_v1",
                 "pipeline": pipeline,
-                "run_type": [part for part in (run_type or "").split(",") if part.strip()],
+                "run_type": [
+                    part for part in (run_type or "").split(",") if part.strip()
+                ],
                 "selection": "required",
                 "rows": [],
             }
