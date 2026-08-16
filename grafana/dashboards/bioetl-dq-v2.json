@@ -243,8 +243,8 @@
         "y": 8
       },
       "options": {
-        "content": "**Data trust — next actions (<=4)**\n1. Read **Status** + **Now · DQ Threshold/Reasons** (not range zeros).\n2. If blocked/quarantine/rejects > 0, use accounting with denominators (expand Run/Range lanes).\n3. Selected run -> **Run Explorer** hub; resume -> Trust **Review First Recovery Action**.\n4. Range cards are SLA/freshness context only — not peer severity.\n",
-        "mode": "markdown"
+        "content": "<div style=\"font-size:16px;line-height:1.4\"><strong style=\"font-size:16px\">Data trust — next actions (&lt;=4)</strong><ol style=\"margin:6px 0 0 22px;padding:0\"><li style=\"font-size:16px\">Read <strong style=\"font-size:16px\">Status</strong> + <strong style=\"font-size:16px\">Now · DQ Threshold/Reasons</strong> (not range zeros).</li><li style=\"font-size:16px\">If blocked/quarantine/rejects &gt; 0, use accounting with denominators (expand Run/Range lanes).</li><li style=\"font-size:16px\">Selected run → <strong style=\"font-size:16px\">Run Explorer</strong> hub; resume → Trust <strong style=\"font-size:16px\">Review First Recovery Action</strong>.</li><li style=\"font-size:16px\">Range cards are SLA/freshness context only — not peer severity.</li></ol></div>",
+        "mode": "html"
       },
       "description": "Start with Current DQ Status, Threshold State, and Current Reasons. For CRIT, inspect validation, anomaly, quarantine, and reject blockers before replay. For WARN, inspect threshold and freshness evidence. Use selected-run accounting and selected-range evidence as supporting lanes, not competing verdicts.",
       "links": [

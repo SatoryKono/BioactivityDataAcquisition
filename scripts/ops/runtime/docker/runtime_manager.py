@@ -101,10 +101,14 @@ def _materialize_report_source_identity(
         reports_source,
         root=ROOT,
     )
-    return write_report_root_source_identity(
+    target = write_report_root_source_identity(
         report_root=reports_root / "run-reports",
         source_id=source_id,
     )
+    # The attestation contains only a schema identifier and a checkout digest.
+    # Main runs as a non-host UID and must be able to read the bind-mounted file.
+    target.chmod(0o644)
+    return target
 
 
 @dataclass(frozen=True)
@@ -479,7 +483,8 @@ def _digest_from_image(value: str | None) -> str | None:
 
 
 _CAUSE_PRIORITY = {
-    "daemon_unavailable": 0,
+    "daemon_unavailable": -1,
+    "preflight_probe_mismatch": 0,
     "preflight_failed": 1,
     "compose_render_failed": 2,
     "project_origin_drift": 3,
@@ -864,7 +869,6 @@ _CROSS_STACK_IGNORABLE_PREFLIGHT_CODES = frozenset(
 )
 _DAEMON_UNAVAILABLE_PREFLIGHT_CODES = frozenset(
     {
-        "CAPACITY_DOCKER_ROOT",
         "DAEMON_UNAVAILABLE",
         "DOCKER_DAEMON",
     }
@@ -924,36 +928,59 @@ def _preflight_errors_are_recoverable(
     return True
 
 
-def _preflight_has_dashboard_source_drift(preflight_path: Path) -> bool:
-    """True when preflight reports dashboard producer bind/identity drift."""
+def _read_preflight_findings(preflight_path: Path) -> list[Mapping[str, Any]]:
+    """Return normalized preflight findings without trusting malformed rows."""
     try:
         payload = json.loads(preflight_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
-        return False
+        return []
     findings = payload.get("findings") or []
     if not isinstance(findings, list):
-        return False
+        return []
+    return [finding for finding in findings if isinstance(finding, Mapping)]
+
+
+def _preflight_finding_applies_to_spec(
+    finding: Mapping[str, Any], spec: StackSpec
+) -> bool:
+    """Scope an origin finding to the selected stack/project when possible."""
+    evidence = finding.get("evidence")
+    if not isinstance(evidence, Mapping):
+        return True
+    finding_stack = str(evidence.get("stack") or "").strip()
+    if finding_stack:
+        return finding_stack == spec.name
+    finding_project = str(evidence.get("project") or "").strip()
+    if finding_project:
+        return finding_project == spec.project
+    actual_owner = str(evidence.get("actual_owner") or "").strip()
+    if "/" in actual_owner:
+        return actual_owner.split("/", 1)[0] == spec.name
+    return True
+
+
+def _preflight_requires_force_recreate(
+    preflight_path: Path, spec: StackSpec
+) -> bool:
+    """True when selected-stack origin/bind drift requires Compose recreation."""
+    recreate_codes = {
+        "DASHBOARD_REPORT_SOURCE_IDENTITY",
+        "DASHBOARD_SOURCE_MOUNT",
+        "DASHBOARD_SOURCE_IDENTITY",
+        "MOUNT_ORIGIN",
+        "PROJECT_ORIGIN",
+    }
     return any(
-        isinstance(finding, Mapping)
-        and finding.get("severity") == "error"
-        and str(finding.get("code") or "")
-        in {"DASHBOARD_SOURCE_MOUNT", "DASHBOARD_SOURCE_IDENTITY"}
-        for finding in findings
+        finding.get("severity") == "error"
+        and str(finding.get("code") or "") in recreate_codes
+        and _preflight_finding_applies_to_spec(finding, spec)
+        for finding in _read_preflight_findings(preflight_path)
     )
 
 
 def _preflight_indicates_daemon_unavailable(preflight_path: Path) -> bool:
     """True when preflight failed because the Docker engine is unreachable."""
-    try:
-        payload = json.loads(preflight_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return False
-    findings = payload.get("findings") or []
-    if not isinstance(findings, list):
-        return False
-    for finding in findings:
-        if not isinstance(finding, Mapping):
-            continue
+    for finding in _read_preflight_findings(preflight_path):
         code = str(finding.get("code") or "")
         message = str(finding.get("message") or "")
         evidence = finding.get("evidence") or {}
@@ -1089,7 +1116,7 @@ def _maybe_desktop_recovery_before_preflight(
     poll_interval: float,
     sleep: Sleeper,
     clock: Clock,
-) -> tuple[CommandResult, bool]:
+) -> tuple[CommandResult, bool, CommandResult | None]:
     """RF-006: optional Desktop recovery when daemon is unavailable at preflight."""
     if not (
         recover
@@ -1097,7 +1124,27 @@ def _maybe_desktop_recovery_before_preflight(
         and _preflight_indicates_daemon_unavailable(preflight_path)
         and clock() < deadline
     ):
-        return preflight, False
+        return preflight, False, None
+    daemon_probe = runner(
+        ["docker", "info", "--format", "{{.ServerVersion}}"],
+        ROOT,
+        min(max(0.1, deadline - clock()), 10.0),
+    )
+    history.append(
+        {
+            "attempt": 0,
+            "action": "daemon_probe",
+            "returncode": daemon_probe.returncode,
+            "stdout": _bounded(daemon_probe.stdout, 200),
+            "stderr": _bounded(daemon_probe.stderr, 500),
+            "elapsed_seconds": round(clock() - started, 3),
+        }
+    )
+    if daemon_probe.returncode == 0 and str(daemon_probe.stdout or "").strip():
+        # The subprocess preflight and direct CLI disagree. Do not restart
+        # Docker Desktop; preserve both probes so the caller reports the
+        # permission/execution-context mismatch instead of a false outage.
+        return preflight, False, daemon_probe
     desktop_report = report_dir / f"docker-desktop-recovery-{spec.name}.json"
     desktop = _invoke_desktop_recovery(
         desktop_report,
@@ -1126,7 +1173,7 @@ def _maybe_desktop_recovery_before_preflight(
         runner=runner,
         timeout=min(max(0.1, deadline - clock()), 60.0),
     )
-    return refreshed, True
+    return refreshed, True, daemon_probe
 
 
 def _capture_recent_logs(
@@ -1426,6 +1473,7 @@ def _bootstrap_recovery_surface(
     preflight: CommandResult,
     preflight_path: Path,
     desktop_recovery_attempted: bool,
+    daemon_probe: CommandResult | None,
     runner: Runner,
     deadline: float,
     clock: Clock,
@@ -1443,7 +1491,33 @@ def _bootstrap_recovery_surface(
         findings: list[dict[str, Any]] = [
             {"cause": "preflight_failed", "stderr": preflight.stderr}
         ]
-        if desktop_recovery_attempted:
+        if daemon_probe is not None:
+            probe_evidence = {
+                "command": daemon_probe.command,
+                "returncode": daemon_probe.returncode,
+                "stdout": _bounded(daemon_probe.stdout, 200),
+                "stderr": _bounded(daemon_probe.stderr, 500),
+            }
+            if daemon_probe.returncode == 0 and str(daemon_probe.stdout or "").strip():
+                findings.append(
+                    {
+                        "cause": "preflight_probe_mismatch",
+                        "message": (
+                            "preflight classified Docker as unavailable while the "
+                            "independent daemon probe succeeded"
+                        ),
+                        "probe": probe_evidence,
+                    }
+                )
+            else:
+                findings.append(
+                    {
+                        "cause": "daemon_unavailable",
+                        "desktop_recovery": desktop_recovery_attempted,
+                        "probe": probe_evidence,
+                    }
+                )
+        elif desktop_recovery_attempted:
             findings.append({"cause": "daemon_unavailable", "desktop_recovery": True})
         return [], findings, 0, None
     networks_ok, network_findings = ensure_shared_networks(
@@ -1556,7 +1630,11 @@ def start_or_recover(
         runner=runner,
         timeout=min(max(0.1, deadline - clock()), 60.0),
     )
-    preflight, desktop_recovery_attempted = _maybe_desktop_recovery_before_preflight(
+    (
+        preflight,
+        desktop_recovery_attempted,
+        daemon_probe,
+    ) = _maybe_desktop_recovery_before_preflight(
         recover=recover,
         preflight=preflight,
         preflight_path=preflight_path,
@@ -1578,6 +1656,7 @@ def start_or_recover(
         preflight=preflight,
         preflight_path=preflight_path,
         desktop_recovery_attempted=desktop_recovery_attempted,
+        daemon_probe=daemon_probe,
         runner=runner,
         deadline=deadline,
         clock=clock,
@@ -1605,7 +1684,7 @@ def start_or_recover(
                 clock=clock,
                 runner=runner,
                 force_recreate=(
-                    _preflight_has_dashboard_source_drift(preflight_path)
+                    _preflight_requires_force_recreate(preflight_path, spec)
                     or spec.name == "main"
                 ),
             ),
@@ -1761,6 +1840,7 @@ def _load_grafana_bootstrap_status(
 def _status_origin_findings(
     preflight_path: Path,
     preflight: CommandResult,
+    spec: StackSpec,
 ) -> list[dict[str, Any]]:
     """Extract only origin/data-plane failures for the lightweight status view."""
     try:
@@ -1781,6 +1861,7 @@ def _status_origin_findings(
         if isinstance(finding, Mapping)
         and finding.get("severity") == "error"
         and str(finding.get("code") or "") in _STATUS_ORIGIN_CODES
+        and _preflight_finding_applies_to_spec(finding, spec)
     ]
 
 
@@ -1957,7 +2038,7 @@ def _dispatch_action(
         )
         snapshots, _ = collect_snapshots(spec, runner=runner, timeout=args.timeout)
         findings = readiness_findings(spec, snapshots)
-        findings.extend(_status_origin_findings(preflight_path, preflight))
+        findings.extend(_status_origin_findings(preflight_path, preflight, spec))
         if spec.name == "monitoring":
             grafana_running = any(
                 snapshot.state == "running"

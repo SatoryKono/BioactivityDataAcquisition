@@ -690,8 +690,10 @@ Benign export noise:
 
 ## 9) DUX5 typography & copy residual
 
-DUX5 artifacts remain historical audit evidence. Active typography floors are
-`body >= 12pt (16px)` and `panel title >= 14pt (18.6667px)` in
+DUX5 artifacts remain historical audit evidence. Active authored-copy floors
+are `body >= 12pt (16px)` and `panel heading >= 14pt (18.6667px)`; pinned
+Grafana-managed chrome retains its theme baselines (`12px` body, `14px` native
+panel title) and MUST pass 200% reflow without global CSS overrides. See
 [`DASHBOARD_REQUIREMENTS.md`](../../01-requirements/DASHBOARD_REQUIREMENTS.md).
 The screenshot protocol remains available at
 [dux5-screenshot-regression-protocol.md](archive/audit-protocols/dux5-screenshot-regression-protocol.md),
