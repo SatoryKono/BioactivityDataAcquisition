@@ -219,7 +219,6 @@ def _load_yaml_from_git_ref(
     return payload if isinstance(payload, dict) else {}
 
 
-
 # Implementation seams are kept in focused sibling modules. Imports remain
 # here so existing callers of this historical module path retain compatibility.
 from scripts.engineering.qa.debt_governance_gate_evaluators import (
@@ -271,6 +270,7 @@ from scripts.engineering.qa.debt_governance_gate_evaluators import (
     _in_test_mode,
     _collect_stale_artifacts,
 )
+
 
 def _gate_status_counts(gates: list[Gate]) -> dict[str, int]:
     """Count pass/warn/fail gate statuses."""
@@ -469,7 +469,6 @@ def build_payload(
         "stale_artifacts": stale_artifacts,
         "gates": [gate.as_dict() for gate in gates],
     }
-
 
 
 from scripts.engineering.qa.debt_governance_gate_report import (

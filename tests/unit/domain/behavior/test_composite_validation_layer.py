@@ -180,4 +180,3 @@ def test_deep_preflight_rejects_string_sources() -> None:
 
     codes = [issue.code for issue in result.issues]
     assert IssueCode.CMP_STR_FORMAT_003 in codes
-

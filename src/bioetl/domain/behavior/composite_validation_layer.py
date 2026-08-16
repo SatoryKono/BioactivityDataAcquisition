@@ -163,28 +163,8 @@ class CompositeValidator:
                 )
             ]
         issues: list[ValidationIssue] = []
-        aggregation = composite_config.get("aggregation")
-        if aggregation is not None:
-            output_schema, schema_issues = self._as_output_schema(
-                composite_config.get("output_schema", {})
-            )
-            issues.extend(schema_issues)
-            if output_schema is not None:
-                issues.extend(
-                    self._validate_aggregation_config(aggregation, output_schema)
-                )
-        if "cross_validation" in composite_config:
-            cross_validation_config = composite_config["cross_validation"]
-            source_names, source_issues = self._as_source_names(
-                composite_config.get("sources", [])
-            )
-            issues.extend(source_issues)
-            if source_names is not None:
-                issues.extend(
-                    self._validate_cross_validation_config(
-                        cross_validation_config, source_names
-                    )
-                )
+        issues.extend(self._aggregation_preflight_issues(composite_config))
+        issues.extend(self._cross_validation_preflight_issues(composite_config))
         self._append_config_issue_if_invalid(
             issues=issues,
             composite_config=composite_config,
@@ -207,6 +187,34 @@ class CompositeValidator:
         )
         return issues
 
+    def _aggregation_preflight_issues(
+        self, composite_config: JsonDict
+    ) -> list[ValidationIssue]:
+        aggregation = composite_config.get("aggregation")
+        if aggregation is None:
+            return []
+        output_schema, issues = self._as_output_schema(
+            composite_config.get("output_schema", {})
+        )
+        if output_schema is not None:
+            issues.extend(self._validate_aggregation_config(aggregation, output_schema))
+        return issues
+
+    def _cross_validation_preflight_issues(
+        self, composite_config: JsonDict
+    ) -> list[ValidationIssue]:
+        if "cross_validation" not in composite_config:
+            return []
+        source_names, issues = self._as_source_names(
+            composite_config.get("sources", [])
+        )
+        if source_names is not None:
+            issues.extend(
+                self._validate_cross_validation_config(
+                    composite_config["cross_validation"], source_names
+                )
+            )
+        return issues
 
     def _as_output_schema(
         self, raw: object

@@ -115,7 +115,9 @@ def _resolve_grafana_username() -> str:
     return DEFAULT_GRAFANA_USERNAME
 
 
-def _resolve_expected_runtime_source_identity() -> RuntimeSourceIdentityResolutionResult:
+def _resolve_expected_runtime_source_identity() -> (
+    RuntimeSourceIdentityResolutionResult
+):
     """Resolve the expected identity with the canonical source precedence."""
     root = Path(__file__).resolve().parents[4]
     contract_path = root / "configs/quality/docker_runtime_contracts.yaml"
@@ -555,7 +557,10 @@ def _validate_dashboard_typography(
     title_minimum = typography.get("panelTitleMinimumPx")
     grafana_body_minimum = typography.get("grafanaBodyMinimumPx")
     grafana_title_minimum = typography.get("grafanaPanelTitleMinimumPx")
-    if not isinstance(body_minimum, (int, float)) or body_minimum < _MIN_PANEL_BODY_FONT_PX:
+    if (
+        not isinstance(body_minimum, (int, float))
+        or body_minimum < _MIN_PANEL_BODY_FONT_PX
+    ):
         return f"render manifest dashboard {uid} body typography floor drift"
     if (
         not isinstance(title_minimum, (int, float))

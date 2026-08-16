@@ -156,9 +156,7 @@ def test_monitoring_images_are_pinned_and_pushgateway_is_not_a_datasource() -> N
             encoding="utf-8"
         )
     )
-    assert [datasource["name"] for datasource in core["datasources"]] == [
-        "Prometheus"
-    ]
+    assert [datasource["name"] for datasource in core["datasources"]] == ["Prometheus"]
     prometheus = core["datasources"][0]
     assert prometheus["uid"] == "prometheus"
     assert prometheus["url"] == "http://prometheus:9090"
@@ -231,8 +229,7 @@ def test_grafana_renderer_fail_fast_and_recovery_contract() -> None:
         for item in renderer_env
     )
     assert any(
-        str(item).startswith("BROWSER_WS_URL_READ_TIMEOUT=")
-        for item in renderer_env
+        str(item).startswith("BROWSER_WS_URL_READ_TIMEOUT=") for item in renderer_env
     )
     assert (
         "GF_RENDERING_CONCURRENT_RENDER_REQUEST_LIMIT="

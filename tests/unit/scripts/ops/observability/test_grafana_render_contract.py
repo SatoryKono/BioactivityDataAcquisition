@@ -350,7 +350,9 @@ def test_render_contract_rejects_missing_typography_evidence() -> None:
         expected_uids=("bioetl-runtime",),
     )
 
-    assert problem == "render manifest dashboard bioetl-runtime lacks typography evidence"
+    assert (
+        problem == "render manifest dashboard bioetl-runtime lacks typography evidence"
+    )
 
 
 def test_render_contract_rejects_title_font_floor_drift() -> None:
@@ -366,7 +368,10 @@ def test_render_contract_rejects_title_font_floor_drift() -> None:
         expected_uids=("bioetl-runtime",),
     )
 
-    assert problem == "render manifest dashboard bioetl-runtime title typography floor drift"
+    assert (
+        problem
+        == "render manifest dashboard bioetl-runtime title typography floor drift"
+    )
 
 
 def test_render_contract_rejects_grafana_title_floor_drift() -> None:

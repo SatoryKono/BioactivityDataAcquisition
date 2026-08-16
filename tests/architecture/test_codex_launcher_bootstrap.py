@@ -33,7 +33,7 @@ def _fake_codex_prefix(tmp_path: Path) -> Path:
     fake_codex.parent.mkdir(parents=True)
     fake_codex.write_text(
         "#!/usr/bin/env bash\n"
-        "if [[ -n \"${REF_TOOL_API_KEY:-}\" ]]; then echo ref_key=set; "
+        'if [[ -n "${REF_TOOL_API_KEY:-}" ]]; then echo ref_key=set; '
         "else echo ref_key=missing; fi\n"
         "printf 'arg=%s\\n' \"$@\"\n",
         encoding="utf-8",
@@ -165,9 +165,7 @@ def test_direct_codex_command_installer_is_bounded_and_secret_free(
 ) -> None:
     """The local PATH shim delegates without copying credentials."""
     root = _project_root()
-    ensure_helper = (
-        root / "scripts" / "ai" / "codex" / "helper" / "ensure-codex-cli.sh"
-    )
+    ensure_helper = root / "scripts" / "ai" / "codex" / "helper" / "ensure-codex-cli.sh"
     shim_dir = tmp_path / "bin"
     fake_prefix = _fake_codex_prefix(tmp_path)
     env = {
@@ -241,9 +239,7 @@ def test_direct_codex_command_installer_preserves_foreign_command(
 ) -> None:
     """Installing the shim must not overwrite an unrelated user command."""
     root = _project_root()
-    ensure_helper = (
-        root / "scripts" / "ai" / "codex" / "helper" / "ensure-codex-cli.sh"
-    )
+    ensure_helper = root / "scripts" / "ai" / "codex" / "helper" / "ensure-codex-cli.sh"
     shim_dir = tmp_path / "bin"
     shim_dir.mkdir()
     shim = shim_dir / "codex"
