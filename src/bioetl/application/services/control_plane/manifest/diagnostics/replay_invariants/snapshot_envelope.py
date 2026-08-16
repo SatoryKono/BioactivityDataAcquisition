@@ -11,8 +11,6 @@ from bioetl.application.services.control_plane.replay.historical_certification i
 )
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
 
-_LIVE_CAPTURE_SNAPSHOT_MATERIALIZED = "live_capture_snapshot_materialized"
-
 
 def _has_partial_input_snapshot_envelope(snapshot_envelope: object) -> bool:
     any_snapshots = bool(getattr(snapshot_envelope, "any_input_snapshots", False))
@@ -55,7 +53,7 @@ def _has_live_capture_materialized_snapshots(
 ) -> bool:
     return any(
         _resolve_snapshot_materialization_mode(snapshot)
-        == _LIVE_CAPTURE_SNAPSHOT_MATERIALIZED
+        == LIVE_CAPTURE_SNAPSHOT_MATERIALIZED
         for snapshot in input_snapshots
     )
 

@@ -24,6 +24,13 @@ from bioetl.domain.types.schema_policy import (
 )
 
 
+def _as_properties(value: object) -> JsonDict | None:
+    """Copy a properties mapping, or flag malformed schema structure."""
+    if not isinstance(value, Mapping):
+        return None
+    return {str(key): item for key, item in value.items()}
+
+
 class SchemaClassifier:
     """Policy-aware schema change classifier."""
 
