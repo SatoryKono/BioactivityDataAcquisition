@@ -7,7 +7,7 @@ import json
 from dataclasses import dataclass
 from datetime import date, datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.types import JsonDict
 
@@ -245,12 +245,43 @@ def _deterministic_record_id(record: JsonDict) -> str:
 def _canonical_json_text(value: object) -> str:
     """Serialize supported values without identity-bearing repr fallbacks."""
     return json.dumps(
-        value,
+        _canonical_json_value(value),
         sort_keys=True,
         separators=(",", ":"),
         ensure_ascii=False,
+        allow_nan=False,
         default=_json_fallback,
     )
+
+
+def _canonical_json_value(value: object) -> object:
+    """Normalize containers, including mappings with mixed scalar key types."""
+    if isinstance(value, dict):
+        return _canonical_mapping_value(value)
+    if isinstance(value, list | tuple):
+        return [_canonical_json_value(item) for item in value]
+    return value
+
+
+def _canonical_mapping_value(value: dict[object, object]) -> object:
+    if all(isinstance(key, str) for key in value):
+        string_mapping = cast(dict[str, object], value)
+        return {
+            key: _canonical_json_value(item) for key, item in string_mapping.items()
+        }
+    return _canonical_typed_mapping(value)
+
+
+def _canonical_typed_mapping(value: dict[object, object]) -> JsonDict:
+    items = [
+        (
+            {"type": type(key).__name__, "value": _canonical_json_value(key)},
+            _canonical_json_value(item),
+        )
+        for key, item in value.items()
+    ]
+    items.sort(key=lambda item: _canonical_json_text(item[0]))
+    return {"\u0000bioetl:typed-mapping:v1": items}
 
 
 def _json_fallback(value: object) -> object:
