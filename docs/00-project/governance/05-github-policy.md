@@ -249,6 +249,11 @@ The legacy repository ruleset `main`
 (`https://github.com/SatoryKono/BioactivityDataAcquisition/rules/13643213`)
 remains **disabled** and is not part of the active gate set.
 
+For a stale classic branch-protection context left after disconnecting an
+external GitHub App, preview the bounded maintenance helper with
+`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`.
+It does not edit rulesets; use the GitHub ruleset settings or API for those.
+
 Repeat this verification at least quarterly and after any branch-protection or
 ruleset migration.
 

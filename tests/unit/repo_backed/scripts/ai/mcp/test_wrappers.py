@@ -35,6 +35,19 @@ def test_wrapper_command_selects_platform_pair() -> None:
     assert linux_command[1].endswith("mcp_context7_wrapper.sh")
 
 
+def test_ast_grep_windows_wrapper_preserves_runtime_contract() -> None:
+    windows = PlatformInfo(PlatformKind.WINDOWS, "nt", "win32", "fixture")
+    spec = wrappers.load_wrapper_specs()["ast-grep"]
+    wrapper = wrappers.wrapper_path(spec, host=windows)
+
+    assert wrapper == wrappers.MCP_DIR / "mcp_ast_grep_wrapper.ps1"
+    body = wrapper.read_text(encoding="utf-8")
+    assert 'Exit-McpValidateOnly -ServerName "ast-grep"' in body
+    assert 'npx -y "@notprolands/ast-grep-mcp" --stdio @args' in body
+    assert 'npx -y "@chousyn/ast-grep-mcp" --stdio @args' in body
+    assert wrappers.wrapper_command("ast-grep", host=windows)[-1] == str(wrapper)
+
+
 def test_unknown_server_is_rejected() -> None:
     with pytest.raises(ValueError, match="unknown MCP server"):
         wrappers.wrapper_command("../../escape")

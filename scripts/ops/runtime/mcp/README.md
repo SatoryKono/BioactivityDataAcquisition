@@ -61,7 +61,9 @@ Compose or optional monitoring stacks.
 
 For Windows-native optional/heavy profiles, use `start-shared.ps1` and
 `health-shared.ps1`; `apply-shared-to-grok.ps1` remains the explicit Grok
-projection path. Those commands do not change the daily `stable/shared`
+projection path. Run `scripts/ops/runtime/mcp/watchdog-shared.ps1 -Daily` for
+the Windows watchdog and `scripts/ops/runtime/mcp/stop-shared.ps1` to stop that
+host-process plane. Those commands do not change the daily `stable/shared`
 selection unless an operator explicitly persists another profile.
 
 `start-shared.sh --all` is the full acceptance path. A repeated invocation must
