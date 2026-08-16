@@ -85580,9 +85580,19 @@
     },
     "by_recommended_action": {
       "archive-after-github-state-check": 320,
+<<<<<<< HEAD
       "archive-after-migration": 520,
       "generate-automatically": 1055,
       "keep": 1121,
+||||||| 52f6cee3e3
+      "archive-after-migration": 495,
+      "generate-automatically": 1058,
+      "keep": 1120,
+=======
+      "archive-after-migration": 495,
+      "generate-automatically": 1055,
+      "keep": 1120,
+>>>>>>> fix/proof-blockers-postmerge-dd076a79f5
       "reconcile-with-github-state": 4,
       "replace-with-link": 8
     },
@@ -85622,7 +85632,14 @@
       "Canonical": 70,
       "Deprecated": 8,
       "Generated": 1055,
+<<<<<<< HEAD
       "Working": 987
+||||||| 52f6cee3e3
+      "Generated": 1058,
+      "Working": 961
+=======
+      "Working": 961
+>>>>>>> fix/proof-blockers-postmerge-dd076a79f5
     },
     "by_surface_family": {
       "active": 739,
@@ -85630,10 +85647,23 @@
       "canonical": 70,
       "duplicate": 8,
       "generated": 1055,
+<<<<<<< HEAD
       "working": 987
+||||||| 52f6cee3e3
+      "generated": 1058,
+      "working": 961
+=======
+      "working": 961
+>>>>>>> fix/proof-blockers-postmerge-dd076a79f5
     },
     "by_tracking_state": {
+<<<<<<< HEAD
       "tracked": 3028
+||||||| 52f6cee3e3
+      "tracked": 3005
+=======
+      "tracked": 3002
+>>>>>>> fix/proof-blockers-postmerge-dd076a79f5
     },
     "docs_reports_local_count": 33,
     "duplicate_group_count": 9,
@@ -85649,8 +85679,20 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
+<<<<<<< HEAD
     "total_doc_like": 3028,
+||||||| 52f6cee3e3
+    "total_doc_like": 3005,
+=======
+    "total_doc_like": 3002,
+>>>>>>> fix/proof-blockers-postmerge-dd076a79f5
     "total_doc_like_ignored_local": 0,
+<<<<<<< HEAD
     "total_doc_like_tracked": 3028
+||||||| 52f6cee3e3
+    "total_doc_like_tracked": 3005
+=======
+    "total_doc_like_tracked": 3002
+>>>>>>> fix/proof-blockers-postmerge-dd076a79f5
   }
 }

@@ -76,7 +76,7 @@ Skill: **observability-dashboard**. Static metric — **no monitoring/render** n
 1. **Inventory groups:** each `type:"row"` + its scalar children (measured within
    the parent row). Also collect first-screen scalar panels (`y < 18`, root, non-row).
 2. **Survey (source of truth):**
-   `python -m scripts.engineering.qa.report_dashboard_scalar_density --json`
+   `python -m scripts.engineering.qa report-dashboard-scalar-density --json`
    (Windows: `.\.venv-win\Scripts\python.exe -m ...`). It emits per-group `ρ`,
    first-screen `ρ`, and `PASS` / `FAIL` / `n/a`, and writes
    `reports/quality/dashboard-scalar-density.{json,md}`.
