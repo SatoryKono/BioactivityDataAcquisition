@@ -174,6 +174,19 @@ def _validate_comparison_sources(
     source_name: object,
     valid_sources: set[str],
 ) -> list[ValidationIssue]:
+    if _compares_only_to_self(source_name, comparison_sources):
+        return [
+            _create_issue(
+                IssueCode.CMP_PF_CV_007,
+                ValidationSeverity.BLOCKER,
+                f"Cross-validation source '{source_name}' cannot compare only to itself",
+                {
+                    "comparison_source": source_name,
+                    "source_name": source_name,
+                    "available_sources": sorted(valid_sources),
+                },
+            )
+        ]
     issues: list[ValidationIssue] = []
     for comparison_source in comparison_sources:
         if comparison_source == source_name:
@@ -193,6 +206,14 @@ def _validate_comparison_sources(
             )
         )
     return issues
+
+
+def _compares_only_to_self(source_name: object, comparison_sources: list[str]) -> bool:
+    if not isinstance(source_name, str):
+        return False
+    if not comparison_sources:
+        return False
+    return set(comparison_sources) == {source_name}
 
 
 def _validate_rules(rules: dict[str, str]) -> list[ValidationIssue]:
@@ -294,10 +315,25 @@ def _validate_coverage(
 def _collect_covered_sources(pairs: list[dict[str, object]]) -> set[str]:
     covered_sources: set[str] = set()
     for pair in pairs:
-        if not isinstance(pair, dict):
-            continue
-        for source_name, comparison_sources in pair.items():
-            if isinstance(source_name, str):
-                covered_sources.add(source_name)
-            covered_sources.update(_comparison_source_list(comparison_sources))
+        covered_sources.update(_covered_sources_from_pair(pair))
     return covered_sources
+
+
+def _covered_sources_from_pair(pair: object) -> set[str]:
+    if not isinstance(pair, dict):
+        return set()
+    covered_sources: set[str] = set()
+    for source_name, comparison_sources in pair.items():
+        covered_sources.update(_covered_source_names(source_name, comparison_sources))
+    return covered_sources
+
+
+def _covered_source_names(source_name: object, comparison_sources: object) -> set[str]:
+    normalized = _comparison_source_list(comparison_sources)
+    covered = {item for item in normalized if item != source_name}
+    if not isinstance(source_name, str):
+        return covered
+    if not covered:
+        return covered
+    covered.add(source_name)
+    return covered

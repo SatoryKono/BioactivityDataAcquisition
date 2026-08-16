@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import dataclasses
+import json
 from dataclasses import dataclass
 
 from bioetl.domain.behavior.validation_result_envelopes import (
@@ -257,7 +258,18 @@ class AggregationValidator:
             if value is None:
                 components.append(("present", "NoneType", "null"))
             else:
-                components.append(("present", type_name, repr(value)))
+                components.append(
+                    (
+                        "present",
+                        type_name,
+                        json.dumps(
+                            value,
+                            sort_keys=True,
+                            separators=(",", ":"),
+                            ensure_ascii=False,
+                        ),
+                    )
+                )
         return tuple(components)
 
     def _build_uniqueness_issues(
@@ -329,10 +341,12 @@ def _field_name_from_descriptor(entry: object) -> str | None:
 
 
 def _column_name(entry: object) -> str | None:
-    """Preserve fallback column coercion while validating mapping descriptors."""
+    """Return names only from supported string or mapping descriptors."""
+    if isinstance(entry, str):
+        return entry
     if isinstance(entry, dict):
         return _field_name_from_descriptor(entry)
-    return str(entry)
+    return None
 
 
 def _column_names(columns: object) -> set[str]:
@@ -344,7 +358,7 @@ def _column_names(columns: object) -> set[str]:
 
 
 def _explicit_field_names(names: object) -> set[str]:
-    """Return string-coerced names from the fallback ``field_names`` shape."""
+    """Return valid strings from the fallback ``field_names`` shape."""
     if not isinstance(names, list):
         return set()
-    return {str(item) for item in names}
+    return {item for item in names if isinstance(item, str)}

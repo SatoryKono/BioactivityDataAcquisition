@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from typing import cast
 
 from bioetl.domain.behavior.aggregation_validator import AggregationConfig
@@ -171,11 +172,18 @@ def _optional_unit_interval(value: object, field_name: str) -> float | None:
     """Validate an optional numeric threshold in the inclusive unit interval."""
     if value is None:
         return None
-    if not isinstance(value, (int, float)):
-        raise TypeError(f"{field_name} must be a number or null")
-    if value < 0 or value > 1:
+    number = _finite_number(value, field_name)
+    if not 0 <= number <= 1:
         raise ValueError(f"{field_name} must be in [0, 1]")
-    return float(value)
+    return float(number)
+
+
+def _finite_number(value: object, field_name: str) -> int | float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise TypeError(f"{field_name} must be a number or null")
+    if not math.isfinite(value):
+        raise ValueError(f"{field_name} must be finite")
+    return value
 
 
 def _is_valid_field_priorities(priorities: JsonDict) -> bool:

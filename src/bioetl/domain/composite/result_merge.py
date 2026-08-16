@@ -29,7 +29,7 @@ def _reject_inconsistent_enrichment(
             "records_fully_enriched cannot exceed records_enriched: "
             f"{records_fully_enriched} > {records_enriched}"
         )
-    if records_enriched > records_merged > 0:
+    if records_enriched > records_merged:
         raise ValueError(
             "records_enriched cannot exceed records_merged: "
             f"{records_enriched} > {records_merged}"
