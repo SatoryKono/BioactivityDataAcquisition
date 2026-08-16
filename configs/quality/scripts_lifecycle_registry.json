@@ -1003,6 +1003,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-10-31"
     },
+    "scripts/engineering/qa/report_dashboard_scalar_density.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the implementation behind python -m scripts.engineering.qa report-dashboard-scalar-density; keep operator execution routed through the unified QA dispatcher while pure tests import the computation helpers directly.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-10-31"
+    },
     "scripts/engineering/qa/report_dashboard_scenes_parity.py": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain as a bounded dashboard-scenes parity reporter pending consolidation into the canonical observability quality-report command surface.",

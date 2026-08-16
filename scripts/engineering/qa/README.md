@@ -35,6 +35,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `check-prometheus-rules`         | `check_prometheus_rules.py`                           | Run deterministic promtool syntax and rule-vector validation                                      |
 | `report-dashboard-inventory`     | `report_dashboard_inventory.py`                       | Generate/check dashboard inventory parity, provisioning drift, deployed drift, and local health   |
 | `report-dashboard-panel-audit-matrix` | `report_dashboard_panel_audit_matrix.py`         | Generate/check the dashboard panel audit matrix mirror                                            |
+| `report-dashboard-scalar-density` | `report_dashboard_scalar_density.py`             | Survey/check scalar information density by dashboard row                                           |
 | `report-panel-title-inventory`   | `report_panel_title_inventory.py`                     | Generate/check the dashboard panel-title inventory mirror from shipped JSON                       |
 | `report-dashboard-promql-scope`  | `report_dashboard_promql_scope.py`                    | Generate/check dashboard PromQL scope, forbidden `run_id` selectors, and deprecated metric tokens |
 | `assemble-observability-closure-evidence` | `assemble_observability_closure_evidence.py` | Validate, hash, and occurrence-bind one typed closure-campaign evidence envelope                    |
@@ -78,6 +79,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `check-prometheus-rules`         | After changing repo-backed Prometheus rule files or promtool vector tests; default covers observability and control-plane rule files; use `--runner docker` in CI | Observability rule validation gate         |
 | `report-dashboard-inventory`     | When validating shipped Grafana dashboards against docs, provisioning, or exported/deployed snapshots; use `--health-summary` for a local rollup | Dashboard governance / drift check         |
 | `report-dashboard-panel-audit-matrix` | When shipped dashboard panel audit metadata must match the generated docs mirror                                                        | Docs CI dashboard governance gate          |
+| `report-dashboard-scalar-density` | After changing scalar panel geometry or density policy; use `--check` to fail on non-allowlisted sparse groups                         | Dashboard density governance gate          |
 | `report-panel-title-inventory`   | After changing shipped Grafana dashboard panel titles or layout rows; use `--check` to catch generated mirror drift                              | Docs CI dashboard governance gate          |
 | `report-dashboard-promql-scope`  | After changing dashboard PromQL, selectors, or deprecated observability metrics; use `--check` to catch forbidden `run_id` selectors and stale metric tokens | Dashboard PromQL governance gate           |
 | `report-family-baseline`         | When reviewing RF-06 hotspot-family budgets or checking that the committed family baseline artifacts still match the code                        | Manual, preflight / CI drift check         |
@@ -155,6 +157,7 @@ python -m scripts.engineering.qa report-dashboard-inventory --deployed-dir /path
 python -m scripts.engineering.qa check-prometheus-rules
 python -m scripts.engineering.qa check-prometheus-rules --rules-file grafana/prometheus-rules/bioetl_control_plane_current_status.yml
 python -m scripts.engineering.qa report-dashboard-panel-audit-matrix --check
+python -m scripts.engineering.qa report-dashboard-scalar-density --check
 python -m scripts.engineering.qa report-panel-title-inventory --check
 python -m scripts.engineering.qa report-dashboard-promql-scope --check
 python scripts/engineering/qa/report_duplication_baseline.py

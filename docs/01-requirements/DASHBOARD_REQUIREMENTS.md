@@ -242,7 +242,7 @@ The §7 answers map to these root first-window panels. Ids are locked by
 | Full release render | `python -m scripts.ops run-grafana-audit-cycle` on the supported monitoring host |
 | Structural & integrity invariants (`DASH-DATA-003/004`, `DASH-SEC-001`, `DASH-STATE-003`, `DASH-META-002`, `DASH-LAYOUT-002`, `DASH-LINK-001/002`, `DASH-VIZ-001/002`, `DASH-PERF-002`, `DASH-COPY-002`) | `tests/integration/test_dashboard_structural_invariants.py` |
 | Geometry & purpose regression locks (`DASH-LAYOUT-003/004`, `DASH-FIT-001/002/003`, `DASH-COPY-003/004/005/006/007`, `DASH-PERF-003`) | `tests/integration/test_dashboard_geometry_and_purpose_contracts.py` + [`layout-budgets.yaml`](../03-guides/dashboards/contracts/layout-budgets.yaml) |
-| Scalar information density (`DASH-DENSITY-002`, §5.4) | `python -m scripts.engineering.qa.report_dashboard_scalar_density --check` (survey/gate) + `tests/unit/scripts/qa/test_report_dashboard_scalar_density.py` (pure) + enforced-scope gate in `tests/integration/test_dashboard_geometry_and_purpose_contracts.py` |
+| Scalar information density (`DASH-DENSITY-002`, §5.4) | `python -m scripts.engineering.qa report-dashboard-scalar-density --check` (survey/gate) + `tests/unit/scripts/qa/test_report_dashboard_scalar_density.py` (pure) + enforced-scope gate in `tests/integration/test_dashboard_geometry_and_purpose_contracts.py` |
 
 Static tests prove repository structure. They do not replace live datasource,
 render, or human usability evidence.

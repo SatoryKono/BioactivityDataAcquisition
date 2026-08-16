@@ -266,6 +266,7 @@
         "docs/00-project/ai/prompts/library/audit/cycle/run/configs.md",
         "docs/00-project/ai/prompts/library/audit/cycle/run/dashboards.md",
         "docs/00-project/ai/prompts/library/audit/cycle/telemetry.md",
+        "docs/00-project/ai/prompts/library/audit/sequential-run.md",
         "docs/00-project/ai/prompts/library/observability/dashboard-audit-cycle.md",
         "docs/00-project/ai/prompts/library/observability/grafana-six/consolidate.md",
         "docs/00-project/ai/prompts/library/observability/grafana-six/data.md",

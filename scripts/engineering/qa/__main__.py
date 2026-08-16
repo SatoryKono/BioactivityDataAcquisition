@@ -75,6 +75,7 @@ Commands:
     report-dashboard-inventory Generate/check dashboard inventory parity plus
         provisioning/deployed drift and health summary
     report-dashboard-panel-audit-matrix Generate/check dashboard panel audit matrix
+    report-dashboard-scalar-density Survey/check scalar information density by dashboard row
     report-panel-title-inventory Generate/check generated dashboard panel-title inventory mirror
     report-dashboard-query-duplicates Generate report-only exact/near-duplicate Grafana PromQL inventory
     report-dashboard-promql-scope Generate/check dashboard PromQL scope and forbidden-label inventory
@@ -182,6 +183,9 @@ COMMAND_MODULES: dict[str, str] = {
     "report-dashboard-promql-scope": "scripts.engineering.qa.report_dashboard_promql_scope",
     "report-dashboard-panel-audit-matrix": (
         "scripts.engineering.qa.report_dashboard_panel_audit_matrix"
+    ),
+    "report-dashboard-scalar-density": (
+        "scripts.engineering.qa.report_dashboard_scalar_density"
     ),
     "report-panel-title-inventory": (
         "scripts.engineering.qa.report_panel_title_inventory"
