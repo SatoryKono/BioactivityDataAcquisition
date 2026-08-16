@@ -1,5 +1,5 @@
 {
-  "duplicate_basename_count": 70,
+  "duplicate_basename_count": 71,
   "duplicate_basenames": {
     "test_adapter.py": [
       "tests/unit/infrastructure/adapters/openalex/test_adapter.py",
@@ -166,6 +166,13 @@
     "test_metadata_lineage_node_builders.py": [
       "tests/unit/application/services/test_metadata_lineage_node_builders.py",
       "tests/unit/application/services/lineage/test_metadata_lineage_node_builders.py"
+    ],
+    "test_module_coverage_currentness_8775.py": [
+      "tests/unit/application/test_module_coverage_currentness_8775.py",
+      "tests/unit/composition/test_module_coverage_currentness_8775.py",
+      "tests/unit/domain/test_module_coverage_currentness_8775.py",
+      "tests/unit/infrastructure/test_module_coverage_currentness_8775.py",
+      "tests/unit/interfaces/http/test_module_coverage_currentness_8775.py"
     ],
     "test_metrics.py": [
       "tests/unit/infrastructure/observability/test_metrics.py",

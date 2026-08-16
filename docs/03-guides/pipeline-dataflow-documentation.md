@@ -40,7 +40,7 @@ Active narrative and contracts live under `docs/00-05`. Generated passports are
 Example (ChEMBL activity):
 
 - Passport:
-  [chembl_activity pipeline-passport.md](../02-architecture/generated/pipeline-dataflows/chembl_activity/pipeline-passport.md)
+  `docs/02-architecture/generated/pipeline-dataflows/chembl_activity/pipeline-passport.md`
 - Related entity config: `configs/entities/chembl/activity.yaml`
 - Catalog row: [pipeline-catalog.md](../04-reference/pipeline-catalog.md)
 
