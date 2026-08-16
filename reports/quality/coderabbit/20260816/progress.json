@@ -179,8 +179,8 @@
       "reason": "CodeRabbit rate limit",
       "exit_code": 0,
       "log": "reports/quality/coderabbit/20260816/review_A_S01-domain-exceptions.log",
-      "bytes": 19931,
-      "elapsed_s": 268.7,
+      "bytes": 26870,
+      "elapsed_s": 267.0,
       "command": [
         "/home/fedor/.local/bin/coderabbit",
         "review",
@@ -196,5 +196,5 @@
       ]
     }
   },
-  "updated_utc": "2026-08-16T20:14:46.040663+00:00"
+  "updated_utc": "2026-08-16T20:49:12.934579+00:00"
 }
