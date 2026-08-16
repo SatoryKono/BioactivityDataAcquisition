@@ -223,9 +223,7 @@ def test_yaml_empty_collections_and_scalar_quoting() -> None:
     assert "details: {}" in yaml_text
     # type-like and escaped strings stay quoted via safe_dump scalar path
     assert "null" in serializer._yaml_value("null")
-    assert '"' in serializer._yaml_value('a"b') or "'" in serializer._yaml_value(
-        'a"b'
-    )
+    assert '"' in serializer._yaml_value('a"b') or "'" in serializer._yaml_value('a"b')
 
 
 # --- 034 ---
@@ -263,9 +261,7 @@ def test_group_key_preserves_types_and_absence() -> None:
 def test_field_priorities_reject_unhashable_and_duplicates() -> None:
     assert _is_valid_field_priorities({"a": {"priority": 1}, "b": {"priority": 2}})
     assert not _is_valid_field_priorities({"a": {"priority": [1, 2]}})
-    assert not _is_valid_field_priorities(
-        {"a": {"priority": 1}, "b": {"priority": 1}}
-    )
+    assert not _is_valid_field_priorities({"a": {"priority": 1}, "b": {"priority": 1}})
     assert not _is_valid_field_priorities({"a": {}})
 
 
@@ -326,9 +322,13 @@ def test_potency_thresholds_cannot_exceed_pchembl_max() -> None:
 
 def test_typical_range_must_lie_within_absolute_bounds() -> None:
     with pytest.raises(ValueError, match="typical_min and typical_max"):
-        PChemblRangeConfig(min_value=0.0, max_value=10.0, typical_min=-1.0, typical_max=9.0)
+        PChemblRangeConfig(
+            min_value=0.0, max_value=10.0, typical_min=-1.0, typical_max=9.0
+        )
     with pytest.raises(ValueError, match="typical_min and typical_max"):
-        PChemblRangeConfig(min_value=0.0, max_value=10.0, typical_min=1.0, typical_max=11.0)
+        PChemblRangeConfig(
+            min_value=0.0, max_value=10.0, typical_min=1.0, typical_max=11.0
+        )
 
 
 # --- 054 / 057 ---

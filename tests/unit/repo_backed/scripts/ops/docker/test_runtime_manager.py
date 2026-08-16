@@ -76,14 +76,14 @@ def test_direct_script_help_bootstraps_repository_imports(tmp_path: Path) -> Non
 
 
 def test_windows_entrypoint_uses_shared_process_local_env_loader() -> None:
-    wrapper = (
-        runtime_manager.ROOT / "scripts/ops/docker-setup.ps1"
-    ).read_text(encoding="utf-8")
+    wrapper = (runtime_manager.ROOT / "scripts/ops/docker-setup.ps1").read_text(
+        encoding="utf-8"
+    )
 
     assert "scripts/ai/mcp/support/load_repo_env.ps1" in wrapper
     assert '$env:BIOETL_SKIP_ENV_LOCAL = "1"' in wrapper
     assert "Import-BioetlRepoEnv -RepoRoot $ProjectRoot" in wrapper
-    assert '.venv-win/Scripts/python.exe' in wrapper
+    assert ".venv-win/Scripts/python.exe" in wrapper
     assert '"ensure-networks"' in wrapper
     assert '"grafana-preflight"' in wrapper
     assert "SetEnvironmentVariable" not in wrapper

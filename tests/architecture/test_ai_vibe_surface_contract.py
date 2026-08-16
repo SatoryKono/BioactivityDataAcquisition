@@ -47,5 +47,5 @@ def test_vibe_powershell_launcher_passes_prompt_as_data() -> None:
     )
 
     assert "wsl -e bash -c $VibeCommand -- $PromptB64" in launcher
-    assert 'decoded_prompt="$(printf \'\'%s\'\' "$1" | base64 -d)"' in launcher
-    assert '\\$(printf' not in launcher
+    assert "decoded_prompt=\"$(printf ''%s'' \"$1\" | base64 -d)\"" in launcher
+    assert "\\$(printf" not in launcher

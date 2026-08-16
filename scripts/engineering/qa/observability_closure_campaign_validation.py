@@ -7,6 +7,7 @@ from __future__ import annotations
 from scripts.engineering.qa.run_observability_closure_campaign import *
 from scripts.engineering.qa.run_observability_closure_campaign import _sha256_file
 
+
 def _parse_generated_at(value: object) -> bool:
     try:
         parsed = datetime.fromisoformat(str(value))
@@ -1255,6 +1256,3 @@ def _core_campaign_gates_satisfied(payload: dict[str, object]) -> bool:
         if not isinstance(gate, dict) or gate.get("satisfied") is not True:
             return False
     return True
-
-
-

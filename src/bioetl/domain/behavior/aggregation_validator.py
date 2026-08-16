@@ -292,9 +292,7 @@ class AggregationValidator:
         return [
             {
                 "index": duplicate["index"],
-                "group_key": [
-                    list(component) for component in duplicate["group_key"]
-                ],
+                "group_key": [list(component) for component in duplicate["group_key"]],
             }
             for duplicate in duplicate_groups[:5]
         ]

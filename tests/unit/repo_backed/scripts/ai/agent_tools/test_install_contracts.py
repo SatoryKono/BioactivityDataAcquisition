@@ -61,7 +61,7 @@ def test_platform_installers_default_to_none_and_isolate_optional_failures() -> 
     assert '"--frozen"' in windows
     assert "--no-build" in wsl
     assert '"--no-build"' in windows
-    assert '.[dev,tests,tracing,$EXTRA]' in wsl
+    assert ".[dev,tests,tracing,$EXTRA]" in wsl
     assert ".[dev,tests,tracing,$Extra]" in windows
 
 
