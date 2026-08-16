@@ -217,7 +217,7 @@ def test_playwright_fallback_prepares_inner_scroll_before_screenshot() -> None:
     assert "dashboardCaptureMetrics(page)" in script
     assert "prepareDashboardForCapture(page, dashboard, index, total)" in script
     assert "height: MAX_CAPTURE_VIEWPORT_HEIGHT" in script
-    assert "dashboard.captureHeight = desiredHeight" in script
+    assert "dashboard.captureHeight = Math.round(desiredLayoutHeight * scale)" in script
     assert "screenshotOptions.clip" in script
     assert script.index(
         "const viewportChanged = await prepareDashboardForCapture("
@@ -764,6 +764,10 @@ def test_playwright_screenshot_script_uses_multiple_panel_readiness_selectors() 
     assert "[data-bioetl-panel-title]" in script
     assert "panel_body_font_missing" in script
     assert "focusIndicatorVisible" in script
+    assert "layoutViewportForZoom" in script
+    assert "layout-viewport-and-device-scale-factor" in script
+    assert 'document.documentElement.style.zoom =' not in script
+    assert "grafanaPanelTitleMinimumPx" in script
     assert "validateDashboardTerminalStates" in script
     assert "terminalStateValidation" in script
     assert "requiredTerminalPanelIds" in script
@@ -773,6 +777,32 @@ def test_playwright_screenshot_script_uses_multiple_panel_readiness_selectors() 
     assert 'classification: "valid-empty"' in script
     assert "screenshotEvidence" in script
     assert "sha256" in script
+
+
+def test_playwright_zoom_helpers_preserve_physical_viewport_and_reflow() -> None:
+    node_path = rerender_subject._resolve_node_executable()
+    if node_path is None:
+        pytest.skip("Node.js is unavailable")
+    script_path = Path(
+        "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs"
+    ).resolve()
+    program = """
+const { layoutViewportForZoom, physicalViewportFromLayout } = require(process.argv[1]);
+const layout = layoutViewportForZoom({ width: 1366, height: 768 }, 200);
+if (layout.width !== 683 || layout.height !== 384) throw new Error(JSON.stringify(layout));
+const physical = physicalViewportFromLayout(layout, 200);
+if (physical.width !== 1366 || physical.height !== 768) throw new Error(JSON.stringify(physical));
+"""
+    result = subprocess.run(
+        [node_path, "-e", program, str(script_path)],
+        check=False,
+        capture_output=True,
+        text=True,
+        cwd=Path.cwd(),
+        timeout=15,
+    )
+
+    assert result.returncode == 0, result.stderr
 
 
 def test_playwright_terminal_state_extraction_uses_panel_local_content() -> None:

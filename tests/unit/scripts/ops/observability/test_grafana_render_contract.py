@@ -61,6 +61,8 @@ def _manifest(*, classification: str = "incomplete") -> dict[str, object]:
                     "status": "ok",
                     "bodyMinimumPx": 16.0,
                     "panelTitleMinimumPx": 14.0 * 4.0 / 3.0,
+                    "grafanaBodyMinimumPx": 12.0,
+                    "grafanaPanelTitleMinimumPx": 14.0,
                     "violations": [],
                 },
                 "terminalStateValidation": {
@@ -328,6 +330,8 @@ def test_render_matrix_covers_standard_full_repeat_and_kiosk_profiles() -> None:
         "1920x1080-light",
         "1440x900-dark-full",
         "1440x900-dark-repeat",
+        "1366x768-dark-zoom-200",
+        "1366x768-light-zoom-200",
         "2560x1440-dark-kiosk",
         "2560x1440-light-kiosk",
         "3840x2160-dark-kiosk",
@@ -363,6 +367,24 @@ def test_render_contract_rejects_title_font_floor_drift() -> None:
     )
 
     assert problem == "render manifest dashboard bioetl-runtime title typography floor drift"
+
+
+def test_render_contract_rejects_grafana_title_floor_drift() -> None:
+    manifest = _manifest(classification="data")
+    dashboard = manifest["dashboards"][0]
+    assert isinstance(dashboard, dict)
+    typography = dashboard["typographyValidation"]
+    assert isinstance(typography, dict)
+    typography["grafanaPanelTitleMinimumPx"] = 13.0
+
+    problem = preflight._validate_manifest_render_contract(
+        manifest,
+        expected_uids=("bioetl-runtime",),
+    )
+
+    assert problem == (
+        "render manifest dashboard bioetl-runtime Grafana title typography floor drift"
+    )
 
 
 def test_repeat_geometry_comparison_ignores_values_and_detects_layout_drift() -> None:
