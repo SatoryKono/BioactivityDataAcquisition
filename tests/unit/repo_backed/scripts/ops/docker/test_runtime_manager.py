@@ -244,6 +244,63 @@ def test_main_start_materializes_source_bound_report_attestation(
     assert target.stat().st_mode & 0o777 == 0o644
 
 
+def test_reject_transient_origin_blocks_issue_worktree(
+    tmp_path: Path,
+) -> None:
+    contract = tmp_path / "contract.yaml"
+    contract.write_text(
+        yaml.safe_dump(
+            {
+                "path_policy": {
+                    "discouraged_compose_working_dir_prefixes": ["/tmp/bioetl-issues"]
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    blocked = runtime_manager._reject_transient_origin(
+        contract_path=contract,
+        root=Path("/tmp/bioetl-issues-8860-8861"),
+        allow=False,
+    )
+    allowed = runtime_manager._reject_transient_origin(
+        contract_path=contract,
+        root=Path("/tmp/bioetl-issues-8860-8861"),
+        allow=True,
+    )
+    canonical = runtime_manager._reject_transient_origin(
+        contract_path=contract,
+        root=tmp_path,
+        allow=False,
+    )
+
+    assert blocked is not None
+    assert blocked["code"] == "TRANSIENT_ORIGIN"
+    assert allowed is None
+    assert canonical is None
+
+
+def test_transient_origin_is_not_recoverable_for_main(tmp_path: Path) -> None:
+    report = tmp_path / "preflight.json"
+    report.write_text(
+        json.dumps(
+            {
+                "findings": [
+                    {
+                        "code": "TRANSIENT_ORIGIN",
+                        "severity": "error",
+                        "evidence": {"stack": "main"},
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    assert (
+        runtime_manager._preflight_errors_are_recoverable(report, stack="main") is False
+    )
+
+
 def test_post_start_source_gate_failure_cannot_report_success(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

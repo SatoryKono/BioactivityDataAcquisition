@@ -85,6 +85,9 @@ def test_contract_preserves_adr010_and_stability_slo() -> None:
         contract["path_policy"]["discouraged_origin_scope"]
         == "dashboard_data_plane_required_bind_mounts"
     )
+    assert contract["path_policy"]["discouraged_compose_working_dir_prefixes"] == [
+        "/tmp/bioetl-issues"
+    ]
     source_identity = contract["dashboard_data_plane"]["source_identity"]
     assert source_identity["report_marker_name"] == ".bioetl-report-source.json"
     assert source_identity["report_marker_schema_version"] == "bioetl-report-source-v1"
@@ -351,6 +354,36 @@ def test_live_project_origin_and_foreign_port_are_gate_errors(tmp_path: Path) ->
     )
     assert preflight._is_discouraged_bind_source("/host_mnt/e/repo", ("/mnt/e",))
     assert not preflight._is_discouraged_bind_source("/home/user/repo", ("/mnt/e",))
+
+
+def test_transient_issue_worktree_compose_is_gate_error(tmp_path: Path) -> None:
+    preflight = _load_preflight()
+    contract = {
+        "stacks": {
+            "main": {
+                "compose_file": "docker-compose.yml",
+                "project_name": "bioetl-main",
+            }
+        },
+        "path_policy": {
+            "discouraged_compose_working_dir_prefixes": ["/tmp/bioetl-issues"]
+        },
+    }
+    rows = [
+        {
+            "Name": "bioetl-main",
+            "ConfigFiles": "/tmp/bioetl-issues-8860-8861/docker-compose.yml",
+        }
+    ]
+
+    findings = preflight._project_origin_findings(tmp_path, rows, contract)
+
+    assert any(finding.code == "TRANSIENT_ORIGIN" for finding in findings)
+    transient = next(
+        finding for finding in findings if finding.code == "TRANSIENT_ORIGIN"
+    )
+    assert transient.evidence["stack"] == "main"
+    assert transient.severity == "error"
 
 
 def test_mount_origin_proxy_gate_is_scoped_to_dashboard_artifacts() -> None:

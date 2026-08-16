@@ -202,6 +202,49 @@ def _load_contract(path: Path) -> dict[str, Any]:
     return payload
 
 
+def _transient_working_dir_prefixes(contract: Mapping[str, Any]) -> tuple[str, ...]:
+    policy = contract.get("path_policy")
+    if not isinstance(policy, Mapping):
+        return ()
+    raw = policy.get("discouraged_compose_working_dir_prefixes") or []
+    if not isinstance(raw, Sequence) or isinstance(raw, (str, bytes)):
+        return ()
+    return tuple(str(item) for item in raw if str(item).strip())
+
+
+def _is_transient_working_dir(path: Path, prefixes: Sequence[str]) -> bool:
+    normalized = path.resolve().as_posix().replace("\\", "/").lower()
+    return any(
+        normalized.startswith(str(prefix).replace("\\", "/").lower())
+        for prefix in prefixes
+        if str(prefix).strip()
+    )
+
+
+def _reject_transient_origin(
+    *,
+    contract_path: Path,
+    root: Path,
+    allow: bool,
+) -> dict[str, Any] | None:
+    """Refuse main start from leftover issue worktrees unless explicitly allowed."""
+    if allow:
+        return None
+    prefixes = _transient_working_dir_prefixes(_load_contract(contract_path))
+    if not prefixes or not _is_transient_working_dir(root, prefixes):
+        return None
+    return {
+        "ok": False,
+        "error": "transient_origin",
+        "code": "TRANSIENT_ORIGIN",
+        "root": str(root),
+        "message": (
+            "Refusing to start main from a transient issue worktree. "
+            "Re-run from the canonical checkout, or pass --allow-transient-origin."
+        ),
+    }
+
+
 def _load_compose(path: Path) -> dict[str, Any]:
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
@@ -1750,6 +1793,11 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--stabilization-seconds", type=float, default=5.0)
     parser.add_argument("--tail", type=int, default=100)
     parser.add_argument("--confirm-destructive", default="")
+    parser.add_argument(
+        "--allow-transient-origin",
+        action="store_true",
+        help="Allow start/recover of main from /tmp/bioetl-issues* worktrees.",
+    )
     return parser.parse_args(argv)
 
 
@@ -1760,6 +1808,8 @@ _STATUS_ORIGIN_CODES = frozenset(
         "DASHBOARD_SOURCE_MOUNT",
         "MOUNT_ORIGIN",
         "PROJECT_ORIGIN",
+        "TRANSIENT_ORIGIN",
+        "REPORT_BIND",
     }
 )
 
@@ -1975,6 +2025,15 @@ def _dispatch_action(
         print(json.dumps(payload, sort_keys=True, default=str))
         return 0 if report.ok else 1
     if args.action in {"start", "recover"}:
+        if spec.name == "main":
+            blocked = _reject_transient_origin(
+                contract_path=contract_path,
+                root=ROOT,
+                allow=bool(args.allow_transient_origin),
+            )
+            if blocked is not None:
+                print(json.dumps(blocked, sort_keys=True))
+                return 2
         _materialize_report_source_identity(
             spec=spec,
             contract_path=contract_path,
@@ -2055,6 +2114,22 @@ def _dispatch_action(
                     grafana_running=grafana_running,
                 )
             )
+        if spec.name == "main":
+            bind_rc = _post_start_report_bind_gate(
+                spec=spec,
+                report_dir=report_dir,
+            )
+            if bind_rc != 0:
+                findings.append(
+                    {
+                        "cause": "report_bind_mismatch",
+                        "code": "REPORT_BIND",
+                        "message": (
+                            "Host/ops report-root bind verification failed; "
+                            "Inspect Recent Runs would stay empty."
+                        ),
+                    }
+                )
         print(
             json.dumps(
                 {
