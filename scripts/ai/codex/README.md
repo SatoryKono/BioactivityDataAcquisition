@@ -108,11 +108,11 @@ bash scripts/ai/codex/run-codex.sh local-audit \
 ```
 
 `setup` installs a managed, secret-free command shim at
-`~/.local/bin/codex`. The shim delegates to this checkout's canonical launcher,
-which loads only `REF_TOOL_API_KEY` from the repository `.env` into the Codex
-parent process. An existing non-BioETL command at that path is never
-overwritten. Restart an already running Codex process after adding or rotating
-the Ref key.
+`~/.local/bin/codex`. The shim preserves native Codex CLI arguments and uses
+the same focused launcher helper that loads only `REF_TOOL_API_KEY` from the
+repository `.env` into the Codex parent process. An existing non-BioETL command
+at that path is never overwritten. Restart an already running Codex process
+after adding or rotating the Ref key.
 
 `local-audit` reports only aggregate counts: unsafe mode categories, approval
 rule dispositions, retention classes, SQLite integrity/index counts, and PATH
