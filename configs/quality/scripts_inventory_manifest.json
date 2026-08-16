@@ -1,6 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-16T17:22:00.702681+00:00",
+  "generated_at": "2026-08-16T17:31:25.630212+00:00",
+
 
   "summary": {
     "total_scripts": 601,
@@ -318,7 +319,7 @@
       "references": [
         {
           "path": ".codex/agents/CODEX-RUNTIME.md",
-          "line": 51,
+          "line": 55,
           "source_group": "agents",
           "text": "`python3 scripts/ai/codex/doctor.py static --no-write`."
         },
