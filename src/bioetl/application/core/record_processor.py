@@ -1,7 +1,6 @@
 """Orchestrates batch processing through Bronze, Silver, and Gold layers.
 
 Observability: Nested spans for transform → write_bronze → write_silver → write_gold.
-
 Safety Guard (RULES.md §4.6):
     Lock validation is performed at BatchWriter level BEFORE any write operation.
     RecordProcessor passes a lock_validator callback from LockRuntimeService.validate().

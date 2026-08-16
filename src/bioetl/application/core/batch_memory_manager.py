@@ -1,7 +1,6 @@
 """Memory management for adaptive batch sizing.
 
-Extracted from BatchExecutor to reduce class size. Handles memory pressure
-detection, batch size adjustment, and recovery after processing.
+Extracted from BatchExecutor; manages pressure, adaptive sizing, and recovery.
 """
 
 from __future__ import annotations
