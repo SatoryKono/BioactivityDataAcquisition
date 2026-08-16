@@ -18,27 +18,20 @@ from bioetl.application.services.control_plane.manifest.diagnostics.resume_contr
     _build_resume_contract,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
-    collect_input_snapshot_content_hashes as collect_input_snapshot_content_hashes,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
-    collect_input_snapshot_ids as collect_input_snapshot_ids,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
+    collect_input_snapshot_content_hashes,
+    collect_input_snapshot_ids,
     collect_input_snapshot_refs as _collect_input_snapshot_refs,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
-    compute_input_snapshot_identity_fingerprint as compute_input_snapshot_identity_fingerprint,
+    compute_input_snapshot_identity_fingerprint,
 )
 from bioetl.application.services.control_plane.manifest.replay_family_contract_payload import (
-    build_replay_family_contract_payload as _build_replay_family_contract_payload,
-)
-from bioetl.application.services.control_plane.manifest.replay_family_contract_payload import (
-    build_replay_family_contract_payload as build_replay_family_contract_payload,
+    build_replay_family_contract_payload,
 )
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
     ReproducibilityPolicyAssessment,
 )
+
+_build_replay_family_contract_payload = build_replay_family_contract_payload
 
 
 @dataclass(frozen=True, slots=True)

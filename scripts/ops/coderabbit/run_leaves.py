@@ -5,6 +5,7 @@ from __future__ import annotations
 import io
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -31,11 +32,88 @@ CODERABBIT = (
     or "/home/fedor/.local/bin/coderabbit"
 )
 REVIEW_TIMEOUT_SECONDS = int(os.environ.get("CODERABBIT_REVIEW_TIMEOUT", "600"))
-SLEEP_SECONDS = float(os.environ.get("CODERABBIT_SLEEP", "5"))
+SLEEP_SECONDS = float(os.environ.get("CODERABBIT_SLEEP", "15"))
+DEFAULT_RATE_LIMIT_BACKOFF = "1800,1800,1800"
+DEFAULT_ERROR_BACKOFF = "20,40"
+_WAIT_TIME_RE = re.compile(
+    r"(?P<value>\d+(?:\.\d+)?)\s*(?P<unit>hours?|hrs?|h|minutes?|mins?|m|seconds?|secs?|s)\b",
+    re.IGNORECASE,
+)
 
 
 def now() -> str:
     return datetime.now(UTC).isoformat()
+
+
+def parse_backoff_schedule(raw: str, *, default: str) -> tuple[float, ...]:
+    """Parse a comma-separated positive-second backoff schedule."""
+    text = (raw or "").strip() or default
+    values: list[float] = []
+    for part in text.split(","):
+        token = part.strip()
+        if not token:
+            continue
+        value = float(token)
+        if value <= 0:
+            raise ValueError(f"backoff seconds must be positive, got {token!r}")
+        values.append(value)
+    if not values:
+        raise ValueError("backoff schedule is empty")
+    return tuple(values)
+
+
+def parse_wait_time_to_seconds(text: str) -> float | None:
+    """Convert a CodeRabbit waitTime token such as ``30 minutes`` to seconds."""
+    match = _WAIT_TIME_RE.search((text or "").strip())
+    if match is None:
+        return None
+    value = float(match.group("value"))
+    unit = match.group("unit").casefold()
+    if unit.startswith("h"):
+        return value * 3600
+    if unit.startswith("m"):
+        return value * 60
+    return value
+
+
+def extract_rate_limit_wait_seconds(output: str) -> float | None:
+    """Read waitTime from a CodeRabbit rate_limit JSON event, if present."""
+    waits: list[float] = []
+    for line in (output or "").splitlines():
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(event, dict):
+            continue
+        metadata = event.get("metadata")
+        wait_raw = None
+        if isinstance(metadata, dict):
+            wait_raw = metadata.get("waitTime")
+        if wait_raw is None:
+            wait_raw = event.get("waitTime")
+        if wait_raw is None:
+            continue
+        parsed = parse_wait_time_to_seconds(str(wait_raw))
+        if parsed is not None:
+            waits.append(parsed)
+    return max(waits) if waits else None
+
+
+def has_review_completion(output: str) -> bool:
+    """True when the agent log contains a terminal review_completed event."""
+    for line in (output or "").splitlines():
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if (
+            isinstance(event, dict)
+            and event.get("type") == "complete"
+            and event.get("status") == "review_completed"
+        ):
+            return True
+    return False
 
 
 def load_json(path: Path, default: dict[str, Any]) -> dict[str, Any]:
@@ -139,13 +217,20 @@ def materialize_leaf(base_sha: str, paths: list[str], target: Path) -> None:
 def classify_output(return_code: int, output: str) -> tuple[str, str]:
     lowered = output.lower()
     if "rate_limit" in lowered or "rate limit" in lowered or "rate-limit" in lowered:
-        return "rate_limit", "CodeRabbit rate limit"
+        wait = extract_rate_limit_wait_seconds(output)
+        if wait is None:
+            return "rate_limit", "CodeRabbit rate limit"
+        return "rate_limit", f"CodeRabbit rate limit (waitTime={int(wait)}s)"
     if "all files are ignored" in lowered or "all_files_ignored" in lowered:
         return "all_files_ignored", "CodeRabbit reported all files ignored"
     if "not_authenticated" in lowered or "not authenticated" in lowered:
         return "auth_error", "CodeRabbit authentication failed"
+    if "websocket" in lowered or "socket hang up" in lowered or "econnreset" in lowered:
+        return "connection_error", "CodeRabbit connection/WebSocket failure"
     if return_code != 0:
         return "error", f"CodeRabbit exit code {return_code}"
+    if not has_review_completion(output):
+        return "missing_output", "CodeRabbit exited 0 without review_completed"
     return "ok", ""
 
 
@@ -270,8 +355,19 @@ def main() -> int:
     if not isinstance(results, dict):
         raise TypeError("progress.results must be an object")
 
+    rate_limit_backoff = parse_backoff_schedule(
+        os.environ.get("CODERABBIT_RATE_LIMIT_BACKOFF", ""),
+        default=DEFAULT_RATE_LIMIT_BACKOFF,
+    )
+    error_backoff = parse_backoff_schedule(
+        os.environ.get("CODERABBIT_ERROR_BACKOFF", ""),
+        default=DEFAULT_ERROR_BACKOFF,
+    )
     print(
-        f"campaign={matrix['campaign']} base={base_sha} planned={len(leaves)} sequential=true"
+        f"campaign={matrix['campaign']} base={base_sha} planned={len(leaves)} "
+        f"sequential=true rate_limit_backoff={rate_limit_backoff} "
+        f"error_backoff={error_backoff}",
+        flush=True,
     )
     for index, leaf in enumerate(leaves, 1):
         leaf_id = str(leaf["id"])
@@ -293,11 +389,27 @@ def main() -> int:
         )
 
         if result["status"] == "rate_limit":
+            log_path = ROOT / str(result.get("log") or "")
+            parsed_wait = extract_rate_limit_wait_seconds(
+                log_path.read_text(encoding="utf-8", errors="replace")
+                if log_path.is_file()
+                else ""
+            )
+            waits = (
+                (parsed_wait,) + rate_limit_backoff[1:]
+                if parsed_wait is not None
+                else rate_limit_backoff
+            )
             record_blocker(leaf, "rate_limit", str(result["reason"]))
-            for wait_seconds in (30, 60):
+            for wait_seconds in waits:
+                print(
+                    f"[{index}/{len(leaves)}] RATE_LIMIT_WAIT leaf={leaf_id} "
+                    f"after={int(wait_seconds)}s",
+                    flush=True,
+                )
                 time.sleep(wait_seconds)
                 print(
-                    f"[{index}/{len(leaves)}] RETRY leaf={leaf_id} after={wait_seconds}s",
+                    f"[{index}/{len(leaves)}] RETRY leaf={leaf_id} after={int(wait_seconds)}s",
                     flush=True,
                 )
                 retry = run_leaf(leaf, base_sha)
@@ -315,15 +427,40 @@ def main() -> int:
                     flush=True,
                 )
                 break
+        elif result["status"] in {"connection_error", "error", "missing_output"}:
+            record_blocker(leaf, str(result["status"]), str(result["reason"]))
+            for wait_seconds in error_backoff:
+                time.sleep(wait_seconds)
+                print(
+                    f"[{index}/{len(leaves)}] RETRY leaf={leaf_id} after={int(wait_seconds)}s",
+                    flush=True,
+                )
+                retry = run_leaf(leaf, base_sha)
+                results[leaf_id] = retry
+                save_progress(progress)
+                print(
+                    f"[{index}/{len(leaves)}] RETRY_RESULT leaf={leaf_id} status={retry['status']}",
+                    flush=True,
+                )
+                if retry["status"] == "ok":
+                    break
+                if retry["status"] == "rate_limit":
+                    break
         elif result["status"] == "all_files_ignored":
             record_blocker(leaf, "all_files_ignored", str(result["reason"]))
         elif result["status"] in {
             "auth_error",
-            "error",
             "timeout",
             "materialization_error",
         }:
             record_blocker(leaf, str(result["status"]), str(result["reason"]))
+
+        if results[leaf_id]["status"] == "rate_limit":
+            print(
+                "RATE_LIMIT_PERSISTS: stopping this wave for bounded backoff",
+                flush=True,
+            )
+            break
 
         time.sleep(SLEEP_SECONDS)
 
