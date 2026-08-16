@@ -68,7 +68,15 @@ class CompositeValidator:
     ) -> CompositeValidationReport:
         """Run structural and deep-preflight validation for one composite config."""
         structural_result = self._run_structural_validation(config)
-        deep_preflight_result = self._run_deep_preflight_validation(config)
+        if isinstance(config.composite_config, dict):
+            deep_preflight_result = self._run_deep_preflight_validation(config)
+        else:
+            # Fail closed: do not probe a non-mapping payload with .get / membership.
+            deep_preflight_result = build_validation_result(
+                issues=[],
+                validation_layer=ValidationLayer.DEEP_PREFLIGHT,
+                execution_context={"pipeline_name": config.pipeline_name},
+            )
         validation_report = CompositeValidationReport(
             structural_result=structural_result,
             deep_preflight_result=deep_preflight_result,
@@ -145,22 +153,38 @@ class CompositeValidator:
     def _deep_preflight_issues(
         self, composite_config: JsonDict
     ) -> list[ValidationIssue]:
+        if not isinstance(composite_config, dict):
+            return [
+                self._create_issue(
+                    IssueCode.CMP_STR_SCHEMA_001,
+                    ValidationSeverity.BLOCKER,
+                    "Composite config must be a dictionary",
+                    {"actual_type": type(composite_config).__name__},
+                )
+            ]
         issues: list[ValidationIssue] = []
         aggregation = composite_config.get("aggregation")
         if aggregation is not None:
-            issues.extend(
-                self._validate_aggregation_config(
-                    aggregation,
-                    composite_config.get("output_schema", {}),
-                )
+            output_schema, schema_issues = self._as_output_schema(
+                composite_config.get("output_schema", {})
             )
+            issues.extend(schema_issues)
+            if output_schema is not None:
+                issues.extend(
+                    self._validate_aggregation_config(aggregation, output_schema)
+                )
         if "cross_validation" in composite_config:
             cross_validation_config = composite_config["cross_validation"]
-            source_names = composite_config.get("sources", [])
-            cross_validation_issues = self._validate_cross_validation_config(
-                cross_validation_config, source_names
+            source_names, source_issues = self._as_source_names(
+                composite_config.get("sources", [])
             )
-            issues.extend(cross_validation_issues)
+            issues.extend(source_issues)
+            if source_names is not None:
+                issues.extend(
+                    self._validate_cross_validation_config(
+                        cross_validation_config, source_names
+                    )
+                )
         self._append_config_issue_if_invalid(
             issues=issues,
             composite_config=composite_config,
@@ -182,6 +206,37 @@ class CompositeValidator:
             details_key="config",
         )
         return issues
+
+
+    def _as_output_schema(
+        self, raw: object
+    ) -> tuple[JsonDict | None, list[ValidationIssue]]:
+        """Accept only a mapping schema; do not forward strings/lists to .get."""
+        if isinstance(raw, dict):
+            return raw, []
+        return None, [
+            self._create_issue(
+                IssueCode.CMP_STR_SCHEMA_001,
+                ValidationSeverity.BLOCKER,
+                "output_schema must be a mapping",
+                {"actual_type": type(raw).__name__},
+            )
+        ]
+
+    def _as_source_names(
+        self, raw: object
+    ) -> tuple[list[str] | None, list[ValidationIssue]]:
+        """Accept only a list of source name strings."""
+        if isinstance(raw, list) and all(isinstance(item, str) for item in raw):
+            return list(raw), []
+        return None, [
+            self._create_issue(
+                IssueCode.CMP_STR_FORMAT_003,
+                ValidationSeverity.BLOCKER,
+                "sources must be a list of strings",
+                {"actual_type": type(raw).__name__},
+            )
+        ]
 
     def _append_config_issue_if_invalid(
         self,
