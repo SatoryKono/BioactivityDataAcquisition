@@ -122,6 +122,7 @@ def test_failed_start_or_recover_prints_redacted_bounded_json_summary(
         max_attempts=3,
         poll_interval=2.0,
         stabilization_seconds=5.0,
+        allow_transient_origin=True,
     )
 
     result = runtime_manager._dispatch_action(
