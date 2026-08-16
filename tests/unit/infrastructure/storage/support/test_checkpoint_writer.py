@@ -29,17 +29,48 @@
 
 from __future__ import annotations
 
+import errno
 import os
 from pathlib import Path
 
 import pytest
 
 from bioetl.infrastructure.storage.support.checkpoint_writer import (
+    CheckpointPathError,
     FileCompositeCheckpointWriter,
 )
 
 
 pytestmark = pytest.mark.unit
+
+
+def _symlink_or_skip(
+    link: Path,
+    target: Path,
+    *,
+    target_is_directory: bool,
+) -> None:
+    try:
+        link.symlink_to(target, target_is_directory=target_is_directory)
+    except OSError as exc:
+        permission_errors = {errno.EACCES, errno.EPERM}
+        if exc.errno in permission_errors or getattr(exc, "winerror", None) == 1314:
+            pytest.skip(f"symlink privilege is unavailable: {exc}")
+        raise
+
+
+def _assert_file_operations_reject_escape(
+    writer: FileCompositeCheckpointWriter,
+    path: str,
+) -> None:
+    with pytest.raises(CheckpointPathError):
+        writer.read(path)
+    with pytest.raises(CheckpointPathError):
+        writer.write_atomic(path, "{}")
+    with pytest.raises(CheckpointPathError):
+        writer.delete(path)
+    with pytest.raises(CheckpointPathError):
+        writer.exists(path)
 
 
 def test_checkpoint_writer_read_delete_exists_and_missing_paths(tmp_path: Path) -> None:
@@ -97,13 +128,110 @@ def test_checkpoint_writer_write_atomic_removes_temp_on_failure(
 
 
 def test_checkpoint_writer_rejects_path_escape(tmp_path: Path) -> None:
-    from bioetl.infrastructure.storage.support.checkpoint_writer import (
-        CheckpointPathError,
-    )
-
     writer = FileCompositeCheckpointWriter(tmp_path)
     with pytest.raises(CheckpointPathError):
         writer.read("../escape.json")
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "../escape.json",
+        "nested/../../escape.json",
+        "/absolute/escape.json",
+        r"C:\absolute\escape.json",
+        r"C:drive-relative\escape.json",
+        r"\\server\share\escape.json",
+    ],
+)
+def test_checkpoint_writer_rejects_cross_platform_lexical_escapes(
+    tmp_path: Path,
+    path: str,
+) -> None:
+    writer = FileCompositeCheckpointWriter(tmp_path)
+
+    _assert_file_operations_reject_escape(writer, path)
+
+
+@pytest.mark.parametrize(
+    "pattern",
+    [
+        "../*.json",
+        "/absolute/*.json",
+        r"C:\absolute\*.json",
+        r"\\server\share\*.json",
+    ],
+)
+def test_checkpoint_writer_rejects_cross_platform_glob_escapes(
+    tmp_path: Path,
+    pattern: str,
+) -> None:
+    writer = FileCompositeCheckpointWriter(tmp_path)
+
+    with pytest.raises(CheckpointPathError):
+        writer.list_glob(pattern)
+
+
+def test_checkpoint_writer_rejects_directory_symlink_escape_for_all_operations(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "checkpoints"
+    outside = tmp_path / "outside"
+    root.mkdir()
+    outside.mkdir()
+    external = outside / "escape.json"
+    external.write_text("external", encoding="utf-8")
+    _symlink_or_skip(root / "link", outside, target_is_directory=True)
+    writer = FileCompositeCheckpointWriter(root)
+
+    _assert_file_operations_reject_escape(writer, "link/escape.json")
+
+    assert external.read_text(encoding="utf-8") == "external"
+
+
+def test_checkpoint_writer_rejects_nested_symlinked_parent_escape(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "checkpoints"
+    nested = root / "nested"
+    outside = tmp_path / "outside"
+    nested.mkdir(parents=True)
+    outside.mkdir()
+    _symlink_or_skip(nested / "link", outside, target_is_directory=True)
+    writer = FileCompositeCheckpointWriter(root)
+
+    _assert_file_operations_reject_escape(writer, "nested/link/escape.json")
+
+    assert not (outside / "escape.json").exists()
+
+
+def test_checkpoint_writer_rejects_resolved_glob_escape(tmp_path: Path) -> None:
+    root = tmp_path / "checkpoints"
+    outside = tmp_path / "outside"
+    root.mkdir()
+    outside.mkdir()
+    external = outside / "escape.json"
+    external.write_text("external", encoding="utf-8")
+    _symlink_or_skip(root / "escaped.json", external, target_is_directory=False)
+    writer = FileCompositeCheckpointWriter(root)
+
+    with pytest.raises(CheckpointPathError):
+        writer.list_glob("*.json")
+
+    assert external.read_text(encoding="utf-8") == "external"
+
+
+def test_checkpoint_writer_accepts_symlinked_checkpoint_root(tmp_path: Path) -> None:
+    actual_root = tmp_path / "actual"
+    actual_root.mkdir()
+    root_link = tmp_path / "checkpoint-link"
+    _symlink_or_skip(root_link, actual_root, target_is_directory=True)
+    writer = FileCompositeCheckpointWriter(root_link)
+
+    writer.write_atomic("state.json", "{}")
+
+    assert writer.read("state.json") == "{}"
+    assert (actual_root / "state.json").read_text(encoding="utf-8") == "{}"
 
 
 def test_checkpoint_writer_rejects_oversized_payload(tmp_path: Path) -> None:
