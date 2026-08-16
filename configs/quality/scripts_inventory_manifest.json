@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-16T17:14:14.486310+00:00",
+  "generated_at": "2026-08-16T17:22:00.702681+00:00",
   "summary": {
     "total_scripts": 601,
     "status_counts": {
@@ -317,7 +317,7 @@
       "references": [
         {
           "path": ".codex/agents/CODEX-RUNTIME.md",
-          "line": 50,
+          "line": 51,
           "source_group": "agents",
           "text": "`python3 scripts/ai/codex/doctor.py static --no-write`."
         },
@@ -8673,7 +8673,7 @@
           "path": "docs/filters/inventory-baseline.csv",
           "line": 177,
           "source_group": "docs",
-          "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/docs/matrix/generate_pipeline_normalization_matrix.py,5,1696,Source-profile extraction policy,extraction_"
+          "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/docs/matrix/generate_pipeline_normalization_matrix.py,5,1054,Source-profile extraction policy,extraction_"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
@@ -8685,7 +8685,7 @@
           "path": "docs/filters/inventory-baseline.md",
           "line": 124,
           "source_group": "docs",
-          "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | 5 | 1696 | Source-profile extraction policy |"
+          "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | 5 | 1054 | Source-profile extraction policy |"
         }
       ],
       "owner": "@bioetl-docs",
