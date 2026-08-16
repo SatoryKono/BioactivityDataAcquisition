@@ -5,13 +5,14 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Any, Literal
+from typing import Literal
 
 from bioetl.application.services.run_reports.query import (
     ReportIndexEntry,
     list_pipeline_reports,
     list_workflow_reports,
 )
+from bioetl.domain.types import JsonDict
 from bioetl.interfaces.http.report_root_config import (
     configured_report_root,
     report_root_readiness_check,
@@ -58,7 +59,7 @@ def load_pipeline_run_report_payload(
     run_id: str,
     pipeline_name: str | None = None,
     root: Path | None = None,
-) -> dict[str, Any] | None:  # Any: report/json payload shape is dynamic
+) -> JsonDict | None:
     """Load pipeline-run-report.json from local reports tree."""
     if pipeline_name is None:
         return None
@@ -77,7 +78,7 @@ def load_workflow_run_report_payload(
     workflow_run_id: str,
     workflow_name: str | None = None,
     root: Path | None = None,
-) -> dict[str, Any] | None:  # Any: report/json payload shape is dynamic
+) -> JsonDict | None:
     """Load workflow-run-report.json from local reports tree."""
     if workflow_name is None:
         return None
@@ -109,7 +110,7 @@ def _classify_index_state(
     kind: IndexKind,
     entry_count: int,
     root: Path,
-    diagnostics: Mapping[str, Any],
+    diagnostics: Mapping[str, object],
 ) -> tuple[IndexState, str]:
     """Distinguish a valid empty index from a missing or unhealthy tree."""
     if entry_count > 0:
@@ -144,7 +145,7 @@ def _classify_index_state(
     )
 
 
-def _run_index_item(kind: IndexKind, item: ReportIndexEntry) -> dict[str, Any]:
+def _run_index_item(kind: IndexKind, item: ReportIndexEntry) -> JsonDict:
     paths = {
         "status": item.status,
         "completed_at": item.completed_at,
@@ -164,9 +165,9 @@ def _diagnostic_index_item(
     owner: str | None,
     index_state: IndexState,
     message: str,
-) -> dict[str, Any]:
+) -> JsonDict:
     owner_value = owner or "-"
-    row: dict[str, Any] = {
+    row: JsonDict = {
         "row_kind": "diagnostic",
         "status": _INDEX_STATE_STATUS[index_state],
         "completed_at": None,
@@ -190,7 +191,7 @@ def _index_items(
     entries: Sequence[ReportIndexEntry],
     index_state: IndexState,
     message: str,
-) -> list[dict[str, Any]]:
+) -> list[JsonDict]:
     if entries:
         return [_run_index_item(kind, item) for item in entries]
     if index_state == "valid_empty":
@@ -211,7 +212,7 @@ def _list_report_payload(
     owner: str | None,
     entries: Sequence[ReportIndexEntry],
     root: Path,
-) -> dict[str, Any]:
+) -> JsonDict:
     diagnostics = report_root_readiness_check(root=root)
     index_state, index_message = _classify_index_state(
         kind=kind,
@@ -251,7 +252,7 @@ def list_pipeline_run_report_payloads(
     pipeline_name: str | None = None,
     limit: int = 20,
     root: Path | None = None,
-) -> dict[str, Any]:  # Any: list payload
+) -> JsonDict:
     """List recent pipeline run reports (index only, not full bodies)."""
     base = _effective_root(root)
     owner = _normalize_list_owner(pipeline_name)
@@ -273,7 +274,7 @@ def list_workflow_run_report_payloads(
     workflow_name: str | None = None,
     limit: int = 20,
     root: Path | None = None,
-) -> dict[str, Any]:  # Any: list payload
+) -> JsonDict:
     """List recent workflow run reports (index only)."""
     base = _effective_root(root)
     owner = _normalize_list_owner(workflow_name)
@@ -294,7 +295,7 @@ def _load_versioned_payload(
     path: Path,
     *,
     expected_schema: str,
-) -> dict[str, Any] | None:  # Any: report/json payload shape is dynamic
+) -> JsonDict | None:
     """Load one completed artifact and reject malformed/wrong-version payloads."""
     if not path.is_file():
         return None
