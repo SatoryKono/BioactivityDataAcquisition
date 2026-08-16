@@ -257,24 +257,33 @@ def _canonical_json_text(value: object) -> str:
 def _canonical_json_value(value: object) -> object:
     """Normalize containers, including mappings with mixed scalar key types."""
     if isinstance(value, dict):
-        if all(isinstance(key, str) for key in value):
-            return {
-                key: _canonical_json_value(item)
-                for key, item in value.items()
-                if isinstance(key, str)
-            }
-        items = [
-            (
-                {"type": type(key).__name__, "value": _canonical_json_value(key)},
-                _canonical_json_value(item),
-            )
-            for key, item in value.items()
-        ]
-        items.sort(key=lambda item: _canonical_json_text(item[0]))
-        return {"\u0000bioetl:typed-mapping:v1": items}
+        return _canonical_json_mapping(value)
     if isinstance(value, list | tuple):
         return [_canonical_json_value(item) for item in value]
     return value
+
+
+def _canonical_json_mapping(value: dict[object, object]) -> object:
+    if all(isinstance(key, str) for key in value):
+        return {
+            key: _canonical_json_value(item)
+            for key, item in value.items()
+            if isinstance(key, str)
+        }
+    return {"\u0000bioetl:typed-mapping:v1": _typed_mapping_items(value)}
+
+
+def _typed_mapping_items(
+    value: dict[object, object],
+) -> list[tuple[dict[str, object], object]]:
+    items = [
+        (
+            {"type": type(key).__name__, "value": _canonical_json_value(key)},
+            _canonical_json_value(item),
+        )
+        for key, item in value.items()
+    ]
+    return sorted(items, key=lambda item: _canonical_json_text(item[0]))
 
 
 def _json_fallback(value: object) -> object:
@@ -285,6 +294,10 @@ def _json_fallback(value: object) -> object:
     if isinstance(value, (set, frozenset)):
         canonical_items = sorted(_canonical_json_text(item) for item in value)
         return [json.loads(item) for item in canonical_items]
+    return _bytes_or_reject(value)
+
+
+def _bytes_or_reject(value: object) -> str:
     if isinstance(value, bytes):
         return value.hex()
     raise TypeError(
