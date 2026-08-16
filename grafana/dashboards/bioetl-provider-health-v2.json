@@ -263,8 +263,8 @@
         "y": 8
       },
       "options": {
-        "content": "**Next actions (≤4)**\n\n1. Confirm **Telemetry Freshness** (missing vs degraded).\n2. Open worst row in **Severity Matrix**.\n3. Read **Top Causes** for selected provider.\n4. If selector blank → choose provider (Selection required).",
-        "mode": "markdown"
+        "content": "<div style=\"font-size:16px;line-height:1.4\"><strong style=\"font-size:16px\">Next actions (≤4)</strong><ol style=\"margin:6px 0 0 22px;padding:0\"><li style=\"font-size:16px\">Confirm <strong style=\"font-size:16px\">Telemetry Freshness</strong> (missing vs degraded).</li><li style=\"font-size:16px\">Open worst row in <strong style=\"font-size:16px\">Severity Matrix</strong>.</li><li style=\"font-size:16px\">Read <strong style=\"font-size:16px\">Top Causes</strong> for selected provider.</li><li style=\"font-size:16px\">If selector blank → choose provider (Selection required).</li></ol></div>",
+        "mode": "html"
       },
       "links": [
         {
