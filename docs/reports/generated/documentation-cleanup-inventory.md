@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3028 |
-| Tracked doc-like files | 3028 |
+| Doc-like files | 3029 |
+| Tracked doc-like files | 3029 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 9 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3028 |
+| tracked | 3029 |
 
 ## Lifecycle Counts
 
@@ -37,7 +37,7 @@
 | generated_test_run_evidence | 4 |
 | guide | 4 |
 | index | 4 |
-| issue_pack | 50 |
+| issue_pack | 51 |
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 21 |
@@ -51,7 +51,7 @@
 | active_draft | 270 |
 | guide | 4 |
 | index | 4 |
-| issue_pack | 50 |
+| issue_pack | 51 |
 | live_issue_mirror | 4 |
 
 ## Status Counts
@@ -63,7 +63,7 @@
 | Canonical | 70 |
 | Deprecated | 8 |
 | Generated | 1055 |
-| Working | 987 |
+| Working | 988 |
 
 ## Surface Families
 
@@ -74,13 +74,13 @@
 | canonical | 70 |
 | duplicate | 8 |
 | generated | 1055 |
-| working | 987 |
+| working | 988 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-github-state-check | 320 |
+| archive-after-github-state-check | 321 |
 | archive-after-migration | 520 |
 | generate-automatically | 1055 |
 | keep | 1121 |
@@ -277,6 +277,7 @@
 | `.github/ISSUES/ARCHITECTURE_AUDIT_2025-01-30_scripts_governance.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/AUD-OBS-20260714-001-Complete-Application-Level-Observability-Validation.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/AUD-OBS-20260714-002-Add-Truthful-Observability-Validation-Gates.md` | active_draft |  | archive-after-github-state-check |
+| `.github/ISSUES/AUD-RF-2026-08-16-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
 | `.github/ISSUES/CHEMBL-001-Align-Publication-Term-Derived-Contract.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/CHEMBL-002-Rename-ChEMBL-Taxonomy-DQ-Fields-To-Taxonomy-Id.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/CHEMBL-003-Align-Tissue-Ontology-DQ-Patterns-With-Canonical-Ids.md` | active_draft |  | archive-after-github-state-check |
@@ -300,7 +301,6 @@
 | `.github/ISSUES/CHEMBL-021-Sync-ChEMBL-Provider-Docs-With-Active-Normalization-Surfaces.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/CHEMBL-ISSUES-INDEX.md` | index |  | keep |
 | `.github/ISSUES/CODERABBIT-FULL-2026-08-FINDINGS-PACK.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CODERABBIT-FULL-2026-08-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
 
 ## Docs Reports Evidence Examples
 
