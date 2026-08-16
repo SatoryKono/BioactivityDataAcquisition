@@ -84,10 +84,10 @@ original claims.
 
 ## Issues
 
-No GitHub issues were opened in this pass. The working checkout was
-`fix/run-explorer-transient-recover` (foreign WIP). Confirmed items stay
-unlinked (`gh_issue=null`) until an authorized stream issue is created
-off a dedicated campaign branch.
+All 32 confirms are linked to stream issue
+[#8863](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863).
+Implementation is separately authorized; this ledger does not mix product
+fixes. Exact-cover of remaining leaves stays on #8859.
 
 ## Ledgers
 
