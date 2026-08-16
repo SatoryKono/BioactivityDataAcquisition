@@ -315,9 +315,7 @@ def _collect_covered_sources(pairs: list[dict[str, object]]) -> set[str]:
             continue
         for source_name, comparison_sources in pair.items():
             normalized = _comparison_source_list(comparison_sources)
-            valid_comparisons = {
-                item for item in normalized if item != source_name
-            }
+            valid_comparisons = {item for item in normalized if item != source_name}
             if isinstance(source_name, str) and valid_comparisons:
                 covered_sources.add(source_name)
             covered_sources.update(valid_comparisons)

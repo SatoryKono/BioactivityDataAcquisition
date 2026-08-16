@@ -37,10 +37,7 @@ def _is_quoted_literal(value: str) -> bool:
     for character in value[1:-1]:
         if character == quote and not escaped:
             return False
-        if character == "\\" and not escaped:
-            escaped = True
-        else:
-            escaped = False
+        escaped = character == "\\" and not escaped
     return not escaped
 
 

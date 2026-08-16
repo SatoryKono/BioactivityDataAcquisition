@@ -15,13 +15,20 @@ from bioetl.domain.behavior.schema_classifier_helpers import (
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.schema_policy import (
     ChangeClassification,
-    SchemaChangeClassification,
     SchemaChange,
+    SchemaChangeClassification,
     SchemaChangeExplanation,
     SchemaChangeType,
     SchemaCompatibilityPolicy,
     SchemaDiff,
 )
+
+
+def _as_properties(value: object) -> JsonDict | None:
+    """Copy a properties mapping, or flag malformed schema structure."""
+    if not isinstance(value, Mapping):
+        return None
+    return {str(key): item for key, item in value.items()}
 
 
 class SchemaClassifier:
@@ -84,13 +91,6 @@ class SchemaClassifier:
             unknown_changes=[],
         )
 
-
-def _as_properties(value: object) -> JsonDict | None:
-    """Copy a properties mapping, or flag malformed schema structure."""
-    if not isinstance(value, Mapping):
-        return None
-    return {str(key): item for key, item in value.items()}
-
     def _apply_policy_rules(self, diff: SchemaDiff) -> SchemaChangeClassification:
         """Apply policy rules to diff results."""
         if diff.has_breaking_changes():
@@ -132,8 +132,9 @@ def _as_properties(value: object) -> JsonDict | None:
             unknown_changes=diff.unknown_changes,
         )
 
+    @staticmethod
     def _generate_explanation(
-        self, diff: SchemaDiff, classification: SchemaChangeClassification
+        diff: SchemaDiff, classification: SchemaChangeClassification
     ) -> SchemaChangeExplanation:
         """Generate human-readable explanation of changes."""
         base_explanation = classification.explanation

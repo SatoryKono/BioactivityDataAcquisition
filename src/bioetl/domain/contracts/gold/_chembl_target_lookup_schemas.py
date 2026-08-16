@@ -213,7 +213,10 @@ class ChEMBLSubcellularFractionGoldSchema(StrictGoldContractSchema):
     """
 
     # System fields
-    entity_id: Series[str] = pa.Field(nullable=False)
+    entity_id: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=r"^[0-9a-f]{16}$",
+    )
     content_hash: Series[str] = pa.Field(
         nullable=False,
         str_matches=CONTENT_HASH_HEX64_PATTERN,
@@ -237,6 +240,7 @@ class ChEMBLSubcellularFractionGoldSchema(StrictGoldContractSchema):
     # Example reference
     example_assay_id: Series[str] = pa.Field(
         nullable=True,
+        str_matches=r"^CHEMBL\d+$",
         description="Example assay ChEMBL ID",
     )
 
