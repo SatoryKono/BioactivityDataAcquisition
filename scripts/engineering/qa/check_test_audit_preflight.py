@@ -141,12 +141,21 @@ def _git_lfs_version(
     return _git_value(git_runner, ["lfs", "version"])
 
 
-def _windows_git_status(root: Path) -> dict[str, Any] | None:
+def _windows_git_status(
+    root: Path,
+    *,
+    status_args: list[str] | None = None,
+) -> dict[str, Any] | None:
     git_path = _first_existing_candidate(WINDOWS_GIT_CANDIDATES)
     if git_path is None:
         return None
+    resolved_status_args = status_args or [
+        "status",
+        "--short",
+        "--untracked-files=no",
+    ]
     result = _process_value(
-        [git_path, "status", "--short", "--untracked-files=no"],
+        [git_path, *resolved_status_args],
         root=root,
     )
     if result["ok"]:
@@ -241,6 +250,19 @@ def _collect_git_status_surfaces(
         fallback_status = _windows_git_status(root)
         if fallback_status is not None:
             git_status = fallback_status
+    if using_default_runner and vcr_git_status["timed_out"]:
+        fallback_status = _windows_git_status(
+            root,
+            status_args=[
+                "status",
+                "--short",
+                "--untracked-files=all",
+                "--",
+                VCR_FIXTURE_ROOT.as_posix(),
+            ],
+        )
+        if fallback_status is not None:
+            vcr_git_status = fallback_status
     return git_status, vcr_git_status
 
 

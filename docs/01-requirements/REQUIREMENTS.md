@@ -2,7 +2,7 @@
 
 Version: 1.12.4
 Status: active
-Aligned with: RULES.md v6.1.9 ([source](../00-project/RULES.md); architecture stamp re-check 2026-08-10)
+Aligned with: RULES.md v6.1.10 ([source](../00-project/RULES.md); architecture stamp re-check 2026-08-14)
 Last verified: 2026-08-14
 
 ## Purpose and authority

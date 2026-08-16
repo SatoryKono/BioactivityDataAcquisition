@@ -12,6 +12,9 @@
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
+
 import pytest
 
 from scripts.engineering.qa import run_architecture_audit_read_only as audit_lane
@@ -85,3 +88,18 @@ def test_mutation_guard_git_status_disables_lfs_filters() -> None:
     assert "filter.lfs.process=" in command
     assert "filter.lfs.required=false" in command
     assert command[-3:] == ("--", "src/bioetl", "tests")
+
+
+def test_audit_environment_prepends_src_and_preserves_caller_values() -> None:
+    repo_root = Path("/workspace/repo")
+
+    env = audit_lane._audit_environment(
+        repo_root,
+        environ={"PYTHONPATH": "caller-path", "CALLER_FLAG": "kept"},
+    )
+
+    assert env["PYTHONPATH"] == os.pathsep.join(
+        (str((repo_root / "src").resolve()), "caller-path")
+    )
+    assert env["CALLER_FLAG"] == "kept"
+    assert env["PYTHONDONTWRITEBYTECODE"] == "1"

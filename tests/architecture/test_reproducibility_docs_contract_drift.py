@@ -43,6 +43,8 @@ def _find_markdown_phrase_hits(*phrases: str) -> list[str]:
     """
     command = [
         "git",
+        "-c",
+        "color.ui=false",
         "-C",
         str(ROOT),
         "grep",
