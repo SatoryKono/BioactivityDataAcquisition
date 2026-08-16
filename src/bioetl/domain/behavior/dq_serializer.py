@@ -66,9 +66,26 @@ def _serialize_collection(
 ) -> JsonDict | list[object]:  # output mirrors heterogeneous input structure
     """Serialize dict/list/tuple/set recursively."""
     if isinstance(value, Mapping):
-        return {key: _serialize_value(item) for key, item in value.items()}
+        return _serialize_mapping(value)
     if isinstance(value, (set, frozenset)):
-        return [_serialize_value(item) for item in sorted(value, key=repr)]
+        return _serialize_set(value)
+    return _serialize_sequence(value)
+
+
+def _serialize_mapping(value: Mapping[str, object]) -> JsonDict:
+    """Serialize a mapping recursively."""
+    return {key: _serialize_value(item) for key, item in value.items()}
+
+
+def _serialize_set(value: set[object] | frozenset[object]) -> list[object]:
+    """Serialize an unordered collection in deterministic representation order."""
+    return [_serialize_value(item) for item in sorted(value, key=repr)]
+
+
+def _serialize_sequence(
+    value: list[object] | tuple[object, ...],
+) -> list[object]:
+    """Serialize an ordered collection recursively."""
     return [_serialize_value(item) for item in value]
 
 
@@ -83,16 +100,19 @@ def _serialize_value(
     """Serialize a value with dataclass/enum/datetime/collection support."""
     if _is_dataclass_instance(value):
         return _serialize_dataclass(value)
+    if isinstance(value, (Mapping, list, tuple, set, frozenset)):
+        return _serialize_collection(value)
+    return _serialize_scalar(value)
+
+
+def _serialize_scalar(value: Any) -> Any:  # Any: heterogeneous scalar passthrough
+    """Serialize supported scalar values and pass through JSON-native scalars."""
     if isinstance(value, Enum):
         return value.value
-    if isinstance(value, datetime):
-        return value.isoformat()
-    if isinstance(value, date):
+    if isinstance(value, (datetime, date)):
         return value.isoformat()
     if isinstance(value, Decimal):
         return str(value)
-    if isinstance(value, (Mapping, list, tuple, set, frozenset)):
-        return _serialize_collection(value)
     if isinstance(value, bytes):
         return value.hex()
     return value
@@ -201,21 +221,46 @@ class DQReportSerializer:
         """Convert a list to YAML lines."""
         lines = []
         for item in items:
-            if isinstance(item, dict):
-                if not item:
-                    lines.append(f"{prefix}  - {{}}")
-                else:
-                    lines.append(f"{prefix}  -")
-                    lines.append(self._dict_to_yaml(item, indent + 2))
-            elif isinstance(item, list):
-                if not item:
-                    lines.append(f"{prefix}  - []")
-                else:
-                    lines.append(f"{prefix}  -")
-                    lines.extend(self._yaml_list(item, prefix + "  ", indent + 1))
-            else:
-                lines.append(f"{prefix}  - {self._yaml_value(item)}")
+            lines.extend(self._yaml_list_item(item, prefix, indent))
         return lines
+
+    def _yaml_list_item(
+        self,
+        item: object,
+        prefix: str,
+        indent: int,
+    ) -> list[str]:
+        """Convert one list item to YAML lines."""
+        if isinstance(item, dict):
+            return self._yaml_dict_list_item(item, prefix, indent)
+        if isinstance(item, list):
+            return self._yaml_nested_list_item(item, prefix, indent)
+        return [f"{prefix}  - {self._yaml_value(item)}"]
+
+    def _yaml_dict_list_item(
+        self,
+        item: dict[object, object],
+        prefix: str,
+        indent: int,
+    ) -> list[str]:
+        """Convert a mapping list item to YAML lines."""
+        if not item:
+            return [f"{prefix}  - {{}}"]
+        return [f"{prefix}  -", self._dict_to_yaml(cast(JsonDict, item), indent + 2)]
+
+    def _yaml_nested_list_item(
+        self,
+        item: list[object],
+        prefix: str,
+        indent: int,
+    ) -> list[str]:
+        """Convert a nested-list item to YAML lines."""
+        if not item:
+            return [f"{prefix}  - []"]
+        return [
+            f"{prefix}  -",
+            *self._yaml_list(item, prefix + "  ", indent + 1),
+        ]
 
     def _yaml_value(self, value: object) -> str:
         """Format a single value for YAML using safe_dump scalar form."""

@@ -107,47 +107,92 @@ def changed_field_changes(
     non_breaking_changes: list[SchemaChange] = []
     old_required = set(old_schema.get("required", []))
     new_required = set(new_schema.get("required", []))
-
-    for field_name in sorted(set(old_properties).intersection(new_properties)):
-        old_field = old_properties[field_name]
-        new_field = new_properties[field_name]
-
-        type_change = build_field_type_change(field_name, old_field, new_field)
-        if type_change is not None:
-            breaking_changes.append(type_change)
-
-        required_change = build_required_field_change(
-            field_name=field_name,
-            old_required=old_required,
-            new_required=new_required,
-        )
-        if required_change is None:
-            continue
-        target_changes = (
-            breaking_changes
-            if required_field_additions_as_breaking
-            else non_breaking_changes
-        )
-        target_changes.append(required_change)
+    required_changes = _required_change_target(
+        breaking_changes,
+        non_breaking_changes,
+        required_field_additions_as_breaking,
+    )
+    _append_common_field_changes(
+        old_properties=old_properties,
+        new_properties=new_properties,
+        old_required=old_required,
+        new_required=new_required,
+        breaking_changes=breaking_changes,
+        required_changes=required_changes,
+    )
 
     # Newly added properties that are also required must apply the same policy
     # (067-S1): otherwise only FIELD_ADDED is emitted and breaking never fires.
-    for field_name in sorted(set(new_properties) - set(old_properties)):
-        required_change = build_required_field_change(
-            field_name=field_name,
-            old_required=old_required,
-            new_required=new_required,
-        )
-        if required_change is None:
-            continue
-        target_changes = (
-            breaking_changes
-            if required_field_additions_as_breaking
-            else non_breaking_changes
-        )
-        target_changes.append(required_change)
+    _append_new_required_field_changes(
+        old_properties=old_properties,
+        new_properties=new_properties,
+        old_required=old_required,
+        new_required=new_required,
+        required_changes=required_changes,
+    )
 
     return breaking_changes, non_breaking_changes
+
+
+def _required_change_target(
+    breaking_changes: list[SchemaChange],
+    non_breaking_changes: list[SchemaChange],
+    additions_are_breaking: bool,
+) -> list[SchemaChange]:
+    """Select the policy-controlled destination for newly required fields."""
+    return breaking_changes if additions_are_breaking else non_breaking_changes
+
+
+def _append_common_field_changes(
+    *,
+    old_properties: JsonDict,
+    new_properties: JsonDict,
+    old_required: set[str],
+    new_required: set[str],
+    breaking_changes: list[SchemaChange],
+    required_changes: list[SchemaChange],
+) -> None:
+    """Append type and required-status changes for fields present in both schemas."""
+    common_fields = sorted(set(old_properties).intersection(new_properties))
+    for field_name in common_fields:
+        _append_optional_change(
+            breaking_changes,
+            build_field_type_change(
+                field_name,
+                old_properties[field_name],
+                new_properties[field_name],
+            ),
+        )
+        _append_optional_change(
+            required_changes,
+            build_required_field_change(field_name, old_required, new_required),
+        )
+
+
+def _append_new_required_field_changes(
+    *,
+    old_properties: JsonDict,
+    new_properties: JsonDict,
+    old_required: set[str],
+    new_required: set[str],
+    required_changes: list[SchemaChange],
+) -> None:
+    """Append required-status changes for newly added properties."""
+    added_fields = sorted(set(new_properties) - set(old_properties))
+    for field_name in added_fields:
+        _append_optional_change(
+            required_changes,
+            build_required_field_change(field_name, old_required, new_required),
+        )
+
+
+def _append_optional_change(
+    changes: list[SchemaChange],
+    change: SchemaChange | None,
+) -> None:
+    """Append a detected change when present."""
+    if change is not None:
+        changes.append(change)
 
 
 def build_detailed_changes(diff: SchemaDiff) -> list[str]:

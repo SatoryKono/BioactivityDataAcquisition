@@ -703,11 +703,10 @@ def _resolve_e2e_temp_root(
     root when available unless the operator set an explicit override.
     """
     fallback = Path(fallback_tmp or tempfile.gettempdir())
+    override = env.get("BIOETL_E2E_TEMP_ROOT")
+    if override:
+        return Path(override).expanduser()
     if platform == "win32":
-        override = env.get("BIOETL_E2E_TEMP_ROOT")
-        if override:
-            return Path(override).expanduser()
-
         local_appdata = env.get("LOCALAPPDATA")
         if local_appdata:
             local_temp = Path(local_appdata) / "Temp"

@@ -288,17 +288,19 @@ def _run_check(
     )
 
 
-def _architecture_audit_environment(
+def _audit_environment(
     repo_root: Path,
     *,
     environ: Mapping[str, str] | None = None,
 ) -> dict[str, str]:
-    """Build a src-layout child environment without discarding caller settings."""
+    """Return a caller-preserving environment with the src layout importable."""
     env = dict(os.environ if environ is None else environ)
     src_path = str((repo_root / "src").resolve())
-    caller_pythonpath = env.get("PYTHONPATH")
+    existing_pythonpath = env.get("PYTHONPATH")
     env["PYTHONPATH"] = (
-        f"{src_path}{os.pathsep}{caller_pythonpath}" if caller_pythonpath else src_path
+        os.pathsep.join((src_path, existing_pythonpath))
+        if existing_pythonpath
+        else src_path
     )
     env["PYTHONDONTWRITEBYTECODE"] = "1"
     return env
@@ -311,7 +313,7 @@ def run_architecture_audit_read_only(
 ) -> dict[str, object]:
     """Run architecture evidence checks and fail if tracked files mutate."""
     repo_root = repo_root.resolve()
-    env = _architecture_audit_environment(repo_root)
+    env = _audit_environment(repo_root)
 
     before_status = _git_tracked_status(repo_root)
     results = [
