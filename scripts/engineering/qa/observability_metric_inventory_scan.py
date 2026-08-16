@@ -2,10 +2,17 @@
 
 from __future__ import annotations
 
+import ast
+import os
+import re
+import subprocess
+import types
+from collections import defaultdict
+from collections.abc import Callable
+from pathlib import Path
+from typing import TypedDict, cast
+
 from scripts.engineering.qa.report_observability_metric_inventory import (
-    Callable,
-    Path,
-    TypedDict,
     _CANONICAL_METRIC_RE,
     _DEFAULT_DECLARED_METRIC_DEFINITIONS,
     _DIRECT_COLLECTOR_TERMINAL_METHODS,
@@ -33,13 +40,6 @@ from scripts.engineering.qa.report_observability_metric_inventory import (
     _TEXT_DISCOVERY_TIMEOUT_SECONDS,
     _TEXT_FILE_DISCOVERY_CACHE,
     _TEXT_SUFFIXES,
-    ast,
-    cast,
-    defaultdict,
-    os,
-    re,
-    subprocess,
-    types,
 )
 
 REGISTERED_PROMETHEUS_METRIC_LABELS: dict[str, frozenset[str]] = {}

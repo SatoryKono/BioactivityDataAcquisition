@@ -135,9 +135,16 @@ def test_discover_context_uses_policy_timeout_for_full_diffs(
 
     monkeypatch.setattr(proof, "_git", recording_git)
 
-    discover_context(proof_repo, policy=policy, claim="tested")
+    _, clean_source = discover_context(proof_repo, policy=policy, claim="tested")
+
+    assert observed == [180.0]
+    assert clean_source["dirty"] is False
+
+    (proof_repo / "tracked.py").write_text("VALUE = 2\n", encoding="utf-8")
+    _, dirty_source = discover_context(proof_repo, policy=policy, claim="tested")
 
     assert observed == [180.0, 180.0]
+    assert dirty_source["dirty"] is True
 
 
 @pytest.mark.parametrize("configured", [True, "180", 0, 301])

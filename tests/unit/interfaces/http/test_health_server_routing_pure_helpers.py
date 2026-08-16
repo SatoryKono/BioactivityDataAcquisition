@@ -873,7 +873,14 @@ async def test_processed_records_distinguishes_empty_and_backend_unavailable(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     host = _RoutingHost()
+    # Force the Prometheus-backed branch: no ledger port and an explicit run_id
+    # selector (absent run_id yields the selection-required contract instead).
+    host._run_ledger_port = None
     writer = _Writer()
+    query = {
+        "pipeline": "chembl_activity",
+        "run_id": "00000000-0000-0000-0000-000000000001",
+    }
     empty_payload = {"contract": "processed_records_table_v1", "rows": []}
     monkeypatch.setattr(
         observability_routing,
@@ -885,7 +892,7 @@ async def test_processed_records_distinguishes_empty_and_backend_unavailable(
         host,
         writer=writer,
         path="/ops/observability/processed-records",
-        query={"pipeline": "chembl_activity"},
+        query=query,
     )
     assert host.sent[-1] == ("payload", 200, empty_payload)
 
@@ -901,7 +908,7 @@ async def test_processed_records_distinguishes_empty_and_backend_unavailable(
         host,
         writer=writer,
         path="/ops/observability/processed-records",
-        query={"pipeline": "chembl_activity"},
+        query=query,
     )
     assert host.sent[-1] == (
         "payload",
