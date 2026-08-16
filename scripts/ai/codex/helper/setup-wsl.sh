@@ -48,6 +48,7 @@ echo ""
 # Step 3: Install/update Codex CLI in a writable local prefix
 echo "[3/5] Installing Codex CLI..."
 "${ENSURE_SCRIPT}" --update >/dev/null
+"${ENSURE_SCRIPT}" --install-command-shim >/dev/null
 CODEX_PREFIX="$("${ENSURE_SCRIPT}" --print-prefix)"
 echo "✓ Codex CLI installed in ${CODEX_PREFIX}"
 echo ""

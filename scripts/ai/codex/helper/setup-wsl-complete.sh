@@ -132,6 +132,7 @@ log_success "Cache directory: ${CACHE_DIR}"
 if "${ENSURE_SCRIPT}" --update 2>&1 | grep -E '(Installing|Updating|ERROR)'; then
     log_success "Codex CLI installation completed"
 fi
+"${ENSURE_SCRIPT}" --install-command-shim >/dev/null
 
 CODEX_PREFIX="$("${ENSURE_SCRIPT}" --print-prefix)"
 CODEX_BIN="$("${ENSURE_SCRIPT}" --print-bin)"

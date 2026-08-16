@@ -6,7 +6,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../.." && pwd))}"
+REPO_ROOT="${REPO_ROOT:-$(cd "${SCRIPT_DIR}/../../../.." && pwd)}"
 
 CODEX_TOOL_HOME_DEFAULT="${REPO_ROOT}/.cache/tools/codex-cli"
 # Windows-mounted paths under /mnt/* often reject npm rename (EACCES). Prefer a
@@ -31,12 +31,47 @@ USER_CODEX_PREFIX_DEFAULT="${HOME}/.npm-global"
 USER_CODEX_BIN_DEFAULT="${USER_CODEX_PREFIX_DEFAULT}/bin/codex"
 LINUX_CODEX_PREFIX_DEFAULT="${HOME}/.cache/bioetl-codex/npm-global"
 LINUX_CODEX_BIN_DEFAULT="${LINUX_CODEX_PREFIX_DEFAULT}/bin/codex"
+CODEX_COMMAND_SHIM_DIR="${BIOETL_CODEX_COMMAND_SHIM_DIR:-${HOME}/.local/bin}"
+CODEX_COMMAND_SHIM="${CODEX_COMMAND_SHIM_DIR}/codex"
+CODEX_COMMAND_SHIM_MARKER="# Managed by BioETL Codex launcher setup"
+CANONICAL_LAUNCHER="${REPO_ROOT}/scripts/ai/codex/run-codex.sh"
 
 MODE_UPDATE="update"
 MODE="ensure"
 PRINT_BIN=0
 PRINT_PREFIX=0
 ALLOW_INSTALL=1
+INSTALL_COMMAND_SHIM=0
+
+install_command_shim() {
+    local temporary_shim=""
+
+    if [[ ! -f "${CANONICAL_LAUNCHER}" ]]; then
+        echo "[ensure-codex] ERROR: Canonical launcher not found: ${CANONICAL_LAUNCHER}" >&2
+        return 1
+    fi
+
+    if [[ -e "${CODEX_COMMAND_SHIM}" || -L "${CODEX_COMMAND_SHIM}" ]]; then
+        if [[ ! -f "${CODEX_COMMAND_SHIM}" ]] || \
+            ! grep -Fq "${CODEX_COMMAND_SHIM_MARKER}" "${CODEX_COMMAND_SHIM}"; then
+            echo "[ensure-codex] ERROR: Refusing to overwrite non-BioETL command: ${CODEX_COMMAND_SHIM}" >&2
+            return 1
+        fi
+    fi
+
+    mkdir -p "${CODEX_COMMAND_SHIM_DIR}"
+    temporary_shim="$(mktemp "${CODEX_COMMAND_SHIM}.tmp.XXXXXX")"
+    {
+        printf '%s\n' '#!/usr/bin/env bash'
+        printf '%s\n' "${CODEX_COMMAND_SHIM_MARKER}"
+        printf '%s\n' 'set -euo pipefail'
+        printf 'REPO_ROOT=%q exec bash %q "$@"\n' \
+            "${REPO_ROOT}" "${CANONICAL_LAUNCHER}"
+    } > "${temporary_shim}"
+    chmod 700 "${temporary_shim}"
+    mv -f -- "${temporary_shim}" "${CODEX_COMMAND_SHIM}"
+    printf '%s\n' "${CODEX_COMMAND_SHIM}"
+}
 
 for arg in "$@"; do
     case "$arg" in
@@ -55,12 +90,20 @@ for arg in "$@"; do
         --no-install)
             ALLOW_INSTALL=0
             ;;
+        --install-command-shim)
+            INSTALL_COMMAND_SHIM=1
+            ;;
         *)
             echo "[ensure-codex] ERROR: Unsupported argument: $arg" >&2
             exit 2
             ;;
     esac
 done
+
+if [[ "${INSTALL_COMMAND_SHIM}" -eq 1 ]]; then
+    install_command_shim
+    exit $?
+fi
 
 resolve_existing_codex() {
     local path_bin=""

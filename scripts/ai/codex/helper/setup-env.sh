@@ -106,6 +106,19 @@ fi
 
 echo ""
 
+log_info "Installing managed 'codex' command shim..."
+if ! "${ENSURE_SCRIPT}" --install-command-shim >/dev/null; then
+    log_error "Could not install the managed codex command shim"
+    exit 1
+fi
+if [[ ":${PATH}:" == *":${HOME}/.local/bin:"* ]]; then
+    log_success "Direct command ready: codex"
+else
+    log_warn "Command shim installed in ${HOME}/.local/bin; add that directory to PATH"
+fi
+
+echo ""
+
 # STEP 4: Auth surface (.env.codex optional when ChatGPT device auth exists).
 # The default is non-mutating: without BIOETL_CREATE_LOCAL_ENV_FILES=1 this
 # helper does not create .env automatically.
@@ -162,7 +175,7 @@ echo ""
 log_info "Next steps (WSL):"
 echo "  1. If needed: bash scripts/ai/codex/run-codex.sh device-login"
 echo "  2. Interactive: bash scripts/ai/codex/run-codex.sh"
-echo "  3. Or from repo: codex   (bashrc wrapper → scripts/ops/launchers/codex/codex.sh)"
+echo "  3. Or directly: codex   (managed shim → scripts/ai/codex/run-codex.sh)"
 echo ""
 
 exit 0

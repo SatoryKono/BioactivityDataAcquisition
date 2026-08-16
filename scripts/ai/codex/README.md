@@ -90,6 +90,9 @@ bash scripts/ai/codex/run-codex.sh exec "fix the focused failure"
 bash scripts/ai/codex/run-codex.sh check
 bash scripts/ai/codex/run-codex.sh setup
 
+# After setup, the managed PATH command uses the same launcher
+codex
+
 # MCP: static configuration versus bounded live readiness
 bash scripts/ai/codex/run-codex.sh mcp-static
 bash scripts/ai/codex/run-codex.sh mcp-check --profile stable \
@@ -103,6 +106,13 @@ bash scripts/ai/codex/run-codex.sh baseline --runs 3 \
 bash scripts/ai/codex/run-codex.sh local-audit \
   --output reports/quality/codex-local-state-audit.json
 ```
+
+`setup` installs a managed, secret-free command shim at
+`~/.local/bin/codex`. The shim delegates to this checkout's canonical launcher,
+which loads only `REF_TOOL_API_KEY` from the repository `.env` into the Codex
+parent process. An existing non-BioETL command at that path is never
+overwritten. Restart an already running Codex process after adding or rotating
+the Ref key.
 
 `local-audit` reports only aggregate counts: unsafe mode categories, approval
 rule dispositions, retention classes, SQLite integrity/index counts, and PATH
