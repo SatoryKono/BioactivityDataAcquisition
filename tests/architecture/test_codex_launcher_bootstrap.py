@@ -27,6 +27,21 @@ def _project_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+def _fake_codex_prefix(tmp_path: Path) -> Path:
+    prefix = tmp_path / "managed"
+    fake_codex = prefix / "bin" / "codex"
+    fake_codex.parent.mkdir(parents=True)
+    fake_codex.write_text(
+        "#!/usr/bin/env bash\n"
+        "if [[ -n \"${REF_TOOL_API_KEY:-}\" ]]; then echo ref_key=set; "
+        "else echo ref_key=missing; fi\n"
+        "printf 'arg=%s\\n' \"$@\"\n",
+        encoding="utf-8",
+    )
+    fake_codex.chmod(0o700)
+    return prefix
+
+
 def test_wsl_launchers_use_local_bootstrap_helper() -> None:
     """Bash launchers should redirect to canonical launcher with deprecation warning."""
     root = _project_root()
@@ -142,7 +157,7 @@ def test_setup_installs_managed_direct_codex_command() -> None:
     assert '"${ENSURE_SCRIPT}" --install-command-shim' in setup_helper
     assert "--install-command-shim" in ensure_helper
     assert "BIOETL_CODEX_COMMAND_SHIM_DIR" in ensure_helper
-    assert "run-codex.sh" in ensure_helper
+    assert "run-codex-impl.sh" in ensure_helper
 
 
 def test_direct_codex_command_installer_is_bounded_and_secret_free(
@@ -154,9 +169,11 @@ def test_direct_codex_command_installer_is_bounded_and_secret_free(
         root / "scripts" / "ai" / "codex" / "helper" / "ensure-codex-cli.sh"
     )
     shim_dir = tmp_path / "bin"
+    fake_prefix = _fake_codex_prefix(tmp_path)
     env = {
         **os.environ,
         "BIOETL_CODEX_COMMAND_SHIM_DIR": str(shim_dir),
+        "CODEX_NPM_PREFIX": str(fake_prefix),
     }
 
     completed = subprocess.run(
@@ -173,10 +190,50 @@ def test_direct_codex_command_installer_is_bounded_and_secret_free(
     shim = shim_dir / "codex"
     content = shim.read_text(encoding="utf-8")
     assert "Managed by BioETL Codex launcher setup" in content
-    assert "scripts/ai/codex/run-codex.sh" in content
+    assert "scripts/ai/codex/helper/run-codex-impl.sh" in content
     assert "REPO_ROOT=" in content
     assert '"$@"' in content
     assert "REF_TOOL_API_KEY" not in content
+
+    original_stat = shim.stat()
+    shim_dir.chmod(0o500)
+    try:
+        repeated = subprocess.run(
+            ["bash", str(ensure_helper), "--install-command-shim"],
+            cwd=root,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=10,
+        )
+    finally:
+        shim_dir.chmod(0o700)
+    assert repeated.returncode == 0, repeated.stderr
+    repeated_stat = shim.stat()
+    assert repeated_stat.st_ino == original_stat.st_ino
+    assert repeated_stat.st_mtime_ns == original_stat.st_mtime_ns
+
+    direct_env = {
+        **env,
+        "REF_TOOL_API_KEY": "synthetic-ref-key",
+    }
+    direct = subprocess.run(
+        [str(shim), "mcp", "get", "ref"],
+        cwd=root,
+        env=direct_env,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=10,
+    )
+    assert direct.returncode == 0, direct.stderr
+    assert direct.stdout.splitlines() == [
+        "ref_key=set",
+        "arg=mcp",
+        "arg=get",
+        "arg=ref",
+    ]
 
 
 def test_direct_codex_command_installer_preserves_foreign_command(
@@ -191,9 +248,11 @@ def test_direct_codex_command_installer_preserves_foreign_command(
     shim_dir.mkdir()
     shim = shim_dir / "codex"
     shim.write_text("#!/usr/bin/env bash\necho foreign\n", encoding="utf-8")
+    fake_prefix = _fake_codex_prefix(tmp_path)
     env = {
         **os.environ,
         "BIOETL_CODEX_COMMAND_SHIM_DIR": str(shim_dir),
+        "CODEX_NPM_PREFIX": str(fake_prefix),
     }
 
     completed = subprocess.run(

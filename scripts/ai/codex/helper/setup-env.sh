@@ -175,7 +175,7 @@ echo ""
 log_info "Next steps (WSL):"
 echo "  1. If needed: bash scripts/ai/codex/run-codex.sh device-login"
 echo "  2. Interactive: bash scripts/ai/codex/run-codex.sh"
-echo "  3. Or directly: codex   (managed shim → scripts/ai/codex/run-codex.sh)"
+echo "  3. Or directly: codex   (managed Ref-aware command shim)"
 echo ""
 
 exit 0

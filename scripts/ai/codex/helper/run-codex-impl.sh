@@ -46,6 +46,19 @@ if [[ -f "${REPO_ENV_LOADER}" ]]; then
     )
 fi
 
+# The managed ~/.local/bin/codex shim uses this bounded direct mode. It keeps
+# native Codex CLI argument semantics while sharing the Ref-only env loader
+# with the canonical launcher path.
+if [[ -n "${BIOETL_CODEX_DIRECT_BIN:-}" ]]; then
+    if [[ ! -x "${BIOETL_CODEX_DIRECT_BIN}" ]]; then
+        echo "[ERROR] Direct Codex binary is unavailable: ${BIOETL_CODEX_DIRECT_BIN}" >&2
+        exit 1
+    fi
+    direct_codex_bin="${BIOETL_CODEX_DIRECT_BIN}"
+    unset BIOETL_CODEX_DIRECT_BIN
+    exec "${direct_codex_bin}" "$@"
+fi
+
 # Accept either OPENAI_API_KEY or persisted ChatGPT tokens from `codex login`.
 if ! codex_has_usable_auth; then
     echo "[ERROR] No usable Codex auth found." >&2

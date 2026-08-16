@@ -256,8 +256,8 @@ new Codex session. `bash scripts/ai/codex/run-codex.sh`,
 `scripts/ops/launchers/codex/codex-exec.sh` verify the persisted workspace
 projections and the managed `~/.codex/config.toml` block before launch. Current
 files are left untouched; missing or stale state is regenerated automatically.
-The setup flow also installs a managed `~/.local/bin/codex` shim that delegates
-to `scripts/ai/codex/run-codex.sh`. This makes the direct `codex` command load
+The setup flow also installs a managed `~/.local/bin/codex` shim. It preserves
+native Codex CLI arguments and uses the same focused launcher helper to load
 `REF_TOOL_API_KEY` from the repository `.env` before Ref MCP startup, while
 leaving other wrapper-scoped credentials out of the Codex parent environment.
 Setup refuses to overwrite a non-BioETL command already present at that path.

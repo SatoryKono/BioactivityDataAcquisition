@@ -34,7 +34,7 @@ LINUX_CODEX_BIN_DEFAULT="${LINUX_CODEX_PREFIX_DEFAULT}/bin/codex"
 CODEX_COMMAND_SHIM_DIR="${BIOETL_CODEX_COMMAND_SHIM_DIR:-${HOME}/.local/bin}"
 CODEX_COMMAND_SHIM="${CODEX_COMMAND_SHIM_DIR}/codex"
 CODEX_COMMAND_SHIM_MARKER="# Managed by BioETL Codex launcher setup"
-CANONICAL_LAUNCHER="${REPO_ROOT}/scripts/ai/codex/run-codex.sh"
+DIRECT_LAUNCHER="${REPO_ROOT}/scripts/ai/codex/helper/run-codex-impl.sh"
 
 MODE_UPDATE="update"
 MODE="ensure"
@@ -44,12 +44,26 @@ ALLOW_INSTALL=1
 INSTALL_COMMAND_SHIM=0
 
 install_command_shim() {
+    local real_codex_bin="${1:-}"
+    local desired_content=""
     local temporary_shim=""
 
-    if [[ ! -f "${CANONICAL_LAUNCHER}" ]]; then
-        echo "[ensure-codex] ERROR: Canonical launcher not found: ${CANONICAL_LAUNCHER}" >&2
+    if [[ ! -f "${DIRECT_LAUNCHER}" ]]; then
+        echo "[ensure-codex] ERROR: Direct launcher not found: ${DIRECT_LAUNCHER}" >&2
         return 1
     fi
+    if [[ -z "${real_codex_bin}" || ! -x "${real_codex_bin}" ]]; then
+        echo "[ensure-codex] ERROR: Real Codex binary is unavailable: ${real_codex_bin}" >&2
+        return 1
+    fi
+
+    printf -v desired_content '%s\n%s\n%s\nREPO_ROOT=%q BIOETL_CODEX_DIRECT_BIN=%q exec bash %q "$@"' \
+        '#!/usr/bin/env bash' \
+        "${CODEX_COMMAND_SHIM_MARKER}" \
+        'set -euo pipefail' \
+        "${REPO_ROOT}" \
+        "${real_codex_bin}" \
+        "${DIRECT_LAUNCHER}"
 
     if [[ -e "${CODEX_COMMAND_SHIM}" || -L "${CODEX_COMMAND_SHIM}" ]]; then
         if [[ ! -f "${CODEX_COMMAND_SHIM}" ]] || \
@@ -57,17 +71,15 @@ install_command_shim() {
             echo "[ensure-codex] ERROR: Refusing to overwrite non-BioETL command: ${CODEX_COMMAND_SHIM}" >&2
             return 1
         fi
+        if [[ "$(<"${CODEX_COMMAND_SHIM}")" == "${desired_content}" ]]; then
+            printf '%s\n' "${CODEX_COMMAND_SHIM}"
+            return 0
+        fi
     fi
 
     mkdir -p "${CODEX_COMMAND_SHIM_DIR}"
     temporary_shim="$(mktemp "${CODEX_COMMAND_SHIM}.tmp.XXXXXX")"
-    {
-        printf '%s\n' '#!/usr/bin/env bash'
-        printf '%s\n' "${CODEX_COMMAND_SHIM_MARKER}"
-        printf '%s\n' 'set -euo pipefail'
-        printf 'REPO_ROOT=%q exec bash %q "$@"\n' \
-            "${REPO_ROOT}" "${CANONICAL_LAUNCHER}"
-    } > "${temporary_shim}"
+    printf '%s\n' "${desired_content}" > "${temporary_shim}"
     chmod 700 "${temporary_shim}"
     mv -f -- "${temporary_shim}" "${CODEX_COMMAND_SHIM}"
     printf '%s\n' "${CODEX_COMMAND_SHIM}"
@@ -100,11 +112,6 @@ for arg in "$@"; do
     esac
 done
 
-if [[ "${INSTALL_COMMAND_SHIM}" -eq 1 ]]; then
-    install_command_shim
-    exit $?
-fi
-
 resolve_existing_codex() {
     local path_bin=""
     if [[ -x "${CODEX_BIN}" ]]; then
@@ -134,6 +141,15 @@ resolve_existing_codex() {
 
     return 1
 }
+
+if [[ "${INSTALL_COMMAND_SHIM}" -eq 1 ]]; then
+    if ! resolve_existing_codex; then
+        echo "[ensure-codex] ERROR: Install Codex before creating the command shim" >&2
+        exit 1
+    fi
+    install_command_shim "${CODEX_BIN}"
+    exit $?
+fi
 
 if ! command -v node >/dev/null 2>&1; then
     echo "[ensure-codex] ERROR: Node.js is required but was not found in PATH" >&2
