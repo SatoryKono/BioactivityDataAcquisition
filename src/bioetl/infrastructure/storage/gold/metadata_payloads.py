@@ -13,7 +13,7 @@ from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.lineage_persistence import (
     resolve_metadata_and_lineage_fragment,
 )
-from bioetl.infrastructure.storage.metadata.schema_metadata_adapter import (
+from bioetl.infrastructure.storage.metadata.metadata_helpers import (
     inspect_schema_metadata,
 )
 
