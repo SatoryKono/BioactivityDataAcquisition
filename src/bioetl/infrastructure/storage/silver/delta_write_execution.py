@@ -336,15 +336,11 @@ async def _evolve_delta_schema_with_empty_append(
             schema_mode="merge",
         ),
     )
-    await _await_blocking_deltalake_call(
-        operation_name="schema-evolve",
-        call=lambda: load_module().write_deltalake(
-            **_build_plain_delta_write_kwargs(
-                empty_request,
-                mode="append",
-                schema_mode="merge",
-            )
-        ),
+    await _write_plain_delta_request(
+        load_module=load_module,
+        request=empty_request,
+        mode="append",
+        schema_mode="merge",
     )
     return replace(request, merge_schema=False)
 

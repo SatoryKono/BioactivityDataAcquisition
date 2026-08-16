@@ -643,11 +643,6 @@ def managed_e2e_data_dir(data_dir: Path) -> Generator[Path, None, None]:
     E2E suites can share one data directory when they intentionally reuse the
     same pipeline run output across multiple assertions.
     """
-    from bioetl.infrastructure.config._base import (
-        get_pipeline_config,
-        get_settings,
-    )
-
     data_dir.mkdir(parents=True, exist_ok=True)
 
     # Create Medallion subdirectories
@@ -665,8 +660,7 @@ def managed_e2e_data_dir(data_dir: Path) -> Generator[Path, None, None]:
         "degraded_observable"
     )
 
-    get_settings.cache_clear()
-    get_pipeline_config.cache_clear()
+    _clear_runtime_config_caches()
 
     try:
         # StoragePathSettingsMixin derives the medallion paths from data_dir;
@@ -686,8 +680,7 @@ def managed_e2e_data_dir(data_dir: Path) -> Generator[Path, None, None]:
             os.environ[
                 "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE"
             ] = previous_required_profile
-        get_settings.cache_clear()
-        get_pipeline_config.cache_clear()
+        _clear_runtime_config_caches()
 
 
 def clone_e2e_data_dir_snapshot(snapshot_dir: Path, target_dir: Path) -> None:
