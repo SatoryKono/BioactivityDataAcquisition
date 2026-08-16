@@ -655,6 +655,19 @@ def test_resolve_e2e_temp_root_prefers_posix_tmp_when_available(
     assert result == posix_tmp
 
 
+def test_non_windows_e2e_temp_root_honors_explicit_override(tmp_path: Path) -> None:
+    override = tmp_path / "override"
+
+    result = e2e_conftest._resolve_e2e_temp_root(
+        platform="linux",
+        posix_tmp=tmp_path / "tmp",
+        fallback_tmp=str(tmp_path / "fallback"),
+        env={"BIOETL_E2E_TEMP_ROOT": str(override)},
+    )
+
+    assert result == override
+
+
 def test_resolve_e2e_temp_root_falls_back_when_posix_tmp_missing(
     tmp_path: Path,
 ) -> None:
