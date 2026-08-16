@@ -135,6 +135,8 @@ def build_universal_scope_global_claim(
 
 
 __all__ = [
+    "HistoricalReplayClaimScopeMode",
+    "HistoricalReplayResidualDispositionRecord",
     "build_narrowed_scope_global_claim",
     "build_universal_scope_global_claim",
     "has_irrecoverable_dispositions",

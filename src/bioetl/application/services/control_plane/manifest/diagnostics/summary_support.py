@@ -238,5 +238,6 @@ __all__ = [
     "build_exact_replay_anchors",
     "build_final_summary_updates",
     "build_identity_graph",
+    "build_produced_artifact_trace",
     "build_runtime_views",
 ]
