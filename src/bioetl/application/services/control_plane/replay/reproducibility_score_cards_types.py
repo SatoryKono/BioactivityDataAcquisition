@@ -81,8 +81,8 @@ __all__ = [
     "PROFILE_SCORE_THRESHOLDS",
     "JsonDict",
     "ScoreCardRecord",
-    "build_score_card_record",
     "bounded",
+    "build_score_card_record",
     "string_items",
     "supported_boundary_block_reason",
 ]

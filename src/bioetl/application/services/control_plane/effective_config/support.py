@@ -18,9 +18,11 @@ from bioetl.application.services.control_plane.effective_config.serialization im
     build_effective_config_artifact_id,
     build_semantic_identity_payload,
     canonical_source_refs,
-    semantic_artifact_payload as semantic_artifact_payload,
     serialize_artifact,
     stable_hash,
+)
+from bioetl.application.services.control_plane.effective_config.serialization import (
+    semantic_artifact_payload as semantic_artifact_payload,
 )
 from bioetl.domain.behavior.dq_policy_resolver import DQPolicyResolver
 from bioetl.domain.config.dq import DQConfig

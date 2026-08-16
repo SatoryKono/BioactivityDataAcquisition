@@ -6,12 +6,10 @@ import hashlib
 import json
 
 from bioetl.application.services.control_plane.replay.closure_claims import (
-    build_narrowed_scope_global_claim,
-    build_universal_scope_global_claim,
-)
-from bioetl.application.services.control_plane.replay.closure_claims import (
     HistoricalReplayClaimScopeMode,
     HistoricalReplayResidualDispositionRecord,
+    build_narrowed_scope_global_claim,
+    build_universal_scope_global_claim,
 )
 from bioetl.application.services.control_plane.replay.historical_corpus_models import (
     HistoricalReplayCertifiabilityInventory,

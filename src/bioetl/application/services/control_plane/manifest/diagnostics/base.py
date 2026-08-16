@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
-    build_produced_artifact_trace as _build_produced_artifact_trace,
-)
 from bioetl.application.services.control_plane.manifest.diagnostics.base_effective_config_diagnostics import (
     _build_effective_config_diagnostics,
 )
@@ -29,6 +26,9 @@ from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_p
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
     build_exact_replay_anchors as _build_exact_replay_anchors,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
+    build_produced_artifact_trace as _build_produced_artifact_trace,
 )
 from bioetl.domain.control_plane import RunManifest
 

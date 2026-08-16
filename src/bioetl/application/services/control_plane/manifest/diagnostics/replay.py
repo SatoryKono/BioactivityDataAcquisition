@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
+from bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections import (
+    _build_replay_parentage,
+)
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family import (
     ReplayFamilyContext,
     _resolve_exact_replay_support_boundary,
     _resolve_replay_family_contract,
     build_replay_family_context,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections import (
-    _build_replay_parentage,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_readiness import (
     _resolve_manifest_replay_readiness_verdict,
