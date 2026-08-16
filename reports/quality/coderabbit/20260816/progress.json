@@ -1,0 +1,32 @@
+{
+  "campaign": "CR-FULL-20260816",
+  "base_sha": "6a2c8abe8ac5501bae3fef69667c3ff09280e46c",
+  "started_utc": "2026-08-16T17:50:03.641281+00:00",
+  "results": {
+    "S01-domain-aggregates": {
+      "id": "S01-domain-aggregates",
+      "wave": "A",
+      "files": 19,
+      "status": "ok",
+      "reason": "",
+      "exit_code": 0,
+      "log": "reports/quality/coderabbit/20260816/review_A_S01-domain-aggregates.log",
+      "bytes": 20142,
+      "elapsed_s": 233.0,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ]
+    }
+  },
+  "updated_utc": "2026-08-16T17:53:56.642839+00:00"
+}
