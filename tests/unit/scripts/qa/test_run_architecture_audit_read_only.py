@@ -109,7 +109,7 @@ def test_mutation_guard_git_status_disables_lfs_filters() -> None:
 def test_audit_environment_prepends_src_and_preserves_caller_values() -> None:
     repo_root = Path("/workspace/repo")
 
-    env = audit_lane._audit_environment(
+    env = audit_lane._architecture_audit_environment(
         repo_root,
         environ={"PYTHONPATH": "caller-path", "CALLER_FLAG": "kept"},
     )

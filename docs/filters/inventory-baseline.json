@@ -1604,7 +1604,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "docs/03-guides/running-pipelines.md",
       "occurrence_count": 15,
-      "first_line": 621,
+      "first_line": 622,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1824,7 +1824,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "grafana/README.md",
       "occurrence_count": 6,
-      "first_line": 881,
+      "first_line": 890,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1835,7 +1835,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "grafana/dashboards/bioetl-dq-v2.json",
       "occurrence_count": 2,
-      "first_line": 1625,
+      "first_line": 1724,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1901,7 +1901,7 @@
       "symbol": "bioetl_silver_filter_reject_total_mismatch_15m",
       "path": "grafana/README.md",
       "occurrence_count": 2,
-      "first_line": 1280,
+      "first_line": 1285,
       "role": "Silver reject accounting reconciliation",
       "migration_relevance": "Recording rule reconciles stage totals with bounded Silver reject breakdowns.",
       "notes": ""
@@ -1967,7 +1967,7 @@
       "symbol": "apply_silver_filter",
       "path": "src/bioetl/application/core/base_transformer_execution_mixin.py",
       "occurrence_count": 4,
-      "first_line": 16,
+      "first_line": 17,
       "role": "Runtime Silver filter application callsite",
       "migration_relevance": "Any new runtime application gate must remain structural-only or be inventoried.",
       "notes": ""
@@ -2275,7 +2275,7 @@
       "symbol": "extraction_params",
       "path": "scripts/docs/matrix/generate_pipeline_normalization_matrix.py",
       "occurrence_count": 5,
-      "first_line": 1696,
+      "first_line": 1054,
       "role": "Source-profile extraction policy",
       "migration_relevance": "extraction_params are provider request policy and must not be treated as Silver filters.",
       "notes": ""
