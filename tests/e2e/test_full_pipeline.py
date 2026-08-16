@@ -30,12 +30,8 @@
 These tests verify full Extract → Bronze → Silver → Gold flows
 with real infrastructure (MinIO, Redis via Docker).
 
-NOTE: These tests are currently SKIPPED due to existing issues with:
-- Delta Lake Arrow schema compatibility
-- PubChem query requirements
-- Domain model changes
-
-Focus on test_infrastructure.py for E2E infrastructure testing.
+Replay-backed tests use materialized VCR cassettes and per-test data roots so
+the non-live suite remains deterministic and isolated from global ``data/output``.
 """
 
 from pathlib import Path
@@ -51,6 +47,7 @@ from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 from tests.e2e.conftest import (
+    _read_delta_records,
     assert_run_ledger_has_events,
     assert_run_manifest_exists,
     create_test_context,
@@ -338,16 +335,12 @@ async def test_full_pipeline__pipeline_idempotency__e17c8c60(
         limit=5,
     )
 
-    # Count records after first run
-    import polars as pl
-
     silver_path = storage_paths["silver"]
     # Find the actual Delta table directory
     delta_tables = [d for d in silver_path.rglob("*") if (d / "_delta_log").exists()]
 
     if len(delta_tables) > 0:
-        df_first = pl.read_delta(str(delta_tables[0]))
-        count_first = len(df_first)
+        count_first = len(await _read_delta_records(delta_tables[0]))
 
         # Run 2: Same data on append-mode pipeline
         await _run_pipeline_with_test_storage(
@@ -357,8 +350,7 @@ async def test_full_pipeline__pipeline_idempotency__e17c8c60(
         )
 
         # Count records after second run
-        df_second = pl.read_delta(str(delta_tables[0]))
-        count_second = len(df_second)
+        count_second = len(await _read_delta_records(delta_tables[0]))
 
         assert count_second >= count_first, (
             f"Append rerun unexpectedly shrank output: {count_first} -> {count_second}."

@@ -75,6 +75,15 @@ def test_managed_e2e_data_dir_binds_and_restores_all_runtime_paths(
     assert cache_clears == ["clear", "clear"]
 
 
+def test_pipeline_idempotency_reuses_materialized_cassette() -> None:
+    cassette_name = e2e_conftest.resolve_cassette_name(
+        node_name="test_full_pipeline__pipeline_idempotency__e17c8c60",
+        overrides=e2e_conftest._E2E_VCR_CASSETTE_NAME_OVERRIDES,
+    )
+
+    assert cassette_name == "test_pipeline_idempotency"
+
+
 def test_read_delta_records_uses_shared_delta_reader(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
