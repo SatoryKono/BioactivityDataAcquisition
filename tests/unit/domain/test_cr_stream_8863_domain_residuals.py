@@ -261,6 +261,9 @@ def test_record_identity_rejects_unsupported_values_and_sorts_sets() -> None:
     assert _deterministic_record_id({"tags": {"a", "b"}}) == (
         _deterministic_record_id({"tags": {"b", "a"}})
     )
+    assert _deterministic_record_id({1: "one", "2": "two"}) == (
+        _deterministic_record_id({"2": "two", 1: "one"})
+    )
     with pytest.raises(TypeError, match="Unsupported value"):
         _deterministic_record_id({"unsupported": object()})
 

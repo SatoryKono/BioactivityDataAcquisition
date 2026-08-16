@@ -245,12 +245,36 @@ def _deterministic_record_id(record: JsonDict) -> str:
 def _canonical_json_text(value: object) -> str:
     """Serialize supported values without identity-bearing repr fallbacks."""
     return json.dumps(
-        value,
+        _canonical_json_value(value),
         sort_keys=True,
         separators=(",", ":"),
         ensure_ascii=False,
+        allow_nan=False,
         default=_json_fallback,
     )
+
+
+def _canonical_json_value(value: object) -> object:
+    """Normalize containers, including mappings with mixed scalar key types."""
+    if isinstance(value, dict):
+        if all(isinstance(key, str) for key in value):
+            return {
+                key: _canonical_json_value(item)
+                for key, item in value.items()
+                if isinstance(key, str)
+            }
+        items = [
+            (
+                {"type": type(key).__name__, "value": _canonical_json_value(key)},
+                _canonical_json_value(item),
+            )
+            for key, item in value.items()
+        ]
+        items.sort(key=lambda item: _canonical_json_text(item[0]))
+        return {"\u0000bioetl:typed-mapping:v1": items}
+    if isinstance(value, list | tuple):
+        return [_canonical_json_value(item) for item in value]
+    return value
 
 
 def _json_fallback(value: object) -> object:
