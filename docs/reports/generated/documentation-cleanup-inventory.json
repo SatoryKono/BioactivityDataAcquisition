@@ -79643,6 +79643,7 @@
       "duplicate_group": null,
       "duplicate_resolution": null,
 <<<<<<< HEAD
+<<<<<<< HEAD
       "extension": ".json",
       "freshness": "review-required",
       "generated_route": null,
@@ -79674,6 +79675,37 @@
 ||||||| 64ea579d59
 =======
 >>>>>>> codex/full-suite-green-20260816
+||||||| d42d22aae3
+=======
+      "extension": ".json",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/quality/coderabbit/20260816/progress.json",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+>>>>>>> agent/issues-8860-8861-closeout
       "extension": ".md",
       "freshness": "review-required",
       "generated_route": null,
@@ -88367,7 +88399,13 @@
       "active_quality_baseline": 56,
       "closeout_evidence": 87,
       "docs_reports_curated_entrypoint": 2,
+<<<<<<< HEAD
       "docs_reports_curated_or_historical_report": 9,
+||||||| d42d22aae3
+      "docs_reports_curated_or_historical_report": 3,
+=======
+      "docs_reports_curated_or_historical_report": 4,
+>>>>>>> agent/issues-8860-8861-closeout
       "docs_reports_generated_or_route_owned": 7,
       "docs_reports_retention_sensitive_evidence": 21,
       "generated_skill_license_mirror": 5,
@@ -88381,15 +88419,22 @@
       "published_skill_reference_redirect": 21,
       "reports_workspace_entrypoint": 1,
 <<<<<<< HEAD
+<<<<<<< HEAD
       "working_report": 608
 ||||||| 64ea579d59
       "working_report": 515
 =======
       "working_report": 607
 >>>>>>> codex/full-suite-green-20260816
+||||||| d42d22aae3
+      "working_report": 515
+=======
+      "working_report": 608
+>>>>>>> agent/issues-8860-8861-closeout
     },
     "by_recommended_action": {
       "archive-after-github-state-check": 321,
+<<<<<<< HEAD
 <<<<<<< HEAD
       "archive-after-migration": 619,
 ||||||| 64ea579d59
@@ -88397,6 +88442,11 @@
 =======
       "archive-after-migration": 612,
 >>>>>>> codex/full-suite-green-20260816
+||||||| d42d22aae3
+      "archive-after-migration": 520,
+=======
+      "archive-after-migration": 614,
+>>>>>>> agent/issues-8860-8861-closeout
       "generate-automatically": 1055,
       "keep": 1121,
       "reconcile-with-github-state": 4,
@@ -88429,12 +88479,18 @@
       "mkdocs.yml": 1,
       "plans": 2,
 <<<<<<< HEAD
+<<<<<<< HEAD
       "reports": 795,
 ||||||| 64ea579d59
       "reports": 696,
 =======
       "reports": 788,
 >>>>>>> codex/full-suite-green-20260816
+||||||| d42d22aae3
+      "reports": 696,
+=======
+      "reports": 790,
+>>>>>>> agent/issues-8860-8861-closeout
       "reports-migration-analysis.md": 1,
       "security": 2
     },
@@ -88445,12 +88501,18 @@
       "Deprecated": 8,
       "Generated": 1055,
 <<<<<<< HEAD
+<<<<<<< HEAD
       "Working": 1087
 ||||||| 64ea579d59
       "Working": 988
 =======
       "Working": 1080
 >>>>>>> codex/full-suite-green-20260816
+||||||| d42d22aae3
+      "Working": 988
+=======
+      "Working": 1082
+>>>>>>> agent/issues-8860-8861-closeout
     },
     "by_surface_family": {
       "active": 739,
@@ -88459,14 +88521,21 @@
       "duplicate": 8,
       "generated": 1055,
 <<<<<<< HEAD
+<<<<<<< HEAD
       "working": 1087
 ||||||| 64ea579d59
       "working": 988
 =======
       "working": 1080
 >>>>>>> codex/full-suite-green-20260816
+||||||| d42d22aae3
+      "working": 988
+=======
+      "working": 1082
+>>>>>>> agent/issues-8860-8861-closeout
     },
     "by_tracking_state": {
+<<<<<<< HEAD
 <<<<<<< HEAD
       "ignored_local": 5,
       "tracked": 3123
@@ -88475,8 +88544,19 @@
 =======
       "tracked": 3121
 >>>>>>> codex/full-suite-green-20260816
+||||||| d42d22aae3
+      "tracked": 3029
+=======
+      "tracked": 3123
+>>>>>>> agent/issues-8860-8861-closeout
     },
+<<<<<<< HEAD
     "docs_reports_local_count": 39,
+||||||| d42d22aae3
+    "docs_reports_local_count": 33,
+=======
+    "docs_reports_local_count": 34,
+>>>>>>> agent/issues-8860-8861-closeout
     "duplicate_group_count": 9,
     "generated_route_count": 70,
     "generated_without_route_count": 217,
@@ -88491,17 +88571,29 @@
     "scan_error_count": 0,
     "scan_errors": [],
 <<<<<<< HEAD
+<<<<<<< HEAD
     "total_doc_like": 3128,
     "total_doc_like_ignored_local": 5,
     "total_doc_like_tracked": 3123
 ||||||| 64ea579d59
     "total_doc_like": 3029,
+||||||| d42d22aae3
+    "total_doc_like": 3029,
+=======
+    "total_doc_like": 3123,
+>>>>>>> agent/issues-8860-8861-closeout
     "total_doc_like_ignored_local": 0,
+<<<<<<< HEAD
     "total_doc_like_tracked": 3029
 =======
     "total_doc_like": 3121,
     "total_doc_like_ignored_local": 0,
     "total_doc_like_tracked": 3121
 >>>>>>> codex/full-suite-green-20260816
+||||||| d42d22aae3
+    "total_doc_like_tracked": 3029
+=======
+    "total_doc_like_tracked": 3123
+>>>>>>> agent/issues-8860-8861-closeout
   }
 }
