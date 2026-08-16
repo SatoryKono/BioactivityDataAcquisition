@@ -74,7 +74,6 @@ def _resolve_exact_replay_supported_reason(
 
 
 __all__ = [
-    "LIVE_CAPTURE_SNAPSHOT_MATERIALIZED",
     "_has_historical_composite_certified_snapshots",
     "_has_historical_source_certified_snapshots",
     "_has_live_capture_materialized_snapshots",

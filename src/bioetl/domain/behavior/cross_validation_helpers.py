@@ -217,6 +217,14 @@ def _unknown_comparison_source_issue(
     )
 
 
+def _compares_only_to_self(source_name: object, comparison_sources: list[str]) -> bool:
+    if not isinstance(source_name, str):
+        return False
+    if not comparison_sources:
+        return False
+    return set(comparison_sources) == {source_name}
+
+
 def _validate_rules(rules: dict[str, str]) -> list[ValidationIssue]:
     if not rules:
         return [
