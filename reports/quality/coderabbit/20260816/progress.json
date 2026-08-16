@@ -170,7 +170,31 @@
         "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
         "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
       ]
+    },
+    "S01-domain-exceptions": {
+      "id": "S01-domain-exceptions",
+      "wave": "A",
+      "files": 24,
+      "status": "rate_limit",
+      "reason": "CodeRabbit rate limit",
+      "exit_code": 0,
+      "log": "reports/quality/coderabbit/20260816/review_A_S01-domain-exceptions.log",
+      "bytes": 23663,
+      "elapsed_s": 321.0,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ]
     }
   },
-  "updated_utc": "2026-08-16T19:34:41.251431+00:00"
+  "updated_utc": "2026-08-16T19:40:17.290806+00:00"
 }

@@ -2608,6 +2608,13 @@ Machine mapping: `docs/03-guides/dashboards/contracts/dashboard-inventory.yaml`.
 | 5. Incident Workspace | `bioetl-incident-v1` | Prometheus | Multi-domain suspects + ALERTS support |
 | 6. Run Explorer | `bioetl-run-explorer-v1` | BioETL Ops HTTP | Exact-run identity (never Prom `run_id` labels) |
 
+`Inspect Recent Runs` (`3010`) is a filesystem index, not Prometheus.
+`/health/ready` green does not prove the table should fill. Empty
+`VALID EMPTY` means no artifacts for that pipeline; a `TREE_MISSING` row
+means the container bind is wrong — from the checkout you are viewing run
+`python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay`.
+Do not start `--stack main` from `/tmp/bioetl-issues*`.
+
 **Retired (not shipped):** `bioetl-workflow-overview`, `bioetl-alerts-slo`,
 `bioetl-silver-reject-explorer`. Do not list them as active routing targets.
 
