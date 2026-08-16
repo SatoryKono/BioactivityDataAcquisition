@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-14T17:26:56.110945+00:00",
+  "generated_at": "2026-08-16T12:42:45.410075+00:00",
   "summary": {
-    "total_scripts": 599,
+    "total_scripts": 601,
     "status_counts": {
       "active": 338,
-      "supporting": 261
+      "supporting": 263
     },
     "reference_group_coverage": {
       "agents": 5,
@@ -3155,10 +3155,14 @@
     {
       "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
-      "references": []
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the canonical AST Grep MCP wrapper generated on Windows; keep it supporting unless tracked Windows runtime configs become first-class governed artifacts."
     },
     {
       "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
@@ -6176,13 +6180,13 @@
         },
         {
           "path": "scripts/diagrams/check/check_diagram_quality_gates.py",
-          "line": 23,
+          "line": 25,
           "source_group": "scripts",
           "text": "from scripts.diagrams.core.diagram_paths import ("
         },
         {
           "path": "scripts/diagrams/check/check_diagram_quality_gates.py",
-          "line": 30,
+          "line": 32,
           "source_group": "scripts",
           "text": "from scripts.diagrams.core.diagram_paths import ("
         },
@@ -6959,7 +6963,7 @@
         },
         {
           "path": "tests/architecture/test_diagram_regression_workflow.py",
-          "line": 135,
+          "line": 164,
           "source_group": "tests",
           "text": "wrapper = Path(\"scripts/diagrams/render.ps1\")"
         }
@@ -7813,7 +7817,7 @@
         },
         {
           "path": "tests/architecture/test_docs_build_site_router.py",
-          "line": 27,
+          "line": 28,
           "source_group": "tests",
           "text": "shell_wrapper = (root / \"scripts\" / \"docs\" / \"build_docs_site.sh\").read_text("
         },
@@ -19668,7 +19672,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
-          "line": 892,
+          "line": 922,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/run_grafana_dashboard_audit_cycle.py\","
         }
