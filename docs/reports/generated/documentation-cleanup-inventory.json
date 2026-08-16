@@ -65345,6 +65345,34 @@
       "lifecycle": "docs_reports_curated_or_historical_report",
       "outbound_links": 0,
       "owner": "BioETL Team",
+      "path": "docs/reports/dashboard-ux-checks/2026-08-16.md",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "docs_reports_curated_or_historical_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
       "path": "docs/reports/dashboard-ux-checks/README.md",
       "recommended_action": "archive-after-migration",
       "root_doc_kind": null,
@@ -85591,7 +85619,7 @@
       "active_quality_baseline": 56,
       "closeout_evidence": 87,
       "docs_reports_curated_entrypoint": 2,
-      "docs_reports_curated_or_historical_report": 3,
+      "docs_reports_curated_or_historical_report": 4,
       "docs_reports_generated_or_route_owned": 7,
       "docs_reports_retention_sensitive_evidence": 21,
       "generated_skill_license_mirror": 5,
@@ -85608,7 +85636,7 @@
     },
     "by_recommended_action": {
       "archive-after-github-state-check": 321,
-      "archive-after-migration": 520,
+      "archive-after-migration": 521,
       "generate-automatically": 1055,
       "keep": 1121,
       "reconcile-with-github-state": 4,
@@ -85640,7 +85668,7 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
-      "reports": 696,
+      "reports": 697,
       "reports-migration-analysis.md": 1,
       "security": 2
     },
@@ -85650,7 +85678,7 @@
       "Canonical": 70,
       "Deprecated": 8,
       "Generated": 1055,
-      "Working": 988
+      "Working": 989
     },
     "by_surface_family": {
       "active": 739,
@@ -85658,12 +85686,12 @@
       "canonical": 70,
       "duplicate": 8,
       "generated": 1055,
-      "working": 988
+      "working": 989
     },
     "by_tracking_state": {
-      "tracked": 3029
+      "tracked": 3030
     },
-    "docs_reports_local_count": 33,
+    "docs_reports_local_count": 34,
     "duplicate_group_count": 9,
     "generated_route_count": 70,
     "generated_without_route_count": 217,
@@ -85677,8 +85705,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3029,
+    "total_doc_like": 3030,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3029
+    "total_doc_like_tracked": 3030
   }
 }

@@ -241,6 +241,7 @@ def test_main_start_materializes_source_bound_report_attestation(
         "schema_version": "bioetl-report-source-v1",
         "runtime_source_id": expected,
     }
+    assert target.stat().st_mode & 0o777 == 0o644
 
 
 def test_post_start_source_gate_failure_cannot_report_success(
@@ -319,6 +320,40 @@ def test_compose_up_force_recreates_main_stack_on_first_attempt() -> None:
     assert "--force-recreate" in wait
 
 
+def test_monitoring_project_origin_drift_requires_force_recreate(
+    tmp_path: Path,
+) -> None:
+    report = tmp_path / "preflight.json"
+    report.write_text(
+        json.dumps(
+            {
+                "findings": [
+                    {
+                        "code": "PROJECT_ORIGIN",
+                        "severity": "error",
+                        "evidence": {"project": "bioetl-main"},
+                    },
+                    {
+                        "code": "PROJECT_ORIGIN",
+                        "severity": "error",
+                        "evidence": {"project": "bioetl-monitoring"},
+                    },
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    monitoring = runtime_manager.StackSpec(
+        name="monitoring",
+        project="bioetl-monitoring",
+        compose_file=Path("docker-compose.monitoring.yml"),
+        required_services=("grafana",),
+        expected_images={},
+    )
+
+    assert runtime_manager._preflight_requires_force_recreate(report, monitoring)
+
+
 def test_status_origin_findings_exposes_dashboard_source_drift(
     tmp_path: Path,
 ) -> None:
@@ -348,6 +383,7 @@ def test_status_origin_findings_exposes_dashboard_source_drift(
     findings = runtime_manager._status_origin_findings(
         report_path,
         runtime_manager.CommandResult(["preflight"], 2),
+        _spec(),
     )
 
     assert findings == [
@@ -358,6 +394,48 @@ def test_status_origin_findings_exposes_dashboard_source_drift(
             "evidence": {"target": "/app/data"},
         }
     ]
+
+
+def test_status_origin_findings_ignore_foreign_stack_projects(
+    tmp_path: Path,
+) -> None:
+    report_path = tmp_path / "preflight.json"
+    report_path.write_text(
+        json.dumps(
+            {
+                "findings": [
+                    {
+                        "code": "PROJECT_ORIGIN",
+                        "severity": "error",
+                        "message": "main is foreign",
+                        "evidence": {"project": "bioetl-main"},
+                    },
+                    {
+                        "code": "PROJECT_ORIGIN",
+                        "severity": "error",
+                        "message": "monitoring is foreign",
+                        "evidence": {"project": "bioetl-monitoring"},
+                    },
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    monitoring = runtime_manager.StackSpec(
+        name="monitoring",
+        project="bioetl-monitoring",
+        compose_file=Path("docker-compose.monitoring.yml"),
+        required_services=("grafana",),
+        expected_images={},
+    )
+
+    findings = runtime_manager._status_origin_findings(
+        report_path,
+        runtime_manager.CommandResult(["preflight"], 2),
+        monitoring,
+    )
+
+    assert [finding["message"] for finding in findings] == ["monitoring is foreign"]
 
 
 def test_status_grafana_bootstrap_deferred_is_finding() -> None:
@@ -688,6 +766,96 @@ def test_preflight_failure_writes_one_redacted_incident_without_mutation(
     payload = json.loads(incidents[0].read_text(encoding="utf-8"))
     assert payload["primary_cause"] == "preflight_failed"
     assert "ghp_" not in incidents[0].read_text(encoding="utf-8")
+
+
+def test_recover_reports_daemon_probe_mismatch_without_desktop_restart(
+    tmp_path: Path,
+) -> None:
+    report_path = tmp_path / "docker-runtime-main-preflight.json"
+    calls: list[list[str]] = []
+
+    def runner(
+        command: Sequence[str], cwd: Path, timeout: float
+    ) -> runtime_manager.CommandResult:
+        del cwd, timeout
+        current = list(command)
+        calls.append(current)
+        if "docker_runtime_preflight.py" in " ".join(current):
+            report_path.write_text(
+                json.dumps(
+                    {
+                        "findings": [
+                            {
+                                "code": "DOCKER_DAEMON",
+                                "severity": "warning",
+                                "message": "Docker daemon is unavailable",
+                                "evidence": {"error": "permission denied"},
+                            },
+                            {
+                                "code": "MONITORING_PROMQL_SYNTAX",
+                                "severity": "error",
+                                "message": "promtool failed",
+                                "evidence": {"stderr": "permission denied"},
+                            },
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+            return runtime_manager.CommandResult(current, 2)
+        if current[:2] == ["docker", "info"]:
+            return runtime_manager.CommandResult(current, 0, stdout="29.7.2\n")
+        raise AssertionError(current)
+
+    result = runtime_manager.start_or_recover(
+        _spec(),
+        Path("contract.yml"),
+        tmp_path,
+        recover=True,
+        runner=runner,
+        sleep=lambda _seconds: None,
+    )
+
+    assert result == 1
+    assert not any("restart-docker.ps1" in " ".join(call) for call in calls)
+    incident = json.loads(
+        (tmp_path / "docker-incident-main.json").read_text(encoding="utf-8")
+    )
+    assert incident["primary_cause"] == "preflight_probe_mismatch"
+    mismatch = next(
+        finding
+        for finding in incident["findings"]
+        if finding["cause"] == "preflight_probe_mismatch"
+    )
+    assert mismatch["probe"]["stdout"].strip() == "29.7.2"
+
+
+def test_unmeasurable_docker_root_does_not_mean_daemon_unavailable(
+    tmp_path: Path,
+) -> None:
+    report_path = tmp_path / "docker-runtime-main-preflight.json"
+    report_path.write_text(
+        json.dumps(
+            {
+                "findings": [
+                    {
+                        "code": "CAPACITY_DOCKER_ROOT",
+                        "severity": "error",
+                        "message": (
+                            "Docker data root capacity cannot be measured from this host"
+                        ),
+                        "evidence": {
+                            "docker_root_dir": "/var/lib/docker",
+                            "error": "No such file or directory",
+                        },
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert not runtime_manager._preflight_indicates_daemon_unavailable(report_path)
 
 
 def test_recover_continues_when_preflight_only_reports_container_health(

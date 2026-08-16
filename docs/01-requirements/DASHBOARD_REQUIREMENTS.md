@@ -54,8 +54,11 @@ MUST NOT be treated as shipping requirements.
   threshold/series line color, or neutral `auto` table cells without an area
   fill.
 
-CSS conversion uses the browser reference ratio `1pt = 4/3px`: `12pt = 16px`;
-`14pt = 18.6667px`. Render validation uses the unrounded pixel thresholds.
+Authored BioETL copy uses the browser reference ratio `1pt = 4/3px`:
+`12pt = 16px`; `14pt = 18.6667px`. Render validation uses the unrounded pixel
+thresholds. Grafana-managed panel chrome is governed separately by the pinned
+Grafana theme tokens because dashboard JSON has no supported native-title font
+size option.
 
 ## 3. P0 — truth, safety, and evidence
 
@@ -106,14 +109,30 @@ one oversized chart from masking a prose-heavy group.
 
 `REQ-DASH-002` / `DASH-TYPOGRAPHY-001`:
 
-- Operator-visible body text inside panels MUST be at least `12pt` (`16px`).
-- Panel titles MUST be at least `14pt` (`18.6667px`; normally authored or
-  rounded to `19px`).
+- BioETL-authored body copy inside text/navigation panels MUST be at least
+  `12pt` (`16px`).
+- BioETL-authored panel headings MUST be at least `14pt` (`18.6667px`;
+  normally rounded to `19px`).
+- Grafana-managed panel titles MUST remain at or above the pinned theme token
+  baseline (`14px` in Grafana 12); other Grafana-managed panel text MUST remain
+  at or above `12px`. These native surfaces MUST also pass the 200% reflow gate
+  below. Global CSS overrides, sanitizer bypasses, and screenshot-only style
+  injection are forbidden remedies.
 - Text MUST wrap, reflow, or shorten instead of shrinking below the floor.
-- Inline HTML/CSS sizes below the floor are forbidden in shipped JSON.
+- Inline HTML/CSS sizes below the authored floor are forbidden in shipped JSON.
 - Grafana-managed titles, Markdown, table cells, axes, and plugin-rendered text
   MUST be checked by computed-style render evidence; static JSON alone is not
   sufficient proof.
+
+`DASH-REFLOW-001`:
+
+- Every shipped dashboard MUST pass Dark and Light at 100% and 200% browser
+  zoom for the 1366×768 physical viewport.
+- The 200% browser profile MUST use a reduced CSS layout viewport plus matching
+  device scale. Applying CSS `zoom` to the root document is not browser-zoom
+  evidence because it magnifies the desktop layout without reflow.
+- No profile may introduce page-level horizontal overflow, clipped titles,
+  filters, KPIs or table headers, and controls MUST remain usable.
 
 ### 5.3 Palette and area fills
 
