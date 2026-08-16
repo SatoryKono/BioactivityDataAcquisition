@@ -113,7 +113,7 @@
       "id": 3010,
       "type": "table",
       "title": "Inspect Recent Runs (last 20)",
-      "description": "Browse mode: Recent pipeline-run reports found on disk for the selected pipeline. $pipeline is a pipeline name (chembl_assay, chembl_target, chembl_publication), not a workflow (chembl_baseline). Workflow artifacts live under reports/run-reports/workflow/<name>/ and GET /ops/observability/workflow-run-reports. Choose a row to set the run ID and open exact-run evidence. An empty table is valid when no matching reports exist. If reports are expected, treat backend unavailable as a distinct failure state and verify BioETL Ops HTTP at /health/live. Empty table: no matching reports under reports/run-reports/pipeline/<name>/. Has reports: chembl_assay, chembl_target, chembl_publication. chembl_activity may appear in run_id (control-plane) but has no report artifacts yet. If the host has reports and this is empty: bind mismatch — python -m scripts.ops.runtime.docker.verify_report_bind Index is bounded to the last 20 pipeline-run-report artifacts (limit=20). Older runs are omitted by design; they are not a missing backend.",
+      "description": "Browse mode: Recent pipeline-run reports found on disk for the selected pipeline. $pipeline is a pipeline name (chembl_assay, chembl_target, chembl_publication), not a workflow (chembl_baseline). Workflow artifacts live under reports/run-reports/workflow/<name>/ and GET /ops/observability/workflow-run-reports. Choose a row to set the run ID and open exact-run evidence. An empty table is valid when no matching reports exist for this pipeline (index_state=valid_empty). A TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is bind or origin failure, not a selector problem — run python scripts/ops/runtime/docker/verify_report_bind.py from the checkout you are viewing. If reports are expected and the table is empty without that row, treat backend unavailable as a distinct failure and verify BioETL Ops HTTP at /health/live. Has reports: chembl_assay, chembl_target, chembl_publication. chembl_activity may appear in run_id (control-plane) but has no report artifacts yet. Index is bounded to the last 20 pipeline-run-report artifacts (limit=20). Older runs are omitted by design; they are not a missing backend.",
       "gridPos": {
         "h": 5,
         "w": 24,
@@ -153,6 +153,46 @@
                 "value": "dateTimeAsIso"
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "status"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "TREE_MISSING": {
+                        "text": "TREE_MISSING",
+                        "color": "red"
+                      },
+                      "LAYOUT_UNHEALTHY": {
+                        "text": "LAYOUT_UNHEALTHY",
+                        "color": "orange"
+                      },
+                      "IDENTITY_UNHEALTHY": {
+                        "text": "IDENTITY_UNHEALTHY",
+                        "color": "orange"
+                      },
+                      "success": {
+                        "text": "success",
+                        "color": "green"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
@@ -188,13 +228,15 @@
               "markdown_path": true,
               "path": true,
               "report_path": true,
-              "artifact_path": true
+              "artifact_path": true,
+              "row_kind": true
             },
             "renameByName": {
               "completed_at": "Completed",
               "run_id": "Run",
               "pipeline": "Pipeline",
               "status": "Status",
+              "message": "Message",
               "kind": "Artifact",
               "name": "Artifact"
             }
@@ -1093,7 +1135,7 @@
           "id": 3020,
           "type": "table",
           "title": "Inspect Recent Workflow Runs (last 20)",
-          "description": "Browse mode for workflow-run reports. $workflow is a workflow name (e.g. chembl_baseline), not a pipeline. This panel calls GET /ops/observability/workflow-run-reports?workflow=${workflow}&limit=20. Panel 3010 remains pipeline-only. An empty table is valid when no matching workflow reports exist. Backend unavailable is a distinct failure — verify BioETL Ops HTTP at /health/live.",
+          "description": "Browse mode for workflow-run reports. $workflow is a workflow name (e.g. chembl_baseline), not a pipeline. This panel calls GET /ops/observability/workflow-run-reports?workflow=${workflow}&limit=20. Panel 3010 remains pipeline-only. An empty table is valid when no matching workflow reports exist (index_state=valid_empty). A TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is bind or origin failure, not a selector problem — run python scripts/ops/runtime/docker/verify_report_bind.py from the checkout you are viewing. Backend unavailable is a distinct failure — verify BioETL Ops HTTP at /health/live.",
           "gridPos": {
             "h": 5,
             "w": 24,
@@ -1109,7 +1151,48 @@
               },
               "noValue": "VALID EMPTY — no workflow-run-report artifacts for workflow '$workflow' under reports/run-reports/workflow/<name>/ (index is last 20)."
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "TREE_MISSING": {
+                            "text": "TREE_MISSING",
+                            "color": "red"
+                          },
+                          "LAYOUT_UNHEALTHY": {
+                            "text": "LAYOUT_UNHEALTHY",
+                            "color": "orange"
+                          },
+                          "IDENTITY_UNHEALTHY": {
+                            "text": "IDENTITY_UNHEALTHY",
+                            "color": "orange"
+                          },
+                          "success": {
+                            "text": "success",
+                            "color": "green"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           },
           "options": {
             "showHeader": true,
@@ -1143,13 +1226,15 @@
                   "markdown_path": true,
                   "path": true,
                   "report_path": true,
-                  "artifact_path": true
+                  "artifact_path": true,
+                  "row_kind": true
                 },
                 "renameByName": {
                   "completed_at": "Completed",
                   "run_id": "Run",
                   "workflow": "Workflow",
-                  "status": "Status"
+                  "status": "Status",
+                  "message": "Message"
                 }
               }
             }
