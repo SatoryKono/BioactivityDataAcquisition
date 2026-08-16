@@ -37,7 +37,7 @@ _REPORT_STYLES = """
             font-size: 14px;
         }
         .status-pass { background: #28a745; color: white; }
-        .status-warning { background: #ffc107; color: #333; }
+        .status-warn { background: #ffc107; color: #333; }
         .status-fail { background: #dc3545; color: white; }
         .card {
             background: white;
