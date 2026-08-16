@@ -134,4 +134,7 @@ def _resolve_base_summary_replay_context(
 __all__ = [
     "_BaseSummaryReplayContext",
     "_resolve_base_summary_replay_context",
+    "collect_input_snapshot_content_hashes",
+    "collect_input_snapshot_ids",
+    "compute_input_snapshot_identity_fingerprint",
 ]
