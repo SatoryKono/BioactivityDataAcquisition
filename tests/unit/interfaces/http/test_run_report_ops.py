@@ -159,6 +159,7 @@ def test_list_pipeline_payloads_includes_report_root_diagnostics(
         root=tmp_path,
     )
     assert payload["status"] == "ok"
+    assert payload["index_state"] == "ok"
     assert payload["count"] == 1
     assert payload["report_root"] == str(tmp_path.as_posix())
     assert payload["marker_status"] in {"healthy", "unhealthy"}
@@ -204,6 +205,7 @@ def test_list_workflow_payloads_includes_identity_and_artifact_paths(
     )
 
     assert payload["status"] == "ok"
+    assert payload["index_state"] == "ok"
     assert payload["count"] == 1
     assert payload["report_root"] == str(tmp_path.as_posix())
     assert payload["marker_status"] in {"healthy", "unhealthy"}
@@ -342,13 +344,14 @@ def test_list_pipeline_run_reports(tmp_path: Path) -> None:
         root=tmp_path,
     )
     assert payload["count"] == 1
+    assert payload["index_state"] == "ok"
     assert payload["items"][0]["run_id"] == "run1"
 
 
 def test_list_pipeline_run_reports_distinguishes_no_artifacts(
     tmp_path: Path,
 ) -> None:
-    """An empty on-disk index is a successful empty result, not backend failure."""
+    """A missing kind tree is TREE_MISSING, not a backend failure."""
     payload = list_pipeline_run_report_payloads(
         pipeline_name="chembl_activity",
         limit=5,
@@ -357,9 +360,111 @@ def test_list_pipeline_run_reports_distinguishes_no_artifacts(
 
     assert payload["status"] == "ok"
     assert payload["count"] == 0
-    assert payload["items"] == []
+    assert payload["index_state"] == "tree_missing"
+    assert payload["items"] == [
+        {
+            "row_kind": "diagnostic",
+            "pipeline": "chembl_activity",
+            "run_id": "-",
+            "status": "TREE_MISSING",
+            "completed_at": None,
+            "json_path": None,
+            "markdown_path": None,
+            "message": payload["index_state_message"],
+        }
+    ]
+    assert "verify_report_bind.py" in str(payload["index_state_message"])
     assert payload["report_root"] == str(tmp_path.as_posix())
     assert "marker_status" in payload
+
+
+def _healthy_index_diagnostics(**_kwargs: object) -> dict[str, str]:
+    return {
+        "layout_status": "healthy",
+        "source_identity_status": "healthy",
+        "source_identity_state": "aligned",
+        "marker": "ok",
+    }
+
+
+def test_list_pipeline_valid_empty_when_kind_tree_exists(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tmp_path / "pipeline").mkdir()
+    monkeypatch.setattr(
+        "bioetl.interfaces.http.run_report_ops.report_root_readiness_check",
+        _healthy_index_diagnostics,
+    )
+    payload = list_pipeline_run_report_payloads(
+        pipeline_name="chembl_activity",
+        limit=5,
+        root=tmp_path,
+    )
+    assert payload["status"] == "ok"
+    assert payload["count"] == 0
+    assert payload["index_state"] == "valid_empty"
+    assert payload["items"] == []
+
+
+def test_list_pipeline_layout_unhealthy_when_marker_missing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tmp_path / "pipeline").mkdir()
+    monkeypatch.setattr(
+        "bioetl.interfaces.http.run_report_ops.report_root_readiness_check",
+        lambda **_kwargs: {
+            "layout_status": "unhealthy",
+            "layout_message": "Report-root marker missing",
+            "source_identity_status": "healthy",
+            "marker": "missing",
+        },
+    )
+    payload = list_pipeline_run_report_payloads(
+        pipeline_name="chembl_assay",
+        limit=5,
+        root=tmp_path,
+    )
+    assert payload["index_state"] == "layout_unhealthy"
+    assert payload["count"] == 0
+    assert payload["items"][0]["status"] == "LAYOUT_UNHEALTHY"
+    assert payload["items"][0]["row_kind"] == "diagnostic"
+
+
+def test_list_pipeline_identity_unhealthy_when_source_drifts(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tmp_path / "pipeline").mkdir()
+    monkeypatch.setattr(
+        "bioetl.interfaces.http.run_report_ops.report_root_readiness_check",
+        lambda **_kwargs: {
+            "layout_status": "healthy",
+            "source_identity_status": "unhealthy",
+            "source_identity_message": "foreign source identity",
+            "source_identity_state": "foreign",
+            "marker": "ok",
+        },
+    )
+    payload = list_pipeline_run_report_payloads(
+        pipeline_name="chembl_assay",
+        limit=5,
+        root=tmp_path,
+    )
+    assert payload["index_state"] == "identity_unhealthy"
+    assert payload["items"][0]["status"] == "IDENTITY_UNHEALTHY"
+    assert payload["items"][0]["run_id"] == "-"
+
+
+def test_list_workflow_tree_missing_emits_diagnostic_row(tmp_path: Path) -> None:
+    payload = list_workflow_run_report_payloads(
+        workflow_name="chembl_baseline",
+        limit=5,
+        root=tmp_path,
+    )
+    assert payload["index_state"] == "tree_missing"
+    assert payload["count"] == 0
+    assert payload["items"][0]["workflow"] == "chembl_baseline"
+    assert payload["items"][0]["workflow_run_id"] == "-"
+    assert payload["items"][0]["status"] == "TREE_MISSING"
 
 
 def test_load_rejects_wrong_schema_version(tmp_path: Path) -> None:

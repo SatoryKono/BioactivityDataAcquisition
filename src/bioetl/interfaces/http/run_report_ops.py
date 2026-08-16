@@ -3,16 +3,37 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from bioetl.application.services.run_reports.query import (
+    ReportIndexEntry,
     list_pipeline_reports,
     list_workflow_reports,
 )
 from bioetl.interfaces.http.report_root_config import (
     configured_report_root,
     report_root_readiness_check,
+)
+
+IndexKind = Literal["pipeline", "workflow"]
+IndexState = Literal[
+    "ok",
+    "valid_empty",
+    "tree_missing",
+    "layout_unhealthy",
+    "identity_unhealthy",
+]
+
+_INDEX_STATE_STATUS: Mapping[str, str] = {
+    "tree_missing": "TREE_MISSING",
+    "layout_unhealthy": "LAYOUT_UNHEALTHY",
+    "identity_unhealthy": "IDENTITY_UNHEALTHY",
+}
+_VERIFY_BIND_HINT = (
+    "From the checkout you are viewing run: "
+    "python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay"
 )
 
 
@@ -83,24 +104,127 @@ def _normalize_list_owner(name: str | None) -> str | None:
     return text
 
 
-def list_pipeline_run_report_payloads(
+def _classify_index_state(
     *,
-    pipeline_name: str | None = None,
-    limit: int = 20,
-    root: Path | None = None,
-) -> dict[str, Any]:  # Any: list payload
-    """List recent pipeline run reports (index only, not full bodies)."""
-    base = _effective_root(root)
-    entries = list_pipeline_reports(
-        pipeline_name=_normalize_list_owner(pipeline_name),
-        limit=limit,
-        root=base,
+    kind: IndexKind,
+    entry_count: int,
+    root: Path,
+    diagnostics: Mapping[str, Any],
+) -> tuple[IndexState, str]:
+    """Distinguish a valid empty index from a missing or unhealthy tree."""
+    if entry_count > 0:
+        return "ok", f"{kind}-run-report index has matching artifacts."
+    kind_root = root / kind
+    if not root.exists() or not kind_root.is_dir():
+        return (
+            "tree_missing",
+            (
+                f"Ops HTTP has no {kind} run-reports tree at {root.as_posix()}. "
+                f"{_VERIFY_BIND_HINT}"
+            ),
+        )
+    if diagnostics.get("layout_status") != "healthy":
+        layout_message = diagnostics.get("layout_message") or diagnostics.get("message")
+        return (
+            "layout_unhealthy",
+            f"{layout_message or 'Report-root layout is unhealthy.'} {_VERIFY_BIND_HINT}",
+        )
+    if diagnostics.get("source_identity_status") != "healthy":
+        identity_message = diagnostics.get("source_identity_message")
+        return (
+            "identity_unhealthy",
+            (
+                f"{identity_message or 'Report-root source identity is unhealthy.'} "
+                f"{_VERIFY_BIND_HINT}"
+            ),
+        )
+    return (
+        "valid_empty",
+        f"No matching {kind}-run-report artifacts under {kind_root.as_posix()}.",
     )
-    diagnostics = report_root_readiness_check(root=base)
+
+
+def _run_index_item(kind: IndexKind, item: ReportIndexEntry) -> dict[str, Any]:
+    paths = {
+        "status": item.status,
+        "completed_at": item.completed_at,
+        "json_path": str(item.json_path.as_posix()),
+        "markdown_path": (
+            str(item.markdown_path.as_posix()) if item.markdown_path else None
+        ),
+    }
+    if kind == "workflow":
+        return {"workflow": item.owner, "workflow_run_id": item.run_id, **paths}
+    return {"pipeline": item.owner, "run_id": item.run_id, **paths}
+
+
+def _diagnostic_index_item(
+    *,
+    kind: IndexKind,
+    owner: str | None,
+    index_state: IndexState,
+    message: str,
+) -> dict[str, Any]:
+    owner_value = owner or "-"
+    row: dict[str, Any] = {
+        "row_kind": "diagnostic",
+        "status": _INDEX_STATE_STATUS[index_state],
+        "completed_at": None,
+        "json_path": None,
+        "markdown_path": None,
+        "message": message,
+    }
+    if kind == "workflow":
+        row["workflow"] = owner_value
+        row["workflow_run_id"] = "-"
+        return row
+    row["pipeline"] = owner_value
+    row["run_id"] = "-"
+    return row
+
+
+def _index_items(
+    *,
+    kind: IndexKind,
+    owner: str | None,
+    entries: Sequence[ReportIndexEntry],
+    index_state: IndexState,
+    message: str,
+) -> list[dict[str, Any]]:
+    if entries:
+        return [_run_index_item(kind, item) for item in entries]
+    if index_state == "valid_empty":
+        return []
+    return [
+        _diagnostic_index_item(
+            kind=kind,
+            owner=owner,
+            index_state=index_state,
+            message=message,
+        )
+    ]
+
+
+def _list_report_payload(
+    *,
+    kind: IndexKind,
+    owner: str | None,
+    entries: Sequence[ReportIndexEntry],
+    root: Path,
+) -> dict[str, Any]:
+    diagnostics = report_root_readiness_check(root=root)
+    index_state, index_message = _classify_index_state(
+        kind=kind,
+        entry_count=len(entries),
+        root=root,
+        diagnostics=diagnostics,
+    )
     return {
         "status": "ok",
         "count": len(entries),
-        "report_root": str(base.as_posix()),
+        "index_state": index_state,
+        "index_state_message": index_message,
+        "report_root": str(root.as_posix()),
         "marker": diagnostics.get("marker"),
         # Backward-compatible layout status for existing Grafana payloads.
         "marker_status": diagnostics.get("layout_status"),
@@ -112,20 +236,36 @@ def list_pipeline_run_report_payloads(
         "source_identity_resolution_source": diagnostics.get(
             "source_identity_resolution_source"
         ),
-        "items": [
-            {
-                "pipeline": item.owner,
-                "run_id": item.run_id,
-                "status": item.status,
-                "completed_at": item.completed_at,
-                "json_path": str(item.json_path.as_posix()),
-                "markdown_path": (
-                    str(item.markdown_path.as_posix()) if item.markdown_path else None
-                ),
-            }
-            for item in entries
-        ],
+        "items": _index_items(
+            kind=kind,
+            owner=owner,
+            entries=entries,
+            index_state=index_state,
+            message=index_message,
+        ),
     }
+
+
+def list_pipeline_run_report_payloads(
+    *,
+    pipeline_name: str | None = None,
+    limit: int = 20,
+    root: Path | None = None,
+) -> dict[str, Any]:  # Any: list payload
+    """List recent pipeline run reports (index only, not full bodies)."""
+    base = _effective_root(root)
+    owner = _normalize_list_owner(pipeline_name)
+    entries = list_pipeline_reports(
+        pipeline_name=owner,
+        limit=limit,
+        root=base,
+    )
+    return _list_report_payload(
+        kind="pipeline",
+        owner=owner,
+        entries=entries,
+        root=base,
+    )
 
 
 def list_workflow_run_report_payloads(
@@ -136,40 +276,18 @@ def list_workflow_run_report_payloads(
 ) -> dict[str, Any]:  # Any: list payload
     """List recent workflow run reports (index only)."""
     base = _effective_root(root)
+    owner = _normalize_list_owner(workflow_name)
     entries = list_workflow_reports(
-        workflow_name=_normalize_list_owner(workflow_name),
+        workflow_name=owner,
         limit=limit,
         root=base,
     )
-    diagnostics = report_root_readiness_check(root=base)
-    return {
-        "status": "ok",
-        "count": len(entries),
-        "report_root": str(base.as_posix()),
-        "marker": diagnostics.get("marker"),
-        "marker_status": diagnostics.get("layout_status"),
-        "source_identity": diagnostics.get("source_identity"),
-        "source_identity_state": diagnostics.get("source_identity_state"),
-        "source_identity_status": diagnostics.get("source_identity_status"),
-        "source_identity_expected": diagnostics.get("source_identity_expected"),
-        "source_identity_actual": diagnostics.get("source_identity_actual"),
-        "source_identity_resolution_source": diagnostics.get(
-            "source_identity_resolution_source"
-        ),
-        "items": [
-            {
-                "workflow": item.owner,
-                "workflow_run_id": item.run_id,
-                "status": item.status,
-                "completed_at": item.completed_at,
-                "json_path": str(item.json_path.as_posix()),
-                "markdown_path": (
-                    str(item.markdown_path.as_posix()) if item.markdown_path else None
-                ),
-            }
-            for item in entries
-        ],
-    }
+    return _list_report_payload(
+        kind="workflow",
+        owner=owner,
+        entries=entries,
+        root=base,
+    )
 
 
 def _load_versioned_payload(
