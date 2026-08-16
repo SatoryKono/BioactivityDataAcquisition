@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 from bioetl.domain.behavior.aggregation_validator import AggregationConfig
 from bioetl.domain.behavior.cross_validation_validator import CrossValidationConfig
 from bioetl.domain.types import JsonDict
@@ -67,37 +69,14 @@ def _convert_to_aggregation_config(config: JsonDict) -> AggregationConfig:
         TypeError: When group_by or aggregations have invalid shapes.
         ValueError: When field values are semantically invalid.
     """
-    group_by_raw = config.get("group_by", [])
-    aggregations_raw = config.get("aggregations", {})
-    if not isinstance(group_by_raw, list):
-        raise TypeError(
-            f"group_by must be a list of field names, got {type(group_by_raw).__name__}"
-        )
-    if not all(isinstance(item, str) for item in group_by_raw):
-        raise TypeError("group_by entries must be strings")
-    if not isinstance(aggregations_raw, dict):
-        raise TypeError(
-            "aggregations must be a mapping of field -> function, "
-            f"got {type(aggregations_raw).__name__}"
-        )
-    for field_name, function in aggregations_raw.items():
-        if not isinstance(field_name, str):
-            raise TypeError("aggregations keys must be strings")
-        if not isinstance(function, str):
-            raise TypeError(
-                f"aggregations[{field_name!r}] must be a string function name"
-            )
-    source_field = config.get("source_field")
-    if source_field is not None and not isinstance(source_field, str):
-        raise TypeError("source_field must be a string or null")
-    provenance = config.get("provenance_tracking", True)
-    if not isinstance(provenance, bool):
-        raise TypeError("provenance_tracking must be a boolean")
     return AggregationConfig(
-        group_by=list(group_by_raw),
-        aggregations={str(k): str(v) for k, v in aggregations_raw.items()},
-        source_field=source_field,
-        provenance_tracking=provenance,
+        group_by=_aggregation_group_by(config.get("group_by", [])),
+        aggregations=_aggregation_mapping(config.get("aggregations", {})),
+        source_field=_optional_string(config.get("source_field"), "source_field"),
+        provenance_tracking=_require_bool(
+            config.get("provenance_tracking", True),
+            "provenance_tracking",
+        ),
     )
 
 
@@ -108,35 +87,98 @@ def _convert_to_cross_validation_config(config: JsonDict) -> CrossValidationConf
         TypeError: When pairs, rules, flags, or thresholds have invalid shapes.
         ValueError: When threshold values are out of range.
     """
-    pairs_raw = config.get("pairs", [])
-    rules_raw = config.get("rules", {})
-    if not isinstance(pairs_raw, list) or not all(isinstance(item, dict) for item in pairs_raw):
-        raise TypeError(f"pairs must be a list of dictionaries, got {type(pairs_raw).__name__}")
-    if not isinstance(rules_raw, dict):
-        raise TypeError(f"rules must be a mapping, got {type(rules_raw).__name__}")
-    for rule_key, rule_value in rules_raw.items():
-        if not isinstance(rule_key, str) or not isinstance(rule_value, str):
-            raise TypeError("rules keys and values must be strings")
-    strict_mode = config.get("strict_mode", True)
-    if not isinstance(strict_mode, bool):
-        raise TypeError("strict_mode must be a boolean")
-    coverage = config.get("coverage_threshold")
-    consistency = config.get("consistency_threshold")
-    if coverage is not None and not isinstance(coverage, (int, float)):
-        raise TypeError("coverage_threshold must be a number or null")
-    if consistency is not None and not isinstance(consistency, (int, float)):
-        raise TypeError("consistency_threshold must be a number or null")
-    if coverage is not None and (coverage < 0 or coverage > 1):
-        raise ValueError("coverage_threshold must be in [0, 1]")
-    if consistency is not None and (consistency < 0 or consistency > 1):
-        raise ValueError("consistency_threshold must be in [0, 1]")
     return CrossValidationConfig(
-        pairs=list(pairs_raw),
-        rules={str(k): str(v) for k, v in rules_raw.items()},
-        strict_mode=strict_mode,
-        coverage_threshold=float(coverage) if coverage is not None else None,
-        consistency_threshold=float(consistency) if consistency is not None else None,
+        pairs=_cross_validation_pairs(config.get("pairs", [])),
+        rules=_string_rules(config.get("rules", {})),
+        strict_mode=_require_bool(config.get("strict_mode", True), "strict_mode"),
+        coverage_threshold=_optional_unit_interval(
+            config.get("coverage_threshold"),
+            "coverage_threshold",
+        ),
+        consistency_threshold=_optional_unit_interval(
+            config.get("consistency_threshold"),
+            "consistency_threshold",
+        ),
     )
+
+
+def _aggregation_group_by(value: object) -> list[str]:
+    """Validate and copy aggregation group-by fields."""
+    if not isinstance(value, list):
+        raise TypeError(
+            f"group_by must be a list of field names, got {type(value).__name__}"
+        )
+    if not all(isinstance(item, str) for item in value):
+        raise TypeError("group_by entries must be strings")
+    return list(cast(list[str], value))
+
+
+def _aggregation_mapping(value: object) -> dict[str, str]:
+    """Validate and copy aggregation field/function entries."""
+    if not isinstance(value, dict):
+        raise TypeError(
+            "aggregations must be a mapping of field -> function, "
+            f"got {type(value).__name__}"
+        )
+    entries = (_aggregation_entry(field, function) for field, function in value.items())
+    return dict(entries)
+
+
+def _aggregation_entry(field: object, function: object) -> tuple[str, str]:
+    """Validate one aggregation mapping entry."""
+    if not isinstance(field, str):
+        raise TypeError("aggregations keys must be strings")
+    if not isinstance(function, str):
+        raise TypeError(f"aggregations[{field!r}] must be a string function name")
+    return field, function
+
+
+def _optional_string(value: object, field_name: str) -> str | None:
+    """Validate an optional string field."""
+    if value is not None and not isinstance(value, str):
+        raise TypeError(f"{field_name} must be a string or null")
+    return value
+
+
+def _require_bool(value: object, field_name: str) -> bool:
+    """Validate a required boolean field."""
+    if not isinstance(value, bool):
+        raise TypeError(f"{field_name} must be a boolean")
+    return value
+
+
+def _cross_validation_pairs(value: object) -> list[dict[str, object]]:
+    """Validate and copy cross-validation pair definitions."""
+    if not isinstance(value, list) or not all(
+        isinstance(item, dict) for item in value
+    ):
+        raise TypeError(
+            f"pairs must be a list of dictionaries, got {type(value).__name__}"
+        )
+    return list(cast(list[dict[str, object]], value))
+
+
+def _string_rules(value: object) -> dict[str, str]:
+    """Validate and copy string-to-string cross-validation rules."""
+    if not isinstance(value, dict):
+        raise TypeError(f"rules must be a mapping, got {type(value).__name__}")
+    if not all(
+        isinstance(key, str) and isinstance(item, str)
+        for key, item in value.items()
+    ):
+        raise TypeError("rules keys and values must be strings")
+    return cast(dict[str, str], dict(value))
+
+
+def _optional_unit_interval(value: object, field_name: str) -> float | None:
+    """Validate an optional numeric threshold in the inclusive unit interval."""
+    if value is None:
+        return None
+    if not isinstance(value, (int, float)):
+        raise TypeError(f"{field_name} must be a number or null")
+    if value < 0 or value > 1:
+        raise ValueError(f"{field_name} must be in [0, 1]")
+    return float(value)
 
 
 def _is_valid_field_priorities(priorities: JsonDict) -> bool:
