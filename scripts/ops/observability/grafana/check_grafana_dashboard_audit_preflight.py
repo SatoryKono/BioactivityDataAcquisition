@@ -36,7 +36,7 @@ from bioetl.application.services.run_reports.source_identity import (
     IDENTITY_STATE_INVALID,
     IDENTITY_STATE_MISSING,
     RUNTIME_SOURCE_ID_ENV,
-    RuntimeSourceIdentityResolution,
+    RuntimeSourceIdentityResolutionResult,
     compare_runtime_source_identity,
     load_repository_source_environment,
     resolve_runtime_source_identity,
@@ -115,7 +115,7 @@ def _resolve_grafana_username() -> str:
     return DEFAULT_GRAFANA_USERNAME
 
 
-def _resolve_expected_runtime_source_identity() -> RuntimeSourceIdentityResolution:
+def _resolve_expected_runtime_source_identity() -> RuntimeSourceIdentityResolutionResult:
     """Resolve the expected identity with the canonical source precedence."""
     root = Path(__file__).resolve().parents[4]
     contract_path = root / "configs/quality/docker_runtime_contracts.yaml"
