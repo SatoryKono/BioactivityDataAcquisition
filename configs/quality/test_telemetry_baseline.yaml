@@ -1,19 +1,19 @@
 version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
-source_branch: main
-refreshed_at_utc: '2026-08-12T07:29:22.132632+00:00'
+source_branch: agent/issue-8863-closeout-20260816
+refreshed_at_utc: '2026-08-17T01:04:42.527747+00:00'
 refresh_status: captured
-source_commit: 95429a120db067cef6767062df19f2254b07c99b
-source_run_id: local-merge-resolution-20260812
-source_tree_sha256: f97620a374bc8520bb4e0570425fcf4b119ecd6e9ec743c8ebe68ddcd70b54b0
+source_commit: e7fe00cfebfb1ce3984f2452dce7d7ea2c736002
+source_run_id: local-governance-refresh-20260817
+source_tree_sha256: 4a75ea7e99dbf689cb5ffffbe57ff959cbba4bd04a9e8d8dcd74081503a71ddb
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
 artifact_inputs:
   coverage_xml: reports/coverage/coverage.xml
   coverage_log: null
-  coverage_percent_fallback: null
+  coverage_percent_fallback: 95.69
   slowest_tests_json: reports/test-telemetry/slowest-tests.json
   junit_inputs: []
 coverage:

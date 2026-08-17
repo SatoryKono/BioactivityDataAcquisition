@@ -104,9 +104,9 @@
       "source": "reports/quality/full-app-duplication-baseline.json"
     },
     "repo_wide_zero_import_candidates": {
-      "classified": 5,
-      "current": 5,
-      "owner_test_anchored": 5,
+      "classified": 4,
+      "current": 4,
+      "owner_test_anchored": 4,
       "source": "reports/quality/dead-code-inventory.json",
       "untriaged": 0
     },
@@ -126,7 +126,7 @@
       "targeted_line_rate": 1.0
     },
     "zero_reference_supporting_scripts": {
-      "current": 4,
+      "current": 0,
       "entries_without_owner_metadata": 0,
       "source": "configs/quality/scripts_inventory_manifest.json"
     }

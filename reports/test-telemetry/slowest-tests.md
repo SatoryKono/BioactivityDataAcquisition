@@ -1,7 +1,7 @@
 # Slowest Tests
 
-Source commit: `95429a120db067cef6767062df19f2254b07c99b`
-Source run id: `local-merge-resolution-20260812`
+Source commit: `e7fe00cfebfb1ce3984f2452dce7d7ea2c736002`
+Source run id: `local-governance-refresh-20260817`
 Refresh status: `captured`
 Collected test cases: `47415`
 Freshness guard: `<=45 days`
