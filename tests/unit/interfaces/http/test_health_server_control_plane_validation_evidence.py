@@ -126,6 +126,20 @@ async def test_all_control_plane_validation_routes_publish_stable_contract(
             assert payload["endpoint"] == endpoint
             assert payload["run_id"] == str(manifest.run_id)
             assert payload["manifest_id"] == manifest.manifest_id
+            assert payload["trust_status"] in {
+                "OK",
+                "WARNING",
+                "ERROR",
+                "INCOMPLETE",
+            }
+            assert payload["processing_status"] in {
+                "success",
+                "failed",
+                "shutdown",
+                "unknown",
+            }
+            assert payload["scope_kind"] == "exact_run"
+            assert "trust" in payload
         _, failure_payload = await _get_json(
             server,
             "/ops/control-plane/failure-reasons?pipeline=chembl_activity"

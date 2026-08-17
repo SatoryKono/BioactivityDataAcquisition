@@ -113,6 +113,30 @@ def test_finalize_lineage_fragment_dedupes_nodes_and_preserves_envelope() -> Non
     )
 
 
+def test_finalize_lineage_fragment_rejects_dangling_edge_endpoints() -> None:
+    run_context = _make_run_context()
+    created_at = datetime(2026, 4, 24, 12, 30, tzinfo=UTC)
+    run_node = LineageNodeRef(
+        node_type=LineageNodeType.RUN,
+        node_id=f"run:{run_context.run_id}",
+    )
+    missing = LineageNodeRef(node_type=LineageNodeType.DATASET, node_id="dataset:missing")
+    with pytest.raises(ValueError, match="dataset:missing"):
+        finalize_lineage_fragment(
+            fragment_name="bronze",
+            run_context=run_context,
+            nodes=[run_node],
+            edges=[
+                LineageEdge(
+                    edge_type=LineageEdgeType.PRODUCED_BY,
+                    source=missing,
+                    target=run_node,
+                )
+            ],
+            created_at=created_at,
+        )
+
+
 def test_finalize_lineage_fragment_orders_nodes_by_stable_identifier() -> None:
     run_context = _make_run_context()
     created_at = datetime(2026, 4, 24, 12, 30, tzinfo=UTC)

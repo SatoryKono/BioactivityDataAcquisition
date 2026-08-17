@@ -31,6 +31,7 @@ from bioetl.domain.lineage import (
     LineageNodeRef,
     LineageNodeType,
 )
+from bioetl.domain.ports import RawManifestInspection
 from bioetl.domain.types import RunID, RunType
 from tests.helpers.control_plane import InMemoryRunLedgerStore
 
@@ -199,6 +200,32 @@ def test_manifest_validation_does_not_overclaim_registry_compatibility() -> None
 
     assert payload["status"] == "UNKNOWN"
     assert "manifest_contract_compatibility_not_verified" in _reasons(payload)
+
+
+class _CompatibleInspector:
+    def inspect_raw_manifest(self, manifest_id: str) -> RawManifestInspection:
+        _ = manifest_id
+        return RawManifestInspection(
+            True,
+            (),
+            contract_comparison_status="compatible",
+            contract_comparison_reason="manifest_contract_comparison_compatible",
+            resume_contract="n/a",
+            resume_contract_reason="fresh_run_not_resume",
+            lock_owner_id="n/a",
+            lock_owner_reason="no_distributed_lock",
+        )
+
+
+def test_manifest_validation_ok_requires_recorded_comparison() -> None:
+    payload = ControlPlaneEvidenceService(
+        manifest_inspector=_CompatibleInspector()  # type: ignore[arg-type]
+    ).manifest_validation(scope=_scope(_manifest()))
+
+    assert payload["status"] == "OK"
+    assert payload["trust_status"] == "OK"
+    assert "manifest_contract_comparison_compatible" in _reasons(payload)
+    assert "resume_contract_recorded" in _reasons(payload)
 
 
 def test_manifest_validation_rejects_unknown_persistence_profile() -> None:
@@ -491,3 +518,75 @@ def test_failure_reasons_make_unknown_state_visible_without_zero_counts(
     assert {row["reason"] for row in rows} == {expected_reason}
     assert all(row["count"] is None for row in rows)
     assert payload["total_failure_count"] is None
+
+
+def test_trust_status_is_incomplete_when_processing_succeeds_without_evidence() -> None:
+    manifest = _manifest(launch_context={
+        "required_persistence_profile": "replay_ready",
+        "processing_status": "success",
+    })
+    payload = ControlPlaneEvidenceService().manifest_validation(scope=_scope(manifest))
+
+    assert payload["processing_status"] == "success"
+    assert payload["trust_status"] == "INCOMPLETE"
+    assert payload["scope_kind"] == "exact_run"
+    assert payload["evidence_freshness"] == "observed"
+    assert payload["status"] == "UNKNOWN"
+    assert "manifest_contract_compatibility_not_verified" in payload["trust"]["reasons"]
+
+
+def test_trust_status_precedence_keeps_error_above_incomplete() -> None:
+    manifest = _manifest(
+        schema_version="2.0",
+        launch_context={"processing_status": "success"},
+        code_provenance=RunCodeProvenance(),
+    )
+    payload = ControlPlaneEvidenceService().manifest_validation(scope=_scope(manifest))
+
+    assert payload["processing_status"] == "success"
+    assert payload["trust_status"] == "ERROR"
+    assert payload["status"] == "ERROR"
+
+
+def test_unresolved_scope_is_not_false_ok() -> None:
+    payload = ControlPlaneEvidenceService().manifest_validation(
+        scope=_unresolved_scope()
+    )
+
+    assert payload["processing_status"] == "unknown"
+    assert payload["trust_status"] == "INCOMPLETE"
+    assert payload["scope_kind"] == "unresolved"
+    assert payload["evidence_freshness"] == "unknown"
+
+
+def test_retention_prefers_plan_for_manifest_over_full_plan() -> None:
+    manifest = _snapshot_manifest()
+    plan = ControlPlaneArtifactLifecyclePlan(
+        generated_at=_NOW,
+        cutoff=_NOW,
+        dry_run=True,
+        artifacts=(),
+    )
+
+    class _BoundedPlanner:
+        def __init__(self) -> None:
+            self.full_plan_calls = 0
+            self.manifest_plan_calls = 0
+
+        def plan(self, policy: object, *, dry_run: bool = True) -> object:
+            self.full_plan_calls += 1
+            return plan
+
+        def plan_for_manifest(
+            self, policy: object, *, manifest: object, dry_run: bool = True
+        ) -> object:
+            self.manifest_plan_calls += 1
+            return plan
+
+    planner = _BoundedPlanner()
+    ControlPlaneEvidenceService(
+        lifecycle_planner=planner  # type: ignore[arg-type]
+    ).retention_compliance(scope=_scope(manifest), now=_NOW)
+
+    assert planner.manifest_plan_calls == 1
+    assert planner.full_plan_calls == 0

@@ -947,10 +947,25 @@
       "id": "S17-docs-00-project-01",
       "wave": "E",
       "files": 300,
-      "status": "timeout",
-      "reason": "timeout after 600s",
+      "status": "ok",
+      "reason": "",
+      "exit_code": 0,
       "log": "reports/quality/coderabbit/20260816/review_E_S17-docs-00-project-01.log",
-      "elapsed_s": 607.6
+      "bytes": 248609,
+      "elapsed_s": 808.4,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ]
     },
     "S17-docs-00-project-02": {
       "id": "S17-docs-00-project-02",
@@ -980,10 +995,25 @@
       "id": "S17-docs-decisions",
       "wave": "E",
       "files": 60,
-      "status": "timeout",
-      "reason": "timeout after 600s",
+      "status": "rate_limit",
+      "reason": "CodeRabbit rate limit (waitTime=1680s)",
+      "exit_code": 1,
       "log": "reports/quality/coderabbit/20260816/review_E_S17-docs-decisions.log",
-      "elapsed_s": 608.5
+      "bytes": 940,
+      "elapsed_s": 40.8,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ]
     },
     "S18-dashboard-docs": {
       "id": "S18-dashboard-docs",
@@ -1123,5 +1153,5 @@
       ]
     }
   },
-  "updated_utc": "2026-08-17T16:50:46.863862+00:00"
+  "updated_utc": "2026-08-17T17:05:26.236702+00:00"
 }

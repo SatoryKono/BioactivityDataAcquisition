@@ -214,3 +214,11 @@ billing was not enabled.
 - Files: `156`
 - Detail: CodeRabbit connection/WebSocket failure
 - GitHub issue: pending reconciliation
+## S17-docs-decisions — rate_limit
+
+- UTC: `2026-08-17T17:05:26.241594+00:00`
+- Wave: `E`
+- Files: `60`
+- Detail: CodeRabbit rate limit (waitTime=1680s)
+- GitHub issue: pending reconciliation
+
