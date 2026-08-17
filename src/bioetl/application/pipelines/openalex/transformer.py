@@ -221,7 +221,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
 
         return {
             "pmid": external_ids.get("pmid"),
-            "pmc_id": None,
+            "pmc_id": external_ids.get("pmmolecule_id") or external_ids.get("pmc_id"),
             "mag_id": external_ids.get("mag_id"),
             "journal": journal_info.get("journal"),
             **issn_fields,

@@ -255,7 +255,12 @@ def _mark_projection_unsupported(
     return _evolve_projection(
         projection,
         projector_coverage_complete=False,
-        unsupported_replay_entries=tuple(sorted(unsupported)),
+        unsupported_replay_entries=tuple(
+            sorted(
+                unsupported,
+                key=lambda item: (item[0], item[1], item[2] or ""),
+            )
+        ),
     )
 
 

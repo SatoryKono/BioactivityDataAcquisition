@@ -39,7 +39,7 @@ def find_required_failures(
         if result.is_success:
             continue
         dep_cfg = host._config.get_dependency(name)
-        if dep_cfg and dep_cfg.required:
+        if dep_cfg is None or dep_cfg.required:
             failed.append(name)
     return failed
 
