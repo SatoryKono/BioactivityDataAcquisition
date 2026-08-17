@@ -105,6 +105,7 @@ class GoldBusinessRuleSpec:
             if not reason_code.is_semantic:
                 raise ValueError("Gold business rules must use gold_semantic_* codes")
             object.__setattr__(self, "reject_reason_code", reason_code)
+        _reject_inverted_numeric_range(self.minimum, self.maximum)
 
     @staticmethod
     def _parse_allowed_values(raw_values: object) -> tuple[object, ...]:
@@ -191,3 +192,14 @@ class GoldBusinessRuleSpec:
                 "violations": violations,
             },
         )
+
+
+def _is_numeric_bound(value: object) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def _reject_inverted_numeric_range(minimum: object, maximum: object) -> None:
+    if not (_is_numeric_bound(minimum) and _is_numeric_bound(maximum)):
+        return
+    if minimum > maximum:
+        raise ValueError("minimum cannot exceed maximum")

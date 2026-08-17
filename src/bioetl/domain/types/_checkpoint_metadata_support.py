@@ -36,12 +36,19 @@ def coerce_snapshot_ids(value: object | None) -> tuple[str, ...]:
     normalized: list[str] = []
     seen: set[str] = set()
     for item in value:
-        text = str(item).strip()
-        if not text or text in seen:
+        text = _snapshot_id_text(item)
+        if text is None or text in seen:
             continue
         seen.add(text)
         normalized.append(text)
     return tuple(normalized)
+
+
+def _snapshot_id_text(item: object) -> str | None:
+    if not isinstance(item, str):
+        return None
+    text = item.strip()
+    return text or None
 
 
 def is_empty_checkpoint_metadata_value(value: object | None) -> bool:

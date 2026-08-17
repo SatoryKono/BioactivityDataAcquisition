@@ -209,3 +209,38 @@ Code/config/contracts and executable gates outrank CodeRabbit output.
 | CR-20260816-A-S01-domain-types-022 | confirm | critical | ContractRolloutPolicy single-mode defaults 
 ead_order/write_versions=() fail __post_init__ (ctive_version must be present in read_order). | src/bioetl/domain/types/contract_rollout.py; #8893 |
 
+| CR-20260816-A-S01-domain-types-001 | reject | trivial | Stale Any comment; field is already JsonDict \| None. | docstring |
+| CR-20260816-A-S01-domain-types-002 | reject | trivial | StrEnum/Literal for debug status/formats is an API expansion. | debug_export.py |
+| CR-20260816-A-S01-domain-types-003 | reject | trivial | Literal resume_verdict is typing/API tightening, not a broken invariant. | checkpoint_compatibility_result.py |
+| CR-20260816-A-S01-domain-types-004 | confirm | major | incompatible_result defaults identity_continuity_proven=True. | #8895 |
+| CR-20260816-A-S01-domain-types-005 | reject | trivial | Extra dual_read/dual_write cardinality rules are a new policy, not the shipped contract. | contract_rollout.py |
+| CR-20260816-A-S01-domain-types-006 | reject | trivial | Unconstrained severity string is the shipped API; enum swap is expansion. | dq_contracts.py |
+| CR-20260816-A-S01-domain-types-007 | reject | minor | Whitespace-padded versions already fail membership; current path is fail-closed. | contract_rollout.py |
+| CR-20260816-A-S01-domain-types-008 | reject | major | DRY consolidate of coerce helpers; no divergent outcome. | _checkpoint_metadata_support.py |
+| CR-20260816-A-S01-domain-types-009 | reject | major | Transition lookup is phase-scoped; WRITE_TO_SUCCESS from CROSS_VALIDATION is an explicit degraded rule. | _execution_phase_transition_builders.py |
+| CR-20260816-A-S01-domain-types-010 | confirm | major | ids-only fingerprint is None; equivalent refs hash. | #8895 |
+| CR-20260816-A-S01-domain-types-011 | confirm | minor | coerce_snapshot_ids stringifies None/int into fake ids. | #8895 |
+| CR-20260816-A-S01-domain-types-012 | confirm | minor | invoke_to_schema swallows ValueError from a valid to_schema(). | #8895 |
+| CR-20260816-A-S01-domain-types-013 | confirm | minor | Empty/dot-only contract_ref validates; from_legacy('') -> .v1.0.0. | #8895 |
+| CR-20260816-A-S01-domain-types-014 | confirm | minor | coerce_mapping returns a mutable dict. | #8895 |
+| CR-20260816-A-S01-domain-types-015 | confirm | minor | _extract_with_fallback returns raw unstripped / non-string values. | #8895 |
+| CR-20260816-A-S01-domain-types-016 | confirm | major | messages list on frozen VO is mutable and unhashable. | #8895 |
+| CR-20260816-A-S01-domain-types-017 | confirm | major | affected_fields list on frozen VO is mutable and unhashable. | #8895 |
+| CR-20260816-A-S01-domain-types-019 | confirm | major | DebugExportPack nested dicts stay mutable; pack is unhashable. | #8895 |
+| CR-20260816-A-S01-domain-types-020 | reject | major | Unreachable TYPE_CHECKING / pragma is coverage style. | types/__init__.py |
+| CR-20260816-A-S01-domain-types-021 | reject | major | DRY consolidate of from_legacy/from_dict constructors. | checkpoint_metadata.py |
+| CR-20260816-A-S01-domain-types-023 | confirm | major | records_processed is not coerced; '10' stays str, None stays None. | #8895 |
+| CR-20260816-A-S01-domain-types-024 | reject | trivial | Whitespace normalize-only; membership already fail-closes mismatches. | gold_schema_policy.py |
+| CR-20260816-A-S01-domain-types-025 | reject | trivial | DRY generator for get_all_* accessors. | validation_result.py |
+| CR-20260816-A-S01-domain-types-026 | confirm | minor | Inverted numeric min>max is accepted. | #8895 |
+| CR-20260816-A-S01-domain-types-027 | reject | trivial | DRY from_mapping vs __post_init__ normalization. | gold_contracts_rules.py |
+| CR-20260816-A-S01-domain-types-028 | confirm | minor | bool is accepted as SCD type because bool is an int. | #8895 |
+| CR-20260816-A-S01-domain-types-029 | reject | trivial | CompositeFSM is a mutable state machine; history is internal state. | execution_phase.py |
+| CR-20260816-A-S01-domain-types-030 | reject | minor | Required-before-reference is the shipped heuristic; CR wants a different order. | gold_contracts_rejects.py |
+| CR-20260816-A-S01-domain-types-031 | reject | trivial | cls() vs explicit class name is subclass style. | schema_policy.py |
+| CR-20260816-A-S01-domain-types-032 | reject | trivial | DRY shared transition lookup. | execution_phase.py |
+| CR-20260816-A-S01-domain-types-033 | reject | major | Protocol-only runtime_checkable complaint. | identifiers.py |
+| CR-20260816-A-S01-domain-types-034 | reject | trivial | Current CMP-RT blockers except SHADOW are already listed. | validation_severity.py |
+| CR-20260816-A-S01-domain-types-035 | reject | trivial | Terminal phases do not overlap explicit table keys; no overwrite. | execution_phase_transitions.py |
+| CR-20260816-A-S01-domain-types-036 | reject | trivial | Literal annotation only. | gold_contracts_rejects.py |
+
