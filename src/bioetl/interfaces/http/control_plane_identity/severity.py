@@ -39,6 +39,11 @@ def domain_severity(
     checkpoint_status: str,
     applicable: bool,
 ) -> str:
+    """Map one identity anchor to a domain severity token.
+
+    Returns N/A, OK, DEGRADED, WARNING, or FAILING from applicability,
+    checkpoint status, exact-replay eligibility, and missing-anchor policy.
+    """
     if not applicable:
         return "N/A"
     if spec.name == "checkpoint_anchor_status":
@@ -109,6 +114,7 @@ def _missing_anchor_severity(
 
 
 def ui_status(domain_status: str) -> str:
+    """Map a domain severity token to the Control Plane UI status."""
     if domain_status == "FAILING":
         return "CRIT"
     if domain_status in {"DEGRADED", "WARNING"}:
@@ -117,10 +123,12 @@ def ui_status(domain_status: str) -> str:
 
 
 def is_identity_gap(domain_status: str) -> bool:
+    """Return True when the domain status is a failing or degraded gap."""
     return domain_status in {"FAILING", "DEGRADED", "WARNING"}
 
 
 def applicability(name: str, manifest: RunManifest | None) -> str:
+    """Return APPLICABLE, N/A, or a scope note for one identity anchor."""
     if manifest is None:
         return "not available for current scope"
     if name in {"replay_of_run_id", "replay_of_manifest_id"} and not is_replay(

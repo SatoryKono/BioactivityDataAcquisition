@@ -1,13 +1,14 @@
 %% BioETL — Storage Support Components
 %% Support utilities, metadata write-preparation zones, validators, and metadata builders for the storage layer.
+%% Re-verified 2026-08-17 against live src/bioetl symbols
 
-%% @version 1.1.0
-%% @date    2026-03-19
+%% @version 1.1.1
+%% @date    2026-08-17
 %% @type    flowchart
 %% @level   System / Component
 %% @view    storage-support
 %% @parent  06-storage-layer.mmd
-%% @nodes   14
+%% @nodes   13
 
 %%{init: {
   'flowchart': {
@@ -38,11 +39,10 @@ graph TB
     end
 
     subgraph Metadata["Metadata Builders"]
-        BMB["BronzeMetadataBuilder"]:::size-sm
-        SMB["SilverMetadataBuilder"]:::size-sm
-        GMB["GoldMetadataBuilder"]:::size-sm
+        BMB["BronzeWriterMetadataMixin"]:::size-sm
+        SMB["SilverWriterMetadataMixin"]:::size-sm
+        GMB["GoldWriterMetadataMixin"]:::size-sm
         CMH["composite_metadata_helpers<br/>canonical shared seam"]:::size-sm
-        CMW["metadata_builder_composite_helpers<br/>compat wrapper"]:::size-sm
     end
 
     %% Layout hints (no data edges — independent components)
@@ -54,10 +54,9 @@ graph TB
     MW --> MWO
     SMB --> CMH
     GMB --> CMH
-    CMW -.-> CMH
 
     classDef storage fill:#eff6ff,stroke:#2563eb
     classDef service fill:#f5f3ff,stroke:#7c3aed
 
-    class AC,RM,MW,MWO,CSV,DQW,BMB,SMB,GMB,CMH,CMW storage
+    class AC,RM,MW,MWO,CSV,DQW,BMB,SMB,GMB,CMH storage
     class PSV,PGV,NOV service
