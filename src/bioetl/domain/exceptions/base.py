@@ -48,6 +48,16 @@ class BioETLError(Exception):
             "with_traceback",
         }
     )
+    _RESERVED_CONTEXT_KEYS: ClassVar[frozenset[str]] = _CONTEXT_EXCLUDE | frozenset(
+        {
+            "add_note",
+            "context",
+            "get_error_type",
+            "get_reason_code",
+            "to_structured_context",
+            "with_context",
+        }
+    )
 
     def __init__(
         self,
@@ -61,7 +71,7 @@ class BioETLError(Exception):
         if reason_code is not None:
             self.reason_code = reason_code
         for key, value in context.items():
-            setattr(self, key, value)
+            self._assign_context_attr(key, value)
 
     @classmethod
     def get_error_type(cls) -> ErrorType:
@@ -124,8 +134,21 @@ class BioETLError(Exception):
             This exception instance with the supplied context attached.
         """
         for key, value in extra.items():
-            setattr(self, key, value)
+            self._assign_context_attr(key, value)
         return self
+
+    def _assign_context_attr(self, key: str, value: object) -> None:
+        """Attach one diagnostic field, rejecting reserved or read-only names."""
+        if not key or key.startswith("_") or key in self._RESERVED_CONTEXT_KEYS:
+            raise ValueError(
+                f"reserved or read-only context key cannot be assigned: {key!r}"
+            )
+        existing = getattr(type(self), key, None)
+        if isinstance(existing, property) or callable(existing):
+            raise ValueError(
+                f"reserved or read-only context key cannot be assigned: {key!r}"
+            )
+        setattr(self, key, value)
 
 
 class CriticalError(BioETLError):

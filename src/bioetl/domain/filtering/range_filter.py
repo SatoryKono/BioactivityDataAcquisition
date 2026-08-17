@@ -38,3 +38,12 @@ class GoldRangeFilter:
             raise ValueError(
                 f"At least one of min_value or max_value must be provided for column '{self.column}'"
             )
+        if (
+            self.min_value is not None
+            and self.max_value is not None
+            and self.min_value > self.max_value
+        ):
+            raise ValueError(
+                f"min_value ({self.min_value}) cannot exceed max_value "
+                f"({self.max_value}) for column '{self.column}'"
+            )
