@@ -55,6 +55,36 @@ def _create_issue(
     )
 
 
+def _append_named_config_issue_if_invalid(
+    *,
+    issues: list[ValidationIssue],
+    composite_config: JsonDict,
+    config_key: str,
+    validator: object,
+    code: IssueCode,
+    severity: ValidationSeverity,
+    message: str,
+    details_key: str,
+) -> None:
+    """Validate one optional named mapping section and append its issue."""
+    section_value = composite_config.get(config_key)
+    if section_value is None:
+        return
+    is_valid = (
+        isinstance(section_value, dict)
+        and callable(validator)
+        and validator(section_value)
+    )
+    _append_config_issue_if_invalid(
+        issues=issues,
+        is_valid=is_valid,
+        code=code,
+        severity=severity,
+        message=message,
+        details={details_key: section_value},
+    )
+
+
 def _get_layer_for_code(code: IssueCode) -> ValidationLayer:
     if code.value.startswith("CMP-STR-"):
         return ValidationLayer.STRUCTURAL
@@ -184,7 +214,7 @@ def _finite_number(value: object, field_name: str) -> float:
         raise TypeError(f"{field_name} must be a number or null")
     normalized = float(value)
     if not math.isfinite(normalized):
-        raise ValueError(f"{field_name} must be finite")
+        raise ValueError(f"{field_name} must be in [0, 1]")
     return normalized
 
 

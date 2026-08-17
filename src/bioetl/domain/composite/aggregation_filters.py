@@ -20,13 +20,14 @@ def _require_filter_field(field: str) -> None:
 def _validate_null_filter(text: str, upper: str, token: str) -> bool:
     if token not in upper:
         return False
-    token_index = upper.find(token)
-    field = text[:token_index].strip()
-    _require_filter_field(field)
-    if text[token_index + len(token) :].strip():
+    token_start = upper.find(token)
+    suffix = text[token_start + len(token) :].strip()
+    if suffix:
         raise ValueError(
             "aggregation filter_condition null check must not contain trailing text"
         )
+    field = text[:token_start].strip()
+    _require_filter_field(field)
     return True
 
 

@@ -112,9 +112,7 @@ def test_transform_node_id_encodes_delimiter_collision() -> None:
         step_index=1,
         pipeline_name="chembl_activity",
     )
-    assert colliding.node_id == (
-        "transform:chembl_activity:normalize%3Avalues:1.2.3:1"
-    )
+    assert colliding.node_id == ("transform:chembl_activity:normalize%3Avalues:1.2.3:1")
 
 
 def test_lineage_edge_and_fragment_roundtrip() -> None:

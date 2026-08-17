@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from bioetl.application.core.batch_operation_errors import OPERATION_ERRORS
+from bioetl.application.core import batch_pipeline_execution_errors as errors
 
 SOURCE_METADATA_ERRORS: tuple[type[Exception], ...] = (
-    *OPERATION_ERRORS,
+    *errors.PIPELINE_EXECUTION_ERRORS,
     AttributeError,
 )
 
