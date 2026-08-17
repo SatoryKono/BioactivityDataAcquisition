@@ -7,6 +7,9 @@ from typing import Any, SupportsIndex, SupportsInt, TypeGuard
 
 from bioetl.domain.run_reports.models import WorkflowExecutionRow
 
+_TOP_REASONS_LIMIT = 3
+_REASONS_ROLLUP_LIMIT = 10
+
 
 def normalize_top_reasons(
     raw: object,
@@ -14,8 +17,12 @@ def normalize_top_reasons(
     """Normalize and bound child pipeline reason payloads."""
     if not _is_reason_sequence(raw):
         return ()
-    items = (_normalize_reason(entry) for entry in raw)
-    return tuple(item for item in items if item is not None)[:3]
+    items = [item for item in (_normalize_reason(entry) for entry in raw) if item]
+    ranked = sorted(
+        items,
+        key=lambda item: (-_as_int(item.get("count")), str(item.get("reason_code"))),
+    )
+    return tuple(ranked[:_TOP_REASONS_LIMIT])
 
 
 def build_reasons_rollup(
@@ -35,7 +42,7 @@ def build_reasons_rollup(
             "reason_family": family,
             "count": count,
         }
-        for (code, outcome, family), count in ranked[:10]
+        for (code, outcome, family), count in ranked[:_REASONS_ROLLUP_LIMIT]
     )
 
 

@@ -160,7 +160,7 @@ def _serialize_unordered_json_collection(
         return serialize_json_canonical(_sort_json_collection(parsed))
     if isinstance(parsed, dict):
         return serialize_json_canonical(parsed)
-    return original
+    return parsed if isinstance(parsed, str) else original
 
 
 def _sort_json_collection(values: list[object]) -> list[object]:

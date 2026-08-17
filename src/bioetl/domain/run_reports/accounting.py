@@ -159,13 +159,21 @@ class StageAccountingAccumulator(StageAccountingSnapshotsMixin, StageAccountingP
 
     def sum_outcome(self, stage: str, outcome: str) -> int:
         """Return total removals for one stage/outcome."""
+        mapped = self._mapped_outcome_total(stage, outcome)
+        return 0 if mapped is None else mapped
+
+    @override
+    def _sum_outcome(self, stage: str, outcome: str) -> int | None:
+        return self._mapped_outcome_total(stage, outcome)
+
+    def _mapped_outcome_total(self, stage: str, outcome: str) -> int | None:
         bucket = self._stages.get(stage)
-        if bucket is None:
-            return 0
+        if not _bucket_has_mapped_outcomes(bucket):
+            return None
         return sum(
             count for (out, _code), count in bucket.removals.items() if out == outcome
         )
 
-    @override
-    def _sum_outcome(self, stage: str, outcome: str) -> int:
-        return self.sum_outcome(stage, outcome)
+
+def _bucket_has_mapped_outcomes(bucket: _StageBucket | None) -> bool:
+    return bucket is not None and (bucket.instrumented or bool(bucket.removals))

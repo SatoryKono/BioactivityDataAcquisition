@@ -6,6 +6,9 @@ import hashlib
 from collections.abc import Iterable, Mapping
 from datetime import datetime
 
+from bioetl.domain.normalization._hash_identity_scalars import (
+    normalize_hash_scalar_for_policy,
+)
 from bioetl.domain.normalization.json import serialize_json_canonical
 
 __all__ = [
@@ -58,7 +61,10 @@ def _normalize_snapshot_field_value(value: object | None) -> str | None:
     if value is None:
         return None
     if isinstance(value, datetime):
-        return value.isoformat()
+        normalized = normalize_hash_scalar_for_policy(
+            value, datetime_policy="v2_datetime_utc"
+        )
+        return str(normalized)
     text = str(value).strip()
     return text or None
 
