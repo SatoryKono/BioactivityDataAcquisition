@@ -34,3 +34,11 @@ Each entry requires GitHub reconciliation before closeout.
 - Detail: CodeRabbit rate limit (waitTime=2220s)
 - GitHub issue: pending reconciliation
 
+## S01-domain-schemas — rate_limit
+
+- UTC: `2026-08-17T01:09:16.854451+00:00`
+- Wave: `A`
+- Files: `49`
+- Detail: CodeRabbit rate limit (waitTime=1800s)
+- GitHub issue: pending reconciliation
+
