@@ -29,3 +29,13 @@ Exact-cover of still-blocked CodeRabbit leaves remains #8859.
 | later-leaf-ok-triage | #8890 | ~756 raw | P2 | independent triage; types criticals promoted to #8893 |
 | domain-20260816-types-remaining | #8895 | 13 | P1 | remaining types confirms after #8893 |
 | domain-20260816-vo-schemas | #8905 | 24 | P1 | VO fail-closed/freeze + schema date/dups/json/accession |
+<<<<<<< Updated upstream
+||||||| Stash base
+| infra-20260816-fail-closed | #8916 | 5 | P1 | join `.0` regex; Silver FK empty-ref; empty Arrow table; time-travel assert; empty composite FK keys |
+| app-20260816-fail-closed | #8918 | 11 | P1 | manifest skip; replay sort; PK/FK pairing; lock leak; author/pages strip; pmc_id |
+| security-20260816-redaction | #8917 | 5 | P1 | Bearer/token logs; VCR substring redaction; salt length; password argv |
+=======
+| infra-20260816-fail-closed | #8916 | 5 | P1 | join `.0` regex; Silver FK empty-ref; empty Arrow table; time-travel assert; empty composite FK keys |
+| app-20260816-fail-closed | #8918 | 20 | P1 | manifest skip; replay sort; PK/FK pairing; lock leak; author/pages strip; pmc_id; composition replay/hash/preflight |
+| security-20260816-redaction | #8917 | 5 | P1 | Bearer/token logs; VCR substring redaction; salt length; password argv |
+>>>>>>> Stashed changes
