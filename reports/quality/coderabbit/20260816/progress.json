@@ -827,10 +827,25 @@
       "id": "S16b-configs-other",
       "wave": "B",
       "files": 156,
-      "status": "timeout",
-      "reason": "timeout after 600s",
+      "status": "connection_error",
+      "reason": "CodeRabbit connection/WebSocket failure",
+      "exit_code": 1,
       "log": "reports/quality/coderabbit/20260816/review_B_S16b-configs-other.log",
-      "elapsed_s": 607.2
+      "bytes": 1787,
+      "elapsed_s": 244.4,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ]
     },
     "S06-infra-adapters": {
       "id": "S06-infra-adapters",
@@ -1108,5 +1123,5 @@
       ]
     }
   },
-  "updated_utc": "2026-08-17T15:06:30.197007+00:00"
+  "updated_utc": "2026-08-17T16:39:50.957365+00:00"
 }

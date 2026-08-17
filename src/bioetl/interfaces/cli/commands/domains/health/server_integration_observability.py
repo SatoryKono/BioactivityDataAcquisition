@@ -98,6 +98,8 @@ def _start_health_observability(logger: LoggerPort | None = None) -> None:
         retry_delay=settings.observability.metrics_retry_delay,
         logger=logger,
     )
+    if started:
+        _rehydrate_current_metrics(logger=logger)
     if logger is None:
         return
     if started:
@@ -116,7 +118,32 @@ def _start_health_observability(logger: LoggerPort | None = None) -> None:
     )
 
 
+def _rehydrate_current_metrics(*, logger: LoggerPort | None = None) -> None:
+    """Seed scraped contract samples from durable run reports."""
+    from bioetl.application.observability.current_metrics_rehydrate import (
+        rehydrate_current_metrics_safely,
+    )
+
+    result = rehydrate_current_metrics_safely()
+    if logger is None:
+        return
+    if result.error:
+        logger.warning(
+            "health_server_current_metrics_rehydrate_failed",
+            error=result.error,
+        )
+        return
+    logger.info(
+        "health_server_current_metrics_rehydrated",
+        anchors=result.anchors,
+        pipeline_runs_seeded=result.pipeline_runs_seeded,
+        provider_universe_seeded=result.provider_universe_seeded,
+        stage_series_seeded=result.stage_series_seeded,
+    )
+
+
 __all__ = [
+    "_rehydrate_current_metrics",
     "_start_health_observability",
     "get_metrics_server_starter",
     "get_runtime_settings",

@@ -104,7 +104,6 @@ def _int_value(payload: dict[str, object], key: str) -> int:
         value = payload.get(key, 0)
         if value is None or value == "":
             return 0
-        # Handle numeric values directly to avoid string conversion issues
         if isinstance(value, (int, float)):
             return int(value)
         return int(str(value))
@@ -117,7 +116,6 @@ def _float_value(payload: dict[str, object], key: str) -> float:
         value = payload.get(key, 0.0)
         if value is None or value == "":
             return 0.0
-        # Handle numeric values directly to avoid string conversion issues
         if isinstance(value, (int, float)):
             return float(value)
         return float(str(value))
@@ -194,9 +192,7 @@ def _project_composite_merge_completed(
     )
 
 
-def _snapshot_identity(
-    payload: dict[str, object],
-) -> tuple[str, str, str] | None:
+def _snapshot_identity(payload: dict[str, object]) -> tuple[str, str, str] | None:
     snapshot_id = _optional_text(payload, "snapshot_id")
     content_hash = _optional_text(payload, "content_hash")
     immutable_uri = _optional_text(payload, "immutable_uri")

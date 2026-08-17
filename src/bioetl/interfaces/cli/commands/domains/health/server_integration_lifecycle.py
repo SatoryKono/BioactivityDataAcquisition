@@ -80,8 +80,12 @@ async def _run_health_server(
     try:
         if start_metrics:
             _observability._start_health_observability()
+        refresh_ticks = 0
         while True:
             await asyncio.sleep(1)
+            refresh_ticks += 1
+            if start_metrics and refresh_ticks % 30 == 0:
+                _observability._rehydrate_current_metrics()
     finally:
         try:
             await server.stop()

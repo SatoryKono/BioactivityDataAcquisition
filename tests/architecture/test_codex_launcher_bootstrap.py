@@ -15,6 +15,7 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+import sys
 
 import pytest
 
@@ -22,6 +23,11 @@ from pathlib import Path
 
 
 pytestmark = pytest.mark.architecture
+
+_BASH_SUBPROCESS_UNSUPPORTED_ON_WINDOWS = pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="bash-based Codex shim installers are not reliable on native Windows shells",
+)
 
 
 def _project_root() -> Path:
@@ -161,6 +167,7 @@ def test_setup_installs_managed_direct_codex_command() -> None:
     assert "run-codex-impl.sh" in ensure_helper
 
 
+@_BASH_SUBPROCESS_UNSUPPORTED_ON_WINDOWS
 def test_direct_codex_command_installer_is_bounded_and_secret_free(
     tmp_path: Path,
 ) -> None:
@@ -236,6 +243,7 @@ def test_direct_codex_command_installer_is_bounded_and_secret_free(
     ]
 
 
+@_BASH_SUBPROCESS_UNSUPPORTED_ON_WINDOWS
 def test_direct_codex_command_ensures_mcp_before_exec(tmp_path: Path) -> None:
     """The PATH shim must reconcile the shared MCP plane before Codex starts."""
     root = _project_root()
@@ -298,6 +306,7 @@ def test_direct_codex_command_ensures_mcp_before_exec(tmp_path: Path) -> None:
     ]
 
 
+@_BASH_SUBPROCESS_UNSUPPORTED_ON_WINDOWS
 def test_direct_codex_command_installer_preserves_foreign_command(
     tmp_path: Path,
 ) -> None:

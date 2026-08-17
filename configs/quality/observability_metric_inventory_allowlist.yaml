@@ -183,6 +183,11 @@ allowed:
       reason: "Pipeline run terminal events are emitted by execution, observer, and composite lifecycle paths."
       review_date: "2026-09-30"
       approved_max_series: 500
+    - metric: bioetl_records_processed_total
+      owner: "@bioetl-observability"
+      reason: "Processed-record counters are emitted by batch accounting, transform, and storage write paths."
+      review_date: "2026-09-30"
+      approved_max_series: 500
   declared_risky_label_review_required:
     - metric: bioetl_publication_raw_vocab_unknown_total
       owner: "@bioetl-observability"
