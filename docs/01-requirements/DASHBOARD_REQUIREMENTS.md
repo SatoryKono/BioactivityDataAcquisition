@@ -195,6 +195,8 @@ one oversized chart from masking a prose-heavy group.
 | `DASH-VIZ-002` | `panel.type` MUST be an allowlisted modern plugin type; legacy `graph` and unknown/typo plugin types are forbidden. |
 | `DASH-PERF-002` | `maxDataPoints`, when set on a panel, MUST be a positive integer within `[1, 5000]`. |
 | `DASH-COPY-002` | Verdict severity cards MUST carry a non-empty `description` and explicit value `mappings` (state encoding; no bare numbers). |
+| `DASH-COPY-008` | Authored HTML on enrolled dashboards MUST use the five inline copy roles in design-system §9.1: numbered bold dashboard names, italic panel titles, CAPS status/scope without bold, `<code>` 16px field tokens, regular 16px body. Navigation-bus chips are exempt. |
+| `DASH-TIME-001` | Operator-facing date/time MUST render as `YYYY-MM-DD HH:MM`. Grafana custom units MUST be `time:YYYY-MM-DD HH:mm` (`mm` is minutes; `MM` is months and is forbidden). HTTP ISO timestamp strings MUST use `convertFieldType` to `time` before that unit. Compose `GF_DATE_FORMATS_*` MUST use the same pattern. |
 
 ### 6.1 Geometry & purpose regression locks (added 2026-08-14)
 
@@ -264,6 +266,7 @@ The §7 answers map to these root first-window panels. Ids are locked by
 | Full release render | `python -m scripts.ops run-grafana-audit-cycle` on the supported monitoring host |
 | Structural & integrity invariants (`DASH-DATA-003/004`, `DASH-SEC-001`, `DASH-STATE-003`, `DASH-META-002`, `DASH-LAYOUT-002`, `DASH-LINK-001/002`, `DASH-VIZ-001/002`, `DASH-PERF-002`, `DASH-COPY-002`) | `tests/integration/test_dashboard_structural_invariants.py` |
 | Geometry & purpose regression locks (`DASH-LAYOUT-003/004`, `DASH-FIT-001/002/003/004/005`, `DASH-COPY-003/004/005/006/007`, `DASH-PERF-003`) | `tests/integration/test_dashboard_geometry_and_purpose_contracts.py` + `tests/integration/test_dashboard_first_window_containment.py` + [`layout-budgets.yaml`](../03-guides/dashboards/contracts/layout-budgets.yaml) |
+| Operator readability (`DASH-COPY-008`, `DASH-TIME-001`, static `DASH-FIT-004`) | `tests/integration/test_dashboard_operator_readability.py` — required on every `grafana/dashboards/**` change |
 | Scalar information density (`DASH-DENSITY-002`, §5.4) | `python -m scripts.engineering.qa report-dashboard-scalar-density --check` (survey/gate) + `tests/unit/scripts/qa/test_report_dashboard_scalar_density.py` (pure) + enforced-scope gate in `tests/integration/test_dashboard_geometry_and_purpose_contracts.py` |
 
 Static tests prove repository structure. They do not replace live datasource,

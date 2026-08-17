@@ -519,6 +519,7 @@ jobs:
             tests/architecture/test_observability_metric_governance.py \
             tests/integration/ci/test_dashboard_active_docs_sync.py \
             tests/integration/test_dashboard_no_data_policy.py \
+            tests/integration/test_dashboard_operator_readability.py \
             tests/integration/test_grafana_config.py \
             tests/integration/test_grafana_datasource_provisioning.py \
             tests/integration/test_grafana_selector_contract.py \
@@ -890,7 +891,6 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-
   # Tooling/script unit tests (passport projector, ops scripts). Single canonical lane (#8327/#8328).
   unit-scripts-tooling:
     runs-on: ubuntu-latest
@@ -1070,7 +1070,6 @@ jobs:
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 7
-
 
   # Full test matrix runs in parallel for comprehensive coverage
   test-matrix:

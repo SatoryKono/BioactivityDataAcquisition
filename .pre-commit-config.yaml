@@ -356,6 +356,16 @@ repos:
         files: ^(grafana/dashboards/.*\.json|docs/03-guides/dashboards/panel-title-inventory\.md|scripts/engineering/qa/report_panel_title_inventory\.py)$
         stages: [manual]
 
+      - id: check-dashboard-operator-readability
+        name: Check dashboard copy roles, datetime format, and first-window no-scroll
+        entry: >
+          python scripts/engineering/dev/run_project_python.py -m pytest
+          tests/integration/test_dashboard_operator_readability.py -q --tb=short
+        language: python
+        pass_filenames: false
+        files: ^(grafana/dashboards/.*\.json|grafana/provisioning/.*|docker-compose\.monitoring\.yml|tests/integration/test_dashboard_operator_readability\.py|docs/03-guides/dashboards/design-system\.md)$
+        stages: [pre-push]
+
       - id: ruff-scripts-advisory
         name: Ruff advisory scan for scripts backlog
         entry: python scripts/engineering/dev/run_project_python.py -m ruff check scripts --exit-zero

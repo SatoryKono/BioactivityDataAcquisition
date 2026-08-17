@@ -13,6 +13,8 @@ Stable commands:
     render-grafana-matrix
                        Render the standard, full-page, kiosk, and repeat matrix
     audit-live-grafana Run reviewed live Grafana datasource/frame audit
+    check-dashboard-panel-fill
+                       Fail if any shipped panel fill returns gateway/query error
     check-grafana-audit-preflight
                        Check local stack readiness for a full Grafana dashboard audit
     check-bioetl-prometheus-scrape
@@ -50,6 +52,9 @@ _PYTHON_COMMAND_PATHS = {
     "rerender-grafana": "observability/grafana/rerender_grafana_screenshots.py",
     "render-grafana-matrix": ("observability/grafana/run_grafana_render_matrix.py"),
     "audit-live-grafana": "observability/grafana/audit_live_grafana_panels.py",
+    "check-dashboard-panel-fill": (
+        "observability/grafana/check_dashboard_panel_fill.py"
+    ),
     "check-grafana-audit-preflight": (
         "observability/grafana/check_grafana_dashboard_audit_preflight.py"
     ),
