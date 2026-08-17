@@ -39,6 +39,7 @@ _compute_input_snapshot_identity_fingerprint = (
 )
 _build_replay_family_contract_payload = build_replay_family_contract_payload
 
+
 @dataclass(frozen=True, slots=True)
 class _BaseSummaryReplayContext:
     """Replay- and resume-related inputs reused by base summary assembly."""

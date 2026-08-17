@@ -430,8 +430,9 @@ class TestTargetComponent:
         tc = TargetComponent(**BASE_KWARGS, component_id=12345)
         assert tc.component_id == 12345
 
-    def test_falsy_component_id_raises(self) -> None:
+    @pytest.mark.parametrize("component_id", [0, -1])
+    def test_non_positive_component_id_raises(self, component_id: int) -> None:
         from bioetl.domain.entities.chembl_structures import TargetComponent
 
-        with pytest.raises(ValueError, match="Component ID is required"):
-            TargetComponent(**BASE_KWARGS, component_id=0)
+        with pytest.raises(ValueError, match="component_id must be > 0"):
+            TargetComponent(**BASE_KWARGS, component_id=component_id)

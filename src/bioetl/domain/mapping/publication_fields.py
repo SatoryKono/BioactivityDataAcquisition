@@ -221,11 +221,16 @@ def apply_field_mapping(
         {"publication_type": "article", "publication_year": 2020, "title": "Test"}
     """
     mapping = PUBLICATION_FIELD_MAPPING.get(provider, {})
-    result = {}
+    result: dict[str, object] = {}
 
     for key, value in record.items():
         # Map to unified name if mapping exists, otherwise keep original
         unified_key = mapping.get(key, key)
+        if unified_key in result:
+            raise ValueError(
+                "publication field mapping produced a duplicate unified key "
+                f"{unified_key!r} from {key!r}"
+            )
         result[unified_key] = value
 
     return result

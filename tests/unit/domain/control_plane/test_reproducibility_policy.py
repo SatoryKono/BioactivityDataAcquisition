@@ -41,6 +41,7 @@ from bioetl.domain.control_plane import (
 from bioetl.domain.control_plane.reproducibility_policy import (
     assess_reproducibility_policy,
     is_degraded_observable_profile_requested,
+    normalize_required_persistence_profile,
     resolve_effective_required_persistence_profile,
     resolve_replay_capability,
 )
@@ -113,6 +114,26 @@ def test_replay_ready_assessment_reports_snapshot_gate_gaps() -> None:
     assert (
         assessment.replay_readiness_verdict
         == ReplayReadinessVerdict.EXACT_REPLAY_BLOCKED
+    )
+
+
+@pytest.mark.parametrize(
+    "raw_profile",
+    ["Replay-Ready", "REPLAY_READY", " replay_ready "],
+)
+def test_mixed_case_persistence_profile_is_canonical_strict_token(
+    raw_profile: str,
+) -> None:
+    assert normalize_required_persistence_profile(raw_profile) == "replay_ready"
+    assessment = assess_reproducibility_policy(
+        source_refs=(_source_ref(),),
+        required_persistence_profile=raw_profile,
+        strict_exact_replay_supported=True,
+    )
+    assert assessment.required_persistence_profile == "replay_ready"
+    assert assessment.blocking_gaps == (
+        "immutable_input_snapshots",
+        "exact_replay_capability",
     )
 
 

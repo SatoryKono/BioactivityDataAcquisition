@@ -12,6 +12,7 @@ import hashlib
 import json
 from collections.abc import Mapping
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import Literal
 
 __all__ = [
@@ -60,6 +61,9 @@ class ExtractionParams:
     """
 
     params: Mapping[str, str | int | bool]
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "params", MappingProxyType(dict(self.params)))
 
     def to_query_dict(self) -> dict[str, str | int | bool]:
         """Return params as mutable dict for adapter consumption.

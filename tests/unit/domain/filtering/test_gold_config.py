@@ -340,6 +340,19 @@ class TestGoldFilterConfigListContainsFilters:
         )
         assert config.should_include({"tags": []}) is True
 
+    def test_empty_list_any_mode_is_not_a_match(self) -> None:
+        config = GoldFilterConfig(
+            list_contains_filters=(
+                GoldListContainsFilter(
+                    column="tags",
+                    values=frozenset({"a"}),
+                    mode="any",
+                ),
+            ),
+        )
+        assert config.should_include({"tags": []}) is False
+        assert config.should_include({"other": ["a"]}) is True
+
     def test_none_value_vacuous_truth(self) -> None:
         """Test None value passes (vacuous truth)."""
         config = GoldFilterConfig(
