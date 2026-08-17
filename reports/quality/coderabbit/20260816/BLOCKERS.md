@@ -169,33 +169,6 @@ Each entry requires GitHub reconciliation before closeout.
 - Detail: CodeRabbit rate limit (waitTime=840s)
 - GitHub issue: pending reconciliation
 
-<<<<<<< Updated upstream
-||||||| Stash base
-## S12-tests-architecture-01 — error
-
-- UTC: `2026-08-17T13:50:44.274231+00:00`
-- Wave: `F`
-- Files: `300`
-- Detail: CodeRabbit exit code 1
-- GitHub issue: pending reconciliation
-
-## S16-configs-quality — rate_limit
-
-- UTC: `2026-08-17T14:00:00.358263+00:00`
-- Wave: `B`
-- Files: `100`
-- Detail: CodeRabbit rate limit (waitTime=240s)
-- GitHub issue: pending reconciliation
-
-## S12-tests-architecture-01 — connection_error
-
-- UTC: `2026-08-17T14:04:13.679458+00:00`
-- Wave: `F`
-- Files: `300`
-- Detail: CodeRabbit connection/WebSocket failure
-- GitHub issue: pending reconciliation
-
-=======
 ## S12-tests-architecture-01 — error
 
 - UTC: `2026-08-17T13:50:44.274231+00:00`
@@ -228,4 +201,8 @@ Each entry requires GitHub reconciliation before closeout.
 - Detail: CodeRabbit rate limit (waitTime=960s)
 - GitHub issue: pending reconciliation
 
->>>>>>> Stashed changes
+## Closeout note (2026-08-17)
+
+Historical rate_limit / timeout / connection entries above remain **service residual**,
+not invented product findings. Parent reconciliation: #8859. Usage-based CodeRabbit
+billing was not enabled.
