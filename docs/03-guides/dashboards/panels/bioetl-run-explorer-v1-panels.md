@@ -34,13 +34,15 @@ collapsed progressive-disclosure row. `run_id` is never a Prometheus label.
 
 ### 5. Inspect Recent Runs (last 4)
 - **Type:** Table (compact first-screen index)
-- **Purpose:** Last 4 pipeline-run reports for the selected pipeline; pick a
-  row to set `run_id` and open exact-run identity/accounting above the fold.
-  The complete last-20 browser lives in Selected Run Details.
+- **Purpose:** Last 4 pipeline-run reports for the selected pipeline. The Run
+  column data link writes `var-run_id` and `var-pipeline` from the row (Grafana
+  does not bind a table highlight by itself). The complete last-20 browser
+  lives in Selected Run Details.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`
 - **Layout:** Compact index; Inspect Run Identity / Processed Records stay on
   the first screen (`y<=13`). Selected-run forensics stay collapsed.
-- **Empty states:** Valid empty (`noValue` starts with `VALID EMPTY`) when
+- **Empty states:** Valid empty (`noValue` starts with `VALID EMPTY` and must
+  not embed `$pipeline` — Grafana does not interpolate `noValue`) when
   Ops HTTP `index_state=valid_empty` — no matching reports for this pipeline.
   A visible `TREE_MISSING` / `LAYOUT_UNHEALTHY` / `IDENTITY_UNHEALTHY` row is
   bind or origin failure, not a selector problem; run
