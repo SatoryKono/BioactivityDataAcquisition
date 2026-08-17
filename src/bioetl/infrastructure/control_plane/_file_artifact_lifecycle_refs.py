@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from datetime import datetime
 from pathlib import Path
 
@@ -12,12 +13,12 @@ from bioetl.domain.control_plane import (
     ControlPlaneArtifactSurface,
     RunManifest,
 )
+from bioetl.infrastructure.control_plane._file_artifact_lifecycle_surfaces import (
+    iter_surface_files,
+)
 from bioetl.infrastructure.control_plane._file_lineage_index import (
     load_fragment_ids,
     stable_key_filename,
-)
-from bioetl.infrastructure.control_plane._file_artifact_lifecycle_surfaces import (
-    iter_surface_files,
 )
 from bioetl.infrastructure.control_plane.file_artifact_lifecycle_payloads import (
     _artifact_id,
@@ -105,32 +106,39 @@ def _manifest_candidate_paths(
         / "_by_manifest_id"
         / f"{stable_key_filename(manifest.manifest_id)}.jsonl"
     )
-    for fragment_id in load_fragment_ids(lineage_index, key=manifest.manifest_id):
-        candidates.append(
-            (
-                ControlPlaneArtifactSurface.LINEAGE,
-                base_path / "lineage" / "fragments" / f"{fragment_id}.json",
-            )
-        )
+    fragment_ids = set(load_fragment_ids(lineage_index, key=manifest.manifest_id))
+    fragments_root = base_path / "lineage" / "fragments"
+    if fragments_root.exists():
+        for path in fragments_root.glob("*.json"):
+            if path.stem in fragment_ids or _json_mentions_manifest(path, manifest):
+                candidates.append((ControlPlaneArtifactSurface.LINEAGE, path))
     checkpoint_root = base_path.parent / "checkpoints"
     if checkpoint_root.exists():
-        for path in checkpoint_root.rglob(f"*{manifest.run_id}*"):
-            if path.is_file():
+        for path in checkpoint_root.rglob("*"):
+            if path.is_file() and (
+                str(manifest.run_id) in path.name
+                or manifest.manifest_id in path.name
+            ):
                 candidates.append((ControlPlaneArtifactSurface.CHECKPOINT, path))
     bronze_root = base_path.parent / "bronze"
-    snapshot_ids = {
-        snapshot.snapshot_id
-        for source in manifest.source_refs
-        for snapshot in source.input_snapshots
-        if snapshot.snapshot_id
-    }
     if bronze_root.exists():
-        for snapshot_id in snapshot_ids:
-            safe = snapshot_id.replace(":", "_")
-            for path in bronze_root.rglob(f"*{safe}*"):
-                if path.is_file():
-                    candidates.append((ControlPlaneArtifactSurface.CACHED_BRONZE, path))
+        for path in bronze_root.rglob("*"):
+            if path.is_file():
+                candidates.append((ControlPlaneArtifactSurface.CACHED_BRONZE, path))
     return candidates
+
+
+def _json_mentions_manifest(path: Path, manifest: RunManifest) -> bool:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return False
+    if not isinstance(payload, dict):
+        return False
+    return manifest.manifest_id in {
+        payload.get("manifest_id"),
+        payload.get("stored_fragment_id"),
+    } or str(manifest.run_id) in {payload.get("run_id")}
 
 
 def build_artifact_ref(
