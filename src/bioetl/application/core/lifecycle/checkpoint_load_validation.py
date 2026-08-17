@@ -129,7 +129,7 @@ def validate_loaded_checkpoint(
         host._logger.info(
             "Checkpoint compatibility validation passed.",
             pipeline=host._pipeline_name,
-            messages=compatibility_result.messages,
+            messages=list(compatibility_result.messages),
         )
         return checkpoint_metadata, False
     return (
@@ -175,7 +175,7 @@ def handle_incompatible_checkpoint_result(
             identity_continuity_proven=(
                 compatibility_result.identity_continuity_proven
             ),
-            messages=compatibility_result.messages,
+            messages=list(compatibility_result.messages),
         )
     except host._operation_errors:
         host._emit_checkpoint_load_status(

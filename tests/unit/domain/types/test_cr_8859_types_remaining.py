@@ -148,7 +148,7 @@ def test_debug_export_pack_freezes_nested_tables() -> None:
         formats=("csv",),
         include_bom=False,
         max_rows_per_sheet=1,
-        created_at=datetime.now(UTC),
+        created_at=datetime(2026, 8, 17, tzinfo=UTC),
         tables={"t": (row,)},
         reason_dictionary=({"code": "x"},),
     )
