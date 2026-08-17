@@ -172,13 +172,20 @@ def _optional_unit_interval(value: object, field_name: str) -> float | None:
     """Validate an optional numeric threshold in the inclusive unit interval."""
     if value is None:
         return None
+    normalized = _finite_number(value, field_name)
+    if normalized < 0 or normalized > 1:
+        raise ValueError(f"{field_name} must be in [0, 1]")
+    return normalized
+
+
+def _finite_number(value: object, field_name: str) -> float:
+    """Return a finite non-boolean number or fail closed."""
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise TypeError(f"{field_name} must be a number or null")
-    if not math.isfinite(value):
+    normalized = float(value)
+    if not math.isfinite(normalized):
         raise ValueError(f"{field_name} must be finite")
-    if value < 0 or value > 1:
-        raise ValueError(f"{field_name} must be in [0, 1]")
-    return float(value)
+    return normalized
 
 
 def _is_valid_field_priorities(priorities: JsonDict) -> bool:

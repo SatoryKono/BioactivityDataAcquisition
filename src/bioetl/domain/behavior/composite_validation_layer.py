@@ -203,16 +203,15 @@ class CompositeValidator:
     def _cross_validation_preflight_issues(
         self, composite_config: JsonDict
     ) -> list[ValidationIssue]:
-        if "cross_validation" not in composite_config:
+        cross_validation = composite_config.get("cross_validation")
+        if cross_validation is None:
             return []
         source_names, issues = self._as_source_names(
             composite_config.get("sources", [])
         )
         if source_names is not None:
             issues.extend(
-                self._validate_cross_validation_config(
-                    composite_config["cross_validation"], source_names
-                )
+                self._validate_cross_validation_config(cross_validation, source_names)
             )
         return issues
 
