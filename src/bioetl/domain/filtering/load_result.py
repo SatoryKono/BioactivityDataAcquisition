@@ -55,30 +55,6 @@ class FilterLoadResult:
             return
         _validate_single_column_result(self)
 
-    def _validate_multi_column(self) -> None:
-        """Fail closed when multi-column combinations do not match declared fields."""
-        fields = self.filter_fields or tuple(self.column_ids.keys())
-        if self.filter_fields and tuple(self.filter_fields) != tuple(
-            self.column_ids.keys()
-        ):
-            raise ValueError(
-                "filter_fields must match column_ids keys in order: "
-                f"expected {tuple(self.column_ids.keys())}, got {self.filter_fields}"
-            )
-        arity = len(fields)
-        for combination in self.valid_combinations:
-            if len(combination) != arity:
-                raise ValueError(
-                    "valid_combinations entries must have length "
-                    f"{arity}, got {len(combination)}"
-                )
-            for field_name, value in zip(fields, combination, strict=True):
-                allowed = self.column_ids.get(field_name, ())
-                if value not in allowed:
-                    raise ValueError(
-                        f"combination value {value!r} is not in column_ids[{field_name!r}]"
-                    )
-
     @property
     def has_duplicates(self) -> bool:
         """Check whether any duplicates were found."""
