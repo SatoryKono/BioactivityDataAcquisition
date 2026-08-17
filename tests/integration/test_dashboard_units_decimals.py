@@ -97,6 +97,28 @@ def test_shipped_dashboards_do_not_use_iso_datetime_unit():
                     )
 
 
+def test_trust_evidence_observed_at_is_converted_to_time():
+    """Trust first-screen ISO evidence_observed_at must become YYYY-MM-DD HH:mm."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panel = next(
+        item for item in get_dashboard_panels(dashboard) if item.get("id") == 9418
+    )
+    conversions = [
+        conversion
+        for transform in panel.get("transformations") or []
+        if isinstance(transform, dict) and transform.get("id") == "convertFieldType"
+        for conversion in (transform.get("options") or {}).get("conversions") or []
+        if isinstance(conversion, dict)
+    ]
+    assert any(
+        conversion.get("targetField") == "evidence_observed_at"
+        and conversion.get("destinationType") == "time"
+        for conversion in conversions
+    )
+    units = _iter_field_units(panel)
+    assert DASHBOARD_DATETIME_UNIT in units
+
+
 def test_run_explorer_completed_at_is_converted_to_time():
     """ISO completed_at strings must become time fields before unit formatting."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-run-explorer-v1.json"))
