@@ -269,7 +269,7 @@ class DQPolicyResolver:
             violation_kind=violation_kind,
             severity=severity,
             disposition=disposition,
-            affected_fields=affected_fields or [],
+            affected_fields=tuple(affected_fields or ()),
             config_path=config_path,
             policy_ref=self.build_policy_ref(),
         )

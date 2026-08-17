@@ -139,10 +139,11 @@ def test_all_potency_labels_are_reachable_for_presets(
     normalizer = BioactivityNormalizer(config=config)
     potency = config.potency_threshold
     high = config.high_potency_threshold
+    inactive = potency - (high - potency) / 2.0
     midpoint = (potency + high) / 2.0
 
     labels = {
-        normalizer.classify_potency(potency - 1.5),
+        normalizer.classify_potency(inactive - 0.5),
         normalizer.classify_potency(potency - 0.5),
         normalizer.classify_potency((potency + midpoint) / 2.0),
         normalizer.classify_potency((midpoint + high) / 2.0),
@@ -219,7 +220,7 @@ def test_quarantine_disposition_is_idempotent() -> None:
     assert all(issue.message.count("(quarantined)") == 1 for issue in twice.issues)
 
 
-def test_explicit_null_cross_validation_is_absent_optional_config() -> None:
+def test_composite_config__explicit_null_cross_validation_is_absent() -> None:
     issues = _composite_validator()._deep_preflight_issues(
         {
             "sources": ["chembl"],
@@ -241,7 +242,7 @@ def test_structured_group_keys_are_canonical_across_mapping_order() -> None:
     assert result.has_blockers()
 
 
-def test_empty_existing_schema_reports_all_incoming_fields_as_drift() -> None:
+def test_dq_metrics__empty_existing_schema_reports_all_incoming_fields() -> None:
     metrics = DQMetricsCalculator().calculate(
         DQMetricsInput(records=[{"id": 1}], existing_schema_fields=set())
     )
@@ -269,7 +270,7 @@ def test_record_identity_rejects_unsupported_values_and_sorts_sets() -> None:
 
 
 @pytest.mark.parametrize("value", [True, False, math.nan, math.inf])
-def test_optional_unit_interval_rejects_bool_and_non_finite(value: object) -> None:
+def test_optional_unit_interval__rejects_bool_and_non_finite(value: object) -> None:
     with pytest.raises((TypeError, ValueError)):
         _optional_unit_interval(value, "threshold")
 
@@ -321,7 +322,7 @@ def test_present_malformed_optional_composite_section_is_rejected() -> None:
     assert kwargs == {}
 
 
-def test_null_filter_rejects_trailing_text() -> None:
+def test_aggregation_null_filter__rejects_trailing_text() -> None:
     with pytest.raises(ValueError, match="trailing text"):
         _validate_aggregation_filter_condition("field IS NULL OR other == 1")
     _validate_aggregation_filter_condition("field IS NOT NULL")
@@ -339,7 +340,7 @@ def test_aggregation_output_field_is_non_empty_and_normalized() -> None:
 
 
 def test_aggregation_rejects_duplicate_effective_output_fields() -> None:
-    with pytest.raises(ValueError, match="duplicate output fields"):
+    with pytest.raises(ValueError, match="duplicate output field"):
         AggregationConfig(
             group_by="id",
             fields=(
@@ -379,7 +380,7 @@ def test_enriched_records_cannot_exceed_zero_merged_records() -> None:
         MergeResult(records_merged=0, records_enriched=1)
 
 
-def test_partition_append_contract_requires_partition_columns() -> None:
+def test_table_config__partition_append_requires_partition_columns() -> None:
     with pytest.raises(ValueError, match="partition_cols"):
         TableConfig(
             silver_idempotency_contract=(

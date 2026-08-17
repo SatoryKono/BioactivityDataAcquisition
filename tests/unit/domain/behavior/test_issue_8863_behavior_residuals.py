@@ -10,11 +10,13 @@ import pytest
 
 from bioetl.domain.behavior._author_helpers import _collect_affiliation_values
 from bioetl.domain.behavior._dq_serializer_html._styles import _REPORT_STYLES
-from bioetl.domain.behavior.aggregation_validator import (
-    AggregationValidator,
-    _column_names,
-    _explicit_field_names,
+from bioetl.domain.behavior.aggregation_validation_helpers import (
+    column_names as _column_names,
 )
+from bioetl.domain.behavior.aggregation_validation_helpers import (
+    explicit_field_names as _explicit_field_names,
+)
+from bioetl.domain.behavior.aggregation_validator import AggregationValidator
 from bioetl.domain.behavior.composite_validation_helpers import (
     _optional_unit_interval,
 )
@@ -168,7 +170,7 @@ def test_explanation_value_objects_freeze_nested_collections() -> None:
     assert len(record.field_explanations) == 1
     assert record.field_explanations[0].priority_order == ("chembl",)
     with pytest.raises(FrozenInstanceError):
-        setattr(record, "record_id", "changed")
+        record.record_id = "changed"  # type: ignore[misc]
 
 
 def test_enrichment_rate_counts_enriched_records_not_total_enrichments() -> None:

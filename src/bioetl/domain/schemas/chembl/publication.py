@@ -6,6 +6,7 @@ Aligned with RULES.md v5.24, ChEMBL 34 schema, and Publication Schema Unificatio
 from __future__ import annotations
 
 from datetime import date
+from typing import cast
 
 import pandas as pd
 import pandera.pandas as pa
@@ -109,7 +110,7 @@ class ChemblPublicationSchema(PublicationBaseSchema):
 
     @pa.check("creation_date", name="creation_date_calendar")
     def _check_creation_date(cls, series: Series[str]) -> Series[bool]:
-        return series.isna() | series.map(_is_iso_calendar_date)
+        return cast("Series[bool]", series.isna() | series.map(_is_iso_calendar_date))
 
     # === Open Access Status (compatibility field) ===
     oa_status: Series[str] | None = pa.Field(

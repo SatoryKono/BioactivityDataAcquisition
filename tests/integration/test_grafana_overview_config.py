@@ -213,6 +213,7 @@ def test_review_domain_status_is_deviation_first_and_capped() -> None:
     panels = _panels_by_title()
     summary = panels["Review Domain Status"]
     full_matrix = panels["Review All Domain Status"]
+    next_action = panels["Review First Action"]
     summary_expr = _panel_expr(summary)
     full_expr = _panel_expr(full_matrix)
 

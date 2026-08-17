@@ -29,7 +29,7 @@ import math
 import re
 from collections.abc import Mapping, Sequence
 from functools import lru_cache
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeGuard
 
 from bioetl.domain.normalization.json import (
     canonicalize_json_string as _canonicalize_json_string,
@@ -209,7 +209,7 @@ def _reject_nested_non_finite_json_floats(value: object) -> None:
             _reject_non_finite_json_floats(nested)
 
 
-def _is_json_like_sequence(value: object) -> bool:
+def _is_json_like_sequence(value: object) -> TypeGuard[Sequence[object]]:
     return isinstance(value, Sequence) and not isinstance(
         value, (str, bytes, bytearray)
     )
@@ -285,44 +285,9 @@ def flatten_arrow_table_for_export(table: pa.Table) -> pa.Table:
     Returns:
         PyArrow Table with complex columns serialized as JSON strings.
     """
-    import pyarrow as pa
+    from bioetl.domain.serialization_arrow import flatten_arrow_table
 
-    def is_complex_type(field_type: pa.DataType) -> bool:
-        """Return True for list/large_list/struct Arrow types."""
-        return bool(
-            pa.types.is_list(field_type)
-            or pa.types.is_large_list(field_type)
-            or pa.types.is_struct(field_type)
-        )
-
-    def serialize_column_to_json(col: pa.ChunkedArray) -> pa.Array:
-        """Serialize a complex Arrow column into stringified JSON values."""
-        # Use walrus operator to cache expensive v.as_py() evaluation
-        vals = [
-            serialize_to_json(val) if (val := v.as_py()) is not None else None
-            for v in col
-        ]
-        return pa.array(vals, type=pa.string())
-
-    new_columns = []
-    for i, field in enumerate(table.schema):
-        col = table.column(i)
-        if is_complex_type(field.type):
-            new_columns.append(serialize_column_to_json(col))
-        else:
-            new_columns.append(col)
-
-    new_schema = pa.schema(
-        [
-            pa.field(
-                f.name,
-                pa.string() if is_complex_type(f.type) else f.type,
-                f.nullable,
-            )
-            for f in table.schema
-        ]
-    )
-    return pa.Table.from_arrays(new_columns, schema=new_schema)
+    return flatten_arrow_table(table)
 
 
 __all__ = [

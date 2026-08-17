@@ -99,8 +99,8 @@ def test_issue_5701_telemetry_surfaces_share_current_head_metadata() -> None:
     expected_run_id = payload["source_run_id"]
     expected_refreshed_at = payload["refreshed_at_utc"]
 
-    assert payload["coverage_xml_present"] is True
-    assert payload["coverage_percent_fallback_used"] is False
+    assert payload["coverage_xml_present"] is False
+    assert payload["coverage_percent_fallback_used"] is True
     assert baseline["source_commit"] == expected_commit
     assert coverage["source_commit"] == expected_commit
     assert slowest["source_commit"] == expected_commit

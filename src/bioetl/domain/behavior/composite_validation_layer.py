@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import replace
 
 from bioetl.domain.behavior.aggregation_validator import AggregationValidator
 from bioetl.domain.behavior.composite_validation_config import CompositeValidationConfig
@@ -15,8 +16,6 @@ from bioetl.domain.behavior.composite_validation_helpers import (
     _is_valid_field_priorities,
     _is_valid_lineage_config,
     append_invalid_config_section,
-    as_output_schema,
-    as_source_names,
 )
 from bioetl.domain.behavior.composite_validation_shapes import (
     as_output_schema,
@@ -47,11 +46,6 @@ from bioetl.domain.types.validation_severity import (
 
 class CompositeValidator:
     """Validator for structural and deep-preflight composite checks."""
-
-    _as_output_schema = staticmethod(as_output_schema)
-    _as_source_names = staticmethod(as_source_names)
-    _extract_priority = staticmethod(_extract_priority)
-    _is_valid_lineage_config = staticmethod(_is_valid_lineage_config)
 
     def __init__(
         self,
@@ -97,9 +91,7 @@ class CompositeValidator:
             execution_context=config.execution_context,
             config=governance_config,
         )
-        return replace(
-            validation_report, execution_decision=governance_decision
-        )  # NOSONAR
+        return replace(validation_report, execution_decision=governance_decision)  # NOSONAR
 
     def _run_structural_validation(
         self,

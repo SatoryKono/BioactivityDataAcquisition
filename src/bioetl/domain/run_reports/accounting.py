@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import override
+from typing import TypeGuard, override
 
 from bioetl.domain.ports import StageAccountingPort
 from bioetl.domain.run_reports._stage_bucket import _StageBucket
@@ -50,27 +50,32 @@ class StageAccountingAccumulator(StageAccountingSnapshotsMixin, StageAccountingP
     @property
     @override
     def reason_catalog_version(self) -> str:
+        """Return the version of the reason catalog used for accounting."""
         return self._catalog.version
 
     @property
     @override
     def unmapped_reason_count(self) -> int:
+        """Return the number of removal reasons not mapped by the catalog."""
         return self._unmapped_reasons
 
     @override
     def mark_instrumented(self, stage: str) -> None:
+        """Mark a stage as explicitly covered by accounting instrumentation."""
         bucket = self._stages[stage]
         bucket.instrumented = True
         self._touched_instrumented = True
 
     @override
     def record_in(self, stage: str, count: int) -> None:
+        """Add a positive number of records entering a stage."""
         if count <= 0:
             return
         self._stages[stage].records_in += int(count)
 
     @override
     def record_out(self, stage: str, count: int) -> None:
+        """Add a positive number of records leaving a stage."""
         if count <= 0:
             return
         self._stages[stage].records_out += int(count)
@@ -85,6 +90,7 @@ class StageAccountingAccumulator(StageAccountingSnapshotsMixin, StageAccountingP
         count: int = 1,
         sample_ref: str | None = None,
     ) -> None:
+        """Record a stage removal with normalized outcome, reason, and sample."""
         if count <= 0:
             return
         bucket = self._stages[stage]
@@ -175,5 +181,7 @@ class StageAccountingAccumulator(StageAccountingSnapshotsMixin, StageAccountingP
         )
 
 
-def _bucket_has_mapped_outcomes(bucket: _StageBucket | None) -> bool:
+def _bucket_has_mapped_outcomes(
+    bucket: _StageBucket | None,
+) -> TypeGuard[_StageBucket]:
     return bucket is not None and (bucket.instrumented or bool(bucket.removals))

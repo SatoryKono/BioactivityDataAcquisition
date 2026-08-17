@@ -190,6 +190,12 @@ class UniProtId(ValueObject[str]):
             return None
 
 
+def _normalize_pubchem_cid_input(value: int | str) -> int:
+    if isinstance(value, str):
+        return int(value.strip())
+    return value
+
+
 class PubChemCid(ValueObject[int]):
     """PubChem Compound Identifier (CID).
 
@@ -253,6 +259,7 @@ class PubChemCid(ValueObject[int]):
         if isinstance(raw, str) and not raw.strip():
             return None
         try:
-            return cls(raw)
+            normalized = _normalize_pubchem_cid_input(raw)
+            return cls(normalized)
         except (TypeError, ValueError):
             return None
