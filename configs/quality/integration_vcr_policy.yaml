@@ -219,7 +219,7 @@ tracked_suite_inventory:
         - tests/integration/test_grafana_navigation_matrix.py
         - tests/integration/test_grafana_no_data_contract.py
         - tests/integration/test_grafana_overview_config.py
-      - tests/integration/test_grafana_panel_fill_errors.py
+        - tests/integration/test_grafana_panel_fill_errors.py
         - tests/integration/test_grafana_provenance_readability_contract.py
         - tests/integration/test_grafana_render_first_remediation.py
         - tests/integration/test_grafana_selector_contract.py
