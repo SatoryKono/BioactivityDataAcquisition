@@ -91,7 +91,9 @@ class CompositeValidator:
             execution_context=config.execution_context,
             config=governance_config,
         )
-        return replace(validation_report, execution_decision=governance_decision)  # NOSONAR
+        return replace(
+            validation_report, execution_decision=governance_decision
+        )  # NOSONAR
 
     def _run_structural_validation(
         self,

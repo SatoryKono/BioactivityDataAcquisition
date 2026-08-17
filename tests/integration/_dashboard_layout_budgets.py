@@ -114,7 +114,9 @@ STRADDLE_ALLOWLIST = _allowlist(_PAYLOAD, "straddle")
 MIN_HEIGHT_ALLOWLIST = _allowlist(_PAYLOAD, "min_height")
 FIRST_WINDOW_OVERFLOW_ALLOWLIST = _allowlist(_PAYLOAD, "first_window_overflow")
 HORIZONTAL_SCROLL_ALLOWLIST = _allowlist(_PAYLOAD, "horizontal_scroll")
-PANEL_CONTAINMENT_TOLERANCE_PX = _require_int(_PAYLOAD, "panel_containment_tolerance_px")
+PANEL_CONTAINMENT_TOLERANCE_PX = _require_int(
+    _PAYLOAD, "panel_containment_tolerance_px"
+)
 FIRST_WINDOW_CONTAINMENT_TYPES = _string_set(_PAYLOAD, "first_window_containment_types")
 
 # DASH-DENSITY-002: scalar information density (values/area).
@@ -187,7 +189,9 @@ def first_window_summary_tables() -> tuple[dict[str, Any], ...]:
     return tuple(out)
 
 
-def is_first_window_panel(panel: dict[str, Any], *, first_window_y: int | None = None) -> bool:
+def is_first_window_panel(
+    panel: dict[str, Any], *, first_window_y: int | None = None
+) -> bool:
     """Root-style first-window test: non-row and ``gridPos.y < FIRST_WINDOW_Y``."""
     if panel.get("type") == "row":
         return False

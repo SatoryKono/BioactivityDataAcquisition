@@ -525,7 +525,9 @@ def test_workflow_prune_removes_recursive_duplicate_candidate_once(
     assert [entry.run_id for entry in list_workflow_reports(root=tmp_path)] == ["new"]
 
 
-def test_remove_tree_unlinks_symlinks_without_traversing_targets(tmp_path: Path) -> None:
+def test_remove_tree_unlinks_symlinks_without_traversing_targets(
+    tmp_path: Path,
+) -> None:
     external = tmp_path / "external"
     external.mkdir()
     external_file = external / "keep.txt"
@@ -545,10 +547,17 @@ def test_reports_for_prune_is_unbounded(tmp_path: Path, monkeypatch) -> None:
     base = tmp_path / "pipeline"
     base.mkdir()
     candidates = [
-        (float(index), "owner", tmp_path / f"run-{index}", tmp_path / f"run-{index}.json")
+        (
+            float(index),
+            "owner",
+            tmp_path / f"run-{index}",
+            tmp_path / f"run-{index}.json",
+        )
         for index in range(10_001)
     ]
-    monkeypatch.setattr(report_query, "_collect_report_candidates", lambda **_: candidates)
+    monkeypatch.setattr(
+        report_query, "_collect_report_candidates", lambda **_: candidates
+    )
     monkeypatch.setattr(
         report_query,
         "_build_report_index_entry",

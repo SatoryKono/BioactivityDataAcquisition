@@ -86,9 +86,7 @@ class JoinExecutorService:
                 right_type=str(right_df[right_key].dtype),
             )
             left_df = left_df.with_columns(
-                pl.col(left_key)
-                .cast(pl.String)
-                .str.replace(r"\.0$", "", literal=False)
+                pl.col(left_key).cast(pl.String).str.replace(r"\.0$", "", literal=False)
             )
             right_df = right_df.with_columns(
                 pl.col(right_key)

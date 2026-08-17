@@ -130,11 +130,7 @@ def _pop_matching_source_snapshots(
     if query is not None:
         return snapshots_by_source.pop(exact_key, [])
 
-    matched_keys = [
-        key
-        for key in snapshots_by_source
-        if key[:3] == exact_key[:3]
-    ]
+    matched_keys = [key for key in snapshots_by_source if key[:3] == exact_key[:3]]
     snapshots: list[RunInputSnapshotRef] = []
     for key in matched_keys:
         snapshots.extend(snapshots_by_source.pop(key, []))

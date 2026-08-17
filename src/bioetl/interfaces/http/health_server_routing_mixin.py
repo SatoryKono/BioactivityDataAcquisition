@@ -278,6 +278,7 @@ class HealthServerRoutingMixin:
         from bioetl.application.observability.current_metrics_reconciliation import (
             current_metrics_reconciliation_check,
         )
+
         report_root_check = report_root_readiness_check()
 
         checks: JsonDict = {

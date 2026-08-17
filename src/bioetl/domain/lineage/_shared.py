@@ -103,7 +103,9 @@ def _plain_leaf(value: object) -> object:
     identifier = _plain_identifier(value)
     if identifier is not _UNHANDLED:
         return identifier
-    raise TypeError(f"Lineage attributes require JSON-safe values; got {type(value).__name__}")
+    raise TypeError(
+        f"Lineage attributes require JSON-safe values; got {type(value).__name__}"
+    )
 
 
 def _plain_float(value: float) -> float:

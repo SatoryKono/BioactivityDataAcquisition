@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-05'
+  Last verified: '2026-08-17'
 
 ______________________________________________________________________
 
@@ -51,3 +51,18 @@ Deprecated framing (do not use):
 
 - resume logic as ledger-only mutable state;
 - resume keyed only by workflow name without execution fingerprint.
+
+## Architecture scanner census
+
+Three architecture scanners count different populations. They are not interchangeable
+and a numeric gap is not a layer violation.
+
+| Scanner | Artifact / command | What it counts |
+| --- | --- | --- |
+| Coverage inventory | `reports/quality/module-coverage-inventory.json` | Every `src/bioetl/**/*.py` module (currently 2427), including packages that have no hexagonal layer tag |
+| Dependency map | `docs/02-architecture/generated/module-dependency-map.json` | Modules with a resolvable hexagonal layer + group (currently 2425). The two-module gap vs coverage is packages outside `domain/application/infrastructure/composition/interfaces` |
+| import-linter | `lint-imports` (`.importlinter`) | Importable files in the `bioetl` package graph (currently 2377 files). Excludes some stubs / non-imported modules |
+
+`families_at_budget` on the architecture scorecard (currently
+`application_services_control_plane` fan-in 2/2) is a tracked residual, not a
+budget-growth event. Do not raise the fan-in cap; keep new internal imports flat.
