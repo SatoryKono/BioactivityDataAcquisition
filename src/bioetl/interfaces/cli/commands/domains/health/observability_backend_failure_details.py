@@ -8,6 +8,7 @@ from typing import Protocol
 from urllib.error import HTTPError, URLError
 from urllib.request import build_opener
 
+from bioetl.domain.exceptions._redaction import _redact_string
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_probes import (
     _HttpProbeResponse,
     _UrlOpenFn,
@@ -51,14 +52,19 @@ def _read_backend_startup_log_excerpt(
     max_lines: int = 8,
     max_chars: int = 1200,
 ) -> str | None:
+    max_read_bytes = min(max(max_chars * 4, 4096), 64 * 1024)
     try:
-        content = log_path.read_text(encoding="utf-8", errors="replace")
+        with log_path.open("rb") as stream:
+            stream.seek(0, 2)
+            file_size = stream.tell()
+            stream.seek(max(0, file_size - max_read_bytes))
+            content = stream.read(max_read_bytes).decode("utf-8", errors="replace")
     except OSError:
         return None
     nonempty_lines = [line.strip() for line in content.splitlines() if line.strip()]
     if not nonempty_lines:
         return None
-    excerpt = " || ".join(nonempty_lines[-max_lines:])
+    excerpt = _redact_string(" || ".join(nonempty_lines[-max_lines:]))
     if len(excerpt) > max_chars:
         excerpt = f"...{excerpt[-max_chars:]}"
     return excerpt
@@ -122,9 +128,25 @@ def _describe_required_probe_failure(
     if not required_probe_paths:
         return None
     base_url = _build_backend_base_url(health_url)
-    raw_path = required_probe_paths[0]
-    path = raw_path if raw_path.startswith("/") else f"/{raw_path}"
-    probe_url = f"{base_url}{path}"
+    for raw_path in required_probe_paths:
+        path = raw_path if raw_path.startswith("/") else f"/{raw_path}"
+        failure = _probe_required_path(
+            f"{base_url}{path}",
+            timeout_seconds=timeout_seconds,
+            urlopen_fn=urlopen_fn,
+        )
+        if failure is not None:
+            return failure
+    return None
+
+
+def _probe_required_path(
+    probe_url: str,
+    *,
+    timeout_seconds: float,
+    urlopen_fn: _UrlOpenFn,
+) -> str | None:
+    """Return one capability-probe failure, or None for a healthy path."""
     try:
         with urlopen_fn(probe_url, timeout=timeout_seconds) as response:
             status = response.status

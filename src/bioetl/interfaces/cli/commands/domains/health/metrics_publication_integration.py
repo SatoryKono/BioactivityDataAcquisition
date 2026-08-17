@@ -16,18 +16,9 @@ def publish_metrics_safely(
     metric_names: tuple[str, ...] | None = None,
 ) -> bool:
     """Push process-local metrics without failing the completed CLI command."""
-    from bioetl.composition.observability_api import push_metrics_to_gateway
-
     try:
-        if metric_names is None:
-            return bool(
-                push_metrics_to_gateway(
-                    run_label=run_label,
-                    pipeline_name=pipeline_name,
-                    run_type=run_type,
-                    grouping_key_extra=grouping_key_extra,
-                )
-            )
+        from bioetl.composition.observability_api import push_metrics_to_gateway
+
         return bool(
             push_metrics_to_gateway(
                 run_label=run_label,
@@ -38,6 +29,7 @@ def publish_metrics_safely(
             )
         )
     except (
+        ImportError,
         OSError,
         ConnectionError,
         TimeoutError,

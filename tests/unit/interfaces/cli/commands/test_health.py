@@ -871,9 +871,8 @@ class TestHealthCheckEdgeCases:
         with mock_asyncio_run(return_value={}):
             result = cli_runner.invoke(cli, ["health", "check"])
 
-        # Should show "All providers healthy" even with no providers
-        assert "All providers healthy" in result.output
-        assert result.exit_code == ExitCode.OK.value
+        assert result.exit_code == 1
+        assert "Some providers unhealthy" in result.output
 
     def test_health_check_with_multiple_provider_flags(
         self,

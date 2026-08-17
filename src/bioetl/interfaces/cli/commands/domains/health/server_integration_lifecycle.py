@@ -31,6 +31,10 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from bioetl.application.services.quality.quarantine_service import QuarantineService
+    from bioetl.composition.health_service_access import (
+        HealthServerDependenciesProtocol,
+    )
     from bioetl.interfaces.http.health_server import HealthServer
 
 DEFAULT_HEALTH_SERVER_PORT = 8000
@@ -68,19 +72,42 @@ async def _run_health_server(
         deps=deps,
         quarantine_service=quarantine_service,
     )
+    await _start_health_server(
+        server,
+        deps=deps,
+        quarantine_service=quarantine_service,
+    )
     try:
-        await server.start()
         if start_metrics:
             _observability._start_health_observability()
         while True:
             await asyncio.sleep(1)
     finally:
-        await server.stop()
+        try:
+            await server.stop()
+        finally:
+            await _deps.close_health_server_resources(
+                deps=deps,
+                quarantine_service=quarantine_service,
+            )
+        click.echo("\nHealth server stopped.")
+
+
+async def _start_health_server(
+    server: HealthServer,
+    *,
+    deps: HealthServerDependenciesProtocol,
+    quarantine_service: QuarantineService | None,
+) -> None:
+    """Start one server and close acquired resources on startup failure."""
+    try:
+        await server.start()
+    except BaseException:
         await _deps.close_health_server_resources(
             deps=deps,
             quarantine_service=quarantine_service,
         )
-        click.echo("\nHealth server stopped.")
+        raise
 
 
 def run_long_lived_health_server_command(
@@ -91,6 +118,7 @@ def run_long_lived_health_server_command(
     data_root: Path | None = None,
 ) -> None:
     """Start the long-lived health/quarantine explorer backend."""
+    original_pycache_prefix = sys.pycache_prefix
     for line in build_health_server_info_lines(host, port):
         click.echo(line)
     if data_root is None:
@@ -128,6 +156,7 @@ def run_long_lived_health_server_command(
         click.echo("\nShutting down...")
         sys.exit(ExitCode.OK)
     finally:
+        sys.pycache_prefix = original_pycache_prefix
         if getattr(coro, "cr_frame", None) is not None:
             coro.close()
 

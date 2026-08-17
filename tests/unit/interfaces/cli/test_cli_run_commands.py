@@ -695,6 +695,32 @@ class MockRunResult:
 class TestRunCommandExceptionHandlers:
     """Tests for exception handlers in run command."""
 
+    def test_validate_options_without_error_message_exits_config_error(
+        self,
+        capsys,
+    ) -> None:
+        from types import SimpleNamespace
+
+        import bioetl.interfaces.cli.commands.run as run_command
+        from bioetl.interfaces.cli.exit_codes import ExitCode
+
+        service = SimpleNamespace(
+            validate_start_offset=lambda **_kwargs: SimpleNamespace(
+                is_valid=False,
+                error_message=None,
+            )
+        )
+        with patch.object(
+            run_command,
+            "create_cli_run_orchestration_service",
+            return_value=service,
+        ):
+            with pytest.raises(SystemExit) as exc_info:
+                run_command.validate_options(1, "incremental", False)
+
+        assert exc_info.value.code == ExitCode.CONFIG_ERROR
+        assert "Invalid run options" in capsys.readouterr().err
+
     def test_run_pipeline_not_found(self, capsys):
         """Test run execution step handles PipelineNotFoundError."""
         from bioetl.application.services.execution.cli_run_orchestration_models import (

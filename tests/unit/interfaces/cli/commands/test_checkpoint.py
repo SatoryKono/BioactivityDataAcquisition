@@ -321,6 +321,30 @@ class TestCheckpointCommands:
         assert "inspect" in result.output
         assert "audit-run" in result.output
 
+    def test_checkpoint_list_service_resolution_failure_is_nonzero(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        import bioetl.interfaces.cli.commands.checkpoint as checkpoint_module
+
+        def _fail_service_resolution(_pipeline: str) -> object:
+            raise RuntimeError("checkpoint composition failed")
+
+        monkeypatch.setattr(
+            checkpoint_module,
+            "get_checkpoint_runtime_service",
+            _fail_service_resolution,
+        )
+
+        result = cli_runner.invoke(
+            cli,
+            ["checkpoint", "list", "--pipeline", "chembl_activity"],
+        )
+
+        assert result.exit_code == 1
+        assert "checkpoint composition failed" in result.output
+
     def test_checkpoint_inspect_json_outputs_workflow_payload(
         self,
         cli_runner: CliRunner,

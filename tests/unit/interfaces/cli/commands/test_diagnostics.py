@@ -561,6 +561,83 @@ def test_diagnostics_health_json_uses_bundle_health_service(
 
 
 @pytest.mark.unit
+def test_diagnostics_health_json_unhealthy_exits_nonzero(
+    cli_runner: CliRunner,
+    monkeypatch: Any,
+) -> None:
+    health_service = MagicMock()
+    health_service.check_providers = AsyncMock(
+        return_value=_FakeHealthSummary(
+            {"chembl": {"status": "unhealthy", "latency_ms": 12.0}}
+        )
+    )
+    bundle = _build_bundle(health_service=health_service)
+    import bioetl.interfaces.cli.commands.diagnostics as diagnostics_module
+
+    monkeypatch.setattr(
+        diagnostics_module,
+        "get_observability_diagnostics_bundle",
+        lambda: bundle,
+        raising=True,
+    )
+
+    result = cli_runner.invoke(cli, ["diagnostics", "health", "--json"])
+
+    assert result.exit_code == 1
+    assert json.loads(result.output)["chembl"]["status"] == "unhealthy"
+
+
+@pytest.mark.unit
+def test_diagnostics_health_empty_result_exits_nonzero(
+    cli_runner: CliRunner,
+    monkeypatch: Any,
+) -> None:
+    health_service = MagicMock()
+    health_service.check_providers = AsyncMock(return_value=_FakeHealthSummary({}))
+    bundle = _build_bundle(health_service=health_service)
+    import bioetl.interfaces.cli.commands.diagnostics as diagnostics_module
+
+    monkeypatch.setattr(
+        diagnostics_module,
+        "get_observability_diagnostics_bundle",
+        lambda: bundle,
+        raising=True,
+    )
+
+    result = cli_runner.invoke(cli, ["diagnostics", "health", "--json"])
+
+    assert result.exit_code == 1
+    assert json.loads(result.output) == {}
+
+
+@pytest.mark.unit
+def test_diagnostics_async_inspection_value_error_exits_nonzero(
+    cli_runner: CliRunner,
+    monkeypatch: Any,
+) -> None:
+    workflow_service = SimpleNamespace(
+        inspect_run_dossier=AsyncMock(side_effect=ValueError("missing dossier"))
+    )
+    bundle = _build_bundle(workflow_service=workflow_service)
+    import bioetl.interfaces.cli.commands.diagnostics as diagnostics_module
+
+    monkeypatch.setattr(
+        diagnostics_module,
+        "get_observability_diagnostics_bundle",
+        lambda: bundle,
+        raising=True,
+    )
+
+    result = cli_runner.invoke(
+        cli,
+        ["diagnostics", "run", "--run-id", "run-missing"],
+    )
+
+    assert result.exit_code == 1
+    assert "missing dossier" in result.output
+
+
+@pytest.mark.unit
 def test_diagnostics_run_text_outputs_correlated_summary(
     cli_runner: CliRunner,
     monkeypatch: Any,
@@ -787,6 +864,31 @@ def test_diagnostics_manifest_json_outputs_manifest_payload(
 
 
 @pytest.mark.unit
+def test_diagnostics_manifest_value_error_exits_nonzero(
+    cli_runner: CliRunner,
+    monkeypatch: Any,
+) -> None:
+    service = SimpleNamespace(show=MagicMock(side_effect=ValueError("missing manifest")))
+    bundle = _build_bundle(run_manifest_service=service)
+    import bioetl.interfaces.cli.commands.diagnostics as diagnostics_module
+
+    monkeypatch.setattr(
+        diagnostics_module,
+        "get_observability_diagnostics_bundle",
+        lambda: bundle,
+        raising=True,
+    )
+
+    result = cli_runner.invoke(
+        cli,
+        ["diagnostics", "manifest", "missing", "--format", "json"],
+    )
+
+    assert result.exit_code == 1
+    assert "missing manifest" in result.output
+
+
+@pytest.mark.unit
 def test_diagnostics_forensic_diff_json_outputs_cross_artifact_report(
     cli_runner: CliRunner,
     monkeypatch: Any,
@@ -818,6 +920,30 @@ def test_diagnostics_forensic_diff_json_outputs_cross_artifact_report(
     assert payload["checkpoint_compatibility"]["compatible"] is False
     assert payload["artifact_completeness"]["right"]["complete"] is False
     assert payload["missing_evidence"]["right"] == ["published_artifacts_missing"]
+
+
+@pytest.mark.unit
+def test_diagnostics_forensic_diff_value_error_exits_nonzero(
+    cli_runner: CliRunner,
+    monkeypatch: Any,
+) -> None:
+    service = SimpleNamespace(compare=MagicMock(side_effect=ValueError("missing run")))
+    import bioetl.interfaces.cli.commands.diagnostics as diagnostics_module
+
+    monkeypatch.setattr(
+        diagnostics_module,
+        "get_forensic_run_diff_service",
+        lambda: service,
+        raising=True,
+    )
+
+    result = cli_runner.invoke(
+        cli,
+        ["diagnostics", "forensic-diff", "left", "right"],
+    )
+
+    assert result.exit_code == 1
+    assert "missing run" in result.output
 
 
 @pytest.mark.unit

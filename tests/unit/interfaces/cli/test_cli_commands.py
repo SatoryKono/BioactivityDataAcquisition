@@ -652,7 +652,7 @@ class TestLockReleaseCommand:
                 ],
             )
 
-        assert result.exit_code == 0
+        assert result.exit_code == 1
         assert "Lock not released" in result.output or "not held" in result.output
 
     def test_lock_release_with_exclusive(self, cli_runner, mock_lock_service):
@@ -695,7 +695,8 @@ class TestLockReleaseCommand:
             ],
         )
 
-        assert "Invalid run-id" in result.output or "valid UUID" in result.output
+        assert result.exit_code == 2
+        assert "valid UUID" in result.output
 
 
 # =============================================================================
@@ -763,7 +764,8 @@ class TestLockCheckCommand:
             ],
         )
 
-        assert "Invalid run-id" in result.output or "valid UUID" in result.output
+        assert result.exit_code == 2
+        assert "valid UUID" in result.output
 
 
 # =============================================================================

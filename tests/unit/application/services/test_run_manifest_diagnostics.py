@@ -63,6 +63,9 @@ from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_sta
 from bioetl.application.services.control_plane.manifest.diagnostics.source_posture import (
     _resolve_source_posture,
 )
+from bioetl.application.services.control_plane.manifest.diagnostics.source_refs import (
+    _build_effective_source_refs,
+)
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_types import (
     bounded,
     string_items,
@@ -497,6 +500,71 @@ def test_build_diagnostics_summary_merges_ledger_derived_input_snapshots() -> No
             "source_event_id": "entry-input-snapshot",
         }
     ]
+
+
+def test_effective_source_refs_normalize_grouping_and_lookup_keys() -> None:
+    manifest = replace(
+        _make_manifest(),
+        source_refs=(
+            RunSourceRef(
+                provider="chembl",
+                entity="activity",
+                pipeline_name="chembl_activity",
+                query="target",
+            ),
+        ),
+    )
+
+    result = _build_effective_source_refs(
+        manifest=manifest,
+        input_snapshots=(
+            {
+                "provider": " chembl ",
+                "entity": " activity ",
+                "pipeline_name": " chembl_activity ",
+                "query": " target ",
+                "snapshot_id": "snapshot-normalized",
+                "content_hash": "sha256:normalized",
+            },
+        ),
+    )
+
+    assert len(result) == 1
+    assert result[0].input_snapshots[0].snapshot_id == "snapshot-normalized"
+
+
+def test_effective_source_refs_order_optional_query_and_ignore_bad_timestamp() -> None:
+    manifest = replace(_make_manifest(), source_refs=())
+
+    result = _build_effective_source_refs(
+        manifest=manifest,
+        input_snapshots=(
+            {
+                "provider": "chembl",
+                "entity": "activity",
+                "pipeline_name": "chembl_activity",
+                "query": "target",
+                "snapshot_id": "snapshot-query",
+                "content_hash": "sha256:query",
+                "captured_at": "not-a-timestamp",
+            },
+            {
+                "provider": "chembl",
+                "entity": "activity",
+                "pipeline_name": "chembl_activity",
+                "query": None,
+                "snapshot_id": "snapshot-default",
+                "content_hash": "sha256:default",
+                "captured_at": " 2026-08-17T09:00:00+00:00 ",
+            },
+        ),
+    )
+
+    assert [item.query for item in result] == [None, "target"]
+    assert result[0].input_snapshots[0].captured_at == datetime(
+        2026, 8, 17, 9, 0, tzinfo=UTC
+    )
+    assert result[1].input_snapshots[0].captured_at is None
 
 
 def test_build_diagnostics_summary_exposes_bounded_historical_upgrade_policy() -> None:
