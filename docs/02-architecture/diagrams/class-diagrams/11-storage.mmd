@@ -1,11 +1,12 @@
 %% BioETL — Class Diagram: Storage Components
 %% Bronze/Silver/Gold writers and supporting classes.
+%% Re-verified 2026-08-17 against live src/bioetl symbols
 
-%% @version 1.2.0
-%% @date    2026-03-19
+%% @version 1.2.1
+%% @date    2026-08-17
 %% @type    classDiagram
 %% @level   Class / Interface
-%% @nodes   19
+%% @nodes   18
 %% @uniform class width=240 height=156 max_title_len=22 max_desc_lines=6
 
 classDiagram
@@ -70,33 +71,30 @@ classDiagram
         +write_gold_metadata(base_path, metadata)
     }
 
-    class BronzeMetadataBuilder {
-        +build(config, result)
+    class BronzeWriterMetadataMixin {
+        +write_bronze_metadata(...)
     }
 
-    class SilverMetadataBuilder {
-        +build(config, result)
+    class SilverWriterMetadataMixin {
+        +write_silver_metadata(...)
     }
 
-    class GoldMetadataBuilder {
-        +build(config, result)
+    class GoldWriterMetadataMixin {
+        +write_gold_metadata(...)
     }
 
     class MetadataWriteOperations {
+        <<module metadata_writer_operations>>
         +prepare(request)
         +build_retry_callback(...)
         +emit_final_telemetry(...)
     }
 
-    class CompositeMetadataHelpers {
+    class composite_metadata_helpers {
+        <<module>>
         +extract_composite_output_ext(records)
         +parse_composite_list(value)
         +parse_composite_status(value)
-    }
-
-    class MetadataBuilderCompositeHelpers {
-        <<compat wrapper>>
-        +build_composite_output_ext(records)
     }
 
     class AtomicWriteGroup {
@@ -138,10 +136,9 @@ classDiagram
 
     BronzeWriter o-- AtomicWriteGroup
     BronzeWriter o-- MetadataWriter
-    BronzeWriter o-- BronzeMetadataBuilder
-    SilverWriter o-- SilverMetadataBuilder
-    GoldWriter o-- GoldMetadataBuilder
+    BronzeWriter o-- BronzeWriterMetadataMixin
+    SilverWriter o-- SilverWriterMetadataMixin
+    GoldWriter o-- GoldWriterMetadataMixin
     MetadataWriter --> MetadataWriteOperations
-    SilverMetadataBuilder --> CompositeMetadataHelpers
-    GoldMetadataBuilder --> CompositeMetadataHelpers
-    MetadataBuilderCompositeHelpers ..> CompositeMetadataHelpers
+    SilverWriterMetadataMixin --> composite_metadata_helpers
+    GoldWriterMetadataMixin --> composite_metadata_helpers

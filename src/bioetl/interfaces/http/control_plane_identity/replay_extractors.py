@@ -23,6 +23,12 @@ def exact_replay_blockers(
     *,
     snapshot_fingerprint: object | None,
 ) -> list[str]:
+    """Return missing exact-replay anchors, or a pre-reported blocker list.
+
+    Prefers ``diagnostics['exact_replay_blockers']`` when present. Otherwise,
+    when the run requested exact replay, lists required identity fields that
+    are absent from the manifest or snapshot set.
+    """
     reported = diagnostics.get("exact_replay_blockers")
     if isinstance(reported, list | tuple | set):
         return [str(item) for item in reported if is_present(item)]
@@ -45,6 +51,7 @@ def exact_replay_blockers(
 
 
 def runtime_mode(manifest: RunManifest) -> str:
+    """Render run_type plus active runtime flags for identity evidence."""
     flags = [
         f"{name}={value}"
         for name in (
@@ -61,6 +68,7 @@ def runtime_mode(manifest: RunManifest) -> str:
 
 
 def replay_mode(manifest: RunManifest) -> str:
+    """Classify the run as exact_replay, replay, or the native run_type."""
     if requested_exact_replay(manifest):
         return "exact_replay"
     if manifest.replay_of_run_id or manifest.replay_of_manifest_id:
@@ -72,6 +80,7 @@ def exact_replay_eligible(
     manifest: RunManifest,
     snapshots: tuple[RunInputSnapshotRef, ...],
 ) -> bool:
+    """Return True when required exact-replay identity anchors are present."""
     code = manifest.code_provenance
     required = (
         manifest.execution_fingerprint,
@@ -83,23 +92,27 @@ def exact_replay_eligible(
 
 
 def requested_exact_replay(manifest: RunManifest) -> bool:
+    """Return True when the manifest payload requested exact replay."""
     value = first_payload_value(manifest, "exact_replay", "requested_exact_replay")
     return value is True or str(value).strip().lower() == "true"
 
 
 def is_replay(manifest: RunManifest) -> bool:
+    """Return True when the run is a replay or requested exact replay."""
     return bool(manifest.replay_of_run_id or manifest.replay_of_manifest_id) or (
         requested_exact_replay(manifest)
     )
 
 
 def is_composite(manifest: RunManifest) -> bool:
+    """Return True when the run is a composite pipeline or composite identity."""
     return manifest.pipeline_name.startswith("composite_") or (
         manifest.provider == "composite" or bool(composite_run_identity(manifest))
     )
 
 
 def is_terminal(ledger_entries: tuple[RunLedgerEntry, ...]) -> bool:
+    """Return True when any ledger entry is in a terminal status."""
     return any(
         str(entry.status or "").lower() in TERMINAL_STATUSES for entry in ledger_entries
     )

@@ -1,10 +1,11 @@
 %% Title: Infrastructure Layer Class Diagram
 %% Covers: RULES.md §1.1 (Infrastructure Layer), §3.6 (Resilience), RF-014
-%% Updated: 2026-03-19
+%% Updated: 2026-08-17
 %% Components: UnifiedHTTPClient, provider adapters, storage writers, metadata writer, observability
+%% Re-verified 2026-08-17 against live src/bioetl symbols
 
-%% @version 1.1.0
-%% @date    2026-03-19
+%% @version 1.1.1
+%% @date    2026-08-17
 %% @type    classDiagram
 %% @level   Mixed (System / Component / Class)
 %% @nodes   18
@@ -18,27 +19,25 @@ classDiagram
             -_client: httpx.AsyncClient
             -_rate_limiter: RateLimiterPort
             -_circuit_breaker: CircuitBreakerPort
-            -_retry_policy: RetryPolicy
+            +retry_config: RetryConfig
             +request(method, url, **kwargs) Response
             +get(url, **kwargs) Response
             +post(url, data, **kwargs) Response
         }
 
-        class CircuitBreaker {
-            -_state: CircuitState
+        class CircuitBreakerGuard {
+            -_state: CircuitBreakerState
             -_failure_count: int
             +call(func, *args) T
             +reset() None
-            +get_state() CircuitState
+            +get_state() CircuitBreakerState
         }
 
-        class TokenBucket {
-            -_rate: float
-            -_capacity: int
+        class TokenBucketRateLimiter {
+            +rate: float
+            +capacity: int
             -_tokens: float
             +acquire() None
-            +try_acquire() bool
-            +available_tokens() int
         }
     }
 
@@ -49,19 +48,19 @@ classDiagram
             +health_check() HealthStatus
         }
 
-        class PubchemAdapter {
+        class PubChemAdapter {
             -_http_client: UnifiedHTTPClient
             +fetch(query) AsyncIterator~BronzeRecord~
             +health_check() HealthStatus
         }
 
-        class UniprotAdapter {
+        class UniProtAdapter {
             -_http_client: UnifiedHTTPClient
             +fetch(query) AsyncIterator~BronzeRecord~
             +health_check() HealthStatus
         }
 
-        class PubmedAdapter {
+        class PubMedAdapter {
             -_http_client: UnifiedHTTPClient
             +fetch(query) AsyncIterator~BronzeRecord~
             +health_check() HealthStatus
@@ -83,7 +82,7 @@ classDiagram
         }
 
         class GoldWriter {
-            +write_gold(table_name, records, schema, primary_keys, mode) GoldWriteResult
+            +write_gold(table_name, records, schema, primary_keys, mode) None
             +write_gold_merged(table_name, records, primary_keys, run_id, sources_used) None
         }
 
@@ -106,22 +105,22 @@ classDiagram
             +heartbeat(key, owner_id, exclusive) bool
         }
 
-        class FileCheckpointManager {
-            +save(key, state) None
-            +load(key) CheckpointState?
+        class LocalCheckpointAdapter {
+            +save(pipeline, run_id, metadata) None
+            +load(pipeline) tuple~RunID, JsonDict~?
             +list_all() list~str~
-            +delete(key) None
+            +delete(pipeline) None
         }
 
-        class QuarantineWriter {
+        class UnifiedQuarantineAdapter {
             +write(record) None
             +inspect(pipeline, limit) list~QuarantineRecord~
-            +get_stats(pipeline) QuarantineStats
+            +get_stats(pipeline) object
         }
     }
 
     namespace Observability {
-        class StructlogAdapter {
+        class StructlogLogger {
             +bind(**context) LoggerPort
             +info(msg, **kwargs) None
             +warning(msg, **kwargs) None
@@ -142,12 +141,12 @@ classDiagram
     }
 
     ChemblAdapter --> UnifiedHTTPClient
-    PubchemAdapter --> UnifiedHTTPClient
-    UniprotAdapter --> UnifiedHTTPClient
-    PubmedAdapter --> UnifiedHTTPClient
+    PubChemAdapter --> UnifiedHTTPClient
+    UniProtAdapter --> UnifiedHTTPClient
+    PubMedAdapter --> UnifiedHTTPClient
 
-    UnifiedHTTPClient --> CircuitBreaker
-    UnifiedHTTPClient --> TokenBucket
+    UnifiedHTTPClient --> CircuitBreakerGuard
+    UnifiedHTTPClient --> TokenBucketRateLimiter
 
     BronzeWriter --> MetadataWriter
     SilverWriter --> CsvExporter
