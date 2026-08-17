@@ -208,7 +208,7 @@ class CompositeLifecycleObserverService(CompositeLifecycleTracingMixin):
         self._record_pipeline_terminal_metrics(
             composite_name=composite_name,
             duration_seconds=duration_seconds,
-            status="success",
+            status=status,
         )
         self._close_active_phase_spans_for_run(
             run_id=run_id,

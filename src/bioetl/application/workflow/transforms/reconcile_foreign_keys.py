@@ -270,12 +270,10 @@ def _required_primary_keys(config: Mapping[str, object]) -> tuple[str, ...]:
         raise ValueError(
             "reconcile_foreign_keys requires config.primary_keys as a non-empty list"
         )
-    primary_keys = tuple(
-        str(item).strip() for item in raw_primary_keys if str(item).strip()
-    )
-    if not primary_keys:
+    primary_keys = tuple(str(item).strip() for item in raw_primary_keys)
+    if any(not key for key in primary_keys):
         raise ValueError(
-            "reconcile_foreign_keys requires at least one non-empty primary key"
+            "reconcile_foreign_keys primary_keys cannot contain blank entries"
         )
     return primary_keys
 
@@ -345,10 +343,9 @@ def _optional_key_tuple(
         raise ValueError(
             f"reconcile_foreign_keys requires config.{key} as a non-empty list"
         )
-    keys = tuple(str(item).strip() for item in value if str(item).strip())
-    if not keys:
+    keys = tuple(str(item).strip() for item in value)
+    if any(not item for item in keys):
         raise ValueError(
-            f"reconcile_foreign_keys requires at least one non-empty entry in "
-            f"config.{key}"
+            f"reconcile_foreign_keys {key} cannot contain blank entries"
         )
     return keys

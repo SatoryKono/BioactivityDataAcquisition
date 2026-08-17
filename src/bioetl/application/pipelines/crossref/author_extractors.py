@@ -79,9 +79,15 @@ def _build_author_detail(
     author: JsonDict,  # Any: raw Crossref API JSON
 ) -> JsonDict | None:  # Any: raw Crossref API JSON
     """Build author detail dict from raw author object."""
-    given = author.get("given", "").strip() or None
-    family = author.get("family", "").strip() or None
-    org_name = author.get("name", "").strip() or None
+    given_raw = author.get("given", "")
+    family_raw = author.get("family", "")
+    org_raw = author.get("name", "")
+    given = given_raw.strip() if isinstance(given_raw, str) else None
+    family = family_raw.strip() if isinstance(family_raw, str) else None
+    org_name = org_raw.strip() if isinstance(org_raw, str) else None
+    given = given or None
+    family = family or None
+    org_name = org_name or None
     if not given and not family and not org_name:
         return None
     authenticated_orcid = author.get("authenticated-orcid")
