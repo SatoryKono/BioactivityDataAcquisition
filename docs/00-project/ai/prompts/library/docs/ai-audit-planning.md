@@ -5,7 +5,7 @@ status: active
 class: operator-paste
 owner: BioETL Team
 runtimes: [codex, grok, any]
-params: [SCOPE, MODE, LANGUAGE]
+params: [SCOPE=docs/, MODE=plan+execute, LANGUAGE=ru]
 includes:
   - fragments/read-order.md
   - fragments/git-safety.md
