@@ -849,6 +849,52 @@ def test_run_explorer_reconciliation_fits_all_bounded_rows_without_scroll() -> N
     assert props.get("custom.cellOptions") == {"type": "color-text"}
 
 
+def test_run_explorer_novalue_has_no_uninterpolated_variables() -> None:
+    explorer = _load("bioetl-run-explorer-v1.json")
+    for panel in _iter_panels(explorer.get("panels") or []):
+        no_value = str(
+            (panel.get("fieldConfig") or {}).get("defaults", {}).get("noValue") or ""
+        )
+        assert "$pipeline" not in no_value
+        assert "$workflow" not in no_value
+        assert "$run_id" not in no_value
+
+
+def _run_select_links(panel: dict[str, object]) -> list[str]:
+    urls: list[str] = []
+    for override in (panel.get("fieldConfig") or {}).get("overrides") or []:
+        if not isinstance(override, dict):
+            continue
+        for prop in override.get("properties") or []:
+            if not isinstance(prop, dict) or prop.get("id") != "links":
+                continue
+            for link in prop.get("value") or []:
+                if isinstance(link, dict) and isinstance(link.get("url"), str):
+                    urls.append(str(link["url"]))
+    return urls
+
+
+def test_run_explorer_recent_runs_bind_run_id_via_data_link() -> None:
+    explorer = _load("bioetl-run-explorer-v1.json")
+    first_screen = _panel(explorer, 3010)
+    last_twenty = next(
+        panel
+        for panel in _iter_panels(explorer.get("panels") or [])
+        if panel.get("id") == 3021
+    )
+    first_links = _run_select_links(first_screen)
+    last_links = _run_select_links(last_twenty)
+    assert first_links
+    assert last_links
+    assert any("var-run_id=${__value.raw}" in url for url in first_links)
+    assert any("var-pipeline=${__data.fields.Pipeline}" in url for url in first_links)
+    assert any("var-run_id=${__value.raw}" in url for url in last_links)
+    identity = _panel(explorer, 9402)
+    assert str(
+        identity.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
+    ).startswith("SELECT RUN")
+
+
 def test_run_explorer_selected_run_details_row_nests_forensics() -> None:
     """REC-03: Selected Run Details must collapse nested forensic panels."""
     explorer = _load("bioetl-run-explorer-v1.json")
