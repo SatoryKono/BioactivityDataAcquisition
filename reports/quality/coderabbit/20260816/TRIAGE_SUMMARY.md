@@ -117,4 +117,3 @@ Independent ground-truth of the remaining 34 S01-domain-types findings:
 - value_objects 41: confirm 18 -> #8905; reject 23
 - schemas 42: confirm 6 -> #8905; reject 36
 - rejected after reproduction: vo-008 (UTC offset is contract expansion), sch-016 (UTC-required ingestion_ts breaks shipped fixtures)
-
