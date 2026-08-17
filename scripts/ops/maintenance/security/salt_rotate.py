@@ -250,8 +250,7 @@ def complete_rotation() -> RotationResult:
             success=False,
             action="complete",
             error=(
-                f"{ENV_SALT_NEXT} is too short "
-                f"({len(next_salt)} < {MIN_SALT_LENGTH})"
+                f"{ENV_SALT_NEXT} is too short ({len(next_salt)} < {MIN_SALT_LENGTH})"
             ),
         )
 
