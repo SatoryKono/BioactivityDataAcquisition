@@ -721,12 +721,12 @@
       "id": "S05-app-pipelines",
       "wave": "B",
       "files": 99,
-      "status": "rate_limit",
-      "reason": "CodeRabbit rate limit (waitTime=120s)",
-      "exit_code": 1,
+      "status": "ok",
+      "reason": "",
+      "exit_code": 0,
       "log": "reports/quality/coderabbit/20260816/review_B_S05-app-pipelines.log",
-      "bytes": 938,
-      "elapsed_s": 34.6,
+      "bytes": 99736,
+      "elapsed_s": 415.3,
       "command": [
         "/home/fedor/.local/bin/coderabbit",
         "review",
@@ -742,5 +742,5 @@
       ]
     }
   },
-  "updated_utc": "2026-08-17T05:07:31.955538+00:00"
+  "updated_utc": "2026-08-17T05:16:27.273075+00:00"
 }
