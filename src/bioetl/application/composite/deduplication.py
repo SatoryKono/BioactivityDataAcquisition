@@ -78,7 +78,9 @@ class EnricherDeduplicatorService:
         non_key_columns = [c for c in df.columns if c not in key_columns]
 
         if not non_key_columns:
-            result = df.select(key_columns).unique(maintain_order=True)
+            # OPTIMIZATION: maintain_order=False avoids high FFI overhead for large cardinality data.
+            # We explicitly sort afterwards to ensure deterministic output.
+            result = df.select(key_columns).unique(maintain_order=False).sort(key_columns)
             self._record_deduplicated(records_before - len(result))
             self._log_deduplication(
                 enricher_name, key_columns, records_before, len(result), []
@@ -93,7 +95,9 @@ class EnricherDeduplicatorService:
             df, columns_with_conflicts, columns_without_conflicts
         )
 
-        result = df.group_by(key_columns, maintain_order=True).agg(agg_exprs)
+        # OPTIMIZATION: maintain_order=False avoids high FFI overhead for large cardinality data.
+        # We explicitly sort afterwards to ensure deterministic output.
+        result = df.group_by(key_columns, maintain_order=False).agg(agg_exprs).sort(key_columns)
         self._record_deduplicated(records_before - len(result))
 
         self._log_deduplication(
