@@ -95,3 +95,12 @@ fixes. Exact-cover of remaining leaves stays on #8859.
 - `FINDINGS.jsonl` / `FINDINGS.md`
 - `TRIAGE.md`
 - `DE_DUPE_MAP.json`
+
+## Later-leaf start (2026-08-17)
+
+Independent ground-truth of S01-domain-types criticals against current main:
+
+- confirm 	ypes-018 / 	ypes-022 -> stream #8893
+- remaining 34 S01-domain-types findings and ~720 other ok-leaf raw items stay on #8890
+- product streams already opened: #8891 / #8888 / #8889 (PR #8892)
+
