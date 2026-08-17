@@ -995,12 +995,12 @@
       "id": "S17-docs-decisions",
       "wave": "E",
       "files": 60,
-      "status": "rate_limit",
-      "reason": "CodeRabbit rate limit (waitTime=1680s)",
-      "exit_code": 1,
+      "status": "ok",
+      "reason": "",
+      "exit_code": 0,
       "log": "reports/quality/coderabbit/20260816/review_E_S17-docs-decisions.log",
-      "bytes": 940,
-      "elapsed_s": 40.8,
+      "bytes": 116891,
+      "elapsed_s": 1182.3,
       "command": [
         "/home/fedor/.local/bin/coderabbit",
         "review",
@@ -1043,10 +1043,25 @@
       "id": "S18-grafana",
       "wave": "E",
       "files": 104,
-      "status": "timeout",
-      "reason": "timeout after 600s",
+      "status": "ok",
+      "reason": "",
+      "exit_code": 0,
       "log": "reports/quality/coderabbit/20260816/review_E_S18-grafana.log",
-      "elapsed_s": 607.4
+      "bytes": 65758,
+      "elapsed_s": 645.7,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ]
     },
     "S19-github-workflows": {
       "id": "S19-github-workflows",
@@ -1153,5 +1168,5 @@
       ]
     }
   },
-  "updated_utc": "2026-08-17T17:05:26.236702+00:00"
+  "updated_utc": "2026-08-17T18:34:40.023310+00:00"
 }
