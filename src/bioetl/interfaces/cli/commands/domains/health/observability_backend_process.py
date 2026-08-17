@@ -13,12 +13,18 @@ from pathlib import Path
 from shutil import which
 from typing import TYPE_CHECKING, Any, cast
 
+import bioetl
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
 )
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+_PROCESS_PROBE_TIMEOUT_SECONDS = 5.0
+_BIOETL_PACKAGE_ROOT = Path(cast(str, bioetl.__file__)).resolve().parent
+_BIOETL_SRC_ROOT = _BIOETL_PACKAGE_ROOT.parent
+_BIOETL_REPOSITORY_ROOT = _BIOETL_SRC_ROOT.parent
 
 
 def _resolve_system_executable(command: str) -> str | None:
@@ -56,22 +62,39 @@ def _parse_posix_ss_listener_pids(output: str, port: int) -> tuple[int, ...]:
     suffix = f":{port}"
     pids: set[int] = set()
     for line in output.splitlines():
-        if suffix not in line or "LISTEN" not in line:
+        process_field = _posix_ss_listener_process_field(line, suffix=suffix)
+        if process_field is None:
             continue
-        for remainder in line.split("pid=")[1:]:
+        for remainder in process_field.split("pid=")[1:]:
             pid_text = remainder.split(",", maxsplit=1)[0].split(")", maxsplit=1)[0]
             if (pid := _try_parse_pid(pid_text)) is not None:
                 pids.add(pid)
     return _as_sorted_pid_tuple(pids)
 
 
+def _posix_ss_listener_process_field(line: str, *, suffix: str) -> str | None:
+    """Return the process field only for a matching local LISTEN address."""
+    fields = line.split(maxsplit=5)
+    if len(fields) < 5:
+        return None
+    if fields[0].upper() != "LISTEN":
+        return None
+    if not fields[3].endswith(suffix):
+        return None
+    return fields[5] if len(fields) > 5 else ""
+
+
 def _run_listener_probe(command: list[str]) -> str:
-    result = subprocess.run(  # nosec B603
-        command,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
+    try:
+        result = subprocess.run(  # nosec B603
+            command,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=_PROCESS_PROBE_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired:
+        return ""
     return result.stdout
 
 
@@ -140,12 +163,17 @@ def _run_taskkill(pid: int) -> subprocess.CompletedProcess[str]:
     taskkill = _resolve_system_executable("taskkill")
     if taskkill is None:
         return subprocess.CompletedProcess(args=(), returncode=1)
-    return subprocess.run(  # nosec B603
-        [taskkill, "/PID", str(pid), "/T", "/F"],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
+    command = [taskkill, "/PID", str(pid), "/T", "/F"]
+    try:
+        return subprocess.run(  # nosec B603
+            command,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=_PROCESS_PROBE_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired:
+        return subprocess.CompletedProcess(args=command, returncode=1)
 
 
 def _drop_posix_listener_pid(port: int, pid: int) -> bool:
@@ -222,9 +250,8 @@ def _build_detached_backend_env(
 ) -> dict[str, str]:
     """Ensure detached backend subprocess can import the src-layout package."""
     env = dict(current_env if current_env is not None else os.environ)
-    src_root = Path(__file__).resolve().parents[6]
     existing_pythonpath = env.get("PYTHONPATH", "").strip()
-    pythonpath_parts = [str(src_root)]
+    pythonpath_parts = [str(_BIOETL_SRC_ROOT)]
     if existing_pythonpath:
         pythonpath_parts.append(existing_pythonpath)
     env["PYTHONPATH"] = os.pathsep.join(pythonpath_parts)
@@ -270,7 +297,7 @@ def start_detached_ops_http_backend(
     kwargs = _build_detached_backend_popen_kwargs()
     kwargs.pop("stdout", None)
     kwargs.pop("stderr", None)
-    kwargs["cwd"] = str(Path(__file__).resolve().parents[7])
+    kwargs["cwd"] = str(_BIOETL_REPOSITORY_ROOT)
     kwargs["env"] = _build_detached_backend_env()
     log_path = build_detached_backend_log_path(port)
     log_path.parent.mkdir(parents=True, exist_ok=True)

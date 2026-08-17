@@ -30,6 +30,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import sys
 from unittest.mock import AsyncMock, MagicMock
 
 import click
@@ -99,6 +100,56 @@ async def test_run_health_server_resolves_quarantine_before_build(
 
     assert order.index("get_quarantine") < order.index("build_server")
     assert order.index("get_deps") < order.index("build_server")
+
+
+@pytest.mark.asyncio
+async def test_run_health_server_start_failure_closes_without_stopping(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    deps = MagicMock(name="deps")
+    quarantine = MagicMock(name="quarantine")
+    server = MagicMock()
+    server.start = AsyncMock(side_effect=OSError("bind failed"))
+    server.stop = AsyncMock()
+    close_resources = AsyncMock()
+    monkeypatch.setattr(
+        lifecycle._deps, "get_health_server_dependencies", lambda: deps
+    )
+    monkeypatch.setattr(
+        lifecycle._deps,
+        "_get_optional_health_server_quarantine_service",
+        lambda: quarantine,
+    )
+    monkeypatch.setattr(lifecycle._deps, "build_health_server", lambda **_: server)
+    monkeypatch.setattr(
+        lifecycle._deps,
+        "close_health_server_resources",
+        close_resources,
+    )
+
+    with pytest.raises(OSError, match="bind failed"):
+        await lifecycle._run_health_server("127.0.0.1", 9)
+
+    server.stop.assert_not_awaited()
+    close_resources.assert_awaited_once_with(
+        deps=deps,
+        quarantine_service=quarantine,
+    )
+
+
+def test_long_lived_health_command_restores_pycache_prefix(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original_prefix = sys.pycache_prefix
+
+    def _run_and_mutate_prefix(_coro: object) -> None:
+        sys.pycache_prefix = "/tmp/bioetl-mutated-prefix"
+
+    monkeypatch.setattr(lifecycle.asyncio, "run", _run_and_mutate_prefix)
+
+    lifecycle.run_long_lived_health_server_command("127.0.0.1", 9)
+
+    assert sys.pycache_prefix == original_prefix
 
 
 def test_load_maintenance_command_does_not_mutate_shared_name() -> None:

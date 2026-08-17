@@ -161,7 +161,7 @@ class TestConfigShowCommand:
         ):
             result = cli_runner.invoke(cli, ["config", "show", "unknown_pipeline"])
 
-        assert result.exit_code == 0  # Returns 0 but prints error
+        assert result.exit_code == 80
         assert "error" in result.output.lower() or "Configuration" in result.output
 
     def test_show_file_not_found_prints_error(
@@ -178,7 +178,7 @@ class TestConfigShowCommand:
         ):
             result = cli_runner.invoke(cli, ["config", "show", "missing_pipeline"])
 
-        assert result.exit_code == 0
+        assert result.exit_code == 66
         assert "not found" in result.output.lower() or "Config file" in result.output
 
 
@@ -235,7 +235,7 @@ class TestConfigValidateCommand:
         ):
             result = cli_runner.invoke(cli, ["config", "validate", "bad_pipeline"])
 
-        assert result.exit_code == 0
+        assert result.exit_code == 80
         assert "invalid" in result.output.lower() or "Configuration" in result.output
 
 

@@ -29,7 +29,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 
 import pytest
@@ -171,6 +171,27 @@ def test_scope_resolution_uses_terminal_time_and_scope_tokens() -> None:
         )
         is None
     )
+    mixed_timestamp_service = _RunManifestService(
+        manifests=(),
+        entries={
+            "mixed": [
+                _entry(
+                    records_bronze=5,
+                    occurred_at=datetime(2025, 1, 1, 11, 0),
+                    entry_id="naive",
+                ),
+                _entry(
+                    records_bronze=5,
+                    occurred_at=datetime(2025, 1, 1, 12, 0, tzinfo=UTC),
+                    entry_id="aware",
+                ),
+            ]
+        },
+    )
+    assert helpers._latest_terminal_timestamp(
+        run_id="mixed",
+        ledger_port=mixed_timestamp_service.ledger_port,
+    ) == datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
     assert (
         helpers._latest_terminal_timestamp(
             run_id="run-2",

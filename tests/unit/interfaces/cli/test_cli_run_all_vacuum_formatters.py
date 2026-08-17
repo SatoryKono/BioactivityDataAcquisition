@@ -276,10 +276,10 @@ class TestDetermineExitCode:
         )
         assert determine_batch_exit_code(result) == ExitCode.SIGINT
 
-    def test_sigint_when_no_total(self):
-        """Test ExitCode.SIGINT when total is 0 (all_succeeded is False)."""
+    def test_ok_when_no_total(self):
+        """A benign empty batch is successful, not an interrupt."""
         result = BatchRunResult(total=0, succeeded=0, failed=0, skipped=0)
-        assert determine_batch_exit_code(result) == ExitCode.SIGINT
+        assert determine_batch_exit_code(result) == ExitCode.OK
 
 
 @pytest.mark.unit

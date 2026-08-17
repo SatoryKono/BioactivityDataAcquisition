@@ -10,13 +10,16 @@ import asyncio
 from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
+import click
+
 from bioetl.domain.types import RunID
 from bioetl.interfaces.cli.commands.domains.shared.click_options import (
     typed_click_group,
     typed_click_option,
     typed_group_command,
 )
-from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
+from bioetl.interfaces.cli.exit_codes import ExitCode
+from bioetl.interfaces.cli.formatters import echo_info, echo_warning
 
 if TYPE_CHECKING:
     from bioetl.application.services.ops.lock_service import LockService
@@ -66,9 +69,11 @@ def release_command(pipeline: str, run_id: str, exclusive: bool) -> None:
     """
     try:
         parsed_run_id = cast(RunID, UUID(run_id))
-    except ValueError:
-        echo_error("Invalid run-id", "Must be a valid UUID")
-        return
+    except ValueError as exc:
+        raise click.BadParameter(
+            "Must be a valid UUID",
+            param_hint="--run-id",
+        ) from exc
 
     service = get_lock_service()
 
@@ -83,6 +88,7 @@ def release_command(pipeline: str, run_id: str, exclusive: bool) -> None:
             echo_info(f"Lock released for {pipeline}")
         else:
             echo_warning(f"Lock not released (not held by run-id {run_id})")
+            raise SystemExit(ExitCode.FAIL)
 
     asyncio.run(_run())
 
@@ -103,9 +109,11 @@ def check_command(pipeline: str, run_id: str) -> None:
     """
     try:
         parsed_run_id = cast(RunID, UUID(run_id))
-    except ValueError:
-        echo_error("Invalid run-id", "Must be a valid UUID")
-        return
+    except ValueError as exc:
+        raise click.BadParameter(
+            "Must be a valid UUID",
+            param_hint="--run-id",
+        ) from exc
 
     service = get_lock_service()
 
