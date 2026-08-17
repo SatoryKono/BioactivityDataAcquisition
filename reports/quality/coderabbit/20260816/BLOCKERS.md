@@ -137,3 +137,35 @@ Each entry requires GitHub reconciliation before closeout.
 - Files: `60`
 - Detail: CodeRabbit rate limit (waitTime=1260s)
 - GitHub issue: pending reconciliation
+## S18-grafana — timeout
+
+- UTC: `2026-08-17T12:53:33.689827+00:00`
+- Wave: `E`
+- Files: `104`
+- Detail: timeout after 600s
+- GitHub issue: pending reconciliation
+
+## S19-github-workflows — timeout
+
+- UTC: `2026-08-17T13:03:54.650104+00:00`
+- Wave: `E`
+- Files: `41`
+- Detail: timeout after 600s
+- GitHub issue: pending reconciliation
+
+## S12-tests-architecture-01 — error
+
+- UTC: `2026-08-17T13:08:59.726929+00:00`
+- Wave: `F`
+- Files: `300`
+- Detail: CodeRabbit exit code 1
+- GitHub issue: pending reconciliation
+
+## S12-tests-architecture-02 — rate_limit
+
+- UTC: `2026-08-17T13:11:00.233906+00:00`
+- Wave: `F`
+- Files: `200`
+- Detail: CodeRabbit rate limit (waitTime=840s)
+- GitHub issue: pending reconciliation
+
