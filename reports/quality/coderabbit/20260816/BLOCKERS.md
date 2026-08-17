@@ -74,3 +74,11 @@ Each entry requires GitHub reconciliation before closeout.
 - Detail: CodeRabbit rate limit (waitTime=120s)
 - GitHub issue: pending reconciliation
 
+## S07-infra-storage — rate_limit
+
+- UTC: `2026-08-17T05:17:22.279962+00:00`
+- Wave: `B`
+- Files: `146`
+- Detail: CodeRabbit rate limit (waitTime=1320s)
+- GitHub issue: pending reconciliation
+
