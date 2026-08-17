@@ -87,13 +87,13 @@
       "runtime_checkable": true
     },
     {
-      "line": 32,
+      "line": 38,
       "name": "RawRunManifestInspectionPort",
       "path": "src/bioetl/domain/ports/control_plane/run_manifest.py",
       "runtime_checkable": true
     },
     {
-      "line": 41,
+      "line": 47,
       "name": "RunManifestPort",
       "path": "src/bioetl/domain/ports/control_plane/run_manifest.py",
       "runtime_checkable": true
