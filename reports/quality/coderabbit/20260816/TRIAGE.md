@@ -1079,6 +1079,7 @@ Code/config/contracts and executable gates outrank CodeRabbit output.
 | `CR-20260816-A-S04b-app-residual-074` | pending | trivial | pending ground-truth reconciliation |  |
 | `CR-20260816-A-S04b-app-residual-075` | pending | major | pending ground-truth reconciliation |  |
 | `CR-20260816-A-S04b-app-residual-076` | pending | trivial | pending ground-truth reconciliation |  |
+<<<<<<< Updated upstream
 | `CR-20260816-A-S04b-app-residual-077` | pending | minor | pending ground-truth reconciliation |  |
 | `CR-20260816-A-S04b-app-residual-078` | pending | major | pending ground-truth reconciliation |  |
 | `CR-20260816-A-S04b-app-residual-079` | pending | trivial | pending ground-truth reconciliation |  |
@@ -1126,6 +1127,647 @@ Code/config/contracts and executable gates outrank CodeRabbit output.
 | `CR-20260816-A-S04b-app-residual-121` | pending | major | pending ground-truth reconciliation |  |
 | `CR-20260816-A-S04b-app-residual-122` | pending | major | pending ground-truth reconciliation |  |
 | `CR-20260816-A-S04b-app-residual-123` | pending | trivial | pending ground-truth reconciliation |  |
+||||||| Stash base
+| `CR-20260816-A-S04b-app-residual-077` | reject | minor | Reject duplicate dependency pipelines is config-policy expansion. | src/bioetl/application/composite/dependency_coordinator.py |
+| `CR-20260816-A-S04b-app-residual-078` | reject | major | Inject accounting port is architecture style. | src/bioetl/application/composite/deduplication.py |
+| `CR-20260816-A-S04b-app-residual-079` | reject | trivial | log_fields uses left/right/seed/dep keys, not reserved dependency/result_rows; no TypeError path. | src/bioetl/application/composite/dependency_join_execution.py:127-155 |
+| `CR-20260816-A-S04b-app-residual-080` | reject | trivial | Shared seed-sentinel constant is DRY. | src/bioetl/application/composite/dependency_join_context_builders.py |
+| `CR-20260816-A-S04b-app-residual-081` | reject | major | zip(..., strict=True) is hardening without a current unequal-length producer. | src/bioetl/application/composite/cross_validator_helpers.py |
+| `CR-20260816-A-S04b-app-residual-082` | reject | minor | Ordered column sequence vs set is determinism style. | src/bioetl/application/composite/column_service_support.py |
+| `CR-20260816-A-S04b-app-residual-083` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/composite/coordinator.py |
+| `CR-20260816-A-S04b-app-residual-084` | reject | trivial | Local polars import hoist is style. | src/bioetl/application/composite/deduplication.py |
+| `CR-20260816-A-S04b-app-residual-085` | reject | trivial | Defer create_task until after planning is a scheduling-style change. | src/bioetl/application/composite/coordinator_planning.py |
+| `CR-20260816-A-S04b-app-residual-086` | reject | major | Suffix collision with existing enricher columns has no demonstrated producer; current check against seed_cols is the shipped resolver. | src/bioetl/application/composite/conflict_resolver.py:80-83 |
+| `CR-20260816-A-S04b-app-residual-087` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/composite/cross_validator_helpers.py |
+| `CR-20260816-A-S04b-app-residual-088` | reject | minor | Missing-column vs unsupported-filter warning split is message-style. | src/bioetl/application/composite/coordinator_planning.py |
+| `CR-20260816-A-S04b-app-residual-089` | reject | major | Keyword vs positional unpack is style; field order is already aligned. | src/bioetl/application/composite/dependency_join_context_builders.py |
+| `CR-20260816-A-S04b-app-residual-090` | reject | trivial | One aggregated.select instead of per-column scans is perf. | src/bioetl/application/composite/deduplication.py |
+| `CR-20260816-A-S04b-app-residual-091` | reject | trivial | tuple/frozenset/eq=False on join contexts is freeze-style. | src/bioetl/application/composite/dependency_join_models.py |
+| `CR-20260816-A-S04b-app-residual-092` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/composite/join_execution.py |
+| `CR-20260816-A-S04b-app-residual-093` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/composite/helpers/join_planner_identity.py |
+| `CR-20260816-A-S04b-app-residual-094` | reject | trivial | Remove passthrough logger wrappers is style. | src/bioetl/application/composite/helpers/resolver_helper.py |
+| `CR-20260816-A-S04b-app-residual-095` | reject | trivial | Collaborator dataclass extraction is DRY. | src/bioetl/application/composite/helpers/dependency_join_apply_ops.py |
+| `CR-20260816-A-S04b-app-residual-096` | reject | major | Shared join-key coerce helper is DRY; the remaining regex bug is already confirmed as S04b-109/#8916 and is not reopened here. | src/bioetl/application/composite/join_execution.py |
+| `CR-20260816-A-S04b-app-residual-097` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/composite/helpers/resolver_helper.py |
+| `CR-20260816-A-S04b-app-residual-098` | reject | trivial | Remove pass-through wrappers is style. | src/bioetl/application/composite/helpers/dependency_join_service_ops.py |
+| `CR-20260816-A-S04b-app-residual-099` | reject | trivial | Precomputed dtype groups / zip strict is perf/style. | src/bioetl/application/composite/helpers/preflight_type_and_aggregation.py |
+| `CR-20260816-A-S04b-app-residual-100` | reject | trivial | Shared terminal-emit helper is DRY. | src/bioetl/application/composite/helpers/lifecycle_observer_terminal_emit.py |
+| `CR-20260816-A-S04b-app-residual-101` | reject | major | Surface skipped schema-registry entries is reporting expansion. | src/bioetl/application/composite/helpers/preflight_schema_registry.py |
+| `CR-20260816-A-S04b-app-residual-102` | reject | major | Restrict vars(module) fallback is discovery-policy tightening. | src/bioetl/application/composite/helpers/preflight_schema_registry.py |
+| `CR-20260816-A-S04b-app-residual-103` | reject | minor | Nested-bracket dtype parse is hardening without a reproduced wrong dtype. | src/bioetl/application/composite/helpers/preflight_schema_field_extraction.py |
+| `CR-20260816-A-S04b-app-residual-104` | reject | major | Dedup join-key expressions is hardening without a demonstrated duplicate-key producer. | src/bioetl/application/composite/join_key_normalization.py |
+| `CR-20260816-A-S04b-app-residual-105` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/composite/helpers/merger_orchestration_types.py |
+| `CR-20260816-A-S04b-app-residual-106` | reject | trivial | Read-only merge-context annotations are Protocol/style. | src/bioetl/application/composite/helpers/merger_orchestration_types.py |
+| `CR-20260816-A-S04b-app-residual-107` | reject | trivial | Hoist module_aliases constant is style. | src/bioetl/application/composite/helpers/preflight_schema_registry.py |
+| `CR-20260816-A-S04b-app-residual-108` | reject | minor | Earliest-layer token selection is a path-parse policy change. | src/bioetl/application/composite/helpers/join_planner_identity.py |
+| `CR-20260816-A-S04b-app-residual-109` | confirm | critical | Join-key regex r"\.0$" is over-escaped and does not strip a literal .0 suffix after String cast. | src/bioetl/application/composite/join_execution.py str.replace |
+| `CR-20260816-A-S04b-app-residual-110` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/composite/runner_pkg/runner_runtime_helpers.py |
+| `CR-20260816-A-S04b-app-residual-111` | reject | trivial | __all__ placement is style. | src/bioetl/application/composite/runner_pkg/runner_stage_dependency_state_flow.py |
+| `CR-20260816-A-S04b-app-residual-112` | reject | trivial | Remove asyncio.sleep(0) is style. | src/bioetl/application/composite/runner_pkg/runner_stage_enrichment_mixin.py |
+| `CR-20260816-A-S04b-app-residual-113` | reject | minor | Explicit InvalidStateError on unexpected enrichment states is hardening of a shipped no-op branch. | src/bioetl/application/composite/runner_pkg/runner_stage_enrichment_mixin.py |
+| `CR-20260816-A-S04b-app-residual-114` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/composite/runner_pkg/runner_observability_helpers.py |
+| `CR-20260816-A-S04b-app-residual-115` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/composite/runner_pkg/runner_stage_dependency_flow.py |
+| `CR-20260816-A-S04b-app-residual-116` | confirm | major | run_while_locked finally calls heartbeat.stop() then lock release; a stop() exception skips release and leaks the lock. | src/bioetl/application/composite/runner_pkg/runner_runtime_helpers.py:224-226 |
+| `CR-20260816-A-S04b-app-residual-117` | reject | minor | Persist-before-emit ordering is style; both steps still run. | src/bioetl/application/composite/runner_pkg/runner_stage_dependency_state_flow.py |
+| `CR-20260816-A-S04b-app-residual-118` | reject | minor | Prefer get_reason_code() is telemetry-style. | src/bioetl/application/composite/runner_pkg/runner_merge_stage_runtime.py |
+| `CR-20260816-A-S04b-app-residual-119` | reject | trivial | Clearer UUID ValueError is message-style. | src/bioetl/application/composite/runner_pkg/runner_runtime_helpers.py |
+| `CR-20260816-A-S04b-app-residual-120` | reject | trivial | Copy-before-mutate in add_not_run_results is freeze-style. | src/bioetl/application/composite/runner_pkg/runner_mergeability_helpers.py |
+| `CR-20260816-A-S04b-app-residual-121` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/composite/runner_pkg/runner_observability_helpers.py |
+| `CR-20260816-A-S04b-app-residual-122` | reject | major | cast(Any, None) to annotation-only is Protocol/style. | src/bioetl/application/composite/runner_pkg/runner_observability_mixin.py |
+| `CR-20260816-A-S04b-app-residual-123` | reject | trivial | Consolidate exception handlers is DRY. | src/bioetl/application/composite/runner_pkg/runner_merge_stage_runtime.py |
+| `CR-20260816-A-S09-composition-001` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-002` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-003` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-004` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-005` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-006` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-007` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-008` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-009` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-010` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-011` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-012` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-013` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-014` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-015` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-016` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-017` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-018` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-019` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-020` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-021` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-022` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-023` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-024` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-025` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-026` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-027` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-028` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-029` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-030` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-031` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-032` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-033` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-034` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-035` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-036` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-037` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-038` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-039` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-040` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-041` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-042` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-043` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-044` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-045` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-046` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-047` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-048` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-049` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-050` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-051` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-052` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-053` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-054` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-055` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-056` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-057` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-058` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-059` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-060` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-061` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-062` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-063` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-064` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-065` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-066` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-067` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-068` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-069` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-070` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-071` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-072` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-073` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-074` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-075` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-076` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-077` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-078` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-079` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-080` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-081` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-082` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-083` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-084` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-085` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-086` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-087` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-088` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-089` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-090` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-091` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-092` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-093` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-094` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-095` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-096` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-097` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-098` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-099` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-100` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-101` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-102` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-103` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-104` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-105` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-106` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-107` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-108` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-109` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-110` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-111` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-112` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-113` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-114` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-115` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-116` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-117` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-118` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-119` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-120` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-121` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-122` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-123` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-124` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-125` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-126` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-127` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-128` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-129` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-130` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-131` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-132` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-133` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-134` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-135` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-136` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-137` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-138` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-139` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-140` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-141` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-142` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-143` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-144` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-145` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-146` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-147` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-148` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-149` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-150` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-151` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-152` | pending | critical | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-153` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-154` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-155` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-156` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-157` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-158` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-159` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-160` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-161` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-162` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-163` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-164` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-165` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-166` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-167` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-168` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-169` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-170` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-171` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-172` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-173` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-174` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-175` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-176` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-177` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-178` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-179` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-180` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-181` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-182` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-183` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-184` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-185` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-186` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-187` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-188` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-189` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-190` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-191` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-192` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-193` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-194` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-195` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-196` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-197` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-198` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-199` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-200` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-201` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-202` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-203` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-204` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-205` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-206` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-207` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-208` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-209` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-210` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-211` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-212` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-213` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-214` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-215` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-216` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-217` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-218` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-219` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-220` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-221` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-222` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-223` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-224` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-225` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-226` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-227` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-228` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-229` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-230` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-231` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-232` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-233` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-234` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-235` | pending | critical | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-236` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-237` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-238` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-239` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-240` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-241` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-242` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-243` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-244` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-245` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-246` | pending | critical | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-247` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-248` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-249` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-250` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-251` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-252` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-253` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-254` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-255` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-256` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-257` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-258` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-259` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-260` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-261` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-262` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-263` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-264` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-265` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-266` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-267` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-268` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-269` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-270` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-271` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S09-composition-272` | pending | minor | pending ground-truth reconciliation |  |
+=======
+| `CR-20260816-A-S04b-app-residual-077` | reject | minor | Reject duplicate dependency pipelines is config-policy expansion. | src/bioetl/application/composite/dependency_coordinator.py |
+| `CR-20260816-A-S04b-app-residual-078` | reject | major | Inject accounting port is architecture style. | src/bioetl/application/composite/deduplication.py |
+| `CR-20260816-A-S04b-app-residual-079` | reject | trivial | log_fields uses left/right/seed/dep keys, not reserved dependency/result_rows; no TypeError path. | src/bioetl/application/composite/dependency_join_execution.py:127-155 |
+| `CR-20260816-A-S04b-app-residual-080` | reject | trivial | Shared seed-sentinel constant is DRY. | src/bioetl/application/composite/dependency_join_context_builders.py |
+| `CR-20260816-A-S04b-app-residual-081` | reject | major | zip(..., strict=True) is hardening without a current unequal-length producer. | src/bioetl/application/composite/cross_validator_helpers.py |
+| `CR-20260816-A-S04b-app-residual-082` | reject | minor | Ordered column sequence vs set is determinism style. | src/bioetl/application/composite/column_service_support.py |
+| `CR-20260816-A-S04b-app-residual-083` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/composite/coordinator.py |
+| `CR-20260816-A-S04b-app-residual-084` | reject | trivial | Local polars import hoist is style. | src/bioetl/application/composite/deduplication.py |
+| `CR-20260816-A-S04b-app-residual-085` | reject | trivial | Defer create_task until after planning is a scheduling-style change. | src/bioetl/application/composite/coordinator_planning.py |
+| `CR-20260816-A-S04b-app-residual-086` | reject | major | Suffix collision with existing enricher columns has no demonstrated producer; current check against seed_cols is the shipped resolver. | src/bioetl/application/composite/conflict_resolver.py:80-83 |
+| `CR-20260816-A-S04b-app-residual-087` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/composite/cross_validator_helpers.py |
+| `CR-20260816-A-S04b-app-residual-088` | reject | minor | Missing-column vs unsupported-filter warning split is message-style. | src/bioetl/application/composite/coordinator_planning.py |
+| `CR-20260816-A-S04b-app-residual-089` | reject | major | Keyword vs positional unpack is style; field order is already aligned. | src/bioetl/application/composite/dependency_join_context_builders.py |
+| `CR-20260816-A-S04b-app-residual-090` | reject | trivial | One aggregated.select instead of per-column scans is perf. | src/bioetl/application/composite/deduplication.py |
+| `CR-20260816-A-S04b-app-residual-091` | reject | trivial | tuple/frozenset/eq=False on join contexts is freeze-style. | src/bioetl/application/composite/dependency_join_models.py |
+| `CR-20260816-A-S04b-app-residual-092` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/composite/join_execution.py |
+| `CR-20260816-A-S04b-app-residual-093` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/composite/helpers/join_planner_identity.py |
+| `CR-20260816-A-S04b-app-residual-094` | reject | trivial | Remove passthrough logger wrappers is style. | src/bioetl/application/composite/helpers/resolver_helper.py |
+| `CR-20260816-A-S04b-app-residual-095` | reject | trivial | Collaborator dataclass extraction is DRY. | src/bioetl/application/composite/helpers/dependency_join_apply_ops.py |
+| `CR-20260816-A-S04b-app-residual-096` | reject | major | Shared join-key coerce helper is DRY; the remaining regex bug is already confirmed as S04b-109/#8916 and is not reopened here. | src/bioetl/application/composite/join_execution.py |
+| `CR-20260816-A-S04b-app-residual-097` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/composite/helpers/resolver_helper.py |
+| `CR-20260816-A-S04b-app-residual-098` | reject | trivial | Remove pass-through wrappers is style. | src/bioetl/application/composite/helpers/dependency_join_service_ops.py |
+| `CR-20260816-A-S04b-app-residual-099` | reject | trivial | Precomputed dtype groups / zip strict is perf/style. | src/bioetl/application/composite/helpers/preflight_type_and_aggregation.py |
+| `CR-20260816-A-S04b-app-residual-100` | reject | trivial | Shared terminal-emit helper is DRY. | src/bioetl/application/composite/helpers/lifecycle_observer_terminal_emit.py |
+| `CR-20260816-A-S04b-app-residual-101` | reject | major | Surface skipped schema-registry entries is reporting expansion. | src/bioetl/application/composite/helpers/preflight_schema_registry.py |
+| `CR-20260816-A-S04b-app-residual-102` | reject | major | Restrict vars(module) fallback is discovery-policy tightening. | src/bioetl/application/composite/helpers/preflight_schema_registry.py |
+| `CR-20260816-A-S04b-app-residual-103` | reject | minor | Nested-bracket dtype parse is hardening without a reproduced wrong dtype. | src/bioetl/application/composite/helpers/preflight_schema_field_extraction.py |
+| `CR-20260816-A-S04b-app-residual-104` | reject | major | Dedup join-key expressions is hardening without a demonstrated duplicate-key producer. | src/bioetl/application/composite/join_key_normalization.py |
+| `CR-20260816-A-S04b-app-residual-105` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/composite/helpers/merger_orchestration_types.py |
+| `CR-20260816-A-S04b-app-residual-106` | reject | trivial | Read-only merge-context annotations are Protocol/style. | src/bioetl/application/composite/helpers/merger_orchestration_types.py |
+| `CR-20260816-A-S04b-app-residual-107` | reject | trivial | Hoist module_aliases constant is style. | src/bioetl/application/composite/helpers/preflight_schema_registry.py |
+| `CR-20260816-A-S04b-app-residual-108` | reject | minor | Earliest-layer token selection is a path-parse policy change. | src/bioetl/application/composite/helpers/join_planner_identity.py |
+| `CR-20260816-A-S04b-app-residual-109` | confirm | critical | Join-key regex r"\.0$" is over-escaped and does not strip a literal .0 suffix after String cast. | src/bioetl/application/composite/join_execution.py str.replace |
+| `CR-20260816-A-S04b-app-residual-110` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/composite/runner_pkg/runner_runtime_helpers.py |
+| `CR-20260816-A-S04b-app-residual-111` | reject | trivial | __all__ placement is style. | src/bioetl/application/composite/runner_pkg/runner_stage_dependency_state_flow.py |
+| `CR-20260816-A-S04b-app-residual-112` | reject | trivial | Remove asyncio.sleep(0) is style. | src/bioetl/application/composite/runner_pkg/runner_stage_enrichment_mixin.py |
+| `CR-20260816-A-S04b-app-residual-113` | reject | minor | Explicit InvalidStateError on unexpected enrichment states is hardening of a shipped no-op branch. | src/bioetl/application/composite/runner_pkg/runner_stage_enrichment_mixin.py |
+| `CR-20260816-A-S04b-app-residual-114` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/composite/runner_pkg/runner_observability_helpers.py |
+| `CR-20260816-A-S04b-app-residual-115` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/composite/runner_pkg/runner_stage_dependency_flow.py |
+| `CR-20260816-A-S04b-app-residual-116` | confirm | major | run_while_locked finally calls heartbeat.stop() then lock release; a stop() exception skips release and leaks the lock. | src/bioetl/application/composite/runner_pkg/runner_runtime_helpers.py:224-226 |
+| `CR-20260816-A-S04b-app-residual-117` | reject | minor | Persist-before-emit ordering is style; both steps still run. | src/bioetl/application/composite/runner_pkg/runner_stage_dependency_state_flow.py |
+| `CR-20260816-A-S04b-app-residual-118` | reject | minor | Prefer get_reason_code() is telemetry-style. | src/bioetl/application/composite/runner_pkg/runner_merge_stage_runtime.py |
+| `CR-20260816-A-S04b-app-residual-119` | reject | trivial | Clearer UUID ValueError is message-style. | src/bioetl/application/composite/runner_pkg/runner_runtime_helpers.py |
+| `CR-20260816-A-S04b-app-residual-120` | reject | trivial | Copy-before-mutate in add_not_run_results is freeze-style. | src/bioetl/application/composite/runner_pkg/runner_mergeability_helpers.py |
+| `CR-20260816-A-S04b-app-residual-121` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/composite/runner_pkg/runner_observability_helpers.py |
+| `CR-20260816-A-S04b-app-residual-122` | reject | major | cast(Any, None) to annotation-only is Protocol/style. | src/bioetl/application/composite/runner_pkg/runner_observability_mixin.py |
+| `CR-20260816-A-S04b-app-residual-123` | reject | trivial | Consolidate exception handlers is DRY. | src/bioetl/application/composite/runner_pkg/runner_merge_stage_runtime.py |
+| `CR-20260816-A-S09-composition-001` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/cli/config.py |
+| `CR-20260816-A-S09-composition-002` | reject | major | Process-local MemoryLock is the documented shipped CLI/runtime contract until a durable adapter exists. | src/bioetl/composition/bootstrap/cli/lock.py:21-26 |
+| `CR-20260816-A-S09-composition-003` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/assembly/checkpoint.py |
+| `CR-20260816-A-S09-composition-004` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/assembly/health_service.py |
+| `CR-20260816-A-S09-composition-005` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/assembly/health_server.py |
+| `CR-20260816-A-S09-composition-006` | reject | major | Layering/DRY move of already-correct policy; composition wiring is not a broken invariant. | src/bioetl/composition/bootstrap/cli/config_helpers.py |
+| `CR-20260816-A-S09-composition-007` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/assembly/metrics_service.py |
+| `CR-20260816-A-S09-composition-008` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/cli/__init__.py |
+| `CR-20260816-A-S09-composition-009` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/cli/lock.py |
+| `CR-20260816-A-S09-composition-010` | reject | major | Layering/DRY move of already-correct policy; composition wiring is not a broken invariant. | src/bioetl/composition/bootstrap/assembly/health_service.py |
+| `CR-20260816-A-S09-composition-011` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/cli/lineage.py |
+| `CR-20260816-A-S09-composition-012` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/cli/health.py |
+| `CR-20260816-A-S09-composition-013` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/cli/config_helpers.py |
+| `CR-20260816-A-S09-composition-014` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/cli/checkpoint.py |
+| `CR-20260816-A-S09-composition-015` | reject | major | Protocol/conformance typing request; reject class for this campaign. | src/bioetl/composition/bootstrap/assembly/health_server.py |
+| `CR-20260816-A-S09-composition-016` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/assembly/storage.py |
+| `CR-20260816-A-S09-composition-017` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/execution_api.py |
+| `CR-20260816-A-S09-composition-018` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/composite_api.py |
+| `CR-20260816-A-S09-composition-019` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/entrypoints.py |
+| `CR-20260816-A-S09-composition-020` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/bootstrap_logger.py |
+| `CR-20260816-A-S09-composition-021` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/factories/__init__.py |
+| `CR-20260816-A-S09-composition-022` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap_logger.py |
+| `CR-20260816-A-S09-composition-023` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/factories/_transformer_spec_rows.py |
+| `CR-20260816-A-S09-composition-024` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/factories/_observability_wiring.py |
+| `CR-20260816-A-S09-composition-025` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/builders.py |
+| `CR-20260816-A-S09-composition-026` | reject | major | Docs/ADR-for-shipped-API request; reject class for this campaign. | src/bioetl/composition/entrypoints.py |
+| `CR-20260816-A-S09-composition-027` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/runtime/__init__.py |
+| `CR-20260816-A-S09-composition-028` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/cli/metrics.py |
+| `CR-20260816-A-S09-composition-029` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/cli/storage.py |
+| `CR-20260816-A-S09-composition-030` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py |
+| `CR-20260816-A-S09-composition-031` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/runtime/_composite_plan_runtime_support.py |
+| `CR-20260816-A-S09-composition-032` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/cli/noop.py |
+| `CR-20260816-A-S09-composition-033` | reject | major | Layering/DRY move of already-correct policy; composition wiring is not a broken invariant. | src/bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py |
+| `CR-20260816-A-S09-composition-034` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/cli/service_builders.py |
+| `CR-20260816-A-S09-composition-035` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/control_plane_store_builders.py |
+| `CR-20260816-A-S09-composition-036` | reject | major | Layering/DRY move of already-correct policy; composition wiring is not a broken invariant. | src/bioetl/composition/bootstrap/runtime/_composite_control_plane_payloads.py |
+| `CR-20260816-A-S09-composition-037` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/runtime/_composite_control_plane_builder_support.py |
+| `CR-20260816-A-S09-composition-038` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/runtime/_composite_control_plane_payloads.py |
+| `CR-20260816-A-S09-composition-039` | reject | major | Layering/DRY move of already-correct policy; composition wiring is not a broken invariant. | src/bioetl/composition/bootstrap/cli/storage.py |
+| `CR-20260816-A-S09-composition-040` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/bootstrap/runtime/_composite_control_plane_builder_support.py |
+| `CR-20260816-A-S09-composition-041` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/cli/run_manifest.py |
+| `CR-20260816-A-S09-composition-042` | reject | major | Protocol/conformance typing request; reject class for this campaign. | src/bioetl/composition/factories/services/port_factories.py |
+| `CR-20260816-A-S09-composition-043` | reject | major | Protocol/conformance typing request; reject class for this campaign. | src/bioetl/composition/factories/storage/audit.py |
+| `CR-20260816-A-S09-composition-044` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/services/runtime_managers.py |
+| `CR-20260816-A-S09-composition-045` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/factories/services/runtime_managers.py |
+| `CR-20260816-A-S09-composition-046` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/factories/storage/_helpers.py |
+| `CR-20260816-A-S09-composition-047` | reject | major | Layering/DRY move of already-correct policy; composition wiring is not a broken invariant. | src/bioetl/composition/factories/storage/_helpers.py |
+| `CR-20260816-A-S09-composition-048` | reject | minor | Injected registry is caller-owned; get(pipeline_name) already fail-closes a missing name. Auto-registering into a partial registry is a convenience change. | src/bioetl/composition/bootstrap/runtime/pipeline_bootstrap_phases.py:174-179 |
+| `CR-20260816-A-S09-composition-049` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/bootstrap/runtime/runtime_basics.py |
+| `CR-20260816-A-S09-composition-050` | reject | major | Layering/DRY move of already-correct policy; composition wiring is not a broken invariant. | src/bioetl/composition/bootstrap/runtime/runner_factory_builder_service.py |
+| `CR-20260816-A-S09-composition-051` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/runtime_public_exports.py |
+| `CR-20260816-A-S09-composition-052` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/bootstrap/runtime/pipeline_context_builder.py |
+| `CR-20260816-A-S09-composition-053` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/bootstrap/runtime/pipeline_context_builder.py |
+| `CR-20260816-A-S09-composition-054` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/bootstrap/runtime/dq_bootstrap.py |
+| `CR-20260816-A-S09-composition-055` | reject | major | Layering/DRY move of already-correct policy; composition wiring is not a broken invariant. | src/bioetl/composition/bootstrap/runtime/composite_support_services_factory.py |
+| `CR-20260816-A-S09-composition-056` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/bootstrap/runtime/normalization_policy_init.py |
+| `CR-20260816-A-S09-composition-057` | reject | minor | Deterministic UUIDv5 from pid+counter is the intended occurrence/correlation contract, not a randomness hole. | src/bioetl/composition/bootstrap/runtime/logger_bootstrap.py |
+| `CR-20260816-A-S09-composition-058` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/factories/pipeline/contract_validator.py |
+| `CR-20260816-A-S09-composition-059` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/factories/storage/maintenance_mixin.py |
+| `CR-20260816-A-S09-composition-060` | reject | major | Tests lock in no-op: clear_delta(None) returns 0. Tests outrank the port docstring request to wipe all tables. | tests/unit/composition/factories/storage/test_clear_mixin.py:164-168 |
+| `CR-20260816-A-S09-composition-061` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/factories/storage/resilience.py |
+| `CR-20260816-A-S09-composition-062` | reject | major | Protocol/conformance typing request; reject class for this campaign. | src/bioetl/composition/factories/storage/clear_mixin.py |
+| `CR-20260816-A-S09-composition-063` | reject | major | Protocol/conformance typing request; reject class for this campaign. | src/bioetl/composition/factories/storage/merged_mixin.py |
+| `CR-20260816-A-S09-composition-064` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/factories/transformer_dependencies.py |
+| `CR-20260816-A-S09-composition-065` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/health_service_access.py |
+| `CR-20260816-A-S09-composition-066` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/storage/maintenance_mixin.py |
+| `CR-20260816-A-S09-composition-067` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/health_api.py |
+| `CR-20260816-A-S09-composition-068` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/factories/storage/merged_mixin.py |
+| `CR-20260816-A-S09-composition-069` | reject | major | Docs/ADR-for-shipped-API request; reject class for this campaign. | src/bioetl/composition/factories/storage/storage_factory.py |
+| `CR-20260816-A-S09-composition-070` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/storage/write_mixin.py |
+| `CR-20260816-A-S09-composition-071` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/factories/storage/factory.py |
+| `CR-20260816-A-S09-composition-072` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/factories/transformer_factory.py |
+| `CR-20260816-A-S09-composition-073` | reject | major | csv_exporter.clear returns list[Path]; len(deleted) in _run_clear matches the exporter contract. | src/bioetl/infrastructure/export/csv_exporter.py:116 |
+| `CR-20260816-A-S09-composition-074` | reject | minor | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/pipeline/config_types.py |
+| `CR-20260816-A-S09-composition-075` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/pipeline/creation_support.py |
+| `CR-20260816-A-S09-composition-076` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/factories/storage/health_mixin.py |
+| `CR-20260816-A-S09-composition-077` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/_workflow_services.py |
+| `CR-20260816-A-S09-composition-078` | reject | major | Lazy MemoryLock singleton race is concurrency hardening without a demonstrated dual-lock producer. | src/bioetl/composition/_workflow_services.py |
+| `CR-20260816-A-S09-composition-079` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/_workflow_services.py |
+| `CR-20260816-A-S09-composition-080` | reject | minor | Docs/ADR-for-shipped-API request; reject class for this campaign. | src/bioetl/composition/README.md |
+| `CR-20260816-A-S09-composition-081` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/_services.py |
+| `CR-20260816-A-S09-composition-082` | reject | minor | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/bootstrap/assembly/__init__.py |
+| `CR-20260816-A-S09-composition-083` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/bootstrap/__init__.py |
+| `CR-20260816-A-S09-composition-084` | reject | trivial | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/_resource_management.py |
+| `CR-20260816-A-S09-composition-085` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/_services.py |
+| `CR-20260816-A-S09-composition-086` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/_workflow_services.py |
+| `CR-20260816-A-S09-composition-087` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/bootstrap/assembly/__init__.py |
+| `CR-20260816-A-S09-composition-088` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/_pipeline_execution.py |
+| `CR-20260816-A-S09-composition-089` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/_pipeline_execution.py |
+| `CR-20260816-A-S09-composition-090` | reject | minor | Protocol/conformance typing request; reject class for this campaign. | src/bioetl/composition/_workflow_services.py |
+| `CR-20260816-A-S09-composition-091` | reject | minor | Docs/ADR-for-shipped-API request; reject class for this campaign. | src/bioetl/composition/README.md |
+| `CR-20260816-A-S09-composition-092` | reject | minor | json.dumps already fail-closes on non-JSON leaves; default=str would fail-open. | src/bioetl/composition/services/effective_config_serializer.py:46-48 |
+| `CR-20260816-A-S09-composition-093` | reject | minor | Ancestor lockfile walk is the shipped lookup contract; no demonstrated wrong-file producer on current CLI cwd. | src/bioetl/composition/services/versioning.py:155-165 |
+| `CR-20260816-A-S09-composition-094` | reject | trivial | Protocol/conformance typing request; reject class for this campaign. | src/bioetl/composition/services/versioning.py |
+| `CR-20260816-A-S09-composition-095` | reject | major | _to_jsonable already str()-coerces keys; sorted(items()) TypeError on mixed keys is fail-closed, not a silent hash hole. | src/bioetl/composition/services/effective_config_serializer.py:39-40 |
+| `CR-20260816-A-S09-composition-096` | reject | trivial | Docs/ADR-for-shipped-API request; reject class for this campaign. | src/bioetl/composition/types.py |
+| `CR-20260816-A-S09-composition-097` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/services/effective_config_serializer.py |
+| `CR-20260816-A-S09-composition-098` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/bootstrap/runtime/composite_merge_service_builder.py |
+| `CR-20260816-A-S09-composition-099` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/bootstrap/runtime/composite_support_runtime_context.py |
+| `CR-20260816-A-S09-composition-100` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/bootstrap/runtime/composite_support_runtime_context.py |
+| `CR-20260816-A-S09-composition-101` | reject | major | Layering/DRY move of already-correct policy; composition wiring is not a broken invariant. | src/bioetl/composition/bootstrap/runtime/composite_filter_extraction_service.py |
+| `CR-20260816-A-S09-composition-102` | reject | major | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/bootstrap/runtime/composite_runtime_management_builder.py |
+| `CR-20260816-A-S09-composition-103` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/bootstrap/runtime/composite_runtime_management_builder.py |
+| `CR-20260816-A-S09-composition-104` | reject | major | Filesystem path already hashes raw bytes; git-show text path is a fallback when the file is absent, not a current dual-hash producer. | src/bioetl/composition/services/versioning.py:168-181 |
+| `CR-20260816-A-S09-composition-105` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/bootstrap/runtime/composite_support_helpers.py |
+| `CR-20260816-A-S09-composition-106` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/bootstrap/runtime/composite_runtime_management_builder.py |
+| `CR-20260816-A-S09-composition-107` | reject | trivial | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/runtime_builders/runner_control_plane_assembly.py |
+| `CR-20260816-A-S09-composition-108` | reject | major | Layering/DRY move of already-correct policy; composition wiring is not a broken invariant. | src/bioetl/composition/runtime_builders/_run_manifest_sink_policy.py |
+| `CR-20260816-A-S09-composition-109` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/_run_manifest_snapshot_support.py |
+| `CR-20260816-A-S09-composition-110` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/_run_manifest_data_roots.py |
+| `CR-20260816-A-S09-composition-111` | reject | major | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/runtime_builders/_runner_builder_orchestration.py |
+| `CR-20260816-A-S09-composition-112` | reject | trivial | Protocol/conformance typing request; reject class for this campaign. | src/bioetl/composition/runtime_builders/_runner_builder_orchestration.py |
+| `CR-20260816-A-S09-composition-113` | reject | major | Temporary pending manifest_id is the two-phase create/attach seam, not a leftover identity written to disk. | src/bioetl/composition/runtime_builders/_run_manifest_publication_support.py |
+| `CR-20260816-A-S09-composition-114` | reject | trivial | Protocol/conformance typing request; reject class for this campaign. | src/bioetl/composition/runtime_builders/_run_manifest_replay_support.py |
+| `CR-20260816-A-S09-composition-115` | reject | minor | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/_run_manifest_sink_policy.py |
+| `CR-20260816-A-S09-composition-116` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/_run_manifest_refs.py |
+| `CR-20260816-A-S09-composition-117` | reject | major | Layering/DRY move of already-correct policy; composition wiring is not a broken invariant. | src/bioetl/composition/runtime_builders/_runner_control_plane_artifact_policy.py |
+| `CR-20260816-A-S09-composition-118` | confirm | minor | isinstance(raw, int \| float) accepts bool; False becomes 0.0 and invents lag for blocked status, True becomes 1.0. | src/bioetl/composition/runtime_builders/_run_manifest_creation_support_helpers.py:206-210 |
+| `CR-20260816-A-S09-composition-119` | reject | trivial | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/runtime_builders/_run_manifest_snapshot_support.py |
+| `CR-20260816-A-S09-composition-120` | reject | major | Owner-private mode/uid checks already fail closed; symlink lstat is hardening without a demonstrated traversal producer. | src/bioetl/composition/runtime_builders/_run_manifest_data_roots.py:102-151 |
+| `CR-20260816-A-S09-composition-121` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/bootstrap/runtime/composite_merge_dependency_builder.py |
+| `CR-20260816-A-S09-composition-122` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/_run_manifest_identity_ref_values.py |
+| `CR-20260816-A-S09-composition-123` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/_run_manifest_sink_policy.py |
+| `CR-20260816-A-S09-composition-124` | reject | trivial | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/factories/datasource/adapter_helpers.py |
+| `CR-20260816-A-S09-composition-125` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/factories/datasource/adapter_helpers.py |
+| `CR-20260816-A-S09-composition-126` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/datasource/_crossref_support.py |
+| `CR-20260816-A-S09-composition-127` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/datasource/data_source_factory.py |
+| `CR-20260816-A-S09-composition-128` | reject | trivial | Protocol/conformance typing request; reject class for this campaign. | src/bioetl/composition/factories/dq/_context_resolver_support.py |
+| `CR-20260816-A-S09-composition-129` | reject | minor | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/datasource/pubchem.py |
+| `CR-20260816-A-S09-composition-130` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/control_plane.py |
+| `CR-20260816-A-S09-composition-131` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/inputs_resolution_orchestration.py |
+| `CR-20260816-A-S09-composition-132` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/cached_bronze_snapshot_support.py |
+| `CR-20260816-A-S09-composition-133` | reject | major | Layering/DRY move of already-correct policy; composition wiring is not a broken invariant. | src/bioetl/composition/runtime_builders/_runner_control_plane_policy.py |
+| `CR-20260816-A-S09-composition-134` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/_runner_input_preparation.py |
+| `CR-20260816-A-S09-composition-135` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/_context_field_binding.py |
+| `CR-20260816-A-S09-composition-136` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/_effective_config_graph_support.py |
+| `CR-20260816-A-S09-composition-137` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/providers/provider_registry.py |
+| `CR-20260816-A-S09-composition-138` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/providers/registration_biblio.py |
+| `CR-20260816-A-S09-composition-139` | reject | major | Empty missing-lineage on unset sink is the documented compatibility path for non-forensic launches. | src/bioetl/composition/runtime_builders/_runner_control_plane_policy_support.py:58-70 |
+| `CR-20260816-A-S09-composition-140` | reject | major | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/runtime_builders/_effective_config_artifact_builder_support.py |
+| `CR-20260816-A-S09-composition-141` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/providers/registration_bio.py |
+| `CR-20260816-A-S09-composition-142` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/_effective_config_artifact_builder_support.py |
+| `CR-20260816-A-S09-composition-143` | reject | minor | Empty default_email is already falsy and raises; kwargs path already requires a non-empty str. | src/bioetl/composition/factories/datasource/_crossref_inputs.py:10-20 |
+| `CR-20260816-A-S09-composition-144` | reject | trivial | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/runtime_builders/_effective_config_graph_support.py |
+| `CR-20260816-A-S09-composition-145` | reject | minor | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/datasource/data_source_factory.py |
+| `CR-20260816-A-S09-composition-146` | reject | major | Concurrency hardening without a demonstrated race on the current producer path. | src/bioetl/composition/factories/datasource/pubchem.py |
+| `CR-20260816-A-S09-composition-147` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/datasource/pubchem.py |
+| `CR-20260816-A-S09-composition-148` | confirm | major | normalize_snapshot serializes set/frozenset in hash-randomized iteration order, so snapshot hashes are non-deterministic. | src/bioetl/composition/runtime_builders/_snapshot_mapping_support.py:52-53 |
+| `CR-20260816-A-S09-composition-149` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/datasource/http_client.py |
+| `CR-20260816-A-S09-composition-150` | reject | major | Protocol/conformance typing request; reject class for this campaign. | src/bioetl/composition/runtime_builders/_context_field_binding.py |
+| `CR-20260816-A-S09-composition-151` | confirm | major | Malformed replay run_id UUID is swallowed as ValueError and becomes None, so a bad replay pointer silently drops parent snapshot evidence. | src/bioetl/composition/runtime_builders/input_snapshot_resolution.py:127-130 |
+| `CR-20260816-A-S09-composition-152` | reject | critical | source.api has default_factory=ApiConfig, so .base_url access cannot see a missing api on typed config. | src/bioetl/infrastructure/schemas/pipeline_config_provider.py:51; registration_bio.py:205 |
+| `CR-20260816-A-S09-composition-153` | reject | trivial | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/factories/datasource/crossref.py |
+| `CR-20260816-A-S09-composition-154` | reject | minor | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/bootstrap/runtime/_observability_preflight_support.py |
+| `CR-20260816-A-S09-composition-155` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/bootstrap/runtime/composite_control_plane_builder.py |
+| `CR-20260816-A-S09-composition-156` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/bootstrap/runtime/composite_control_plane_builder.py |
+| `CR-20260816-A-S09-composition-157` | reject | major | AssertionError-to-ValueError is exception-type style; the missing-input path already fails. | src/bioetl/composition/bootstrap/runtime/_runner_assembly_support.py |
+| `CR-20260816-A-S09-composition-158` | reject | trivial | Protocol/conformance typing request; reject class for this campaign. | src/bioetl/composition/runtime_builders/_snapshot_mapping_support.py |
+| `CR-20260816-A-S09-composition-159` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/pipeline/_factory_method_types.py |
+| `CR-20260816-A-S09-composition-160` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/pipeline/_factory_method_control_plane.py |
+| `CR-20260816-A-S09-composition-161` | reject | trivial | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/factories/pipeline/_assembler_factory.py |
+| `CR-20260816-A-S09-composition-162` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/_manifest_publication_context_support.py |
+| `CR-20260816-A-S09-composition-163` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/_effective_config_source_refs_support.py |
+| `CR-20260816-A-S09-composition-164` | reject | trivial | Optional filter batch-size resolution fail-softs to None so batch adjustment is skipped; not a required-config hole. | src/bioetl/composition/runtime_builders/_inputs_resolution_support.py:161-171 |
+| `CR-20260816-A-S09-composition-165` | reject | major | Layering/DRY move of already-correct policy; composition wiring is not a broken invariant. | src/bioetl/composition/runtime_builders/_exact_replay_cached_bronze_context.py |
+| `CR-20260816-A-S09-composition-166` | reject | trivial | Docs/ADR-for-shipped-API request; reject class for this campaign. | src/bioetl/composition/factories/pipeline/_factory_method_types.py |
+| `CR-20260816-A-S09-composition-167` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/_effective_config_runtime_snapshot_support.py |
+| `CR-20260816-A-S09-composition-168` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/_inputs_resolution_support.py |
+| `CR-20260816-A-S09-composition-169` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/_effective_config_source_refs_support.py |
+| `CR-20260816-A-S09-composition-170` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/_effective_config_runtime_snapshot_support.py |
+| `CR-20260816-A-S09-composition-171` | reject | trivial | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/runtime_builders/_effective_config_secret_support.py |
+| `CR-20260816-A-S09-composition-172` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/pipeline/_factory_method_runtime_support.py |
+| `CR-20260816-A-S09-composition-173` | reject | minor | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/_effective_config_secret_support.py |
+| `CR-20260816-A-S09-composition-174` | reject | major | VacuumSettings.retention_days is a required positive int; enabled tri-state is the documented selector. | src/bioetl/domain/context_filtering.py:175-186 |
+| `CR-20260816-A-S09-composition-175` | reject | major | exact_replay already dereferences ctx.cached_bronze and AttributeErrors; that is fail-closed, not a silent hole. | src/bioetl/composition/runtime_builders/_inputs_resolution_support.py:107-111 |
+| `CR-20260816-A-S09-composition-176` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/pipeline/_registry_factory_catalog.py |
+| `CR-20260816-A-S09-composition-177` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py |
+| `CR-20260816-A-S09-composition-178` | reject | minor | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/pipeline/_assembler_factory.py |
+| `CR-20260816-A-S09-composition-179` | reject | minor | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/runtime_builders/_run_manifest_context_updates.py |
+| `CR-20260816-A-S09-composition-180` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/pipeline/_registry_factory_catalog.py |
+| `CR-20260816-A-S09-composition-181` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/_run_manifest_context_updates.py |
+| `CR-20260816-A-S09-composition-182` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/_run_manifest_builder_policy.py |
+| `CR-20260816-A-S09-composition-183` | reject | trivial | Docs/ADR-for-shipped-API request; reject class for this campaign. | src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py |
+| `CR-20260816-A-S09-composition-184` | reject | major | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/factories/pipeline/_factory_method_runtime_support.py |
+| `CR-20260816-A-S09-composition-185` | reject | major | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/factories/services/_record_processor_policy_support.py |
+| `CR-20260816-A-S09-composition-186` | reject | major | Layering/DRY move of already-correct policy; composition wiring is not a broken invariant. | src/bioetl/composition/factories/pipeline_support/checkpoint_policy_helpers.py |
+| `CR-20260816-A-S09-composition-187` | reject | minor | Protocol/conformance typing request; reject class for this campaign. | src/bioetl/composition/factories/pipeline_support/registry_validation_helpers.py |
+| `CR-20260816-A-S09-composition-188` | reject | trivial | Docs/ADR-for-shipped-API request; reject class for this campaign. | src/bioetl/composition/factories/pipeline_support/contract_validation_helpers.py |
+| `CR-20260816-A-S09-composition-189` | reject | major | Layering/DRY move of already-correct policy; composition wiring is not a broken invariant. | src/bioetl/composition/factories/services/_record_processor_policy_support.py |
+| `CR-20260816-A-S09-composition-190` | reject | trivial | Docs/ADR-for-shipped-API request; reject class for this campaign. | src/bioetl/composition/factories/pipeline_support/checkpoint_metadata_resolution.py |
+| `CR-20260816-A-S09-composition-191` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/pipeline_support/registry_validation_helpers.py |
+| `CR-20260816-A-S09-composition-192` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/services/_builder_record_processor_support.py |
+| `CR-20260816-A-S09-composition-193` | confirm | major | Unrecognized hash_datetime_policy is silently remapped to v2_datetime_utc instead of failing closed. | src/bioetl/composition/factories/services/_record_processor_policy_support.py:82-87 |
+| `CR-20260816-A-S09-composition-194` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/pipeline_support/checkpoint_metadata_helpers.py |
+| `CR-20260816-A-S09-composition-195` | reject | major | Docs/ADR-for-shipped-API request; reject class for this campaign. | src/bioetl/composition/factories/pipeline/runner_constructor.py |
+| `CR-20260816-A-S09-composition-196` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/pipeline/transformer_dependencies.py |
+| `CR-20260816-A-S09-composition-197` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/pipeline/registry_core.py |
+| `CR-20260816-A-S09-composition-198` | reject | major | Concurrency hardening without a demonstrated race on the current producer path. | src/bioetl/composition/factories/pipeline/registry.py |
+| `CR-20260816-A-S09-composition-199` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/composition/factories/pipeline/transformer_builder.py |
+| `CR-20260816-A-S09-composition-200` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/pipeline/runner_assembly.py |
+| `CR-20260816-A-S09-composition-201` | reject | major | Concurrency hardening without a demonstrated race on the current producer path. | src/bioetl/composition/factories/pipeline/registry.py |
+| `CR-20260816-A-S09-composition-202` | reject | minor | Concurrency hardening without a demonstrated race on the current producer path. | src/bioetl/composition/factories/pipeline_support/checkpoint_metadata_helpers.py |
+| `CR-20260816-A-S09-composition-203` | reject | major | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/factories/services/_record_processor_policy_support.py |
+| `CR-20260816-A-S09-composition-204` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/services/__init__.py |
+| `CR-20260816-A-S09-composition-205` | reject | trivial | Protocol/conformance typing request; reject class for this campaign. | src/bioetl/composition/factories/pipeline_support/assembler_helpers.py |
+| `CR-20260816-A-S09-composition-206` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/inputs_resolver.py |
+| `CR-20260816-A-S09-composition-207` | reject | trivial | Docs/ADR-for-shipped-API request; reject class for this campaign. | src/bioetl/composition/runtime_builders/run_manifest_builder.py |
+| `CR-20260816-A-S09-composition-208` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/ledger_collaborator.py |
+| `CR-20260816-A-S09-composition-209` | reject | trivial | Non-dict registry entries become None and still fail closed under strict=True. | src/bioetl/composition/runtime_builders/run_manifest_contract_identity.py:107-118 |
+| `CR-20260816-A-S09-composition-210` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/inputs_runtime_helpers.py |
+| `CR-20260816-A-S09-composition-211` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/runner_builder_wiring.py |
+| `CR-20260816-A-S09-composition-212` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/run_manifest_contract_identity.py |
+| `CR-20260816-A-S09-composition-213` | reject | trivial | _coerce_optional_text already maps empty/whitespace to None; or-fallback is text identity, not empty-zero. | src/bioetl/composition/runtime_builders/run_manifest_contract_identity.py:150-192 |
+| `CR-20260816-A-S09-composition-214` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/run_manifest_support.py |
+| `CR-20260816-A-S09-composition-215` | reject | minor | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/run_manifest_support.py |
+| `CR-20260816-A-S09-composition-216` | reject | trivial | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/factories/observability_api.py |
+| `CR-20260816-A-S09-composition-217` | reject | major | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/runtime_builders/run_manifest_builder.py |
+| `CR-20260816-A-S09-composition-218` | reject | major | Concurrency hardening without a demonstrated race on the current producer path. | src/bioetl/composition/factories/pipeline_support/checkpoint_metadata_resolution.py |
+| `CR-20260816-A-S09-composition-219` | reject | minor | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/pipeline/_creation_wiring.py |
+| `CR-20260816-A-S09-composition-220` | confirm | minor | Empty content_hash_include_fields is truthy-collapsed to None, so an explicit empty include policy becomes hash-all; EntityIdentityGenerator treats empty set as explicit. | src/bioetl/composition/factories/pipeline/transformer_dependencies.py:76-79; src/bioetl/domain/behavior/identity_service.py:75-80 |
+| `CR-20260816-A-S09-composition-221` | reject | minor | TransformConfig.steps is list[str] via Pydantic; a scalar string is rejected at config parse, not character-split. | src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py:262-269 |
+| `CR-20260816-A-S09-composition-222` | reject | trivial | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/runtime_builders/inputs_resolver.py |
+| `CR-20260816-A-S09-composition-223` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/pipeline/registry_exports.py |
+| `CR-20260816-A-S09-composition-224` | reject | major | Salt-free NoOpPiiHasher is the shipped default; tests assert it. Warning/strict escalation is a policy expansion. | src/bioetl/composition/factories/pipeline/transformer_dependencies.py:40-45; tests/unit/composition/factories/pipeline/test_transformer_dependencies.py |
+| `CR-20260816-A-S09-composition-225` | reject | major | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/factories/pipeline/runner_assembly.py |
+| `CR-20260816-A-S09-composition-226` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/pipeline_support/checkpoint_policy_helpers.py |
+| `CR-20260816-A-S09-composition-227` | reject | trivial | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/factories/pipeline/runner_constructor.py |
+| `CR-20260816-A-S09-composition-228` | reject | trivial | Protocol/conformance typing request; reject class for this campaign. | src/bioetl/composition/runtime_builders/observability_builder.py |
+| `CR-20260816-A-S09-composition-229` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/runtime_builders/ledger_collaborator.py |
+| `CR-20260816-A-S09-composition-230` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/pipeline/runner.py |
+| `CR-20260816-A-S09-composition-231` | confirm | minor | leaf_ids_from_value and _component_ids_from_component_ids_value iterate Mapping keys; numeric-looking JSON object keys become leaf/component IDs. | src/bioetl/composition/providers/_chembl_target_protein_classification_helpers.py:135-155,207-216 |
+| `CR-20260816-A-S09-composition-232` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/providers/_chembl_target_protein_classification_manifest.py |
+| `CR-20260816-A-S09-composition-233` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py |
+| `CR-20260816-A-S09-composition-234` | confirm | major | fetch offset slices target_ids while limit counts emitted relation rows, so checkpoint resume skips parents rather than records. | src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py:162-171; src/bioetl/domain/ports/data_source.py:72-74 |
+| `CR-20260816-A-S09-composition-235` | reject | critical | Occurrence counters are process-local correlation IDs, not replay anchors; lock/live-pid is concurrency hardening. | src/bioetl/composition/occurrence_identity.py:1-6,18-31 |
+| `CR-20260816-A-S09-composition-236` | reject | trivial | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/observability_api.py |
+| `CR-20260816-A-S09-composition-237` | reject | major | Concurrency hardening without a demonstrated race on the current producer path. | src/bioetl/composition/factories/pipeline/runner.py |
+| `CR-20260816-A-S09-composition-238` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/observability_api.py |
+| `CR-20260816-A-S09-composition-239` | reject | trivial | Docs/ADR-for-shipped-API request; reject class for this campaign. | src/bioetl/composition/observability_api.py |
+| `CR-20260816-A-S09-composition-240` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py |
+| `CR-20260816-A-S09-composition-241` | reject | major | 0.0.0.0 is the shipped metrics-server default; changing it is an API change, not a residual invariant hole. | src/bioetl/composition/observability_api.py:114-117 |
+| `CR-20260816-A-S09-composition-242` | reject | minor | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/pipeline_runner_request.py |
+| `CR-20260816-A-S09-composition-243` | confirm | major | _audit_required is true only for a present NoOpAudit; audit_required=True with audit=None fail-opens prod preflight. Forensic path already treats None as missing. | src/bioetl/composition/bootstrap/runtime/_observability_bundle_support.py:229-230; _observability_preflight_support.py:120-135,154-155 |
+| `CR-20260816-A-S09-composition-244` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/pipeline_runner_request.py |
+| `CR-20260816-A-S09-composition-245` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/observability.py |
+| `CR-20260816-A-S09-composition-246` | confirm | critical | strict resolver TypeError is caught and retried without strict=True, so an internal TypeError bypasses fail-closed identity instead of only handling legacy two-arg signatures. | src/bioetl/composition/factories/pipeline/run_context_contract_identity.py:119-127 |
+| `CR-20260816-A-S09-composition-247` | reject | minor | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/providers/_chembl_target_protein_classification_manifest.py |
+| `CR-20260816-A-S09-composition-248` | reject | trivial | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/lazy_exports.py |
+| `CR-20260816-A-S09-composition-249` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/providers/_store.py |
+| `CR-20260816-A-S09-composition-250` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/providers/_creation.py |
+| `CR-20260816-A-S09-composition-251` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/providers/_loading.py |
+| `CR-20260816-A-S09-composition-252` | reject | major | Fingerprint is documented as stable identifier drift, not full hierarchy content hashing. | src/bioetl/composition/providers/_chembl_target_protein_classification_manifest.py:86-111 |
+| `CR-20260816-A-S09-composition-253` | reject | minor | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/providers/decorators.py |
+| `CR-20260816-A-S09-composition-254` | reject | trivial | Protocol/conformance typing request; reject class for this campaign. | src/bioetl/composition/providers/_models.py |
+| `CR-20260816-A-S09-composition-255` | reject | trivial | Protocol/conformance typing request; reject class for this campaign. | src/bioetl/composition/providers/_registry_protocols.py |
+| `CR-20260816-A-S09-composition-256` | reject | trivial | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/providers/_registration_biblio_adapters.py |
+| `CR-20260816-A-S09-composition-257` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py |
+| `CR-20260816-A-S09-composition-258` | reject | trivial | Protocol/conformance typing request; reject class for this campaign. | src/bioetl/composition/providers/_config_helpers.py |
+| `CR-20260816-A-S09-composition-259` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/providers/__init__.py |
+| `CR-20260816-A-S09-composition-260` | reject | minor | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/providers/_store.py |
+| `CR-20260816-A-S09-composition-261` | reject | trivial | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/providers/_config_helpers.py |
+| `CR-20260816-A-S09-composition-262` | reject | minor | Concurrency hardening without a demonstrated race on the current producer path. | src/bioetl/composition/providers/_store.py |
+| `CR-20260816-A-S09-composition-263` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/providers/_default_registry.py |
+| `CR-20260816-A-S09-composition-264` | reject | minor | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/providers/_creation.py |
+| `CR-20260816-A-S09-composition-265` | reject | major | Protocol/conformance typing request; reject class for this campaign. | src/bioetl/composition/providers/_registry_resolution.py |
+| `CR-20260816-A-S09-composition-266` | reject | minor | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/providers/_models.py |
+| `CR-20260816-A-S09-composition-267` | reject | minor | Concurrency hardening without a demonstrated race on the current producer path. | src/bioetl/composition/providers/_default_registry.py |
+| `CR-20260816-A-S09-composition-268` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/services/builder.py |
+| `CR-20260816-A-S09-composition-269` | reject | trivial | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/services/builder.py |
+| `CR-20260816-A-S09-composition-270` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/services/bundle.py |
+| `CR-20260816-A-S09-composition-271` | reject | major | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/factories/services/pipeline_record_processor_builder.py |
+| `CR-20260816-A-S09-composition-272` | reject | minor | Empty debug_export_formats falling back to csv/xlsx is the documented default-all-formats path. | src/bioetl/composition/factories/services/pipeline_record_processor_builder.py:50-55 |
+>>>>>>> Stashed changes
 | `CR-20260816-A-S10-interfaces-cli-001` | confirm | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/interfaces/cli/commands/_workflow_override_support.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review |
 | `CR-20260816-A-S10-interfaces-cli-002` | reject | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/interfaces/cli/__init__.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review |
 | `CR-20260816-A-S10-interfaces-cli-003` | reject | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/interfaces/cli/__init__.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review |
@@ -1272,6 +1914,7 @@ Code/config/contracts and executable gates outrank CodeRabbit output.
 | `CR-20260816-A-S11-interfaces-http-062` | confirm | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/interfaces/http/health_server_http_mixin.py; reports/quality/coderabbit/20260816/review_A_S11-interfaces-http.log; #8890 ground-truth review |
 | `CR-20260816-A-S11-interfaces-http-063` | reject | trivial | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/interfaces/http/_processed_records_table_support.py; reports/quality/coderabbit/20260816/review_A_S11-interfaces-http.log; #8890 ground-truth review |
 | `CR-20260816-A-S11-interfaces-http-064` | confirm | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/interfaces/http/control_plane_identity/types.py; reports/quality/coderabbit/20260816/review_A_S11-interfaces-http.log; #8890 ground-truth review |
+<<<<<<< Updated upstream
 | `CR-20260816-B-S05-app-pipelines-001` | pending | minor | pending ground-truth reconciliation |  |
 | `CR-20260816-B-S05-app-pipelines-002` | pending | minor | pending ground-truth reconciliation |  |
 | `CR-20260816-B-S05-app-pipelines-003` | pending | minor | pending ground-truth reconciliation |  |
@@ -1518,3 +2161,2655 @@ Code/config/contracts and executable gates outrank CodeRabbit output.
 | `CR-20260816-B-S07-infra-storage-150` | pending | major | pending ground-truth reconciliation |  |
 | `CR-20260816-B-S07-infra-storage-151` | pending | major | pending ground-truth reconciliation |  |
 | `CR-20260816-B-S07-infra-storage-152` | pending | major | pending ground-truth reconciliation |  |
+||||||| Stash base
+| `CR-20260816-B-S05-app-pipelines-001` | reject | minor | Stricter ORCID charset is contract expansion of the shipped dash-layout check. | src/bioetl/application/pipelines/crossref/author_extractors.py _is_orcid_identifier |
+| `CR-20260816-B-S05-app-pipelines-002` | reject | minor | Strip-before-append is hardening of already-truthy name handling. | src/bioetl/application/pipelines/openalex/_extractors_authors.py |
+| `CR-20260816-B-S05-app-pipelines-003` | reject | minor | Whitespace-only display_name reject is tightening without a broken topic identity. | src/bioetl/application/pipelines/openalex/_extractors_common.py |
+| `CR-20260816-B-S05-app-pipelines-004` | reject | major | Removing author_details_raw_json is a shipped Gold-field deletion. | src/bioetl/application/pipelines/crossref/_business_data_builder.py |
+| `CR-20260816-B-S05-app-pipelines-005` | reject | major | Replace install_runtime_transformer_init with an explicit ctor is a shipped init-API rewrite. | src/bioetl/application/pipelines/crossref/transformer.py |
+| `CR-20260816-B-S05-app-pipelines-006` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/openalex/_extractors_authors.py |
+| `CR-20260816-B-S05-app-pipelines-007` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/crossref/_business_data_builder.py |
+| `CR-20260816-B-S05-app-pipelines-008` | confirm | minor | author.get('given'\|'family'\|'name', '').strip() raises AttributeError when the key is present and null, which Crossref JSON does. | src/bioetl/application/pipelines/crossref/author_extractors.py:82-84 |
+| `CR-20260816-B-S05-app-pipelines-009` | reject | major | Independent issn_list serialization is a field-policy change, not a reproduced crash. | src/bioetl/application/pipelines/crossref/transformer.py |
+| `CR-20260816-B-S05-app-pipelines-010` | reject | major | hierarchy_molecule_chembl_id precedence is a flatten-policy change without a reproduced overwrite on current helpers. | src/bioetl/application/pipelines/chembl/molecule_transformer.py _HIERARCHY_RENAMES |
+| `CR-20260816-B-S05-app-pipelines-011` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/chembl/activity_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-012` | reject | major | SSOT alias-table DRY; no divergent alias outcome shown. | src/bioetl/application/pipelines/chembl/alias_policy.py |
+| `CR-20260816-B-S05-app-pipelines-013` | reject | major | Remove legacy_collaborators kwargs is a shipped constructor rewrite. | src/bioetl/application/pipelines/chembl/base_chembl_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-014` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/pipelines/chembl/compound_record_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-015` | reject | trivial | Richer validation-failed log fields are observability style. | src/bioetl/application/pipelines/chembl/base_chembl_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-016` | reject | major | int() vs safe_int is helper-style; invalid ids already fail the transform path. | src/bioetl/application/pipelines/chembl/assay_parameters_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-017` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/pipelines/chembl/alias_policy.py |
+| `CR-20260816-B-S05-app-pipelines-018` | reject | trivial | JsonDict vs Mapping annotation is typing-only. | src/bioetl/application/pipelines/chembl/assay_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-019` | reject | trivial | Frozen empty-mapping fallback is style. | src/bioetl/application/pipelines/chembl/alias_policy.py |
+| `CR-20260816-B-S05-app-pipelines-020` | reject | trivial | @override decorator is style. | src/bioetl/application/pipelines/chembl/molecule_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-021` | reject | major | Coverage-inventory refresh is not an invariant hole. | src/bioetl/application/pipelines/uniprot/idmapping_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-022` | reject | major | Test-only IDMappingTransformer coverage. | src/bioetl/application/pipelines/uniprot/idmapping_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-023` | reject | major | Test-only UniProt transformer coverage. | src/bioetl/application/pipelines/uniprot/transformer.py |
+| `CR-20260816-B-S05-app-pipelines-024` | confirm | major | transform_pre_silver does not catch FilteredOutError/ValueError that _transform_impl swallows, so the pre-silver path can abort the batch on missing required fields. | src/bioetl/application/pipelines/uniprot/transformer.py:50-83 |
+| `CR-20260816-B-S05-app-pipelines-025` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/uniprot/extractors/features.py |
+| `CR-20260816-B-S05-app-pipelines-026` | reject | minor | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/uniprot/extractors/_crossref_go.py |
+| `CR-20260816-B-S05-app-pipelines-027` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/uniprot/extractors/features.py |
+| `CR-20260816-B-S05-app-pipelines-028` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/uniprot/extractors/comments.py |
+| `CR-20260816-B-S05-app-pipelines-029` | reject | major | Test-only CrossRefExtractor coverage. | src/bioetl/application/pipelines/uniprot/extractors/crossrefs.py |
+| `CR-20260816-B-S05-app-pipelines-030` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/uniprot/extractors/genes.py |
+| `CR-20260816-B-S05-app-pipelines-031` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/uniprot/extractors/extractor_helpers.py |
+| `CR-20260816-B-S05-app-pipelines-032` | reject | major | Rank-bearing genus extraction is a taxonomy-contract rewrite of the shipped lineage heuristic. | src/bioetl/application/pipelines/uniprot/extractors/taxonomy.py |
+| `CR-20260816-B-S05-app-pipelines-033` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/pubchem/transformer.py |
+| `CR-20260816-B-S05-app-pipelines-034` | reject | major | Test-only OpenAlex _extract_business_data coverage. | src/bioetl/application/pipelines/openalex/transformer.py |
+| `CR-20260816-B-S05-app-pipelines-035` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/pubmed/__init__.py |
+| `CR-20260816-B-S05-app-pipelines-036` | reject | major | Replace install_runtime_transformer_init is a shipped init-API rewrite. | src/bioetl/application/pipelines/openalex/transformer.py |
+| `CR-20260816-B-S05-app-pipelines-037` | reject | minor | Strip-before-append keywords is hardening. | src/bioetl/application/pipelines/openalex/_extractors_publication_fields.py |
+| `CR-20260816-B-S05-app-pipelines-038` | reject | major | Coverage-inventory refresh is not an invariant hole. | src/bioetl/application/pipelines/openalex/_extractors_publication_fields.py |
+| `CR-20260816-B-S05-app-pipelines-039` | confirm | major | extract_external_ids already extracts pmcid, but the transformer hardcodes pmc_id=None and never reads that value. | src/bioetl/application/pipelines/openalex/transformer.py:223-225; _extractors_publication_fields.py:136-143 |
+| `CR-20260816-B-S05-app-pipelines-040` | reject | trivial | Literal __all__ vs imported export tuple is style. | src/bioetl/application/pipelines/uniprot/extractors/_comment_facets.py |
+| `CR-20260816-B-S05-app-pipelines-041` | reject | trivial | Reject bool h-index is bool-as-int hardening without a demonstrated S2 producer. | src/bioetl/application/pipelines/semanticscholar/_author_extractors.py |
+| `CR-20260816-B-S05-app-pipelines-042` | reject | minor | None names are already skipped; non-string names are not a demonstrated S2 payload. | src/bioetl/application/pipelines/semanticscholar/_author_extractors.py:40-42 |
+| `CR-20260816-B-S05-app-pipelines-043` | confirm | minor | raw_pages.strip() runs on any truthy pages value, so a numeric journal.pages raises AttributeError. | src/bioetl/application/pipelines/semanticscholar/extractors.py:156 |
+| `CR-20260816-B-S05-app-pipelines-044` | reject | trivial | Keep underscore-prefixed business fields in the hash is a hash-contract expansion. | src/bioetl/application/pipelines/common/publication_transformer_records.py |
+| `CR-20260816-B-S05-app-pipelines-045` | reject | major | MappingProxyType wrap is freeze-style. | src/bioetl/application/pipelines/common/publication_vocab_observability.py |
+| `CR-20260816-B-S05-app-pipelines-046` | reject | minor | isinstance(entity_type, str) is typing/hardening. | src/bioetl/application/pipelines/common/publication_transformer_context.py |
+| `CR-20260816-B-S05-app-pipelines-047` | reject | trivial | Warn on overlapping extract blocks is observability style. | src/bioetl/application/pipelines/common/publication_transformer_hooks_mixin.py |
+| `CR-20260816-B-S05-app-pipelines-048` | reject | trivial | Init-time strategy attribute asserts are style. | src/bioetl/application/pipelines/common/base_publication_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-049` | reject | trivial | TypedDict for transformer kwargs is typing-only. | src/bioetl/application/pipelines/common/transformer_initialization.py |
+| `CR-20260816-B-S05-app-pipelines-050` | reject | trivial | Remove CrossRef re-export shim is packaging/style. | src/bioetl/application/pipelines/common/blocks.py |
+| `CR-20260816-B-S05-app-pipelines-051` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/pipelines/semanticscholar/extractors.py |
+| `CR-20260816-B-S05-app-pipelines-052` | reject | trivial | Safer locals() lookup is hardening of the shipped init helper. | src/bioetl/application/pipelines/common/transformer_initialization.py |
+| `CR-20260816-B-S05-app-pipelines-053` | reject | trivial | Public wrappers for private collaborators is API expansion. | src/bioetl/application/pipelines/common/publication_assembly.py |
+| `CR-20260816-B-S05-app-pipelines-054` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/pipelines/common/publication_transformer_hooks_mixin.py |
+| `CR-20260816-B-S05-app-pipelines-055` | reject | trivial | Literal extractor __all__ is export-style. | src/bioetl/application/pipelines/semanticscholar/__init__.py |
+| `CR-20260816-B-S05-app-pipelines-056` | reject | trivial | list[JsonDict] \| None annotation is typing-only. | src/bioetl/application/pipelines/uniprot/extractors/_comment_facets_extractors.py |
+| `CR-20260816-B-S05-app-pipelines-057` | reject | trivial | Reuse one comment index is a perf/DRY suggestion. | src/bioetl/application/pipelines/uniprot/extractors/_comment_facets_all.py |
+| `CR-20260816-B-S05-app-pipelines-058` | reject | trivial | Stale Any comment removal is docs/style. | src/bioetl/application/pipelines/common/extractors.py |
+| `CR-20260816-B-S05-app-pipelines-059` | reject | minor | Reject dict/set ISSN containers is hardening of the shipped scalar fallback. | src/bioetl/application/pipelines/common/publication_issn.py |
+| `CR-20260816-B-S05-app-pipelines-060` | reject | trivial | Shared serialization helper is DRY. | src/bioetl/application/pipelines/uniprot/extractors/_comment_facets_extractors.py |
+| `CR-20260816-B-S05-app-pipelines-061` | reject | major | MetricsPort instead of object/getattr is Protocol tightening. | src/bioetl/application/pipelines/common/publication_vocab_observability.py |
+| `CR-20260816-B-S05-app-pipelines-062` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/pipelines/common/publication_transformer_context.py |
+| `CR-20260816-B-S05-app-pipelines-063` | reject | minor | Align ELocationID XPath depths is a parse-policy change without a reproduced DOI/PII miss. | src/bioetl/application/pipelines/pubmed/extractors/identifier.py |
+| `CR-20260816-B-S05-app-pipelines-064` | reject | major | Shared author-name helper is DRY; no divergent outputs shown. | src/bioetl/application/pipelines/pubmed/extractors/author.py |
+| `CR-20260816-B-S05-app-pipelines-065` | reject | minor | Whitespace-padded numeric months are not a demonstrated PubMed payload; month_map path already strips. | src/bioetl/application/pipelines/pubmed/_block_helpers.py parse_month |
+| `CR-20260816-B-S05-app-pipelines-066` | reject | minor | EMAIL_PATTERN pipe-in-class is a regex nit without a real TLD producer. | src/bioetl/application/pipelines/pubmed/extractors/author.py EMAIL_PATTERN |
+| `CR-20260816-B-S05-app-pipelines-067` | reject | major | transformer_initialization remainder is style/typing. | src/bioetl/application/pipelines/common/transformer_initialization.py |
+| `CR-20260816-B-S05-app-pipelines-068` | reject | minor | L3-L5 multifunctional sentinel alignment is a schema-policy change. | src/bioetl/application/pipelines/chembl/target_protein_classification_summary.py |
+| `CR-20260816-B-S05-app-pipelines-069` | reject | trivial | Move helper onto the class is style. | src/bioetl/application/pipelines/chembl/subcellular_fraction_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-070` | reject | major | Public coercion-module extraction is DRY. | src/bioetl/application/pipelines/chembl/target_protein_classification_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-071` | reject | major | Shared pipe-sentinel helper is DRY. | src/bioetl/application/pipelines/chembl/target_helpers.py |
+| `CR-20260816-B-S05-app-pipelines-072` | reject | major | Remove file-wide type:ignore is typing-only. | src/bioetl/application/pipelines/chembl/publication_term_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-073` | reject | trivial | Precompute counted_top_levels is perf. | src/bioetl/application/pipelines/chembl/target_protein_classification_summary.py |
+| `CR-20260816-B-S05-app-pipelines-074` | reject | major | Aggregate every KeywordList is an extraction-contract expansion of the shipped first-list behavior. | src/bioetl/application/pipelines/pubmed/extractors/classification.py |
+| `CR-20260816-B-S05-app-pipelines-075` | reject | trivial | Hoist key_map is style. | src/bioetl/application/pipelines/pubmed/extractors/identifier.py |
+| `CR-20260816-B-S05-app-pipelines-076` | reject | trivial | Replace dynamic re-export with explicit imports is style. | src/bioetl/application/pipelines/pubmed/blocks.py |
+| `CR-20260816-B-S05-app-pipelines-077` | reject | major | Coerce non-str xref_id is contract expansion of the shipped str-only cleaner. | src/bioetl/application/pipelines/chembl/target_helpers.py clean_pipe_value |
+| `CR-20260816-B-S05-app-pipelines-078` | reject | major | TypeError on wrong extractor type is constructor-hardening of the shipped default-replace path. | src/bioetl/application/pipelines/pubmed/transformer.py |
+| `CR-20260816-B-S05-app-pipelines-079` | reject | major | Remove DateExtractor singleton is a shipped identity-API change. | src/bioetl/application/pipelines/pubmed/extractors/date.py |
+| `CR-20260816-B-S05-app-pipelines-080` | reject | minor | Whitespace-only classification as missing is policy tightening. | src/bioetl/application/pipelines/chembl/target_protein_classification_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-081` | reject | major | Calendar-range checks in _format_date are contract expansion of the shipped string formatter. | src/bioetl/application/pipelines/pubmed/extractors/date.py |
+| `CR-20260816-B-S05-app-pipelines-082` | reject | major | Treat None canonical alias as absent is alias-policy tightening. | src/bioetl/application/pipelines/chembl/provider_aliases.py |
+| `CR-20260816-B-S05-app-pipelines-083` | reject | major | Include component_id in unresolved entity ids is an identity-contract change. | src/bioetl/application/pipelines/chembl/target_protein_classification_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-084` | reject | trivial | Trailing comment removal is style. | src/bioetl/application/pipelines/chembl/publication_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-085` | reject | major | Empty-frame schema on missing target_id is a summary-contract change. | src/bioetl/application/pipelines/chembl/target_protein_classification_summary.py |
+| `CR-20260816-B-S05-app-pipelines-086` | reject | trivial | @override decorator is style. | src/bioetl/application/pipelines/chembl/tissue_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-087` | reject | major | int() vs safe_int is helper-style. | src/bioetl/application/pipelines/chembl/subcellular_fraction_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-088` | reject | trivial | Consolidate excluded output fields is DRY. | src/bioetl/application/pipelines/chembl/publication_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-089` | reject | major | int() vs safe_int is helper-style. | src/bioetl/application/pipelines/chembl/publication_similarity_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-090` | reject | major | Hoist walrus/classification_ids is style. | src/bioetl/application/pipelines/chembl/target_component_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-091` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/pipelines/chembl/target_helpers.py |
+| `CR-20260816-B-S05-app-pipelines-092` | reject | major | Catch DefusedXmlException explicitly is exception-style; parse failures already become ValueError. | src/bioetl/application/pipelines/pubmed/transformer.py |
+| `CR-20260816-B-S05-app-pipelines-093` | reject | trivial | Call extract_all_identifiers once is DRY/perf. | src/bioetl/application/pipelines/pubmed/extractors/identifier.py |
+| `CR-20260816-B-S05-app-pipelines-094` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/pipelines/pubmed/xml_parser.py |
+| `CR-20260816-B-S07-infra-storage-001` | reject | None | Coverage-inventory refresh is not an invariant hole; same class as S01-aggregates-001. | reports/quality/module-coverage-inventory.json |
+| `CR-20260816-B-S07-infra-storage-002` | reject | None | Path-join hardening; provider/entity are config identifiers, not a demonstrated traversal path. | src/bioetl/infrastructure/storage/bronze/metadata_paths.py resolve_bronze_metadata_base_path |
+| `CR-20260816-B-S07-infra-storage-003` | reject | None | fd_owned is cleared after open(); leftover close is OSError-suppressed and does not change write outcome. | src/bioetl/infrastructure/storage/bronze/io_mixin.py:108-148 |
+| `CR-20260816-B-S07-infra-storage-004` | reject | None | DRY extraction of an already-identical raiser; fail-closed wording is unchanged. | src/bioetl/infrastructure/storage/bronze/metadata_operations.py |
+| `CR-20260816-B-S07-infra-storage-005` | reject | None | Incremental compare is a perf rewrite; current full-stream compare is correct. | src/bioetl/infrastructure/storage/bronze/io_mixin.py _compressed_payload_matches |
+| `CR-20260816-B-S07-infra-storage-006` | reject | None | DRY helper reuse; both raisers already fail closed. | src/bioetl/infrastructure/storage/gold/metadata_payloads.py |
+| `CR-20260816-B-S07-infra-storage-007` | reject | None | Push-down of history filters is a perf rewrite, not a broken result contract. | src/bioetl/infrastructure/storage/gold/read_cleanup_mixin.py get_history |
+| `CR-20260816-B-S07-infra-storage-008` | reject | None | min(_ingestion_ts) is a deterministic fallback; no contract requires latest. | src/bioetl/infrastructure/storage/gold/metadata_payloads.py _extract_completed_at |
+| `CR-20260816-B-S07-infra-storage-009` | reject | None | del run_id is explicit; merged path already has optional composite_run_id. | src/bioetl/infrastructure/storage/gold/metadata_payloads.py build_gold_metadata_payload |
+| `CR-20260816-B-S07-infra-storage-010` | reject | None | getattr-to-direct-attribute is style; host contract already supplies the attrs. | src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py |
+| `CR-20260816-B-S07-infra-storage-011` | reject | None | Redundant audit guard removal is style; inner helper already no-ops. | src/bioetl/infrastructure/storage/bronze/write_execution.py |
+| `CR-20260816-B-S07-infra-storage-012` | reject | None | Suffix-constant extraction is style; paths already match the contract. | src/bioetl/infrastructure/storage/bronze/pipeline_helpers.py |
+| `CR-20260816-B-S07-infra-storage-013` | reject | None | Failure-counter addition is telemetry, not a write-invariant breach. | src/bioetl/infrastructure/storage/bronze_writer.py _write_bronze_with_tracing |
+| `CR-20260816-B-S07-infra-storage-014` | reject | None | Warning-log on fallback conversion is observability, not a conversion hole. | src/bioetl/infrastructure/storage/delta/arrow_converter.py |
+| `CR-20260816-B-S07-infra-storage-015` | reject | None | asyncio.to_thread offload is perf; preview payload is already correct. | src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py preview_cleanup |
+| `CR-20260816-B-S07-infra-storage-016` | reject | None | Streaming read is a perf rewrite; incremental iteration is already contracted. | src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py read_bronze |
+| `CR-20260816-B-S07-infra-storage-017` | confirm | None | Sidecar conflict is checked after _write_atomic_stream, so a replay with the same batch_id can replace Bronze bytes and then raise FileExistsError, leaving new data beside the old sidecar. | src/bioetl/infrastructure/storage/bronze/write_execution.py write_bronze_data_and_sidecar; pipeline_helpers.py batch_{date}_{batch_id}.jsonl.zst |
+| `CR-20260816-B-S07-infra-storage-018` | reject | None | str(schema) 'null' match only extra-runs sanitization; _sanitize_null_columns still keys off pa.types.is_null. | src/bioetl/infrastructure/storage/delta/arrow_converter.py:238-241,280-281 |
+| `CR-20260816-B-S07-infra-storage-019` | reject | None | Cast-fallback JSON encoder is a consistency polish; current str() fallback still fails closed on uncastable values. | src/bioetl/infrastructure/storage/delta/arrow_converter.py _sanitize_single_null_column |
+| `CR-20260816-B-S07-infra-storage-020` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py |
+| `CR-20260816-B-S07-infra-storage-021` | reject | critical | DeltaTable.to_pyarrow_table first positional argument is the column projection; keyword-only rewrite is style. | src/bioetl/infrastructure/storage/gold/read_cleanup_mixin.py |
+| `CR-20260816-B-S07-infra-storage-022` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/metadata_mixin_protocols.py |
+| `CR-20260816-B-S07-infra-storage-023` | reject | None | __all__ hygiene for time is style/export-only. | src/bioetl/infrastructure/storage/silver/metadata_mixin.py |
+| `CR-20260816-B-S07-infra-storage-024` | reject | None | cast(Any, None) default is annotation/host-attr style accepted by the Any gate. | src/bioetl/infrastructure/storage/silver/operations/delta_operation_impls.py |
+| `CR-20260816-B-S07-infra-storage-025` | reject | None | Public wrapper collapse is DRY; behavior is already identical. | src/bioetl/infrastructure/storage/silver/operations/arrow_operations.py |
+| `CR-20260816-B-S07-infra-storage-026` | reject | None | Any->BronzeWritePrepared is annotation-only. | src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py _build_bronze_write_result |
+| `CR-20260816-B-S07-infra-storage-027` | reject | None | Rename event_name->context is style; skip behavior is unchanged. | src/bioetl/infrastructure/storage/silver/metadata_mixin.py |
+| `CR-20260816-B-S07-infra-storage-028` | reject | None | TypeVar/overload pairing is Protocol/typing-only. | src/bioetl/infrastructure/storage/silver/metadata_write_execution.py |
+| `CR-20260816-B-S07-infra-storage-029` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/metadata_mixin_protocols.py |
+| `CR-20260816-B-S07-infra-storage-030` | reject | None | Current Gold validation builds a pandas DataFrame; no disk proof that these schemas are Polars-only. | src/bioetl/infrastructure/storage/gold/validation_mixin.py _validate_records_against_schema |
+| `CR-20260816-B-S07-infra-storage-031` | reject | None | cast(Any, None) host-attr cleanup is annotation-only. | src/bioetl/infrastructure/storage/silver/operations/delta_operations.py |
+| `CR-20260816-B-S07-infra-storage-032` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/metadata_write_execution.py |
+| `CR-20260816-B-S07-infra-storage-033` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/metadata_writer_public.py |
+| `CR-20260816-B-S07-infra-storage-034` | reject | None | Pass-through request builder removal is DRY. | src/bioetl/infrastructure/storage/metadata_writer_operations_impl.py |
+| `CR-20260816-B-S07-infra-storage-035` | reject | None | isinstance before cast is typing hardening; callers already pass the matching model. | src/bioetl/infrastructure/storage/metadata_writer_finalizers.py |
+| `CR-20260816-B-S07-infra-storage-036` | reject | None | unknown layer label is a diagnostic default, not a silent write of the wrong model. | src/bioetl/infrastructure/storage/metadata_artifact_details.py resolve_artifact_semantics |
+| `CR-20260816-B-S07-infra-storage-037` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/metadata_writer.py |
+| `CR-20260816-B-S07-infra-storage-038` | reject | None | Unused layer parameter removal is style. | src/bioetl/infrastructure/storage/metadata_writer_helpers.py _resolve_existing_metadata_path |
+| `CR-20260816-B-S07-infra-storage-039` | reject | None | __all__ private-helper hygiene is export style. | src/bioetl/infrastructure/storage/metadata_artifact_publication.py |
+| `CR-20260816-B-S07-infra-storage-040` | reject | None | Count-only audit field is a memory cleanup; count is already len(records). | src/bioetl/infrastructure/storage/silver/audit_operations.py |
+| `CR-20260816-B-S07-infra-storage-041` | reject | None | to_thread/timeout around publication I/O is perf, not a wrong artifact. | src/bioetl/infrastructure/storage/metadata_artifact_publication.py |
+| `CR-20260816-B-S07-infra-storage-042` | reject | None | object->_MetadataWriteRequest return annotation is typing-only. | src/bioetl/infrastructure/storage/metadata_writer_public.py |
+| `CR-20260816-B-S07-infra-storage-043` | reject | None | Unknown layer already model_validates as GoldMetadata and fails closed on a Silver payload; no silent accept path. | src/bioetl/infrastructure/storage/metadata_writer_helpers.py _load_existing_metadata_model |
+| `CR-20260816-B-S07-infra-storage-044` | reject | None | Delegate-to-operations DRY; both paths already write the same request. | src/bioetl/infrastructure/storage/metadata_writer.py |
+| `CR-20260816-B-S07-infra-storage-045` | reject | None | Broaden RuntimeError catch is telemetry completeness, not a dropped write. | src/bioetl/infrastructure/storage/metadata_artifact_publication.py |
+| `CR-20260816-B-S07-infra-storage-046` | reject | None | Credential-in-URI is speculative on the local-only default; no producer of secret query params shown. | src/bioetl/infrastructure/storage/metadata_artifact_details.py serialize_input_snapshot_ref |
+| `CR-20260816-B-S07-infra-storage-047` | reject | None | Copy-before-mutate is defensive style; SCD2 init is the write-path contract. | src/bioetl/infrastructure/storage/gold/io_delta_runtime.py |
+| `CR-20260816-B-S07-infra-storage-048` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/delta/schema_ops.py |
+| `CR-20260816-B-S07-infra-storage-049` | reject | None | Windows dataset bypass already exists on the record-read path; finding restates the helper. | src/bioetl/infrastructure/storage/delta/table_ops.py _can_use_pyarrow_dataset_scanner / read_delta_records |
+| `CR-20260816-B-S07-infra-storage-050` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/gold/io_execution.py |
+| `CR-20260816-B-S07-infra-storage-051` | reject | None | Retry wrap for merged overwrite is resilience expansion, not a wrong first write. | src/bioetl/infrastructure/storage/gold/io_execution.py |
+| `CR-20260816-B-S07-infra-storage-052` | reject | None | Per-attempt timeout is a policy expansion; current retry already propagates failures. | src/bioetl/infrastructure/storage/gold/io_delta_runtime.py |
+| `CR-20260816-B-S07-infra-storage-053` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/gold/io_delta_runtime.py |
+| `CR-20260816-B-S07-infra-storage-054` | reject | None | Prefer scanner.to_table() is a read-path optimization, not a wrong count. | src/bioetl/infrastructure/storage/delta_reader.py |
+| `CR-20260816-B-S07-infra-storage-055` | reject | None | None business-key sort raises TypeError and stays fail-closed; not a silent mis-order. | src/bioetl/infrastructure/storage/gold/io_delta_runtime.py _prepare_scd2_gold_write |
+| `CR-20260816-B-S07-infra-storage-056` | reject | None | Richer FileNotFoundError text is diagnostics-only. | src/bioetl/infrastructure/storage/delta_reader.py read_with_fallback |
+| `CR-20260816-B-S07-infra-storage-057` | reject | None | KeyboardInterrupt/SystemExit already re-raise; leftover BaseException fallback still returns a count rather than inventing rows. | src/bioetl/infrastructure/storage/delta_reader_helpers.py count_delta_rows |
+| `CR-20260816-B-S07-infra-storage-058` | reject | None | Jitter hash collision polish; delay remains bounded and deterministic. | src/bioetl/infrastructure/storage/delta/resilience.py _deterministic_jitter_seconds |
+| `CR-20260816-B-S07-infra-storage-059` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/gold/io_delta_protocols.py |
+| `CR-20260816-B-S07-infra-storage-060` | reject | None | unknown vs failure metric label is telemetry taxonomy, not write outcome. | src/bioetl/infrastructure/storage/gold/io_metrics.py |
+| `CR-20260816-B-S07-infra-storage-061` | reject | None | Narrow schema parameter union is annotation-only. | src/bioetl/infrastructure/storage/gold_writer.py write_gold |
+| `CR-20260816-B-S07-infra-storage-062` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/gold/writer_metrics.py |
+| `CR-20260816-B-S07-infra-storage-063` | reject | None | Distinguish inspect-fail vs empty columns is fail-soft diagnostics. | src/bioetl/infrastructure/storage/metadata/metadata_helpers.py |
+| `CR-20260816-B-S07-infra-storage-064` | reject | None | Incremental min timestamp is a micro-optimization; result is already min(). | src/bioetl/infrastructure/storage/metadata/builder_base.py |
+| `CR-20260816-B-S07-infra-storage-065` | reject | None | assert-to-RuntimeError under -O still AttributeErrors; not a silent dual-write. | src/bioetl/infrastructure/storage/gold/writer_implementation.py:119 |
+| `CR-20260816-B-S07-infra-storage-066` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/metadata/metadata_helpers.py |
+| `CR-20260816-B-S07-infra-storage-067` | reject | None | Dual-write requires GoldSchemaPolicyByVersion; plain schema correctly takes the single-target path. | src/bioetl/infrastructure/storage/gold_writer.py:253-259 |
+| `CR-20260816-B-S07-infra-storage-068` | reject | None | Filename sanitization is hardening; provider/entity/table_name are config identifiers. | src/bioetl/infrastructure/storage/metadata/writer_operations.py |
+| `CR-20260816-B-S07-infra-storage-069` | reject | None | errno None -> 'None' label is telemetry wording. | src/bioetl/infrastructure/storage/metadata/writer_operations.py |
+| `CR-20260816-B-S07-infra-storage-070` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/operations/validation_operations.py |
+| `CR-20260816-B-S07-infra-storage-071` | reject | None | Empty column tuple pass-through is only after to_schema/columns both fail; production Pandera schemas resolve. | src/bioetl/infrastructure/storage/gold/writer_schema_helpers.py _schema_column_names |
+| `CR-20260816-B-S07-infra-storage-072` | reject | None | Duplicated collaborator annotations are DRY/Protocol style. | src/bioetl/infrastructure/storage/silver/operations/validation_operations.py |
+| `CR-20260816-B-S07-infra-storage-073` | reject | None | Exactly-one lineage metric is telemetry completeness. | src/bioetl/infrastructure/storage/lineage_persistence.py |
+| `CR-20260816-B-S07-infra-storage-074` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/postwrite_mixin.py |
+| `CR-20260816-B-S07-infra-storage-075` | reject | None | hasattr(type(target)) vs getattr is style; None still rejected downstream. | src/bioetl/infrastructure/storage/lineage_persistence.py _has_explicit_member |
+| `CR-20260816-B-S07-infra-storage-076` | reject | None | Broader except around dual-write logging is diagnostics; committed targets already logged for the caught tuple. | src/bioetl/infrastructure/storage/gold/writer_implementation.py:159-175 |
+| `CR-20260816-B-S07-infra-storage-077` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/runtime_helpers.py |
+| `CR-20260816-B-S07-infra-storage-078` | reject | None | KeyError vs descriptive ValueError is exception-wording style; unmapped modes still fail. | src/bioetl/infrastructure/storage/silver/validation_operations.py _to_policy_write_mode_impl |
+| `CR-20260816-B-S07-infra-storage-079` | confirm | None | Bare except Exception returns None, so permission/corruption errors look like a missing table and schema-drift enforcement is skipped. | src/bioetl/infrastructure/storage/silver/support.py _sync_get_schema; schema_drift_operations.py _check_schema_drift |
+| `CR-20260816-B-S07-infra-storage-080` | reject | None | Audit hook when _metadata is None is a missing-telemetry path, not a dropped write. | src/bioetl/infrastructure/storage/silver/operations/postwrite_operations.py |
+| `CR-20260816-B-S07-infra-storage-081` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/operations/postwrite_execution.py |
+| `CR-20260816-B-S07-infra-storage-082` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/validation_operations.py |
+| `CR-20260816-B-S07-infra-storage-083` | confirm | None | _diff_schema_fields uses only records[0], so later-row additions/omissions never trip on_schema_mismatch=error. | src/bioetl/infrastructure/storage/silver/schema_drift_operations.py:65-75 |
+| `CR-20260816-B-S07-infra-storage-084` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/postwrite_mixin.py |
+| `CR-20260816-B-S07-infra-storage-085` | reject | None | operation_id vs table_path for jitter seed is determinism polish, not a wrong retry decision. | src/bioetl/infrastructure/storage/silver/merge_resilience_helpers.py |
+| `CR-20260816-B-S07-infra-storage-086` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/maintenance_mixin.py |
+| `CR-20260816-B-S07-infra-storage-087` | reject | None | tuple-freeze of key lists is immutability style; no demonstrated retry mutation. | src/bioetl/infrastructure/storage/silver/delta_request_models.py |
+| `CR-20260816-B-S07-infra-storage-088` | reject | None | locals()/cast cleanup is typing/DRY. | src/bioetl/infrastructure/storage/silver/merged_request_support.py |
+| `CR-20260816-B-S07-infra-storage-089` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/delta_merge_helpers.py |
+| `CR-20260816-B-S07-infra-storage-090` | reject | None | Duplicate timeout log removal is telemetry DRY. | src/bioetl/infrastructure/storage/silver/merge_resilience_helpers.py |
+| `CR-20260816-B-S07-infra-storage-091` | reject | None | Unused asyncio re-export is style; test-patch seam only. | src/bioetl/infrastructure/storage/silver/delta_helpers.py |
+| `CR-20260816-B-S07-infra-storage-092` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/maintenance_mixin.py |
+| `CR-20260816-B-S07-infra-storage-093` | reject | None | Replace unittest.mock type-branch with a flag is a refactor, not a merge-outcome hole. | src/bioetl/infrastructure/storage/silver/delta_merge_helpers.py |
+| `CR-20260816-B-S07-infra-storage-094` | reject | None | to_thread offload of sync validate is perf. | src/bioetl/infrastructure/storage/silver/operations/validation_operations.py |
+| `CR-20260816-B-S07-infra-storage-095` | reject | None | Remove file-level mypy disable is annotation/tooling. | src/bioetl/infrastructure/storage/silver/merged_mixin.py |
+| `CR-20260816-B-S07-infra-storage-096` | reject | None | Stale comment removal is docstring/style. | src/bioetl/infrastructure/storage/silver/merge_resilience_helpers.py |
+| `CR-20260816-B-S07-infra-storage-097` | reject | None | Explicit field mapping vs locals() is DRY/typing. | src/bioetl/infrastructure/storage/silver/merged_operations.py |
+| `CR-20260816-B-S07-infra-storage-098` | reject | None | Forward timeout into empty schema-evolution append is resilience expansion. | src/bioetl/infrastructure/storage/silver/delta_write_execution.py |
+| `CR-20260816-B-S07-infra-storage-099` | reject | None | Kill orphaned child on timeout is process-hygiene; no proven post-timeout commit on disk. | src/bioetl/infrastructure/storage/silver/delta_write_execution.py |
+| `CR-20260816-B-S07-infra-storage-100` | reject | None | Default merge off the event loop is perf/cancellation polish. | src/bioetl/infrastructure/storage/silver/delta_merge_helpers.py |
+| `CR-20260816-B-S07-infra-storage-101` | reject | None | Move static assignments into class body is style. | src/bioetl/infrastructure/storage/silver/validation_mixin.py |
+| `CR-20260816-B-S07-infra-storage-102` | reject | None | Literal annotation / remove type:ignore is typing-only. | src/bioetl/infrastructure/storage/silver/key_nullability_operations.py |
+| `CR-20260816-B-S07-infra-storage-103` | reject | None | Hoist local polars import is style. | src/bioetl/infrastructure/storage/silver/writer_metadata_facade.py |
+| `CR-20260816-B-S07-infra-storage-104` | reject | None | Test-only coverage of lazy __getattr__ re-export. | src/bioetl/infrastructure/storage/support/atomic_ops.py |
+| `CR-20260816-B-S07-infra-storage-105` | reject | None | Alias rename of _write_dual_targets_impl is style. | src/bioetl/infrastructure/storage/silver/writer_runtime_facade.py |
+| `CR-20260816-B-S07-infra-storage-106` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/writer_runtime_support.py |
+| `CR-20260816-B-S07-infra-storage-107` | reject | None | records[0] optional-missing path only debug-logs; it does not gate the write. | src/bioetl/infrastructure/storage/silver/validation_record_support.py:113-120 |
+| `CR-20260816-B-S07-infra-storage-108` | reject | None | Comment pointing at a guard ID is docs/style. | src/bioetl/infrastructure/storage/silver_writer.py |
+| `CR-20260816-B-S07-infra-storage-109` | reject | None | Reject non-positive checkpoint bounds is config hardening without a current producer of 0. | src/bioetl/infrastructure/storage/support/checkpoint_writer.py |
+| `CR-20260816-B-S07-infra-storage-110` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/support/checkpoint_writer.py |
+| `CR-20260816-B-S07-infra-storage-111` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/writer_runtime_support.py |
+| `CR-20260816-B-S07-infra-storage-112` | reject | None | BaseException temp cleanup is resource hygiene; ATOMIC_WRITE_EXCEPTIONS already wraps OS errors. | src/bioetl/infrastructure/storage/support/atomic_ops.py |
+| `CR-20260816-B-S07-infra-storage-113` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver_writer.py |
+| `CR-20260816-B-S07-infra-storage-114` | reject | None | TypeError vs ValueError for legacy-arg mismatch is exception-class style. | src/bioetl/infrastructure/storage/silver/writer_runtime_invocation.py |
+| `CR-20260816-B-S07-infra-storage-115` | reject | None | @override decorator is annotation-only. | src/bioetl/infrastructure/storage/silver_writer.py _check_schema_drift |
+| `CR-20260816-B-S07-infra-storage-116` | reject | None | Drop unused payload from pending tuples is DRY. | src/bioetl/infrastructure/storage/support/atomic_group.py |
+| `CR-20260816-B-S07-infra-storage-117` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/support/atomic_group.py |
+| `CR-20260816-B-S07-infra-storage-118` | reject | minor | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/support/checkpoint_writer.py |
+| `CR-20260816-B-S07-infra-storage-119` | reject | None | Integer winerror membership tighten is retry-taxonomy polish; errno fallback remains. | src/bioetl/infrastructure/storage/support/_atomic_replace.py |
+| `CR-20260816-B-S07-infra-storage-120` | reject | None | assert-to-RuntimeError under -O still AttributeErrors on a missing policy. | src/bioetl/infrastructure/storage/silver/writer_runtime_support.py:184 |
+| `CR-20260816-B-S07-infra-storage-121` | reject | None | Rollback leftover temps on success-exit is misuse hygiene; commit() already clears _pending. | src/bioetl/infrastructure/storage/support/atomic_group.py __exit__ |
+| `CR-20260816-B-S07-infra-storage-122` | reject | None | Incremental glob consume is a perf rewrite; limit still raises CheckpointSizeError. | src/bioetl/infrastructure/storage/support/checkpoint_writer.py |
+| `CR-20260816-B-S07-infra-storage-123` | reject | None | Missing version hash keeps the incoming content_hash; no proof that is the wrong identity vs fail-closed. | src/bioetl/infrastructure/storage/silver/writer_runtime_support.py _project_records_for_contract_version |
+| `CR-20260816-B-S07-infra-storage-124` | reject | None | Explicit fsync before replace is durability hardening, not a current torn-write invariant. | src/bioetl/infrastructure/storage/support/atomic_ops.py |
+| `CR-20260816-B-S07-infra-storage-125` | reject | None | Force UTC on completed_at is timestamp-normalization style without a mixed-tz crash on this path. | src/bioetl/infrastructure/storage/silver/writer_runtime_invocation.py _resolve_completed_at |
+| `CR-20260816-B-S07-infra-storage-126` | reject | None | Mixed-type PK sort TypeError is fail-closed; Silver keys are contracted as hashable scalars. | src/bioetl/infrastructure/storage/silver/validation_record_support.py |
+| `CR-20260816-B-S07-infra-storage-127` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/support/_atomic_replace.py |
+| `CR-20260816-B-S07-infra-storage-128` | reject | None | Bounded quarantine batching is a memory rewrite; all orphans are still written. | src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py |
+| `CR-20260816-B-S07-infra-storage-129` | reject | None | Column projection / max-rows is a config/perf expansion, not a wrong orphan decision. | src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py _read_source_rows |
+| `CR-20260816-B-S07-infra-storage-130` | reject | None | Incremental dedup is a memory rewrite; winner selection is already deterministic. | src/bioetl/infrastructure/storage/support/retention_dedup.py |
+| `CR-20260816-B-S07-infra-storage-131` | reject | None | Fail if reader lacks limit is a config expansion; post-read bound already exists. | src/bioetl/infrastructure/storage/workflow_row_reconciliation.py |
+| `CR-20260816-B-S07-infra-storage-132` | confirm | critical | Missing Silver reference table returns [] so destructive FK reconcile treats every source row as an orphan. | src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py _read_reference_rows |
+| `CR-20260816-B-S07-infra-storage-133` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py |
+| `CR-20260816-B-S07-infra-storage-134` | reject | None | Replace post-hoc elapsed check with wait_for is timeout-policy polish. | src/bioetl/infrastructure/storage/support/retention.py |
+| `CR-20260816-B-S07-infra-storage-135` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/workflow_row_reconciliation.py |
+| `CR-20260816-B-S07-infra-storage-136` | reject | None | Reuse orphan_error_code helper is DRY; mapping literals already match. | src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_support.py |
+| `CR-20260816-B-S07-infra-storage-137` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/operations/metadata_write_facade.py |
+| `CR-20260816-B-S07-infra-storage-138` | reject | None | Shared _require_metadata_coordinator helper is DRY. | src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_support.py |
+| `CR-20260816-B-S07-infra-storage-139` | reject | None | Constructor-inject write callable is a refactor/test-seam change. | src/bioetl/infrastructure/storage/silver/operations/metadata_operations.py |
+| `CR-20260816-B-S07-infra-storage-140` | reject | None | Cache inspect.signature is a micro-optimization. | src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py |
+| `CR-20260816-B-S07-infra-storage-141` | confirm | critical | if arrow_data treats an empty table as missing and drops schema/records. | src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py _compute |
+| `CR-20260816-B-S07-infra-storage-142` | reject | None | Failure metric on metadata write is telemetry. | src/bioetl/infrastructure/storage/silver/operations/metadata_write_support.py |
+| `CR-20260816-B-S07-infra-storage-143` | reject | None | Error-string method name typo is diagnostics/docs. | src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py should_skip_silver_metadata_write |
+| `CR-20260816-B-S07-infra-storage-144` | reject | None | Missing _get_delta_version hook is not the production writer surface; return 0 is a test-double fallback. | src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py resolve_version_after |
+| `CR-20260816-B-S07-infra-storage-145` | reject | None | Cap vacuum file-path list is payload-size cleanup. | src/bioetl/infrastructure/storage/silver/operations/maintenance_operations.py |
+| `CR-20260816-B-S07-infra-storage-146` | reject | None | Reorder coordinator require vs prepare is DRY; both already fail closed. | src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_support.py |
+| `CR-20260816-B-S07-infra-storage-147` | reject | None | to_thread for DQ normalize is perf. | src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py resolve_finalization_dq_metrics |
+| `CR-20260816-B-S07-infra-storage-148` | reject | None | VAR_KEYWORD discriminator tighten is typing/dispatch polish without a shown mis-route. | src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py _is_base_path_writer |
+| `CR-20260816-B-S07-infra-storage-149` | confirm | critical | Missing timestamp uses assert instead of fail-closed ValueError. | src/bioetl/infrastructure/storage/support/retention_time_travel.py |
+| `CR-20260816-B-S07-infra-storage-150` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py |
+| `CR-20260816-B-S07-infra-storage-151` | reject | None | JSON-safe schema/metadata serialization is a representation change, not a retention decision hole. | src/bioetl/infrastructure/storage/support/retention_delta.py build_table_info |
+| `CR-20260816-B-S07-infra-storage-152` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/operations/maintenance_operations.py |
+| `CR-20260816-C-S06-infra-adapters-001` | reject | None | Coverage-inventory refresh is not an invariant hole. | reports/quality/module-coverage-inventory.json |
+| `CR-20260816-C-S06-infra-adapters-002` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/response_parser.py |
+| `CR-20260816-C-S06-infra-adapters-003` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/validation.py |
+| `CR-20260816-C-S06-infra-adapters-004` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/validation.py |
+| `CR-20260816-C-S06-infra-adapters-005` | reject | None | Coverage-inventory refresh is not an invariant hole. | src/bioetl/infrastructure/adapters/__init__.py |
+| `CR-20260816-C-S06-infra-adapters-006` | reject | None | 408 already classifies as 4xx DATA_QUALITY; making it RECOVERABLE is a retry-policy expansion. | src/bioetl/infrastructure/adapters/adapter_error_classifier.py _classify_http_status |
+| `CR-20260816-C-S06-infra-adapters-007` | reject | None | aclose is documented no-op; HTTP client is closed via __aexit__. | src/bioetl/infrastructure/adapters/base.py aclose / __aexit__ |
+| `CR-20260816-C-S06-infra-adapters-008` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/_error_handling_support.py |
+| `CR-20260816-C-S06-infra-adapters-009` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/_base_runtime.py |
+| `CR-20260816-C-S06-infra-adapters-010` | confirm | None | external_api_error logs raw str(error) plus unallowlisted extra, so transport messages can retain secrets. | src/bioetl/infrastructure/adapters/_error_handling_support.py:80-95 |
+| `CR-20260816-C-S06-infra-adapters-011` | reject | None | Reserved-key collision with logger kwargs is telemetry hygiene, not a data/fail-closed hole. | src/bioetl/infrastructure/adapters/_error_handling_support.py |
+| `CR-20260816-C-S06-infra-adapters-012` | confirm | None | health_check_failed logs error_message=str(error) with no redaction. | src/bioetl/infrastructure/adapters/_health_check_observability.py:96-102 |
+| `CR-20260816-C-S06-infra-adapters-013` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/__init__.py |
+| `CR-20260816-C-S06-infra-adapters-014` | reject | None | functools.wraps on a bound iterator is style. | src/bioetl/infrastructure/adapters/common/_fetch_resilience_batch_iter.py |
+| `CR-20260816-C-S06-infra-adapters-015` | reject | None | dict[str, str] return annotation is typing-only. | src/bioetl/infrastructure/adapters/common/_api_request_sanitize.py |
+| `CR-20260816-C-S06-infra-adapters-016` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/response_parser.py |
+| `CR-20260816-C-S06-infra-adapters-017` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/common/_api_request_sanitize.py |
+| `CR-20260816-C-S06-infra-adapters-018` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/crossref/response_mapper.py |
+| `CR-20260816-C-S06-infra-adapters-019` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/decorators/retry.py |
+| `CR-20260816-C-S06-infra-adapters-020` | reject | None | Test-only wrap_with_resilience matrix. | src/bioetl/infrastructure/adapters/decorators/__init__.py |
+| `CR-20260816-C-S06-infra-adapters-021` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/crossref/query_builder.py |
+| `CR-20260816-C-S06-infra-adapters-022` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/decorators/_circuit_breaker_snapshot.py |
+| `CR-20260816-C-S06-infra-adapters-023` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/chembl/health.py |
+| `CR-20260816-C-S06-infra-adapters-024` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/chembl/fetch_multi_filter_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-025` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py |
+| `CR-20260816-C-S06-infra-adapters-026` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/chembl/fetch_multi_filter_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-027` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/chembl/metadata.py |
+| `CR-20260816-C-S06-infra-adapters-028` | confirm | None | Redaction regex consumes only the Bearer scheme as \S+, so the token after Authorization: Bearer remains in retry logs. | src/bioetl/infrastructure/adapters/decorators/_retry_support.py _redact_transport_error_message |
+| `CR-20260816-C-S06-infra-adapters-029` | reject | None | Test-only CrossRef fetch nominal matrix. | src/bioetl/infrastructure/adapters/crossref/fetch_flow.py |
+| `CR-20260816-C-S06-infra-adapters-030` | confirm | None | dois = filter_ids[:limit] if limit else filter_ids treats limit=0 as unlimited, against the established limit is not None contract. | src/bioetl/infrastructure/adapters/crossref/fetch_flow.py:71-79; common/_title_fallback_flow.py:132 |
+| `CR-20260816-C-S06-infra-adapters-031` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/crossref/models.py |
+| `CR-20260816-C-S06-infra-adapters-032` | reject | None | Ownership-flag vs enter-depth is a lifecycle refactor without a shown double-close on the public API. | src/bioetl/infrastructure/adapters/crossref/client.py |
+| `CR-20260816-C-S06-infra-adapters-033` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/chembl/fetch_multi_filter_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-034` | reject | None | cast(Any, None) host-attr is annotation-only. | src/bioetl/infrastructure/adapters/pubchem/_client_fetch_surface.py |
+| `CR-20260816-C-S06-infra-adapters-035` | reject | None | Coverage-inventory refresh is not an invariant hole. | src/bioetl/infrastructure/adapters/pubchem/client.py |
+| `CR-20260816-C-S06-infra-adapters-036` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubchem/_fetch_strategy_identifiers.py |
+| `CR-20260816-C-S06-infra-adapters-037` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/openalex/query_execution.py |
+| `CR-20260816-C-S06-infra-adapters-038` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubchem/_fetch_strategy_search.py |
+| `CR-20260816-C-S06-infra-adapters-039` | reject | None | Collector suppress is telemetry; payload return is unchanged and not a Bronze write. | src/bioetl/infrastructure/adapters/openalex/query_execution.py:51-52 |
+| `CR-20260816-C-S06-infra-adapters-040` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubchem/client_model_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-041` | reject | None | Replace shipped pubchempy transport with UnifiedHTTPClient is ADR/API rewrite for an already-shipped adapter. | src/bioetl/infrastructure/adapters/pubchem/client.py |
+| `CR-20260816-C-S06-infra-adapters-042` | confirm | None | rows = min(limit, 100) if limit else 100 treats limit=0 as unbounded pagination. | src/bioetl/infrastructure/adapters/crossref/_search_paginator.py:109-120 |
+| `CR-20260816-C-S06-infra-adapters-043` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/metadata_adapter_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-044` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/feature_sequence_adapter_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-045` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/query_builder.py |
+| `CR-20260816-C-S06-infra-adapters-046` | confirm | None | if limit and fetched >= limit treats limit=0 as unlimited on UniProt filtered/batched fetch. | src/bioetl/infrastructure/adapters/uniprot/filtering_adapter_mixin.py:41-70 |
+| `CR-20260816-C-S06-infra-adapters-047` | reject | None | Coverage-inventory refresh is not an invariant hole. | src/bioetl/infrastructure/adapters/openalex/client.py |
+| `CR-20260816-C-S06-infra-adapters-048` | reject | None | Test-only OpenAlex fetch nominal matrix. | src/bioetl/infrastructure/adapters/openalex/filter_fetch_adapter_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-049` | confirm | None | Untitled OpenAlex candidates are returned without titles_match, so fallback can bind an unvalidated work. | src/bioetl/infrastructure/adapters/openalex/fallback.py:71-75 |
+| `CR-20260816-C-S06-infra-adapters-050` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/openalex/filter_fetch_adapter_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-051` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/chembl/_client_request_helpers.py |
+| `CR-20260816-C-S06-infra-adapters-052` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/cached_bronze_data_source.py |
+| `CR-20260816-C-S06-infra-adapters-053` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/cached_bronze_data_source.py |
+| `CR-20260816-C-S06-infra-adapters-054` | reject | None | Offset-based ChEMBL stop can under-fetch after dedup; it does not silently exceed the requested page budget. | src/bioetl/infrastructure/adapters/chembl/_fetch_paging_filtered.py:70-107 |
+| `CR-20260816-C-S06-infra-adapters-055` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/openalex/client_helpers_adapter_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-056` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/cached_bronze_data_source.py |
+| `CR-20260816-C-S06-infra-adapters-057` | confirm | None | Semantic Scholar fallback builds headers with skip_placeholder_api_key=False while the primary adapter suppresses your_* keys. | src/bioetl/infrastructure/adapters/semanticscholar/fallback.py:91-95; adapter.py:149 |
+| `CR-20260816-C-S06-infra-adapters-058` | reject | None | Coverage-inventory refresh is not an invariant hole. | src/bioetl/infrastructure/adapters/semanticscholar/adapter.py |
+| `CR-20260816-C-S06-infra-adapters-059` | reject | None | Any->typed fallback handler is annotation-only. | src/bioetl/infrastructure/adapters/semanticscholar/_client_fallback_policy.py |
+| `CR-20260816-C-S06-infra-adapters-060` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/semanticscholar/__init__.py |
+| `CR-20260816-C-S06-infra-adapters-061` | confirm | None | dois = filter_ids[:limit] if limit else filter_ids treats limit=0 as unlimited DOI fetch. | src/bioetl/infrastructure/adapters/semanticscholar/fetch_adapter_mixin.py:133-144 |
+| `CR-20260816-C-S06-infra-adapters-062` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubmed/xml_processor.py |
+| `CR-20260816-C-S06-infra-adapters-063` | confirm | None | page_size = min(100, limit or 100) and if limit treat limit=0 as an unbounded search. | src/bioetl/infrastructure/adapters/semanticscholar/_search_fetch_flow.py:33-50 |
+| `CR-20260816-C-S06-infra-adapters-064` | reject | None | Test-only SemanticScholarAdapter contract suite. | src/bioetl/infrastructure/adapters/semanticscholar/adapter.py |
+| `CR-20260816-C-S06-infra-adapters-065` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/semanticscholar/fallback.py |
+| `CR-20260816-C-S06-infra-adapters-066` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/semanticscholar/batch_request_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-067` | reject | None | if filter_ids: treating [] as omitted search is the current empty-filter contract, not a proven caller hole. | src/bioetl/infrastructure/adapters/semanticscholar/fetch_adapter_mixin.py:61-70 |
+| `CR-20260816-C-S06-infra-adapters-068` | reject | None | Any->optional handler annotation is typing-only. | src/bioetl/infrastructure/adapters/pubmed/_client_fallback_policy.py |
+| `CR-20260816-C-S06-infra-adapters-069` | reject | None | Callable[..., Awaitable] vs Any is annotation-only. | src/bioetl/infrastructure/adapters/pubchem/fetch_strategies.py |
+| `CR-20260816-C-S06-infra-adapters-070` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubchem/entity_mapper.py |
+| `CR-20260816-C-S06-infra-adapters-071` | reject | None | Stricter CID positivity is schema tightening without a shown bool/float producer on this mapper. | src/bioetl/infrastructure/adapters/pubchem/entity_mapper.py _resolve_molecule_id |
+| `CR-20260816-C-S06-infra-adapters-072` | reject | None | kwargs TypedDict is Protocol/typing-only. | src/bioetl/infrastructure/adapters/pubmed/_adapter_support.py |
+| `CR-20260816-C-S06-infra-adapters-073` | reject | None | Test-only PubChem mapper contract suite. | src/bioetl/infrastructure/adapters/pubchem/response_mapper.py |
+| `CR-20260816-C-S06-infra-adapters-074` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubmed/_client_fallback_policy.py |
+| `CR-20260816-C-S06-infra-adapters-075` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubmed/_adapter_support.py |
+| `CR-20260816-C-S06-infra-adapters-076` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubchem/fetch_flow.py |
+| `CR-20260816-C-S06-infra-adapters-077` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubchem/models.py |
+| `CR-20260816-C-S06-infra-adapters-078` | reject | None | Coverage-inventory refresh is not an invariant hole. | src/bioetl/infrastructure/adapters/pubchem/constants.py |
+| `CR-20260816-C-S06-infra-adapters-079` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubmed/__init__.py |
+| `CR-20260816-C-S06-infra-adapters-080` | reject | None | Normalize API null lists to [] is a model-default convenience, not a broken required field. | src/bioetl/infrastructure/adapters/crossref/_publication_record.py |
+| `CR-20260816-C-S06-infra-adapters-081` | reject | None | Comment vs TYPE_CHECKING host-attr declaration is docs/style. | src/bioetl/infrastructure/adapters/crossref/_client_fallback_policy.py |
+| `CR-20260816-C-S06-infra-adapters-082` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/common/title_matching.py |
+| `CR-20260816-C-S06-infra-adapters-083` | reject | None | Shared callable-alias module is DRY. | src/bioetl/infrastructure/adapters/openalex/_client_runtime_factories.py |
+| `CR-20260816-C-S06-infra-adapters-084` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/openalex/__init__.py |
+| `CR-20260816-C-S06-infra-adapters-085` | reject | None | LRU vs insertion-order cache eviction is a perf/cache-policy tweak. | src/bioetl/infrastructure/adapters/openalex/_cursor_lookup.py |
+| `CR-20260816-C-S06-infra-adapters-086` | reject | None | Serialize rate-limit waiters is a thundering-herd perf rewrite; token accounting is already locked. | src/bioetl/infrastructure/adapters/http/rate_limiter.py |
+| `CR-20260816-C-S06-infra-adapters-087` | reject | None | Return fallback service from _require_openalex_runtime is DRY/style. | src/bioetl/infrastructure/adapters/openalex/_client_support.py |
+| `CR-20260816-C-S06-infra-adapters-088` | reject | None | Make CrossRef type optional is a contract expansion. | src/bioetl/infrastructure/adapters/crossref/_publication_record.py |
+| `CR-20260816-C-S06-infra-adapters-089` | reject | None | Unicode-dash normalization is matching-policy expansion; ASCII path already works. | src/bioetl/infrastructure/adapters/common/title_matching.py |
+| `CR-20260816-C-S06-infra-adapters-090` | reject | None | Log/raise unused offset is API-surface expansion; cursor paging is the shipped contract. | src/bioetl/infrastructure/adapters/crossref/_client_port_surface.py |
+| `CR-20260816-C-S06-infra-adapters-091` | reject | None | total_count=len(all_ids) matches the processor, which only appends non-empty IDs/markers. | src/bioetl/infrastructure/adapters/input/csv_filter_reader.py:160-168 |
+| `CR-20260816-C-S06-infra-adapters-092` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/openalex/_cursor_lookup.py |
+| `CR-20260816-C-S06-infra-adapters-093` | reject | None | Truthiness on CSV ID cells is not a demonstrated 0/False identifier path; return-tuple rewrite is API style. | src/bioetl/infrastructure/adapters/input/csv_filter_processor.py:120-141 |
+| `CR-20260816-C-S06-infra-adapters-094` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubmed/_search.py |
+| `CR-20260816-C-S06-infra-adapters-095` | reject | None | Reuse validate_publication_entity is DRY; both checks already reject non-publication. | src/bioetl/infrastructure/adapters/pubmed/_filter_fetch_support.py |
+| `CR-20260816-C-S06-infra-adapters-096` | reject | None | Shared placeholder-key helper is DRY; current substring skip is the shipped placeholder policy. | src/bioetl/infrastructure/adapters/pubmed/_fetch.py |
+| `CR-20260816-C-S06-infra-adapters-097` | reject | None | Drop \| None from list fields with default_factory=list is annotation-only. | src/bioetl/infrastructure/adapters/pubmed/_extended_record.py |
+| `CR-20260816-C-S06-infra-adapters-098` | reject | None | Narrow collector suppress is telemetry; fetch still returns. | src/bioetl/infrastructure/adapters/crossref/_batch_support.py |
+| `CR-20260816-C-S06-infra-adapters-099` | reject | None | Single to_thread around CSV load is perf. | src/bioetl/infrastructure/adapters/input/csv_filter_reader.py |
+| `CR-20260816-C-S06-infra-adapters-100` | reject | None | Skip non-positive CIDs is filter tightening; current int() path already drops non-ints. | src/bioetl/infrastructure/adapters/pubchem/policy_helper.py |
+| `CR-20260816-C-S06-infra-adapters-101` | reject | None | Derive expected_keys from dataclass fields is DRY. | src/bioetl/infrastructure/adapters/openalex/_client_runtime_request.py |
+| `CR-20260816-C-S06-infra-adapters-102` | reject | None | DOI path encoding/comma reject is hardening; no shown broken current DOI fetch. | src/bioetl/infrastructure/adapters/crossref/_doi_batch_processor.py |
+| `CR-20260816-C-S06-infra-adapters-103` | confirm | None | build_cid_batch_endpoint interpolates the truncated preview including ',...' into the real PubChem path for batches larger than 3. | src/bioetl/infrastructure/adapters/pubchem/query_builder.py:40-47 |
+| `CR-20260816-C-S06-infra-adapters-104` | reject | None | empty_async_iterator yield style is typing/style. | src/bioetl/infrastructure/adapters/pubmed/_filter_fetch_support.py |
+| `CR-20260816-C-S06-infra-adapters-105` | reject | None | Parse search JSON through PubMedSearchResponse is a validation expansion; current path already reads idlist. | src/bioetl/infrastructure/adapters/pubmed/_search.py |
+| `CR-20260816-C-S06-infra-adapters-106` | confirm | None | if limit and total_fetched >= limit treats PubMed limit=0 as unlimited. | src/bioetl/infrastructure/adapters/pubmed/_fetch.py:96-103 |
+| `CR-20260816-C-S06-infra-adapters-107` | reject | None | Any->Callable annotation is typing-only. | src/bioetl/infrastructure/adapters/pubmed/adapter.py |
+| `CR-20260816-C-S06-infra-adapters-108` | reject | None | Require every OpenAlex factory key is API-hardening; optional defaults already exist. | src/bioetl/infrastructure/adapters/openalex/_client_runtime_request.py |
+| `CR-20260816-C-S06-infra-adapters-109` | reject | None | Log unresolved DOIs / pass normalized list is completeness polish; fallback already runs. | src/bioetl/infrastructure/adapters/crossref/_doi_batch_processor.py |
+| `CR-20260816-C-S06-infra-adapters-110` | confirm | None | PubChem name/AID path segments are interpolated raw, so spaces or slashes break the request path. | src/bioetl/infrastructure/adapters/pubchem/query_builder.py:15-27 |
+| `CR-20260816-C-S06-infra-adapters-111` | confirm | None | Docstring requires a title match, but unmatched PubMed results[0] is still returned. | src/bioetl/infrastructure/adapters/pubmed/fallback.py:75-83 |
+| `CR-20260816-C-S06-infra-adapters-112` | reject | None | Cap/split PubMed 10k window is provider-limit hardening, not a current silent wrap. | src/bioetl/infrastructure/adapters/pubmed/_search.py |
+| `CR-20260816-C-S06-infra-adapters-113` | reject | None | Quote UniProt filter literals is injection hardening; accessions are the contracted input. | src/bioetl/infrastructure/adapters/uniprot/filtering_adapter_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-114` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/http/_health_monitor_models.py |
+| `CR-20260816-C-S06-infra-adapters-115` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/http/_circuit_breaker_support.py |
+| `CR-20260816-C-S06-infra-adapters-116` | reject | None | Share health_check/_collect_probe_outcome is DRY. | src/bioetl/infrastructure/adapters/health_check_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-117` | reject | None | error_type metric label is telemetry taxonomy. | src/bioetl/infrastructure/adapters/http/_client_retry_policy.py |
+| `CR-20260816-C-S06-infra-adapters-118` | reject | None | Preserve unused operation in error context is telemetry. | src/bioetl/infrastructure/adapters/health_check_mixin.py _get_error_context |
+| `CR-20260816-C-S06-infra-adapters-119` | reject | None | Remove redundant AUTH_FAILURE branch is DRY; 500 mapping is an explicit policy choice. | src/bioetl/infrastructure/adapters/health_status_policy.py |
+| `CR-20260816-C-S06-infra-adapters-120` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/common/fallback_policy_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-121` | reject | None | Trim AttributeError/KeyError from the resilience bundle is policy/style. | src/bioetl/infrastructure/adapters/common/error_bundles.py |
+| `CR-20260816-C-S06-infra-adapters-122` | reject | None | Collapse duplicate retry wrappers is DRY. | src/bioetl/infrastructure/adapters/common/fetch_resilience_template.py |
+| `CR-20260816-C-S06-infra-adapters-123` | reject | None | Count unresolved IDs from found_ids vs lookup labels is a metric-definition change. | src/bioetl/infrastructure/adapters/common/fallback_fetch_service.py |
+| `CR-20260816-C-S06-infra-adapters-124` | reject | None | Shared _lookup_method constant is DRY. | src/bioetl/infrastructure/adapters/common/fetch_retry_policy.py |
+| `CR-20260816-C-S06-infra-adapters-125` | reject | None | Remove pass-through sanitizer wrappers is DRY. | src/bioetl/infrastructure/adapters/common/api_request_collector.py |
+| `CR-20260816-C-S06-infra-adapters-126` | confirm | None | any(...) on remaining/limit/retry_after treats remaining=0 as absent and drops RateLimitInfo when the quota is exhausted. | src/bioetl/infrastructure/adapters/common/api_request_collector.py:94-102 |
+| `CR-20260816-C-S06-infra-adapters-127` | reject | None | Add TimeoutException / route RecoverableError through config is retry-policy expansion; Connect/Read timeouts already retry. | src/bioetl/infrastructure/adapters/http/_client_retry_policy.py _is_retryable_error |
+| `CR-20260816-C-S06-infra-adapters-128` | reject | None | Pipe-escape composite dedup keys is a theoretical collision without a shown producer. | src/bioetl/infrastructure/adapters/common/deduplication.py |
+| `CR-20260816-C-S06-infra-adapters-129` | reject | None | Sentinel vs None getattr is Protocol/typing without a host that sets supported_filter_field=None to clear inheritance. | src/bioetl/infrastructure/adapters/common/composable_fallback.py |
+| `CR-20260816-C-S06-infra-adapters-130` | reject | None | Remove retry_error assert is style; exhaustion already recovers. | src/bioetl/infrastructure/adapters/common/fetch_resilience_template.py |
+| `CR-20260816-C-S06-infra-adapters-131` | reject | None | object->HTTP response type is annotation-only. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_retry.py |
+| `CR-20260816-C-S06-infra-adapters-132` | reject | None | Shared /health constant is DRY. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_health.py |
+| `CR-20260816-C-S06-infra-adapters-133` | reject | None | str()-coerce accession before strip is defensive; hook already receives strings. | src/bioetl/infrastructure/adapters/uniprot/client.py |
+| `CR-20260816-C-S06-infra-adapters-134` | reject | None | Reuse description constant is DRY. | src/bioetl/infrastructure/adapters/uniprot/_uniprot_model_structures.py |
+| `CR-20260816-C-S06-infra-adapters-135` | reject | None | Apply limiter/breaker/timeout inside _run_in_executor is policy expansion for an already-shipped sync adapter. | src/bioetl/infrastructure/adapters/sync_base.py |
+| `CR-20260816-C-S06-infra-adapters-136` | reject | None | Route submit/fetch through deps is style; both already hit the same host methods. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_transport.py |
+| `CR-20260816-C-S06-infra-adapters-137` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/_client_support.py |
+| `CR-20260816-C-S06-infra-adapters-138` | reject | None | Derive UNIPROT_RECORD_MODELS from strategies is DRY/test-only coupling. | src/bioetl/infrastructure/adapters/uniprot/_uniprot_model_records.py |
+| `CR-20260816-C-S06-infra-adapters-139` | reject | None | Coerce taxonId/from types is annotation/validation tightening. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_parser.py |
+| `CR-20260816-C-S06-infra-adapters-140` | reject | None | Drop **legacy_ports is an already-shipped constructor API rewrite. | src/bioetl/infrastructure/adapters/uniprot/client.py |
+| `CR-20260816-C-S06-infra-adapters-141` | reject | None | Relax UniProt model required fields is a contract expansion. | src/bioetl/infrastructure/adapters/uniprot/_uniprot_model_structures.py |
+| `CR-20260816-C-S06-infra-adapters-142` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/_uniprot_model_annotations.py |
+| `CR-20260816-C-S06-infra-adapters-143` | reject | None | _closed flag for idempotent close is lifecycle style. | src/bioetl/infrastructure/adapters/sync_base.py |
+| `CR-20260816-C-S06-infra-adapters-144` | reject | None | Test-only UniProt fetch dispatch coverage plus inventory refresh. | src/bioetl/infrastructure/adapters/uniprot/client.py |
+| `CR-20260816-C-S06-infra-adapters-145` | reject | None | HEALTHY fallback for unmapped HealthStatus is policy polish. | src/bioetl/infrastructure/adapters/http/_health_monitor_transitions.py |
+| `CR-20260816-C-S06-infra-adapters-146` | reject | None | Guard missing response.request is defensive; collector is not on the write path. | src/bioetl/infrastructure/adapters/common/api_request_collector.py |
+| `CR-20260816-C-S06-infra-adapters-147` | reject | None | Class-level health thresholds vs instance fields is config/style. | src/bioetl/infrastructure/adapters/http/_health_monitor_transitions.py |
+| `CR-20260816-C-S06-infra-adapters-148` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/http/client_retry_observability.py |
+| `CR-20260816-C-S06-infra-adapters-149` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/client.py |
+| `CR-20260816-C-S06-infra-adapters-150` | reject | None | Return copied health-state snapshots is defensive immutability style. | src/bioetl/infrastructure/adapters/http/health_monitor.py |
+| `CR-20260816-C-S06-infra-adapters-151` | reject | None | Reject unused UniProt offset is API-surface expansion; del offset is the shipped paging contract. | src/bioetl/infrastructure/adapters/uniprot/client.py |
+| `CR-20260816-C-S06-infra-adapters-152` | reject | None | Fail fast on 4xx during poll is timeout-error taxonomy; job still does not succeed. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_retry.py |
+| `CR-20260816-C-S06-infra-adapters-153` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/http/health.py |
+| `CR-20260816-C-S06-infra-adapters-154` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_health.py |
+| `CR-20260816-C-S06-infra-adapters-155` | reject | None | Richer Link-header parser is pagination hardening; current rel="next" form is the UniProt default. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_parser.py _get_next_page_url |
+| `CR-20260816-C-S06-infra-adapters-156` | reject | None | Catch JSON decode in the poll loop is resilience polish; decode errors already escape rather than succeed. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_retry.py |
+| `CR-20260816-C-S06-infra-adapters-157` | reject | None | dataclass field(init=False) for _states is style. | src/bioetl/infrastructure/adapters/http/health_monitor.py |
+| `CR-20260816-C-S06-infra-adapters-158` | reject | None | float() wrap for gauge is telemetry typing. | src/bioetl/infrastructure/adapters/http/_health_monitor_observability.py |
+| `CR-20260816-C-S06-infra-adapters-159` | confirm | None | Non-200 or non-dict ID-mapping pages break pagination and leave empty entry lists, so _resolve_entries reports those IDs as not_found. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_transport.py:132-164 |
+| `CR-20260816-C-S06-infra-adapters-160` | reject | None | Clear _client before aclose is lifecycle style; nested depth already tracked. | src/bioetl/infrastructure/adapters/http/client_context_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-161` | reject | None | Reject unknown factory kwargs is API-hardening. | src/bioetl/infrastructure/adapters/uniprot/_client_support.py |
+| `CR-20260816-C-S06-infra-adapters-162` | reject | None | Explicit default=None on init=False fields is annotation-only. | src/bioetl/infrastructure/adapters/http/client.py |
+| `CR-20260816-C-S06-infra-adapters-163` | reject | None | Offload thread_pool.shutdown is event-loop perf. | src/bioetl/infrastructure/adapters/sync_base.py |
+| `CR-20260816-C-S06-infra-adapters-164` | reject | None | Mark span failed on last_error is telemetry. | src/bioetl/infrastructure/adapters/http/client_retry_observability.py |
+| `CR-20260816-C-S06-infra-adapters-165` | reject | None | HTTP-date Retry-After parsing is retry-policy expansion; numeric path already works. | src/bioetl/infrastructure/adapters/http/client_retry_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-166` | reject | None | Quoted CircuitBreakerSnapshot return annotation is typing-only. | src/bioetl/infrastructure/adapters/http/circuit_breaker.py |
+| `CR-20260816-C-S06-infra-adapters-167` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/http/client_request_methods_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-168` | reject | None | Copy selected mapping entry / tolerate '5.0' scores is defensive; int() still fail-closes malformed scores. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_parser.py _select_primary_entry |
+| `CR-20260816-C-S06-infra-adapters-169` | reject | critical | start_as_current_span is typed to return SpanLike; extra context-manager wrapper is Protocol expansion. | src/bioetl/infrastructure/adapters/http/client_retry_observability.py start_request_span |
+| `CR-20260816-C-S06-infra-adapters-170` | reject | critical | Annotation-only required fields are a typing/API style request, not an invariant breach. | src/bioetl/infrastructure/adapters/http/client.py |
+| `CR-20260816-C-S08-infra-observability-001` | reject | minor | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/_metrics_defs_core.py |
+| `CR-20260816-C-S08-infra-observability-002` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/__init__.py |
+| `CR-20260816-C-S08-infra-observability-003` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/anomaly/__init__.py |
+| `CR-20260816-C-S08-infra-observability-004` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/anomaly/__init__.py |
+| `CR-20260816-C-S08-infra-observability-005` | confirm | minor | AnomalyDetector accepts min_baseline_samples > baseline_window, so the detector can never accumulate enough samples and silently never fires. | src/bioetl/infrastructure/observability/anomaly/detector.py:48-58 |
+| `CR-20260816-C-S08-infra-observability-006` | reject | major | Skip baseline update on any anomaly is a policy change; current contract skips only CRITICAL. | src/bioetl/infrastructure/observability/anomaly/monitor.py:131-140 |
+| `CR-20260816-C-S08-infra-observability-007` | reject | minor | Reject negative z-threshold / strict > is detector-policy tightening. | src/bioetl/infrastructure/observability/anomaly/detectors/zscore.py |
+| `CR-20260816-C-S08-infra-observability-008` | reject | major | Test-only log_error/log_debug spies. | src/bioetl/infrastructure/observability/logging_helpers.py |
+| `CR-20260816-C-S08-infra-observability-009` | reject | minor | None vs empty enabled_breakpoints is a shipped default-all-breakpoints contract. | src/bioetl/infrastructure/observability/debug_adapters.py |
+| `CR-20260816-C-S08-infra-observability-010` | reject | major | Test-only gateway adapter delegation. | src/bioetl/infrastructure/observability/metrics_publisher_adapter.py |
+| `CR-20260816-C-S08-infra-observability-011` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/metrics_collector.py |
+| `CR-20260816-C-S08-infra-observability-012` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/metrics_server_adapter.py |
+| `CR-20260816-C-S08-infra-observability-013` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/logging.py |
+| `CR-20260816-C-S08-infra-observability-014` | reject | major | Test-only metrics facade export identity. | src/bioetl/infrastructure/observability/metrics.py |
+| `CR-20260816-C-S08-infra-observability-015` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/health_metrics_exposition.py |
+| `CR-20260816-C-S08-infra-observability-016` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/circuit_breaker_mapping.py |
+| `CR-20260816-C-S08-infra-observability-017` | reject | major | Bounded run_type vocabulary is a metric-label policy expansion. | src/bioetl/infrastructure/observability/_prometheus_metric_label_dispatch_policy.py |
+| `CR-20260816-C-S08-infra-observability-018` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/_prometheus_metric_label_normalizers.py |
+| `CR-20260816-C-S08-infra-observability-019` | reject | major | Approved-only grouping labels are a gateway-label policy expansion. | src/bioetl/infrastructure/observability/_metrics_gateway_publication.py |
+| `CR-20260816-C-S08-infra-observability-020` | reject | major | retry_count/retry_delay pre-validation is config hardening of the shipped loop. | src/bioetl/infrastructure/observability/_metrics_server_startup.py |
+| `CR-20260816-C-S08-infra-observability-021` | reject | major | Redact gateway target in delete logs is hardening without a reproduced secret leak on that path. | src/bioetl/infrastructure/observability/_metrics_gateway_publication.py |
+| `CR-20260816-C-S08-infra-observability-022` | confirm | major | Authorization redaction regex consumes only [\w-]+, so 'Authorization: Bearer <token>' redacts Bearer and leaves the token in logs. | src/bioetl/infrastructure/observability/logging_config.py:49-52 |
+| `CR-20260816-C-S08-infra-observability-023` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/prometheus_metrics.py |
+| `CR-20260816-C-S08-infra-observability-024` | reject | major | Coverage-inventory refresh is not an invariant hole. | src/bioetl/infrastructure/observability/noop_logger.py |
+| `CR-20260816-C-S08-infra-observability-025` | reject | major | Changing start_metrics_server default addr from 0.0.0.0 is a shipped-API change. | src/bioetl/infrastructure/observability/server.py:46-48 |
+| `CR-20260816-C-S08-infra-observability-026` | reject | major | Drop run_id/pipeline from extra is bind-context policy; extra already cannot overwrite existing sanitized keys. | src/bioetl/infrastructure/observability/unified_logger.py:176-180 |
+| `CR-20260816-C-S08-infra-observability-027` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/tracing.py |
+| `CR-20260816-C-S08b-infra-residual-001` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/audit/__init__.py |
+| `CR-20260816-C-S08b-infra-residual-002` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/arrow_typed.py |
+| `CR-20260816-C-S08b-infra-residual-003` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/adr/fs_adr_service.py |
+| `CR-20260816-C-S08b-infra-residual-004` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/adr/_adr_file_utils.py |
+| `CR-20260816-C-S08b-infra-residual-005` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/arrow_typed.py |
+| `CR-20260816-C-S08b-infra-residual-006` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/audit/file_audit.py |
+| `CR-20260816-C-S08b-infra-residual-007` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/audit/_file_audit_payloads.py |
+| `CR-20260816-C-S08b-infra-residual-008` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/audit/_file_audit_io.py |
+| `CR-20260816-C-S08b-infra-residual-009` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/audit/_file_audit_io.py |
+| `CR-20260816-C-S08b-infra-residual-010` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/_dq_config_validation_merge.py |
+| `CR-20260816-C-S08b-infra-residual-011` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/_yaml_settings_source.py |
+| `CR-20260816-C-S08b-infra-residual-012` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/config/composite_config_api.py |
+| `CR-20260816-C-S08b-infra-residual-013` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/chembl_policy_registry_loader.py |
+| `CR-20260816-C-S08b-infra-residual-014` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/composite_config_api.py |
+| `CR-20260816-C-S08b-infra-residual-015` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/base_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-016` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/_retry_settings.py |
+| `CR-20260816-C-S08b-infra-residual-017` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/base_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-018` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/_settings_validation.py |
+| `CR-20260816-C-S08b-infra-residual-019` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/chembl_policy_registry_loader.py |
+| `CR-20260816-C-S08b-infra-residual-020` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/composite_config_api.py |
+| `CR-20260816-C-S08b-infra-residual-021` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/config/chembl_policy_registry_loader.py |
+| `CR-20260816-C-S08b-infra-residual-022` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/_dq_config_validation_merge.py |
+| `CR-20260816-C-S08b-infra-residual-023` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/config/_yaml_settings_source.py |
+| `CR-20260816-C-S08b-infra-residual-024` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/config/workflow_config_api.py |
+| `CR-20260816-C-S08b-infra-residual-025` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/__init__.py |
+| `CR-20260816-C-S08b-infra-residual-026` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config_loader_filtering.py |
+| `CR-20260816-C-S08b-infra-residual-027` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/semantic_field_registry_loader.py |
+| `CR-20260816-C-S08b-infra-residual-028` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/config/staged_enforcement_policy_loader.py |
+| `CR-20260816-C-S08b-infra-residual-029` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/source_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-030` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/workflow_config_api.py |
+| `CR-20260816-C-S08b-infra-residual-031` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/config_merge.py |
+| `CR-20260816-C-S08b-infra-residual-032` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/staged_enforcement_policy_loader.py |
+| `CR-20260816-C-S08b-infra-residual-033` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/config/reason_catalog_loader.py |
+| `CR-20260816-C-S08b-infra-residual-034` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/checkpoint/_local_checkpoint_io.py |
+| `CR-20260816-C-S08b-infra-residual-035` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/checkpoint/_local_checkpoint_sync.py |
+| `CR-20260816-C-S08b-infra-residual-036` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/checkpoint/_local_checkpoint_sync.py |
+| `CR-20260816-C-S08b-infra-residual-037` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/_base.py |
+| `CR-20260816-C-S08b-infra-residual-038` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/config/_composite_config_paths.py |
+| `CR-20260816-C-S08b-infra-residual-039` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/checkpoint/local_checkpoint.py |
+| `CR-20260816-C-S08b-infra-residual-040` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/checkpoint/_local_checkpoint_sync.py |
+| `CR-20260816-C-S08b-infra-residual-041` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/checkpoint/_local_checkpoint_sync.py |
+| `CR-20260816-C-S08b-infra-residual-042` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/checkpoint/local_checkpoint.py |
+| `CR-20260816-C-S08b-infra-residual-043` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/config/source_normalizers/source.py |
+| `CR-20260816-C-S08b-infra-residual-044` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/validation/contract_validator.py |
+| `CR-20260816-C-S08b-infra-residual-045` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/validation/contract_validator.py |
+| `CR-20260816-C-S08b-infra-residual-046` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/validation/pandera_validator.py |
+| `CR-20260816-C-S08b-infra-residual-047` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/validation/contract_validator.py |
+| `CR-20260816-C-S08b-infra-residual-048` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/pipeline_contract_policy.py |
+| `CR-20260816-C-S08b-infra-residual-049` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/silver_publication_field_blocks.py |
+| `CR-20260816-C-S08b-infra-residual-050` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/silver_publication_field_blocks.py |
+| `CR-20260816-C-S08b-infra-residual-051` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/silver_common_field_blocks.py |
+| `CR-20260816-C-S08b-infra-residual-052` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_contract_policy.py |
+| `CR-20260816-C-S08b-infra-residual-053` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/source_config.py |
+| `CR-20260816-C-S08b-infra-residual-054` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/silver_chembl_core.py |
+| `CR-20260816-C-S08b-infra-residual-055` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/silver_chembl_core.py |
+| `CR-20260816-C-S08b-infra-residual-056` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/silver_chembl_extended.py |
+| `CR-20260816-C-S08b-infra-residual-057` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/silver_compounds.py |
+| `CR-20260816-C-S08b-infra-residual-058` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/dq_report_writer.py |
+| `CR-20260816-C-S08b-infra-residual-059` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/locking/memory_lock.py |
+| `CR-20260816-C-S08b-infra-residual-060` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/debug_export_ops.py |
+| `CR-20260816-C-S08b-infra-residual-061` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/locking/memory_lock.py |
+| `CR-20260816-C-S08b-infra-residual-062` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/csv_exporter.py |
+| `CR-20260816-C-S08b-infra-residual-063` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/debug_export_adapter.py |
+| `CR-20260816-C-S08b-infra-residual-064` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/export/export_writer_adapter.py |
+| `CR-20260816-C-S08b-infra-residual-065` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/debug_export_adapter.py |
+| `CR-20260816-C-S08b-infra-residual-066` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/export_catalog_adapter.py |
+| `CR-20260816-C-S08b-infra-residual-067` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/csv_exporter_io_ops.py |
+| `CR-20260816-C-S08b-infra-residual-068` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/locking/memory_lock.py |
+| `CR-20260816-C-S08b-infra-residual-069` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/debug_export_ops.py |
+| `CR-20260816-C-S08b-infra-residual-070` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/dq_report_writer.py |
+| `CR-20260816-C-S08b-infra-residual-071` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/csv_exporter_table_ops.py |
+| `CR-20260816-C-S08b-infra-residual-072` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/serialization/encoders.py |
+| `CR-20260816-C-S08b-infra-residual-073` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/system/memory_monitor.py |
+| `CR-20260816-C-S08b-infra-residual-074` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/workflow_config.py |
+| `CR-20260816-C-S08b-infra-residual-075` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/security/pii_hasher.py |
+| `CR-20260816-C-S08b-infra-residual-076` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/serialization/encoders.py |
+| `CR-20260816-C-S08b-infra-residual-077` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/workflow_config.py |
+| `CR-20260816-C-S08b-infra-residual-078` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/workflow_config.py |
+| `CR-20260816-C-S08b-infra-residual-079` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/serialization/encoders.py |
+| `CR-20260816-C-S08b-infra-residual-080` | confirm | critical | source_keys=[] is not None so the pair-present check passes; empty composite keys are accepted for a destructive reconcile. | src/bioetl/infrastructure/schemas/workflow_config_fk.py _normalize_fk_required_names / _require_fk_key_pairs_present |
+| `CR-20260816-C-S08b-infra-residual-081` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/system/memory_monitor.py |
+| `CR-20260816-C-S08b-infra-residual-082` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/source_config.py |
+| `CR-20260816-C-S08b-infra-residual-083` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/security/pii_hasher.py |
+| `CR-20260816-C-S08b-infra-residual-084` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/csv_exporter.py |
+| `CR-20260816-C-S08b-infra-residual-085` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/system/memory_monitor.py |
+| `CR-20260816-C-S08b-infra-residual-086` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/security/__init__.py |
+| `CR-20260816-C-S08b-infra-residual-087` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/time/system_clock.py |
+| `CR-20260816-C-S08b-infra-residual-088` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/_composite_config_merge_schema.py |
+| `CR-20260816-C-S08b-infra-residual-089` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/_composite_config_merge_schema.py |
+| `CR-20260816-C-S08b-infra-residual-090` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/filtered_manifest_support.py |
+| `CR-20260816-C-S08b-infra-residual-091` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/filtered_reads.py |
+| `CR-20260816-C-S08b-infra-residual-092` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/unified.py |
+| `CR-20260816-C-S08b-infra-residual-093` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/_timeseries.py |
+| `CR-20260816-C-S08b-infra-residual-094` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/status_events.py |
+| `CR-20260816-C-S08b-infra-residual-095` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/filtered_reads.py |
+| `CR-20260816-C-S08b-infra-residual-096` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/filtered_read_support.py |
+| `CR-20260816-C-S08b-infra-residual-097` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/_composite_config_merge_schema.py |
+| `CR-20260816-C-S08b-infra-residual-098` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/unified.py |
+| `CR-20260816-C-S08b-infra-residual-099` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/system/memory_monitor.py |
+| `CR-20260816-C-S08b-infra-residual-100` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_raw_run_manifest_inspection.py |
+| `CR-20260816-C-S08b-infra-residual-101` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_file_run_ledger_helpers.py |
+| `CR-20260816-C-S08b-infra-residual-102` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/_file_lineage_index.py |
+| `CR-20260816-C-S08b-infra-residual-103` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_runtime_protections.py |
+| `CR-20260816-C-S08b-infra-residual-104` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_manifest_protections.py |
+| `CR-20260816-C-S08b-infra-residual-105` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/_file_lineage_index.py |
+| `CR-20260816-C-S08b-infra-residual-106` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/_file_lineage_queries.py |
+| `CR-20260816-C-S08b-infra-residual-107` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_runtime_protections.py |
+| `CR-20260816-C-S08b-infra-residual-108` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_surfaces.py |
+| `CR-20260816-C-S08b-infra-residual-109` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_file_run_ledger_helpers.py |
+| `CR-20260816-C-S08b-infra-residual-110` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/publication_controlled_vocabulary_loader.py |
+| `CR-20260816-C-S08b-infra-residual-111` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/config/field_group_loader.py |
+| `CR-20260816-C-S08b-infra-residual-112` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/pipeline_normalizers.py |
+| `CR-20260816-C-S08b-infra-residual-113` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/pipeline_normalizers.py |
+| `CR-20260816-C-S08b-infra-residual-114` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/filtered_reads.py |
+| `CR-20260816-C-S08b-infra-residual-115` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/config/pipeline_normalizers.py |
+| `CR-20260816-C-S08b-infra-residual-116` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/pipeline_payload_normalization.py |
+| `CR-20260816-C-S08b-infra-residual-117` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/record_encoding.py |
+| `CR-20260816-C-S08b-infra-residual-118` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_file_run_manifest_persistence.py |
+| `CR-20260816-C-S08b-infra-residual-119` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/pipeline_config_api.py |
+| `CR-20260816-C-S08b-infra-residual-120` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/publication_type_classification_loader.py |
+| `CR-20260816-C-S08b-infra-residual-121` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/config/pipeline_config_api.py |
+| `CR-20260816-C-S08b-infra-residual-122` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/field_group_loader.py |
+| `CR-20260816-C-S08b-infra-residual-123` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_manifest_protections.py |
+| `CR-20260816-C-S08b-infra-residual-124` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_raw_run_manifest_inspection.py |
+| `CR-20260816-C-S08b-infra-residual-125` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/_run_manifest_scope_rebuild.py |
+| `CR-20260816-C-S08b-infra-residual-126` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_reasons.py |
+| `CR-20260816-C-S08b-infra-residual-127` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/artifact_byte_comparison.py |
+| `CR-20260816-C-S08b-infra-residual-128` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py |
+| `CR-20260816-C-S08b-infra-residual-129` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/enum_file_loader.py |
+| `CR-20260816-C-S08b-infra-residual-130` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/statistics_support.py |
+| `CR-20260816-C-S08b-infra-residual-131` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/pipeline_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-132` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/filtered_manifest_support.py |
+| `CR-20260816-C-S08b-infra-residual-133` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/enum_file_loader.py |
+| `CR-20260816-C-S08b-infra-residual-134` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/pipeline_normalizers.py |
+| `CR-20260816-C-S08b-infra-residual-135` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/field_group_loader.py |
+| `CR-20260816-C-S08b-infra-residual-136` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_contract_registry_store.py |
+| `CR-20260816-C-S08b-infra-residual-137` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_raw_run_manifest_nested_validation.py |
+| `CR-20260816-C-S08b-infra-residual-138` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/enum_loader_adapter.py |
+| `CR-20260816-C-S08b-infra-residual-139` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_file_lineage_index.py |
+| `CR-20260816-C-S08b-infra-residual-140` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_payloads.py |
+| `CR-20260816-C-S08b-infra-residual-141` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py |
+| `CR-20260816-C-S08b-infra-residual-142` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/publication_controlled_vocabulary_loader.py |
+| `CR-20260816-C-S08b-infra-residual-143` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_payloads.py |
+| `CR-20260816-C-S08b-infra-residual-144` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/pipeline_payload_normalization.py |
+| `CR-20260816-C-S08b-infra-residual-145` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_reasons.py |
+| `CR-20260816-C-S08b-infra-residual-146` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py |
+| `CR-20260816-C-S08b-infra-residual-147` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_run_manifest_scope_index.py |
+| `CR-20260816-C-S08b-infra-residual-148` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_store.py |
+| `CR-20260816-C-S08b-infra-residual-149` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_file_run_manifest_persistence.py |
+| `CR-20260816-C-S08b-infra-residual-150` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/artifact_byte_comparison.py |
+| `CR-20260816-C-S08b-infra-residual-151` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/serialization/encoders.py |
+| `CR-20260816-C-S08b-infra-residual-152` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/filter_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-153` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_quality_scorecard.py |
+| `CR-20260816-C-S08b-infra-residual-154` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_task_support.py |
+| `CR-20260816-C-S08b-infra-residual-155` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/exemptions_registry_policy.py |
+| `CR-20260816-C-S08b-infra-residual-156` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_quality_scorecard.py |
+| `CR-20260816-C-S08b-infra-residual-157` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py |
+| `CR-20260816-C-S08b-infra-residual-158` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/debt_scorecard.py |
+| `CR-20260816-C-S08b-infra-residual-159` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/exemptions_registry_paths.py |
+| `CR-20260816-C-S08b-infra-residual-160` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_quality_scorecard.py |
+| `CR-20260816-C-S08b-infra-residual-161` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/exemptions_registry_access.py |
+| `CR-20260816-C-S08b-infra-residual-162` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/quarantine/_pyarrow_helpers.py |
+| `CR-20260816-C-S08b-infra-residual-163` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/quarantine/_statistics.py |
+| `CR-20260816-C-S08b-infra-residual-164` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/quarantine/_inspection.py |
+| `CR-20260816-C-S08b-infra-residual-165` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/exemptions_registry_validation.py |
+| `CR-20260816-C-S08b-infra-residual-166` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/_statistics.py |
+| `CR-20260816-C-S08b-infra-residual-167` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/quarantine/_lifecycle.py |
+| `CR-20260816-C-S08b-infra-residual-168` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/exemptions_registry_targets.py |
+| `CR-20260816-C-S08b-infra-residual-169` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/registry_sync_service.py |
+| `CR-20260816-C-S08b-infra-residual-170` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/budget_evaluator.py |
+| `CR-20260816-C-S08b-infra-residual-171` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/inventory.py |
+| `CR-20260816-C-S08b-infra-residual-172` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/scoring.py |
+| `CR-20260816-C-S08b-infra-residual-173` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_task_policy.py |
+| `CR-20260816-C-S08b-infra-residual-174` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/_inspection.py |
+| `CR-20260816-C-S08b-infra-residual-175` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/exemptions_registry_paths.py |
+| `CR-20260816-C-S08b-infra-residual-176` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/scoring.py |
+| `CR-20260816-C-S08b-infra-residual-177` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/scoring.py |
+| `CR-20260816-C-S08b-infra-residual-178` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/_inspection.py |
+| `CR-20260816-C-S08b-infra-residual-179` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/registry_sync_service.py |
+| `CR-20260816-C-S08b-infra-residual-180` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_governance_validation.py |
+| `CR-20260816-C-S08b-infra-residual-181` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/quality/architecture_debt_reduction.py |
+| `CR-20260816-C-S08b-infra-residual-182` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/quality/_quarterly_targets_validation.py |
+| `CR-20260816-C-S08b-infra-residual-183` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_artifact_tasks.py |
+| `CR-20260816-C-S08b-infra-residual-184` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_execution_state_store.py |
+| `CR-20260816-C-S08b-infra-residual-185` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_ledger_store.py |
+| `CR-20260816-C-S08b-infra-residual-186` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/errors/exception_mapper.py |
+| `CR-20260816-C-S08b-infra-residual-187` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_ledger_store.py |
+| `CR-20260816-C-S08b-infra-residual-188` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/errors/exception_mapper.py |
+| `CR-20260816-C-S08b-infra-residual-189` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_manifest_store.py |
+| `CR-20260816-C-S08b-infra-residual-190` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_reduction.py |
+| `CR-20260816-C-S08b-infra-residual-191` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py |
+| `CR-20260816-C-S08b-infra-residual-192` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_execution_state_store.py |
+| `CR-20260816-C-S08b-infra-residual-193` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py |
+| `CR-20260816-C-S08b-infra-residual-194` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_run_manifest_store.py |
+| `CR-20260816-C-S08b-infra-residual-195` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py |
+| `CR-20260816-C-S08b-infra-residual-196` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/errors/exception_mapper.py |
+| `CR-20260816-C-S08b-infra-residual-197` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_baseline_validation.py |
+| `CR-20260816-C-S08b-infra-residual-198` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py |
+| `CR-20260816-C-S08b-infra-residual-199` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_manifest_store.py |
+| `CR-20260816-C-S08b-infra-residual-200` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py |
+| `CR-20260816-C-S08b-infra-residual-201` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_run_ledger_store.py |
+| `CR-20260816-C-S08b-infra-residual-202` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_decomposition_program_policy.py |
+| `CR-20260816-C-S08b-infra-residual-203` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_decomposition_owner_policy.py |
+| `CR-20260816-C-S08b-infra-residual-204` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/debt_scorecard.py |
+| `CR-20260816-C-S08b-infra-residual-205` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_primitives.py |
+| `CR-20260816-C-S08b-infra-residual-206` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_decomposition_owner_policy.py |
+| `CR-20260816-C-S08b-infra-residual-207` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_quarterly_targets_validation.py |
+| `CR-20260816-C-S08b-infra-residual-208` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_artifact_tasks.py |
+| `CR-20260816-C-S08b-infra-residual-209` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/_statistics.py |
+| `CR-20260816-C-S08b-infra-residual-210` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_artifact_tasks.py |
+| `CR-20260816-C-S08b-infra-residual-211` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py |
+| `CR-20260816-C-S08b-infra-residual-212` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_quarterly_targets_validation.py |
+| `CR-20260816-C-S08b-infra-residual-213` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_reduction.py |
+| `CR-20260816-C-S08b-infra-residual-214` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_artifact_tasks.py |
+| `CR-20260816-C-S08b-infra-residual-215` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_grace_windows_validation.py |
+| `CR-20260816-C-S08b-infra-residual-216` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_decomposition_burndown_policy.py |
+| `CR-20260816-C-S08b-infra-residual-217` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py |
+| `CR-20260816-C-S08b-infra-residual-218` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_manifest_store.py |
+| `CR-20260816-C-S08b-infra-residual-219` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/report_formatter.py |
+| `CR-20260816-C-S08b-infra-residual-220` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_primitives.py |
+| `CR-20260816-C-S08b-infra-residual-221` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_baseline_validation.py |
+| `CR-20260816-C-S08b-infra-residual-222` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_reduction.py |
+| `CR-20260816-C-S08b-infra-residual-223` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_governance_validation.py |
+| `CR-20260816-C-S08b-infra-residual-224` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_governance_validation.py |
+| `CR-20260816-C-S08b-infra-residual-225` | reject | critical | overwrite fallback runs only on TableNotFoundError to create the first event table; it does not clobber an existing table. | src/bioetl/infrastructure/quarantine/status_events.py |
+| `CR-20260816-C-S08b-infra-residual-226` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/exemptions_registry_validation.py |
+| `CR-20260816-C-S08b-infra-residual-227` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_task_generation.py |
+| `CR-20260816-C-S08b-infra-residual-228` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_lineage_store.py |
+| `CR-20260816-C-S08b-infra-residual-229` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_task_support.py |
+| `CR-20260816-C-S08b-infra-residual-230` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/scoring.py |
+| `CR-20260816-C-S08b-infra-residual-231` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/_lifecycle.py |
+| `CR-20260816-C-S08b-infra-residual-232` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/entity_filter_metadata_registry.py |
+| `CR-20260816-C-S08b-infra-residual-233` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/config/dq_config_resolution.py |
+| `CR-20260816-C-S08b-infra-residual-234` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/entity_filter_metadata_registry.py |
+| `CR-20260816-C-S08b-infra-residual-235` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_policy_loader.py |
+| `CR-20260816-C-S08b-infra-residual-236` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/config/contract_registry_loader.py |
+| `CR-20260816-C-S08b-infra-residual-237` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/dq_contract_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-238` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_policy_validation.py |
+| `CR-20260816-C-S08b-infra-residual-239` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/dq_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-240` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/dq_contract_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-241` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/dq_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-242` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_registry_loader.py |
+| `CR-20260816-C-S08b-infra-residual-243` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/config_ci_contract.py |
+| `CR-20260816-C-S08b-infra-residual-244` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/config_ci_contract.py |
+| `CR-20260816-C-S08b-infra-residual-245` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/dq_contract_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-246` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/config_root.py |
+| `CR-20260816-C-S08b-infra-residual-247` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_policy_loader.py |
+| `CR-20260816-C-S08b-infra-residual-248` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/config/domain_config_resolver.py |
+| `CR-20260816-C-S08b-infra-residual-249` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_policy_validation.py |
+| `CR-20260816-C-S08b-infra-residual-250` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_policy_loader.py |
+| `CR-20260816-C-S08b-infra-residual-251` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/converters.py |
+| `CR-20260816-C-S08b-infra-residual-252` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/dq_config_resolution.py |
+| `CR-20260816-C-S08b-infra-residual-253` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/converters.py |
+| `CR-20260816-C-S08b-infra-residual-254` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/config_root.py |
+| `CR-20260816-C-S08b-infra-residual-255` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_policy_validation.py |
+| `CR-20260816-C-S08b-infra-residual-256` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/config/dq_contract_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-257` | reject | critical | config_helpers.load_config is an unused placeholder; CLI composite load uses composition.composite_api.load_composite_config. | src/bioetl/interfaces/cli/commands/domains/composite/execution.py load_composite_config |
+| `CR-20260816-C-S08b-infra-residual-258` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/entity_filter_metadata_registry.py |
+| `CR-20260816-C-S08b-infra-residual-259` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/dq_contract_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-260` | reject | critical | Network-drive YAML load already fail-closes via Future.result(timeout=); OS-level kill is an enhancement. | src/bioetl/infrastructure/config/contract_registry_loader.py _load_yaml_with_timeout |
+| `CR-20260816-C-S08b-infra-residual-261` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/filter_config.py |
+| `CR-20260816-C-S08b-infra-residual-262` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/composite_validation.py |
+| `CR-20260816-C-S08b-infra-residual-263` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/filter_config.py |
+| `CR-20260816-C-S08b-infra-residual-264` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_config.py |
+| `CR-20260816-C-S08b-infra-residual-265` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/composite_config_base.py |
+| `CR-20260816-C-S08b-infra-residual-266` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/dq_config.py |
+| `CR-20260816-C-S08b-infra-residual-267` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/composite_validation.py |
+| `CR-20260816-C-S08b-infra-residual-268` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/base_schemas_chembl.py |
+| `CR-20260816-C-S08b-infra-residual-269` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/composite_config_base.py |
+| `CR-20260816-C-S08b-infra-residual-270` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/composite_config.py |
+| `CR-20260816-C-S08b-infra-residual-271` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/base_schemas.py |
+| `CR-20260816-C-S08b-infra-residual-272` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py |
+| `CR-20260816-C-S08b-infra-residual-273` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/filter_config.py |
+| `CR-20260816-C-S08b-infra-residual-274` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/composite_config.py |
+| `CR-20260816-C-S08b-infra-residual-275` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/dq_report_config.py |
+| `CR-20260816-C-S08b-infra-residual-276` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py |
+| `CR-20260816-C-S08b-infra-residual-277` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/dq_report_config.py |
+| `CR-20260816-C-S08b-infra-residual-278` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/base_schemas_chembl.py |
+| `CR-20260816-C-S08b-infra-residual-279` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/composite_validation.py |
+| `CR-20260816-C-S08b-infra-residual-280` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_registry_loader.py |
+| `CR-20260816-C-S08b-infra-residual-281` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_config.py |
+| `CR-20260816-C-S08b-infra-residual-282` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/dq_config.py |
+| `CR-20260816-C-S08b-infra-residual-283` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/base_schemas_pubchem.py |
+| `CR-20260816-C-S08b-infra-residual-284` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py |
+| `CR-20260816-C-S08b-infra-residual-285` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_config_common.py |
+| `CR-20260816-C-S08b-infra-residual-286` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/dq_config.py |
+| `CR-20260816-C-S08b-infra-residual-287` | reject | minor | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/filter_config.py |
+| `CR-20260816-C-S08b-infra-residual-288` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/base_schemas_chembl.py |
+| `CR-20260816-C-S08b-infra-residual-289` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py |
+| `CR-20260816-C-S08b-infra-residual-290` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/base_schemas.py |
+| `CR-20260816-C-S08b-infra-residual-291` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_config.py |
+| `CR-20260816-C-S08b-infra-residual-292` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_config_common.py |
+| `CR-20260816-D-S-D-security-residual-001` | reject | major | Stricter persisted OPENAI_API_KEY shape is helper-policy tightening. | scripts/ai/codex/helper/codex-auth-lib.sh |
+| `CR-20260816-D-S-D-security-residual-002` | reject | minor | print vs logger in a local patch script is style. | scripts/ai/mcp/_patch_grok_mcp_tokens.py |
+| `CR-20260816-D-S-D-security-residual-003` | reject | major | Section-scoped idempotency check is helper hardening without a reproduced missed patch. | scripts/ai/mcp/_patch_grok_mcp_tokens.py |
+| `CR-20260816-D-S-D-security-residual-004` | confirm | major | _looks_redacted treats any substring in REDACTED_MARKERS as redacted, so real tokens containing test/example/redacted are silently accepted. | scripts/engineering/qa/vcr/check_vcr_secrets.py:27-34 |
+| `CR-20260816-D-S-D-security-residual-005` | reject | major | Test-only bump_timeouts/wire_ref coverage. | scripts/ai/mcp/_patch_grok_mcp_tokens.py |
+| `CR-20260816-D-S-D-security-residual-006` | reject | major | Test-only codex_has_usable_auth coverage. | scripts/ai/codex/helper/codex-auth-lib.sh |
+| `CR-20260816-D-S-D-security-residual-007` | reject | major | Test-only salt-rotation state machine coverage. | scripts/ops/maintenance/security/salt_rotate.py |
+| `CR-20260816-D-S-D-security-residual-008` | reject | major | Operator salt handoff via env_updates is the shipped CLI contract, not a reproduced log leak. | scripts/ops/maintenance/security/salt_rotate.py |
+| `CR-20260816-D-S-D-security-residual-009` | reject | major | Test-only token_validation.sh/.ps1 parity. | scripts/ai/mcp/support/token_validation.ps1 |
+| `CR-20260816-D-S-D-security-residual-010` | reject | major | CLI paths / dry-run / atomic write are feature expansion of a local helper. | scripts/ai/mcp/_patch_grok_mcp_tokens.py |
+| `CR-20260816-D-S-D-security-residual-011` | reject | minor | Docs/docstring-only request; reject class for this campaign. | scripts/ops/maintenance/security/salt_rotate.py |
+| `CR-20260816-D-S-D-security-residual-012` | confirm | major | complete_rotation promotes ENV_SALT_NEXT without enforcing MIN_SALT_LENGTH, so a short next salt becomes current. | scripts/ops/maintenance/security/salt_rotate.py:247-258 |
+| `CR-20260816-D-S-D-security-residual-013` | reject | trivial | Remove unused allowed_files is test-style. | tests/security/test_sql_injection_prevention.py |
+| `CR-20260816-D-S-D-security-residual-014` | reject | major | Move duplicated fixture to conftest is DRY/test-style. | tests/security/test_sql_injection_prevention.py |
+| `CR-20260816-D-S-D-security-residual-015` | reject | trivial | Split excluded_dirs/files is test-style. | tests/security/test_security.py |
+| `CR-20260816-D-S-D-security-residual-016` | reject | trivial | Extend hash-algorithm scan is test-policy expansion. | tests/security/test_security.py |
+| `CR-20260816-D-S-D-security-residual-017` | reject | trivial | Tighten hashing exemption is test-policy expansion. | tests/security/test_security.py |
+| `CR-20260816-D-S-D-security-residual-018` | reject | trivial | Parametrize/consolidate XXE tests is test-style. | tests/security/test_pubmed_xxe_mitigation.py |
+| `CR-20260816-D-S-D-security-residual-019` | reject | trivial | Richer assertion message is test-style. | tests/security/test_security.py |
+| `CR-20260816-D-S-D-security-residual-020` | reject | minor | Email-allowlist scoping is test-policy tightening. | tests/security/test_security.py |
+| `CR-20260816-D-S-D-security-residual-021` | reject | trivial | Path-segment vs substring file filter is test-style. | tests/security/test_xss_prevention.py |
+| `CR-20260816-D-S-D-security-residual-022` | reject | major | Fail/skip on git_grep timeout is test-harness style. | tests/security/test_security.py |
+| `CR-20260816-D-S-D-security-residual-023` | reject | major | Multiline SQL-pattern filter tweak is test-policy without a reproduced missed injection. | tests/security/test_sql_injection_prevention.py |
+| `CR-20260816-D-S-D-security-residual-024` | reject | minor | Delete an unconditional test is test-only. | tests/security/test_xss_prevention.py |
+| `CR-20260816-D-S-D-security-residual-025` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | tests/security/test_pubmed_xxe_mitigation.py |
+| `CR-20260816-D-S-D-security-residual-026` | reject | minor | Delete an unconditional inventory test is test-only. | tests/security/test_sql_injection_prevention.py |
+| `CR-20260816-E-S17-docs-00-project-02-001` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/script-testing-standards.md |
+| `CR-20260816-E-S17-docs-00-project-02-002` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/script-documentation-standards.md |
+| `CR-20260816-E-S17-docs-00-project-02-003` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/qodo/README.md |
+| `CR-20260816-E-S17-docs-00-project-02-004` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/root-local-clutter-cleanup.md |
+| `CR-20260816-E-S17-docs-00-project-02-005` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/script-testing-standards.md |
+| `CR-20260816-E-S17-docs-00-project-02-006` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/07-doc-nav-policy.md |
+| `CR-20260816-E-S17-docs-00-project-02-007` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/documentation-update-plan.md |
+| `CR-20260816-E-S17-docs-00-project-02-008` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/06-doc-publication-policy.md |
+| `CR-20260816-E-S17-docs-00-project-02-009` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/ai/skills/local/documentation-audit/references/audit-checklist.md |
+| `CR-20260816-E-S17-docs-00-project-02-010` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/ai/skills/local/agent-debugging/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-011` | reject | minor | Docs-mirror link fix; docs-only reject class. | docs/00-project/ai/skills/global/py-test-bot/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-012` | reject | minor | Markdown table punctuation is docs-only. | docs/00-project/rules-summary.md |
+| `CR-20260816-E-S17-docs-00-project-02-013` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/rules-summary.md |
+| `CR-20260816-E-S17-docs-00-project-02-014` | reject | minor | Docs-mirror template wording; docs-only. | docs/00-project/ai/skills/local/research-workflow/references/brief-template.md |
+| `CR-20260816-E-S17-docs-00-project-02-015` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/ai/skills/local/py-plan-bot/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-016` | reject | minor | Docs-mirror link fix; docs-only reject class. | docs/00-project/ai/skills/local/py-doc-bot/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-017` | reject | minor | Docs-mirror link fix; docs-only reject class. | docs/00-project/ai/skills/local/py-debug-bot/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-018` | reject | minor | Docs-mirror link fix; docs-only reject class. | docs/00-project/ai/skills/local/py-test-bot/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-019` | reject | major | Docs-mirror link fix; docs-only reject class. | docs/00-project/ai/skills/local/py-audit-bot/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-020` | reject | major | Docs-mirror link fix; docs-only reject class. | docs/00-project/ai/skills/local/py-config-bot/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-021` | reject | major | Docs-mirror ownership wording; docs-only. | docs/00-project/ai/skills/local/new-pipeline/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-022` | reject | minor | Docs-mirror checklist wording; docs-only. | docs/00-project/ai/skills/local/research-workflow/references/evidence-object-schema.md |
+| `CR-20260816-E-S17-docs-00-project-02-023` | reject | major | Docs-mirror link fix; docs-only reject class. | docs/00-project/ai/skills/local/new-pipeline/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-024` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/ai/skills/local/research-workflow/references/constraint-rules.md |
+| `CR-20260816-E-S17-docs-00-project-02-025` | reject | major | Docs-mirror Mermaid guidance; docs-only. | docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-026` | reject | minor | Docs-mirror path wording; docs-only. | docs/00-project/ai/skills/local/observability-dashboard/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-027` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/04-extending-bioetl.md |
+| `CR-20260816-E-S17-docs-00-project-02-028` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/02-naming-policy.md |
+| `CR-20260816-E-S17-docs-00-project-02-029` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/architecture-index.md |
+| `CR-20260816-E-S17-docs-00-project-02-030` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/02-naming-policy.md |
+| `CR-20260816-E-S17-docs-00-project-02-031` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/extended-docs-index.md |
+| `CR-20260816-E-S17-docs-00-project-02-032` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/ai/skills/local/verify-architecture/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-033` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/ai/skills/local/vcr-record/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-034` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/ai/skills/local/vcr-record/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-035` | reject | major | Glossary wording vs ADR-047 is docs-only. | docs/00-project/glossary.md |
+| `CR-20260816-E-S17-docs-00-project-02-036` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/glossary.md |
+| `CR-20260816-E-S17-docs-00-project-02-037` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/01-documentation-governance-style-guide.md |
+| `CR-20260816-E-S17-docs-00-project-02-038` | reject | minor | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | docs/00-project/governance/02-naming-policy.md |
+| `CR-20260816-E-S17-docs-00-project-02-039` | reject | major | Docs-mirror command wording; docs-only. | docs/00-project/ai/skills/local/verify-architecture/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-040` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/03-file-policy.md |
+| `CR-20260816-E-S17-docs-00-project-02-041` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/03-file-policy.md |
+| `CR-20260816-E-S17-docs-00-project-02-042` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/04-extending-bioetl.md |
+| `CR-20260816-E-S17-docs-00-project-02-043` | reject | minor | Docs-mirror Mermaid metadata; docs-only. | docs/00-project/ai/skills/local/technical-designer-mermaid/references/patterns.md |
+| `CR-20260816-E-S18-dashboard-docs-001` | reject | minor | Docs-only command typo; reject class for this campaign. | docs/03-guides/dashboards/dashboard-extension-llm.md |
+| `CR-20260816-E-S18-dashboard-docs-002` | reject | major | Docs-only dashboard-count wording. | docs/03-guides/dashboards/dashboard-extension-llm.md |
+| `CR-20260816-E-S18-dashboard-docs-003` | reject | major | Docs-only retired-surface wording. | docs/03-guides/dashboards/design-system.md |
+| `CR-20260816-E-S18-dashboard-docs-004` | reject | major | Docs-only health-endpoint wording. | docs/03-guides/dashboards/dashboard-v2-usage.md |
+| `CR-20260816-E-S18-dashboard-docs-005` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/dashboard-v2-usage.md |
+| `CR-20260816-E-S18-dashboard-docs-006` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/design-system.md |
+| `CR-20260816-E-S18-dashboard-docs-007` | reject | major | Docs-only operator-playbook inventory wording. | docs/03-guides/dashboards/operator-scenarios-s1-s6.md |
+| `CR-20260816-E-S18-dashboard-docs-008` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/dashboard-v2-usage.md |
+| `CR-20260816-E-S18-dashboard-docs-009` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboard-guide.md |
+| `CR-20260816-E-S18-dashboard-docs-010` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/archive/audit-protocols/dux3-audit-selection-notes.md |
+| `CR-20260816-E-S18-dashboard-docs-011` | reject | minor | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | docs/03-guides/dashboards/archive/audit-protocols/dux3-first-screen-inventory.json |
+| `CR-20260816-E-S18-dashboard-docs-012` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboard-guide.md |
+| `CR-20260816-E-S18-dashboard-docs-013` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/reports/dashboard-ux-checks/2026-08-05.md |
+| `CR-20260816-E-S18-dashboard-docs-014` | reject | minor | Docs-only selector alias wording. | docs/03-guides/dashboards/selector-architecture.md |
+| `CR-20260816-E-S18-dashboard-docs-015` | reject | minor | Docs-only nav-bus wording. | docs/03-guides/dashboards/v3.0/template/run-centric-dashboard-template.md |
+| `CR-20260816-E-S18-dashboard-docs-016` | reject | minor | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | docs/03-guides/dashboards/usability-baseline-protocol.md |
+| `CR-20260816-E-S18-dashboard-docs-017` | reject | major | Docs-only status-panel mapping wording. | docs/03-guides/dashboards/v3.0/template/panel-contract.md |
+| `CR-20260816-E-S18-dashboard-docs-018` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/v3.0/1-overview.md |
+| `CR-20260816-E-S18-dashboard-docs-019` | reject | major | Docs-only dashboard-family list wording. | docs/03-guides/grafana-dashboard-configuration.md |
+| `CR-20260816-E-S18-dashboard-docs-020` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/selector-architecture.md |
+| `CR-20260816-E-S18-dashboard-docs-021` | reject | major | Docs-contract wording; no executable invariant reproduced in this leaf. | docs/03-guides/dashboards/contracts/navigation-links.yaml |
+| `CR-20260816-E-S18-dashboard-docs-022` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/contracts/performance-budgets.yaml |
+| `CR-20260816-E-S18-dashboard-docs-023` | reject | major | Docs-only synthetic-zero guidance. | docs/03-guides/dashboards/dashboard-extension-human.md |
+| `CR-20260816-E-S18-dashboard-docs-024` | reject | minor | Docs-contract primary-count wording. | docs/03-guides/dashboards/contracts/performance-budgets.yaml |
+| `CR-20260816-E-S18-dashboard-docs-025` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/dashboard-extension-human.md |
+| `CR-20260816-E-S18-dashboard-docs-026` | reject | major | Docs-contract link-title consistency is docs-only. | docs/03-guides/dashboards/contracts/navigation-links.yaml |
+| `CR-20260816-E-S18-dashboard-docs-027` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md |
+| `CR-20260816-E-S18-dashboard-docs-028` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/operator-ux-v2.md |
+| `CR-20260816-E-S18-dashboard-docs-029` | reject | minor | Docs-only section numbering. | docs/03-guides/dashboards/panels/bioetl-runtime-panels.md |
+| `CR-20260816-E-S18-dashboard-docs-030` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md |
+| `CR-20260816-E-S18-dashboard-docs-031` | reject | major | Docs-only panel-index wording. | docs/03-guides/dashboards/panels/dashboard-panels-guide.md |
+| `CR-20260816-E-S18-dashboard-docs-032` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md |
+| `CR-20260816-E-S18-dashboard-docs-033` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/panels/bioetl-runtime-panels.md |
+| `CR-20260816-E-S18-dashboard-docs-034` | reject | major | Docs-only PromQL wording. | docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md |
+| `CR-20260816-E-S18-dashboard-docs-035` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md |
+| `CR-20260816-E-S18-dashboard-docs-036` | reject | major | Docs-contract selector-registry wording. | docs/03-guides/dashboards/contracts/selector-contracts.yaml |
+| `CR-20260816-E-S18-dashboard-docs-037` | reject | trivial | Docs-only truncated note. | docs/03-guides/dashboards/contracts/performance-budgets.yaml |
+| `CR-20260816-E-S18-dashboard-docs-038` | reject | minor | Docs-contract YAML literal style. | docs/03-guides/dashboards/contracts/synthetic-zero-policy.yaml |
+| `CR-20260816-E-S18-dashboard-docs-039` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/archive/audit-protocols/dux5-copy-dictionary.md |
+| `CR-20260816-E-S18-dashboard-docs-040` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md |
+| `CR-20260816-E-S18-dashboard-docs-041` | reject | minor | Docs-only CLI command wording. | docs/03-guides/dashboards/dashboard-extension-human.md |
+| `CR-20260816-E-S18-dashboard-docs-042` | reject | minor | Docs-only notes punctuation. | docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md |
+| `CR-20260816-E-S19b-github-actions-001` | reject | major | Removing restore-keys is CI-cache policy; exact key already exists and stale restore is the shipped actions/cache fallback, not a reproduced architecture-hash skip. | .github/actions/architecture-governance-cache/action.yml:43-45 |
+| `CR-20260816-E-S19b-github-actions-002` | reject | major | Docs/docstring-only request; reject class for this campaign. | .github/actions/setup-mermaid/action.yml |
+| `CR-20260816-F-S12-tests-architecture-01-001` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-002` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-003` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-004` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-005` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-006` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-007` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-008` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-009` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-010` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-011` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-012` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-013` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-014` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-015` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-016` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-017` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-018` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-019` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-020` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-021` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-022` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-023` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-024` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-025` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-026` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-027` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-028` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-029` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-030` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-031` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-032` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-033` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-034` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-035` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-036` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-037` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-038` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-039` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-040` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-041` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-042` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-043` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-044` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-045` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-046` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-047` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-048` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-049` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-050` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-051` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-052` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-053` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-054` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-055` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-056` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-057` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-058` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-059` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-060` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-061` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-062` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-063` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-064` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-065` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-066` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-067` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-068` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-069` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-070` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-071` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-072` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-073` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-074` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-075` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-076` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-077` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-078` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-079` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-080` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-081` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-082` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-083` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-084` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-085` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-086` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-087` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-088` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-089` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-090` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-091` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-092` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-093` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-094` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-095` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-096` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-097` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-098` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-099` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-100` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-101` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-102` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-103` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-104` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-105` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-106` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-107` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-108` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-109` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-110` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-111` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-112` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-113` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-114` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-115` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-116` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-117` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-118` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-119` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-120` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-121` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-122` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-123` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-124` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-125` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-126` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-127` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-128` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-129` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-130` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-131` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-132` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-133` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-134` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-135` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-136` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-137` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-138` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-139` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-140` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-141` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-142` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-143` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-144` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-145` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-146` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-147` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-148` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-149` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-150` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-151` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-152` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-153` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-154` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-155` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-156` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-157` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-158` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-159` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-160` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-161` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-162` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-163` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-164` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-165` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-166` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-167` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-168` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-169` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-170` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-171` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-172` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-173` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-174` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-175` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-176` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-177` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-178` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-179` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-180` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-181` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-182` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-183` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-184` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-185` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-186` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-187` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-188` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-189` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-190` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-191` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-192` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-193` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-194` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-195` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-196` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-197` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-198` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-199` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-200` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-201` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-202` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-203` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-204` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-205` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-206` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-207` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-208` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-209` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-210` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-211` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-212` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-213` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-214` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-215` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-216` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-217` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-218` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-219` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-220` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-221` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-222` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-223` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-224` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-225` | pending | critical | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-226` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-227` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-228` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-229` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-230` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-231` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-232` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-233` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-234` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-235` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-236` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-237` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-238` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-239` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-240` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-241` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-242` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-243` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-244` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-245` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-246` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-247` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-248` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-249` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-250` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-251` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-252` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-253` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-254` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-255` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-256` | pending | critical | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-257` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-258` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-259` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-260` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-261` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-262` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-263` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-264` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-265` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-266` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-267` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-268` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-269` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-270` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-271` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-272` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-273` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-274` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-275` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-276` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-277` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-278` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-279` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-280` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-281` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-282` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-283` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-284` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-285` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-286` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-287` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-288` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-289` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-290` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-291` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-292` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-293` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-294` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-295` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-296` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-297` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-298` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-299` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-300` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-301` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-302` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-303` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-304` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-305` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-306` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-307` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-308` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-309` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-310` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-311` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-312` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-313` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-314` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-315` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-316` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-317` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-318` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-319` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-320` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-321` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-322` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-323` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-324` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-325` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-326` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-327` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-328` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-329` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-330` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-331` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-332` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-333` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-334` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-335` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-336` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-337` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-338` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-339` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-340` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-341` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-342` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-343` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-344` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-345` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-346` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-347` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-348` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-349` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-350` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-351` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-352` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-353` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-354` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-355` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-356` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-357` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-358` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-359` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-360` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-361` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-362` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-363` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-364` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-365` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-366` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-367` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-368` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-369` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-370` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-371` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-372` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-373` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-374` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-375` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-376` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-377` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-378` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-379` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-380` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-381` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-382` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-383` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-384` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-385` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-386` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-387` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-388` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-389` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-390` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-391` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-392` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-393` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-394` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-395` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-396` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-397` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-398` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-399` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-400` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-401` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-402` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-403` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-404` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-405` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-406` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-407` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-408` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-409` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-410` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-411` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-412` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-413` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-414` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-415` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-416` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-417` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-418` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-419` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-420` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-421` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-422` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-423` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-424` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-425` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-426` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-427` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-428` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-429` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-430` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-431` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-432` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-433` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-434` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-435` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-436` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-437` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-438` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-439` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-440` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-441` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-442` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-443` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-444` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-445` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-446` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-447` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-448` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-449` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-450` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-451` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-452` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-453` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-454` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-455` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-456` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-457` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-458` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-459` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-460` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-461` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-462` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-463` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-464` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-465` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-466` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-467` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-468` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-469` | pending | critical | pending ground-truth reconciliation |  |
+| `CR-20260816-R-S-R-scripts-memory-001` | reject | major | Test-only run_workflow.sh wrapper coverage. | scripts/memory/run_workflow.sh |
+| `CR-20260816-R-S-R-scripts-memory-002` | confirm | major | upsert_env_local passes NEO4J_PASSWORD/NEO4J_AUTH as python3 argv, so the secret is visible in process listings. | scripts/memory/setup/wsl_startup.sh:53-63 python3 - "$file_path" "$key" "$value" |
+| `CR-20260816-R-S-R-scripts-memory-003` | reject | major | Removing Docker from the WSL setup helper is a shipped setup-script rewrite, not a BioETL runtime invariant. | scripts/memory/setup/wsl_startup.sh |
+| `CR-20260816-R-S-R-scripts-memory-004` | reject | major | Test-only request; reject class for this campaign. | scripts/memory/__init__.py |
+| `CR-20260816-R-S-R-scripts-memory-005` | reject | major | Force mode 0600 is permission hardening without a reproduced world-readable write path. | scripts/memory/setup/wsl_startup.sh |
+| `CR-20260816-R-S-R-scripts-memory-006` | reject | major | Test-only request; reject class for this campaign. | scripts/memory/__main__.py |
+| `CR-20260816-R-S-R-scripts-memory-007` | reject | major | Test-only print_seed.sh phase dispatch. | scripts/memory/prompts/print_seed.sh |
+| `CR-20260816-R-S-R-scripts-memory-008` | reject | major | Test-only WSL startup coverage. | scripts/memory/setup/wsl_startup.sh |
+=======
+| `CR-20260816-B-S05-app-pipelines-001` | reject | minor | Stricter ORCID charset is contract expansion of the shipped dash-layout check. | src/bioetl/application/pipelines/crossref/author_extractors.py _is_orcid_identifier |
+| `CR-20260816-B-S05-app-pipelines-002` | reject | minor | Strip-before-append is hardening of already-truthy name handling. | src/bioetl/application/pipelines/openalex/_extractors_authors.py |
+| `CR-20260816-B-S05-app-pipelines-003` | reject | minor | Whitespace-only display_name reject is tightening without a broken topic identity. | src/bioetl/application/pipelines/openalex/_extractors_common.py |
+| `CR-20260816-B-S05-app-pipelines-004` | reject | major | Removing author_details_raw_json is a shipped Gold-field deletion. | src/bioetl/application/pipelines/crossref/_business_data_builder.py |
+| `CR-20260816-B-S05-app-pipelines-005` | reject | major | Replace install_runtime_transformer_init with an explicit ctor is a shipped init-API rewrite. | src/bioetl/application/pipelines/crossref/transformer.py |
+| `CR-20260816-B-S05-app-pipelines-006` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/openalex/_extractors_authors.py |
+| `CR-20260816-B-S05-app-pipelines-007` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/crossref/_business_data_builder.py |
+| `CR-20260816-B-S05-app-pipelines-008` | confirm | minor | author.get('given'\|'family'\|'name', '').strip() raises AttributeError when the key is present and null, which Crossref JSON does. | src/bioetl/application/pipelines/crossref/author_extractors.py:82-84 |
+| `CR-20260816-B-S05-app-pipelines-009` | reject | major | Independent issn_list serialization is a field-policy change, not a reproduced crash. | src/bioetl/application/pipelines/crossref/transformer.py |
+| `CR-20260816-B-S05-app-pipelines-010` | reject | major | hierarchy_molecule_chembl_id precedence is a flatten-policy change without a reproduced overwrite on current helpers. | src/bioetl/application/pipelines/chembl/molecule_transformer.py _HIERARCHY_RENAMES |
+| `CR-20260816-B-S05-app-pipelines-011` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/chembl/activity_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-012` | reject | major | SSOT alias-table DRY; no divergent alias outcome shown. | src/bioetl/application/pipelines/chembl/alias_policy.py |
+| `CR-20260816-B-S05-app-pipelines-013` | reject | major | Remove legacy_collaborators kwargs is a shipped constructor rewrite. | src/bioetl/application/pipelines/chembl/base_chembl_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-014` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/pipelines/chembl/compound_record_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-015` | reject | trivial | Richer validation-failed log fields are observability style. | src/bioetl/application/pipelines/chembl/base_chembl_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-016` | reject | major | int() vs safe_int is helper-style; invalid ids already fail the transform path. | src/bioetl/application/pipelines/chembl/assay_parameters_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-017` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/pipelines/chembl/alias_policy.py |
+| `CR-20260816-B-S05-app-pipelines-018` | reject | trivial | JsonDict vs Mapping annotation is typing-only. | src/bioetl/application/pipelines/chembl/assay_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-019` | reject | trivial | Frozen empty-mapping fallback is style. | src/bioetl/application/pipelines/chembl/alias_policy.py |
+| `CR-20260816-B-S05-app-pipelines-020` | reject | trivial | @override decorator is style. | src/bioetl/application/pipelines/chembl/molecule_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-021` | reject | major | Coverage-inventory refresh is not an invariant hole. | src/bioetl/application/pipelines/uniprot/idmapping_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-022` | reject | major | Test-only IDMappingTransformer coverage. | src/bioetl/application/pipelines/uniprot/idmapping_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-023` | reject | major | Test-only UniProt transformer coverage. | src/bioetl/application/pipelines/uniprot/transformer.py |
+| `CR-20260816-B-S05-app-pipelines-024` | confirm | major | transform_pre_silver does not catch FilteredOutError/ValueError that _transform_impl swallows, so the pre-silver path can abort the batch on missing required fields. | src/bioetl/application/pipelines/uniprot/transformer.py:50-83 |
+| `CR-20260816-B-S05-app-pipelines-025` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/uniprot/extractors/features.py |
+| `CR-20260816-B-S05-app-pipelines-026` | reject | minor | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/uniprot/extractors/_crossref_go.py |
+| `CR-20260816-B-S05-app-pipelines-027` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/uniprot/extractors/features.py |
+| `CR-20260816-B-S05-app-pipelines-028` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/uniprot/extractors/comments.py |
+| `CR-20260816-B-S05-app-pipelines-029` | reject | major | Test-only CrossRefExtractor coverage. | src/bioetl/application/pipelines/uniprot/extractors/crossrefs.py |
+| `CR-20260816-B-S05-app-pipelines-030` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/uniprot/extractors/genes.py |
+| `CR-20260816-B-S05-app-pipelines-031` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/uniprot/extractors/extractor_helpers.py |
+| `CR-20260816-B-S05-app-pipelines-032` | reject | major | Rank-bearing genus extraction is a taxonomy-contract rewrite of the shipped lineage heuristic. | src/bioetl/application/pipelines/uniprot/extractors/taxonomy.py |
+| `CR-20260816-B-S05-app-pipelines-033` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/pubchem/transformer.py |
+| `CR-20260816-B-S05-app-pipelines-034` | reject | major | Test-only OpenAlex _extract_business_data coverage. | src/bioetl/application/pipelines/openalex/transformer.py |
+| `CR-20260816-B-S05-app-pipelines-035` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/pubmed/__init__.py |
+| `CR-20260816-B-S05-app-pipelines-036` | reject | major | Replace install_runtime_transformer_init is a shipped init-API rewrite. | src/bioetl/application/pipelines/openalex/transformer.py |
+| `CR-20260816-B-S05-app-pipelines-037` | reject | minor | Strip-before-append keywords is hardening. | src/bioetl/application/pipelines/openalex/_extractors_publication_fields.py |
+| `CR-20260816-B-S05-app-pipelines-038` | reject | major | Coverage-inventory refresh is not an invariant hole. | src/bioetl/application/pipelines/openalex/_extractors_publication_fields.py |
+| `CR-20260816-B-S05-app-pipelines-039` | confirm | major | extract_external_ids already extracts pmcid, but the transformer hardcodes pmc_id=None and never reads that value. | src/bioetl/application/pipelines/openalex/transformer.py:223-225; _extractors_publication_fields.py:136-143 |
+| `CR-20260816-B-S05-app-pipelines-040` | reject | trivial | Literal __all__ vs imported export tuple is style. | src/bioetl/application/pipelines/uniprot/extractors/_comment_facets.py |
+| `CR-20260816-B-S05-app-pipelines-041` | reject | trivial | Reject bool h-index is bool-as-int hardening without a demonstrated S2 producer. | src/bioetl/application/pipelines/semanticscholar/_author_extractors.py |
+| `CR-20260816-B-S05-app-pipelines-042` | reject | minor | None names are already skipped; non-string names are not a demonstrated S2 payload. | src/bioetl/application/pipelines/semanticscholar/_author_extractors.py:40-42 |
+| `CR-20260816-B-S05-app-pipelines-043` | confirm | minor | raw_pages.strip() runs on any truthy pages value, so a numeric journal.pages raises AttributeError. | src/bioetl/application/pipelines/semanticscholar/extractors.py:156 |
+| `CR-20260816-B-S05-app-pipelines-044` | reject | trivial | Keep underscore-prefixed business fields in the hash is a hash-contract expansion. | src/bioetl/application/pipelines/common/publication_transformer_records.py |
+| `CR-20260816-B-S05-app-pipelines-045` | reject | major | MappingProxyType wrap is freeze-style. | src/bioetl/application/pipelines/common/publication_vocab_observability.py |
+| `CR-20260816-B-S05-app-pipelines-046` | reject | minor | isinstance(entity_type, str) is typing/hardening. | src/bioetl/application/pipelines/common/publication_transformer_context.py |
+| `CR-20260816-B-S05-app-pipelines-047` | reject | trivial | Warn on overlapping extract blocks is observability style. | src/bioetl/application/pipelines/common/publication_transformer_hooks_mixin.py |
+| `CR-20260816-B-S05-app-pipelines-048` | reject | trivial | Init-time strategy attribute asserts are style. | src/bioetl/application/pipelines/common/base_publication_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-049` | reject | trivial | TypedDict for transformer kwargs is typing-only. | src/bioetl/application/pipelines/common/transformer_initialization.py |
+| `CR-20260816-B-S05-app-pipelines-050` | reject | trivial | Remove CrossRef re-export shim is packaging/style. | src/bioetl/application/pipelines/common/blocks.py |
+| `CR-20260816-B-S05-app-pipelines-051` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/pipelines/semanticscholar/extractors.py |
+| `CR-20260816-B-S05-app-pipelines-052` | reject | trivial | Safer locals() lookup is hardening of the shipped init helper. | src/bioetl/application/pipelines/common/transformer_initialization.py |
+| `CR-20260816-B-S05-app-pipelines-053` | reject | trivial | Public wrappers for private collaborators is API expansion. | src/bioetl/application/pipelines/common/publication_assembly.py |
+| `CR-20260816-B-S05-app-pipelines-054` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/pipelines/common/publication_transformer_hooks_mixin.py |
+| `CR-20260816-B-S05-app-pipelines-055` | reject | trivial | Literal extractor __all__ is export-style. | src/bioetl/application/pipelines/semanticscholar/__init__.py |
+| `CR-20260816-B-S05-app-pipelines-056` | reject | trivial | list[JsonDict] \| None annotation is typing-only. | src/bioetl/application/pipelines/uniprot/extractors/_comment_facets_extractors.py |
+| `CR-20260816-B-S05-app-pipelines-057` | reject | trivial | Reuse one comment index is a perf/DRY suggestion. | src/bioetl/application/pipelines/uniprot/extractors/_comment_facets_all.py |
+| `CR-20260816-B-S05-app-pipelines-058` | reject | trivial | Stale Any comment removal is docs/style. | src/bioetl/application/pipelines/common/extractors.py |
+| `CR-20260816-B-S05-app-pipelines-059` | reject | minor | Reject dict/set ISSN containers is hardening of the shipped scalar fallback. | src/bioetl/application/pipelines/common/publication_issn.py |
+| `CR-20260816-B-S05-app-pipelines-060` | reject | trivial | Shared serialization helper is DRY. | src/bioetl/application/pipelines/uniprot/extractors/_comment_facets_extractors.py |
+| `CR-20260816-B-S05-app-pipelines-061` | reject | major | MetricsPort instead of object/getattr is Protocol tightening. | src/bioetl/application/pipelines/common/publication_vocab_observability.py |
+| `CR-20260816-B-S05-app-pipelines-062` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/pipelines/common/publication_transformer_context.py |
+| `CR-20260816-B-S05-app-pipelines-063` | reject | minor | Align ELocationID XPath depths is a parse-policy change without a reproduced DOI/PII miss. | src/bioetl/application/pipelines/pubmed/extractors/identifier.py |
+| `CR-20260816-B-S05-app-pipelines-064` | reject | major | Shared author-name helper is DRY; no divergent outputs shown. | src/bioetl/application/pipelines/pubmed/extractors/author.py |
+| `CR-20260816-B-S05-app-pipelines-065` | reject | minor | Whitespace-padded numeric months are not a demonstrated PubMed payload; month_map path already strips. | src/bioetl/application/pipelines/pubmed/_block_helpers.py parse_month |
+| `CR-20260816-B-S05-app-pipelines-066` | reject | minor | EMAIL_PATTERN pipe-in-class is a regex nit without a real TLD producer. | src/bioetl/application/pipelines/pubmed/extractors/author.py EMAIL_PATTERN |
+| `CR-20260816-B-S05-app-pipelines-067` | reject | major | transformer_initialization remainder is style/typing. | src/bioetl/application/pipelines/common/transformer_initialization.py |
+| `CR-20260816-B-S05-app-pipelines-068` | reject | minor | L3-L5 multifunctional sentinel alignment is a schema-policy change. | src/bioetl/application/pipelines/chembl/target_protein_classification_summary.py |
+| `CR-20260816-B-S05-app-pipelines-069` | reject | trivial | Move helper onto the class is style. | src/bioetl/application/pipelines/chembl/subcellular_fraction_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-070` | reject | major | Public coercion-module extraction is DRY. | src/bioetl/application/pipelines/chembl/target_protein_classification_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-071` | reject | major | Shared pipe-sentinel helper is DRY. | src/bioetl/application/pipelines/chembl/target_helpers.py |
+| `CR-20260816-B-S05-app-pipelines-072` | reject | major | Remove file-wide type:ignore is typing-only. | src/bioetl/application/pipelines/chembl/publication_term_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-073` | reject | trivial | Precompute counted_top_levels is perf. | src/bioetl/application/pipelines/chembl/target_protein_classification_summary.py |
+| `CR-20260816-B-S05-app-pipelines-074` | reject | major | Aggregate every KeywordList is an extraction-contract expansion of the shipped first-list behavior. | src/bioetl/application/pipelines/pubmed/extractors/classification.py |
+| `CR-20260816-B-S05-app-pipelines-075` | reject | trivial | Hoist key_map is style. | src/bioetl/application/pipelines/pubmed/extractors/identifier.py |
+| `CR-20260816-B-S05-app-pipelines-076` | reject | trivial | Replace dynamic re-export with explicit imports is style. | src/bioetl/application/pipelines/pubmed/blocks.py |
+| `CR-20260816-B-S05-app-pipelines-077` | reject | major | Coerce non-str xref_id is contract expansion of the shipped str-only cleaner. | src/bioetl/application/pipelines/chembl/target_helpers.py clean_pipe_value |
+| `CR-20260816-B-S05-app-pipelines-078` | reject | major | TypeError on wrong extractor type is constructor-hardening of the shipped default-replace path. | src/bioetl/application/pipelines/pubmed/transformer.py |
+| `CR-20260816-B-S05-app-pipelines-079` | reject | major | Remove DateExtractor singleton is a shipped identity-API change. | src/bioetl/application/pipelines/pubmed/extractors/date.py |
+| `CR-20260816-B-S05-app-pipelines-080` | reject | minor | Whitespace-only classification as missing is policy tightening. | src/bioetl/application/pipelines/chembl/target_protein_classification_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-081` | reject | major | Calendar-range checks in _format_date are contract expansion of the shipped string formatter. | src/bioetl/application/pipelines/pubmed/extractors/date.py |
+| `CR-20260816-B-S05-app-pipelines-082` | reject | major | Treat None canonical alias as absent is alias-policy tightening. | src/bioetl/application/pipelines/chembl/provider_aliases.py |
+| `CR-20260816-B-S05-app-pipelines-083` | reject | major | Include component_id in unresolved entity ids is an identity-contract change. | src/bioetl/application/pipelines/chembl/target_protein_classification_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-084` | reject | trivial | Trailing comment removal is style. | src/bioetl/application/pipelines/chembl/publication_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-085` | reject | major | Empty-frame schema on missing target_id is a summary-contract change. | src/bioetl/application/pipelines/chembl/target_protein_classification_summary.py |
+| `CR-20260816-B-S05-app-pipelines-086` | reject | trivial | @override decorator is style. | src/bioetl/application/pipelines/chembl/tissue_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-087` | reject | major | int() vs safe_int is helper-style. | src/bioetl/application/pipelines/chembl/subcellular_fraction_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-088` | reject | trivial | Consolidate excluded output fields is DRY. | src/bioetl/application/pipelines/chembl/publication_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-089` | reject | major | int() vs safe_int is helper-style. | src/bioetl/application/pipelines/chembl/publication_similarity_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-090` | reject | major | Hoist walrus/classification_ids is style. | src/bioetl/application/pipelines/chembl/target_component_transformer.py |
+| `CR-20260816-B-S05-app-pipelines-091` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/pipelines/chembl/target_helpers.py |
+| `CR-20260816-B-S05-app-pipelines-092` | reject | major | Catch DefusedXmlException explicitly is exception-style; parse failures already become ValueError. | src/bioetl/application/pipelines/pubmed/transformer.py |
+| `CR-20260816-B-S05-app-pipelines-093` | reject | trivial | Call extract_all_identifiers once is DRY/perf. | src/bioetl/application/pipelines/pubmed/extractors/identifier.py |
+| `CR-20260816-B-S05-app-pipelines-094` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/pipelines/pubmed/xml_parser.py |
+| `CR-20260816-B-S07-infra-storage-001` | reject | None | Coverage-inventory refresh is not an invariant hole; same class as S01-aggregates-001. | reports/quality/module-coverage-inventory.json |
+| `CR-20260816-B-S07-infra-storage-002` | reject | None | Path-join hardening; provider/entity are config identifiers, not a demonstrated traversal path. | src/bioetl/infrastructure/storage/bronze/metadata_paths.py resolve_bronze_metadata_base_path |
+| `CR-20260816-B-S07-infra-storage-003` | reject | None | fd_owned is cleared after open(); leftover close is OSError-suppressed and does not change write outcome. | src/bioetl/infrastructure/storage/bronze/io_mixin.py:108-148 |
+| `CR-20260816-B-S07-infra-storage-004` | reject | None | DRY extraction of an already-identical raiser; fail-closed wording is unchanged. | src/bioetl/infrastructure/storage/bronze/metadata_operations.py |
+| `CR-20260816-B-S07-infra-storage-005` | reject | None | Incremental compare is a perf rewrite; current full-stream compare is correct. | src/bioetl/infrastructure/storage/bronze/io_mixin.py _compressed_payload_matches |
+| `CR-20260816-B-S07-infra-storage-006` | reject | None | DRY helper reuse; both raisers already fail closed. | src/bioetl/infrastructure/storage/gold/metadata_payloads.py |
+| `CR-20260816-B-S07-infra-storage-007` | reject | None | Push-down of history filters is a perf rewrite, not a broken result contract. | src/bioetl/infrastructure/storage/gold/read_cleanup_mixin.py get_history |
+| `CR-20260816-B-S07-infra-storage-008` | reject | None | min(_ingestion_ts) is a deterministic fallback; no contract requires latest. | src/bioetl/infrastructure/storage/gold/metadata_payloads.py _extract_completed_at |
+| `CR-20260816-B-S07-infra-storage-009` | reject | None | del run_id is explicit; merged path already has optional composite_run_id. | src/bioetl/infrastructure/storage/gold/metadata_payloads.py build_gold_metadata_payload |
+| `CR-20260816-B-S07-infra-storage-010` | reject | None | getattr-to-direct-attribute is style; host contract already supplies the attrs. | src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py |
+| `CR-20260816-B-S07-infra-storage-011` | reject | None | Redundant audit guard removal is style; inner helper already no-ops. | src/bioetl/infrastructure/storage/bronze/write_execution.py |
+| `CR-20260816-B-S07-infra-storage-012` | reject | None | Suffix-constant extraction is style; paths already match the contract. | src/bioetl/infrastructure/storage/bronze/pipeline_helpers.py |
+| `CR-20260816-B-S07-infra-storage-013` | reject | None | Failure-counter addition is telemetry, not a write-invariant breach. | src/bioetl/infrastructure/storage/bronze_writer.py _write_bronze_with_tracing |
+| `CR-20260816-B-S07-infra-storage-014` | reject | None | Warning-log on fallback conversion is observability, not a conversion hole. | src/bioetl/infrastructure/storage/delta/arrow_converter.py |
+| `CR-20260816-B-S07-infra-storage-015` | reject | None | asyncio.to_thread offload is perf; preview payload is already correct. | src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py preview_cleanup |
+| `CR-20260816-B-S07-infra-storage-016` | reject | None | Streaming read is a perf rewrite; incremental iteration is already contracted. | src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py read_bronze |
+| `CR-20260816-B-S07-infra-storage-017` | confirm | None | Sidecar conflict is checked after _write_atomic_stream, so a replay with the same batch_id can replace Bronze bytes and then raise FileExistsError, leaving new data beside the old sidecar. | src/bioetl/infrastructure/storage/bronze/write_execution.py write_bronze_data_and_sidecar; pipeline_helpers.py batch_{date}_{batch_id}.jsonl.zst |
+| `CR-20260816-B-S07-infra-storage-018` | reject | None | str(schema) 'null' match only extra-runs sanitization; _sanitize_null_columns still keys off pa.types.is_null. | src/bioetl/infrastructure/storage/delta/arrow_converter.py:238-241,280-281 |
+| `CR-20260816-B-S07-infra-storage-019` | reject | None | Cast-fallback JSON encoder is a consistency polish; current str() fallback still fails closed on uncastable values. | src/bioetl/infrastructure/storage/delta/arrow_converter.py _sanitize_single_null_column |
+| `CR-20260816-B-S07-infra-storage-020` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py |
+| `CR-20260816-B-S07-infra-storage-021` | reject | critical | DeltaTable.to_pyarrow_table first positional argument is the column projection; keyword-only rewrite is style. | src/bioetl/infrastructure/storage/gold/read_cleanup_mixin.py |
+| `CR-20260816-B-S07-infra-storage-022` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/metadata_mixin_protocols.py |
+| `CR-20260816-B-S07-infra-storage-023` | reject | None | __all__ hygiene for time is style/export-only. | src/bioetl/infrastructure/storage/silver/metadata_mixin.py |
+| `CR-20260816-B-S07-infra-storage-024` | reject | None | cast(Any, None) default is annotation/host-attr style accepted by the Any gate. | src/bioetl/infrastructure/storage/silver/operations/delta_operation_impls.py |
+| `CR-20260816-B-S07-infra-storage-025` | reject | None | Public wrapper collapse is DRY; behavior is already identical. | src/bioetl/infrastructure/storage/silver/operations/arrow_operations.py |
+| `CR-20260816-B-S07-infra-storage-026` | reject | None | Any->BronzeWritePrepared is annotation-only. | src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py _build_bronze_write_result |
+| `CR-20260816-B-S07-infra-storage-027` | reject | None | Rename event_name->context is style; skip behavior is unchanged. | src/bioetl/infrastructure/storage/silver/metadata_mixin.py |
+| `CR-20260816-B-S07-infra-storage-028` | reject | None | TypeVar/overload pairing is Protocol/typing-only. | src/bioetl/infrastructure/storage/silver/metadata_write_execution.py |
+| `CR-20260816-B-S07-infra-storage-029` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/metadata_mixin_protocols.py |
+| `CR-20260816-B-S07-infra-storage-030` | reject | None | Current Gold validation builds a pandas DataFrame; no disk proof that these schemas are Polars-only. | src/bioetl/infrastructure/storage/gold/validation_mixin.py _validate_records_against_schema |
+| `CR-20260816-B-S07-infra-storage-031` | reject | None | cast(Any, None) host-attr cleanup is annotation-only. | src/bioetl/infrastructure/storage/silver/operations/delta_operations.py |
+| `CR-20260816-B-S07-infra-storage-032` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/metadata_write_execution.py |
+| `CR-20260816-B-S07-infra-storage-033` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/metadata_writer_public.py |
+| `CR-20260816-B-S07-infra-storage-034` | reject | None | Pass-through request builder removal is DRY. | src/bioetl/infrastructure/storage/metadata_writer_operations_impl.py |
+| `CR-20260816-B-S07-infra-storage-035` | reject | None | isinstance before cast is typing hardening; callers already pass the matching model. | src/bioetl/infrastructure/storage/metadata_writer_finalizers.py |
+| `CR-20260816-B-S07-infra-storage-036` | reject | None | unknown layer label is a diagnostic default, not a silent write of the wrong model. | src/bioetl/infrastructure/storage/metadata_artifact_details.py resolve_artifact_semantics |
+| `CR-20260816-B-S07-infra-storage-037` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/metadata_writer.py |
+| `CR-20260816-B-S07-infra-storage-038` | reject | None | Unused layer parameter removal is style. | src/bioetl/infrastructure/storage/metadata_writer_helpers.py _resolve_existing_metadata_path |
+| `CR-20260816-B-S07-infra-storage-039` | reject | None | __all__ private-helper hygiene is export style. | src/bioetl/infrastructure/storage/metadata_artifact_publication.py |
+| `CR-20260816-B-S07-infra-storage-040` | reject | None | Count-only audit field is a memory cleanup; count is already len(records). | src/bioetl/infrastructure/storage/silver/audit_operations.py |
+| `CR-20260816-B-S07-infra-storage-041` | reject | None | to_thread/timeout around publication I/O is perf, not a wrong artifact. | src/bioetl/infrastructure/storage/metadata_artifact_publication.py |
+| `CR-20260816-B-S07-infra-storage-042` | reject | None | object->_MetadataWriteRequest return annotation is typing-only. | src/bioetl/infrastructure/storage/metadata_writer_public.py |
+| `CR-20260816-B-S07-infra-storage-043` | reject | None | Unknown layer already model_validates as GoldMetadata and fails closed on a Silver payload; no silent accept path. | src/bioetl/infrastructure/storage/metadata_writer_helpers.py _load_existing_metadata_model |
+| `CR-20260816-B-S07-infra-storage-044` | reject | None | Delegate-to-operations DRY; both paths already write the same request. | src/bioetl/infrastructure/storage/metadata_writer.py |
+| `CR-20260816-B-S07-infra-storage-045` | reject | None | Broaden RuntimeError catch is telemetry completeness, not a dropped write. | src/bioetl/infrastructure/storage/metadata_artifact_publication.py |
+| `CR-20260816-B-S07-infra-storage-046` | reject | None | Credential-in-URI is speculative on the local-only default; no producer of secret query params shown. | src/bioetl/infrastructure/storage/metadata_artifact_details.py serialize_input_snapshot_ref |
+| `CR-20260816-B-S07-infra-storage-047` | reject | None | Copy-before-mutate is defensive style; SCD2 init is the write-path contract. | src/bioetl/infrastructure/storage/gold/io_delta_runtime.py |
+| `CR-20260816-B-S07-infra-storage-048` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/delta/schema_ops.py |
+| `CR-20260816-B-S07-infra-storage-049` | reject | None | Windows dataset bypass already exists on the record-read path; finding restates the helper. | src/bioetl/infrastructure/storage/delta/table_ops.py _can_use_pyarrow_dataset_scanner / read_delta_records |
+| `CR-20260816-B-S07-infra-storage-050` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/gold/io_execution.py |
+| `CR-20260816-B-S07-infra-storage-051` | reject | None | Retry wrap for merged overwrite is resilience expansion, not a wrong first write. | src/bioetl/infrastructure/storage/gold/io_execution.py |
+| `CR-20260816-B-S07-infra-storage-052` | reject | None | Per-attempt timeout is a policy expansion; current retry already propagates failures. | src/bioetl/infrastructure/storage/gold/io_delta_runtime.py |
+| `CR-20260816-B-S07-infra-storage-053` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/gold/io_delta_runtime.py |
+| `CR-20260816-B-S07-infra-storage-054` | reject | None | Prefer scanner.to_table() is a read-path optimization, not a wrong count. | src/bioetl/infrastructure/storage/delta_reader.py |
+| `CR-20260816-B-S07-infra-storage-055` | reject | None | None business-key sort raises TypeError and stays fail-closed; not a silent mis-order. | src/bioetl/infrastructure/storage/gold/io_delta_runtime.py _prepare_scd2_gold_write |
+| `CR-20260816-B-S07-infra-storage-056` | reject | None | Richer FileNotFoundError text is diagnostics-only. | src/bioetl/infrastructure/storage/delta_reader.py read_with_fallback |
+| `CR-20260816-B-S07-infra-storage-057` | reject | None | KeyboardInterrupt/SystemExit already re-raise; leftover BaseException fallback still returns a count rather than inventing rows. | src/bioetl/infrastructure/storage/delta_reader_helpers.py count_delta_rows |
+| `CR-20260816-B-S07-infra-storage-058` | reject | None | Jitter hash collision polish; delay remains bounded and deterministic. | src/bioetl/infrastructure/storage/delta/resilience.py _deterministic_jitter_seconds |
+| `CR-20260816-B-S07-infra-storage-059` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/gold/io_delta_protocols.py |
+| `CR-20260816-B-S07-infra-storage-060` | reject | None | unknown vs failure metric label is telemetry taxonomy, not write outcome. | src/bioetl/infrastructure/storage/gold/io_metrics.py |
+| `CR-20260816-B-S07-infra-storage-061` | reject | None | Narrow schema parameter union is annotation-only. | src/bioetl/infrastructure/storage/gold_writer.py write_gold |
+| `CR-20260816-B-S07-infra-storage-062` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/gold/writer_metrics.py |
+| `CR-20260816-B-S07-infra-storage-063` | reject | None | Distinguish inspect-fail vs empty columns is fail-soft diagnostics. | src/bioetl/infrastructure/storage/metadata/metadata_helpers.py |
+| `CR-20260816-B-S07-infra-storage-064` | reject | None | Incremental min timestamp is a micro-optimization; result is already min(). | src/bioetl/infrastructure/storage/metadata/builder_base.py |
+| `CR-20260816-B-S07-infra-storage-065` | reject | None | assert-to-RuntimeError under -O still AttributeErrors; not a silent dual-write. | src/bioetl/infrastructure/storage/gold/writer_implementation.py:119 |
+| `CR-20260816-B-S07-infra-storage-066` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/metadata/metadata_helpers.py |
+| `CR-20260816-B-S07-infra-storage-067` | reject | None | Dual-write requires GoldSchemaPolicyByVersion; plain schema correctly takes the single-target path. | src/bioetl/infrastructure/storage/gold_writer.py:253-259 |
+| `CR-20260816-B-S07-infra-storage-068` | reject | None | Filename sanitization is hardening; provider/entity/table_name are config identifiers. | src/bioetl/infrastructure/storage/metadata/writer_operations.py |
+| `CR-20260816-B-S07-infra-storage-069` | reject | None | errno None -> 'None' label is telemetry wording. | src/bioetl/infrastructure/storage/metadata/writer_operations.py |
+| `CR-20260816-B-S07-infra-storage-070` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/operations/validation_operations.py |
+| `CR-20260816-B-S07-infra-storage-071` | reject | None | Empty column tuple pass-through is only after to_schema/columns both fail; production Pandera schemas resolve. | src/bioetl/infrastructure/storage/gold/writer_schema_helpers.py _schema_column_names |
+| `CR-20260816-B-S07-infra-storage-072` | reject | None | Duplicated collaborator annotations are DRY/Protocol style. | src/bioetl/infrastructure/storage/silver/operations/validation_operations.py |
+| `CR-20260816-B-S07-infra-storage-073` | reject | None | Exactly-one lineage metric is telemetry completeness. | src/bioetl/infrastructure/storage/lineage_persistence.py |
+| `CR-20260816-B-S07-infra-storage-074` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/postwrite_mixin.py |
+| `CR-20260816-B-S07-infra-storage-075` | reject | None | hasattr(type(target)) vs getattr is style; None still rejected downstream. | src/bioetl/infrastructure/storage/lineage_persistence.py _has_explicit_member |
+| `CR-20260816-B-S07-infra-storage-076` | reject | None | Broader except around dual-write logging is diagnostics; committed targets already logged for the caught tuple. | src/bioetl/infrastructure/storage/gold/writer_implementation.py:159-175 |
+| `CR-20260816-B-S07-infra-storage-077` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/runtime_helpers.py |
+| `CR-20260816-B-S07-infra-storage-078` | reject | None | KeyError vs descriptive ValueError is exception-wording style; unmapped modes still fail. | src/bioetl/infrastructure/storage/silver/validation_operations.py _to_policy_write_mode_impl |
+| `CR-20260816-B-S07-infra-storage-079` | confirm | None | Bare except Exception returns None, so permission/corruption errors look like a missing table and schema-drift enforcement is skipped. | src/bioetl/infrastructure/storage/silver/support.py _sync_get_schema; schema_drift_operations.py _check_schema_drift |
+| `CR-20260816-B-S07-infra-storage-080` | reject | None | Audit hook when _metadata is None is a missing-telemetry path, not a dropped write. | src/bioetl/infrastructure/storage/silver/operations/postwrite_operations.py |
+| `CR-20260816-B-S07-infra-storage-081` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/operations/postwrite_execution.py |
+| `CR-20260816-B-S07-infra-storage-082` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/validation_operations.py |
+| `CR-20260816-B-S07-infra-storage-083` | confirm | None | _diff_schema_fields uses only records[0], so later-row additions/omissions never trip on_schema_mismatch=error. | src/bioetl/infrastructure/storage/silver/schema_drift_operations.py:65-75 |
+| `CR-20260816-B-S07-infra-storage-084` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/postwrite_mixin.py |
+| `CR-20260816-B-S07-infra-storage-085` | reject | None | operation_id vs table_path for jitter seed is determinism polish, not a wrong retry decision. | src/bioetl/infrastructure/storage/silver/merge_resilience_helpers.py |
+| `CR-20260816-B-S07-infra-storage-086` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/maintenance_mixin.py |
+| `CR-20260816-B-S07-infra-storage-087` | reject | None | tuple-freeze of key lists is immutability style; no demonstrated retry mutation. | src/bioetl/infrastructure/storage/silver/delta_request_models.py |
+| `CR-20260816-B-S07-infra-storage-088` | reject | None | locals()/cast cleanup is typing/DRY. | src/bioetl/infrastructure/storage/silver/merged_request_support.py |
+| `CR-20260816-B-S07-infra-storage-089` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/delta_merge_helpers.py |
+| `CR-20260816-B-S07-infra-storage-090` | reject | None | Duplicate timeout log removal is telemetry DRY. | src/bioetl/infrastructure/storage/silver/merge_resilience_helpers.py |
+| `CR-20260816-B-S07-infra-storage-091` | reject | None | Unused asyncio re-export is style; test-patch seam only. | src/bioetl/infrastructure/storage/silver/delta_helpers.py |
+| `CR-20260816-B-S07-infra-storage-092` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/maintenance_mixin.py |
+| `CR-20260816-B-S07-infra-storage-093` | reject | None | Replace unittest.mock type-branch with a flag is a refactor, not a merge-outcome hole. | src/bioetl/infrastructure/storage/silver/delta_merge_helpers.py |
+| `CR-20260816-B-S07-infra-storage-094` | reject | None | to_thread offload of sync validate is perf. | src/bioetl/infrastructure/storage/silver/operations/validation_operations.py |
+| `CR-20260816-B-S07-infra-storage-095` | reject | None | Remove file-level mypy disable is annotation/tooling. | src/bioetl/infrastructure/storage/silver/merged_mixin.py |
+| `CR-20260816-B-S07-infra-storage-096` | reject | None | Stale comment removal is docstring/style. | src/bioetl/infrastructure/storage/silver/merge_resilience_helpers.py |
+| `CR-20260816-B-S07-infra-storage-097` | reject | None | Explicit field mapping vs locals() is DRY/typing. | src/bioetl/infrastructure/storage/silver/merged_operations.py |
+| `CR-20260816-B-S07-infra-storage-098` | reject | None | Forward timeout into empty schema-evolution append is resilience expansion. | src/bioetl/infrastructure/storage/silver/delta_write_execution.py |
+| `CR-20260816-B-S07-infra-storage-099` | reject | None | Kill orphaned child on timeout is process-hygiene; no proven post-timeout commit on disk. | src/bioetl/infrastructure/storage/silver/delta_write_execution.py |
+| `CR-20260816-B-S07-infra-storage-100` | reject | None | Default merge off the event loop is perf/cancellation polish. | src/bioetl/infrastructure/storage/silver/delta_merge_helpers.py |
+| `CR-20260816-B-S07-infra-storage-101` | reject | None | Move static assignments into class body is style. | src/bioetl/infrastructure/storage/silver/validation_mixin.py |
+| `CR-20260816-B-S07-infra-storage-102` | reject | None | Literal annotation / remove type:ignore is typing-only. | src/bioetl/infrastructure/storage/silver/key_nullability_operations.py |
+| `CR-20260816-B-S07-infra-storage-103` | reject | None | Hoist local polars import is style. | src/bioetl/infrastructure/storage/silver/writer_metadata_facade.py |
+| `CR-20260816-B-S07-infra-storage-104` | reject | None | Test-only coverage of lazy __getattr__ re-export. | src/bioetl/infrastructure/storage/support/atomic_ops.py |
+| `CR-20260816-B-S07-infra-storage-105` | reject | None | Alias rename of _write_dual_targets_impl is style. | src/bioetl/infrastructure/storage/silver/writer_runtime_facade.py |
+| `CR-20260816-B-S07-infra-storage-106` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/writer_runtime_support.py |
+| `CR-20260816-B-S07-infra-storage-107` | reject | None | records[0] optional-missing path only debug-logs; it does not gate the write. | src/bioetl/infrastructure/storage/silver/validation_record_support.py:113-120 |
+| `CR-20260816-B-S07-infra-storage-108` | reject | None | Comment pointing at a guard ID is docs/style. | src/bioetl/infrastructure/storage/silver_writer.py |
+| `CR-20260816-B-S07-infra-storage-109` | reject | None | Reject non-positive checkpoint bounds is config hardening without a current producer of 0. | src/bioetl/infrastructure/storage/support/checkpoint_writer.py |
+| `CR-20260816-B-S07-infra-storage-110` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/support/checkpoint_writer.py |
+| `CR-20260816-B-S07-infra-storage-111` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/writer_runtime_support.py |
+| `CR-20260816-B-S07-infra-storage-112` | reject | None | BaseException temp cleanup is resource hygiene; ATOMIC_WRITE_EXCEPTIONS already wraps OS errors. | src/bioetl/infrastructure/storage/support/atomic_ops.py |
+| `CR-20260816-B-S07-infra-storage-113` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver_writer.py |
+| `CR-20260816-B-S07-infra-storage-114` | reject | None | TypeError vs ValueError for legacy-arg mismatch is exception-class style. | src/bioetl/infrastructure/storage/silver/writer_runtime_invocation.py |
+| `CR-20260816-B-S07-infra-storage-115` | reject | None | @override decorator is annotation-only. | src/bioetl/infrastructure/storage/silver_writer.py _check_schema_drift |
+| `CR-20260816-B-S07-infra-storage-116` | reject | None | Drop unused payload from pending tuples is DRY. | src/bioetl/infrastructure/storage/support/atomic_group.py |
+| `CR-20260816-B-S07-infra-storage-117` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/support/atomic_group.py |
+| `CR-20260816-B-S07-infra-storage-118` | reject | minor | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/support/checkpoint_writer.py |
+| `CR-20260816-B-S07-infra-storage-119` | reject | None | Integer winerror membership tighten is retry-taxonomy polish; errno fallback remains. | src/bioetl/infrastructure/storage/support/_atomic_replace.py |
+| `CR-20260816-B-S07-infra-storage-120` | reject | None | assert-to-RuntimeError under -O still AttributeErrors on a missing policy. | src/bioetl/infrastructure/storage/silver/writer_runtime_support.py:184 |
+| `CR-20260816-B-S07-infra-storage-121` | reject | None | Rollback leftover temps on success-exit is misuse hygiene; commit() already clears _pending. | src/bioetl/infrastructure/storage/support/atomic_group.py __exit__ |
+| `CR-20260816-B-S07-infra-storage-122` | reject | None | Incremental glob consume is a perf rewrite; limit still raises CheckpointSizeError. | src/bioetl/infrastructure/storage/support/checkpoint_writer.py |
+| `CR-20260816-B-S07-infra-storage-123` | reject | None | Missing version hash keeps the incoming content_hash; no proof that is the wrong identity vs fail-closed. | src/bioetl/infrastructure/storage/silver/writer_runtime_support.py _project_records_for_contract_version |
+| `CR-20260816-B-S07-infra-storage-124` | reject | None | Explicit fsync before replace is durability hardening, not a current torn-write invariant. | src/bioetl/infrastructure/storage/support/atomic_ops.py |
+| `CR-20260816-B-S07-infra-storage-125` | reject | None | Force UTC on completed_at is timestamp-normalization style without a mixed-tz crash on this path. | src/bioetl/infrastructure/storage/silver/writer_runtime_invocation.py _resolve_completed_at |
+| `CR-20260816-B-S07-infra-storage-126` | reject | None | Mixed-type PK sort TypeError is fail-closed; Silver keys are contracted as hashable scalars. | src/bioetl/infrastructure/storage/silver/validation_record_support.py |
+| `CR-20260816-B-S07-infra-storage-127` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/support/_atomic_replace.py |
+| `CR-20260816-B-S07-infra-storage-128` | reject | None | Bounded quarantine batching is a memory rewrite; all orphans are still written. | src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py |
+| `CR-20260816-B-S07-infra-storage-129` | reject | None | Column projection / max-rows is a config/perf expansion, not a wrong orphan decision. | src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py _read_source_rows |
+| `CR-20260816-B-S07-infra-storage-130` | reject | None | Incremental dedup is a memory rewrite; winner selection is already deterministic. | src/bioetl/infrastructure/storage/support/retention_dedup.py |
+| `CR-20260816-B-S07-infra-storage-131` | reject | None | Fail if reader lacks limit is a config expansion; post-read bound already exists. | src/bioetl/infrastructure/storage/workflow_row_reconciliation.py |
+| `CR-20260816-B-S07-infra-storage-132` | confirm | critical | Missing Silver reference table returns [] so destructive FK reconcile treats every source row as an orphan. | src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py _read_reference_rows |
+| `CR-20260816-B-S07-infra-storage-133` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py |
+| `CR-20260816-B-S07-infra-storage-134` | reject | None | Replace post-hoc elapsed check with wait_for is timeout-policy polish. | src/bioetl/infrastructure/storage/support/retention.py |
+| `CR-20260816-B-S07-infra-storage-135` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/workflow_row_reconciliation.py |
+| `CR-20260816-B-S07-infra-storage-136` | reject | None | Reuse orphan_error_code helper is DRY; mapping literals already match. | src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_support.py |
+| `CR-20260816-B-S07-infra-storage-137` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/operations/metadata_write_facade.py |
+| `CR-20260816-B-S07-infra-storage-138` | reject | None | Shared _require_metadata_coordinator helper is DRY. | src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_support.py |
+| `CR-20260816-B-S07-infra-storage-139` | reject | None | Constructor-inject write callable is a refactor/test-seam change. | src/bioetl/infrastructure/storage/silver/operations/metadata_operations.py |
+| `CR-20260816-B-S07-infra-storage-140` | reject | None | Cache inspect.signature is a micro-optimization. | src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py |
+| `CR-20260816-B-S07-infra-storage-141` | confirm | critical | if arrow_data treats an empty table as missing and drops schema/records. | src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py _compute |
+| `CR-20260816-B-S07-infra-storage-142` | reject | None | Failure metric on metadata write is telemetry. | src/bioetl/infrastructure/storage/silver/operations/metadata_write_support.py |
+| `CR-20260816-B-S07-infra-storage-143` | reject | None | Error-string method name typo is diagnostics/docs. | src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py should_skip_silver_metadata_write |
+| `CR-20260816-B-S07-infra-storage-144` | reject | None | Missing _get_delta_version hook is not the production writer surface; return 0 is a test-double fallback. | src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py resolve_version_after |
+| `CR-20260816-B-S07-infra-storage-145` | reject | None | Cap vacuum file-path list is payload-size cleanup. | src/bioetl/infrastructure/storage/silver/operations/maintenance_operations.py |
+| `CR-20260816-B-S07-infra-storage-146` | reject | None | Reorder coordinator require vs prepare is DRY; both already fail closed. | src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_support.py |
+| `CR-20260816-B-S07-infra-storage-147` | reject | None | to_thread for DQ normalize is perf. | src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py resolve_finalization_dq_metrics |
+| `CR-20260816-B-S07-infra-storage-148` | reject | None | VAR_KEYWORD discriminator tighten is typing/dispatch polish without a shown mis-route. | src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py _is_base_path_writer |
+| `CR-20260816-B-S07-infra-storage-149` | confirm | critical | Missing timestamp uses assert instead of fail-closed ValueError. | src/bioetl/infrastructure/storage/support/retention_time_travel.py |
+| `CR-20260816-B-S07-infra-storage-150` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py |
+| `CR-20260816-B-S07-infra-storage-151` | reject | None | JSON-safe schema/metadata serialization is a representation change, not a retention decision hole. | src/bioetl/infrastructure/storage/support/retention_delta.py build_table_info |
+| `CR-20260816-B-S07-infra-storage-152` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/operations/maintenance_operations.py |
+| `CR-20260816-C-S06-infra-adapters-001` | reject | None | Coverage-inventory refresh is not an invariant hole. | reports/quality/module-coverage-inventory.json |
+| `CR-20260816-C-S06-infra-adapters-002` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/response_parser.py |
+| `CR-20260816-C-S06-infra-adapters-003` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/validation.py |
+| `CR-20260816-C-S06-infra-adapters-004` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/validation.py |
+| `CR-20260816-C-S06-infra-adapters-005` | reject | None | Coverage-inventory refresh is not an invariant hole. | src/bioetl/infrastructure/adapters/__init__.py |
+| `CR-20260816-C-S06-infra-adapters-006` | reject | None | 408 already classifies as 4xx DATA_QUALITY; making it RECOVERABLE is a retry-policy expansion. | src/bioetl/infrastructure/adapters/adapter_error_classifier.py _classify_http_status |
+| `CR-20260816-C-S06-infra-adapters-007` | reject | None | aclose is documented no-op; HTTP client is closed via __aexit__. | src/bioetl/infrastructure/adapters/base.py aclose / __aexit__ |
+| `CR-20260816-C-S06-infra-adapters-008` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/_error_handling_support.py |
+| `CR-20260816-C-S06-infra-adapters-009` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/_base_runtime.py |
+| `CR-20260816-C-S06-infra-adapters-010` | confirm | None | external_api_error logs raw str(error) plus unallowlisted extra, so transport messages can retain secrets. | src/bioetl/infrastructure/adapters/_error_handling_support.py:80-95 |
+| `CR-20260816-C-S06-infra-adapters-011` | reject | None | Reserved-key collision with logger kwargs is telemetry hygiene, not a data/fail-closed hole. | src/bioetl/infrastructure/adapters/_error_handling_support.py |
+| `CR-20260816-C-S06-infra-adapters-012` | confirm | None | health_check_failed logs error_message=str(error) with no redaction. | src/bioetl/infrastructure/adapters/_health_check_observability.py:96-102 |
+| `CR-20260816-C-S06-infra-adapters-013` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/__init__.py |
+| `CR-20260816-C-S06-infra-adapters-014` | reject | None | functools.wraps on a bound iterator is style. | src/bioetl/infrastructure/adapters/common/_fetch_resilience_batch_iter.py |
+| `CR-20260816-C-S06-infra-adapters-015` | reject | None | dict[str, str] return annotation is typing-only. | src/bioetl/infrastructure/adapters/common/_api_request_sanitize.py |
+| `CR-20260816-C-S06-infra-adapters-016` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/response_parser.py |
+| `CR-20260816-C-S06-infra-adapters-017` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/common/_api_request_sanitize.py |
+| `CR-20260816-C-S06-infra-adapters-018` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/crossref/response_mapper.py |
+| `CR-20260816-C-S06-infra-adapters-019` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/decorators/retry.py |
+| `CR-20260816-C-S06-infra-adapters-020` | reject | None | Test-only wrap_with_resilience matrix. | src/bioetl/infrastructure/adapters/decorators/__init__.py |
+| `CR-20260816-C-S06-infra-adapters-021` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/crossref/query_builder.py |
+| `CR-20260816-C-S06-infra-adapters-022` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/decorators/_circuit_breaker_snapshot.py |
+| `CR-20260816-C-S06-infra-adapters-023` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/chembl/health.py |
+| `CR-20260816-C-S06-infra-adapters-024` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/chembl/fetch_multi_filter_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-025` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py |
+| `CR-20260816-C-S06-infra-adapters-026` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/chembl/fetch_multi_filter_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-027` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/chembl/metadata.py |
+| `CR-20260816-C-S06-infra-adapters-028` | confirm | None | Redaction regex consumes only the Bearer scheme as \S+, so the token after Authorization: Bearer remains in retry logs. | src/bioetl/infrastructure/adapters/decorators/_retry_support.py _redact_transport_error_message |
+| `CR-20260816-C-S06-infra-adapters-029` | reject | None | Test-only CrossRef fetch nominal matrix. | src/bioetl/infrastructure/adapters/crossref/fetch_flow.py |
+| `CR-20260816-C-S06-infra-adapters-030` | confirm | None | dois = filter_ids[:limit] if limit else filter_ids treats limit=0 as unlimited, against the established limit is not None contract. | src/bioetl/infrastructure/adapters/crossref/fetch_flow.py:71-79; common/_title_fallback_flow.py:132 |
+| `CR-20260816-C-S06-infra-adapters-031` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/crossref/models.py |
+| `CR-20260816-C-S06-infra-adapters-032` | reject | None | Ownership-flag vs enter-depth is a lifecycle refactor without a shown double-close on the public API. | src/bioetl/infrastructure/adapters/crossref/client.py |
+| `CR-20260816-C-S06-infra-adapters-033` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/chembl/fetch_multi_filter_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-034` | reject | None | cast(Any, None) host-attr is annotation-only. | src/bioetl/infrastructure/adapters/pubchem/_client_fetch_surface.py |
+| `CR-20260816-C-S06-infra-adapters-035` | reject | None | Coverage-inventory refresh is not an invariant hole. | src/bioetl/infrastructure/adapters/pubchem/client.py |
+| `CR-20260816-C-S06-infra-adapters-036` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubchem/_fetch_strategy_identifiers.py |
+| `CR-20260816-C-S06-infra-adapters-037` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/openalex/query_execution.py |
+| `CR-20260816-C-S06-infra-adapters-038` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubchem/_fetch_strategy_search.py |
+| `CR-20260816-C-S06-infra-adapters-039` | reject | None | Collector suppress is telemetry; payload return is unchanged and not a Bronze write. | src/bioetl/infrastructure/adapters/openalex/query_execution.py:51-52 |
+| `CR-20260816-C-S06-infra-adapters-040` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubchem/client_model_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-041` | reject | None | Replace shipped pubchempy transport with UnifiedHTTPClient is ADR/API rewrite for an already-shipped adapter. | src/bioetl/infrastructure/adapters/pubchem/client.py |
+| `CR-20260816-C-S06-infra-adapters-042` | confirm | None | rows = min(limit, 100) if limit else 100 treats limit=0 as unbounded pagination. | src/bioetl/infrastructure/adapters/crossref/_search_paginator.py:109-120 |
+| `CR-20260816-C-S06-infra-adapters-043` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/metadata_adapter_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-044` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/feature_sequence_adapter_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-045` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/query_builder.py |
+| `CR-20260816-C-S06-infra-adapters-046` | confirm | None | if limit and fetched >= limit treats limit=0 as unlimited on UniProt filtered/batched fetch. | src/bioetl/infrastructure/adapters/uniprot/filtering_adapter_mixin.py:41-70 |
+| `CR-20260816-C-S06-infra-adapters-047` | reject | None | Coverage-inventory refresh is not an invariant hole. | src/bioetl/infrastructure/adapters/openalex/client.py |
+| `CR-20260816-C-S06-infra-adapters-048` | reject | None | Test-only OpenAlex fetch nominal matrix. | src/bioetl/infrastructure/adapters/openalex/filter_fetch_adapter_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-049` | confirm | None | Untitled OpenAlex candidates are returned without titles_match, so fallback can bind an unvalidated work. | src/bioetl/infrastructure/adapters/openalex/fallback.py:71-75 |
+| `CR-20260816-C-S06-infra-adapters-050` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/openalex/filter_fetch_adapter_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-051` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/chembl/_client_request_helpers.py |
+| `CR-20260816-C-S06-infra-adapters-052` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/cached_bronze_data_source.py |
+| `CR-20260816-C-S06-infra-adapters-053` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/cached_bronze_data_source.py |
+| `CR-20260816-C-S06-infra-adapters-054` | reject | None | Offset-based ChEMBL stop can under-fetch after dedup; it does not silently exceed the requested page budget. | src/bioetl/infrastructure/adapters/chembl/_fetch_paging_filtered.py:70-107 |
+| `CR-20260816-C-S06-infra-adapters-055` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/openalex/client_helpers_adapter_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-056` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/cached_bronze_data_source.py |
+| `CR-20260816-C-S06-infra-adapters-057` | confirm | None | Semantic Scholar fallback builds headers with skip_placeholder_api_key=False while the primary adapter suppresses your_* keys. | src/bioetl/infrastructure/adapters/semanticscholar/fallback.py:91-95; adapter.py:149 |
+| `CR-20260816-C-S06-infra-adapters-058` | reject | None | Coverage-inventory refresh is not an invariant hole. | src/bioetl/infrastructure/adapters/semanticscholar/adapter.py |
+| `CR-20260816-C-S06-infra-adapters-059` | reject | None | Any->typed fallback handler is annotation-only. | src/bioetl/infrastructure/adapters/semanticscholar/_client_fallback_policy.py |
+| `CR-20260816-C-S06-infra-adapters-060` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/semanticscholar/__init__.py |
+| `CR-20260816-C-S06-infra-adapters-061` | confirm | None | dois = filter_ids[:limit] if limit else filter_ids treats limit=0 as unlimited DOI fetch. | src/bioetl/infrastructure/adapters/semanticscholar/fetch_adapter_mixin.py:133-144 |
+| `CR-20260816-C-S06-infra-adapters-062` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubmed/xml_processor.py |
+| `CR-20260816-C-S06-infra-adapters-063` | confirm | None | page_size = min(100, limit or 100) and if limit treat limit=0 as an unbounded search. | src/bioetl/infrastructure/adapters/semanticscholar/_search_fetch_flow.py:33-50 |
+| `CR-20260816-C-S06-infra-adapters-064` | reject | None | Test-only SemanticScholarAdapter contract suite. | src/bioetl/infrastructure/adapters/semanticscholar/adapter.py |
+| `CR-20260816-C-S06-infra-adapters-065` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/semanticscholar/fallback.py |
+| `CR-20260816-C-S06-infra-adapters-066` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/semanticscholar/batch_request_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-067` | reject | None | if filter_ids: treating [] as omitted search is the current empty-filter contract, not a proven caller hole. | src/bioetl/infrastructure/adapters/semanticscholar/fetch_adapter_mixin.py:61-70 |
+| `CR-20260816-C-S06-infra-adapters-068` | reject | None | Any->optional handler annotation is typing-only. | src/bioetl/infrastructure/adapters/pubmed/_client_fallback_policy.py |
+| `CR-20260816-C-S06-infra-adapters-069` | reject | None | Callable[..., Awaitable] vs Any is annotation-only. | src/bioetl/infrastructure/adapters/pubchem/fetch_strategies.py |
+| `CR-20260816-C-S06-infra-adapters-070` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubchem/entity_mapper.py |
+| `CR-20260816-C-S06-infra-adapters-071` | reject | None | Stricter CID positivity is schema tightening without a shown bool/float producer on this mapper. | src/bioetl/infrastructure/adapters/pubchem/entity_mapper.py _resolve_molecule_id |
+| `CR-20260816-C-S06-infra-adapters-072` | reject | None | kwargs TypedDict is Protocol/typing-only. | src/bioetl/infrastructure/adapters/pubmed/_adapter_support.py |
+| `CR-20260816-C-S06-infra-adapters-073` | reject | None | Test-only PubChem mapper contract suite. | src/bioetl/infrastructure/adapters/pubchem/response_mapper.py |
+| `CR-20260816-C-S06-infra-adapters-074` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubmed/_client_fallback_policy.py |
+| `CR-20260816-C-S06-infra-adapters-075` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubmed/_adapter_support.py |
+| `CR-20260816-C-S06-infra-adapters-076` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubchem/fetch_flow.py |
+| `CR-20260816-C-S06-infra-adapters-077` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubchem/models.py |
+| `CR-20260816-C-S06-infra-adapters-078` | reject | None | Coverage-inventory refresh is not an invariant hole. | src/bioetl/infrastructure/adapters/pubchem/constants.py |
+| `CR-20260816-C-S06-infra-adapters-079` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubmed/__init__.py |
+| `CR-20260816-C-S06-infra-adapters-080` | reject | None | Normalize API null lists to [] is a model-default convenience, not a broken required field. | src/bioetl/infrastructure/adapters/crossref/_publication_record.py |
+| `CR-20260816-C-S06-infra-adapters-081` | reject | None | Comment vs TYPE_CHECKING host-attr declaration is docs/style. | src/bioetl/infrastructure/adapters/crossref/_client_fallback_policy.py |
+| `CR-20260816-C-S06-infra-adapters-082` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/common/title_matching.py |
+| `CR-20260816-C-S06-infra-adapters-083` | reject | None | Shared callable-alias module is DRY. | src/bioetl/infrastructure/adapters/openalex/_client_runtime_factories.py |
+| `CR-20260816-C-S06-infra-adapters-084` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/openalex/__init__.py |
+| `CR-20260816-C-S06-infra-adapters-085` | reject | None | LRU vs insertion-order cache eviction is a perf/cache-policy tweak. | src/bioetl/infrastructure/adapters/openalex/_cursor_lookup.py |
+| `CR-20260816-C-S06-infra-adapters-086` | reject | None | Serialize rate-limit waiters is a thundering-herd perf rewrite; token accounting is already locked. | src/bioetl/infrastructure/adapters/http/rate_limiter.py |
+| `CR-20260816-C-S06-infra-adapters-087` | reject | None | Return fallback service from _require_openalex_runtime is DRY/style. | src/bioetl/infrastructure/adapters/openalex/_client_support.py |
+| `CR-20260816-C-S06-infra-adapters-088` | reject | None | Make CrossRef type optional is a contract expansion. | src/bioetl/infrastructure/adapters/crossref/_publication_record.py |
+| `CR-20260816-C-S06-infra-adapters-089` | reject | None | Unicode-dash normalization is matching-policy expansion; ASCII path already works. | src/bioetl/infrastructure/adapters/common/title_matching.py |
+| `CR-20260816-C-S06-infra-adapters-090` | reject | None | Log/raise unused offset is API-surface expansion; cursor paging is the shipped contract. | src/bioetl/infrastructure/adapters/crossref/_client_port_surface.py |
+| `CR-20260816-C-S06-infra-adapters-091` | reject | None | total_count=len(all_ids) matches the processor, which only appends non-empty IDs/markers. | src/bioetl/infrastructure/adapters/input/csv_filter_reader.py:160-168 |
+| `CR-20260816-C-S06-infra-adapters-092` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/openalex/_cursor_lookup.py |
+| `CR-20260816-C-S06-infra-adapters-093` | reject | None | Truthiness on CSV ID cells is not a demonstrated 0/False identifier path; return-tuple rewrite is API style. | src/bioetl/infrastructure/adapters/input/csv_filter_processor.py:120-141 |
+| `CR-20260816-C-S06-infra-adapters-094` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubmed/_search.py |
+| `CR-20260816-C-S06-infra-adapters-095` | reject | None | Reuse validate_publication_entity is DRY; both checks already reject non-publication. | src/bioetl/infrastructure/adapters/pubmed/_filter_fetch_support.py |
+| `CR-20260816-C-S06-infra-adapters-096` | reject | None | Shared placeholder-key helper is DRY; current substring skip is the shipped placeholder policy. | src/bioetl/infrastructure/adapters/pubmed/_fetch.py |
+| `CR-20260816-C-S06-infra-adapters-097` | reject | None | Drop \| None from list fields with default_factory=list is annotation-only. | src/bioetl/infrastructure/adapters/pubmed/_extended_record.py |
+| `CR-20260816-C-S06-infra-adapters-098` | reject | None | Narrow collector suppress is telemetry; fetch still returns. | src/bioetl/infrastructure/adapters/crossref/_batch_support.py |
+| `CR-20260816-C-S06-infra-adapters-099` | reject | None | Single to_thread around CSV load is perf. | src/bioetl/infrastructure/adapters/input/csv_filter_reader.py |
+| `CR-20260816-C-S06-infra-adapters-100` | reject | None | Skip non-positive CIDs is filter tightening; current int() path already drops non-ints. | src/bioetl/infrastructure/adapters/pubchem/policy_helper.py |
+| `CR-20260816-C-S06-infra-adapters-101` | reject | None | Derive expected_keys from dataclass fields is DRY. | src/bioetl/infrastructure/adapters/openalex/_client_runtime_request.py |
+| `CR-20260816-C-S06-infra-adapters-102` | reject | None | DOI path encoding/comma reject is hardening; no shown broken current DOI fetch. | src/bioetl/infrastructure/adapters/crossref/_doi_batch_processor.py |
+| `CR-20260816-C-S06-infra-adapters-103` | confirm | None | build_cid_batch_endpoint interpolates the truncated preview including ',...' into the real PubChem path for batches larger than 3. | src/bioetl/infrastructure/adapters/pubchem/query_builder.py:40-47 |
+| `CR-20260816-C-S06-infra-adapters-104` | reject | None | empty_async_iterator yield style is typing/style. | src/bioetl/infrastructure/adapters/pubmed/_filter_fetch_support.py |
+| `CR-20260816-C-S06-infra-adapters-105` | reject | None | Parse search JSON through PubMedSearchResponse is a validation expansion; current path already reads idlist. | src/bioetl/infrastructure/adapters/pubmed/_search.py |
+| `CR-20260816-C-S06-infra-adapters-106` | confirm | None | if limit and total_fetched >= limit treats PubMed limit=0 as unlimited. | src/bioetl/infrastructure/adapters/pubmed/_fetch.py:96-103 |
+| `CR-20260816-C-S06-infra-adapters-107` | reject | None | Any->Callable annotation is typing-only. | src/bioetl/infrastructure/adapters/pubmed/adapter.py |
+| `CR-20260816-C-S06-infra-adapters-108` | reject | None | Require every OpenAlex factory key is API-hardening; optional defaults already exist. | src/bioetl/infrastructure/adapters/openalex/_client_runtime_request.py |
+| `CR-20260816-C-S06-infra-adapters-109` | reject | None | Log unresolved DOIs / pass normalized list is completeness polish; fallback already runs. | src/bioetl/infrastructure/adapters/crossref/_doi_batch_processor.py |
+| `CR-20260816-C-S06-infra-adapters-110` | confirm | None | PubChem name/AID path segments are interpolated raw, so spaces or slashes break the request path. | src/bioetl/infrastructure/adapters/pubchem/query_builder.py:15-27 |
+| `CR-20260816-C-S06-infra-adapters-111` | confirm | None | Docstring requires a title match, but unmatched PubMed results[0] is still returned. | src/bioetl/infrastructure/adapters/pubmed/fallback.py:75-83 |
+| `CR-20260816-C-S06-infra-adapters-112` | reject | None | Cap/split PubMed 10k window is provider-limit hardening, not a current silent wrap. | src/bioetl/infrastructure/adapters/pubmed/_search.py |
+| `CR-20260816-C-S06-infra-adapters-113` | reject | None | Quote UniProt filter literals is injection hardening; accessions are the contracted input. | src/bioetl/infrastructure/adapters/uniprot/filtering_adapter_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-114` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/http/_health_monitor_models.py |
+| `CR-20260816-C-S06-infra-adapters-115` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/http/_circuit_breaker_support.py |
+| `CR-20260816-C-S06-infra-adapters-116` | reject | None | Share health_check/_collect_probe_outcome is DRY. | src/bioetl/infrastructure/adapters/health_check_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-117` | reject | None | error_type metric label is telemetry taxonomy. | src/bioetl/infrastructure/adapters/http/_client_retry_policy.py |
+| `CR-20260816-C-S06-infra-adapters-118` | reject | None | Preserve unused operation in error context is telemetry. | src/bioetl/infrastructure/adapters/health_check_mixin.py _get_error_context |
+| `CR-20260816-C-S06-infra-adapters-119` | reject | None | Remove redundant AUTH_FAILURE branch is DRY; 500 mapping is an explicit policy choice. | src/bioetl/infrastructure/adapters/health_status_policy.py |
+| `CR-20260816-C-S06-infra-adapters-120` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/common/fallback_policy_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-121` | reject | None | Trim AttributeError/KeyError from the resilience bundle is policy/style. | src/bioetl/infrastructure/adapters/common/error_bundles.py |
+| `CR-20260816-C-S06-infra-adapters-122` | reject | None | Collapse duplicate retry wrappers is DRY. | src/bioetl/infrastructure/adapters/common/fetch_resilience_template.py |
+| `CR-20260816-C-S06-infra-adapters-123` | reject | None | Count unresolved IDs from found_ids vs lookup labels is a metric-definition change. | src/bioetl/infrastructure/adapters/common/fallback_fetch_service.py |
+| `CR-20260816-C-S06-infra-adapters-124` | reject | None | Shared _lookup_method constant is DRY. | src/bioetl/infrastructure/adapters/common/fetch_retry_policy.py |
+| `CR-20260816-C-S06-infra-adapters-125` | reject | None | Remove pass-through sanitizer wrappers is DRY. | src/bioetl/infrastructure/adapters/common/api_request_collector.py |
+| `CR-20260816-C-S06-infra-adapters-126` | confirm | None | any(...) on remaining/limit/retry_after treats remaining=0 as absent and drops RateLimitInfo when the quota is exhausted. | src/bioetl/infrastructure/adapters/common/api_request_collector.py:94-102 |
+| `CR-20260816-C-S06-infra-adapters-127` | reject | None | Add TimeoutException / route RecoverableError through config is retry-policy expansion; Connect/Read timeouts already retry. | src/bioetl/infrastructure/adapters/http/_client_retry_policy.py _is_retryable_error |
+| `CR-20260816-C-S06-infra-adapters-128` | reject | None | Pipe-escape composite dedup keys is a theoretical collision without a shown producer. | src/bioetl/infrastructure/adapters/common/deduplication.py |
+| `CR-20260816-C-S06-infra-adapters-129` | reject | None | Sentinel vs None getattr is Protocol/typing without a host that sets supported_filter_field=None to clear inheritance. | src/bioetl/infrastructure/adapters/common/composable_fallback.py |
+| `CR-20260816-C-S06-infra-adapters-130` | reject | None | Remove retry_error assert is style; exhaustion already recovers. | src/bioetl/infrastructure/adapters/common/fetch_resilience_template.py |
+| `CR-20260816-C-S06-infra-adapters-131` | reject | None | object->HTTP response type is annotation-only. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_retry.py |
+| `CR-20260816-C-S06-infra-adapters-132` | reject | None | Shared /health constant is DRY. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_health.py |
+| `CR-20260816-C-S06-infra-adapters-133` | reject | None | str()-coerce accession before strip is defensive; hook already receives strings. | src/bioetl/infrastructure/adapters/uniprot/client.py |
+| `CR-20260816-C-S06-infra-adapters-134` | reject | None | Reuse description constant is DRY. | src/bioetl/infrastructure/adapters/uniprot/_uniprot_model_structures.py |
+| `CR-20260816-C-S06-infra-adapters-135` | reject | None | Apply limiter/breaker/timeout inside _run_in_executor is policy expansion for an already-shipped sync adapter. | src/bioetl/infrastructure/adapters/sync_base.py |
+| `CR-20260816-C-S06-infra-adapters-136` | reject | None | Route submit/fetch through deps is style; both already hit the same host methods. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_transport.py |
+| `CR-20260816-C-S06-infra-adapters-137` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/_client_support.py |
+| `CR-20260816-C-S06-infra-adapters-138` | reject | None | Derive UNIPROT_RECORD_MODELS from strategies is DRY/test-only coupling. | src/bioetl/infrastructure/adapters/uniprot/_uniprot_model_records.py |
+| `CR-20260816-C-S06-infra-adapters-139` | reject | None | Coerce taxonId/from types is annotation/validation tightening. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_parser.py |
+| `CR-20260816-C-S06-infra-adapters-140` | reject | None | Drop **legacy_ports is an already-shipped constructor API rewrite. | src/bioetl/infrastructure/adapters/uniprot/client.py |
+| `CR-20260816-C-S06-infra-adapters-141` | reject | None | Relax UniProt model required fields is a contract expansion. | src/bioetl/infrastructure/adapters/uniprot/_uniprot_model_structures.py |
+| `CR-20260816-C-S06-infra-adapters-142` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/_uniprot_model_annotations.py |
+| `CR-20260816-C-S06-infra-adapters-143` | reject | None | _closed flag for idempotent close is lifecycle style. | src/bioetl/infrastructure/adapters/sync_base.py |
+| `CR-20260816-C-S06-infra-adapters-144` | reject | None | Test-only UniProt fetch dispatch coverage plus inventory refresh. | src/bioetl/infrastructure/adapters/uniprot/client.py |
+| `CR-20260816-C-S06-infra-adapters-145` | reject | None | HEALTHY fallback for unmapped HealthStatus is policy polish. | src/bioetl/infrastructure/adapters/http/_health_monitor_transitions.py |
+| `CR-20260816-C-S06-infra-adapters-146` | reject | None | Guard missing response.request is defensive; collector is not on the write path. | src/bioetl/infrastructure/adapters/common/api_request_collector.py |
+| `CR-20260816-C-S06-infra-adapters-147` | reject | None | Class-level health thresholds vs instance fields is config/style. | src/bioetl/infrastructure/adapters/http/_health_monitor_transitions.py |
+| `CR-20260816-C-S06-infra-adapters-148` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/http/client_retry_observability.py |
+| `CR-20260816-C-S06-infra-adapters-149` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/client.py |
+| `CR-20260816-C-S06-infra-adapters-150` | reject | None | Return copied health-state snapshots is defensive immutability style. | src/bioetl/infrastructure/adapters/http/health_monitor.py |
+| `CR-20260816-C-S06-infra-adapters-151` | reject | None | Reject unused UniProt offset is API-surface expansion; del offset is the shipped paging contract. | src/bioetl/infrastructure/adapters/uniprot/client.py |
+| `CR-20260816-C-S06-infra-adapters-152` | reject | None | Fail fast on 4xx during poll is timeout-error taxonomy; job still does not succeed. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_retry.py |
+| `CR-20260816-C-S06-infra-adapters-153` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/http/health.py |
+| `CR-20260816-C-S06-infra-adapters-154` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_health.py |
+| `CR-20260816-C-S06-infra-adapters-155` | reject | None | Richer Link-header parser is pagination hardening; current rel="next" form is the UniProt default. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_parser.py _get_next_page_url |
+| `CR-20260816-C-S06-infra-adapters-156` | reject | None | Catch JSON decode in the poll loop is resilience polish; decode errors already escape rather than succeed. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_retry.py |
+| `CR-20260816-C-S06-infra-adapters-157` | reject | None | dataclass field(init=False) for _states is style. | src/bioetl/infrastructure/adapters/http/health_monitor.py |
+| `CR-20260816-C-S06-infra-adapters-158` | reject | None | float() wrap for gauge is telemetry typing. | src/bioetl/infrastructure/adapters/http/_health_monitor_observability.py |
+| `CR-20260816-C-S06-infra-adapters-159` | confirm | None | Non-200 or non-dict ID-mapping pages break pagination and leave empty entry lists, so _resolve_entries reports those IDs as not_found. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_transport.py:132-164 |
+| `CR-20260816-C-S06-infra-adapters-160` | reject | None | Clear _client before aclose is lifecycle style; nested depth already tracked. | src/bioetl/infrastructure/adapters/http/client_context_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-161` | reject | None | Reject unknown factory kwargs is API-hardening. | src/bioetl/infrastructure/adapters/uniprot/_client_support.py |
+| `CR-20260816-C-S06-infra-adapters-162` | reject | None | Explicit default=None on init=False fields is annotation-only. | src/bioetl/infrastructure/adapters/http/client.py |
+| `CR-20260816-C-S06-infra-adapters-163` | reject | None | Offload thread_pool.shutdown is event-loop perf. | src/bioetl/infrastructure/adapters/sync_base.py |
+| `CR-20260816-C-S06-infra-adapters-164` | reject | None | Mark span failed on last_error is telemetry. | src/bioetl/infrastructure/adapters/http/client_retry_observability.py |
+| `CR-20260816-C-S06-infra-adapters-165` | reject | None | HTTP-date Retry-After parsing is retry-policy expansion; numeric path already works. | src/bioetl/infrastructure/adapters/http/client_retry_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-166` | reject | None | Quoted CircuitBreakerSnapshot return annotation is typing-only. | src/bioetl/infrastructure/adapters/http/circuit_breaker.py |
+| `CR-20260816-C-S06-infra-adapters-167` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/http/client_request_methods_mixin.py |
+| `CR-20260816-C-S06-infra-adapters-168` | reject | None | Copy selected mapping entry / tolerate '5.0' scores is defensive; int() still fail-closes malformed scores. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_parser.py _select_primary_entry |
+| `CR-20260816-C-S06-infra-adapters-169` | reject | critical | start_as_current_span is typed to return SpanLike; extra context-manager wrapper is Protocol expansion. | src/bioetl/infrastructure/adapters/http/client_retry_observability.py start_request_span |
+| `CR-20260816-C-S06-infra-adapters-170` | reject | critical | Annotation-only required fields are a typing/API style request, not an invariant breach. | src/bioetl/infrastructure/adapters/http/client.py |
+| `CR-20260816-C-S08-infra-observability-001` | reject | minor | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/_metrics_defs_core.py |
+| `CR-20260816-C-S08-infra-observability-002` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/__init__.py |
+| `CR-20260816-C-S08-infra-observability-003` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/anomaly/__init__.py |
+| `CR-20260816-C-S08-infra-observability-004` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/anomaly/__init__.py |
+| `CR-20260816-C-S08-infra-observability-005` | confirm | minor | AnomalyDetector accepts min_baseline_samples > baseline_window, so the detector can never accumulate enough samples and silently never fires. | src/bioetl/infrastructure/observability/anomaly/detector.py:48-58 |
+| `CR-20260816-C-S08-infra-observability-006` | reject | major | Skip baseline update on any anomaly is a policy change; current contract skips only CRITICAL. | src/bioetl/infrastructure/observability/anomaly/monitor.py:131-140 |
+| `CR-20260816-C-S08-infra-observability-007` | reject | minor | Reject negative z-threshold / strict > is detector-policy tightening. | src/bioetl/infrastructure/observability/anomaly/detectors/zscore.py |
+| `CR-20260816-C-S08-infra-observability-008` | reject | major | Test-only log_error/log_debug spies. | src/bioetl/infrastructure/observability/logging_helpers.py |
+| `CR-20260816-C-S08-infra-observability-009` | reject | minor | None vs empty enabled_breakpoints is a shipped default-all-breakpoints contract. | src/bioetl/infrastructure/observability/debug_adapters.py |
+| `CR-20260816-C-S08-infra-observability-010` | reject | major | Test-only gateway adapter delegation. | src/bioetl/infrastructure/observability/metrics_publisher_adapter.py |
+| `CR-20260816-C-S08-infra-observability-011` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/metrics_collector.py |
+| `CR-20260816-C-S08-infra-observability-012` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/metrics_server_adapter.py |
+| `CR-20260816-C-S08-infra-observability-013` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/logging.py |
+| `CR-20260816-C-S08-infra-observability-014` | reject | major | Test-only metrics facade export identity. | src/bioetl/infrastructure/observability/metrics.py |
+| `CR-20260816-C-S08-infra-observability-015` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/health_metrics_exposition.py |
+| `CR-20260816-C-S08-infra-observability-016` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/circuit_breaker_mapping.py |
+| `CR-20260816-C-S08-infra-observability-017` | reject | major | Bounded run_type vocabulary is a metric-label policy expansion. | src/bioetl/infrastructure/observability/_prometheus_metric_label_dispatch_policy.py |
+| `CR-20260816-C-S08-infra-observability-018` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/_prometheus_metric_label_normalizers.py |
+| `CR-20260816-C-S08-infra-observability-019` | reject | major | Approved-only grouping labels are a gateway-label policy expansion. | src/bioetl/infrastructure/observability/_metrics_gateway_publication.py |
+| `CR-20260816-C-S08-infra-observability-020` | reject | major | retry_count/retry_delay pre-validation is config hardening of the shipped loop. | src/bioetl/infrastructure/observability/_metrics_server_startup.py |
+| `CR-20260816-C-S08-infra-observability-021` | reject | major | Redact gateway target in delete logs is hardening without a reproduced secret leak on that path. | src/bioetl/infrastructure/observability/_metrics_gateway_publication.py |
+| `CR-20260816-C-S08-infra-observability-022` | confirm | major | Authorization redaction regex consumes only [\w-]+, so 'Authorization: Bearer <token>' redacts Bearer and leaves the token in logs. | src/bioetl/infrastructure/observability/logging_config.py:49-52 |
+| `CR-20260816-C-S08-infra-observability-023` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/prometheus_metrics.py |
+| `CR-20260816-C-S08-infra-observability-024` | reject | major | Coverage-inventory refresh is not an invariant hole. | src/bioetl/infrastructure/observability/noop_logger.py |
+| `CR-20260816-C-S08-infra-observability-025` | reject | major | Changing start_metrics_server default addr from 0.0.0.0 is a shipped-API change. | src/bioetl/infrastructure/observability/server.py:46-48 |
+| `CR-20260816-C-S08-infra-observability-026` | reject | major | Drop run_id/pipeline from extra is bind-context policy; extra already cannot overwrite existing sanitized keys. | src/bioetl/infrastructure/observability/unified_logger.py:176-180 |
+| `CR-20260816-C-S08-infra-observability-027` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/tracing.py |
+| `CR-20260816-C-S08b-infra-residual-001` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/audit/__init__.py |
+| `CR-20260816-C-S08b-infra-residual-002` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/arrow_typed.py |
+| `CR-20260816-C-S08b-infra-residual-003` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/adr/fs_adr_service.py |
+| `CR-20260816-C-S08b-infra-residual-004` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/adr/_adr_file_utils.py |
+| `CR-20260816-C-S08b-infra-residual-005` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/arrow_typed.py |
+| `CR-20260816-C-S08b-infra-residual-006` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/audit/file_audit.py |
+| `CR-20260816-C-S08b-infra-residual-007` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/audit/_file_audit_payloads.py |
+| `CR-20260816-C-S08b-infra-residual-008` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/audit/_file_audit_io.py |
+| `CR-20260816-C-S08b-infra-residual-009` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/audit/_file_audit_io.py |
+| `CR-20260816-C-S08b-infra-residual-010` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/_dq_config_validation_merge.py |
+| `CR-20260816-C-S08b-infra-residual-011` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/_yaml_settings_source.py |
+| `CR-20260816-C-S08b-infra-residual-012` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/config/composite_config_api.py |
+| `CR-20260816-C-S08b-infra-residual-013` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/chembl_policy_registry_loader.py |
+| `CR-20260816-C-S08b-infra-residual-014` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/composite_config_api.py |
+| `CR-20260816-C-S08b-infra-residual-015` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/base_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-016` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/_retry_settings.py |
+| `CR-20260816-C-S08b-infra-residual-017` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/base_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-018` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/_settings_validation.py |
+| `CR-20260816-C-S08b-infra-residual-019` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/chembl_policy_registry_loader.py |
+| `CR-20260816-C-S08b-infra-residual-020` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/composite_config_api.py |
+| `CR-20260816-C-S08b-infra-residual-021` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/config/chembl_policy_registry_loader.py |
+| `CR-20260816-C-S08b-infra-residual-022` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/_dq_config_validation_merge.py |
+| `CR-20260816-C-S08b-infra-residual-023` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/config/_yaml_settings_source.py |
+| `CR-20260816-C-S08b-infra-residual-024` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/config/workflow_config_api.py |
+| `CR-20260816-C-S08b-infra-residual-025` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/__init__.py |
+| `CR-20260816-C-S08b-infra-residual-026` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config_loader_filtering.py |
+| `CR-20260816-C-S08b-infra-residual-027` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/semantic_field_registry_loader.py |
+| `CR-20260816-C-S08b-infra-residual-028` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/config/staged_enforcement_policy_loader.py |
+| `CR-20260816-C-S08b-infra-residual-029` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/source_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-030` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/workflow_config_api.py |
+| `CR-20260816-C-S08b-infra-residual-031` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/config_merge.py |
+| `CR-20260816-C-S08b-infra-residual-032` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/staged_enforcement_policy_loader.py |
+| `CR-20260816-C-S08b-infra-residual-033` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/config/reason_catalog_loader.py |
+| `CR-20260816-C-S08b-infra-residual-034` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/checkpoint/_local_checkpoint_io.py |
+| `CR-20260816-C-S08b-infra-residual-035` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/checkpoint/_local_checkpoint_sync.py |
+| `CR-20260816-C-S08b-infra-residual-036` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/checkpoint/_local_checkpoint_sync.py |
+| `CR-20260816-C-S08b-infra-residual-037` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/_base.py |
+| `CR-20260816-C-S08b-infra-residual-038` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/config/_composite_config_paths.py |
+| `CR-20260816-C-S08b-infra-residual-039` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/checkpoint/local_checkpoint.py |
+| `CR-20260816-C-S08b-infra-residual-040` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/checkpoint/_local_checkpoint_sync.py |
+| `CR-20260816-C-S08b-infra-residual-041` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/checkpoint/_local_checkpoint_sync.py |
+| `CR-20260816-C-S08b-infra-residual-042` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/checkpoint/local_checkpoint.py |
+| `CR-20260816-C-S08b-infra-residual-043` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/config/source_normalizers/source.py |
+| `CR-20260816-C-S08b-infra-residual-044` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/validation/contract_validator.py |
+| `CR-20260816-C-S08b-infra-residual-045` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/validation/contract_validator.py |
+| `CR-20260816-C-S08b-infra-residual-046` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/validation/pandera_validator.py |
+| `CR-20260816-C-S08b-infra-residual-047` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/validation/contract_validator.py |
+| `CR-20260816-C-S08b-infra-residual-048` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/pipeline_contract_policy.py |
+| `CR-20260816-C-S08b-infra-residual-049` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/silver_publication_field_blocks.py |
+| `CR-20260816-C-S08b-infra-residual-050` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/silver_publication_field_blocks.py |
+| `CR-20260816-C-S08b-infra-residual-051` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/silver_common_field_blocks.py |
+| `CR-20260816-C-S08b-infra-residual-052` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_contract_policy.py |
+| `CR-20260816-C-S08b-infra-residual-053` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/source_config.py |
+| `CR-20260816-C-S08b-infra-residual-054` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/silver_chembl_core.py |
+| `CR-20260816-C-S08b-infra-residual-055` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/silver_chembl_core.py |
+| `CR-20260816-C-S08b-infra-residual-056` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/silver_chembl_extended.py |
+| `CR-20260816-C-S08b-infra-residual-057` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/silver_compounds.py |
+| `CR-20260816-C-S08b-infra-residual-058` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/dq_report_writer.py |
+| `CR-20260816-C-S08b-infra-residual-059` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/locking/memory_lock.py |
+| `CR-20260816-C-S08b-infra-residual-060` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/debug_export_ops.py |
+| `CR-20260816-C-S08b-infra-residual-061` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/locking/memory_lock.py |
+| `CR-20260816-C-S08b-infra-residual-062` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/csv_exporter.py |
+| `CR-20260816-C-S08b-infra-residual-063` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/debug_export_adapter.py |
+| `CR-20260816-C-S08b-infra-residual-064` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/export/export_writer_adapter.py |
+| `CR-20260816-C-S08b-infra-residual-065` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/debug_export_adapter.py |
+| `CR-20260816-C-S08b-infra-residual-066` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/export_catalog_adapter.py |
+| `CR-20260816-C-S08b-infra-residual-067` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/csv_exporter_io_ops.py |
+| `CR-20260816-C-S08b-infra-residual-068` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/locking/memory_lock.py |
+| `CR-20260816-C-S08b-infra-residual-069` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/debug_export_ops.py |
+| `CR-20260816-C-S08b-infra-residual-070` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/dq_report_writer.py |
+| `CR-20260816-C-S08b-infra-residual-071` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/csv_exporter_table_ops.py |
+| `CR-20260816-C-S08b-infra-residual-072` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/serialization/encoders.py |
+| `CR-20260816-C-S08b-infra-residual-073` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/system/memory_monitor.py |
+| `CR-20260816-C-S08b-infra-residual-074` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/workflow_config.py |
+| `CR-20260816-C-S08b-infra-residual-075` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/security/pii_hasher.py |
+| `CR-20260816-C-S08b-infra-residual-076` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/serialization/encoders.py |
+| `CR-20260816-C-S08b-infra-residual-077` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/workflow_config.py |
+| `CR-20260816-C-S08b-infra-residual-078` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/workflow_config.py |
+| `CR-20260816-C-S08b-infra-residual-079` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/serialization/encoders.py |
+| `CR-20260816-C-S08b-infra-residual-080` | confirm | critical | source_keys=[] is not None so the pair-present check passes; empty composite keys are accepted for a destructive reconcile. | src/bioetl/infrastructure/schemas/workflow_config_fk.py _normalize_fk_required_names / _require_fk_key_pairs_present |
+| `CR-20260816-C-S08b-infra-residual-081` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/system/memory_monitor.py |
+| `CR-20260816-C-S08b-infra-residual-082` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/source_config.py |
+| `CR-20260816-C-S08b-infra-residual-083` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/security/pii_hasher.py |
+| `CR-20260816-C-S08b-infra-residual-084` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/csv_exporter.py |
+| `CR-20260816-C-S08b-infra-residual-085` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/system/memory_monitor.py |
+| `CR-20260816-C-S08b-infra-residual-086` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/security/__init__.py |
+| `CR-20260816-C-S08b-infra-residual-087` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/time/system_clock.py |
+| `CR-20260816-C-S08b-infra-residual-088` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/_composite_config_merge_schema.py |
+| `CR-20260816-C-S08b-infra-residual-089` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/_composite_config_merge_schema.py |
+| `CR-20260816-C-S08b-infra-residual-090` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/filtered_manifest_support.py |
+| `CR-20260816-C-S08b-infra-residual-091` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/filtered_reads.py |
+| `CR-20260816-C-S08b-infra-residual-092` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/unified.py |
+| `CR-20260816-C-S08b-infra-residual-093` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/_timeseries.py |
+| `CR-20260816-C-S08b-infra-residual-094` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/status_events.py |
+| `CR-20260816-C-S08b-infra-residual-095` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/filtered_reads.py |
+| `CR-20260816-C-S08b-infra-residual-096` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/filtered_read_support.py |
+| `CR-20260816-C-S08b-infra-residual-097` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/_composite_config_merge_schema.py |
+| `CR-20260816-C-S08b-infra-residual-098` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/unified.py |
+| `CR-20260816-C-S08b-infra-residual-099` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/system/memory_monitor.py |
+| `CR-20260816-C-S08b-infra-residual-100` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_raw_run_manifest_inspection.py |
+| `CR-20260816-C-S08b-infra-residual-101` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_file_run_ledger_helpers.py |
+| `CR-20260816-C-S08b-infra-residual-102` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/_file_lineage_index.py |
+| `CR-20260816-C-S08b-infra-residual-103` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_runtime_protections.py |
+| `CR-20260816-C-S08b-infra-residual-104` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_manifest_protections.py |
+| `CR-20260816-C-S08b-infra-residual-105` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/_file_lineage_index.py |
+| `CR-20260816-C-S08b-infra-residual-106` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/_file_lineage_queries.py |
+| `CR-20260816-C-S08b-infra-residual-107` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_runtime_protections.py |
+| `CR-20260816-C-S08b-infra-residual-108` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_surfaces.py |
+| `CR-20260816-C-S08b-infra-residual-109` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_file_run_ledger_helpers.py |
+| `CR-20260816-C-S08b-infra-residual-110` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/publication_controlled_vocabulary_loader.py |
+| `CR-20260816-C-S08b-infra-residual-111` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/config/field_group_loader.py |
+| `CR-20260816-C-S08b-infra-residual-112` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/pipeline_normalizers.py |
+| `CR-20260816-C-S08b-infra-residual-113` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/pipeline_normalizers.py |
+| `CR-20260816-C-S08b-infra-residual-114` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/filtered_reads.py |
+| `CR-20260816-C-S08b-infra-residual-115` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/config/pipeline_normalizers.py |
+| `CR-20260816-C-S08b-infra-residual-116` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/pipeline_payload_normalization.py |
+| `CR-20260816-C-S08b-infra-residual-117` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/record_encoding.py |
+| `CR-20260816-C-S08b-infra-residual-118` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_file_run_manifest_persistence.py |
+| `CR-20260816-C-S08b-infra-residual-119` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/pipeline_config_api.py |
+| `CR-20260816-C-S08b-infra-residual-120` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/publication_type_classification_loader.py |
+| `CR-20260816-C-S08b-infra-residual-121` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/config/pipeline_config_api.py |
+| `CR-20260816-C-S08b-infra-residual-122` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/field_group_loader.py |
+| `CR-20260816-C-S08b-infra-residual-123` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_manifest_protections.py |
+| `CR-20260816-C-S08b-infra-residual-124` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_raw_run_manifest_inspection.py |
+| `CR-20260816-C-S08b-infra-residual-125` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/_run_manifest_scope_rebuild.py |
+| `CR-20260816-C-S08b-infra-residual-126` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_reasons.py |
+| `CR-20260816-C-S08b-infra-residual-127` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/artifact_byte_comparison.py |
+| `CR-20260816-C-S08b-infra-residual-128` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py |
+| `CR-20260816-C-S08b-infra-residual-129` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/enum_file_loader.py |
+| `CR-20260816-C-S08b-infra-residual-130` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/statistics_support.py |
+| `CR-20260816-C-S08b-infra-residual-131` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/pipeline_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-132` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/filtered_manifest_support.py |
+| `CR-20260816-C-S08b-infra-residual-133` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/enum_file_loader.py |
+| `CR-20260816-C-S08b-infra-residual-134` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/pipeline_normalizers.py |
+| `CR-20260816-C-S08b-infra-residual-135` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/field_group_loader.py |
+| `CR-20260816-C-S08b-infra-residual-136` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_contract_registry_store.py |
+| `CR-20260816-C-S08b-infra-residual-137` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_raw_run_manifest_nested_validation.py |
+| `CR-20260816-C-S08b-infra-residual-138` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/enum_loader_adapter.py |
+| `CR-20260816-C-S08b-infra-residual-139` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_file_lineage_index.py |
+| `CR-20260816-C-S08b-infra-residual-140` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_payloads.py |
+| `CR-20260816-C-S08b-infra-residual-141` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py |
+| `CR-20260816-C-S08b-infra-residual-142` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/publication_controlled_vocabulary_loader.py |
+| `CR-20260816-C-S08b-infra-residual-143` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_payloads.py |
+| `CR-20260816-C-S08b-infra-residual-144` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/pipeline_payload_normalization.py |
+| `CR-20260816-C-S08b-infra-residual-145` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_reasons.py |
+| `CR-20260816-C-S08b-infra-residual-146` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py |
+| `CR-20260816-C-S08b-infra-residual-147` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_run_manifest_scope_index.py |
+| `CR-20260816-C-S08b-infra-residual-148` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_store.py |
+| `CR-20260816-C-S08b-infra-residual-149` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_file_run_manifest_persistence.py |
+| `CR-20260816-C-S08b-infra-residual-150` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/artifact_byte_comparison.py |
+| `CR-20260816-C-S08b-infra-residual-151` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/serialization/encoders.py |
+| `CR-20260816-C-S08b-infra-residual-152` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/filter_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-153` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_quality_scorecard.py |
+| `CR-20260816-C-S08b-infra-residual-154` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_task_support.py |
+| `CR-20260816-C-S08b-infra-residual-155` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/exemptions_registry_policy.py |
+| `CR-20260816-C-S08b-infra-residual-156` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_quality_scorecard.py |
+| `CR-20260816-C-S08b-infra-residual-157` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py |
+| `CR-20260816-C-S08b-infra-residual-158` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/debt_scorecard.py |
+| `CR-20260816-C-S08b-infra-residual-159` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/exemptions_registry_paths.py |
+| `CR-20260816-C-S08b-infra-residual-160` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_quality_scorecard.py |
+| `CR-20260816-C-S08b-infra-residual-161` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/exemptions_registry_access.py |
+| `CR-20260816-C-S08b-infra-residual-162` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/quarantine/_pyarrow_helpers.py |
+| `CR-20260816-C-S08b-infra-residual-163` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/quarantine/_statistics.py |
+| `CR-20260816-C-S08b-infra-residual-164` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/quarantine/_inspection.py |
+| `CR-20260816-C-S08b-infra-residual-165` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/exemptions_registry_validation.py |
+| `CR-20260816-C-S08b-infra-residual-166` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/_statistics.py |
+| `CR-20260816-C-S08b-infra-residual-167` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/quarantine/_lifecycle.py |
+| `CR-20260816-C-S08b-infra-residual-168` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/exemptions_registry_targets.py |
+| `CR-20260816-C-S08b-infra-residual-169` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/registry_sync_service.py |
+| `CR-20260816-C-S08b-infra-residual-170` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/budget_evaluator.py |
+| `CR-20260816-C-S08b-infra-residual-171` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/inventory.py |
+| `CR-20260816-C-S08b-infra-residual-172` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/scoring.py |
+| `CR-20260816-C-S08b-infra-residual-173` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_task_policy.py |
+| `CR-20260816-C-S08b-infra-residual-174` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/_inspection.py |
+| `CR-20260816-C-S08b-infra-residual-175` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/exemptions_registry_paths.py |
+| `CR-20260816-C-S08b-infra-residual-176` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/scoring.py |
+| `CR-20260816-C-S08b-infra-residual-177` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/scoring.py |
+| `CR-20260816-C-S08b-infra-residual-178` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/_inspection.py |
+| `CR-20260816-C-S08b-infra-residual-179` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/registry_sync_service.py |
+| `CR-20260816-C-S08b-infra-residual-180` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_governance_validation.py |
+| `CR-20260816-C-S08b-infra-residual-181` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/quality/architecture_debt_reduction.py |
+| `CR-20260816-C-S08b-infra-residual-182` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/quality/_quarterly_targets_validation.py |
+| `CR-20260816-C-S08b-infra-residual-183` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_artifact_tasks.py |
+| `CR-20260816-C-S08b-infra-residual-184` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_execution_state_store.py |
+| `CR-20260816-C-S08b-infra-residual-185` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_ledger_store.py |
+| `CR-20260816-C-S08b-infra-residual-186` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/errors/exception_mapper.py |
+| `CR-20260816-C-S08b-infra-residual-187` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_ledger_store.py |
+| `CR-20260816-C-S08b-infra-residual-188` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/errors/exception_mapper.py |
+| `CR-20260816-C-S08b-infra-residual-189` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_manifest_store.py |
+| `CR-20260816-C-S08b-infra-residual-190` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_reduction.py |
+| `CR-20260816-C-S08b-infra-residual-191` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py |
+| `CR-20260816-C-S08b-infra-residual-192` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_execution_state_store.py |
+| `CR-20260816-C-S08b-infra-residual-193` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py |
+| `CR-20260816-C-S08b-infra-residual-194` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_run_manifest_store.py |
+| `CR-20260816-C-S08b-infra-residual-195` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py |
+| `CR-20260816-C-S08b-infra-residual-196` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/errors/exception_mapper.py |
+| `CR-20260816-C-S08b-infra-residual-197` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_baseline_validation.py |
+| `CR-20260816-C-S08b-infra-residual-198` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py |
+| `CR-20260816-C-S08b-infra-residual-199` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_manifest_store.py |
+| `CR-20260816-C-S08b-infra-residual-200` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py |
+| `CR-20260816-C-S08b-infra-residual-201` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_run_ledger_store.py |
+| `CR-20260816-C-S08b-infra-residual-202` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_decomposition_program_policy.py |
+| `CR-20260816-C-S08b-infra-residual-203` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_decomposition_owner_policy.py |
+| `CR-20260816-C-S08b-infra-residual-204` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/debt_scorecard.py |
+| `CR-20260816-C-S08b-infra-residual-205` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_primitives.py |
+| `CR-20260816-C-S08b-infra-residual-206` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_decomposition_owner_policy.py |
+| `CR-20260816-C-S08b-infra-residual-207` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_quarterly_targets_validation.py |
+| `CR-20260816-C-S08b-infra-residual-208` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_artifact_tasks.py |
+| `CR-20260816-C-S08b-infra-residual-209` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/_statistics.py |
+| `CR-20260816-C-S08b-infra-residual-210` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_artifact_tasks.py |
+| `CR-20260816-C-S08b-infra-residual-211` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py |
+| `CR-20260816-C-S08b-infra-residual-212` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_quarterly_targets_validation.py |
+| `CR-20260816-C-S08b-infra-residual-213` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_reduction.py |
+| `CR-20260816-C-S08b-infra-residual-214` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_artifact_tasks.py |
+| `CR-20260816-C-S08b-infra-residual-215` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_grace_windows_validation.py |
+| `CR-20260816-C-S08b-infra-residual-216` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_decomposition_burndown_policy.py |
+| `CR-20260816-C-S08b-infra-residual-217` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py |
+| `CR-20260816-C-S08b-infra-residual-218` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_manifest_store.py |
+| `CR-20260816-C-S08b-infra-residual-219` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/report_formatter.py |
+| `CR-20260816-C-S08b-infra-residual-220` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_primitives.py |
+| `CR-20260816-C-S08b-infra-residual-221` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_baseline_validation.py |
+| `CR-20260816-C-S08b-infra-residual-222` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_reduction.py |
+| `CR-20260816-C-S08b-infra-residual-223` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_governance_validation.py |
+| `CR-20260816-C-S08b-infra-residual-224` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_governance_validation.py |
+| `CR-20260816-C-S08b-infra-residual-225` | reject | critical | overwrite fallback runs only on TableNotFoundError to create the first event table; it does not clobber an existing table. | src/bioetl/infrastructure/quarantine/status_events.py |
+| `CR-20260816-C-S08b-infra-residual-226` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/exemptions_registry_validation.py |
+| `CR-20260816-C-S08b-infra-residual-227` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_task_generation.py |
+| `CR-20260816-C-S08b-infra-residual-228` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_lineage_store.py |
+| `CR-20260816-C-S08b-infra-residual-229` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_task_support.py |
+| `CR-20260816-C-S08b-infra-residual-230` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/scoring.py |
+| `CR-20260816-C-S08b-infra-residual-231` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/_lifecycle.py |
+| `CR-20260816-C-S08b-infra-residual-232` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/entity_filter_metadata_registry.py |
+| `CR-20260816-C-S08b-infra-residual-233` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/config/dq_config_resolution.py |
+| `CR-20260816-C-S08b-infra-residual-234` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/entity_filter_metadata_registry.py |
+| `CR-20260816-C-S08b-infra-residual-235` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_policy_loader.py |
+| `CR-20260816-C-S08b-infra-residual-236` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/config/contract_registry_loader.py |
+| `CR-20260816-C-S08b-infra-residual-237` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/dq_contract_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-238` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_policy_validation.py |
+| `CR-20260816-C-S08b-infra-residual-239` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/dq_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-240` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/dq_contract_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-241` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/dq_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-242` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_registry_loader.py |
+| `CR-20260816-C-S08b-infra-residual-243` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/config_ci_contract.py |
+| `CR-20260816-C-S08b-infra-residual-244` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/config_ci_contract.py |
+| `CR-20260816-C-S08b-infra-residual-245` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/dq_contract_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-246` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/config_root.py |
+| `CR-20260816-C-S08b-infra-residual-247` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_policy_loader.py |
+| `CR-20260816-C-S08b-infra-residual-248` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/config/domain_config_resolver.py |
+| `CR-20260816-C-S08b-infra-residual-249` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_policy_validation.py |
+| `CR-20260816-C-S08b-infra-residual-250` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_policy_loader.py |
+| `CR-20260816-C-S08b-infra-residual-251` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/converters.py |
+| `CR-20260816-C-S08b-infra-residual-252` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/dq_config_resolution.py |
+| `CR-20260816-C-S08b-infra-residual-253` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/converters.py |
+| `CR-20260816-C-S08b-infra-residual-254` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/config_root.py |
+| `CR-20260816-C-S08b-infra-residual-255` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_policy_validation.py |
+| `CR-20260816-C-S08b-infra-residual-256` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/config/dq_contract_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-257` | reject | critical | config_helpers.load_config is an unused placeholder; CLI composite load uses composition.composite_api.load_composite_config. | src/bioetl/interfaces/cli/commands/domains/composite/execution.py load_composite_config |
+| `CR-20260816-C-S08b-infra-residual-258` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/entity_filter_metadata_registry.py |
+| `CR-20260816-C-S08b-infra-residual-259` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/dq_contract_config_loader.py |
+| `CR-20260816-C-S08b-infra-residual-260` | reject | critical | Network-drive YAML load already fail-closes via Future.result(timeout=); OS-level kill is an enhancement. | src/bioetl/infrastructure/config/contract_registry_loader.py _load_yaml_with_timeout |
+| `CR-20260816-C-S08b-infra-residual-261` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/filter_config.py |
+| `CR-20260816-C-S08b-infra-residual-262` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/composite_validation.py |
+| `CR-20260816-C-S08b-infra-residual-263` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/filter_config.py |
+| `CR-20260816-C-S08b-infra-residual-264` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_config.py |
+| `CR-20260816-C-S08b-infra-residual-265` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/composite_config_base.py |
+| `CR-20260816-C-S08b-infra-residual-266` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/dq_config.py |
+| `CR-20260816-C-S08b-infra-residual-267` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/composite_validation.py |
+| `CR-20260816-C-S08b-infra-residual-268` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/base_schemas_chembl.py |
+| `CR-20260816-C-S08b-infra-residual-269` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/composite_config_base.py |
+| `CR-20260816-C-S08b-infra-residual-270` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/composite_config.py |
+| `CR-20260816-C-S08b-infra-residual-271` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/base_schemas.py |
+| `CR-20260816-C-S08b-infra-residual-272` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py |
+| `CR-20260816-C-S08b-infra-residual-273` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/filter_config.py |
+| `CR-20260816-C-S08b-infra-residual-274` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/composite_config.py |
+| `CR-20260816-C-S08b-infra-residual-275` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/dq_report_config.py |
+| `CR-20260816-C-S08b-infra-residual-276` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py |
+| `CR-20260816-C-S08b-infra-residual-277` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/dq_report_config.py |
+| `CR-20260816-C-S08b-infra-residual-278` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/base_schemas_chembl.py |
+| `CR-20260816-C-S08b-infra-residual-279` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/composite_validation.py |
+| `CR-20260816-C-S08b-infra-residual-280` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_registry_loader.py |
+| `CR-20260816-C-S08b-infra-residual-281` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_config.py |
+| `CR-20260816-C-S08b-infra-residual-282` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/dq_config.py |
+| `CR-20260816-C-S08b-infra-residual-283` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/base_schemas_pubchem.py |
+| `CR-20260816-C-S08b-infra-residual-284` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py |
+| `CR-20260816-C-S08b-infra-residual-285` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_config_common.py |
+| `CR-20260816-C-S08b-infra-residual-286` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/dq_config.py |
+| `CR-20260816-C-S08b-infra-residual-287` | reject | minor | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/filter_config.py |
+| `CR-20260816-C-S08b-infra-residual-288` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/base_schemas_chembl.py |
+| `CR-20260816-C-S08b-infra-residual-289` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py |
+| `CR-20260816-C-S08b-infra-residual-290` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/base_schemas.py |
+| `CR-20260816-C-S08b-infra-residual-291` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_config.py |
+| `CR-20260816-C-S08b-infra-residual-292` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_config_common.py |
+| `CR-20260816-D-S-D-security-residual-001` | reject | major | Stricter persisted OPENAI_API_KEY shape is helper-policy tightening. | scripts/ai/codex/helper/codex-auth-lib.sh |
+| `CR-20260816-D-S-D-security-residual-002` | reject | minor | print vs logger in a local patch script is style. | scripts/ai/mcp/_patch_grok_mcp_tokens.py |
+| `CR-20260816-D-S-D-security-residual-003` | reject | major | Section-scoped idempotency check is helper hardening without a reproduced missed patch. | scripts/ai/mcp/_patch_grok_mcp_tokens.py |
+| `CR-20260816-D-S-D-security-residual-004` | confirm | major | _looks_redacted treats any substring in REDACTED_MARKERS as redacted, so real tokens containing test/example/redacted are silently accepted. | scripts/engineering/qa/vcr/check_vcr_secrets.py:27-34 |
+| `CR-20260816-D-S-D-security-residual-005` | reject | major | Test-only bump_timeouts/wire_ref coverage. | scripts/ai/mcp/_patch_grok_mcp_tokens.py |
+| `CR-20260816-D-S-D-security-residual-006` | reject | major | Test-only codex_has_usable_auth coverage. | scripts/ai/codex/helper/codex-auth-lib.sh |
+| `CR-20260816-D-S-D-security-residual-007` | reject | major | Test-only salt-rotation state machine coverage. | scripts/ops/maintenance/security/salt_rotate.py |
+| `CR-20260816-D-S-D-security-residual-008` | reject | major | Operator salt handoff via env_updates is the shipped CLI contract, not a reproduced log leak. | scripts/ops/maintenance/security/salt_rotate.py |
+| `CR-20260816-D-S-D-security-residual-009` | reject | major | Test-only token_validation.sh/.ps1 parity. | scripts/ai/mcp/support/token_validation.ps1 |
+| `CR-20260816-D-S-D-security-residual-010` | reject | major | CLI paths / dry-run / atomic write are feature expansion of a local helper. | scripts/ai/mcp/_patch_grok_mcp_tokens.py |
+| `CR-20260816-D-S-D-security-residual-011` | reject | minor | Docs/docstring-only request; reject class for this campaign. | scripts/ops/maintenance/security/salt_rotate.py |
+| `CR-20260816-D-S-D-security-residual-012` | confirm | major | complete_rotation promotes ENV_SALT_NEXT without enforcing MIN_SALT_LENGTH, so a short next salt becomes current. | scripts/ops/maintenance/security/salt_rotate.py:247-258 |
+| `CR-20260816-D-S-D-security-residual-013` | reject | trivial | Remove unused allowed_files is test-style. | tests/security/test_sql_injection_prevention.py |
+| `CR-20260816-D-S-D-security-residual-014` | reject | major | Move duplicated fixture to conftest is DRY/test-style. | tests/security/test_sql_injection_prevention.py |
+| `CR-20260816-D-S-D-security-residual-015` | reject | trivial | Split excluded_dirs/files is test-style. | tests/security/test_security.py |
+| `CR-20260816-D-S-D-security-residual-016` | reject | trivial | Extend hash-algorithm scan is test-policy expansion. | tests/security/test_security.py |
+| `CR-20260816-D-S-D-security-residual-017` | reject | trivial | Tighten hashing exemption is test-policy expansion. | tests/security/test_security.py |
+| `CR-20260816-D-S-D-security-residual-018` | reject | trivial | Parametrize/consolidate XXE tests is test-style. | tests/security/test_pubmed_xxe_mitigation.py |
+| `CR-20260816-D-S-D-security-residual-019` | reject | trivial | Richer assertion message is test-style. | tests/security/test_security.py |
+| `CR-20260816-D-S-D-security-residual-020` | reject | minor | Email-allowlist scoping is test-policy tightening. | tests/security/test_security.py |
+| `CR-20260816-D-S-D-security-residual-021` | reject | trivial | Path-segment vs substring file filter is test-style. | tests/security/test_xss_prevention.py |
+| `CR-20260816-D-S-D-security-residual-022` | reject | major | Fail/skip on git_grep timeout is test-harness style. | tests/security/test_security.py |
+| `CR-20260816-D-S-D-security-residual-023` | reject | major | Multiline SQL-pattern filter tweak is test-policy without a reproduced missed injection. | tests/security/test_sql_injection_prevention.py |
+| `CR-20260816-D-S-D-security-residual-024` | reject | minor | Delete an unconditional test is test-only. | tests/security/test_xss_prevention.py |
+| `CR-20260816-D-S-D-security-residual-025` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | tests/security/test_pubmed_xxe_mitigation.py |
+| `CR-20260816-D-S-D-security-residual-026` | reject | minor | Delete an unconditional inventory test is test-only. | tests/security/test_sql_injection_prevention.py |
+| `CR-20260816-E-S17-docs-00-project-02-001` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/script-testing-standards.md |
+| `CR-20260816-E-S17-docs-00-project-02-002` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/script-documentation-standards.md |
+| `CR-20260816-E-S17-docs-00-project-02-003` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/qodo/README.md |
+| `CR-20260816-E-S17-docs-00-project-02-004` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/root-local-clutter-cleanup.md |
+| `CR-20260816-E-S17-docs-00-project-02-005` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/script-testing-standards.md |
+| `CR-20260816-E-S17-docs-00-project-02-006` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/07-doc-nav-policy.md |
+| `CR-20260816-E-S17-docs-00-project-02-007` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/documentation-update-plan.md |
+| `CR-20260816-E-S17-docs-00-project-02-008` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/06-doc-publication-policy.md |
+| `CR-20260816-E-S17-docs-00-project-02-009` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/ai/skills/local/documentation-audit/references/audit-checklist.md |
+| `CR-20260816-E-S17-docs-00-project-02-010` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/ai/skills/local/agent-debugging/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-011` | reject | minor | Docs-mirror link fix; docs-only reject class. | docs/00-project/ai/skills/global/py-test-bot/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-012` | reject | minor | Markdown table punctuation is docs-only. | docs/00-project/rules-summary.md |
+| `CR-20260816-E-S17-docs-00-project-02-013` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/rules-summary.md |
+| `CR-20260816-E-S17-docs-00-project-02-014` | reject | minor | Docs-mirror template wording; docs-only. | docs/00-project/ai/skills/local/research-workflow/references/brief-template.md |
+| `CR-20260816-E-S17-docs-00-project-02-015` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/ai/skills/local/py-plan-bot/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-016` | reject | minor | Docs-mirror link fix; docs-only reject class. | docs/00-project/ai/skills/local/py-doc-bot/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-017` | reject | minor | Docs-mirror link fix; docs-only reject class. | docs/00-project/ai/skills/local/py-debug-bot/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-018` | reject | minor | Docs-mirror link fix; docs-only reject class. | docs/00-project/ai/skills/local/py-test-bot/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-019` | reject | major | Docs-mirror link fix; docs-only reject class. | docs/00-project/ai/skills/local/py-audit-bot/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-020` | reject | major | Docs-mirror link fix; docs-only reject class. | docs/00-project/ai/skills/local/py-config-bot/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-021` | reject | major | Docs-mirror ownership wording; docs-only. | docs/00-project/ai/skills/local/new-pipeline/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-022` | reject | minor | Docs-mirror checklist wording; docs-only. | docs/00-project/ai/skills/local/research-workflow/references/evidence-object-schema.md |
+| `CR-20260816-E-S17-docs-00-project-02-023` | reject | major | Docs-mirror link fix; docs-only reject class. | docs/00-project/ai/skills/local/new-pipeline/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-024` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/ai/skills/local/research-workflow/references/constraint-rules.md |
+| `CR-20260816-E-S17-docs-00-project-02-025` | reject | major | Docs-mirror Mermaid guidance; docs-only. | docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-026` | reject | minor | Docs-mirror path wording; docs-only. | docs/00-project/ai/skills/local/observability-dashboard/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-027` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/04-extending-bioetl.md |
+| `CR-20260816-E-S17-docs-00-project-02-028` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/02-naming-policy.md |
+| `CR-20260816-E-S17-docs-00-project-02-029` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/architecture-index.md |
+| `CR-20260816-E-S17-docs-00-project-02-030` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/02-naming-policy.md |
+| `CR-20260816-E-S17-docs-00-project-02-031` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/extended-docs-index.md |
+| `CR-20260816-E-S17-docs-00-project-02-032` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/ai/skills/local/verify-architecture/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-033` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/ai/skills/local/vcr-record/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-034` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/ai/skills/local/vcr-record/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-035` | reject | major | Glossary wording vs ADR-047 is docs-only. | docs/00-project/glossary.md |
+| `CR-20260816-E-S17-docs-00-project-02-036` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/glossary.md |
+| `CR-20260816-E-S17-docs-00-project-02-037` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/01-documentation-governance-style-guide.md |
+| `CR-20260816-E-S17-docs-00-project-02-038` | reject | minor | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | docs/00-project/governance/02-naming-policy.md |
+| `CR-20260816-E-S17-docs-00-project-02-039` | reject | major | Docs-mirror command wording; docs-only. | docs/00-project/ai/skills/local/verify-architecture/SKILL.md |
+| `CR-20260816-E-S17-docs-00-project-02-040` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/03-file-policy.md |
+| `CR-20260816-E-S17-docs-00-project-02-041` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/03-file-policy.md |
+| `CR-20260816-E-S17-docs-00-project-02-042` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/04-extending-bioetl.md |
+| `CR-20260816-E-S17-docs-00-project-02-043` | reject | minor | Docs-mirror Mermaid metadata; docs-only. | docs/00-project/ai/skills/local/technical-designer-mermaid/references/patterns.md |
+| `CR-20260816-E-S18-dashboard-docs-001` | reject | minor | Docs-only command typo; reject class for this campaign. | docs/03-guides/dashboards/dashboard-extension-llm.md |
+| `CR-20260816-E-S18-dashboard-docs-002` | reject | major | Docs-only dashboard-count wording. | docs/03-guides/dashboards/dashboard-extension-llm.md |
+| `CR-20260816-E-S18-dashboard-docs-003` | reject | major | Docs-only retired-surface wording. | docs/03-guides/dashboards/design-system.md |
+| `CR-20260816-E-S18-dashboard-docs-004` | reject | major | Docs-only health-endpoint wording. | docs/03-guides/dashboards/dashboard-v2-usage.md |
+| `CR-20260816-E-S18-dashboard-docs-005` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/dashboard-v2-usage.md |
+| `CR-20260816-E-S18-dashboard-docs-006` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/design-system.md |
+| `CR-20260816-E-S18-dashboard-docs-007` | reject | major | Docs-only operator-playbook inventory wording. | docs/03-guides/dashboards/operator-scenarios-s1-s6.md |
+| `CR-20260816-E-S18-dashboard-docs-008` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/dashboard-v2-usage.md |
+| `CR-20260816-E-S18-dashboard-docs-009` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboard-guide.md |
+| `CR-20260816-E-S18-dashboard-docs-010` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/archive/audit-protocols/dux3-audit-selection-notes.md |
+| `CR-20260816-E-S18-dashboard-docs-011` | reject | minor | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | docs/03-guides/dashboards/archive/audit-protocols/dux3-first-screen-inventory.json |
+| `CR-20260816-E-S18-dashboard-docs-012` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboard-guide.md |
+| `CR-20260816-E-S18-dashboard-docs-013` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/reports/dashboard-ux-checks/2026-08-05.md |
+| `CR-20260816-E-S18-dashboard-docs-014` | reject | minor | Docs-only selector alias wording. | docs/03-guides/dashboards/selector-architecture.md |
+| `CR-20260816-E-S18-dashboard-docs-015` | reject | minor | Docs-only nav-bus wording. | docs/03-guides/dashboards/v3.0/template/run-centric-dashboard-template.md |
+| `CR-20260816-E-S18-dashboard-docs-016` | reject | minor | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | docs/03-guides/dashboards/usability-baseline-protocol.md |
+| `CR-20260816-E-S18-dashboard-docs-017` | reject | major | Docs-only status-panel mapping wording. | docs/03-guides/dashboards/v3.0/template/panel-contract.md |
+| `CR-20260816-E-S18-dashboard-docs-018` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/v3.0/1-overview.md |
+| `CR-20260816-E-S18-dashboard-docs-019` | reject | major | Docs-only dashboard-family list wording. | docs/03-guides/grafana-dashboard-configuration.md |
+| `CR-20260816-E-S18-dashboard-docs-020` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/selector-architecture.md |
+| `CR-20260816-E-S18-dashboard-docs-021` | reject | major | Docs-contract wording; no executable invariant reproduced in this leaf. | docs/03-guides/dashboards/contracts/navigation-links.yaml |
+| `CR-20260816-E-S18-dashboard-docs-022` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/contracts/performance-budgets.yaml |
+| `CR-20260816-E-S18-dashboard-docs-023` | reject | major | Docs-only synthetic-zero guidance. | docs/03-guides/dashboards/dashboard-extension-human.md |
+| `CR-20260816-E-S18-dashboard-docs-024` | reject | minor | Docs-contract primary-count wording. | docs/03-guides/dashboards/contracts/performance-budgets.yaml |
+| `CR-20260816-E-S18-dashboard-docs-025` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/dashboard-extension-human.md |
+| `CR-20260816-E-S18-dashboard-docs-026` | reject | major | Docs-contract link-title consistency is docs-only. | docs/03-guides/dashboards/contracts/navigation-links.yaml |
+| `CR-20260816-E-S18-dashboard-docs-027` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md |
+| `CR-20260816-E-S18-dashboard-docs-028` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/operator-ux-v2.md |
+| `CR-20260816-E-S18-dashboard-docs-029` | reject | minor | Docs-only section numbering. | docs/03-guides/dashboards/panels/bioetl-runtime-panels.md |
+| `CR-20260816-E-S18-dashboard-docs-030` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md |
+| `CR-20260816-E-S18-dashboard-docs-031` | reject | major | Docs-only panel-index wording. | docs/03-guides/dashboards/panels/dashboard-panels-guide.md |
+| `CR-20260816-E-S18-dashboard-docs-032` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md |
+| `CR-20260816-E-S18-dashboard-docs-033` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/panels/bioetl-runtime-panels.md |
+| `CR-20260816-E-S18-dashboard-docs-034` | reject | major | Docs-only PromQL wording. | docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md |
+| `CR-20260816-E-S18-dashboard-docs-035` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md |
+| `CR-20260816-E-S18-dashboard-docs-036` | reject | major | Docs-contract selector-registry wording. | docs/03-guides/dashboards/contracts/selector-contracts.yaml |
+| `CR-20260816-E-S18-dashboard-docs-037` | reject | trivial | Docs-only truncated note. | docs/03-guides/dashboards/contracts/performance-budgets.yaml |
+| `CR-20260816-E-S18-dashboard-docs-038` | reject | minor | Docs-contract YAML literal style. | docs/03-guides/dashboards/contracts/synthetic-zero-policy.yaml |
+| `CR-20260816-E-S18-dashboard-docs-039` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/archive/audit-protocols/dux5-copy-dictionary.md |
+| `CR-20260816-E-S18-dashboard-docs-040` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md |
+| `CR-20260816-E-S18-dashboard-docs-041` | reject | minor | Docs-only CLI command wording. | docs/03-guides/dashboards/dashboard-extension-human.md |
+| `CR-20260816-E-S18-dashboard-docs-042` | reject | minor | Docs-only notes punctuation. | docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md |
+| `CR-20260816-E-S19b-github-actions-001` | reject | major | Removing restore-keys is CI-cache policy; exact key already exists and stale restore is the shipped actions/cache fallback, not a reproduced architecture-hash skip. | .github/actions/architecture-governance-cache/action.yml:43-45 |
+| `CR-20260816-E-S19b-github-actions-002` | reject | major | Docs/docstring-only request; reject class for this campaign. | .github/actions/setup-mermaid/action.yml |
+| `CR-20260816-F-S12-tests-architecture-01-001` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-002` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-003` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-004` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-005` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-006` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-007` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-008` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-009` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-010` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-011` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-012` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-013` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-014` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-015` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-016` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-017` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-018` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-019` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-020` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-021` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-022` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-023` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-024` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-025` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-026` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-027` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-028` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-029` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-030` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-031` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-032` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-033` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-034` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-035` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-036` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-037` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-038` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-039` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-040` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-041` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-042` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-043` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-044` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-045` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-046` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-047` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-048` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-049` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-050` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-051` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-052` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-053` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-054` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-055` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-056` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-057` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-058` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-059` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-060` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-061` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-062` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-063` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-064` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-065` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-066` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-067` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-068` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-069` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-070` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-071` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-072` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-073` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-074` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-075` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-076` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-077` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-078` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-079` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-080` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-081` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-082` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-083` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-084` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-085` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-086` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-087` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-088` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-089` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-090` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-091` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-092` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-093` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-094` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-095` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-096` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-097` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-098` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-099` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-100` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-101` | pending | critical | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-102` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-103` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-104` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-105` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-106` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-107` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-108` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-109` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-110` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-111` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-112` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-113` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-114` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-115` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-116` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-117` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-118` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-119` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-120` | pending | critical | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-121` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-122` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-123` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-124` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-125` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-126` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-127` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-128` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-129` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-130` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-131` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-132` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-133` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-134` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-135` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-136` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-137` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-138` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-139` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-140` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-141` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-142` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-143` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-144` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-145` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-146` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-147` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-148` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-149` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-150` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-151` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-152` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-153` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-154` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-155` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-156` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-157` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-158` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-159` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-160` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-161` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-162` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-163` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-164` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-165` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-166` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-167` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-168` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-169` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-170` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-171` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-172` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-173` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-174` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-175` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-176` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-177` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-178` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-179` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-180` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-181` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-182` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-183` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-184` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-185` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-186` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-187` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-188` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-189` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-190` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-191` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-192` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-193` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-194` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-195` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-196` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-197` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-198` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-199` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-200` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-201` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-202` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-203` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-204` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-205` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-206` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-207` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-208` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-209` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-210` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-211` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-212` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-213` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-214` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-215` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-216` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-217` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-218` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-219` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-220` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-221` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-222` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-223` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-224` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-225` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-226` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-227` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-228` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-229` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-230` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-231` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-232` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-233` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-234` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-235` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-236` | pending | critical | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-237` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-238` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-239` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-240` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-241` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-242` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-243` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-244` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-245` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-246` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-247` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-248` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-249` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-250` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-251` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-252` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-253` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-254` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-255` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-256` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-257` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-258` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-259` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-260` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-261` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-262` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-263` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-264` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-265` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-266` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-267` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-268` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-269` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-270` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-271` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-272` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-273` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-274` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-275` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-276` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-277` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-278` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-279` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-280` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-281` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-282` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-283` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-284` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-285` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-286` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-287` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-288` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-289` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-290` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-291` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-292` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-293` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-294` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-295` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-296` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-297` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-298` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-299` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-300` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-301` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-302` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-303` | pending | critical | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-304` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-305` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-306` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-307` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-308` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-309` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-310` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-311` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-312` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-313` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-314` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-315` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-316` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-317` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-318` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-319` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-320` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-321` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-322` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-323` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-324` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-325` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-326` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-327` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-328` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-329` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-330` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-331` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-332` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-333` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-334` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-335` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-336` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-337` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-338` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-339` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-340` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-341` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-342` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-343` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-344` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-345` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-346` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-347` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-348` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-349` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-350` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-351` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-352` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-353` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-354` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-355` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-356` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-357` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-358` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-359` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-360` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-361` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-362` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-363` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-364` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-365` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-366` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-367` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-368` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-369` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-370` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-371` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-372` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-373` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-374` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-375` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-376` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-377` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-378` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-379` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-380` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-381` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-382` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-383` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-384` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-385` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-386` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-387` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-388` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-389` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-390` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-391` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-392` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-393` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-394` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-395` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-396` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-397` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-398` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-399` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-400` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-401` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-402` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-403` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-404` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-405` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-406` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-407` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-408` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-409` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-410` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-411` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-412` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-413` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-414` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-415` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-416` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-417` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-418` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-419` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-420` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-421` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-422` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-423` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-424` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-425` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-426` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-427` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-428` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-429` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-430` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-431` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-432` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-433` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-434` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-435` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-436` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-437` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-438` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-439` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-440` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-441` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-442` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-443` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-444` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-445` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-446` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-447` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-448` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-449` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-450` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-451` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-452` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-453` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-454` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-455` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-456` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-457` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-458` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-459` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-460` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-461` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-462` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-463` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-464` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-465` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-466` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-467` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-F-S12-tests-architecture-01-468` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-R-S-R-scripts-memory-001` | reject | major | Test-only run_workflow.sh wrapper coverage. | scripts/memory/run_workflow.sh |
+| `CR-20260816-R-S-R-scripts-memory-002` | confirm | major | upsert_env_local passes NEO4J_PASSWORD/NEO4J_AUTH as python3 argv, so the secret is visible in process listings. | scripts/memory/setup/wsl_startup.sh:53-63 python3 - "$file_path" "$key" "$value" |
+| `CR-20260816-R-S-R-scripts-memory-003` | reject | major | Removing Docker from the WSL setup helper is a shipped setup-script rewrite, not a BioETL runtime invariant. | scripts/memory/setup/wsl_startup.sh |
+| `CR-20260816-R-S-R-scripts-memory-004` | reject | major | Test-only request; reject class for this campaign. | scripts/memory/__init__.py |
+| `CR-20260816-R-S-R-scripts-memory-005` | reject | major | Force mode 0600 is permission hardening without a reproduced world-readable write path. | scripts/memory/setup/wsl_startup.sh |
+| `CR-20260816-R-S-R-scripts-memory-006` | reject | major | Test-only request; reject class for this campaign. | scripts/memory/__main__.py |
+| `CR-20260816-R-S-R-scripts-memory-007` | reject | major | Test-only print_seed.sh phase dispatch. | scripts/memory/prompts/print_seed.sh |
+| `CR-20260816-R-S-R-scripts-memory-008` | reject | major | Test-only WSL startup coverage. | scripts/memory/setup/wsl_startup.sh |
+>>>>>>> Stashed changes

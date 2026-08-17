@@ -655,10 +655,42 @@
       "id": "S09-composition",
       "wave": "A",
       "files": 283,
+<<<<<<< Updated upstream
       "status": "timeout",
       "reason": "timeout after 600s",
+||||||| Stash base
+      "status": "ok",
+      "reason": "",
+=======
+      "status": "ok",
+      "reason": "",
+      "exit_code": 0,
+>>>>>>> Stashed changes
       "log": "reports/quality/coderabbit/20260816/review_A_S09-composition.log",
+<<<<<<< Updated upstream
       "elapsed_s": 606.9
+||||||| Stash base
+      "elapsed_s": 900.8,
+      "bytes": 288241
+=======
+      "bytes": 327071,
+      "elapsed_s": 734.9,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--committed",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ],
+      "context_mode": "config_flags"
+>>>>>>> Stashed changes
     },
     "S10-interfaces-cli": {
       "id": "S10-interfaces-cli",
@@ -1006,12 +1038,30 @@
       "id": "S12-tests-architecture-01",
       "wave": "F",
       "files": 300,
+<<<<<<< Updated upstream
       "status": "error",
       "reason": "CodeRabbit exit code 1",
       "exit_code": 1,
+||||||| Stash base
+      "status": "connection_error",
+      "reason": "CodeRabbit connection/WebSocket failure",
+      "exit_code": 1,
+=======
+      "status": "ok",
+      "reason": "",
+      "exit_code": 0,
+>>>>>>> Stashed changes
       "log": "reports/quality/coderabbit/20260816/review_F_S12-tests-architecture-01.log",
+<<<<<<< Updated upstream
       "bytes": 1279,
       "elapsed_s": 14.6,
+||||||| Stash base
+      "bytes": 508989,
+      "elapsed_s": 591.0,
+=======
+      "bytes": 501151,
+      "elapsed_s": 624.6,
+>>>>>>> Stashed changes
       "command": [
         "/home/fedor/.local/bin/coderabbit",
         "review",
@@ -1051,5 +1101,11 @@
       ]
     }
   },
+<<<<<<< Updated upstream
   "updated_utc": "2026-08-17T13:25:16.526741+00:00"
+||||||| Stash base
+  "updated_utc": "2026-08-17T14:04:13.672940+00:00"
+=======
+  "updated_utc": "2026-08-17T14:49:04.375424+00:00"
+>>>>>>> Stashed changes
 }

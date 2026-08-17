@@ -85,6 +85,31 @@
 | `CR-20260816-A-S04-app-services-other-180` | minor | [#8909](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8909) | `src/bioetl/application/services/run_reports/paths.py` |
 | `CR-20260816-A-S04-app-services-other-182` | major | [#8909](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8909) | `src/bioetl/application/services/run_reports/query.py` |
 | `CR-20260816-A-S04-app-services-other-184` | critical | [#8909](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8909) | `src/bioetl/application/services/run_reports/source_identity.py` |
+<<<<<<< Updated upstream
+||||||| Stash base
+| `CR-20260816-A-S04b-app-residual-021` | minor | [#8918](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918) | `src/bioetl/application/workflow/transforms/reconcile_rows.py` |
+| `CR-20260816-A-S04b-app-residual-022` | major | [#8918](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918) | `src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py` |
+| `CR-20260816-A-S04b-app-residual-033` | major | [#8918](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918) | `src/bioetl/application/composite/lifecycle_observer_service.py` |
+| `CR-20260816-A-S04b-app-residual-060` | minor | [#8918](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918) | `src/bioetl/application/composite/runner_pkg/runner_stage_state_flow.py` |
+| `CR-20260816-A-S04b-app-residual-109` | critical | [#8916](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8916) | `src/bioetl/application/composite/join_execution.py` |
+| `CR-20260816-A-S04b-app-residual-116` | major | [#8918](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918) | `src/bioetl/application/composite/runner_pkg/runner_runtime_helpers.py` |
+=======
+| `CR-20260816-A-S04b-app-residual-021` | minor | [#8918](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918) | `src/bioetl/application/workflow/transforms/reconcile_rows.py` |
+| `CR-20260816-A-S04b-app-residual-022` | major | [#8918](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918) | `src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py` |
+| `CR-20260816-A-S04b-app-residual-033` | major | [#8918](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918) | `src/bioetl/application/composite/lifecycle_observer_service.py` |
+| `CR-20260816-A-S04b-app-residual-060` | minor | [#8918](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918) | `src/bioetl/application/composite/runner_pkg/runner_stage_state_flow.py` |
+| `CR-20260816-A-S04b-app-residual-109` | critical | [#8916](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8916) | `src/bioetl/application/composite/join_execution.py` |
+| `CR-20260816-A-S04b-app-residual-116` | major | [#8918](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918) | `src/bioetl/application/composite/runner_pkg/runner_runtime_helpers.py` |
+| `CR-20260816-A-S09-composition-118` | minor | [#8918](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918) | `src/bioetl/composition/runtime_builders/_run_manifest_creation_support_helpers.py` |
+| `CR-20260816-A-S09-composition-148` | major | [#8918](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918) | `src/bioetl/composition/runtime_builders/_snapshot_mapping_support.py` |
+| `CR-20260816-A-S09-composition-151` | major | [#8918](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918) | `src/bioetl/composition/runtime_builders/input_snapshot_resolution.py` |
+| `CR-20260816-A-S09-composition-193` | major | [#8918](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918) | `src/bioetl/composition/factories/services/_record_processor_policy_support.py` |
+| `CR-20260816-A-S09-composition-220` | minor | [#8918](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918) | `src/bioetl/composition/factories/pipeline/transformer_dependencies.py` |
+| `CR-20260816-A-S09-composition-231` | minor | [#8918](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918) | `src/bioetl/composition/providers/_chembl_target_protein_classification_helpers.py` |
+| `CR-20260816-A-S09-composition-234` | major | [#8918](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918) | `src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py` |
+| `CR-20260816-A-S09-composition-243` | major | [#8918](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918) | `src/bioetl/composition/bootstrap/runtime/_observability_bundle_support.py` |
+| `CR-20260816-A-S09-composition-246` | critical | [#8918](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918) | `src/bioetl/composition/factories/pipeline/run_context_contract_identity.py` |
+>>>>>>> Stashed changes
 | `CR-20260816-A-S10-interfaces-cli-008` | major | [#8910](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910) | `src/bioetl/interfaces/cli/commands/config.py` |
 | `CR-20260816-A-S10-interfaces-cli-010` | major | [#8910](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910) | `src/bioetl/interfaces/cli/commands/checkpoint.py` |
 | `CR-20260816-A-S10-interfaces-cli-015` | major | [#8910](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910) | `src/bioetl/interfaces/cli/commands/cleanup.py` |

@@ -497,6 +497,136 @@
     "path": "src/bioetl/application/services/run_reports/source_identity.py",
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8909"
   },
+<<<<<<< Updated upstream
+||||||| Stash base
+  "CR-20260816-A-S04b-app-residual-021": {
+    "issue": 8918,
+    "severity": "minor",
+    "path": "src/bioetl/application/workflow/transforms/reconcile_rows.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918"
+  },
+  "CR-20260816-A-S04b-app-residual-022": {
+    "issue": 8918,
+    "severity": "major",
+    "path": "src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918"
+  },
+  "CR-20260816-A-S04b-app-residual-033": {
+    "issue": 8918,
+    "severity": "major",
+    "path": "src/bioetl/application/composite/lifecycle_observer_service.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918"
+  },
+  "CR-20260816-A-S04b-app-residual-060": {
+    "issue": 8918,
+    "severity": "minor",
+    "path": "src/bioetl/application/composite/runner_pkg/runner_stage_state_flow.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918"
+  },
+  "CR-20260816-A-S04b-app-residual-109": {
+    "issue": 8916,
+    "severity": "critical",
+    "path": "src/bioetl/application/composite/join_execution.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8916"
+  },
+  "CR-20260816-A-S04b-app-residual-116": {
+    "issue": 8918,
+    "severity": "major",
+    "path": "src/bioetl/application/composite/runner_pkg/runner_runtime_helpers.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918"
+  },
+=======
+  "CR-20260816-A-S04b-app-residual-021": {
+    "issue": 8918,
+    "severity": "minor",
+    "path": "src/bioetl/application/workflow/transforms/reconcile_rows.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918"
+  },
+  "CR-20260816-A-S04b-app-residual-022": {
+    "issue": 8918,
+    "severity": "major",
+    "path": "src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918"
+  },
+  "CR-20260816-A-S04b-app-residual-033": {
+    "issue": 8918,
+    "severity": "major",
+    "path": "src/bioetl/application/composite/lifecycle_observer_service.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918"
+  },
+  "CR-20260816-A-S04b-app-residual-060": {
+    "issue": 8918,
+    "severity": "minor",
+    "path": "src/bioetl/application/composite/runner_pkg/runner_stage_state_flow.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918"
+  },
+  "CR-20260816-A-S04b-app-residual-109": {
+    "issue": 8916,
+    "severity": "critical",
+    "path": "src/bioetl/application/composite/join_execution.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8916"
+  },
+  "CR-20260816-A-S04b-app-residual-116": {
+    "issue": 8918,
+    "severity": "major",
+    "path": "src/bioetl/application/composite/runner_pkg/runner_runtime_helpers.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918"
+  },
+  "CR-20260816-A-S09-composition-118": {
+    "issue": 8918,
+    "severity": "minor",
+    "path": "src/bioetl/composition/runtime_builders/_run_manifest_creation_support_helpers.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918"
+  },
+  "CR-20260816-A-S09-composition-148": {
+    "issue": 8918,
+    "severity": "major",
+    "path": "src/bioetl/composition/runtime_builders/_snapshot_mapping_support.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918"
+  },
+  "CR-20260816-A-S09-composition-151": {
+    "issue": 8918,
+    "severity": "major",
+    "path": "src/bioetl/composition/runtime_builders/input_snapshot_resolution.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918"
+  },
+  "CR-20260816-A-S09-composition-193": {
+    "issue": 8918,
+    "severity": "major",
+    "path": "src/bioetl/composition/factories/services/_record_processor_policy_support.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918"
+  },
+  "CR-20260816-A-S09-composition-220": {
+    "issue": 8918,
+    "severity": "minor",
+    "path": "src/bioetl/composition/factories/pipeline/transformer_dependencies.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918"
+  },
+  "CR-20260816-A-S09-composition-231": {
+    "issue": 8918,
+    "severity": "minor",
+    "path": "src/bioetl/composition/providers/_chembl_target_protein_classification_helpers.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918"
+  },
+  "CR-20260816-A-S09-composition-234": {
+    "issue": 8918,
+    "severity": "major",
+    "path": "src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918"
+  },
+  "CR-20260816-A-S09-composition-243": {
+    "issue": 8918,
+    "severity": "major",
+    "path": "src/bioetl/composition/bootstrap/runtime/_observability_bundle_support.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918"
+  },
+  "CR-20260816-A-S09-composition-246": {
+    "issue": 8918,
+    "severity": "critical",
+    "path": "src/bioetl/composition/factories/pipeline/run_context_contract_identity.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918"
+  },
+>>>>>>> Stashed changes
   "CR-20260816-A-S10-interfaces-cli-008": {
     "issue": 8910,
     "severity": "major",
