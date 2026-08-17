@@ -15,7 +15,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.run_reports.query import list_pipeline_reports
+from bioetl.application.services.run_reports.query import (
+    ReportIndexEntry,
+    list_pipeline_reports,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort
@@ -74,7 +77,7 @@ def _first_text(*values: object) -> str:
     return ""
 
 
-def _anchor_from_report_entry(entry: object) -> PipelineRunAnchor | None:
+def _anchor_from_report_entry(entry: ReportIndexEntry) -> PipelineRunAnchor | None:
     """Build one terminal anchor from a report index entry, or None."""
     payload = _load_report_payload(entry.json_path)
     if payload is None:
@@ -82,10 +85,10 @@ def _anchor_from_report_entry(entry: object) -> PipelineRunAnchor | None:
     identity = payload.get("identity")
     if not isinstance(identity, dict):
         return None
-    pipeline = _first_text(identity.get("pipeline_name"), getattr(entry, "owner", None))
+    pipeline = _first_text(identity.get("pipeline_name"), entry.owner)
     run_type = _first_text(identity.get("run_type"))
-    status = _first_text(identity.get("status"), getattr(entry, "status", None))
-    run_id = _first_text(identity.get("run_id"), getattr(entry, "run_id", None))
+    status = _first_text(identity.get("status"), entry.status)
+    run_id = _first_text(identity.get("run_id"), entry.run_id)
     if not pipeline or not run_type or status not in _TERMINAL_STATUSES:
         return None
     provider_raw = identity.get("provider")
