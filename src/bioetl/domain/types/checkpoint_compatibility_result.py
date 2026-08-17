@@ -12,7 +12,7 @@ class CheckpointCompatibilityResult:
     compatible: bool
     dq_compatible: bool
     pipeline_compatible: bool
-    messages: list[str]
+    messages: tuple[str, ...]
     execution_identity_compatible: bool = True
     identity_continuity_proven: bool = True
     resume_verdict: str = "resume_only"
@@ -29,7 +29,7 @@ class CheckpointCompatibilityResult:
             identity_continuity_proven=True,
             resume_verdict="resume_only",
             degraded_resume_reasons=(),
-            messages=["Checkpoint is compatible for resume"],
+            messages=("Checkpoint is compatible for resume",),
         )
 
     @staticmethod
@@ -37,10 +37,10 @@ class CheckpointCompatibilityResult:
         dq_compatible: bool = False,
         pipeline_compatible: bool = False,
         execution_identity_compatible: bool = False,
-        identity_continuity_proven: bool = True,
+        identity_continuity_proven: bool = False,
         resume_verdict: str = "non_replayable",
         degraded_resume_reasons: tuple[str, ...] = (),
-        messages: list[str] | None = None,
+        messages: tuple[str, ...] | list[str] | None = None,
     ) -> CheckpointCompatibilityResult:
         """Create an incompatible result with optional reason messages."""
         return CheckpointCompatibilityResult(
@@ -51,7 +51,7 @@ class CheckpointCompatibilityResult:
             identity_continuity_proven=identity_continuity_proven,
             resume_verdict=resume_verdict,
             degraded_resume_reasons=degraded_resume_reasons,
-            messages=messages or [],
+            messages=tuple(messages or ()),
         )
 
 
