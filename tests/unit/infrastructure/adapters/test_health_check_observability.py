@@ -38,6 +38,7 @@ from bioetl.infrastructure.adapters._health_check_observability import (
     handle_health_check_result,
     start_health_check,
 )
+from bioetl.infrastructure.adapters.health_check_contract import HealthCheckContext
 
 
 pytestmark = pytest.mark.unit
@@ -155,4 +156,20 @@ def test_handle_health_check_failure_logs_and_returns_unhealthy(
         "bioetl_health_check_latency_seconds",
         pytest.approx(3.0),
         {"provider": "semanticscholar"},
+    )
+
+
+def test_chembl_health_probe_emits_provider_universe_counter() -> None:
+    metrics = MagicMock()
+    logger = MagicMock()
+    handle_health_check_result(
+        logger=logger,
+        metrics=metrics,
+        ctx=HealthCheckContext(provider="chembl", endpoint="/chembl/api/data/status"),
+        status=HealthStatus.HEALTHY,
+    )
+    metrics.increment_counter.assert_called_once_with(
+        "bioetl_health_check_success_total",
+        1,
+        {"provider": "chembl"},
     )

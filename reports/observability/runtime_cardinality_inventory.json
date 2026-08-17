@@ -1384,6 +1384,7 @@
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md",
       "docs/03-guides/dashboards/panels/bioetl-incident-v1-panels.md",
+      "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-dq-v2.json",
       "grafana/dashboards/bioetl-incident-v1.json"
@@ -1799,6 +1800,7 @@
       "docs/03-guides/dashboards/contracts/synthetic-zero-policy.yaml",
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
+      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
@@ -3643,12 +3645,6 @@
       "approved_max_series=500",
       "runtime_emitter_count=3",
       "label_keys=provider"
-    ],
-    "bioetl_pipeline_runs_total": [
-      "observed_series_count=0",
-      "approved_max_series=500",
-      "runtime_emitter_count=3",
-      "label_keys=pipeline,run_type,status"
     ]
   },
   "runtime_cardinality_observed_series": {
@@ -4145,15 +4141,13 @@
   "runtime_cardinality_review_candidates": [
     "bioetl_checkpoint_load_events_total",
     "bioetl_checkpoint_saved_at_seconds",
-    "bioetl_health_check_latency_seconds",
-    "bioetl_pipeline_runs_total"
+    "bioetl_health_check_latency_seconds"
   ],
   "runtime_cardinality_review_required": [],
   "runtime_cardinality_reviewed": [
     "bioetl_checkpoint_load_events_total",
     "bioetl_checkpoint_saved_at_seconds",
-    "bioetl_health_check_latency_seconds",
-    "bioetl_pipeline_runs_total"
+    "bioetl_health_check_latency_seconds"
   ],
   "runtime_cardinality_threshold_violations": [],
   "runtime_emitters": {
@@ -4482,8 +4476,7 @@
     ],
     "bioetl_pipeline_runs_total": [
       "src/bioetl/application/composite/_lifecycle_observer_event_metrics.py",
-      "src/bioetl/application/observability/observer_context_mixin.py",
-      "src/bioetl/application/services/execution/pipeline_runner_service.py"
+      "src/bioetl/application/observability/observer_context_mixin.py"
     ],
     "bioetl_pipeline_stage_expected": [
       "src/bioetl/application/observability/pipeline_metrics.py"

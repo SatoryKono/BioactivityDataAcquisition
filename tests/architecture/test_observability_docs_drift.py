@@ -125,9 +125,9 @@ def test_metrics_catalog_runtime_rows_match_canonical_registry() -> None:
     assert registered_metrics.isdisjoint(alias_metrics)
     assert registered_metrics.isdisjoint(governed_metrics)
     assert len(alias_metrics) == 15
-    assert len(governed_metrics) == 40
-    assert "**Governed Recording/Current-State Metrics: 40**" in catalog
-    assert "**Governed Recording/Current-State Metrics**: 40" in catalog
+    assert len(governed_metrics) == 41
+    assert "**Governed Recording/Current-State Metrics: 41**" in catalog
+    assert "**Governed Recording/Current-State Metrics**: 41" in catalog
 
 
 def test_dq_validation_score_docs_use_canonical_ratio_scale() -> None:

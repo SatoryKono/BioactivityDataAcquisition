@@ -75,25 +75,35 @@ def _extract_author_affiliations_list(
     return affiliations
 
 
+def _optional_stripped_text(value: object) -> str | None:
+    """Return a stripped non-empty string, otherwise None."""
+    if not isinstance(value, str):
+        return None
+    text = value.strip()
+    return text or None
+
+
+def _authenticated_orcid_flag(author: JsonDict) -> bool | None:  # Any: raw JSON
+    """Read Crossref authenticated-ORCID flags as an optional bool."""
+    authenticated = author.get("authenticated-orcid")
+    if authenticated is None:
+        authenticated = author.get("authenticated-ormolecule_id")
+    if authenticated is None:
+        return None
+    return bool(authenticated)
+
+
 def _build_author_detail(
     author: JsonDict,  # Any: raw Crossref API JSON
 ) -> JsonDict | None:  # Any: raw Crossref API JSON
     """Build author detail dict from raw author object."""
-    given_raw = author.get("given", "")
-    family_raw = author.get("family", "")
-    org_raw = author.get("name", "")
-    given = given_raw.strip() if isinstance(given_raw, str) else None
-    family = family_raw.strip() if isinstance(family_raw, str) else None
-    org_name = org_raw.strip() if isinstance(org_raw, str) else None
-    given = given or None
-    family = family or None
-    org_name = org_name or None
+    given = _optional_stripped_text(author.get("given", ""))
+    family = _optional_stripped_text(author.get("family", ""))
+    org_name = _optional_stripped_text(author.get("name", ""))
     if not given and not family and not org_name:
         return None
-    authenticated_orcid = author.get("authenticated-orcid")
-    if authenticated_orcid is None:
-        authenticated_orcid = author.get("authenticated-ormolecule_id")
     normalized_orcid = _normalize_orcid(author.get("ORCID"))
+    authenticated = _authenticated_orcid_flag(author)
     return {
         "given": given,
         "family": family,
@@ -101,12 +111,8 @@ def _build_author_detail(
         "orcid": normalized_orcid,
         # Compatibility alias expected by legacy tests/callers
         "ormolecule_id": normalized_orcid,
-        "authenticated_orcid": (
-            bool(authenticated_orcid) if authenticated_orcid is not None else None
-        ),
-        "authenticated_ormolecule_id": (
-            bool(authenticated_orcid) if authenticated_orcid is not None else None
-        ),
+        "authenticated_orcid": authenticated,
+        "authenticated_ormolecule_id": authenticated,
         "sequence": _extract_author_sequence(author),
         "affiliations": _extract_author_affiliations_list(author),
     }
