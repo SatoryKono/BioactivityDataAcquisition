@@ -746,11 +746,11 @@
       "wave": "B",
       "files": 146,
       "status": "rate_limit",
-      "reason": "CodeRabbit rate limit (waitTime=1320s)",
+      "reason": "CodeRabbit rate limit (waitTime=5s)",
       "exit_code": 1,
       "log": "reports/quality/coderabbit/20260816/review_B_S07-infra-storage.log",
-      "bytes": 939,
-      "elapsed_s": 40.0,
+      "bytes": 938,
+      "elapsed_s": 46.1,
       "command": [
         "/home/fedor/.local/bin/coderabbit",
         "review",
@@ -766,5 +766,5 @@
       ]
     }
   },
-  "updated_utc": "2026-08-17T05:17:22.268760+00:00"
+  "updated_utc": "2026-08-17T05:40:08.319919+00:00"
 }
