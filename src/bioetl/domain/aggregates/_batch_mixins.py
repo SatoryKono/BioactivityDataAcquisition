@@ -147,17 +147,7 @@ class _BatchMutationMixin(_BatchReadModelMixin):
         *,
         quarantined_at: datetime,
     ) -> BatchRecord:
-        """Mark an existing record as quarantined.
-
-        Args:
-            record: An existing BatchRecord that belongs to this batch.
-            error: Human-readable description of the validation or processing error.
-            error_code: Optional error classification code for downstream routing.
-            quarantined_at: Explicit timestamp when the record was quarantined.
-
-        Returns:
-            Updated BatchRecord with quarantine status and error information.
-        """
+        """Mark a batch-owned record as quarantined and emit its event once."""
         self._assert_open("quarantine_record")
         position = record.index - self._start_index
         if position < 0 or position >= len(self._records):

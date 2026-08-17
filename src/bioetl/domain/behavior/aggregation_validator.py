@@ -3,9 +3,21 @@
 from __future__ import annotations
 
 import dataclasses
-import json
 from dataclasses import dataclass
 
+from bioetl.domain.behavior.aggregation_validation_helpers import (
+    build_group_key,
+    collect_duplicate_groups,
+)
+from bioetl.domain.behavior.aggregation_validation_helpers import (
+    column_names as _column_names,
+)
+from bioetl.domain.behavior.aggregation_validation_helpers import (
+    explicit_field_names as _explicit_field_names,
+)
+from bioetl.domain.behavior.aggregation_validation_helpers import (
+    field_name_from_descriptor as _field_name_from_descriptor,
+)
 from bioetl.domain.behavior.validation_result_envelopes import (
     build_validation_result,
 )
@@ -221,45 +233,16 @@ class AggregationValidator:
         aggregation_results: list[JsonDict],
         group_by_fields: list[str],
     ) -> list[JsonDict]:
-        # Type-tagged keys: (presence, type_name, canonical_value)
-        seen_groups: set[tuple[tuple[str, str, str], ...]] = set()
-        duplicates: list[JsonDict] = []
-        for index, record in enumerate(aggregation_results):
-            group_key = self._build_group_key(record, group_by_fields)
-            if group_key in seen_groups:
-                duplicates.append(
-                    {
-                        "index": index,
-                        "group_key": group_key,
-                        "record": record,
-                    }
-                )
-            else:
-                seen_groups.add(group_key)
-        return duplicates
+        return collect_duplicate_groups(
+            aggregation_results=aggregation_results,
+            group_by_fields=group_by_fields,
+        )
 
     @staticmethod
     def _build_group_key(
         record: JsonDict, group_by_fields: list[str]
     ) -> tuple[tuple[str, str, str], ...]:
-        """Build a type-preserving group key.
-
-        Each component is ``(presence, type_name, canonical)`` so that
-        integer ``1`` and string ``\"1\"`` do not collide, and a missing field
-        is distinct from the literal string ``\"MISSING\"``.
-        """
-        components: list[tuple[str, str, str]] = []
-        for field in group_by_fields:
-            if field not in record:
-                components.append(("absent", "", ""))
-                continue
-            value = record[field]
-            type_name = type(value).__name__
-            if value is None:
-                components.append(("present", "NoneType", "null"))
-            else:
-                components.append(("present", type_name, _canonical_group_value(value)))
-        return tuple(components)
+        return build_group_key(record, group_by_fields)
 
     def _build_uniqueness_issues(
         self,
@@ -317,51 +300,3 @@ class AggregationValidator:
                 )
             )
         return provenance
-
-
-def _field_name_from_descriptor(entry: object) -> str | None:
-    """Return a field name from a string or mapping descriptor."""
-    if isinstance(entry, str):
-        return entry
-    if not isinstance(entry, dict):
-        return None
-    name = entry.get("name")
-    return name if isinstance(name, str) and name else None
-
-
-def _column_name(entry: object) -> str | None:
-    """Return only explicit string names from fallback column descriptors."""
-    if isinstance(entry, dict):
-        return _field_name_from_descriptor(entry)
-    return entry if isinstance(entry, str) else None
-
-
-def _column_names(columns: object) -> set[str]:
-    """Return names from the fallback ``columns`` schema shape."""
-    if not isinstance(columns, list):
-        return set()
-    names = (_column_name(entry) for entry in columns)
-    return {name for name in names if name is not None}
-
-
-def _explicit_field_names(names: object) -> set[str]:
-    """Return explicit string names from the fallback ``field_names`` shape."""
-    if not isinstance(names, list):
-        return set()
-    return {item for item in names if isinstance(item, str)}
-
-
-def _canonical_group_value(value: object) -> str:
-    """Serialize supported group values without order- or address-sensitive repr."""
-    try:
-        return json.dumps(
-            value,
-            sort_keys=True,
-            separators=(",", ":"),
-            ensure_ascii=False,
-            allow_nan=False,
-        )
-    except (TypeError, ValueError) as exc:
-        raise TypeError(
-            "aggregation group-by values must be JSON-serializable and finite"
-        ) from exc

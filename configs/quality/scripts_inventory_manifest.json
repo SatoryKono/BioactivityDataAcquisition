@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-16T21:43:23.066401+00:00",
+  "generated_at": "2026-08-17T00:42:27.858653+00:00",
   "summary": {
     "total_scripts": 601,
     "status_counts": {
@@ -1572,7 +1572,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
-          "line": 191,
+          "line": 193,
           "source_group": "tests",
           "text": "\"setup-codex-wsl.ps1\": \"scripts/ai/codex/setup.ps1\","
         }
@@ -16998,7 +16998,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
-          "line": 155,
+          "line": 157,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"repo\" / \"cleanup_root_local_clutter.py\""
         },
@@ -19430,13 +19430,13 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 176,
+          "line": 164,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/generate_trust_validation_fixtures.py\""
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 191,
+          "line": 179,
           "source_group": "tests",
           "text": "\"generate_trust_validation_fixtures.py must not call write_text; \""
         }
@@ -19817,7 +19817,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 14,
+          "line": 13,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana.serve_trust_validation_fixtures import ("
         }
@@ -19993,13 +19993,13 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 17,
+          "line": 16,
           "source_group": "tests",
           "text": "from scripts.ops.observability.trust_validation_fixture_materialization import ("
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 173,
+          "line": 161,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/trust_validation_fixture_materialization.py\""
         }
@@ -20743,7 +20743,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/panels/bioetl-run-explorer-v1-panels.md",
-          "line": 51,
+          "line": 46,
           "source_group": "docs",
           "text": "`python scripts/ops/runtime/docker/verify_report_bind.py` from the checkout"
         },

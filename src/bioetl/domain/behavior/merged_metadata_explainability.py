@@ -2,14 +2,33 @@
 
 from __future__ import annotations
 
-import hashlib
-import json
 from dataclasses import dataclass
-from datetime import date, datetime
-from decimal import Decimal
 from typing import TYPE_CHECKING
 
+from bioetl.domain.behavior.merged_metadata_helpers import (
+    deterministic_record_id as _deterministic_record_id,
+)
+from bioetl.domain.behavior.merged_metadata_helpers import (
+    extract_applied_enrichments as _extract_applied_enrichments,
+)
+from bioetl.domain.behavior.merged_metadata_helpers import (
+    json_fallback as _json_fallback,
+)
+from bioetl.domain.behavior.merged_metadata_helpers import (
+    public_field_names as _public_field_names,
+)
+from bioetl.domain.behavior.merged_metadata_helpers import (
+    resolve_final_value_source as _resolve_final_value_source,
+)
+from bioetl.domain.behavior.merged_metadata_helpers import (
+    resolve_priority_order as _resolve_priority_order,
+)
+from bioetl.domain.behavior.merged_metadata_helpers import (
+    resolve_record_id as _resolve_record_id,
+)
 from bioetl.domain.types import JsonDict
+
+__all__ = ["_deterministic_record_id", "_json_fallback"]
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import CompositeOutputExt
@@ -166,56 +185,6 @@ class MergedMetadataExplainer:
         ]
 
 
-def _resolve_priority_order(
-    field_name: str,
-    field_priorities: dict[str, JsonDict] | None,
-) -> tuple[str, ...] | None:
-    if not field_priorities or field_name not in field_priorities:
-        return None
-    priority = field_priorities[field_name].get("priority")
-    if not isinstance(priority, list):
-        return ()
-    return tuple(str(item) for item in priority)
-
-
-def _resolve_final_value_source(
-    *,
-    source_providers: tuple[str, ...],
-    priority_order: tuple[str, ...] | None,
-) -> str | None:
-    """Select final value source honoring priority_order when available.
-
-    Priority order is highest-first (first item = highest priority).
-    Returns the highest-priority provider that exists in source_providers.
-    """
-    if not source_providers:
-        return None
-    if priority_order:
-        provider_set = set(source_providers)
-        # Return the first (highest priority) provider from priority_order that exists in source_providers
-        for provider in priority_order:
-            if provider in provider_set:
-                return provider
-    return source_providers[0]
-
-
-def _extract_applied_enrichments(
-    composite_metadata: CompositeOutputExt,
-) -> tuple[str, ...] | None:
-    if not composite_metadata.enrichment_status:
-        return None
-    applied = [
-        enricher
-        for enricher, status in composite_metadata.enrichment_status.items()
-        if status == "applied"
-    ]
-    return tuple(applied) or None
-
-
-def _public_field_names(record_data: JsonDict) -> list[str]:
-    return [name for name in record_data if not name.startswith("_")]
-
-
 def _count_conflicts_and_enrichments(
     field_explanations: tuple[MergedFieldExplanation, ...],
 ) -> tuple[int, int]:
@@ -226,69 +195,6 @@ def _count_conflicts_and_enrichments(
         if exp.enrichment_applied:
             enrichers.update(exp.enrichment_applied)
     return conflict_count, len(enrichers)
-
-
-def _resolve_record_id(record: JsonDict) -> str:
-    """Resolve a stable record id, preserving valid falsy identifiers."""
-    for key in ("_record_id", "id", "molecule_id"):
-        if key in record and record[key] is not None:
-            return str(record[key])
-    return _deterministic_record_id(record)
-
-
-def _deterministic_record_id(record: JsonDict) -> str:
-    """Produce a deterministic id even for non-JSON-native supported values."""
-    payload = json.dumps(
-        record,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=False,
-        allow_nan=False,
-        default=_json_fallback,
-    )
-    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
-
-
-def _json_fallback(value: object) -> object:
-    if isinstance(value, (datetime, date)):
-        return value.isoformat()
-    if isinstance(value, Decimal):
-        return str(value)
-    if isinstance(value, (set, frozenset)):
-        normalized_items = [_to_json_compatible(item) for item in value]
-        return sorted(normalized_items, key=_canonical_json_sort_key)
-    return _bytes_or_reject(value)
-
-
-def _bytes_or_reject(value: object) -> str:
-    if isinstance(value, bytes):
-        return value.hex()
-    raise TypeError(
-        f"Unsupported value for deterministic record id: {type(value).__name__}"
-    )
-
-
-def _to_json_compatible(value: object) -> object:
-    """Normalize one supported value through the canonical JSON fallback."""
-    payload = json.dumps(
-        value,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=False,
-        allow_nan=False,
-        default=_json_fallback,
-    )
-    return json.loads(payload)
-
-
-def _canonical_json_sort_key(value: object) -> str:
-    return json.dumps(
-        value,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=False,
-        allow_nan=False,
-    )
 
 
 def _empty_explainability_summary() -> JsonDict:

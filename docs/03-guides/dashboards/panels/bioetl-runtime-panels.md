@@ -17,11 +17,6 @@ used.
 
 ## Key Panels
 
-### 1. Navigate Dashboards
-- **Type:** Text
-- **Purpose:** Explain the dashboard navigation and escalation flow.
-- **Data sources:** Dashboard variables and operator copy.
-
 ### 2. Understand Pipeline Scope
 - **Type:** Text
 - **Purpose:** Show run ID, manifest ID, and replay provenance anchors.

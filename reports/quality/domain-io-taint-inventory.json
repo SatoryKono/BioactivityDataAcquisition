@@ -101,14 +101,14 @@
     },
     {
       "kind": "import:pandera",
-      "line": 6,
+      "line": 8,
       "path": "src/bioetl/domain/contracts/gold/composite_bioassay.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
     },
     {
       "kind": "import:pandera",
-      "line": 7,
+      "line": 9,
       "path": "src/bioetl/domain/contracts/gold/composite_bioassay.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
@@ -185,14 +185,14 @@
     },
     {
       "kind": "import:pandera",
-      "line": 6,
+      "line": 8,
       "path": "src/bioetl/domain/contracts/gold/publications_pubmed.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
     },
     {
       "kind": "import:pandera",
-      "line": 7,
+      "line": 9,
       "path": "src/bioetl/domain/contracts/gold/publications_pubmed.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
@@ -837,7 +837,7 @@
   ],
   "domain_root": "src/bioetl/domain",
   "generated_by": "scripts.engineering.qa.report_domain_io_taint_inventory",
-  "scanned_file_count": 602,
+  "scanned_file_count": 608,
   "schema_version": 1,
   "violation_count": 0,
   "violations": []

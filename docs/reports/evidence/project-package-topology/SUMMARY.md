@@ -1,6 +1,6 @@
 # Сводка evidence: project-package-topology
 
-Дата: 2026-08-11
+Дата: 2026-08-17
 Статус: refreshed
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see
@@ -15,20 +15,21 @@ module-coverage producer. The inventory retains its `2026-07-28` coverage-data
 snapshot date because no newer canonical coverage run was substituted for the
 tracked coverage measurements.
 
-Current-baseline note (2026-08-11): architectural planning and GitHub issues
+Current-baseline note (2026-08-17): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current source baseline is
 `source_module_count=2419` with
-`source_tree_sha256=37701b71dc22edcb381272ba4e9908655eda8a73f7e550ebfdcb1931c3440fbd`.
+`source_tree_sha256=ed49a32921d7edcfc277f0dfac0a2c1b3178a7a9cf60fd397f89c80c9135248c`.
 Raw files dated before `2026-07-19` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence. Refresh (2026-08-05) followed the #4343 composite facade narrowing
 and related module-coverage inventory hash-only reconcile.
 
-Refresh note (2026-08-16): remeasured after the run-reports source-identity
-merge. Source baseline moved to `source_module_count=2419` with the updated
-`source_tree_sha256` above; layer file counts and the module-coverage
-inventory were reconciled from the live working tree.
+Refresh note (2026-08-17): remeasured after the validation-helper and
+service-invocation refactors. Source baseline remains
+`source_module_count=2419` with the updated `source_tree_sha256` above; the
+module-coverage inventory was reconciled with its canonical source-tree-only
+refresh path (coverage measurements were preserved).
 
 Pandera bootstrap ownership remains reconciled with the current runtime:
 `apply_runtime_compatibility_patches` is a no-op compatibility seam, while the
@@ -85,6 +86,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `37701b71dc22edcb381272ba4e9908655eda8a73f7e550ebfdcb1931c3440fbd`
+- source_tree_sha256: `ed49a32921d7edcfc277f0dfac0a2c1b3178a7a9cf60fd397f89c80c9135248c`
 
 `source_module_count=2419`

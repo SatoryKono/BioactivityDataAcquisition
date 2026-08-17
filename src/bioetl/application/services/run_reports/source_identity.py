@@ -129,6 +129,33 @@ def _is_absolute_runtime_path(value: str) -> bool:
     )
 
 
+def _mapped_runtime_path(value: str) -> str | None:
+    """Map host-specific Windows/WSL spellings to canonical WSL paths."""
+    wsl_unc_match = _WSL_UNC_PATTERN.match(value)
+    if wsl_unc_match:
+        return wsl_unc_match.group(1)
+    drive_match = _WINDOWS_DRIVE_PATTERN.match(value)
+    if drive_match:
+        drive, suffix = drive_match.groups()
+        return _canonical_drive_path(drive, suffix)
+    desktop_drive_match = _DOCKER_DESKTOP_DRIVE_PATTERN.match(value)
+    if desktop_drive_match:
+        drive, suffix = desktop_drive_match.groups()
+        return _canonical_drive_path(drive, suffix)
+    desktop_wsl_match = _DOCKER_DESKTOP_WSL_PATTERN.match(value)
+    if desktop_wsl_match:
+        suffix = desktop_wsl_match.group(1) or ""
+        return f"/mnt/wsl/{suffix.lstrip('/')}"
+    return None
+
+
+def _canonical_drive_path(drive: str, suffix: str | None) -> str:
+    normalized = f"/mnt/{drive.lower()}"
+    if suffix:
+        normalized += f"/{suffix.lstrip('/')}"
+    return posixpath.normpath(normalized).casefold()
+
+
 def normalize_runtime_path(path: str | Path, *, root: str | Path) -> str:
     """Normalize Windows, WSL, and Docker Desktop spellings for comparison.
 
@@ -141,30 +168,9 @@ def normalize_runtime_path(path: str | Path, *, root: str | Path) -> str:
     if not value:
         return ""
 
-    wsl_unc_match = _WSL_UNC_PATTERN.match(value)
-    if wsl_unc_match:
-        value = wsl_unc_match.group(1)
-
-    drive_match = _WINDOWS_DRIVE_PATTERN.match(value)
-    if drive_match:
-        drive, suffix = drive_match.groups()
-        normalized = f"/mnt/{drive.lower()}"
-        if suffix:
-            normalized += f"/{suffix.lstrip('/')}"
-        return posixpath.normpath(normalized).casefold()
-
-    desktop_drive_match = _DOCKER_DESKTOP_DRIVE_PATTERN.match(value)
-    if desktop_drive_match:
-        drive, suffix = desktop_drive_match.groups()
-        normalized = f"/mnt/{drive.lower()}"
-        if suffix:
-            normalized += f"/{suffix.lstrip('/')}"
-        return posixpath.normpath(normalized).casefold()
-
-    desktop_wsl_match = _DOCKER_DESKTOP_WSL_PATTERN.match(value)
-    if desktop_wsl_match:
-        suffix = desktop_wsl_match.group(1) or ""
-        value = f"/mnt/wsl/{suffix.lstrip('/')}"
+    mapped = _mapped_runtime_path(value)
+    if mapped is not None:
+        value = mapped
 
     if not _is_absolute_runtime_path(value):
         root_text = _clean_path_text(root)
@@ -182,24 +188,19 @@ def runtime_path_to_local_path(path: str | Path, *, root: str | Path) -> Path:
     value = _clean_path_text(path)
     if not value:
         return Path(root)
-    if os.name != "nt":
-        drive_match = _WINDOWS_DRIVE_PATTERN.match(value)
-        if drive_match:
-            drive, suffix = drive_match.groups()
-            return Path(f"/mnt/{drive.lower()}/{(suffix or '').lstrip('/')}")
-        desktop_drive_match = _DOCKER_DESKTOP_DRIVE_PATTERN.match(value)
-        if desktop_drive_match:
-            drive, suffix = desktop_drive_match.groups()
-            return Path(f"/mnt/{drive.lower()}/{(suffix or '').lstrip('/')}")
-        desktop_wsl_match = _DOCKER_DESKTOP_WSL_PATTERN.match(value)
-        if desktop_wsl_match:
-            suffix = desktop_wsl_match.group(1) or ""
-            return Path(f"/mnt/wsl/{suffix.lstrip('/')}")
-        wsl_unc_match = _WSL_UNC_PATTERN.match(value)
-        if wsl_unc_match:
-            return Path(wsl_unc_match.group(1))
+    mapped = _local_posix_runtime_path(value)
+    if mapped is not None:
+        return mapped
     candidate = Path(value).expanduser()
     return candidate if candidate.is_absolute() else (Path(root) / candidate).resolve()
+
+
+def _local_posix_runtime_path(value: str) -> Path | None:
+    """Return a readable POSIX path for host spellings when running off Windows."""
+    if os.name == "nt":
+        return None
+    mapped = _mapped_runtime_path(value)
+    return Path(mapped) if mapped is not None else None
 
 
 def compute_runtime_source_id(
@@ -355,32 +356,47 @@ def load_repository_source_environment(
     the caller supplies it through ``process_environment``.
     """
     root_path = Path(root)
-    allowed = {str(name) for name in names if str(name)}
     process = process_environment or {}
+    allowed = {str(name) for name in names if str(name)}
+    values: dict[str, str] = {}
+    for path in _repository_env_paths(root_path, process):
+        values.update(_read_repository_env_file(path, allowed))
+    return values
+
+
+def _repository_env_paths(
+    root_path: Path, process: Mapping[str, object]
+) -> tuple[Path, ...]:
     configured_env = str(process.get("BIOETL_ENV_FILE") or "").strip()
     env_path = Path(configured_env) if configured_env else root_path / ".env"
     if not env_path.is_absolute():
         env_path = root_path / env_path
-    paths = [env_path]
-    if str(process.get("BIOETL_SKIP_ENV_LOCAL") or "0").strip() != "1":
-        paths.append(root_path / ".env.local")
+    if str(process.get("BIOETL_SKIP_ENV_LOCAL") or "0").strip() == "1":
+        return (env_path,)
+    return env_path, root_path / ".env.local"
 
+
+def _read_repository_env_file(path: Path, allowed: set[str]) -> dict[str, str]:
+    if not path.is_file():
+        return {}
     values: dict[str, str] = {}
-    for path in paths:
-        if not path.is_file():
-            continue
-        for raw in path.read_text(encoding="utf-8").splitlines():
-            stripped = raw.strip()
-            if not stripped or stripped.startswith("#") or "=" not in raw:
-                continue
-            key, value = raw.split("=", 1)
-            key = key.strip()
-            if key not in allowed:
-                continue
-            value = value.strip()
-            if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
-                value = value[1:-1]
-            else:
-                value = re.sub(r"\s+#.*$", "", value).rstrip()
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        parsed = _parse_repository_env_line(raw, allowed)
+        if parsed is not None:
+            key, value = parsed
             values[key] = value
     return values
+
+
+def _parse_repository_env_line(raw: str, allowed: set[str]) -> tuple[str, str] | None:
+    stripped = raw.strip()
+    if not stripped or stripped.startswith("#") or "=" not in raw:
+        return None
+    key, value = raw.split("=", 1)
+    key = key.strip()
+    if key not in allowed:
+        return None
+    value = value.strip()
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        return key, value[1:-1]
+    return key, re.sub(r"\s+#.*$", "", value).rstrip()

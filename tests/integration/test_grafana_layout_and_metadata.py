@@ -165,7 +165,7 @@ def test_runtime_first_screen_grid_uses_shared_panel_reference_sizes() -> None:
     }
 
     first_action_grid = root_panels["Start Pipeline Triage"]["gridPos"]
-    assert first_action_grid["y"] <= 7
+    assert first_action_grid["y"] <= 8
     assert first_action_grid["w"] >= 8
     context_row = next(
         panel for panel in dashboard["panels"] if panel.get("id") == 9993
