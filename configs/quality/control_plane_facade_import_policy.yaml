@@ -61,12 +61,11 @@ facades:
     path: src/bioetl/application/services/control_plane/replay/__init__.py
     lifecycle: retained_owner_package_root_lazy_facade
     owner: "@bioetl-replay"
-    disposition: retain_bounded_owner_internal_facade
-    max_src_importer_count: 1
-    allowed_src_importers:
-      - src/bioetl/application/services/control_plane/replay/historical_corpus_service.py
+    disposition: retain_external_package_root_zero_first_party_src
+    max_src_importer_count: 0
+    allowed_src_importers: []
     rationale: >-
-      Replay package root remains a bounded owner seam for replay bundle and
-      certification exports. The only first-party source importer is the replay
-      corpus owner module; any additional caller is facade pressure and must
-      fail fast.
+      Replay package root preserves lazy bundle and certification exports for
+      external compatibility. First-party replay owners now import focused
+      modules directly; any package-root caller is facade pressure and must fail
+      fast.

@@ -6,7 +6,6 @@ readiness, and CLI entrypoints call these helpers instead.
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 from bioetl.application.services.run_reports.paths import (
@@ -58,13 +57,19 @@ def enforce_report_root_marker() -> bool:
 
 def runtime_source_identity_resolution() -> RuntimeSourceIdentityResolutionResult:
     """Resolve Ops HTTP identity with the canonical cross-runtime precedence."""
+    runtime_source_id = load_settings().runtime_source_id
+    process_environment = (
+        {RUNTIME_SOURCE_ID_ENV: runtime_source_id}
+        if runtime_source_id is not None
+        else {}
+    )
     repository_environment = load_repository_source_environment(
         _repository_root(),
         names=(RUNTIME_SOURCE_ID_ENV,),
-        process_environment=os.environ,
+        process_environment=process_environment,
     )
     return resolve_runtime_source_identity(
-        process_environment=os.environ,
+        process_environment=process_environment,
         repository_environment=repository_environment,
     )
 

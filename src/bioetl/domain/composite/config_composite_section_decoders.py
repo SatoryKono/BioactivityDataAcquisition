@@ -204,11 +204,7 @@ def build_cross_validation_config(
     cv_data: dict[str, object],
 ) -> CrossValidationConfig:
     return CrossValidationConfig(
-        enabled=optional_bool(
-            cv_data.get("enabled"),
-            True,
-            "cross_validation.enabled",
-        ),
+        enabled=optional_bool(cv_data.get("enabled"), True, "cross_validation.enabled"),
         warning_threshold=require_int(
             cv_data.get("warning_threshold"),
             "cross_validation.warning_threshold",

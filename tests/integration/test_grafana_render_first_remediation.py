@@ -198,12 +198,12 @@ def test_dq_duplicate_validation_fact_is_removed_and_grid_is_compacted() -> None
     assert "or vector(0)" not in canonical["targets"][0]["expr"]
 
     expected_geometry = {
-        3: {"x": 12, "y": 61, "w": 12, "h": 6},
-        4: {"x": 0, "y": 61, "w": 12, "h": 6},
-        101: {"x": 0, "y": 67, "w": 12, "h": 6},
-        9: {"x": 12, "y": 67, "w": 12, "h": 6},
-        12: {"x": 0, "y": 73, "w": 12, "h": 6},
-        151: {"x": 12, "y": 73, "w": 12, "h": 6},
+        3: {"x": 6, "y": 62, "w": 6, "h": 4},
+        4: {"x": 0, "y": 62, "w": 6, "h": 4},
+        101: {"x": 12, "y": 62, "w": 6, "h": 4},
+        9: {"x": 18, "y": 62, "w": 6, "h": 4},
+        12: {"x": 0, "y": 66, "w": 6, "h": 4},
+        151: {"x": 6, "y": 66, "w": 6, "h": 4},
     }
     for panel_id, geometry in expected_geometry.items():
         assert panels[panel_id]["gridPos"] == geometry
@@ -450,7 +450,7 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
 
 def test_rf005_incident_hierarchy_and_semantic_encoding() -> None:
     overview = _load("bioetl-overview-v2.json")
-    assert _panel(overview, 215)["gridPos"]["y"] <= 7
+    assert _panel(overview, 215)["gridPos"]["y"] <= 8
     # Triage alert table is first-screen identity; historical trends stay collapsed.
     assert _panel(overview, 9601).get("type") == "table"
     assert _panel(overview, 9018).get("type") == "state-timeline"
@@ -484,7 +484,7 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
     assert all(panel.get("collapsed") is True for panel in control_rows)
     assert all(panel.get("panels") for panel in control_rows)
     assert [panel["gridPos"]["y"] for panel in control_rows] == list(
-        range(13, 13 + len(control_rows))
+        range(14, 14 + len(control_rows))
     )
     first_row_y = min(panel["gridPos"]["y"] for panel in control_rows)
     assert first_row_y >= 0
@@ -531,9 +531,9 @@ def test_audit_followup_action_first_layout_contracts() -> None:
     ]
     assert [panel.get("id") for panel in provider_rows] == [91, 9404, 9405]
     assert [panel.get("gridPos", {}).get("y") for panel in provider_rows] == [
-        19,
         20,
         21,
+        22,
     ]
     assert all(panel.get("collapsed") is True for panel in provider_rows)
     for panel_id in (9101, 9102, 9103):
@@ -550,10 +550,10 @@ def test_audit_followup_action_first_layout_contracts() -> None:
         "Selected Range · Validation Diagnostics",
     ]
     assert [panel.get("gridPos", {}).get("y") for panel in dq_rows] == [
-        13,
         14,
         15,
         16,
+        17,
     ]
     assert all(panel.get("collapsed") is True for panel in dq_rows)
 

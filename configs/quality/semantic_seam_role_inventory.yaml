@@ -14,15 +14,16 @@ seams:
   semantic_role: policy
   owner: '@bioetl-application-core'
   rationale: Centralized batch-operation error classification is a policy seam used
-    by application-core orchestration helpers. The runner execution-flow caller is
-    reviewed because ordinary lifecycle stage tracking must catch the same operation-error
-    tuple without depending on a mutable service mock surface. New first-party callers
-    must still be reviewed because the module is already high fan-in.
+    by application-core orchestration helpers. The reviewed shared re-export keeps
+    responsibility-focused error tuple modules behind one family-internal seam, while
+    runner lifecycle tracking catches the same operation-error tuple without depending
+    on a mutable service mock surface. New first-party callers must still be reviewed
+    because the module is already at its bounded fan-in.
   caller_guard:
     max_src_importer_count: 4
     allowed_src_importers:
     - src/bioetl/application/core/_batch_write_support.py
-    - src/bioetl/application/core/batch_runtime_failure_policy.py
+    - src/bioetl/application/core/batch_shared_operation_errors.py
     - src/bioetl/application/core/runner_execution_flow.py
     - src/bioetl/application/core/runner_flow.py
 - module: bioetl.application.services.control_plane.replay.historical_certification_service
