@@ -86,6 +86,17 @@ class VersionedContractTarget:
     is_active: bool = False
 
 
+def _apply_single_mode_defaults(policy: ContractRolloutPolicy) -> None:
+    """Fill omitted single-mode read/write tuples from active_version."""
+    if policy.mode != "single":
+        return
+    expected = (policy.active_version,)
+    if not policy.read_order:
+        object.__setattr__(policy, "read_order", expected)
+    if not policy.write_versions:
+        object.__setattr__(policy, "write_versions", expected)
+
+
 @dataclass(frozen=True, slots=True)
 class ContractRolloutPolicy:
     """Pure rollout policy detached from storage/path concerns."""
@@ -102,6 +113,7 @@ class ContractRolloutPolicy:
         _require_non_empty(self.contract_ref, "contract_ref")
         _require_non_empty(self.active_version, "active_version")
         _validate_rollout_mode(self.mode)
+        _apply_single_mode_defaults(self)
         _require_member(self.active_version, self.read_order, "read_order")
         _require_member(self.active_version, self.write_versions, "write_versions")
         _require_unique(self.read_order, "read_order")
