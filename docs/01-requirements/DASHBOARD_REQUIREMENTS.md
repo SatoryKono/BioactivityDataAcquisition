@@ -209,6 +209,8 @@ Derived from the geometry-grounded proposal
 | `DASH-FIT-001` | Always-visible root **non-row** panels MUST have `max(y+h) <= VIEWPORT_ROWS` (`18`, calibrated to the 1366×768 first-viewport / kiosk=tv chrome using Grafana stride 38px). Collapsed row headers MAY sit on or below the fold. | enforced |
 | `DASH-FIT-002` | No always-visible root panel may straddle the fold: `y < FIRST_WINDOW_Y < y+h` is forbidden unless governed-allowlisted. | enforced |
 | `DASH-FIT-003` | The per-dashboard canonical answer panel (§7.1) MUST be a root, non-nested panel with `gridPos.y < FIRST_WINDOW_Y` on every dashboard. | enforced |
+| `DASH-FIT-004` | Every root non-row panel with `gridPos.y < FIRST_WINDOW_Y` MUST have a recorded first-window containment result. First-window `text`, `stat`, and summary-table panels MUST fail closed when `scrollHeight > clientHeight` or `scrollWidth > clientWidth`, with only the documented browser-rounding tolerance. No first-window overflow exception may be added merely to preserve a failing layout. Horizontal scrolling is allowed only for explicitly named below-fold explorer panels. | enforced |
+| `DASH-FIT-005` | Every first-window `table` MUST declare a bounded first-screen row cap in `layout-budgets.yaml` and enforce that cap in the shipped JSON (`topk`, HTTP `limit`, or a deterministic Grafana filter/limit). Full evidence stays below the fold. | enforced |
 | `DASH-COPY-003` | Every non-row, non-`text`, non-shell content-panel title MUST start with a canonical action verb (design-system §3.1); parsing is colon-tolerant. | enforced |
 | `DASH-COPY-004` | First-window `Monitor*` panels MUST NOT use `$__range` (`Inspect + $__range` forensic panels remain allowed; `$__interval`/fixed windows are not range). | enforced |
 | `DASH-COPY-005` | Non-row content-panel titles MUST be unique within a dashboard and MUST NOT be generic placeholders. | enforced |
@@ -260,7 +262,7 @@ The §7 answers map to these root first-window panels. Ids are locked by
 | Performance | `python -m scripts.engineering.qa check-dashboard-performance-budgets` |
 | Full release render | `python -m scripts.ops run-grafana-audit-cycle` on the supported monitoring host |
 | Structural & integrity invariants (`DASH-DATA-003/004`, `DASH-SEC-001`, `DASH-STATE-003`, `DASH-META-002`, `DASH-LAYOUT-002`, `DASH-LINK-001/002`, `DASH-VIZ-001/002`, `DASH-PERF-002`, `DASH-COPY-002`) | `tests/integration/test_dashboard_structural_invariants.py` |
-| Geometry & purpose regression locks (`DASH-LAYOUT-003/004`, `DASH-FIT-001/002/003`, `DASH-COPY-003/004/005/006/007`, `DASH-PERF-003`) | `tests/integration/test_dashboard_geometry_and_purpose_contracts.py` + [`layout-budgets.yaml`](../03-guides/dashboards/contracts/layout-budgets.yaml) |
+| Geometry & purpose regression locks (`DASH-LAYOUT-003/004`, `DASH-FIT-001/002/003/004/005`, `DASH-COPY-003/004/005/006/007`, `DASH-PERF-003`) | `tests/integration/test_dashboard_geometry_and_purpose_contracts.py` + `tests/integration/test_dashboard_first_window_containment.py` + [`layout-budgets.yaml`](../03-guides/dashboards/contracts/layout-budgets.yaml) |
 | Scalar information density (`DASH-DENSITY-002`, §5.4) | `python -m scripts.engineering.qa report-dashboard-scalar-density --check` (survey/gate) + `tests/unit/scripts/qa/test_report_dashboard_scalar_density.py` (pure) + enforced-scope gate in `tests/integration/test_dashboard_geometry_and_purpose_contracts.py` |
 
 Static tests prove repository structure. They do not replace live datasource,

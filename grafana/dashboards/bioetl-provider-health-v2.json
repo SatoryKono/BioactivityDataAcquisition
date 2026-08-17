@@ -110,7 +110,7 @@
       "title": "Understand Evidence Scope",
       "gridPos": {
         "h": 4,
-        "w": 16,
+        "w": 10,
         "x": 0,
         "y": 4
       },
@@ -126,8 +126,8 @@
       "title": "Monitor Selected Provider",
       "gridPos": {
         "h": 4,
-        "w": 8,
-        "x": 16,
+        "w": 14,
+        "x": 10,
         "y": 4
       },
       "datasource": {
@@ -255,7 +255,7 @@
       "id": 9002,
       "type": "text",
       "title": "Start Provider Triage",
-      "description": "Start with Fleet Severity, then check Telemetry Presence, Non-OK Providers, and Top Causes. If fleet severity is non-OK but Top Causes is empty, treat it as an explainability gap. Use selected-provider and range panels only after the fleet-level cause is understood.",
+      "description": "Primary action: open the worst Monitor Fleet Severity row, then confirm Monitor Telemetry Presence. Continue with Inspect Non-OK Providers and Inspect Top Provider Causes. If fleet severity is non-OK but Top Causes is empty, treat it as an explainability gap. Use selected-provider and range panels only after the fleet-level cause is understood. Full fleet/non-OK/cause tables remain in Inspect Full Fleet Evidence.",
       "gridPos": {
         "h": 2,
         "w": 24,
@@ -263,7 +263,7 @@
         "y": 8
       },
       "options": {
-        "content": "<div style=\"font-size:16px;line-height:1.4\"><strong style=\"font-size:16px\">Next actions (≤4)</strong><ol style=\"margin:6px 0 0 22px;padding:0\"><li style=\"font-size:16px\">Confirm <strong style=\"font-size:16px\">Telemetry Freshness</strong> (missing vs degraded).</li><li style=\"font-size:16px\">Open worst row in <strong style=\"font-size:16px\">Severity Matrix</strong>.</li><li style=\"font-size:16px\">Read <strong style=\"font-size:16px\">Top Causes</strong> for selected provider.</li><li style=\"font-size:16px\">If selector blank → choose provider (Selection required).</li></ol></div>",
+        "content": "<div style=\"font-size:16px;line-height:1.4\"><strong>Next action:</strong> open the worst row in <strong>Monitor Fleet Severity</strong>, then confirm <strong>Monitor Telemetry Presence</strong>. Full triage sequence is in this panel description.</div>",
         "mode": "html"
       },
       "links": [
@@ -294,7 +294,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Do not put full UUIDs into Prometheus labels. GLOBAL provider severity matrix. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id. Interpret with freshness: critical -> degraded -> unknown/stale -> healthy. TELEMETRY MISSING or no data with UNKNOWN Status is a blind spot, not evidence of a healthy fleet.",
+      "description": "Do not put full UUIDs into Prometheus labels. First-screen worst four providers by current status. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id. Interpret with freshness: critical -> degraded -> unknown/stale -> healthy. TELEMETRY MISSING or no data with UNKNOWN Status is a blind spot, not evidence of a healthy fleet. Complete fleet rows remain in Inspect Full Fleet Evidence.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -434,7 +434,7 @@
         ]
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 8,
         "x": 0,
         "y": 10
@@ -468,7 +468,7 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "max by (provider) (bioetl_provider_current_status)",
+          "expr": "topk(4, max by (provider) (bioetl_provider_current_status))",
           "format": "table",
           "instant": true,
           "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
@@ -637,7 +637,7 @@
         ]
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 8,
         "y": 10
@@ -671,7 +671,7 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "max by (provider) (bioetl_provider_current_status) >= 1",
+          "expr": "topk(4, max by (provider) (bioetl_provider_current_status) >= 1)",
           "format": "table",
           "instant": true,
           "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
@@ -686,7 +686,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Top current causes of provider degradation, such as raw health, failures, retry exhaustion, latency, HTTP errors, or rate limiting. Scope: fleet; not filtered by run ID. If fleet severity is non-OK and this table is empty, check scrape and recording-rule health.",
+      "description": "Top current causes of provider degradation, bounded to the worst four rows, such as raw health, failures, retry exhaustion, latency, HTTP errors, or rate limiting. Scope: fleet; not filtered by run ID. If fleet severity is non-OK and this table is empty, check scrape and recording-rule health. Complete cause evidence remains in Inspect Full Fleet Evidence.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -816,7 +816,7 @@
         ]
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 10,
         "x": 14,
         "y": 10
@@ -850,7 +850,7 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "topk(5, max by (provider, cause) (bioetl_provider_current_cause) > 0)",
+          "expr": "topk(4, max by (provider, cause) (bioetl_provider_current_cause) > 0)",
           "format": "table",
           "instant": true,
           "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
@@ -944,10 +944,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 15
       },
       "id": 9104,
       "options": {
@@ -981,12 +981,132 @@
     },
     {
       "collapsed": true,
+      "description": "Complete fleet, non-OK-provider, and cause evidence. First-screen tables stay bounded to four rows; this lane is the unbounded forensic copy. Empty domains are not a healthy-fleet verdict.",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "id": 9105,
+      "title": "Inspect Full Fleet Evidence",
+      "type": "row",
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Complete GLOBAL provider severity matrix. First-screen Monitor Fleet Severity is the four-row summary. TELEMETRY MISSING is a blind spot, not a healthy fleet.",
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 0,
+            "y": 20
+          },
+          "id": 9111,
+          "options": {
+            "cellHeight": "sm",
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Severity"
+              }
+            ]
+          },
+          "targets": [
+            {
+              "expr": "max by (provider) (bioetl_provider_current_status)",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "{{provider}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Inspect Full Fleet Severity",
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Complete DEGRADED or FAILING provider list. First-screen Inspect Non-OK Providers is the four-row summary.",
+          "gridPos": {
+            "h": 8,
+            "w": 6,
+            "x": 8,
+            "y": 20
+          },
+          "id": 9112,
+          "options": {
+            "cellHeight": "sm",
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Severity"
+              }
+            ]
+          },
+          "targets": [
+            {
+              "expr": "max by (provider) (bioetl_provider_current_status) >= 1",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "{{provider}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Inspect Full Non-OK Providers",
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Complete current cause evidence. First-screen Inspect Top Provider Causes is the four-row summary.",
+          "gridPos": {
+            "h": 8,
+            "w": 10,
+            "x": 14,
+            "y": 20
+          },
+          "id": 9113,
+          "options": {
+            "cellHeight": "sm",
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Severity"
+              }
+            ]
+          },
+          "targets": [
+            {
+              "expr": "max by (provider, cause) (bioetl_provider_current_cause) > 0",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "{{provider}} {{cause}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Inspect Full Provider Causes",
+          "type": "table"
+        }
+      ]
+    },
+    {
+      "collapsed": true,
       "description": "Select a bounded provider from fleet evidence, then expand for latency, retry, network, throttling, and adapter diagnostics. Unknown selection is not a fleet verdict.",
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 19
       },
       "id": 91,
       "title": "Selected Provider Details",
@@ -2037,7 +2157,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 20
       },
       "id": 9404,
       "panels": [
@@ -2548,7 +2668,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 21
       },
       "id": 9405,
       "panels": [
