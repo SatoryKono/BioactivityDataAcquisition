@@ -27,9 +27,6 @@ from bioetl.application.services.control_plane.manifest.diagnostics.summary_supp
 from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
     build_runtime_views as _build_runtime_views,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
-    build_runtime_views as build_runtime_views,
-)
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 
 if TYPE_CHECKING:

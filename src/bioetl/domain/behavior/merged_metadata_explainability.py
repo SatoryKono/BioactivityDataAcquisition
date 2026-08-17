@@ -287,14 +287,20 @@ def _typed_mapping_items(
 
 
 def _json_fallback(value: object) -> object:
+    converted = _temporal_or_decimal(value)
+    if converted is not None:
+        return converted
+    if isinstance(value, (set, frozenset)):
+        return _canonical_set_members(value)
+    return _bytes_or_reject(value)
+
+
+def _temporal_or_decimal(value: object) -> object | None:
     if isinstance(value, (datetime, date)):
         return value.isoformat()
     if isinstance(value, Decimal):
         return str(value)
-    if isinstance(value, (set, frozenset)):
-        canonical_items = sorted(_canonical_json_text(item) for item in value)
-        return [json.loads(item) for item in canonical_items]
-    return _bytes_or_reject(value)
+    return None
 
 
 def _bytes_or_reject(value: object) -> str:
