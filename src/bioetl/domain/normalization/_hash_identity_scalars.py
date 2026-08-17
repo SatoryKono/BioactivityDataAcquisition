@@ -23,7 +23,8 @@ def _normalize_float(value: float) -> float | None:
     """Normalize floats for deterministic hashing and dedup identity."""
     if math.isnan(value) or math.isinf(value):
         return None
-    return round(value, 10)
+    rounded = round(value, 10)
+    return 0.0 if rounded == 0.0 else rounded
 
 
 @_normalize_scalar.register(datetime)

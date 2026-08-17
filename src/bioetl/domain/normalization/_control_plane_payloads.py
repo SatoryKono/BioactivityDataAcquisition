@@ -178,11 +178,17 @@ def _normalize_manifest_input_snapshots(
     ]
     return sorted(
         normalized,
-        key=lambda item: (
-            item.get("snapshot_id", "") if isinstance(item, Mapping) else "",
-            str(item),
-        ),
+        key=_manifest_snapshot_sort_key,
     )
+
+
+def _manifest_snapshot_sort_key(item: object) -> tuple[str, str]:
+    if not isinstance(item, Mapping):
+        return ("", str(item))
+    snapshot_id = item.get("snapshot_id", "")
+    if snapshot_id is None:
+        snapshot_id = ""
+    return (str(snapshot_id), str(item))
 
 
 def _normalize_optional_text(value: object | None) -> str | None:
