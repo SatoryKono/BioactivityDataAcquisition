@@ -386,7 +386,55 @@
         "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
         "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
       ]
+    },
+    "S01-domain-run_reports": {
+      "id": "S01-domain-run_reports",
+      "wave": "A",
+      "files": 10,
+      "status": "ok",
+      "reason": "",
+      "exit_code": 0,
+      "log": "reports/quality/coderabbit/20260816/review_A_S01-domain-run_reports.log",
+      "bytes": 16851,
+      "elapsed_s": 262.4,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ]
+    },
+    "S01-domain-schemas": {
+      "id": "S01-domain-schemas",
+      "wave": "A",
+      "files": 49,
+      "status": "rate_limit",
+      "reason": "CodeRabbit rate limit (waitTime=1800s)",
+      "exit_code": 1,
+      "log": "reports/quality/coderabbit/20260816/review_A_S01-domain-schemas.log",
+      "bytes": 940,
+      "elapsed_s": 24.1,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ]
     }
   },
-  "updated_utc": "2026-08-17T01:04:00.253524+00:00"
+  "updated_utc": "2026-08-17T01:09:16.838734+00:00"
 }
