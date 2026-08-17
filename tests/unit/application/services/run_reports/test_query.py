@@ -221,12 +221,14 @@ def test_load_helpers_handle_absent_non_mapping_and_invalid_json(
     )
 
     pointer_path.write_text("{invalid", encoding="utf-8")
-    with pytest.raises(json.JSONDecodeError):
+    assert (
         load_latest_pointer(
             kind="pipeline",
             owner="chembl_activity",
             root=tmp_path,
         )
+        is None
+    )
 
     pointer_path.unlink()
     report_path = _write_raw_report(
@@ -247,12 +249,14 @@ def test_load_helpers_handle_absent_non_mapping_and_invalid_json(
     )
 
     report_path.write_text("{invalid", encoding="utf-8")
-    with pytest.raises(json.JSONDecodeError):
+    assert (
         load_pipeline_report(
             pipeline_name="chembl_activity",
             run_id="run-1",
             root=tmp_path,
         )
+        is None
+    )
 
 
 def test_workflow_report_loads_direct_and_latest_targets(tmp_path: Path) -> None:
@@ -519,6 +523,50 @@ def test_workflow_prune_removes_recursive_duplicate_candidate_once(
     assert not old_path.parent.exists()
     assert new_path.is_file()
     assert [entry.run_id for entry in list_workflow_reports(root=tmp_path)] == ["new"]
+
+
+def test_remove_tree_unlinks_symlinks_without_traversing_targets(tmp_path: Path) -> None:
+    external = tmp_path / "external"
+    external.mkdir()
+    external_file = external / "keep.txt"
+    external_file.write_text("keep", encoding="utf-8")
+    report_dir = tmp_path / "report"
+    report_dir.mkdir()
+    (report_dir / "directory-link").symlink_to(external, target_is_directory=True)
+    (report_dir / "file-link").symlink_to(external_file)
+
+    report_query._rm_tree(report_dir)
+
+    assert not report_dir.exists()
+    assert external_file.read_text(encoding="utf-8") == "keep"
+
+
+def test_reports_for_prune_is_unbounded(tmp_path: Path, monkeypatch) -> None:
+    base = tmp_path / "pipeline"
+    base.mkdir()
+    candidates = [
+        (float(index), "owner", tmp_path / f"run-{index}", tmp_path / f"run-{index}.json")
+        for index in range(10_001)
+    ]
+    monkeypatch.setattr(report_query, "_collect_report_candidates", lambda **_: candidates)
+    monkeypatch.setattr(
+        report_query,
+        "_build_report_index_entry",
+        lambda **item: report_query.ReportIndexEntry(
+            kind=item["kind"],
+            owner=item["owner_name"],
+            run_id=item["run_dir"].name,
+            json_path=item["json_path"],
+            markdown_path=None,
+            status=None,
+            completed_at=None,
+            mtime=item["mtime"],
+        ),
+    )
+
+    entries = report_query._reports_for_prune("pipeline", None, tmp_path)
+
+    assert len(entries) == 10_001
 
 
 def test_identity_metadata_handles_os_error_and_non_mapping_payloads(

@@ -72,8 +72,6 @@ def run_health_diagnostics(
 
     results = asyncio.run(_run())
     echo_health_results(results, output_json=output_json)
-    if output_json:
-        return
     if not all_health_results_healthy(results):
         raise SystemExit(ExitCode.FAIL)
 
@@ -163,7 +161,7 @@ def emit_manifest_payload(
         result = service.show(identifier)
     except ValueError as exc:
         echo_error("Run-manifest diagnostics failed", str(exc))
-        return
+        raise SystemExit(ExitCode.FAIL) from exc
     emit_inspection_payload(
         result.to_dict(),
         output_format,
@@ -183,7 +181,7 @@ def emit_forensic_run_diff(
         result = service.compare(left_identifier, right_identifier)
     except ValueError as exc:
         echo_error("Forensic run diff failed", str(exc))
-        return
+        raise SystemExit(ExitCode.FAIL) from exc
     emit_inspection_payload(
         result.to_dict(),
         output_format,

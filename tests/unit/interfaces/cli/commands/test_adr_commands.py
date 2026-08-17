@@ -282,7 +282,7 @@ class TestAdrShowCommand:
 
         result = cli_runner.invoke(cli, ["adr", "show", "999"])
 
-        assert result.exit_code == 0  # echo_error does not set exit code
+        assert result.exit_code == 66
         assert "ADR not found" in result.output or "not found" in result.output.lower()
 
     def test_show_content_preview_first_40_lines(

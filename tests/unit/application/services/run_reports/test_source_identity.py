@@ -68,6 +68,17 @@ def test_normalize_docker_desktop_wsl_bind_path() -> None:
     )
 
 
+def test_normalize_runtime_path_resolves_relative_root_without_recursion(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    normalized = normalize_runtime_path("reports/output", root="workspace")
+
+    assert normalized == (tmp_path / "workspace" / "reports" / "output").as_posix()
+
+
 @pytest.mark.parametrize(
     ("kwargs", "expected_source"),
     [

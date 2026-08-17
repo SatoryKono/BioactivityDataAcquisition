@@ -62,8 +62,8 @@ def _decorate_mapped_error[MappedExternalError: ExternalServiceError](
     payload: DomainErrorMappingInput,
 ) -> MappedExternalError:
     """Attach standardized reason code, context, and root cause metadata."""
+    error.reason_code = reason_code
     error.with_context(
-        reason_code=reason_code,
         provider=payload.provider,
         entity=payload.entity,
         pipeline=payload.pipeline,
@@ -81,8 +81,8 @@ def _raise_critical(
 ) -> None:
     """Raise critical error with taxonomy reason code and contextual payload."""
     critical = CriticalError(message)
+    critical.reason_code = reason_code
     critical.with_context(
-        reason_code=reason_code,
         provider=payload.provider,
         entity=payload.entity,
         pipeline=payload.pipeline,

@@ -8,7 +8,7 @@ Uses ConfigService from composition entrypoints for clean layering.
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, NoReturn, cast
 
 import click
 
@@ -19,6 +19,7 @@ from bioetl.interfaces.cli.commands.domains.shared.click_options import (
     typed_click_option,
     typed_group_command,
 )
+from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
 if TYPE_CHECKING:
@@ -50,6 +51,12 @@ def get_configured_pipeline_names() -> list[str]:
     )
 
     return _impl()
+
+
+def _fail_config(title: str, detail: str, exit_code: ExitCode) -> NoReturn:
+    """Emit one config error and terminate with its established exit code."""
+    echo_error(title, detail)
+    raise SystemExit(int(exit_code))
 
 
 def _config_to_dict(config: object) -> JsonDict:
@@ -109,11 +116,9 @@ def show_command(pipeline: str, output_format: str) -> None:
     try:
         config_dict = service.get_pipeline_yaml_config(pipeline)
     except ValueError as e:
-        echo_error("Configuration error", str(e))
-        return
+        _fail_config("Configuration error", str(e), ExitCode.CONFIG_ERROR)
     except FileNotFoundError as e:
-        echo_error("Config file not found", str(e))
-        return
+        _fail_config("Config file not found", str(e), ExitCode.EX_NOINPUT)
 
     if output_format == "json":
         echo_info(json.dumps(config_dict, indent=2, default=str))
@@ -148,9 +153,9 @@ def validate_command(pipeline: str) -> None:
         if info.gold_table:
             echo_info(f"  Gold table: {info.gold_table}")
     except ValueError as e:
-        echo_error("Configuration invalid", str(e))
+        _fail_config("Configuration invalid", str(e), ExitCode.CONFIG_ERROR)
     except FileNotFoundError as e:
-        echo_error("Config file not found", str(e))
+        _fail_config("Config file not found", str(e), ExitCode.EX_NOINPUT)
 
 
 @typed_group_command(config, "show-settings")

@@ -111,7 +111,7 @@ class TestProvenanceInformationSimple:
 
         assert outcome.rule_id == "schema.required_field"
         assert outcome.violation_kind == DQViolationKind.SCHEMA_VIOLATION
-        assert outcome.affected_fields == ["required_field"]
+        assert outcome.affected_fields == ("required_field",)
         assert outcome.config_path == config_path
         assert validator.policy_ref is not None
         assert validator.policy_ref.contract_ref == "provenance_test"

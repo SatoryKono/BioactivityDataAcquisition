@@ -90,3 +90,50 @@ Each entry requires GitHub reconciliation before closeout.
 - Detail: CodeRabbit connection/WebSocket failure
 - GitHub issue: pending reconciliation
 
+## S09-composition — timeout
+
+- UTC: `2026-08-17T09:45:02.215759+00:00`
+- Wave: `A`
+- Files: `283`
+- Detail: timeout after 600s
+- GitHub issue: pending reconciliation
+
+## S16-configs-quality — timeout
+
+- UTC: `2026-08-17T09:55:23.217302+00:00`
+- Wave: `B`
+- Files: `100`
+- Detail: timeout after 600s
+- GitHub issue: pending reconciliation
+
+## S16b-configs-other — timeout
+
+- UTC: `2026-08-17T10:05:45.378540+00:00`
+- Wave: `B`
+- Files: `156`
+- Detail: timeout after 600s
+- GitHub issue: pending reconciliation
+
+## S08-infra-observability — rate_limit
+
+- UTC: `2026-08-17T10:14:37.683619+00:00`
+- Wave: `C`
+- Files: `57`
+- Detail: CodeRabbit rate limit (waitTime=600s)
+- GitHub issue: pending reconciliation
+
+## S17-docs-00-project-01 — timeout
+
+- UTC: `2026-08-17T11:23:46.506747+00:00`
+- Wave: `E`
+- Files: `300`
+- Detail: timeout after 600s
+- GitHub issue: pending reconciliation
+
+## S17-docs-decisions — rate_limit
+
+- UTC: `2026-08-17T11:33:41.054869+00:00`
+- Wave: `E`
+- Files: `60`
+- Detail: CodeRabbit rate limit (waitTime=1260s)
+- GitHub issue: pending reconciliation

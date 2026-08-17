@@ -83,6 +83,41 @@ def test_inspect_marker_token_mismatch(tmp_path: Path) -> None:
     assert check["marker"] == "mismatch"
 
 
+def test_inspect_marker_bounds_reads_and_handles_invalid_encoding(tmp_path: Path) -> None:
+    root = tmp_path / "run-reports"
+    root.mkdir()
+    marker = tmp_path / REPORT_ROOT_MARKER_NAME
+    marker.write_bytes(b"\xff\xfe")
+
+    invalid = inspect_report_root_marker(report_root=root)
+
+    assert invalid["status"] == "unhealthy"
+    assert invalid["marker"] == "unreadable"
+
+    marker.write_text(REPORT_ROOT_MARKER_VALUE + (" " * 5000), encoding="utf-8")
+    oversized = inspect_report_root_marker(report_root=root)
+    assert oversized["status"] == "unhealthy"
+    assert oversized["marker"] == "mismatch"
+
+
+def test_source_identity_temp_file_is_cleaned_when_fsync_fails(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    root = tmp_path / "run-reports"
+    root.mkdir()
+
+    def _fail_fsync(_file_descriptor: int) -> None:
+        raise OSError("fsync failed")
+
+    monkeypatch.setattr(run_report_paths.os, "fsync", _fail_fsync)
+
+    with pytest.raises(OSError, match="fsync failed"):
+        write_report_root_source_identity(report_root=root, source_id="a" * 64)
+
+    assert list(tmp_path.glob(f"{REPORT_ROOT_SOURCE_IDENTITY_NAME}.*.tmp")) == []
+
+
 def test_source_identity_path_follows_bind_root_layout(tmp_path: Path) -> None:
     root = tmp_path / "run-reports"
     assert report_root_source_identity_path(report_root=root) == (

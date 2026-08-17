@@ -161,8 +161,9 @@ def normalize_runtime_path(path: str | Path, *, root: str | Path) -> str:
 
     if not _is_absolute_runtime_path(value):
         root_text = _clean_path_text(root)
+        if not _is_absolute_runtime_path(root_text):
+            root_text = _clean_path_text(Path(root_text).resolve())
         value = f"{root_text.rstrip('/')}/{value}"
-        return normalize_runtime_path(value, root=root)
 
     normalized = posixpath.normpath(value)
     if re.match(r"^/mnt/[a-z](?:/|$)", normalized, flags=re.IGNORECASE):

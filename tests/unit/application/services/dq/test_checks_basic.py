@@ -121,3 +121,15 @@ class TestCheckDataFreshnessDirect:
         assert result.max_updated_at is None
         assert result.freshness_lag_seconds == pytest.approx(0.0)
         assert result.status == DQCheckStatus.PASS
+
+    def test_normalizes_naive_and_aware_timestamps_before_subtraction(self) -> None:
+        current_time = datetime(2024, 5, 20, 12, 0, tzinfo=UTC)
+        df = pl.DataFrame(
+            {"updated_at": [datetime(2024, 5, 19, 12, 0)]},
+            schema={"updated_at": pl.Datetime},
+        )
+
+        result = check_data_freshness(df, current_time)
+
+        assert result.max_updated_at == datetime(2024, 5, 19, 12, 0, tzinfo=UTC)
+        assert result.freshness_lag_hours == pytest.approx(24.0)
