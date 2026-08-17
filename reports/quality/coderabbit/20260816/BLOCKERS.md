@@ -90,3 +90,11 @@ Each entry requires GitHub reconciliation before closeout.
 - Detail: CodeRabbit connection/WebSocket failure
 - GitHub issue: pending reconciliation
 
+## S09-composition — timeout
+
+- UTC: `2026-08-17T09:45:02.215759+00:00`
+- Wave: `A`
+- Files: `283`
+- Detail: timeout after 600s
+- GitHub issue: pending reconciliation
+
