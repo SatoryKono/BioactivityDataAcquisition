@@ -20,6 +20,7 @@ from tests.integration._grafana_test_support import (
     get_dashboard_panels,
     get_row_child_panels,
     load_dashboard,
+    panel_display_title,
 )
 
 pytestmark = pytest.mark.integration
@@ -294,9 +295,9 @@ def test_control_plane_long_first_screen_titles_keep_extra_width() -> None:
     """Long first-screen title cards must keep enough width to avoid avoidable truncation risk."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     panels = {
-        panel.get("title"): panel
+        panel_display_title(panel): panel
         for panel in get_dashboard_panels(dashboard)
-        if panel.get("title")
+        if panel_display_title(panel)
     }
 
     for panel_title in (

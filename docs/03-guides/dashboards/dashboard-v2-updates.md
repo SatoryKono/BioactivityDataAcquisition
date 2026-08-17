@@ -43,6 +43,9 @@ also: `docs/reports/dashboard-ux-checks/2026-07-28.md`; canonical baseline:
   summary; the complete domain matrix is `Review All Domain Status` (`9031`)
   under collapsed Domain Status Tracks.
 - Trust `Review Recovery Action` no longer relies on `overflow:hidden`.
+- Trust `Review Recovery Action` (`id=906`) omits native Grafana title chrome
+  (`bioetlDisplayTitle`) and keeps a one-line 16px rail so `gridPos.h=2`
+  does not internally scroll (`DASH-FIT-004`). Caveats stay in the description.
 - Pipeline Diagnostics no longer treats SCRAPING as proof of delivery health.
 
 ## Run Explorer Completed timestamp format (2026-08-05)

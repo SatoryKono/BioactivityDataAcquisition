@@ -40,7 +40,7 @@ absence.
 | 892 | Monitor Checkpoint Age | stat | BioETL Ops HTTP | Current checkpoint freshness lag from HTTP-backed control-plane evidence. | shared shell | Numeric lag; no PromQL threshold in doc. |
 | 893 | Monitor Manifest/Ledger | stat | Prometheus | Current manifest/ledger failure state from `bioetl_manifest_ledger_failures_15m`. | shared shell | Severity/value mapping. |
 | 907 | Monitor Telemetry | stat | Prometheus | Missing-control-plane-telemetry signal from `bioetl_control_plane_telemetry_missing_5m`. | shared shell | Value mapping distinguishes no-data vs telemetry-missing. |
-| 906 | Review Recovery Action | text | Static | Static operator next-step guidance for replay/control-plane incidents. | shared shell | Drilldown router into the replay-safety row below. |
+| 906 | Review Recovery Action | text | Static | One-line next-step rail (`bioetlDisplayTitle`, no native title chrome) so `h=2` does not scroll. | shared shell | Drilldown router into the replay-safety row below. |
 
 ### Inspect Replay & Checkpoint Evidence
 
