@@ -45,10 +45,8 @@ class UniprotCoreSchema(ETLRecordSchema):
     @pa.check("accession", name="accession_format")
     def _check_accession(cls, series: Series[str]) -> Series[bool]:
         """Validate UniProt accession format."""
-        pattern = (
-            r"^[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$"
-        )
-        return cast(Series[bool], series.str.match(pattern))
+        pattern = r"^(?:[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})$"
+        return cast(Series[bool], series.str.fullmatch(pattern))
 
     entry_name: Series[str] = pa.Field(
         nullable=False,

@@ -63,6 +63,8 @@ def fingerprint_payload(fingerprint: ExportFileFingerprint) -> dict[str, object]
 
 def format_utc(value: datetime) -> str:
     """Format one datetime as a second-granularity UTC timestamp."""
+    if value.tzinfo is None or value.utcoffset() is None:
+        raise ValueError("format_utc requires a timezone-aware datetime")
     return (
         value.astimezone(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     )

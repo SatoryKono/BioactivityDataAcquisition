@@ -6,8 +6,10 @@ See ADR-026 for rationale.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from enum import IntEnum, auto
+from types import MappingProxyType
 from typing import Final
 
 __all__ = [
@@ -141,7 +143,7 @@ class ColumnOrderConfig:
             First provider's columns appear first.
     """
 
-    field_groups: dict[str, SemanticGroup] = field(
+    field_groups: Mapping[str, SemanticGroup] = field(
         default_factory=lambda: dict(PUBLICATION_FIELD_GROUPS)
     )
     provider_priority: tuple[str, ...] = (
@@ -151,6 +153,11 @@ class ColumnOrderConfig:
         "openalex",
         "semantic_scholar",
     )
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self, "field_groups", MappingProxyType(dict(self.field_groups))
+        )
 
     def get_group(self, column: str) -> SemanticGroup:
         """Get semantic group for a column.

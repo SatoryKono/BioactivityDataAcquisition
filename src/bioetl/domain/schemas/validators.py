@@ -56,7 +56,7 @@ def rows_are_valid_json(series: pd.Series) -> pd.Series:
         Returns:
             Check result as bool.
         """
-        if pd.isna(val):  # type: ignore[call-overload]  # pyright: ignore[reportGeneralTypeIssues]
+        if _is_scalar_missing(val):
             return True
         try:
             json.loads(str(val))
@@ -86,7 +86,7 @@ def rows_are_valid_json_array(series: pd.Series) -> pd.Series:
         Returns:
             Check result as bool.
         """
-        if pd.isna(val):  # type: ignore[call-overload]  # pyright: ignore[reportGeneralTypeIssues]
+        if _is_scalar_missing(val):
             return True
         try:
             parsed = json.loads(str(val))
@@ -116,7 +116,7 @@ def rows_are_valid_json_object(series: pd.Series) -> pd.Series:
         Returns:
             Check result as bool.
         """
-        if pd.isna(val):  # type: ignore[call-overload]  # pyright: ignore[reportGeneralTypeIssues]
+        if _is_scalar_missing(val):
             return True
         try:
             parsed = json.loads(str(val))
@@ -269,4 +269,14 @@ def str_matches_pattern(pandas_obj: pd.Series, *, pattern: str) -> pd.Series:
     Returns:
         The pd.Series result.
     """
-    return pandas_obj.isna() | pandas_obj.str.match(pattern)
+    return pandas_obj.isna() | pandas_obj.str.fullmatch(pattern)
+
+
+def _is_scalar_missing(value: object) -> bool:
+    if isinstance(value, (list, tuple, dict, set)):
+        return False
+    try:
+        result = pd.isna(value)
+    except (ValueError, TypeError):
+        return False
+    return result is True
