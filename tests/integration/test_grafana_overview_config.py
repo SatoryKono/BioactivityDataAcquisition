@@ -207,6 +207,29 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
     assert "or bioetl_l0_next_action_no_route)" not in next_action_expr
     assert len(next_action_expr) <= 200
 
+
+def test_review_domain_status_is_deviation_first_and_capped() -> None:
+    """#8898: first-window domain matrix is top-four; full matrix stays below fold."""
+    panels = _panels_by_title()
+    summary = panels["Review Domain Status"]
+    full_matrix = panels["Review All Domain Status"]
+    summary_expr = _panel_expr(summary)
+    full_expr = _panel_expr(full_matrix)
+
+    assert summary.get("id") == 9002
+    assert "topk(4" in summary_expr
+    assert "bioetl_l0_input_status_selected" in summary_expr
+    assert len(summary_expr) <= 200
+    assert "four worst" in str(summary.get("description", "")).lower()
+
+    assert full_matrix.get("id") == 9031
+    assert "topk(" not in full_expr
+    assert "max by (input)" in full_expr
+    assert "bioetl_l0_input_status_selected" in full_expr
+    content = str(panels["Inspect Scope & Evidence"].get("options", {}).get("content", ""))
+    assert "set a concrete" not in content
+    assert "What is broken or degraded right now?" in content
+
     # Phase 2: Priority is a short color-background badge; Action is sole color-text CTA.
     overrides = next_action.get("fieldConfig", {}).get("overrides", [])
     value_override = next(

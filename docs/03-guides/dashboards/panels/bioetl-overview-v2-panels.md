@@ -37,10 +37,11 @@ multiple runs; use RunLedger for exact reconciliation.
 - **Notes:** `run_id` is URL handoff only (never a Prometheus label). Panel `links` / `dataLinks` remain full domain shortcuts (`Open Runtime`, …); primary CTA is the Action field link (RFA-00 / #7569).
 
 ### 5. Review Domain Status
-- **Type:** Table
-- **Purpose:** Show the first-screen deviation-first matrix across Control Plane,
-  Runtime, Provider, Data Quality, Data Validation, and Workflow.
-- **Data sources:** `bioetl_l0_input_status_selected` (recording rule with label_replace for workflow pipeline mapping)
+- **Type:** Table (`id=9002`)
+- **Purpose:** Show a first-screen deviation-first summary of the four worst
+  current domain statuses. The complete six-domain matrix stays in
+  `Review All Domain Status` under Domain Status Tracks.
+- **Data sources:** `topk(4, max by (input) (bioetl_l0_input_status_selected{…}))`
 
 ### 6. Review Runtime Status
 - **Type:** Table
@@ -74,9 +75,15 @@ multiple runs; use RunLedger for exact reconciliation.
 
 ### 12. Domain Status Tracks
 - **Type:** Row
-- **Purpose:** Collapsed row containing repeated subsystem detail and historical
-  trends after the compact Inputs matrix.
-- **Data sources:** `bioetl_historical_trends`
+- **Purpose:** Collapsed row containing the full domain matrix plus repeated
+  subsystem detail and historical trends after the compact Inputs summary.
+- **Data sources:** `bioetl_l0_input_status_selected` and historical L1 tracks
+
+### 12a. Review All Domain Status
+- **Type:** Table (`id=9031`)
+- **Purpose:** Preserve the complete six-domain current-status matrix below the
+  fold after the first-screen four-row cap.
+- **Data sources:** `max by (input) (bioetl_l0_input_status_selected{…})`
 
 ### 13. Track Runtime Blockers
 - **Type:** Timeseries
