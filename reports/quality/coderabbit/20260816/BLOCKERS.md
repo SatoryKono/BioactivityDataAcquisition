@@ -206,3 +206,11 @@ Each entry requires GitHub reconciliation before closeout.
 Historical rate_limit / timeout / connection entries above remain **service residual**,
 not invented product findings. Parent reconciliation: #8859. Usage-based CodeRabbit
 billing was not enabled.
+## S16b-configs-other — connection_error
+
+- UTC: `2026-08-17T16:35:26.159008+00:00`
+- Wave: `B`
+- Files: `156`
+- Detail: CodeRabbit connection/WebSocket failure
+- GitHub issue: pending reconciliation
+
