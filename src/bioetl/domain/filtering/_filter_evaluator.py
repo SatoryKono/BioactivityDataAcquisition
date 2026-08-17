@@ -71,7 +71,12 @@ def evaluate_column_filters(
             continue
         actual = record.get(column_filter.column)
         expected = (
-            sorted(column_filter.values) if column_filter.values is not None else None
+            sorted(
+                column_filter.values,
+                key=lambda value: (type(value).__name__, str(value)),
+            )
+            if column_filter.values is not None
+            else None
         )
         return FilterDecision.rejected(
             reason_code="column_filter_mismatch",
