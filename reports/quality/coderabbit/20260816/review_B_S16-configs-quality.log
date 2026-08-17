@@ -1,2 +1,14 @@
+<<<<<<< Updated upstream
+||||||| Stash base
+{"type":"review_context","reviewType":"committed","currentBranch":"audit-leaf","baseBranch":"main","workingDirectory":"/tmp/bioetl-cr-S16-configs-quality-9vss9meb"}
+{"type":"status","phase":"connecting","status":"connecting_to_review_service"}
+{"type":"status","phase":"setup","status":"setting_up"}
+{"type":"error","errorType":"rate_limit","message":"Rate limit exceeded","recoverable":true,"details":{},"metadata":{"isProUser":true,"waitTime":"4 minutes","policyGuidance":"**Limit details:** You’ve used all 5 included reviews currently available under your plan.\n\nUsage-based reviews are enabled, but CodeRabbit couldn't verify this CLI session. Reauthenticate the CLI with the account that has an assigned seat, or use an Agentic API key, then retry.","orgAttributed":true,"cliReviewPolicyMode":"normal"}}
+=======
+{"type":"review_context","reviewType":"committed","currentBranch":"audit-leaf","baseBranch":"main","workingDirectory":"/tmp/bioetl-cr-S16-configs-quality-n76l372n"}
+{"type":"status","phase":"connecting","status":"connecting_to_review_service"}
+{"type":"status","phase":"setup","status":"setting_up"}
+{"type":"error","errorType":"rate_limit","message":"Rate limit exceeded","recoverable":true,"details":{},"metadata":{"isProUser":true,"waitTime":"11 seconds","policyGuidance":"**Limit details:** You’ve used all 5 included reviews currently available under your plan.\n\nUsage-based reviews are enabled, but CodeRabbit couldn't verify this CLI session. Reauthenticate the CLI with the account that has an assigned seat, or use an Agentic API key, then retry.","orgAttributed":true,"cliReviewPolicyMode":"normal"}}
+>>>>>>> Stashed changes
 
 TIMEOUT after 600s
