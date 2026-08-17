@@ -1,0 +1,56 @@
+{
+  "pipeline": "chembl_assay",
+  "run_type": "backfill",
+  "provider": "chembl",
+  "accounting": {
+    "bronze_records": 1000,
+    "silver_valid": 1000,
+    "gold_written": 983,
+    "gold_excluded_by_contract": 17,
+    "quarantined": 0
+  },
+  "required_raw_series": [
+    {
+      "name": "bioetl_pipeline_runs_total",
+      "labels": {
+        "pipeline": "chembl_assay",
+        "run_type": "backfill",
+        "status": "success"
+      },
+      "value": 1
+    },
+    {
+      "name": "bioetl_records_processed_total",
+      "labels": {
+        "pipeline": "chembl_assay",
+        "stage": "bronze",
+        "run_type": "backfill"
+      },
+      "value": 1000
+    },
+    {
+      "name": "bioetl_stage_records_total",
+      "labels": {
+        "pipeline": "chembl_assay",
+        "run_type": "backfill",
+        "stage": "gold",
+        "outcome": "excluded_by_contract"
+      },
+      "value": 17
+    },
+    {
+      "name": "bioetl_stage_records_total",
+      "labels": {
+        "pipeline": "chembl_assay",
+        "run_type": "backfill",
+        "stage": "gold",
+        "outcome": "written"
+      },
+      "value": 983
+    }
+  ],
+  "provider_path": {
+    "cached_bronze_emits_provider_chembl": false,
+    "chembl_check_health_emits_universe_counter": true
+  }
+}

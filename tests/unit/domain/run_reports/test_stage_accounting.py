@@ -276,3 +276,23 @@ def test_golden_pipeline_fixture_shape() -> None:
     assert payload["schema_version"] == "pipeline_run_report_v1"
     assert payload["funnel"][2]["stage_id"] == "silver"
     assert payload["funnel"][2]["removed_total"] == 150
+
+
+def test_chembl_assay_backfill_fixture_accounting() -> None:
+    path = (
+        Path(__file__).resolve().parents[3]
+        / "fixtures"
+        / "reports"
+        / "chembl_assay_backfill_run_report_golden.json"
+    )
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    layers = payload["layers"]
+    assert payload["identity"]["pipeline_name"] == "chembl_assay"
+    assert payload["identity"]["run_type"] == "backfill"
+    assert layers["bronze_records"] == 1000
+    assert layers["silver_valid"] == 1000
+    assert layers["gold_written"] == 983
+    assert layers["gold_excluded_by_contract"] == 17
+    assert layers["silver_quarantined"] == 0
+    assert layers["gold_quarantined"] == 0
+    assert layers["gold_written"] + layers["gold_excluded_by_contract"] == 1000
