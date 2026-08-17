@@ -127,7 +127,7 @@
             "align": "left",
             "inspect": true
           },
-          "noValue": "VALID EMPTY — no pipeline-run-report artifacts for pipeline '$pipeline' under reports/run-reports/pipeline/<name>/ (first screen is last 4)."
+          "noValue": "VALID EMPTY — no pipeline-run-report artifacts for the selected pipeline under reports/run-reports/pipeline/<name>/ (first screen is last 4)."
         },
         "overrides": [
           {
@@ -189,6 +189,25 @@
                         "color": "green"
                       }
                     }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Run"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Select this run",
+                    "url": "/d/bioetl-run-explorer-v1/6-run-explorer?var-run_id=${__value.raw}&var-pipeline=${__data.fields.Pipeline}&var-run_type=$run_type&var-workflow=$workflow&${__url_time_range}",
+                    "targetBlank": false,
+                    "includeVars": false
                   }
                 ]
               }
@@ -815,8 +834,29 @@
                 "align": "left",
                 "inspect": true
               },
-              "noValue": "VALID EMPTY — no pipeline-run-report artifacts for pipeline '$pipeline' under reports/run-reports/pipeline/<name>/ (index is last 20)."
-            }
+              "noValue": "VALID EMPTY — no pipeline-run-report artifacts for the selected pipeline under reports/run-reports/pipeline/<name>/ (index is last 20)."
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "run_id"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Select this run",
+                        "url": "/d/bioetl-run-explorer-v1/6-run-explorer?var-run_id=${__value.raw}&var-pipeline=${__data.fields.pipeline}&var-run_type=$run_type&var-workflow=$workflow&${__url_time_range}",
+                        "targetBlank": false,
+                        "includeVars": false
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           },
           "options": {
             "showHeader": true,
@@ -1332,7 +1372,7 @@
                 "align": "left",
                 "inspect": true
               },
-              "noValue": "VALID EMPTY — no workflow-run-report artifacts for workflow '$workflow' under reports/run-reports/workflow/<name>/ (index is last 20)."
+              "noValue": "VALID EMPTY — no workflow-run-report artifacts for the selected workflow under reports/run-reports/workflow/<name>/ (index is last 20)."
             },
             "overrides": [
               {

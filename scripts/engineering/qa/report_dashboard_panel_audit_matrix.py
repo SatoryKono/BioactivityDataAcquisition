@@ -9,18 +9,36 @@ import json
 import sys
 from pathlib import Path
 
+import yaml
+
 ROOT = Path(__file__).resolve().parents[3]
 DASHBOARD_DIR = ROOT / "grafana" / "dashboards"
+INVENTORY_CONTRACT = (
+    ROOT / "docs" / "03-guides" / "dashboards" / "contracts" / "dashboard-inventory.yaml"
+)
 HTTP_DATASOURCE_HINTS = (
     "quarantine explorer",
     "bioetl ops http",
     "bioetl-ops-http",
     "infinity",
 )
-# Leaf+row across the seven shipped dashboards. Keep in lockstep with
-# dashboard-inventory.yaml / report-dashboard-inventory --check (226).
-# Do not revert to the 2026-08-07 #8269 total of 223.
-EXPECTED_PANEL_COUNT = 226
+
+
+def expected_panel_count_from_inventory(
+    inventory_path: Path = INVENTORY_CONTRACT,
+) -> int:
+    """Sum `panel_count` for every shipped UID in the inventory contract."""
+    payload = yaml.safe_load(inventory_path.read_text(encoding="utf-8"))
+    dashboards = payload.get("dashboards", []) if isinstance(payload, dict) else []
+    total = 0
+    for entry in dashboards:
+        if isinstance(entry, dict) and isinstance(entry.get("panel_count"), int):
+            total += int(entry["panel_count"])
+    return total
+
+
+# Derived from dashboard-inventory.yaml. Do not hardcode a stale baseline.
+EXPECTED_PANEL_COUNT = expected_panel_count_from_inventory()
 
 
 def _iter_panels(payload: dict[str, object]) -> list[dict[str, object]]:
@@ -136,8 +154,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     rows = _collect_rows()
-    # Includes collapsed row headers in shipped JSON. Reconciled against the
-    # seven-dashboard inventory and live audit on 2026-08-07 (#8269).
+    # Includes collapsed row headers. Expected count is the YAML inventory sum.
     if args.check and len(rows) != EXPECTED_PANEL_COUNT:
         print(
             f"panel count mismatch: expected {EXPECTED_PANEL_COUNT}, got {len(rows)}",
