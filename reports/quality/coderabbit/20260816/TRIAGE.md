@@ -118,281 +118,281 @@ Code/config/contracts and executable gates outrank CodeRabbit output.
 | `CR-20260816-A-S01-domain-contracts-004` | reject | major | ADR/version-bump for already-shipped public Gold schemas plus test-only ask. | src/bioetl/domain/contracts/gold/composite.py; tests/contract/gold_schemas |
 | `CR-20260816-A-S01-domain-contracts-005` | confirm | major | pub_month/pub_day are coerced floats with only ge/le bounds, so 1.5 and 30.5 validate. | src/bioetl/domain/contracts/gold/publications_pubmed.py:37-38 |
 | `CR-20260816-A-S01-domain-contracts-006` | confirm | major | top_level_count is a coerced float with only ge=0, so fractional counts are accepted. | src/bioetl/domain/contracts/gold/composite_bioassay.py:184-188 |
-| `CR-20260816-A-S01-domain-control_plane-001` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-002` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-003` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-004` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-005` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-006` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-007` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-008` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-009` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-010` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-011` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-012` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-013` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-014` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-015` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-016` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-017` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-018` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-019` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-020` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-021` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-022` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-023` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-024` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-025` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-026` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-027` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-028` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-029` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-030` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-031` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-032` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-033` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-034` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-035` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-036` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-037` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-038` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-039` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-040` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-041` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-042` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-control_plane-043` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-entities-001` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-entities-002` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-entities-003` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-entities-004` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-entities-005` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-entities-006` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-entities-007` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-entities-008` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-entities-009` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-entities-010` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-entities-011` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-entities-012` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-entities-013` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-entities-014` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-entities-015` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-entities-016` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-entities-017` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-entities-018` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-exceptions-001` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-exceptions-002` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-exceptions-003` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-exceptions-004` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-exceptions-005` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-exceptions-006` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-exceptions-007` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-exceptions-008` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-exceptions-009` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-exceptions-010` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-filtering-001` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-filtering-002` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-filtering-003` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-filtering-004` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-filtering-005` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-filtering-006` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-filtering-007` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-filtering-008` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-filtering-009` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-filtering-010` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-filtering-011` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-lineage-001` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-lineage-002` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-lineage-003` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-lineage-004` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-lineage-005` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-mapping-001` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-mapping-002` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-mapping-003` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-mapping-004` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-mapping-005` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-mapping-006` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-mapping-007` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-mapping-008` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-mapping-009` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-mapping-010` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-mapping-011` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-mapping-012` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-mapping-013` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-mapping-014` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-models-001` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-models-002` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-models-003` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-models-004` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-001` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-002` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-003` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-004` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-005` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-006` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-007` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-008` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-009` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-010` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-011` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-012` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-013` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-014` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-015` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-016` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-017` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-018` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-019` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-020` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-021` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-022` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-023` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-024` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-025` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-026` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-027` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-028` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-029` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-030` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-031` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-032` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-033` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-034` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-035` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-036` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-037` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-038` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-039` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-040` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-041` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-042` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-043` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-044` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-045` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-046` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-047` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-048` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-049` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-050` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-051` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-052` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-053` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-054` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-055` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-056` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-057` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-058` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-059` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-060` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-061` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-062` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-063` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-064` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-065` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-066` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-067` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-068` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-069` | pending | critical | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-070` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-normalization-071` | pending | critical | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-001` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-002` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-003` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-004` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-005` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-006` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-007` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-008` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-009` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-010` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-011` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-012` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-013` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-014` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-015` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-016` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-017` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-018` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-019` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-020` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-021` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-022` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-023` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-024` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-025` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-026` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-027` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-028` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-029` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-030` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-031` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-032` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-033` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-034` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-035` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-036` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-037` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-038` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-039` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-040` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-041` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-042` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-043` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-044` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-045` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-046` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-ports-047` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-registry-001` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-registry-002` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-registry-003` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-registry-004` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-001` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-002` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-003` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-004` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-005` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-006` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-007` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-008` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-009` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-010` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-011` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-012` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-013` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-014` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-015` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-016` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-017` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-018` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-019` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-020` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-021` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-022` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-023` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-024` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-025` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-026` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-027` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-028` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-029` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-030` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-residual-root-031` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-run_reports-001` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-run_reports-002` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-run_reports-003` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-run_reports-004` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-run_reports-005` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-run_reports-006` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-run_reports-007` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-run_reports-008` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-run_reports-009` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-run_reports-010` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-run_reports-011` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-run_reports-012` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-run_reports-013` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-run_reports-014` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-run_reports-015` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-run_reports-016` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S01-domain-run_reports-017` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S01-domain-control_plane-001` | reject | trivial | Cycle detection is defensive hardening; freeze/normalize already handle acyclic mappings/sequences/sets and there is no demonstrated cyclic in-process producer. | src/bioetl/domain/control_plane/_run_manifest_serialization.py freeze_manifest_payload |
+| `CR-20260816-A-S01-domain-control_plane-002` | reject | trivial | Watermark index map is a perf suggestion; slice_ledger_entries_after already preserves missing-watermark ValueError and suffix semantics. | src/bioetl/domain/control_plane/_run_ledger_runtime.py slice_ledger_entries_after |
+| `CR-20260816-A-S01-domain-control_plane-003` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/control_plane/_run_ledger_event_family.py |
+| `CR-20260816-A-S01-domain-control_plane-004` | reject | major | dict-only collection check is style/typing; freeze path already accepts Mapping and no non-dict mapping producer was shown. | src/bioetl/domain/control_plane/_run_manifest_serialization.py _freeze_manifest_mapping |
+| `CR-20260816-A-S01-domain-control_plane-005` | reject | major | Retired-stage hydration is a contract expansion; current write/hydrate path fail-closes unknown pipeline stages. | src/bioetl/domain/control_plane/_run_ledger_runtime.py canonicalize_run_ledger_stage_name |
+| `CR-20260816-A-S01-domain-control_plane-006` | reject | major | from_dict stores occurred_at as parsed ISO datetime; no replay comparison site that mixes naive/aware was reproduced. | src/bioetl/domain/control_plane/_run_ledger_runtime.py RunLedgerEntry.from_dict; run_ledger_replay.py last_event_occurred_at |
+| `CR-20260816-A-S01-domain-control_plane-007` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/control_plane/_run_ledger_replay_policy.py |
+| `CR-20260816-A-S01-domain-control_plane-008` | reject | trivial | Style/DRY consolidate of immutable-mapping helpers. | src/bioetl/domain/control_plane/_run_manifest_serialization.py |
+| `CR-20260816-A-S01-domain-control_plane-009` | confirm | major | Malformed non-dict source_refs/input_snapshots/artifacts are silently skipped, so persisted manifest evidence can disappear without fail-closed validation. | src/bioetl/domain/control_plane/_run_manifest_deserialization.py _load_source_refs continues on non-dict items |
+| `CR-20260816-A-S01-domain-control_plane-010` | reject | minor | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/control_plane/_reproducibility_profile_builders.py |
+| `CR-20260816-A-S01-domain-control_plane-011` | reject | major | DRY move of shared event constants; no divergent values demonstrated. | src/bioetl/domain/control_plane/_run_ledger_event_family.py |
+| `CR-20260816-A-S01-domain-control_plane-012` | reject | major | Claim is stale: normalize_required_persistence_profile already lowercases after hyphen-to-underscore. | src/bioetl/domain/control_plane/_reproducibility_policy_profiles.py:10-18 |
+| `CR-20260816-A-S01-domain-control_plane-013` | reject | minor | Unknown capability token currently fail-closes via ValueError; mapping it to rebuild_only would fail-open. | src/bioetl/domain/control_plane/_run_manifest_deserialization.py _load_replay_capability |
+| `CR-20260816-A-S01-domain-control_plane-014` | reject | trivial | Strip-only style for non-pipeline stages. | src/bioetl/domain/control_plane/_run_ledger_runtime.py _normalize_run_ledger_stage |
+| `CR-20260816-A-S01-domain-control_plane-015` | reject | major | MappingProxyType wrap is style without a current mutator hole. | src/bioetl/domain/control_plane/_run_ledger_replay_policy.py |
+| `CR-20260816-A-S01-domain-control_plane-016` | reject | major | Enum JSON conversion is hardening without a demonstrated ledger Enum producer. | src/bioetl/domain/control_plane/_run_ledger_serialization.py normalize_ledger_scalar |
+| `CR-20260816-A-S01-domain-control_plane-017` | reject | trivial | frozenset membership views are a micro-optimization. | src/bioetl/domain/control_plane/_reproducibility_profile_builders.py |
+| `CR-20260816-A-S01-domain-control_plane-018` | reject | major | Removing resume_requested from the verdict is a shipped-policy change, not a residual invariant hole. | src/bioetl/domain/control_plane/_reproducibility_policy_verdicts.py |
+| `CR-20260816-A-S01-domain-control_plane-019` | reject | minor | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/control_plane/_run_ledger_serialization.py |
+| `CR-20260816-A-S01-domain-control_plane-020` | reject | trivial | NamedTuple vs positional tuple is style; field order is already compatible. | src/bioetl/domain/control_plane/_reproducibility_policy_profiles.py |
+| `CR-20260816-A-S01-domain-control_plane-021` | reject | minor | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/control_plane/_run_manifest_serialization.py |
+| `CR-20260816-A-S01-domain-control_plane-022` | reject | minor | Test-only request; reject class for this campaign. | src/bioetl/domain/control_plane/workflow_manifest.py |
+| `CR-20260816-A-S01-domain-control_plane-023` | reject | trivial | Memoize published_supported_boundary_families is perf-only. | src/bioetl/domain/control_plane/reproducibility_profiles.py |
+| `CR-20260816-A-S01-domain-control_plane-024` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/control_plane/workflow_ledger.py |
+| `CR-20260816-A-S01-domain-control_plane-025` | reject | trivial | MappingProxyType on replay projection fields is freeze-style without a current mutator producer. | src/bioetl/domain/control_plane/run_ledger_replay.py RunLedgerReplayProjection |
+| `CR-20260816-A-S01-domain-control_plane-026` | reject | minor | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/control_plane/run_manifest.py |
+| `CR-20260816-A-S01-domain-control_plane-027` | confirm | minor | unsupported_replay_entries is sorted as raw (entry_id, event_type, stage) tuples; equal prefixes with stage None vs str raise TypeError. | src/bioetl/domain/control_plane/run_ledger_replay.py:247-258 tuple(sorted(unsupported)) |
+| `CR-20260816-A-S01-domain-control_plane-028` | reject | minor | empty-frozenset-or-default is API tightening without a demonstrated empty-set caller. | src/bioetl/domain/control_plane/reproducibility_policy.py:132-134 |
+| `CR-20260816-A-S01-domain-control_plane-029` | reject | major | Already shipped: unchanged projector results are marked unsupported for every event, not STAGE_COMPLETED only. | src/bioetl/domain/control_plane/run_ledger_replay.py _apply_projector_result |
+| `CR-20260816-A-S01-domain-control_plane-030` | reject | minor | Raising on unparseable optional ints would change the shipped None fallback contract. | src/bioetl/domain/control_plane/workflow_execution_state.py |
+| `CR-20260816-A-S01-domain-control_plane-031` | reject | major | Unknown status currently fail-closes; treating it as unsupported is a replay-policy expansion. | src/bioetl/domain/control_plane/run_ledger_replay.py |
+| `CR-20260816-A-S01-domain-control_plane-032` | reject | major | DRY reuse of parse_semver plus UNKNOWN fallback is style/contract change. | src/bioetl/domain/control_plane/gold_contract.py |
+| `CR-20260816-A-S01-domain-control_plane-033` | reject | minor | UTC normalize on lifecycle timestamps is hardening; no naive/aware comparison crash was reproduced. | src/bioetl/domain/control_plane/artifact_lifecycle.py |
+| `CR-20260816-A-S01-domain-control_plane-034` | reject | major | Optional-string type tightening is Protocol/typing, not a broken identity. | src/bioetl/domain/control_plane/contract_registry_helpers.py |
+| `CR-20260816-A-S01-domain-control_plane-035` | reject | major | Forward-upgrade register semantics are a shipped GoldContractRegistry API change. | src/bioetl/domain/control_plane/gold_contract.py |
+| `CR-20260816-A-S01-domain-control_plane-036` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/control_plane/ledger/core_events.py |
+| `CR-20260816-A-S01-domain-control_plane-037` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/control_plane/effective_config_artifact.py |
+| `CR-20260816-A-S01-domain-control_plane-038` | reject | trivial | Redundant compatible-branch cleanup is style. | src/bioetl/domain/control_plane/gold_contract.py |
+| `CR-20260816-A-S01-domain-control_plane-039` | reject | trivial | Redundant try/except removal is style. | src/bioetl/domain/control_plane/contract_registry_service.py |
+| `CR-20260816-A-S01-domain-control_plane-040` | reject | major | Re-wrap ValueError as RegistryValidationError is exception-style, not a missing check. | src/bioetl/domain/control_plane/contract_registry_service.py |
+| `CR-20260816-A-S01-domain-control_plane-041` | reject | minor | freeze_fields / owners copy is immutability style. | src/bioetl/domain/control_plane/gold_contract.py |
+| `CR-20260816-A-S01-domain-control_plane-042` | reject | major | Deep-freeze EffectiveConfigArtifact is freeze-style without a current identity-mutation producer. | src/bioetl/domain/control_plane/effective_config_artifact.py |
+| `CR-20260816-A-S01-domain-control_plane-043` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/control_plane/config_source_hashing.py |
+| `CR-20260816-A-S01-domain-entities-001` | reject | trivial | Extra require_non_empty_str on activity_id is validator duplication, not a missing identity check. | src/bioetl/domain/entities/bioactivity/_entity.py |
+| `CR-20260816-A-S01-domain-entities-002` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/entities/__init__.py |
+| `CR-20260816-A-S01-domain-entities-003` | reject | trivial | gt=0 on DTO ints is contract expansion. | src/bioetl/domain/entities/_chembl_additional_models.py |
+| `CR-20260816-A-S01-domain-entities-004` | reject | minor | Field-description typo is docs-only. | src/bioetl/domain/entities/_chembl_activity_assay_models.py |
+| `CR-20260816-A-S01-domain-entities-005` | reject | trivial | String-guard / import placement is style. | src/bioetl/domain/entities/bioactivity/_converters.py |
+| `CR-20260816-A-S01-domain-entities-006` | reject | major | Already shipped: _safe_int accepts finite integral floats such as 5.0 and rejects bool/NaN/non-integral. | src/bioetl/domain/entities/bioactivity/_converters.py _finite_number/_as_integer |
+| `CR-20260816-A-S01-domain-entities-007` | reject | major | Eager __all__ population is export-style. | src/bioetl/domain/entities/__init__.py |
+| `CR-20260816-A-S01-domain-entities-008` | reject | major | Already shipped: _safe_float/_safe_str reject non-finite values. | src/bioetl/domain/entities/bioactivity/_converters.py |
+| `CR-20260816-A-S01-domain-entities-009` | reject | trivial | dataclasses.replace vs asdict is style. | src/bioetl/domain/entities/bioactivity/_entity.py |
+| `CR-20260816-A-S01-domain-entities-010` | reject | trivial | Shared alias helper is DRY. | src/bioetl/domain/entities/bioactivity/_extractors.py |
+| `CR-20260816-A-S01-domain-entities-011` | reject | trivial | Redundant journal field is style. | src/bioetl/domain/entities/pubmed.py |
+| `CR-20260816-A-S01-domain-entities-012` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/entities/pubmed.py |
+| `CR-20260816-A-S01-domain-entities-013` | reject | major | Already shipped: _require_paper_id persists the stripped lowercase paper_id. | src/bioetl/domain/entities/semanticscholar.py:110-116 |
+| `CR-20260816-A-S01-domain-entities-014` | reject | minor | None vs empty alias sync is a shipped empty-value contract, not a crash. | src/bioetl/domain/entities/publication_base.py |
+| `CR-20260816-A-S01-domain-entities-015` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/entities/pubchem.py |
+| `CR-20260816-A-S01-domain-entities-016` | reject | major | Already shipped: component_id is validated with require_positive_id. | src/bioetl/domain/entities/chembl_structures_foundation.py:132-133 |
+| `CR-20260816-A-S01-domain-entities-017` | reject | minor | __all__ completeness is export-style. | src/bioetl/domain/entities/chembl_structures_foundation.py |
+| `CR-20260816-A-S01-domain-entities-018` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/entities/crossref.py |
+| `CR-20260816-A-S01-domain-exceptions-001` | reject | major | Unifying the two BioETLError roots is ADR/shipped-API work; the public facade uses base.BioETLError and error_handler already handles BioETLDomainError separately. | src/bioetl/domain/exceptions/base.py; base_exceptions.py; application/services/ops/error_handler.py |
+| `CR-20260816-A-S01-domain-exceptions-002` | reject | minor | Exception-ctor range checks are not the production DQ invariant surface. | src/bioetl/domain/exceptions/data_quality.py DataQualityThresholdError |
+| `CR-20260816-A-S01-domain-exceptions-003` | reject | major | context overwrite of reserved keys has no demonstrated producer; error_type is already excluded. | src/bioetl/domain/exceptions/base.py to_structured_context |
+| `CR-20260816-A-S01-domain-exceptions-004` | reject | major | Test-only facade coverage request. | src/bioetl/domain/exceptions/__init__.py |
+| `CR-20260816-A-S01-domain-exceptions-005` | reject | major | Domain to_dict redaction is a separate shipped surface; public BioETLError already redacts. | src/bioetl/domain/exceptions/base_exceptions.py to_dict |
+| `CR-20260816-A-S01-domain-exceptions-006` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/exceptions/storage/_delta.py |
+| `CR-20260816-A-S01-domain-exceptions-007` | reject | minor | Coverage-inventory refresh is not an invariant hole. | reports/quality/module-coverage-inventory.json |
+| `CR-20260816-A-S01-domain-exceptions-008` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/exceptions/internal_system.py |
+| `CR-20260816-A-S01-domain-exceptions-009` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/exceptions/network/__init__.py |
+| `CR-20260816-A-S01-domain-exceptions-010` | reject | major | Provider-only RateLimitError path is the shipped dual constructor, not a missing status_code invariant. | src/bioetl/domain/exceptions/network/service.py RateLimitError |
+| `CR-20260816-A-S01-domain-filtering-001` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/filtering/silver_filter_identity.py |
+| `CR-20260816-A-S01-domain-filtering-002` | reject | minor | Coverage-inventory refresh is not an invariant hole. | src/bioetl/domain/filtering/__init__.py |
+| `CR-20260816-A-S01-domain-filtering-003` | reject | minor | Already shipped: GoldRangeFilter rejects min_value > max_value. | src/bioetl/domain/filtering/range_filter.py _require_ordered_float_bounds |
+| `CR-20260816-A-S01-domain-filtering-004` | reject | major | Already shipped: multi-column FilterLoadResult is validated when column_ids is present. | src/bioetl/domain/filtering/load_result.py __post_init__ |
+| `CR-20260816-A-S01-domain-filtering-005` | reject | minor | Already shipped: empty direct_filter_ids and empty direct_multi_filter_ids raise ValueError. | src/bioetl/domain/filtering/input_config.py _validate_direct_ids_mode |
+| `CR-20260816-A-S01-domain-filtering-006` | reject | minor | Already shipped: list-length filters reject negatives and min>max. | src/bioetl/domain/filtering/list_filters.py __post_init__ |
+| `CR-20260816-A-S01-domain-filtering-007` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/filtering/_base_filter_config.py |
+| `CR-20260816-A-S01-domain-filtering-008` | reject | major | Mapping freeze of filter config is style without a current mutator hole. | src/bioetl/domain/filtering/input_config.py |
+| `CR-20260816-A-S01-domain-filtering-009` | reject | major | Claim is stale: only missing/None bypass contains matching; empty/zero are evaluated. | src/bioetl/domain/filtering/_filter_primitives.py check_single_list_contains |
+| `CR-20260816-A-S01-domain-filtering-010` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/filtering/__init__.py |
+| `CR-20260816-A-S01-domain-filtering-011` | reject | major | Claim is stale: mixed values already sort with (type.__name__, str(value)). | src/bioetl/domain/filtering/_filter_evaluator.py:73-77 |
+| `CR-20260816-A-S01-domain-lineage-001` | reject | major | Test-only lineage facade coverage. | src/bioetl/domain/lineage/__init__.py |
+| `CR-20260816-A-S01-domain-lineage-002` | reject | major | Already shipped: TransformRef.node_id passes every segment through _node_id_segment. | src/bioetl/domain/lineage/refs.py:173-184 |
+| `CR-20260816-A-S01-domain-lineage-003` | reject | major | Coverage-inventory refresh is not an invariant hole. | src/bioetl/domain/lineage/__init__.py |
+| `CR-20260816-A-S01-domain-lineage-004` | reject | major | Already shipped: set ordering uses serialize_json_canonical, not repr(). | src/bioetl/domain/lineage/_shared.py _plain_set |
+| `CR-20260816-A-S01-domain-lineage-005` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/lineage/__init__.py |
+| `CR-20260816-A-S01-domain-mapping-001` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/mapping/protein_class_target_type.py |
+| `CR-20260816-A-S01-domain-mapping-002` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/mapping/organism_classification.py |
+| `CR-20260816-A-S01-domain-mapping-003` | reject | major | Immutable Mapping conversion is freeze-style. | src/bioetl/domain/mapping/classification_data.py |
+| `CR-20260816-A-S01-domain-mapping-004` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/mapping/_publication_type_classification_support.py |
+| `CR-20260816-A-S01-domain-mapping-005` | reject | major | Coverage-inventory refresh is not an invariant hole. | src/bioetl/domain/mapping/__init__.py |
+| `CR-20260816-A-S01-domain-mapping-006` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/mapping/publication_fields.py |
+| `CR-20260816-A-S01-domain-mapping-007` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/mapping/publication_controlled_vocabulary.py |
+| `CR-20260816-A-S01-domain-mapping-008` | reject | major | Already shipped: apply_field_mapping raises on duplicate unified keys. | src/bioetl/domain/mapping/publication_fields.py:226-233 |
+| `CR-20260816-A-S01-domain-mapping-009` | reject | major | Coverage-inventory refresh is not an invariant hole. | src/bioetl/domain/mapping/publication_type_classification.py |
+| `CR-20260816-A-S01-domain-mapping-010` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/mapping/pubmed_publication.py |
+| `CR-20260816-A-S01-domain-mapping-011` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/mapping/publication_type_classification.py |
+| `CR-20260816-A-S01-domain-mapping-012` | reject | major | Already shipped: unknown tokens return None and pipe-separated unknown parts fail closed. | src/bioetl/domain/mapping/publication_type_mapping.py _normalize_single/_normalize_known_publication_type_parts |
+| `CR-20260816-A-S01-domain-mapping-013` | reject | major | Removing module-global classification state is a shipped-API rewrite, not a reproduced residual bug. | src/bioetl/domain/mapping/publication_type_classification.py |
+| `CR-20260816-A-S01-domain-mapping-014` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/mapping/publication_type_classification.py |
+| `CR-20260816-A-S01-domain-models-001` | reject | major | Test-only metadata facade coverage. | src/bioetl/domain/models/metadata.py |
+| `CR-20260816-A-S01-domain-models-002` | reject | major | Coverage-inventory refresh is not an invariant hole. | src/bioetl/domain/models/__init__.py |
+| `CR-20260816-A-S01-domain-models-003` | reject | major | Already shipped: Filter copies params into MappingProxyType. | src/bioetl/domain/models/filter.py:65-66 |
+| `CR-20260816-A-S01-domain-models-004` | reject | minor | urlencode of the audit query string is a contract expansion of the shipped join format. | src/bioetl/domain/models/filter.py to_query_string |
+| `CR-20260816-A-S01-domain-normalization-001` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/reference_ids.py |
+| `CR-20260816-A-S01-domain-normalization-002` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/structured_payload_policies.py |
+| `CR-20260816-A-S01-domain-normalization-003` | reject | minor | Test-only request; reject class for this campaign. | src/bioetl/domain/normalization/text.py |
+| `CR-20260816-A-S01-domain-normalization-004` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/normalization/text.py |
+| `CR-20260816-A-S01-domain-normalization-005` | reject | minor | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/rules.py |
+| `CR-20260816-A-S01-domain-normalization-006` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/normalization/rules.py |
+| `CR-20260816-A-S01-domain-normalization-007` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/normalization/reference_ids.py |
+| `CR-20260816-A-S01-domain-normalization-008` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/_publication_structured_field_policy_specs.py |
+| `CR-20260816-A-S01-domain-normalization-009` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/_control_plane_payloads.py |
+| `CR-20260816-A-S01-domain-normalization-010` | reject | minor | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/_chembl_units.py |
+| `CR-20260816-A-S01-domain-normalization-011` | reject | minor | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/_control_plane_identity.py |
+| `CR-20260816-A-S01-domain-normalization-012` | confirm | major | Independently confirmed in later-leaf triage; product stream already opened. | src/bioetl/domain/normalization/_control_plane_payloads.py |
+| `CR-20260816-A-S01-domain-normalization-013` | confirm | minor | Independently confirmed in later-leaf triage; product stream already opened. | src/bioetl/domain/normalization/_hash_identity_scalars.py |
+| `CR-20260816-A-S01-domain-normalization-014` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/_reference_id_normalizers.py |
+| `CR-20260816-A-S01-domain-normalization-015` | reject | minor | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/_reference_id_ncbi_taxonomy.py |
+| `CR-20260816-A-S01-domain-normalization-016` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/_control_plane_primitives.py |
+| `CR-20260816-A-S01-domain-normalization-017` | reject | minor | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/_chembl_policy_family_mapping.py |
+| `CR-20260816-A-S01-domain-normalization-018` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/__init__.py |
+| `CR-20260816-A-S01-domain-normalization-019` | reject | minor | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/_normalization_helpers.py |
+| `CR-20260816-A-S01-domain-normalization-020` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/normalization/profiles/_normalization_helpers.py |
+| `CR-20260816-A-S01-domain-normalization-021` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/normalization/profiles/_chembl_profile_helpers.py |
+| `CR-20260816-A-S01-domain-normalization-022` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/chembl_target.py |
+| `CR-20260816-A-S01-domain-normalization-023` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/chembl_publication.py |
+| `CR-20260816-A-S01-domain-normalization-024` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/chembl_policy_registry_data.py |
+| `CR-20260816-A-S01-domain-normalization-025` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/chembl_json_ordering_policy.py |
+| `CR-20260816-A-S01-domain-normalization-026` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/chembl_policy_registry.py |
+| `CR-20260816-A-S01-domain-normalization-027` | reject | minor | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/chembl_pseudo_nulls.py |
+| `CR-20260816-A-S01-domain-normalization-028` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/chembl_policy_registry.py |
+| `CR-20260816-A-S01-domain-normalization-029` | reject | minor | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/chembl_policy_registry.py |
+| `CR-20260816-A-S01-domain-normalization-030` | reject | minor | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/chembl_target.py |
+| `CR-20260816-A-S01-domain-normalization-031` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/chembl_molecule.py |
+| `CR-20260816-A-S01-domain-normalization-032` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/_profile_textual_normalizers.py |
+| `CR-20260816-A-S01-domain-normalization-033` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/_profile_value_normalizers.py |
+| `CR-20260816-A-S01-domain-normalization-034` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/_publication_classification_rules.py |
+| `CR-20260816-A-S01-domain-normalization-035` | reject | minor | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/_profile_numeric_normalizers.py |
+| `CR-20260816-A-S01-domain-normalization-036` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/_profile_target_normalizers.py |
+| `CR-20260816-A-S01-domain-normalization-037` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/chembl_json_ordering_policy.py |
+| `CR-20260816-A-S01-domain-normalization-038` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/_profile_governed_value_normalizers.py |
+| `CR-20260816-A-S01-domain-normalization-039` | confirm | minor | Independently confirmed in later-leaf triage; product stream already opened. | src/bioetl/domain/normalization/profiles/_profile_textual_normalizers.py |
+| `CR-20260816-A-S01-domain-normalization-040` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/normalization/profiles/_standard_profile_spec.py |
+| `CR-20260816-A-S01-domain-normalization-041` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/_standard_profile_builder.py |
+| `CR-20260816-A-S01-domain-normalization-042` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/_standard_profile_rule_families.py |
+| `CR-20260816-A-S01-domain-normalization-043` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/_standard_profile_rule_families.py |
+| `CR-20260816-A-S01-domain-normalization-044` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/base.py |
+| `CR-20260816-A-S01-domain-normalization-045` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/normalization/profiles/chembl_assay_parameters.py |
+| `CR-20260816-A-S01-domain-normalization-046` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/chembl_activity.py |
+| `CR-20260816-A-S01-domain-normalization-047` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/_standard_profile_rule_components.py |
+| `CR-20260816-A-S01-domain-normalization-048` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/base.py |
+| `CR-20260816-A-S01-domain-normalization-049` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/_standard_profile_spec.py |
+| `CR-20260816-A-S01-domain-normalization-050` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/_standard_profile_rule_context.py |
+| `CR-20260816-A-S01-domain-normalization-051` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/_standard_profile_spec.py |
+| `CR-20260816-A-S01-domain-normalization-052` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/chembl_cell_line.py |
+| `CR-20260816-A-S01-domain-normalization-053` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/crossref_publication.py |
+| `CR-20260816-A-S01-domain-normalization-054` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/profiles/registry.py |
+| `CR-20260816-A-S01-domain-normalization-055` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/normalization/profiles/pubmed_publication.py |
+| `CR-20260816-A-S01-domain-normalization-056` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/json.py |
+| `CR-20260816-A-S01-domain-normalization-057` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/normalization/hash_identity.py |
+| `CR-20260816-A-S01-domain-normalization-058` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/join_keys.py |
+| `CR-20260816-A-S01-domain-normalization-059` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/authors.py |
+| `CR-20260816-A-S01-domain-normalization-060` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/join_keys.py |
+| `CR-20260816-A-S01-domain-normalization-061` | reject | minor | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/normalization/fingerprints.py |
+| `CR-20260816-A-S01-domain-normalization-062` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/normalization/authors.py |
+| `CR-20260816-A-S01-domain-normalization-063` | reject | minor | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/dates.py |
+| `CR-20260816-A-S01-domain-normalization-064` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/normalization/json.py |
+| `CR-20260816-A-S01-domain-normalization-065` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/identifiers.py |
+| `CR-20260816-A-S01-domain-normalization-066` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/chemical_standardization_contract.py |
+| `CR-20260816-A-S01-domain-normalization-067` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/fingerprints.py |
+| `CR-20260816-A-S01-domain-normalization-068` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/normalization/chembl.py |
+| `CR-20260816-A-S01-domain-normalization-069` | reject | critical | date() already fail-closes out-of-range year/month/day; month-only and year-only normalize to period end. | src/bioetl/domain/normalization/dates.py _format_parts_to_date |
+| `CR-20260816-A-S01-domain-normalization-070` | confirm | major | Independently confirmed in later-leaf triage; product stream already opened. | src/bioetl/domain/normalization/fingerprints.py |
+| `CR-20260816-A-S01-domain-normalization-071` | reject | critical | Non-BMP surrogate-pair escapes already implemented in _escape_unicode_match; orjson numpy option is shipped API. | src/bioetl/domain/normalization/json.py _escape_unicode_match |
+| `CR-20260816-A-S01-domain-ports-001` | reject | minor | Independently rejected on 2026-08-17 (#8859 later-leaf triage): no invariant breach on current code/tests. ports 0/47, registry 0/4. | src/bioetl/domain/ports/audit.py |
+| `CR-20260816-A-S01-domain-ports-002` | reject | major | Independently rejected on 2026-08-17 (#8859 later-leaf triage): no invariant breach on current code/tests. ports 0/47, registry 0/4. | src/bioetl/domain/ports/control_plane/artifact_byte_comparison.py |
+| `CR-20260816-A-S01-domain-ports-003` | reject | trivial | Independently rejected on 2026-08-17 (#8859 later-leaf triage): no invariant breach on current code/tests. ports 0/47, registry 0/4. | src/bioetl/domain/ports/__init__.pyi |
+| `CR-20260816-A-S01-domain-ports-004` | reject | trivial | Independently rejected on 2026-08-17 (#8859 later-leaf triage): no invariant breach on current code/tests. ports 0/47, registry 0/4. | src/bioetl/domain/ports/config/config_port.py |
+| `CR-20260816-A-S01-domain-ports-005` | reject | minor | Independently rejected on 2026-08-17 (#8859 later-leaf triage): no invariant breach on current code/tests. ports 0/47, registry 0/4. | src/bioetl/domain/ports/adr.py |
+| `CR-20260816-A-S01-domain-ports-006` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/ports/__init__.py |
+| `CR-20260816-A-S01-domain-ports-007` | reject | major | Independently rejected on 2026-08-17 (#8859 later-leaf triage): no invariant breach on current code/tests. ports 0/47, registry 0/4. | src/bioetl/domain/ports/quality/quarantine.py |
+| `CR-20260816-A-S01-domain-ports-008` | reject | trivial | Independently rejected on 2026-08-17 (#8859 later-leaf triage): no invariant breach on current code/tests. ports 0/47, registry 0/4. | src/bioetl/domain/ports/runtime/checkpoint.py |
+| `CR-20260816-A-S01-domain-ports-009` | reject | major | Independently rejected on 2026-08-17 (#8859 later-leaf triage): no invariant breach on current code/tests. ports 0/47, registry 0/4. | src/bioetl/domain/ports/quality/quarantine.py |
+| `CR-20260816-A-S01-domain-ports-010` | reject | trivial | Independently rejected on 2026-08-17 (#8859 later-leaf triage): no invariant breach on current code/tests. ports 0/47, registry 0/4. | src/bioetl/domain/ports/quality/silver_dq_request.py |
+| `CR-20260816-A-S01-domain-ports-011` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/ports/quality/error_handler.py |
+| `CR-20260816-A-S01-domain-ports-012` | reject | trivial | Independently rejected on 2026-08-17 (#8859 later-leaf triage): no invariant breach on current code/tests. ports 0/47, registry 0/4. | src/bioetl/domain/ports/runtime/composite_checkpoint.py |
+| `CR-20260816-A-S01-domain-ports-013` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/ports/runtime/composite_checkpoint.py |
+| `CR-20260816-A-S01-domain-ports-014` | reject | trivial | Independently rejected on 2026-08-17 (#8859 later-leaf triage): no invariant breach on current code/tests. ports 0/47, registry 0/4. | src/bioetl/domain/ports/workflow_foreign_key_reconciliation.py |
+| `CR-20260816-A-S01-domain-ports-015` | reject | trivial | Independently rejected on 2026-08-17 (#8859 later-leaf triage): no invariant breach on current code/tests. ports 0/47, registry 0/4. | src/bioetl/domain/ports/workflow_row_reconciliation.py |
+| `CR-20260816-A-S01-domain-ports-016` | reject | major | Independently rejected on 2026-08-17 (#8859 later-leaf triage): no invariant breach on current code/tests. ports 0/47, registry 0/4. | src/bioetl/domain/ports/storage/silver_port.py |
+| `CR-20260816-A-S01-domain-ports-017` | reject | major | Independently rejected on 2026-08-17 (#8859 later-leaf triage): no invariant breach on current code/tests. ports 0/47, registry 0/4. | src/bioetl/domain/ports/workflow_foreign_key_reconciliation.py |
+| `CR-20260816-A-S01-domain-ports-018` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/ports/storage/bronze_port.py |
+| `CR-20260816-A-S01-domain-ports-019` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/ports/storage/lifecycle_port.py |
+| `CR-20260816-A-S01-domain-ports-020` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/ports/runtime/registry_port.py |
+| `CR-20260816-A-S01-domain-ports-021` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/ports/serialization.py |
+| `CR-20260816-A-S01-domain-ports-022` | reject | minor | Independently rejected on 2026-08-17 (#8859 later-leaf triage): no invariant breach on current code/tests. ports 0/47, registry 0/4. | src/bioetl/domain/ports/workflow_foreign_key_reconciliation.py |
+| `CR-20260816-A-S01-domain-ports-023` | reject | trivial | Independently rejected on 2026-08-17 (#8859 later-leaf triage): no invariant breach on current code/tests. ports 0/47, registry 0/4. | src/bioetl/domain/ports/workflow_foreign_key_reconciliation.py |
+| `CR-20260816-A-S01-domain-ports-024` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/ports/storage/silver_port.py |
+| `CR-20260816-A-S01-domain-ports-025` | reject | trivial | Independently rejected on 2026-08-17 (#8859 later-leaf triage): no invariant breach on current code/tests. ports 0/47, registry 0/4. | src/bioetl/domain/ports/storage/silver_port.py |
+| `CR-20260816-A-S01-domain-ports-026` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/ports/runtime/shutdown.py |
+| `CR-20260816-A-S01-domain-ports-027` | reject | minor | Independently rejected on 2026-08-17 (#8859 later-leaf triage): no invariant breach on current code/tests. ports 0/47, registry 0/4. | src/bioetl/domain/ports/workflow_row_reconciliation.py |
+| `CR-20260816-A-S01-domain-ports-028` | reject | trivial | Independently rejected on 2026-08-17 (#8859 later-leaf triage): no invariant breach on current code/tests. ports 0/47, registry 0/4. | src/bioetl/domain/ports/runtime/pipeline_debug.py |
+| `CR-20260816-A-S01-domain-ports-029` | reject | major | Independently rejected on 2026-08-17 (#8859 later-leaf triage): no invariant breach on current code/tests. ports 0/47, registry 0/4. | src/bioetl/domain/ports/storage/silver_port.py |
+| `CR-20260816-A-S01-domain-ports-030` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/ports/storage/gold_port.py |
+| `CR-20260816-A-S01-domain-ports-031` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/ports/storage/merged_port.py |
+| `CR-20260816-A-S01-domain-ports-032` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/ports/observability/metrics.py |
+| `CR-20260816-A-S01-domain-ports-033` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/ports/pii.py |
+| `CR-20260816-A-S01-domain-ports-034` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/ports/control_plane/workflow_execution_state.py |
+| `CR-20260816-A-S01-domain-ports-035` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/ports/quality/dq_report.py |
+| `CR-20260816-A-S01-domain-ports-036` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/ports/data_source.py |
+| `CR-20260816-A-S01-domain-ports-037` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/ports/data_source.py |
+| `CR-20260816-A-S01-domain-ports-038` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/ports/export.py |
+| `CR-20260816-A-S01-domain-ports-039` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/ports/data_normalization.py |
+| `CR-20260816-A-S01-domain-ports-040` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/ports/filtering.py |
+| `CR-20260816-A-S01-domain-ports-041` | reject | major | Independently rejected on 2026-08-17 (#8859 later-leaf triage): no invariant breach on current code/tests. ports 0/47, registry 0/4. | src/bioetl/domain/ports/export.py |
+| `CR-20260816-A-S01-domain-ports-042` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/ports/control_plane/run_manifest.py |
+| `CR-20260816-A-S01-domain-ports-043` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/ports/control_plane/lineage.py |
+| `CR-20260816-A-S01-domain-ports-044` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/ports/delta_reader.py |
+| `CR-20260816-A-S01-domain-ports-045` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/ports/health_check.py |
+| `CR-20260816-A-S01-domain-ports-046` | reject | minor | Independently rejected on 2026-08-17 (#8859 later-leaf triage): no invariant breach on current code/tests. ports 0/47, registry 0/4. | src/bioetl/domain/ports/health_check.py |
+| `CR-20260816-A-S01-domain-ports-047` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/ports/noop/_async_boundary.py |
+| `CR-20260816-A-S01-domain-registry-001` | reject | major | Independently rejected on 2026-08-17 (#8859 later-leaf triage): no invariant breach on current code/tests. ports 0/47, registry 0/4. | src/bioetl/domain/registry/__init__.py |
+| `CR-20260816-A-S01-domain-registry-002` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/registry/field_aliases.py |
+| `CR-20260816-A-S01-domain-registry-003` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/registry/publication_data.py |
+| `CR-20260816-A-S01-domain-registry-004` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/registry/__init__.py |
+| `CR-20260816-A-S01-domain-residual-root-001` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/mixin_host.py |
+| `CR-20260816-A-S01-domain-residual-root-002` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/observability_metric_names.py |
+| `CR-20260816-A-S01-domain-residual-root-003` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/error_classifier.py |
+| `CR-20260816-A-S01-domain-residual-root-004` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/context_validation.py |
+| `CR-20260816-A-S01-domain-residual-root-005` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/events.py |
+| `CR-20260816-A-S01-domain-residual-root-006` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/deterministic_identity.py |
+| `CR-20260816-A-S01-domain-residual-root-007` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/observability_event_mapping.py |
+| `CR-20260816-A-S01-domain-residual-root-008` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/medallion.py |
+| `CR-20260816-A-S01-domain-residual-root-009` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/locking.py |
+| `CR-20260816-A-S01-domain-residual-root-010` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/locking.py |
+| `CR-20260816-A-S01-domain-residual-root-011` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/immutability.py |
+| `CR-20260816-A-S01-domain-residual-root-012` | confirm | major | Independently confirmed in later-leaf triage; product stream already opened. | src/bioetl/domain/pubchem_standardization_catalog.py |
+| `CR-20260816-A-S01-domain-residual-root-013` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/resilience.py |
+| `CR-20260816-A-S01-domain-residual-root-014` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/resilience_circuit_breaker.py |
+| `CR-20260816-A-S01-domain-residual-root-015` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/types_config_validation.py |
+| `CR-20260816-A-S01-domain-residual-root-016` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/runtime_observability_publication_contract.py |
+| `CR-20260816-A-S01-domain-residual-root-017` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/context_run.py |
+| `CR-20260816-A-S01-domain-residual-root-018` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/adapter_config.py |
+| `CR-20260816-A-S01-domain-residual-root-019` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/context_run.py |
+| `CR-20260816-A-S01-domain-residual-root-020` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/context_filtering.py |
+| `CR-20260816-A-S01-domain-residual-root-021` | reject | minor | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/context_filtering.py |
+| `CR-20260816-A-S01-domain-residual-root-022` | reject | minor | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/_observability_contract_primitives.py |
+| `CR-20260816-A-S01-domain-residual-root-023` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/context_correlation.py |
+| `CR-20260816-A-S01-domain-residual-root-024` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/_observability_contract_core.py |
+| `CR-20260816-A-S01-domain-residual-root-025` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/context.py |
+| `CR-20260816-A-S01-domain-residual-root-026` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/__init__.py |
+| `CR-20260816-A-S01-domain-residual-root-027` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/serialization.py |
+| `CR-20260816-A-S01-domain-residual-root-028` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/domain/serialization.py |
+| `CR-20260816-A-S01-domain-residual-root-029` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/serialization.py |
+| `CR-20260816-A-S01-domain-residual-root-030` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/version.py |
+| `CR-20260816-A-S01-domain-residual-root-031` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/_observability_contract_core.py |
+| `CR-20260816-A-S01-domain-run_reports-001` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/run_reports/workflow_reasons.py |
+| `CR-20260816-A-S01-domain-run_reports-002` | confirm | major | Independently confirmed in later-leaf triage; product stream already opened. | src/bioetl/domain/run_reports/reason_catalog.py |
+| `CR-20260816-A-S01-domain-run_reports-003` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/run_reports/pipeline_builder.py |
+| `CR-20260816-A-S01-domain-run_reports-004` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/run_reports/accounting_snapshots.py |
+| `CR-20260816-A-S01-domain-run_reports-005` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/domain/run_reports/accounting_snapshots.py |
+| `CR-20260816-A-S01-domain-run_reports-006` | reject | major | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/run_reports/pipeline_builder.py |
+| `CR-20260816-A-S01-domain-run_reports-007` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/run_reports/models.py |
+| `CR-20260816-A-S01-domain-run_reports-008` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/run_reports/pipeline_builder.py |
+| `CR-20260816-A-S01-domain-run_reports-009` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/run_reports/workflow_builder.py |
+| `CR-20260816-A-S01-domain-run_reports-010` | reject | minor | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/run_reports/accounting.py |
+| `CR-20260816-A-S01-domain-run_reports-011` | confirm | major | Independently confirmed in later-leaf triage; product stream already opened. | src/bioetl/domain/run_reports/reason_catalog.py |
+| `CR-20260816-A-S01-domain-run_reports-012` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/run_reports/accounting.py |
+| `CR-20260816-A-S01-domain-run_reports-013` | confirm | minor | Independently confirmed in later-leaf triage; product stream already opened. | src/bioetl/domain/run_reports/workflow_builder.py |
+| `CR-20260816-A-S01-domain-run_reports-014` | confirm | major | Independently confirmed in later-leaf triage; product stream already opened. | src/bioetl/domain/run_reports/workflow_reasons.py |
+| `CR-20260816-A-S01-domain-run_reports-015` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/domain/run_reports/accounting_snapshots.py |
+| `CR-20260816-A-S01-domain-run_reports-016` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/run_reports/__init__.py |
+| `CR-20260816-A-S01-domain-run_reports-017` | reject | trivial | Remainder of 2026-08-17 later-leaf independent triage: no fresh invariant breach after the listed confirms. | src/bioetl/domain/run_reports/reason_catalog.py |
 | `CR-20260816-A-S01-domain-schemas-001` | reject | major | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API | src/bioetl/domain/schemas/_chembl_enum_catalog.py; reports/quality/coderabbit/20260816/review_A_S01-domain-schemas.log; #8890 ground-truth review |
 | `CR-20260816-A-S01-domain-schemas-002` | reject | major | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API | src/bioetl/domain/schemas/chembl/molecule.py; reports/quality/coderabbit/20260816/review_A_S01-domain-schemas.log; #8890 ground-truth review |
 | `CR-20260816-A-S01-domain-schemas-003` | reject | major | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API | src/bioetl/domain/schemas/chembl/assay_parameters.py; reports/quality/coderabbit/20260816/review_A_S01-domain-schemas.log; #8890 ground-truth review |
@@ -1003,451 +1003,82 @@ Code/config/contracts and executable gates outrank CodeRabbit output.
 | `CR-20260816-A-S04-app-services-other-182` | confirm | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/application/services/run_reports/query.py; reports/quality/coderabbit/20260816/review_A_S04-app-services-other.log; #8890 ground-truth review |
 | `CR-20260816-A-S04-app-services-other-183` | reject | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/application/services/run_reports/source_identity.py; reports/quality/coderabbit/20260816/review_A_S04-app-services-other.log; #8890 ground-truth review |
 | `CR-20260816-A-S04-app-services-other-184` | confirm | critical | Confirmed: normalize_runtime_path recursively prepends a relative root and reaches RecursionError. | src/bioetl/application/services/run_reports/source_identity.py; current-tree relative-root reproduction; #8890 |
-| `CR-20260816-A-S04b-app-residual-001` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-002` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-003` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-004` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-005` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-006` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-007` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-008` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-009` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-010` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-011` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-012` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-013` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-014` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-015` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-016` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-017` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-018` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-019` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-020` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-021` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-022` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-023` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-024` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-025` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-026` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-027` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-028` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-029` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-030` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-031` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-032` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-033` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-034` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-035` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-036` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-037` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-038` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-039` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-040` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-041` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-042` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-043` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-044` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-045` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-046` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-047` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-048` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-049` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-050` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-051` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-052` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-053` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-054` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-055` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-056` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-057` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-058` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-059` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-060` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-061` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-062` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-063` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-064` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-065` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-066` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-067` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-068` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-069` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-070` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-071` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-072` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-073` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-074` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-075` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-076` | pending | trivial | pending ground-truth reconciliation |  |
-<<<<<<< Updated upstream
-| `CR-20260816-A-S04b-app-residual-077` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-078` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-079` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-080` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-081` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-082` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-083` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-084` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-085` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-086` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-087` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-088` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-089` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-090` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-091` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-092` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-093` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-094` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-095` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-096` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-097` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-098` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-099` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-100` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-101` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-102` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-103` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-104` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-105` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-106` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-107` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-108` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-109` | pending | critical | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-110` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-111` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-112` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-113` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-114` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-115` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-116` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-117` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-118` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-119` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-120` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-121` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-122` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S04b-app-residual-123` | pending | trivial | pending ground-truth reconciliation |  |
-||||||| Stash base
-| `CR-20260816-A-S04b-app-residual-077` | reject | minor | Reject duplicate dependency pipelines is config-policy expansion. | src/bioetl/application/composite/dependency_coordinator.py |
-| `CR-20260816-A-S04b-app-residual-078` | reject | major | Inject accounting port is architecture style. | src/bioetl/application/composite/deduplication.py |
-| `CR-20260816-A-S04b-app-residual-079` | reject | trivial | log_fields uses left/right/seed/dep keys, not reserved dependency/result_rows; no TypeError path. | src/bioetl/application/composite/dependency_join_execution.py:127-155 |
-| `CR-20260816-A-S04b-app-residual-080` | reject | trivial | Shared seed-sentinel constant is DRY. | src/bioetl/application/composite/dependency_join_context_builders.py |
-| `CR-20260816-A-S04b-app-residual-081` | reject | major | zip(..., strict=True) is hardening without a current unequal-length producer. | src/bioetl/application/composite/cross_validator_helpers.py |
-| `CR-20260816-A-S04b-app-residual-082` | reject | minor | Ordered column sequence vs set is determinism style. | src/bioetl/application/composite/column_service_support.py |
-| `CR-20260816-A-S04b-app-residual-083` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/composite/coordinator.py |
-| `CR-20260816-A-S04b-app-residual-084` | reject | trivial | Local polars import hoist is style. | src/bioetl/application/composite/deduplication.py |
-| `CR-20260816-A-S04b-app-residual-085` | reject | trivial | Defer create_task until after planning is a scheduling-style change. | src/bioetl/application/composite/coordinator_planning.py |
-| `CR-20260816-A-S04b-app-residual-086` | reject | major | Suffix collision with existing enricher columns has no demonstrated producer; current check against seed_cols is the shipped resolver. | src/bioetl/application/composite/conflict_resolver.py:80-83 |
-| `CR-20260816-A-S04b-app-residual-087` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/composite/cross_validator_helpers.py |
-| `CR-20260816-A-S04b-app-residual-088` | reject | minor | Missing-column vs unsupported-filter warning split is message-style. | src/bioetl/application/composite/coordinator_planning.py |
-| `CR-20260816-A-S04b-app-residual-089` | reject | major | Keyword vs positional unpack is style; field order is already aligned. | src/bioetl/application/composite/dependency_join_context_builders.py |
-| `CR-20260816-A-S04b-app-residual-090` | reject | trivial | One aggregated.select instead of per-column scans is perf. | src/bioetl/application/composite/deduplication.py |
-| `CR-20260816-A-S04b-app-residual-091` | reject | trivial | tuple/frozenset/eq=False on join contexts is freeze-style. | src/bioetl/application/composite/dependency_join_models.py |
-| `CR-20260816-A-S04b-app-residual-092` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/composite/join_execution.py |
-| `CR-20260816-A-S04b-app-residual-093` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/composite/helpers/join_planner_identity.py |
-| `CR-20260816-A-S04b-app-residual-094` | reject | trivial | Remove passthrough logger wrappers is style. | src/bioetl/application/composite/helpers/resolver_helper.py |
-| `CR-20260816-A-S04b-app-residual-095` | reject | trivial | Collaborator dataclass extraction is DRY. | src/bioetl/application/composite/helpers/dependency_join_apply_ops.py |
-| `CR-20260816-A-S04b-app-residual-096` | reject | major | Shared join-key coerce helper is DRY; the remaining regex bug is already confirmed as S04b-109/#8916 and is not reopened here. | src/bioetl/application/composite/join_execution.py |
-| `CR-20260816-A-S04b-app-residual-097` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/composite/helpers/resolver_helper.py |
-| `CR-20260816-A-S04b-app-residual-098` | reject | trivial | Remove pass-through wrappers is style. | src/bioetl/application/composite/helpers/dependency_join_service_ops.py |
-| `CR-20260816-A-S04b-app-residual-099` | reject | trivial | Precomputed dtype groups / zip strict is perf/style. | src/bioetl/application/composite/helpers/preflight_type_and_aggregation.py |
-| `CR-20260816-A-S04b-app-residual-100` | reject | trivial | Shared terminal-emit helper is DRY. | src/bioetl/application/composite/helpers/lifecycle_observer_terminal_emit.py |
-| `CR-20260816-A-S04b-app-residual-101` | reject | major | Surface skipped schema-registry entries is reporting expansion. | src/bioetl/application/composite/helpers/preflight_schema_registry.py |
-| `CR-20260816-A-S04b-app-residual-102` | reject | major | Restrict vars(module) fallback is discovery-policy tightening. | src/bioetl/application/composite/helpers/preflight_schema_registry.py |
-| `CR-20260816-A-S04b-app-residual-103` | reject | minor | Nested-bracket dtype parse is hardening without a reproduced wrong dtype. | src/bioetl/application/composite/helpers/preflight_schema_field_extraction.py |
-| `CR-20260816-A-S04b-app-residual-104` | reject | major | Dedup join-key expressions is hardening without a demonstrated duplicate-key producer. | src/bioetl/application/composite/join_key_normalization.py |
-| `CR-20260816-A-S04b-app-residual-105` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/composite/helpers/merger_orchestration_types.py |
-| `CR-20260816-A-S04b-app-residual-106` | reject | trivial | Read-only merge-context annotations are Protocol/style. | src/bioetl/application/composite/helpers/merger_orchestration_types.py |
-| `CR-20260816-A-S04b-app-residual-107` | reject | trivial | Hoist module_aliases constant is style. | src/bioetl/application/composite/helpers/preflight_schema_registry.py |
-| `CR-20260816-A-S04b-app-residual-108` | reject | minor | Earliest-layer token selection is a path-parse policy change. | src/bioetl/application/composite/helpers/join_planner_identity.py |
-| `CR-20260816-A-S04b-app-residual-109` | confirm | critical | Join-key regex r"\.0$" is over-escaped and does not strip a literal .0 suffix after String cast. | src/bioetl/application/composite/join_execution.py str.replace |
-| `CR-20260816-A-S04b-app-residual-110` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/composite/runner_pkg/runner_runtime_helpers.py |
-| `CR-20260816-A-S04b-app-residual-111` | reject | trivial | __all__ placement is style. | src/bioetl/application/composite/runner_pkg/runner_stage_dependency_state_flow.py |
-| `CR-20260816-A-S04b-app-residual-112` | reject | trivial | Remove asyncio.sleep(0) is style. | src/bioetl/application/composite/runner_pkg/runner_stage_enrichment_mixin.py |
-| `CR-20260816-A-S04b-app-residual-113` | reject | minor | Explicit InvalidStateError on unexpected enrichment states is hardening of a shipped no-op branch. | src/bioetl/application/composite/runner_pkg/runner_stage_enrichment_mixin.py |
-| `CR-20260816-A-S04b-app-residual-114` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/composite/runner_pkg/runner_observability_helpers.py |
-| `CR-20260816-A-S04b-app-residual-115` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/composite/runner_pkg/runner_stage_dependency_flow.py |
-| `CR-20260816-A-S04b-app-residual-116` | confirm | major | run_while_locked finally calls heartbeat.stop() then lock release; a stop() exception skips release and leaks the lock. | src/bioetl/application/composite/runner_pkg/runner_runtime_helpers.py:224-226 |
-| `CR-20260816-A-S04b-app-residual-117` | reject | minor | Persist-before-emit ordering is style; both steps still run. | src/bioetl/application/composite/runner_pkg/runner_stage_dependency_state_flow.py |
-| `CR-20260816-A-S04b-app-residual-118` | reject | minor | Prefer get_reason_code() is telemetry-style. | src/bioetl/application/composite/runner_pkg/runner_merge_stage_runtime.py |
-| `CR-20260816-A-S04b-app-residual-119` | reject | trivial | Clearer UUID ValueError is message-style. | src/bioetl/application/composite/runner_pkg/runner_runtime_helpers.py |
-| `CR-20260816-A-S04b-app-residual-120` | reject | trivial | Copy-before-mutate in add_not_run_results is freeze-style. | src/bioetl/application/composite/runner_pkg/runner_mergeability_helpers.py |
-| `CR-20260816-A-S04b-app-residual-121` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/composite/runner_pkg/runner_observability_helpers.py |
-| `CR-20260816-A-S04b-app-residual-122` | reject | major | cast(Any, None) to annotation-only is Protocol/style. | src/bioetl/application/composite/runner_pkg/runner_observability_mixin.py |
-| `CR-20260816-A-S04b-app-residual-123` | reject | trivial | Consolidate exception handlers is DRY. | src/bioetl/application/composite/runner_pkg/runner_merge_stage_runtime.py |
-| `CR-20260816-A-S09-composition-001` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-002` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-003` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-004` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-005` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-006` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-007` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-008` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-009` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-010` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-011` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-012` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-013` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-014` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-015` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-016` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-017` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-018` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-019` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-020` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-021` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-022` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-023` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-024` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-025` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-026` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-027` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-028` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-029` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-030` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-031` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-032` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-033` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-034` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-035` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-036` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-037` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-038` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-039` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-040` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-041` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-042` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-043` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-044` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-045` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-046` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-047` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-048` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-049` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-050` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-051` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-052` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-053` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-054` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-055` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-056` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-057` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-058` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-059` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-060` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-061` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-062` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-063` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-064` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-065` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-066` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-067` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-068` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-069` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-070` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-071` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-072` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-073` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-074` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-075` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-076` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-077` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-078` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-079` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-080` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-081` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-082` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-083` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-084` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-085` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-086` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-087` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-088` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-089` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-090` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-091` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-092` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-093` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-094` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-095` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-096` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-097` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-098` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-099` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-100` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-101` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-102` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-103` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-104` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-105` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-106` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-107` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-108` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-109` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-110` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-111` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-112` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-113` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-114` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-115` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-116` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-117` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-118` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-119` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-120` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-121` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-122` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-123` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-124` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-125` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-126` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-127` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-128` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-129` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-130` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-131` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-132` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-133` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-134` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-135` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-136` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-137` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-138` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-139` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-140` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-141` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-142` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-143` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-144` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-145` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-146` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-147` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-148` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-149` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-150` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-151` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-152` | pending | critical | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-153` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-154` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-155` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-156` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-157` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-158` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-159` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-160` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-161` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-162` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-163` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-164` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-165` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-166` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-167` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-168` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-169` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-170` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-171` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-172` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-173` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-174` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-175` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-176` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-177` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-178` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-179` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-180` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-181` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-182` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-183` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-184` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-185` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-186` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-187` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-188` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-189` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-190` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-191` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-192` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-193` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-194` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-195` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-196` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-197` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-198` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-199` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-200` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-201` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-202` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-203` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-204` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-205` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-206` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-207` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-208` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-209` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-210` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-211` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-212` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-213` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-214` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-215` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-216` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-217` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-218` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-219` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-220` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-221` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-222` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-223` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-224` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-225` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-226` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-227` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-228` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-229` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-230` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-231` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-232` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-233` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-234` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-235` | pending | critical | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-236` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-237` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-238` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-239` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-240` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-241` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-242` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-243` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-244` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-245` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-246` | pending | critical | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-247` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-248` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-249` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-250` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-251` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-252` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-253` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-254` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-255` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-256` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-257` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-258` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-259` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-260` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-261` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-262` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-263` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-264` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-265` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-266` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-267` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-268` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-269` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-270` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-271` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-A-S09-composition-272` | pending | minor | pending ground-truth reconciliation |  |
-=======
+| `CR-20260816-A-S04b-app-residual-001` | reject | major | Catch Exception vs BaseException is style; best-effort span close is already the contract. | src/bioetl/application/composite/_lifecycle_observer_span_management.py |
+| `CR-20260816-A-S04b-app-residual-002` | reject | major | Coverage-inventory refresh is not an invariant hole. | src/bioetl/application/__init__.py |
+| `CR-20260816-A-S04b-app-residual-003` | reject | major | Provider-only first-wins alias is shipped compatibility; explicit provider.entity keys remain registered. | src/bioetl/application/composite/_preflight_orchestration.py setdefault(provider, fields) |
+| `CR-20260816-A-S04b-app-residual-004` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/composite/_preflight_orchestration.py |
+| `CR-20260816-A-S04b-app-residual-005` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/composite/checkpoint/_checkpoint_runtime.py |
+| `CR-20260816-A-S04b-app-residual-006` | reject | major | Promote/share gauge helper is DRY. | src/bioetl/application/composite/checkpoint/_checkpoint_warnings.py |
+| `CR-20260816-A-S04b-app-residual-007` | reject | major | Shared copy/evolve primitive is DRY. | src/bioetl/application/composite/checkpoint/_anchor_context.py |
+| `CR-20260816-A-S04b-app-residual-008` | reject | trivial | Unreachable TypeError fallback cleanup is style; ranking already uses _as_utc_comparable. | src/bioetl/application/composite/checkpoint/_checkpoint_runtime.py |
+| `CR-20260816-A-S04b-app-residual-009` | reject | minor | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/composite/checkpoint/__init__.py |
+| `CR-20260816-A-S04b-app-residual-010` | reject | minor | Distinct replay-skip metric labels are observability expansion. | src/bioetl/application/composite/checkpoint/load_service.py |
+| `CR-20260816-A-S04b-app-residual-011` | reject | trivial | DRY reuse of _anchor_mismatch. | src/bioetl/application/composite/checkpoint/_load_validation.py |
+| `CR-20260816-A-S04b-app-residual-012` | reject | major | Checkpoint timestamps are already UTC-normalized by parse_timestamp; no mixed naive/aware subtraction was reproduced. | src/bioetl/application/composite/checkpoint/state_parsing.py parse_timestamp |
+| `CR-20260816-A-S04b-app-residual-013` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/composite/runtime_models.py |
+| `CR-20260816-A-S04b-app-residual-014` | reject | minor | Test-only request; reject class for this campaign. | src/bioetl/application/observability/control_plane_evidence/failure_reasons.py |
+| `CR-20260816-A-S04b-app-residual-015` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/observability/control_plane_evidence/checkpoint_validation.py |
+| `CR-20260816-A-S04b-app-residual-016` | reject | minor | Narrower cycle-node set is a metric-definition change, not a wrong cycle detection outcome. | src/bioetl/application/observability/control_plane_evidence/lineage_graph_validation.py |
+| `CR-20260816-A-S04b-app-residual-017` | reject | major | Narrower port annotations / required clock are Protocol/API tightening. | src/bioetl/application/composite/runtime_models.py |
+| `CR-20260816-A-S04b-app-residual-018` | reject | major | Moving runtime_wiring_api is a shipped-layer rewrite. | src/bioetl/application/composite/runtime_wiring_api.py |
+| `CR-20260816-A-S04b-app-residual-019` | reject | major | Shared persist helper is DRY. | src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py |
+| `CR-20260816-A-S04b-app-residual-020` | reject | minor | assert vs ValueError is style; omitted layers already default. | src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py |
+| `CR-20260816-A-S04b-app-residual-021` | confirm | minor | reconcile_rows only checks left_primary_keys length against left_columns, so a same-length but disjoint key name is accepted and can reach storage. | src/bioetl/application/workflow/transforms/reconcile_rows.py:66-75 |
+| `CR-20260816-A-S04b-app-residual-022` | confirm | major | _optional_key_tuple strips/filters blank entries and can shorten a paired key tuple instead of fail-closing the original positions. | src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py:348 |
+| `CR-20260816-A-S04b-app-residual-023` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/composite/dependency_key_resolvers.py |
+| `CR-20260816-A-S04b-app-residual-024` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/composite/helpers/dependency_chained_key_resolver.py |
+| `CR-20260816-A-S04b-app-residual-025` | reject | trivial | Private-import / import-hoist is style. | src/bioetl/application/composite/helpers/cross_validator_finalize.py |
+| `CR-20260816-A-S04b-app-residual-026` | reject | minor | Extra warning log is observability style. | src/bioetl/application/composite/helpers/dependency_chained_key_resolver.py |
+| `CR-20260816-A-S04b-app-residual-027` | reject | trivial | Local polars import hoist is style. | src/bioetl/application/composite/key_extractor.py |
+| `CR-20260816-A-S04b-app-residual-028` | reject | major | Typed kwargs instead of Any is Protocol/API tightening. | src/bioetl/application/composite/merge_service.py |
+| `CR-20260816-A-S04b-app-residual-029` | reject | major | Assert on equal lengths is defensive style without a current producer of mismatched series. | src/bioetl/application/composite/helpers/cross_validator_finalize.py |
+| `CR-20260816-A-S04b-app-residual-030` | reject | trivial | __all__/self-alias is export-style. | src/bioetl/application/composite/column_service.py |
+| `CR-20260816-A-S04b-app-residual-031` | reject | trivial | Redundant rstrip is style. | src/bioetl/application/composite/column_priority_orderer.py |
+| `CR-20260816-A-S04b-app-residual-032` | reject | trivial | asyncio yield/to_thread is a perf suggestion. | src/bioetl/application/composite/join_planner.py |
+| `CR-20260816-A-S04b-app-residual-033` | confirm | major | Completion events/spans use completed_with_warnings but _record_pipeline_terminal_metrics is hardcoded to success. | src/bioetl/application/composite/lifecycle_observer_service.py:192-211 |
+| `CR-20260816-A-S04b-app-residual-034` | reject | major | hasattr rename_dataframe probe is a shipped fallback, not a reproduced wrong seed_pipeline. | src/bioetl/application/composite/merger_input_mixin.py |
+| `CR-20260816-A-S04b-app-residual-035` | reject | minor | Duplicate key-name guard is hardening without a demonstrated duplicate-keys producer. | src/bioetl/application/composite/key_extractor.py |
+| `CR-20260816-A-S04b-app-residual-036` | reject | major | Lexicographic coalesce is a determinism policy change; first-match on a stable column set is the shipped behavior. | src/bioetl/application/composite/column_priority_orderer.py resolve_by_column_scan |
+| `CR-20260816-A-S04b-app-residual-037` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/composite/join_planner_delegation_mixin.py |
+| `CR-20260816-A-S04b-app-residual-038` | reject | major | No-column-groups branch is the misconfig warning path; exclude_fields there is contract expansion. | src/bioetl/application/composite/column_orderer_group_flow.py:91-96 |
+| `CR-20260816-A-S04b-app-residual-039` | reject | minor | Protecting lineage columns from exclude_fields is a policy change, not a current crash. | src/bioetl/application/composite/merger_post_join.py |
+| `CR-20260816-A-S04b-app-residual-040` | reject | major | Injected-clock monotonic read is architecture style. | src/bioetl/application/composite/runner_pkg/runner_completion_helpers.py |
+| `CR-20260816-A-S04b-app-residual-041` | reject | minor | datetime-before-date / ISO timestamp parse is contract expansion of the shipped date parser. | src/bioetl/application/composite/merger_orchestration.py |
+| `CR-20260816-A-S04b-app-residual-042` | reject | major | Removing checkpoint-save flush is an export-policy change. | src/bioetl/application/composite/runner_pkg/runner_checkpoint_save_observability.py |
+| `CR-20260816-A-S04b-app-residual-043` | reject | trivial | Warning-level log of delete_orphaned is observability style. | src/bioetl/application/composite/runner_pkg/runner_completion_helpers.py |
+| `CR-20260816-A-S04b-app-residual-044` | reject | minor | Normalize severity once is style; outcomes already share the same helper. | src/bioetl/application/observability/observer_event_mixin.py |
+| `CR-20260816-A-S04b-app-residual-045` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/observability/pipeline_metrics.py |
+| `CR-20260816-A-S04b-app-residual-046` | reject | trivial | Mixed int/float span-attribute fallback is hardening. | src/bioetl/application/observability/span_attribute_values.py |
+| `CR-20260816-A-S04b-app-residual-047` | reject | major | Bounded fallback_reason vocabulary is a metric-label policy expansion. | src/bioetl/application/observability/observer_health_mixin.py |
+| `CR-20260816-A-S04b-app-residual-048` | reject | major | exc_info vs explicit except is style. | src/bioetl/application/observability/tracing_operation_helpers.py |
+| `CR-20260816-A-S04b-app-residual-049` | reject | trivial | __all__ alias naming is export-style. | src/bioetl/application/runtime_clock.py |
+| `CR-20260816-A-S04b-app-residual-050` | reject | major | Removing current_utc_time is a shipped composition-root API change. | src/bioetl/application/runtime_clock.py |
+| `CR-20260816-A-S04b-app-residual-051` | reject | minor | Naive started_at reject is timestamp-policy expansion. | src/bioetl/application/runtime_timestamps.py |
+| `CR-20260816-A-S04b-app-residual-052` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/composite/runner_pkg/runner_summary_helpers.py |
+| `CR-20260816-A-S04b-app-residual-053` | reject | trivial | Injected-clock duration is style. | src/bioetl/application/observability/observer_context_mixin.py |
+| `CR-20260816-A-S04b-app-residual-054` | reject | major | Best-effort teardown around invalid run_id is hardening without a demonstrated replacement of the original exception. | src/bioetl/application/observability/observer_context_mixin.py |
+| `CR-20260816-A-S04b-app-residual-055` | reject | major | 0.0 vs unknown for empty scopes is a metric-semantics change. | src/bioetl/application/observability/control_plane_integrity_metrics.py |
+| `CR-20260816-A-S04b-app-residual-056` | reject | major | Init wall_start_time=None is style; unentered context already has a RuntimeError guard. | src/bioetl/application/observability/observer_context_mixin.py |
+| `CR-20260816-A-S04b-app-residual-057` | reject | major | Early return still yields the same had_warnings=True; extra logging is not an invariant hole. | src/bioetl/application/composite/runner_pkg/runner_summary_helpers.py |
+| `CR-20260816-A-S04b-app-residual-058` | reject | trivial | FSM validate-before-construct is style; transition is still validated. | src/bioetl/application/composite/runner_pkg/runner_stage_state_flow.py |
+| `CR-20260816-A-S04b-app-residual-059` | reject | trivial | assert vs explicit None check is style. | src/bioetl/application/composite/runner_pkg/runner_support_policy.py |
+| `CR-20260816-A-S04b-app-residual-060` | confirm | minor | find_required_failures omits a failed dependency when get_dependency returns None, so missing required config is not fail-closed. | src/bioetl/application/composite/runner_pkg/runner_stage_state_flow.py:41-43 if dep_cfg and dep_cfg.required |
+| `CR-20260816-A-S04b-app-residual-061` | reject | minor | Which layer counter backs records_processed is a metric-definition change. | src/bioetl/application/observability/observer.py |
+| `CR-20260816-A-S04b-app-residual-062` | reject | major | cast(Any, None) to annotation-only is Protocol/style. | src/bioetl/application/composite/runner_pkg/runner_support_mixin.py |
+| `CR-20260816-A-S04b-app-residual-063` | reject | trivial | deque/id() traversal is style/hardening. | src/bioetl/application/observability/control_plane_integrity_metrics.py |
+| `CR-20260816-A-S04b-app-residual-064` | reject | major | unknown vs inconsistent ledger-read failure is a metric-semantics change. | src/bioetl/application/observability/control_plane_integrity_metrics.py |
+| `CR-20260816-A-S04b-app-residual-065` | reject | major | Wrap persistence errors as evidence rows is API expansion. | src/bioetl/application/observability/control_plane_evidence/service.py |
+| `CR-20260816-A-S04b-app-residual-066` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/composite/runner_pkg/runner_support_mixin.py |
+| `CR-20260816-A-S04b-app-residual-067` | reject | trivial | Protecting correlation anchors from extra is hardening without a demonstrated overwrite producer. | src/bioetl/application/composite/runner_pkg/runner_support_flow.py |
+| `CR-20260816-A-S04b-app-residual-068` | reject | trivial | Freeze prepared-context containers is style. | src/bioetl/application/composite/runner_pkg/runner_stage_types.py |
+| `CR-20260816-A-S04b-app-residual-069` | reject | minor | Immutable details on a signal type is freeze-style. | src/bioetl/application/workflow/transforms/__init__.py |
+| `CR-20260816-A-S04b-app-residual-070` | reject | major | Making validate an explicit parameter is an API reshape. | src/bioetl/application/composite/runner_pkg/runner_stage_start_flow.py |
+| `CR-20260816-A-S04b-app-residual-071` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/composite/runner_pkg/runner_execution_orchestrator.py |
+| `CR-20260816-A-S04b-app-residual-072` | reject | major | Coverage-inventory refresh is not an invariant hole. | src/bioetl/application/composite/runner_pkg/runner_control_plane_lifecycle.py |
+| `CR-20260816-A-S04b-app-residual-073` | reject | trivial | Shared _build_pipeline_metrics is DRY. | src/bioetl/application/composite/runner_pkg/runner_control_plane_phase_completion.py |
+| `CR-20260816-A-S04b-app-residual-074` | reject | trivial | __all__ trim is export-style. | src/bioetl/application/composite/runner_pkg/runner_control_plane_phase_completion.py |
+| `CR-20260816-A-S04b-app-residual-075` | reject | major | written<=0 already returns; treating partial writes as a dedicated failure is policy expansion. | src/bioetl/application/composite/runner_pkg/runner_cv_quarantine_helpers.py:76-77 |
+| `CR-20260816-A-S04b-app-residual-076` | reject | trivial | DRY/refactor of duplicate checkpoint choreography; no invariant breach. | src/bioetl/application/composite/runner_pkg/runner_support_runtime.py; #8859 closeout review 2026-08-17 |
 | `CR-20260816-A-S04b-app-residual-077` | reject | minor | Reject duplicate dependency pipelines is config-policy expansion. | src/bioetl/application/composite/dependency_coordinator.py |
 | `CR-20260816-A-S04b-app-residual-078` | reject | major | Inject accounting port is architecture style. | src/bioetl/application/composite/deduplication.py |
 | `CR-20260816-A-S04b-app-residual-079` | reject | trivial | log_fields uses left/right/seed/dep keys, not reserved dependency/result_rows; no TypeError path. | src/bioetl/application/composite/dependency_join_execution.py:127-155 |
@@ -1767,7 +1398,303 @@ Code/config/contracts and executable gates outrank CodeRabbit output.
 | `CR-20260816-A-S09-composition-270` | reject | major | No current-disk invariant breach; request is hardening, layering, or a shipped-contract change. | src/bioetl/composition/factories/services/bundle.py |
 | `CR-20260816-A-S09-composition-271` | reject | major | Style/DRY/typing cleanup without a demonstrated outcome change. | src/bioetl/composition/factories/services/pipeline_record_processor_builder.py |
 | `CR-20260816-A-S09-composition-272` | reject | minor | Empty debug_export_formats falling back to csv/xlsx is the documented default-all-formats path. | src/bioetl/composition/factories/services/pipeline_record_processor_builder.py:50-55 |
->>>>>>> Stashed changes
+| `CR-20260816-A-S09-composition-273` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/assembly/storage.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-274` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/cli/config_helpers.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-275` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/cli/__init__.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-276` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/cli/lock.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-277` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/assembly/health_server.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-278` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/assembly/health_service.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-279` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/assembly/checkpoint.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-280` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/storage/bundle.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-281` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/storage/_layer_writers.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-282` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/storage/_helpers.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-283` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/execution_api.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-284` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/control_plane_api.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-285` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/composite_api.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-286` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/builders.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-287` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/_transformer_spec_rows.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-288` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap_logger.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-289` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/_transformer_spec_rows.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-290` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/builders.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-291` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/composite_api.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-292` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/_observability_wiring.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-293` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/control_plane_api.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-294` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime_public_exports.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-295` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/pipeline_context_builder.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-296` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/runner.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-297` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/publication_vocab_init.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-298` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/pipeline_context_builder.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-299` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/runner_assembly.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-300` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/tracing_bootstrap.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-301` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/runner_factory_builder_service.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-302` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/runtime_basics.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-303` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/pipeline_bootstrap_phases.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-304` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/assembly/__init__.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-305` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/README.md; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-306` | reject | critical | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/_workflow_services.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-307` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/__init__.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-308` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/_pipeline_execution.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-309` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/__init__.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-310` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/logger_bootstrap.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-311` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/dq_bootstrap.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-312` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/metrics_bootstrap.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-313` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/dq_bootstrap.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-314` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/observability_bundle.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-315` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/enum_loader_wiring.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-316` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/_services.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-317` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/pipeline.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-318` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/composite_support_services_factory.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-319` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/pipeline.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-320` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/observability.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-321` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/observability_assembly.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-322` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/normalization_policy_init.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-323` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/_services.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-324` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/_runner_assembly_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-325` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/postrun_assembly.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-326` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/_registry_manifest_non_chembl.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-327` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/postrun_assembly.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-328` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/providers/_config_helpers.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-329` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/providers/decorators.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-330` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/providers/_registry_protocols.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-331` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/providers/_config_helpers.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-332` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/providers/_loading.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-333` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/providers/_default_registry.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-334` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/providers/_registration_biblio_profiles.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-335` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/providers/_registration_biblio_adapters.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-336` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/providers/_creation.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-337` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/providers/decorators.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-338` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/composite_filter_extraction_service.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-339` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/composite_runtime_management_builder.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-340` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/composite_merge_service_builder.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-341` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/composite_support_helpers.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-342` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/composite_merge_dependency_builder.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-343` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/composite_runtime_management_builder.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-344` | reject | critical | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/composite_filter_extraction_service.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-345` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/transformer_factory.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-346` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/storage/maintenance_mixin.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-347` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/storage/maintenance_mixin.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-348` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/storage/factory.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-349` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/transformer_dependencies.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-350` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/storage/merged_mixin.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-351` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/storage/clear_mixin.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-352` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/health_service_access.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-353` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/health_api.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-354` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/transformer_factory.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-355` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/storage/maintenance_mixin.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-356` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/storage/resilience.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-357` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/storage/write_mixin.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-358` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/storage/clear_mixin.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-359` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_run_manifest_data_roots.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-360` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_run_manifest_snapshot_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-361` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_run_manifest_planned_artifacts.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-362` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_runner_builder_orchestration.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-363` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_run_manifest_sink_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-364` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_run_manifest_replay_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-365` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_run_manifest_refs.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-366` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_run_manifest_creation_support_helpers.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-367` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_run_manifest_identity_ref_values.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-368` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline_support/checkpoint_metadata_resolution.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-369` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_run_manifest_data_roots.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-370` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline_support/checkpoint_metadata_resolution.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-371` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline_support/checkpoint_policy_helpers.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-372` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline_support/registry_validation_helpers.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-373` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/services/_bundle_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-374` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/services/_builder_record_processor_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-375` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/services/__init__.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-376` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/services/_record_processor_policy_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-377` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline_support/checkpoint_metadata_helpers.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-378` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline_support/checkpoint_policy_helpers.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-379` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/services/_record_processor_policy_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-380` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_runner_control_plane_artifact_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-381` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline_support/registry_validation_helpers.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-382` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/services/_bundle_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-383` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline_support/assembler_helpers.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-384` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline_support/contract_validation_helpers.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-385` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline_support/checkpoint_metadata_resolution.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-386` | reject | critical | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_run_manifest_sink_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-387` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/services/_record_processor_policy_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-388` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/_composite_control_plane_builder_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-389` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/cli/storage.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-390` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/_composite_control_plane_builder_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-391` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/_composite_control_plane_payloads.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-392` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/_composite_control_plane_payloads.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-393` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/_composite_plan_runtime_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-394` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/composite_infrastructure_context.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-395` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/_composite_plan_runtime_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-396` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-397` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/_composite_control_plane_payloads.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-398` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-399` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/cli/storage.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-400` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/transformer_dependencies.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-401` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/runner.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-402` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/runner_assembly.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-403` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/transformer_dependencies.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-404` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/transformer_builder.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-405` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/run_context_contract_identity.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-406` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/transformer_dependencies.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-407` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/transformer_builder.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-408` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/runner_constructor.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-409` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/registry.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-410` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/runner_constructor.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-411` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/_composite_control_plane_builder_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-412` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/services/effective_config_serializer.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-413` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/services/versioning.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-414` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/services/effective_config_serializer.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-415` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/types.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-416` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/runner_input_assembly.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-417` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/services/effective_config_serializer.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-418` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/services/versioning.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-419` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/runner_input_assembly.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-420` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/registry_core.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-421` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/services/effective_config_serializer.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-422` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/types.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-423` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/cli/run_manifest.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-424` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/cli/service_builders.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-425` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/runner.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-426` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/run_context_factory.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-427` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/runner.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-428` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/registry.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-429` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/runner_control_plane_assembly.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-430` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_runner_control_plane_data_root_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-431` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/effective_config_artifact_builder.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-432` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/input_snapshot_resolution.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-433` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/config_access.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-434` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/registry_core.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-435` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/effective_config_artifact_builder.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-436` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/input_snapshot_resolution.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-437` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-438` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/inputs_resolution_orchestration.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-439` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_runner_control_plane_policy_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-440` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/cached_bronze_snapshot_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-441` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/effective_config_artifact_builder.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-442` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_runner_control_plane_policy_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-443` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/config_access.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-444` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/registry.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-445` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_runner_control_plane_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-446` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_snapshot_mapping_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-447` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/_factory_method_types.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-448` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/_factory_method_control_plane.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-449` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/services/versioning.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-450` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_runner_control_plane_policy_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-451` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/services/effective_config_serializer.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-452` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/input_snapshot_resolution.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-453` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/_registry_factory_catalog.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-454` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/_assembler_factory.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-455` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/datasource/adapter_helpers.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-456` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/datasource/adapter_helpers.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-457` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/datasource/data_source_factory.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-458` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/datasource/crossref.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-459` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/datasource/data_source_factory.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-460` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/dq/_context_resolver_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-461` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_run_manifest_snapshot_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-462` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/datasource/http_client.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-463` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/control_plane.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-464` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/run_context_contract_identity.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-465` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/dq/_context_resolver_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-466` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_runner_control_plane_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-467` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/dq/_context_resolver_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-468` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/runner_control_plane_assembly.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-469` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/datasource/data_source_factory.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-470` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/datasource/_crossref_inputs.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-471` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/datasource/http_client.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-472` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/run_manifest_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-473` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/inputs_runtime_helpers.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-474` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/cli/service_builders.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-475` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/ledger_collaborator.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-476` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_snapshot_mapping_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-477` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/providers/_chembl_target_protein_classification_helpers.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-478` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-479` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/observability_api.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-480` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/cached_bronze_snapshot_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-481` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/datasource/pubchem.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-482` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/datasource/crossref.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-483` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/observability_api.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-484` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/ledger_collaborator.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-485` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/datasource/pubchem.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-486` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/_dependency_runner_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-487` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/composite_control_plane_builder.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-488` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/_observability_bundle_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-489` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/_factory_method_runtime_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-490` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/_observability_preflight_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-491` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/providers/_chembl_target_protein_classification_manifest.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-492` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/providers/_chembl_target_protein_classification_manifest.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-493` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/observability_api.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-494` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/composite_control_plane_builder.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-495` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/assembly.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-496` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/providers/_chembl_target_protein_classification_helpers.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-497` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/run_manifest_contract_identity.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-498` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/services/polars_join_adapter.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-499` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/services/pipeline_record_processor_builder.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-500` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/services/pipeline_builder.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-501` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/composite_control_plane_builder.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-502` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/services/pipeline_record_processor_builder.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-503` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/services/bundle.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-504` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/pipeline_runner_request.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-505` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/_observability_bundle_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-506` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/observability.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-507` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-508` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/datasource/pubchem.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-509` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/composite_control_plane_builder.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-510` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/occurrence_identity.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-511` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/_runner_assembly_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-512` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/assembly.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-513` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/services/pipeline_batch_executor_builder.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-514` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/providers/__init__.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-515` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/lazy_exports.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-516` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/assembly.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-517` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/classification_init.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-518` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-519` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/inputs_resolver.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-520` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/pipeline_runner_request.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-521` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_snapshot_mapping_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-522` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/composite_control_plane_builder.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-523` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/_runner_assembly_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-524` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/observability_builder.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-525` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/composite_bootstrap_registry_manifest.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-526` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/pipeline/_creation_wiring.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-527` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/bootstrap/runtime/composite_bootstrap_builders.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-528` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/services/versioning.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-529` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_run_context_values.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-530` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_manifest_publication_context_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-531` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_run_manifest_context_updates.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-532` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_run_manifest_builder_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-533` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_inputs_resolution_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-534` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_exact_replay_cached_bronze_context.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-535` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_effective_config_runtime_snapshot_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-536` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_effective_config_runtime_snapshot_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-537` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_exact_replay_cached_bronze_context.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-538` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_manifest_publication_context_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-539` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_effective_config_source_refs_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-540` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-541` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-542` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_run_manifest_context_updates.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-543` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_effective_config_runtime_snapshot_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-544` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_run_manifest_builder_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-545` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_effective_config_source_refs_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-546` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_exact_replay_cached_bronze_context.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-547` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_inputs_resolution_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-548` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_effective_config_secret_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-549` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_effective_config_secret_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-550` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_effective_config_source_refs_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-551` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_run_manifest_context_updates.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-552` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_run_manifest_builder_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-553` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_manifest_publication_context_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-554` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_run_manifest_context_updates.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-555` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_exact_replay_cached_bronze_context.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-556` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-557` | reject | critical | VacuumSettings.retention_days is a required positive int (default 7); None is not representable, so the YAML fallback cannot be skipped by a missing retention. | src/bioetl/composition/runtime_builders/_inputs_resolution_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-558` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-559` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_inputs_resolution_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-560` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/providers/provider_registry.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-561` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_effective_config_artifact_builder_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-562` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/providers/registration_bio.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-563` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/providers/registration_bio.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-564` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/factories/services/pipeline_processing_components_builder.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-565` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/providers/registration.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-566` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_effective_config_artifact_builder_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-567` | reject | trivial | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/providers/provider_registry.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-568` | reject | major | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_context_field_binding.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-A-S09-composition-569` | reject | minor | Independent review: style/DRY/thread-safety/already-guarded composition helpers. No new product stream. | src/bioetl/composition/runtime_builders/_effective_config_artifact_builder_support.py; #8859 closeout review 2026-08-17 |
 | `CR-20260816-A-S10-interfaces-cli-001` | confirm | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/interfaces/cli/commands/_workflow_override_support.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review |
 | `CR-20260816-A-S10-interfaces-cli-002` | reject | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/interfaces/cli/__init__.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review |
 | `CR-20260816-A-S10-interfaces-cli-003` | reject | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/interfaces/cli/__init__.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review |
@@ -1914,254 +1841,6 @@ Code/config/contracts and executable gates outrank CodeRabbit output.
 | `CR-20260816-A-S11-interfaces-http-062` | confirm | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/interfaces/http/health_server_http_mixin.py; reports/quality/coderabbit/20260816/review_A_S11-interfaces-http.log; #8890 ground-truth review |
 | `CR-20260816-A-S11-interfaces-http-063` | reject | trivial | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/interfaces/http/_processed_records_table_support.py; reports/quality/coderabbit/20260816/review_A_S11-interfaces-http.log; #8890 ground-truth review |
 | `CR-20260816-A-S11-interfaces-http-064` | confirm | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/interfaces/http/control_plane_identity/types.py; reports/quality/coderabbit/20260816/review_A_S11-interfaces-http.log; #8890 ground-truth review |
-<<<<<<< Updated upstream
-| `CR-20260816-B-S05-app-pipelines-001` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-002` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-003` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-004` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-005` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-006` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-007` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-008` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-009` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-010` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-011` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-012` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-013` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-014` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-015` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-016` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-017` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-018` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-019` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-020` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-021` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-022` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-023` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-024` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-025` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-026` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-027` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-028` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-029` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-030` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-031` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-032` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-033` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-034` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-035` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-036` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-037` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-038` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-039` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-040` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-041` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-042` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-043` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-044` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-045` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-046` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-047` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-048` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-049` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-050` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-051` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-052` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-053` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-054` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-055` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-056` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-057` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-058` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-059` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-060` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-061` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-062` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-063` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-064` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-065` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-066` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-067` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-068` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-069` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-070` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-071` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-072` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-073` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-074` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-075` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-076` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-077` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-078` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-079` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-080` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-081` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-082` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-083` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-084` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-085` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-086` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-087` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-088` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-089` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-090` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-091` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-092` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-093` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S05-app-pipelines-094` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-001` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-002` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-003` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-004` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-005` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-006` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-007` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-008` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-009` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-010` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-011` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-012` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-013` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-014` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-015` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-016` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-017` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-018` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-019` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-020` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-021` | pending | critical | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-022` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-023` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-024` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-025` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-026` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-027` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-028` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-029` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-030` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-031` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-032` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-033` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-034` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-035` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-036` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-037` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-038` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-039` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-040` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-041` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-042` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-043` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-044` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-045` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-046` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-047` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-048` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-049` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-050` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-051` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-052` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-053` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-054` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-055` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-056` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-057` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-058` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-059` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-060` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-061` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-062` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-063` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-064` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-065` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-066` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-067` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-068` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-069` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-070` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-071` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-072` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-073` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-074` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-075` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-076` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-077` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-078` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-079` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-080` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-081` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-082` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-083` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-084` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-085` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-086` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-087` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-088` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-089` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-090` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-091` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-092` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-093` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-094` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-095` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-096` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-097` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-098` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-099` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-100` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-101` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-102` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-103` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-104` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-105` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-106` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-107` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-108` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-109` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-110` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-111` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-112` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-113` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-114` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-115` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-116` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-117` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-118` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-119` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-120` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-121` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-122` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-123` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-124` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-125` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-126` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-127` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-128` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-129` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-130` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-131` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-132` | pending | critical | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-133` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-134` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-135` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-136` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-137` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-138` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-139` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-140` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-141` | pending | critical | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-142` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-143` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-144` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-145` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-146` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-147` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-148` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-149` | pending | critical | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-150` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-151` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-B-S07-infra-storage-152` | pending | major | pending ground-truth reconciliation |  |
-||||||| Stash base
 | `CR-20260816-B-S05-app-pipelines-001` | reject | minor | Stricter ORCID charset is contract expansion of the shipped dash-layout check. | src/bioetl/application/pipelines/crossref/author_extractors.py _is_orcid_identifier |
 | `CR-20260816-B-S05-app-pipelines-002` | reject | minor | Strip-before-append is hardening of already-truthy name handling. | src/bioetl/application/pipelines/openalex/_extractors_authors.py |
 | `CR-20260816-B-S05-app-pipelines-003` | reject | minor | Whitespace-only display_name reject is tightening without a broken topic identity. | src/bioetl/application/pipelines/openalex/_extractors_common.py |
@@ -2408,6 +2087,61 @@ Code/config/contracts and executable gates outrank CodeRabbit output.
 | `CR-20260816-B-S07-infra-storage-150` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py |
 | `CR-20260816-B-S07-infra-storage-151` | reject | None | JSON-safe schema/metadata serialization is a representation change, not a retention decision hole. | src/bioetl/infrastructure/storage/support/retention_delta.py build_table_info |
 | `CR-20260816-B-S07-infra-storage-152` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/operations/maintenance_operations.py |
+| `CR-20260816-B-S16-configs-quality-001` | reject | minor | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/architecture_closeout_inventory.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-002` | reject | minor | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/fixture_governance_ledger.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-003` | reject | trivial | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/scripts_inventory_manifest.json; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-004` | reject | minor | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/scripts_inventory_manifest.json; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-005` | reject | major | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/broad_cleanup_guardrails.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-006` | reject | minor | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/ci_coverage_surface_matrix.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-007` | reject | major | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/root_hygiene_review_registry.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-008` | reject | trivial | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/root_hygiene_review_registry.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-009` | reject | trivial | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/runtime_uuid_seams.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-010` | reject | minor | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/root_hygiene_review_registry.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-011` | reject | trivial | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/root_hygiene_review_registry.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-012` | reject | major | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/root_hygiene_review_registry.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-013` | reject | trivial | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/debt_scorecard.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-014` | reject | trivial | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/determinism_identity_policy.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-015` | reject | minor | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/domain_aggregate_classification.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-016` | reject | minor | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/debt_scorecard.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-017` | reject | minor | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/debt_scorecard.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-018` | reject | major | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/test_matrix.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-019` | reject | minor | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/test_matrix.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-020` | reject | trivial | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/vcr_provider_budget.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-021` | reject | trivial | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/test_suite_role_matrix.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-022` | reject | minor | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/test_telemetry_baseline.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-023` | reject | trivial | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/test_skip_inventory.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-024` | reject | minor | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/test_skip_inventory.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-025` | reject | major | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/test_matrix.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-026` | reject | minor | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/test_structural_watchlist_map.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-027` | reject | major | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/vcr_cassette_freshness_policy.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-028` | reject | minor | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/vcr_cassette_size_budget.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-029` | reject | trivial | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/test_surface_hardening.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-030` | reject | minor | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/test_governance_audit.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-031` | reject | trivial | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/test_governance_audit.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-032` | reject | major | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/silver_schema_ownership.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-033` | reject | trivial | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/technical_debt_audit_registry.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-034` | reject | trivial | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/test_governance_audit.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-035` | reject | trivial | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/test_health_classifiers.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-036` | reject | major | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/test_governance_audit.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-037` | reject | major | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/source_test_mapping_exceptions.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-038` | reject | trivial | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/staged_enforcement_policy_registry.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-039` | reject | minor | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/test_governance_audit.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-040` | reject | minor | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/scripts_lifecycle_registry.json; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-041` | reject | major | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/observability_metric_governance.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-042` | reject | trivial | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/mandatory_tracing_coverage.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-043` | reject | minor | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/module_coverage_gates.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-044` | reject | trivial | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/generated_artifact_routing.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-045` | reject | trivial | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/integration_vcr_policy.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-046` | reject | major | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/integration_vcr_policy.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-047` | reject | trivial | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/mixin_collaborator_metrics.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-048` | reject | major | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/repo_structure_catalog.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-049` | reject | major | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/observability_metric_inventory_allowlist.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-050` | reject | minor | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/replay_safe_cleanup_inventory.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-051` | reject | minor | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/pipeline_contract_exclusion_policy.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-052` | reject | major | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/retirement_candidate_triage.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-053` | reject | trivial | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/retirement_candidate_triage.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-054` | reject | major | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/pytest_shards.yaml; #8859 closeout review 2026-08-17 |
+| `CR-20260816-B-S16-configs-quality-055` | reject | trivial | Quality-config / inventory-hash leaf. No debt-budget change and no independently reproduced product defect. | configs/quality/promql_max_over_time_counter_policy.yaml; #8859 closeout review 2026-08-17 |
 | `CR-20260816-C-S06-infra-adapters-001` | reject | None | Coverage-inventory refresh is not an invariant hole. | reports/quality/module-coverage-inventory.json |
 | `CR-20260816-C-S06-infra-adapters-002` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/response_parser.py |
 | `CR-20260816-C-S06-infra-adapters-003` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/validation.py |
@@ -3010,1806 +2744,471 @@ Code/config/contracts and executable gates outrank CodeRabbit output.
 | `CR-20260816-E-S18-dashboard-docs-042` | reject | minor | Docs-only notes punctuation. | docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md |
 | `CR-20260816-E-S19b-github-actions-001` | reject | major | Removing restore-keys is CI-cache policy; exact key already exists and stale restore is the shipped actions/cache fallback, not a reproduced architecture-hash skip. | .github/actions/architecture-governance-cache/action.yml:43-45 |
 | `CR-20260816-E-S19b-github-actions-002` | reject | major | Docs/docstring-only request; reject class for this campaign. | .github/actions/setup-mermaid/action.yml |
-| `CR-20260816-F-S12-tests-architecture-01-001` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-002` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-003` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-004` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-005` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-006` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-007` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-008` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-009` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-010` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-011` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-012` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-013` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-014` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-015` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-016` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-017` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-018` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-019` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-020` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-021` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-022` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-023` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-024` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-025` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-026` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-027` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-028` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-029` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-030` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-031` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-032` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-033` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-034` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-035` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-036` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-037` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-038` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-039` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-040` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-041` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-042` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-043` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-044` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-045` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-046` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-047` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-048` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-049` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-050` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-051` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-052` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-053` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-054` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-055` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-056` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-057` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-058` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-059` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-060` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-061` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-062` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-063` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-064` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-065` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-066` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-067` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-068` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-069` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-070` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-071` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-072` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-073` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-074` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-075` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-076` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-077` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-078` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-079` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-080` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-081` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-082` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-083` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-084` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-085` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-086` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-087` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-088` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-089` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-090` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-091` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-092` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-093` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-094` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-095` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-096` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-097` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-098` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-099` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-100` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-101` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-102` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-103` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-104` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-105` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-106` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-107` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-108` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-109` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-110` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-111` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-112` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-113` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-114` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-115` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-116` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-117` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-118` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-119` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-120` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-121` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-122` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-123` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-124` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-125` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-126` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-127` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-128` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-129` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-130` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-131` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-132` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-133` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-134` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-135` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-136` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-137` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-138` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-139` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-140` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-141` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-142` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-143` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-144` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-145` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-146` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-147` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-148` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-149` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-150` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-151` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-152` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-153` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-154` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-155` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-156` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-157` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-158` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-159` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-160` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-161` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-162` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-163` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-164` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-165` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-166` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-167` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-168` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-169` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-170` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-171` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-172` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-173` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-174` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-175` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-176` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-177` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-178` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-179` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-180` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-181` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-182` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-183` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-184` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-185` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-186` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-187` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-188` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-189` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-190` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-191` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-192` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-193` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-194` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-195` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-196` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-197` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-198` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-199` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-200` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-201` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-202` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-203` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-204` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-205` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-206` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-207` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-208` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-209` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-210` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-211` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-212` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-213` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-214` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-215` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-216` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-217` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-218` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-219` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-220` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-221` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-222` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-223` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-224` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-225` | pending | critical | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-226` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-227` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-228` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-229` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-230` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-231` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-232` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-233` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-234` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-235` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-236` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-237` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-238` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-239` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-240` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-241` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-242` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-243` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-244` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-245` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-246` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-247` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-248` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-249` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-250` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-251` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-252` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-253` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-254` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-255` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-256` | pending | critical | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-257` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-258` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-259` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-260` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-261` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-262` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-263` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-264` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-265` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-266` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-267` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-268` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-269` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-270` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-271` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-272` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-273` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-274` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-275` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-276` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-277` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-278` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-279` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-280` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-281` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-282` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-283` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-284` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-285` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-286` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-287` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-288` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-289` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-290` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-291` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-292` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-293` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-294` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-295` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-296` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-297` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-298` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-299` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-300` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-301` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-302` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-303` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-304` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-305` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-306` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-307` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-308` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-309` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-310` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-311` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-312` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-313` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-314` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-315` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-316` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-317` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-318` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-319` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-320` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-321` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-322` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-323` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-324` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-325` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-326` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-327` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-328` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-329` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-330` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-331` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-332` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-333` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-334` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-335` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-336` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-337` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-338` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-339` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-340` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-341` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-342` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-343` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-344` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-345` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-346` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-347` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-348` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-349` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-350` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-351` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-352` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-353` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-354` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-355` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-356` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-357` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-358` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-359` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-360` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-361` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-362` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-363` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-364` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-365` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-366` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-367` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-368` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-369` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-370` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-371` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-372` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-373` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-374` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-375` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-376` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-377` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-378` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-379` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-380` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-381` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-382` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-383` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-384` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-385` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-386` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-387` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-388` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-389` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-390` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-391` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-392` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-393` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-394` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-395` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-396` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-397` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-398` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-399` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-400` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-401` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-402` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-403` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-404` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-405` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-406` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-407` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-408` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-409` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-410` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-411` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-412` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-413` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-414` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-415` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-416` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-417` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-418` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-419` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-420` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-421` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-422` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-423` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-424` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-425` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-426` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-427` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-428` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-429` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-430` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-431` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-432` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-433` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-434` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-435` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-436` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-437` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-438` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-439` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-440` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-441` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-442` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-443` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-444` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-445` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-446` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-447` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-448` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-449` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-450` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-451` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-452` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-453` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-454` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-455` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-456` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-457` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-458` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-459` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-460` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-461` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-462` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-463` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-464` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-465` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-466` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-467` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-468` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-469` | pending | critical | pending ground-truth reconciliation |  |
-| `CR-20260816-R-S-R-scripts-memory-001` | reject | major | Test-only run_workflow.sh wrapper coverage. | scripts/memory/run_workflow.sh |
-| `CR-20260816-R-S-R-scripts-memory-002` | confirm | major | upsert_env_local passes NEO4J_PASSWORD/NEO4J_AUTH as python3 argv, so the secret is visible in process listings. | scripts/memory/setup/wsl_startup.sh:53-63 python3 - "$file_path" "$key" "$value" |
-| `CR-20260816-R-S-R-scripts-memory-003` | reject | major | Removing Docker from the WSL setup helper is a shipped setup-script rewrite, not a BioETL runtime invariant. | scripts/memory/setup/wsl_startup.sh |
-| `CR-20260816-R-S-R-scripts-memory-004` | reject | major | Test-only request; reject class for this campaign. | scripts/memory/__init__.py |
-| `CR-20260816-R-S-R-scripts-memory-005` | reject | major | Force mode 0600 is permission hardening without a reproduced world-readable write path. | scripts/memory/setup/wsl_startup.sh |
-| `CR-20260816-R-S-R-scripts-memory-006` | reject | major | Test-only request; reject class for this campaign. | scripts/memory/__main__.py |
-| `CR-20260816-R-S-R-scripts-memory-007` | reject | major | Test-only print_seed.sh phase dispatch. | scripts/memory/prompts/print_seed.sh |
-| `CR-20260816-R-S-R-scripts-memory-008` | reject | major | Test-only WSL startup coverage. | scripts/memory/setup/wsl_startup.sh |
-=======
-| `CR-20260816-B-S05-app-pipelines-001` | reject | minor | Stricter ORCID charset is contract expansion of the shipped dash-layout check. | src/bioetl/application/pipelines/crossref/author_extractors.py _is_orcid_identifier |
-| `CR-20260816-B-S05-app-pipelines-002` | reject | minor | Strip-before-append is hardening of already-truthy name handling. | src/bioetl/application/pipelines/openalex/_extractors_authors.py |
-| `CR-20260816-B-S05-app-pipelines-003` | reject | minor | Whitespace-only display_name reject is tightening without a broken topic identity. | src/bioetl/application/pipelines/openalex/_extractors_common.py |
-| `CR-20260816-B-S05-app-pipelines-004` | reject | major | Removing author_details_raw_json is a shipped Gold-field deletion. | src/bioetl/application/pipelines/crossref/_business_data_builder.py |
-| `CR-20260816-B-S05-app-pipelines-005` | reject | major | Replace install_runtime_transformer_init with an explicit ctor is a shipped init-API rewrite. | src/bioetl/application/pipelines/crossref/transformer.py |
-| `CR-20260816-B-S05-app-pipelines-006` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/openalex/_extractors_authors.py |
-| `CR-20260816-B-S05-app-pipelines-007` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/crossref/_business_data_builder.py |
-| `CR-20260816-B-S05-app-pipelines-008` | confirm | minor | author.get('given'\|'family'\|'name', '').strip() raises AttributeError when the key is present and null, which Crossref JSON does. | src/bioetl/application/pipelines/crossref/author_extractors.py:82-84 |
-| `CR-20260816-B-S05-app-pipelines-009` | reject | major | Independent issn_list serialization is a field-policy change, not a reproduced crash. | src/bioetl/application/pipelines/crossref/transformer.py |
-| `CR-20260816-B-S05-app-pipelines-010` | reject | major | hierarchy_molecule_chembl_id precedence is a flatten-policy change without a reproduced overwrite on current helpers. | src/bioetl/application/pipelines/chembl/molecule_transformer.py _HIERARCHY_RENAMES |
-| `CR-20260816-B-S05-app-pipelines-011` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/chembl/activity_transformer.py |
-| `CR-20260816-B-S05-app-pipelines-012` | reject | major | SSOT alias-table DRY; no divergent alias outcome shown. | src/bioetl/application/pipelines/chembl/alias_policy.py |
-| `CR-20260816-B-S05-app-pipelines-013` | reject | major | Remove legacy_collaborators kwargs is a shipped constructor rewrite. | src/bioetl/application/pipelines/chembl/base_chembl_transformer.py |
-| `CR-20260816-B-S05-app-pipelines-014` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/pipelines/chembl/compound_record_transformer.py |
-| `CR-20260816-B-S05-app-pipelines-015` | reject | trivial | Richer validation-failed log fields are observability style. | src/bioetl/application/pipelines/chembl/base_chembl_transformer.py |
-| `CR-20260816-B-S05-app-pipelines-016` | reject | major | int() vs safe_int is helper-style; invalid ids already fail the transform path. | src/bioetl/application/pipelines/chembl/assay_parameters_transformer.py |
-| `CR-20260816-B-S05-app-pipelines-017` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/pipelines/chembl/alias_policy.py |
-| `CR-20260816-B-S05-app-pipelines-018` | reject | trivial | JsonDict vs Mapping annotation is typing-only. | src/bioetl/application/pipelines/chembl/assay_transformer.py |
-| `CR-20260816-B-S05-app-pipelines-019` | reject | trivial | Frozen empty-mapping fallback is style. | src/bioetl/application/pipelines/chembl/alias_policy.py |
-| `CR-20260816-B-S05-app-pipelines-020` | reject | trivial | @override decorator is style. | src/bioetl/application/pipelines/chembl/molecule_transformer.py |
-| `CR-20260816-B-S05-app-pipelines-021` | reject | major | Coverage-inventory refresh is not an invariant hole. | src/bioetl/application/pipelines/uniprot/idmapping_transformer.py |
-| `CR-20260816-B-S05-app-pipelines-022` | reject | major | Test-only IDMappingTransformer coverage. | src/bioetl/application/pipelines/uniprot/idmapping_transformer.py |
-| `CR-20260816-B-S05-app-pipelines-023` | reject | major | Test-only UniProt transformer coverage. | src/bioetl/application/pipelines/uniprot/transformer.py |
-| `CR-20260816-B-S05-app-pipelines-024` | confirm | major | transform_pre_silver does not catch FilteredOutError/ValueError that _transform_impl swallows, so the pre-silver path can abort the batch on missing required fields. | src/bioetl/application/pipelines/uniprot/transformer.py:50-83 |
-| `CR-20260816-B-S05-app-pipelines-025` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/uniprot/extractors/features.py |
-| `CR-20260816-B-S05-app-pipelines-026` | reject | minor | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/uniprot/extractors/_crossref_go.py |
-| `CR-20260816-B-S05-app-pipelines-027` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/uniprot/extractors/features.py |
-| `CR-20260816-B-S05-app-pipelines-028` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/uniprot/extractors/comments.py |
-| `CR-20260816-B-S05-app-pipelines-029` | reject | major | Test-only CrossRefExtractor coverage. | src/bioetl/application/pipelines/uniprot/extractors/crossrefs.py |
-| `CR-20260816-B-S05-app-pipelines-030` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/uniprot/extractors/genes.py |
-| `CR-20260816-B-S05-app-pipelines-031` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/uniprot/extractors/extractor_helpers.py |
-| `CR-20260816-B-S05-app-pipelines-032` | reject | major | Rank-bearing genus extraction is a taxonomy-contract rewrite of the shipped lineage heuristic. | src/bioetl/application/pipelines/uniprot/extractors/taxonomy.py |
-| `CR-20260816-B-S05-app-pipelines-033` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/pubchem/transformer.py |
-| `CR-20260816-B-S05-app-pipelines-034` | reject | major | Test-only OpenAlex _extract_business_data coverage. | src/bioetl/application/pipelines/openalex/transformer.py |
-| `CR-20260816-B-S05-app-pipelines-035` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/application/pipelines/pubmed/__init__.py |
-| `CR-20260816-B-S05-app-pipelines-036` | reject | major | Replace install_runtime_transformer_init is a shipped init-API rewrite. | src/bioetl/application/pipelines/openalex/transformer.py |
-| `CR-20260816-B-S05-app-pipelines-037` | reject | minor | Strip-before-append keywords is hardening. | src/bioetl/application/pipelines/openalex/_extractors_publication_fields.py |
-| `CR-20260816-B-S05-app-pipelines-038` | reject | major | Coverage-inventory refresh is not an invariant hole. | src/bioetl/application/pipelines/openalex/_extractors_publication_fields.py |
-| `CR-20260816-B-S05-app-pipelines-039` | confirm | major | extract_external_ids already extracts pmcid, but the transformer hardcodes pmc_id=None and never reads that value. | src/bioetl/application/pipelines/openalex/transformer.py:223-225; _extractors_publication_fields.py:136-143 |
-| `CR-20260816-B-S05-app-pipelines-040` | reject | trivial | Literal __all__ vs imported export tuple is style. | src/bioetl/application/pipelines/uniprot/extractors/_comment_facets.py |
-| `CR-20260816-B-S05-app-pipelines-041` | reject | trivial | Reject bool h-index is bool-as-int hardening without a demonstrated S2 producer. | src/bioetl/application/pipelines/semanticscholar/_author_extractors.py |
-| `CR-20260816-B-S05-app-pipelines-042` | reject | minor | None names are already skipped; non-string names are not a demonstrated S2 payload. | src/bioetl/application/pipelines/semanticscholar/_author_extractors.py:40-42 |
-| `CR-20260816-B-S05-app-pipelines-043` | confirm | minor | raw_pages.strip() runs on any truthy pages value, so a numeric journal.pages raises AttributeError. | src/bioetl/application/pipelines/semanticscholar/extractors.py:156 |
-| `CR-20260816-B-S05-app-pipelines-044` | reject | trivial | Keep underscore-prefixed business fields in the hash is a hash-contract expansion. | src/bioetl/application/pipelines/common/publication_transformer_records.py |
-| `CR-20260816-B-S05-app-pipelines-045` | reject | major | MappingProxyType wrap is freeze-style. | src/bioetl/application/pipelines/common/publication_vocab_observability.py |
-| `CR-20260816-B-S05-app-pipelines-046` | reject | minor | isinstance(entity_type, str) is typing/hardening. | src/bioetl/application/pipelines/common/publication_transformer_context.py |
-| `CR-20260816-B-S05-app-pipelines-047` | reject | trivial | Warn on overlapping extract blocks is observability style. | src/bioetl/application/pipelines/common/publication_transformer_hooks_mixin.py |
-| `CR-20260816-B-S05-app-pipelines-048` | reject | trivial | Init-time strategy attribute asserts are style. | src/bioetl/application/pipelines/common/base_publication_transformer.py |
-| `CR-20260816-B-S05-app-pipelines-049` | reject | trivial | TypedDict for transformer kwargs is typing-only. | src/bioetl/application/pipelines/common/transformer_initialization.py |
-| `CR-20260816-B-S05-app-pipelines-050` | reject | trivial | Remove CrossRef re-export shim is packaging/style. | src/bioetl/application/pipelines/common/blocks.py |
-| `CR-20260816-B-S05-app-pipelines-051` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/pipelines/semanticscholar/extractors.py |
-| `CR-20260816-B-S05-app-pipelines-052` | reject | trivial | Safer locals() lookup is hardening of the shipped init helper. | src/bioetl/application/pipelines/common/transformer_initialization.py |
-| `CR-20260816-B-S05-app-pipelines-053` | reject | trivial | Public wrappers for private collaborators is API expansion. | src/bioetl/application/pipelines/common/publication_assembly.py |
-| `CR-20260816-B-S05-app-pipelines-054` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/pipelines/common/publication_transformer_hooks_mixin.py |
-| `CR-20260816-B-S05-app-pipelines-055` | reject | trivial | Literal extractor __all__ is export-style. | src/bioetl/application/pipelines/semanticscholar/__init__.py |
-| `CR-20260816-B-S05-app-pipelines-056` | reject | trivial | list[JsonDict] \| None annotation is typing-only. | src/bioetl/application/pipelines/uniprot/extractors/_comment_facets_extractors.py |
-| `CR-20260816-B-S05-app-pipelines-057` | reject | trivial | Reuse one comment index is a perf/DRY suggestion. | src/bioetl/application/pipelines/uniprot/extractors/_comment_facets_all.py |
-| `CR-20260816-B-S05-app-pipelines-058` | reject | trivial | Stale Any comment removal is docs/style. | src/bioetl/application/pipelines/common/extractors.py |
-| `CR-20260816-B-S05-app-pipelines-059` | reject | minor | Reject dict/set ISSN containers is hardening of the shipped scalar fallback. | src/bioetl/application/pipelines/common/publication_issn.py |
-| `CR-20260816-B-S05-app-pipelines-060` | reject | trivial | Shared serialization helper is DRY. | src/bioetl/application/pipelines/uniprot/extractors/_comment_facets_extractors.py |
-| `CR-20260816-B-S05-app-pipelines-061` | reject | major | MetricsPort instead of object/getattr is Protocol tightening. | src/bioetl/application/pipelines/common/publication_vocab_observability.py |
-| `CR-20260816-B-S05-app-pipelines-062` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/pipelines/common/publication_transformer_context.py |
-| `CR-20260816-B-S05-app-pipelines-063` | reject | minor | Align ELocationID XPath depths is a parse-policy change without a reproduced DOI/PII miss. | src/bioetl/application/pipelines/pubmed/extractors/identifier.py |
-| `CR-20260816-B-S05-app-pipelines-064` | reject | major | Shared author-name helper is DRY; no divergent outputs shown. | src/bioetl/application/pipelines/pubmed/extractors/author.py |
-| `CR-20260816-B-S05-app-pipelines-065` | reject | minor | Whitespace-padded numeric months are not a demonstrated PubMed payload; month_map path already strips. | src/bioetl/application/pipelines/pubmed/_block_helpers.py parse_month |
-| `CR-20260816-B-S05-app-pipelines-066` | reject | minor | EMAIL_PATTERN pipe-in-class is a regex nit without a real TLD producer. | src/bioetl/application/pipelines/pubmed/extractors/author.py EMAIL_PATTERN |
-| `CR-20260816-B-S05-app-pipelines-067` | reject | major | transformer_initialization remainder is style/typing. | src/bioetl/application/pipelines/common/transformer_initialization.py |
-| `CR-20260816-B-S05-app-pipelines-068` | reject | minor | L3-L5 multifunctional sentinel alignment is a schema-policy change. | src/bioetl/application/pipelines/chembl/target_protein_classification_summary.py |
-| `CR-20260816-B-S05-app-pipelines-069` | reject | trivial | Move helper onto the class is style. | src/bioetl/application/pipelines/chembl/subcellular_fraction_transformer.py |
-| `CR-20260816-B-S05-app-pipelines-070` | reject | major | Public coercion-module extraction is DRY. | src/bioetl/application/pipelines/chembl/target_protein_classification_transformer.py |
-| `CR-20260816-B-S05-app-pipelines-071` | reject | major | Shared pipe-sentinel helper is DRY. | src/bioetl/application/pipelines/chembl/target_helpers.py |
-| `CR-20260816-B-S05-app-pipelines-072` | reject | major | Remove file-wide type:ignore is typing-only. | src/bioetl/application/pipelines/chembl/publication_term_transformer.py |
-| `CR-20260816-B-S05-app-pipelines-073` | reject | trivial | Precompute counted_top_levels is perf. | src/bioetl/application/pipelines/chembl/target_protein_classification_summary.py |
-| `CR-20260816-B-S05-app-pipelines-074` | reject | major | Aggregate every KeywordList is an extraction-contract expansion of the shipped first-list behavior. | src/bioetl/application/pipelines/pubmed/extractors/classification.py |
-| `CR-20260816-B-S05-app-pipelines-075` | reject | trivial | Hoist key_map is style. | src/bioetl/application/pipelines/pubmed/extractors/identifier.py |
-| `CR-20260816-B-S05-app-pipelines-076` | reject | trivial | Replace dynamic re-export with explicit imports is style. | src/bioetl/application/pipelines/pubmed/blocks.py |
-| `CR-20260816-B-S05-app-pipelines-077` | reject | major | Coerce non-str xref_id is contract expansion of the shipped str-only cleaner. | src/bioetl/application/pipelines/chembl/target_helpers.py clean_pipe_value |
-| `CR-20260816-B-S05-app-pipelines-078` | reject | major | TypeError on wrong extractor type is constructor-hardening of the shipped default-replace path. | src/bioetl/application/pipelines/pubmed/transformer.py |
-| `CR-20260816-B-S05-app-pipelines-079` | reject | major | Remove DateExtractor singleton is a shipped identity-API change. | src/bioetl/application/pipelines/pubmed/extractors/date.py |
-| `CR-20260816-B-S05-app-pipelines-080` | reject | minor | Whitespace-only classification as missing is policy tightening. | src/bioetl/application/pipelines/chembl/target_protein_classification_transformer.py |
-| `CR-20260816-B-S05-app-pipelines-081` | reject | major | Calendar-range checks in _format_date are contract expansion of the shipped string formatter. | src/bioetl/application/pipelines/pubmed/extractors/date.py |
-| `CR-20260816-B-S05-app-pipelines-082` | reject | major | Treat None canonical alias as absent is alias-policy tightening. | src/bioetl/application/pipelines/chembl/provider_aliases.py |
-| `CR-20260816-B-S05-app-pipelines-083` | reject | major | Include component_id in unresolved entity ids is an identity-contract change. | src/bioetl/application/pipelines/chembl/target_protein_classification_transformer.py |
-| `CR-20260816-B-S05-app-pipelines-084` | reject | trivial | Trailing comment removal is style. | src/bioetl/application/pipelines/chembl/publication_transformer.py |
-| `CR-20260816-B-S05-app-pipelines-085` | reject | major | Empty-frame schema on missing target_id is a summary-contract change. | src/bioetl/application/pipelines/chembl/target_protein_classification_summary.py |
-| `CR-20260816-B-S05-app-pipelines-086` | reject | trivial | @override decorator is style. | src/bioetl/application/pipelines/chembl/tissue_transformer.py |
-| `CR-20260816-B-S05-app-pipelines-087` | reject | major | int() vs safe_int is helper-style. | src/bioetl/application/pipelines/chembl/subcellular_fraction_transformer.py |
-| `CR-20260816-B-S05-app-pipelines-088` | reject | trivial | Consolidate excluded output fields is DRY. | src/bioetl/application/pipelines/chembl/publication_transformer.py |
-| `CR-20260816-B-S05-app-pipelines-089` | reject | major | int() vs safe_int is helper-style. | src/bioetl/application/pipelines/chembl/publication_similarity_transformer.py |
-| `CR-20260816-B-S05-app-pipelines-090` | reject | major | Hoist walrus/classification_ids is style. | src/bioetl/application/pipelines/chembl/target_component_transformer.py |
-| `CR-20260816-B-S05-app-pipelines-091` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/application/pipelines/chembl/target_helpers.py |
-| `CR-20260816-B-S05-app-pipelines-092` | reject | major | Catch DefusedXmlException explicitly is exception-style; parse failures already become ValueError. | src/bioetl/application/pipelines/pubmed/transformer.py |
-| `CR-20260816-B-S05-app-pipelines-093` | reject | trivial | Call extract_all_identifiers once is DRY/perf. | src/bioetl/application/pipelines/pubmed/extractors/identifier.py |
-| `CR-20260816-B-S05-app-pipelines-094` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/application/pipelines/pubmed/xml_parser.py |
-| `CR-20260816-B-S07-infra-storage-001` | reject | None | Coverage-inventory refresh is not an invariant hole; same class as S01-aggregates-001. | reports/quality/module-coverage-inventory.json |
-| `CR-20260816-B-S07-infra-storage-002` | reject | None | Path-join hardening; provider/entity are config identifiers, not a demonstrated traversal path. | src/bioetl/infrastructure/storage/bronze/metadata_paths.py resolve_bronze_metadata_base_path |
-| `CR-20260816-B-S07-infra-storage-003` | reject | None | fd_owned is cleared after open(); leftover close is OSError-suppressed and does not change write outcome. | src/bioetl/infrastructure/storage/bronze/io_mixin.py:108-148 |
-| `CR-20260816-B-S07-infra-storage-004` | reject | None | DRY extraction of an already-identical raiser; fail-closed wording is unchanged. | src/bioetl/infrastructure/storage/bronze/metadata_operations.py |
-| `CR-20260816-B-S07-infra-storage-005` | reject | None | Incremental compare is a perf rewrite; current full-stream compare is correct. | src/bioetl/infrastructure/storage/bronze/io_mixin.py _compressed_payload_matches |
-| `CR-20260816-B-S07-infra-storage-006` | reject | None | DRY helper reuse; both raisers already fail closed. | src/bioetl/infrastructure/storage/gold/metadata_payloads.py |
-| `CR-20260816-B-S07-infra-storage-007` | reject | None | Push-down of history filters is a perf rewrite, not a broken result contract. | src/bioetl/infrastructure/storage/gold/read_cleanup_mixin.py get_history |
-| `CR-20260816-B-S07-infra-storage-008` | reject | None | min(_ingestion_ts) is a deterministic fallback; no contract requires latest. | src/bioetl/infrastructure/storage/gold/metadata_payloads.py _extract_completed_at |
-| `CR-20260816-B-S07-infra-storage-009` | reject | None | del run_id is explicit; merged path already has optional composite_run_id. | src/bioetl/infrastructure/storage/gold/metadata_payloads.py build_gold_metadata_payload |
-| `CR-20260816-B-S07-infra-storage-010` | reject | None | getattr-to-direct-attribute is style; host contract already supplies the attrs. | src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py |
-| `CR-20260816-B-S07-infra-storage-011` | reject | None | Redundant audit guard removal is style; inner helper already no-ops. | src/bioetl/infrastructure/storage/bronze/write_execution.py |
-| `CR-20260816-B-S07-infra-storage-012` | reject | None | Suffix-constant extraction is style; paths already match the contract. | src/bioetl/infrastructure/storage/bronze/pipeline_helpers.py |
-| `CR-20260816-B-S07-infra-storage-013` | reject | None | Failure-counter addition is telemetry, not a write-invariant breach. | src/bioetl/infrastructure/storage/bronze_writer.py _write_bronze_with_tracing |
-| `CR-20260816-B-S07-infra-storage-014` | reject | None | Warning-log on fallback conversion is observability, not a conversion hole. | src/bioetl/infrastructure/storage/delta/arrow_converter.py |
-| `CR-20260816-B-S07-infra-storage-015` | reject | None | asyncio.to_thread offload is perf; preview payload is already correct. | src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py preview_cleanup |
-| `CR-20260816-B-S07-infra-storage-016` | reject | None | Streaming read is a perf rewrite; incremental iteration is already contracted. | src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py read_bronze |
-| `CR-20260816-B-S07-infra-storage-017` | confirm | None | Sidecar conflict is checked after _write_atomic_stream, so a replay with the same batch_id can replace Bronze bytes and then raise FileExistsError, leaving new data beside the old sidecar. | src/bioetl/infrastructure/storage/bronze/write_execution.py write_bronze_data_and_sidecar; pipeline_helpers.py batch_{date}_{batch_id}.jsonl.zst |
-| `CR-20260816-B-S07-infra-storage-018` | reject | None | str(schema) 'null' match only extra-runs sanitization; _sanitize_null_columns still keys off pa.types.is_null. | src/bioetl/infrastructure/storage/delta/arrow_converter.py:238-241,280-281 |
-| `CR-20260816-B-S07-infra-storage-019` | reject | None | Cast-fallback JSON encoder is a consistency polish; current str() fallback still fails closed on uncastable values. | src/bioetl/infrastructure/storage/delta/arrow_converter.py _sanitize_single_null_column |
-| `CR-20260816-B-S07-infra-storage-020` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py |
-| `CR-20260816-B-S07-infra-storage-021` | reject | critical | DeltaTable.to_pyarrow_table first positional argument is the column projection; keyword-only rewrite is style. | src/bioetl/infrastructure/storage/gold/read_cleanup_mixin.py |
-| `CR-20260816-B-S07-infra-storage-022` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/metadata_mixin_protocols.py |
-| `CR-20260816-B-S07-infra-storage-023` | reject | None | __all__ hygiene for time is style/export-only. | src/bioetl/infrastructure/storage/silver/metadata_mixin.py |
-| `CR-20260816-B-S07-infra-storage-024` | reject | None | cast(Any, None) default is annotation/host-attr style accepted by the Any gate. | src/bioetl/infrastructure/storage/silver/operations/delta_operation_impls.py |
-| `CR-20260816-B-S07-infra-storage-025` | reject | None | Public wrapper collapse is DRY; behavior is already identical. | src/bioetl/infrastructure/storage/silver/operations/arrow_operations.py |
-| `CR-20260816-B-S07-infra-storage-026` | reject | None | Any->BronzeWritePrepared is annotation-only. | src/bioetl/infrastructure/storage/bronze/side_effects_mixin.py _build_bronze_write_result |
-| `CR-20260816-B-S07-infra-storage-027` | reject | None | Rename event_name->context is style; skip behavior is unchanged. | src/bioetl/infrastructure/storage/silver/metadata_mixin.py |
-| `CR-20260816-B-S07-infra-storage-028` | reject | None | TypeVar/overload pairing is Protocol/typing-only. | src/bioetl/infrastructure/storage/silver/metadata_write_execution.py |
-| `CR-20260816-B-S07-infra-storage-029` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/metadata_mixin_protocols.py |
-| `CR-20260816-B-S07-infra-storage-030` | reject | None | Current Gold validation builds a pandas DataFrame; no disk proof that these schemas are Polars-only. | src/bioetl/infrastructure/storage/gold/validation_mixin.py _validate_records_against_schema |
-| `CR-20260816-B-S07-infra-storage-031` | reject | None | cast(Any, None) host-attr cleanup is annotation-only. | src/bioetl/infrastructure/storage/silver/operations/delta_operations.py |
-| `CR-20260816-B-S07-infra-storage-032` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/metadata_write_execution.py |
-| `CR-20260816-B-S07-infra-storage-033` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/metadata_writer_public.py |
-| `CR-20260816-B-S07-infra-storage-034` | reject | None | Pass-through request builder removal is DRY. | src/bioetl/infrastructure/storage/metadata_writer_operations_impl.py |
-| `CR-20260816-B-S07-infra-storage-035` | reject | None | isinstance before cast is typing hardening; callers already pass the matching model. | src/bioetl/infrastructure/storage/metadata_writer_finalizers.py |
-| `CR-20260816-B-S07-infra-storage-036` | reject | None | unknown layer label is a diagnostic default, not a silent write of the wrong model. | src/bioetl/infrastructure/storage/metadata_artifact_details.py resolve_artifact_semantics |
-| `CR-20260816-B-S07-infra-storage-037` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/metadata_writer.py |
-| `CR-20260816-B-S07-infra-storage-038` | reject | None | Unused layer parameter removal is style. | src/bioetl/infrastructure/storage/metadata_writer_helpers.py _resolve_existing_metadata_path |
-| `CR-20260816-B-S07-infra-storage-039` | reject | None | __all__ private-helper hygiene is export style. | src/bioetl/infrastructure/storage/metadata_artifact_publication.py |
-| `CR-20260816-B-S07-infra-storage-040` | reject | None | Count-only audit field is a memory cleanup; count is already len(records). | src/bioetl/infrastructure/storage/silver/audit_operations.py |
-| `CR-20260816-B-S07-infra-storage-041` | reject | None | to_thread/timeout around publication I/O is perf, not a wrong artifact. | src/bioetl/infrastructure/storage/metadata_artifact_publication.py |
-| `CR-20260816-B-S07-infra-storage-042` | reject | None | object->_MetadataWriteRequest return annotation is typing-only. | src/bioetl/infrastructure/storage/metadata_writer_public.py |
-| `CR-20260816-B-S07-infra-storage-043` | reject | None | Unknown layer already model_validates as GoldMetadata and fails closed on a Silver payload; no silent accept path. | src/bioetl/infrastructure/storage/metadata_writer_helpers.py _load_existing_metadata_model |
-| `CR-20260816-B-S07-infra-storage-044` | reject | None | Delegate-to-operations DRY; both paths already write the same request. | src/bioetl/infrastructure/storage/metadata_writer.py |
-| `CR-20260816-B-S07-infra-storage-045` | reject | None | Broaden RuntimeError catch is telemetry completeness, not a dropped write. | src/bioetl/infrastructure/storage/metadata_artifact_publication.py |
-| `CR-20260816-B-S07-infra-storage-046` | reject | None | Credential-in-URI is speculative on the local-only default; no producer of secret query params shown. | src/bioetl/infrastructure/storage/metadata_artifact_details.py serialize_input_snapshot_ref |
-| `CR-20260816-B-S07-infra-storage-047` | reject | None | Copy-before-mutate is defensive style; SCD2 init is the write-path contract. | src/bioetl/infrastructure/storage/gold/io_delta_runtime.py |
-| `CR-20260816-B-S07-infra-storage-048` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/delta/schema_ops.py |
-| `CR-20260816-B-S07-infra-storage-049` | reject | None | Windows dataset bypass already exists on the record-read path; finding restates the helper. | src/bioetl/infrastructure/storage/delta/table_ops.py _can_use_pyarrow_dataset_scanner / read_delta_records |
-| `CR-20260816-B-S07-infra-storage-050` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/gold/io_execution.py |
-| `CR-20260816-B-S07-infra-storage-051` | reject | None | Retry wrap for merged overwrite is resilience expansion, not a wrong first write. | src/bioetl/infrastructure/storage/gold/io_execution.py |
-| `CR-20260816-B-S07-infra-storage-052` | reject | None | Per-attempt timeout is a policy expansion; current retry already propagates failures. | src/bioetl/infrastructure/storage/gold/io_delta_runtime.py |
-| `CR-20260816-B-S07-infra-storage-053` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/gold/io_delta_runtime.py |
-| `CR-20260816-B-S07-infra-storage-054` | reject | None | Prefer scanner.to_table() is a read-path optimization, not a wrong count. | src/bioetl/infrastructure/storage/delta_reader.py |
-| `CR-20260816-B-S07-infra-storage-055` | reject | None | None business-key sort raises TypeError and stays fail-closed; not a silent mis-order. | src/bioetl/infrastructure/storage/gold/io_delta_runtime.py _prepare_scd2_gold_write |
-| `CR-20260816-B-S07-infra-storage-056` | reject | None | Richer FileNotFoundError text is diagnostics-only. | src/bioetl/infrastructure/storage/delta_reader.py read_with_fallback |
-| `CR-20260816-B-S07-infra-storage-057` | reject | None | KeyboardInterrupt/SystemExit already re-raise; leftover BaseException fallback still returns a count rather than inventing rows. | src/bioetl/infrastructure/storage/delta_reader_helpers.py count_delta_rows |
-| `CR-20260816-B-S07-infra-storage-058` | reject | None | Jitter hash collision polish; delay remains bounded and deterministic. | src/bioetl/infrastructure/storage/delta/resilience.py _deterministic_jitter_seconds |
-| `CR-20260816-B-S07-infra-storage-059` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/gold/io_delta_protocols.py |
-| `CR-20260816-B-S07-infra-storage-060` | reject | None | unknown vs failure metric label is telemetry taxonomy, not write outcome. | src/bioetl/infrastructure/storage/gold/io_metrics.py |
-| `CR-20260816-B-S07-infra-storage-061` | reject | None | Narrow schema parameter union is annotation-only. | src/bioetl/infrastructure/storage/gold_writer.py write_gold |
-| `CR-20260816-B-S07-infra-storage-062` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/gold/writer_metrics.py |
-| `CR-20260816-B-S07-infra-storage-063` | reject | None | Distinguish inspect-fail vs empty columns is fail-soft diagnostics. | src/bioetl/infrastructure/storage/metadata/metadata_helpers.py |
-| `CR-20260816-B-S07-infra-storage-064` | reject | None | Incremental min timestamp is a micro-optimization; result is already min(). | src/bioetl/infrastructure/storage/metadata/builder_base.py |
-| `CR-20260816-B-S07-infra-storage-065` | reject | None | assert-to-RuntimeError under -O still AttributeErrors; not a silent dual-write. | src/bioetl/infrastructure/storage/gold/writer_implementation.py:119 |
-| `CR-20260816-B-S07-infra-storage-066` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/metadata/metadata_helpers.py |
-| `CR-20260816-B-S07-infra-storage-067` | reject | None | Dual-write requires GoldSchemaPolicyByVersion; plain schema correctly takes the single-target path. | src/bioetl/infrastructure/storage/gold_writer.py:253-259 |
-| `CR-20260816-B-S07-infra-storage-068` | reject | None | Filename sanitization is hardening; provider/entity/table_name are config identifiers. | src/bioetl/infrastructure/storage/metadata/writer_operations.py |
-| `CR-20260816-B-S07-infra-storage-069` | reject | None | errno None -> 'None' label is telemetry wording. | src/bioetl/infrastructure/storage/metadata/writer_operations.py |
-| `CR-20260816-B-S07-infra-storage-070` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/operations/validation_operations.py |
-| `CR-20260816-B-S07-infra-storage-071` | reject | None | Empty column tuple pass-through is only after to_schema/columns both fail; production Pandera schemas resolve. | src/bioetl/infrastructure/storage/gold/writer_schema_helpers.py _schema_column_names |
-| `CR-20260816-B-S07-infra-storage-072` | reject | None | Duplicated collaborator annotations are DRY/Protocol style. | src/bioetl/infrastructure/storage/silver/operations/validation_operations.py |
-| `CR-20260816-B-S07-infra-storage-073` | reject | None | Exactly-one lineage metric is telemetry completeness. | src/bioetl/infrastructure/storage/lineage_persistence.py |
-| `CR-20260816-B-S07-infra-storage-074` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/postwrite_mixin.py |
-| `CR-20260816-B-S07-infra-storage-075` | reject | None | hasattr(type(target)) vs getattr is style; None still rejected downstream. | src/bioetl/infrastructure/storage/lineage_persistence.py _has_explicit_member |
-| `CR-20260816-B-S07-infra-storage-076` | reject | None | Broader except around dual-write logging is diagnostics; committed targets already logged for the caught tuple. | src/bioetl/infrastructure/storage/gold/writer_implementation.py:159-175 |
-| `CR-20260816-B-S07-infra-storage-077` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/runtime_helpers.py |
-| `CR-20260816-B-S07-infra-storage-078` | reject | None | KeyError vs descriptive ValueError is exception-wording style; unmapped modes still fail. | src/bioetl/infrastructure/storage/silver/validation_operations.py _to_policy_write_mode_impl |
-| `CR-20260816-B-S07-infra-storage-079` | confirm | None | Bare except Exception returns None, so permission/corruption errors look like a missing table and schema-drift enforcement is skipped. | src/bioetl/infrastructure/storage/silver/support.py _sync_get_schema; schema_drift_operations.py _check_schema_drift |
-| `CR-20260816-B-S07-infra-storage-080` | reject | None | Audit hook when _metadata is None is a missing-telemetry path, not a dropped write. | src/bioetl/infrastructure/storage/silver/operations/postwrite_operations.py |
-| `CR-20260816-B-S07-infra-storage-081` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/operations/postwrite_execution.py |
-| `CR-20260816-B-S07-infra-storage-082` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/validation_operations.py |
-| `CR-20260816-B-S07-infra-storage-083` | confirm | None | _diff_schema_fields uses only records[0], so later-row additions/omissions never trip on_schema_mismatch=error. | src/bioetl/infrastructure/storage/silver/schema_drift_operations.py:65-75 |
-| `CR-20260816-B-S07-infra-storage-084` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/postwrite_mixin.py |
-| `CR-20260816-B-S07-infra-storage-085` | reject | None | operation_id vs table_path for jitter seed is determinism polish, not a wrong retry decision. | src/bioetl/infrastructure/storage/silver/merge_resilience_helpers.py |
-| `CR-20260816-B-S07-infra-storage-086` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/maintenance_mixin.py |
-| `CR-20260816-B-S07-infra-storage-087` | reject | None | tuple-freeze of key lists is immutability style; no demonstrated retry mutation. | src/bioetl/infrastructure/storage/silver/delta_request_models.py |
-| `CR-20260816-B-S07-infra-storage-088` | reject | None | locals()/cast cleanup is typing/DRY. | src/bioetl/infrastructure/storage/silver/merged_request_support.py |
-| `CR-20260816-B-S07-infra-storage-089` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/delta_merge_helpers.py |
-| `CR-20260816-B-S07-infra-storage-090` | reject | None | Duplicate timeout log removal is telemetry DRY. | src/bioetl/infrastructure/storage/silver/merge_resilience_helpers.py |
-| `CR-20260816-B-S07-infra-storage-091` | reject | None | Unused asyncio re-export is style; test-patch seam only. | src/bioetl/infrastructure/storage/silver/delta_helpers.py |
-| `CR-20260816-B-S07-infra-storage-092` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/maintenance_mixin.py |
-| `CR-20260816-B-S07-infra-storage-093` | reject | None | Replace unittest.mock type-branch with a flag is a refactor, not a merge-outcome hole. | src/bioetl/infrastructure/storage/silver/delta_merge_helpers.py |
-| `CR-20260816-B-S07-infra-storage-094` | reject | None | to_thread offload of sync validate is perf. | src/bioetl/infrastructure/storage/silver/operations/validation_operations.py |
-| `CR-20260816-B-S07-infra-storage-095` | reject | None | Remove file-level mypy disable is annotation/tooling. | src/bioetl/infrastructure/storage/silver/merged_mixin.py |
-| `CR-20260816-B-S07-infra-storage-096` | reject | None | Stale comment removal is docstring/style. | src/bioetl/infrastructure/storage/silver/merge_resilience_helpers.py |
-| `CR-20260816-B-S07-infra-storage-097` | reject | None | Explicit field mapping vs locals() is DRY/typing. | src/bioetl/infrastructure/storage/silver/merged_operations.py |
-| `CR-20260816-B-S07-infra-storage-098` | reject | None | Forward timeout into empty schema-evolution append is resilience expansion. | src/bioetl/infrastructure/storage/silver/delta_write_execution.py |
-| `CR-20260816-B-S07-infra-storage-099` | reject | None | Kill orphaned child on timeout is process-hygiene; no proven post-timeout commit on disk. | src/bioetl/infrastructure/storage/silver/delta_write_execution.py |
-| `CR-20260816-B-S07-infra-storage-100` | reject | None | Default merge off the event loop is perf/cancellation polish. | src/bioetl/infrastructure/storage/silver/delta_merge_helpers.py |
-| `CR-20260816-B-S07-infra-storage-101` | reject | None | Move static assignments into class body is style. | src/bioetl/infrastructure/storage/silver/validation_mixin.py |
-| `CR-20260816-B-S07-infra-storage-102` | reject | None | Literal annotation / remove type:ignore is typing-only. | src/bioetl/infrastructure/storage/silver/key_nullability_operations.py |
-| `CR-20260816-B-S07-infra-storage-103` | reject | None | Hoist local polars import is style. | src/bioetl/infrastructure/storage/silver/writer_metadata_facade.py |
-| `CR-20260816-B-S07-infra-storage-104` | reject | None | Test-only coverage of lazy __getattr__ re-export. | src/bioetl/infrastructure/storage/support/atomic_ops.py |
-| `CR-20260816-B-S07-infra-storage-105` | reject | None | Alias rename of _write_dual_targets_impl is style. | src/bioetl/infrastructure/storage/silver/writer_runtime_facade.py |
-| `CR-20260816-B-S07-infra-storage-106` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/writer_runtime_support.py |
-| `CR-20260816-B-S07-infra-storage-107` | reject | None | records[0] optional-missing path only debug-logs; it does not gate the write. | src/bioetl/infrastructure/storage/silver/validation_record_support.py:113-120 |
-| `CR-20260816-B-S07-infra-storage-108` | reject | None | Comment pointing at a guard ID is docs/style. | src/bioetl/infrastructure/storage/silver_writer.py |
-| `CR-20260816-B-S07-infra-storage-109` | reject | None | Reject non-positive checkpoint bounds is config hardening without a current producer of 0. | src/bioetl/infrastructure/storage/support/checkpoint_writer.py |
-| `CR-20260816-B-S07-infra-storage-110` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/support/checkpoint_writer.py |
-| `CR-20260816-B-S07-infra-storage-111` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/writer_runtime_support.py |
-| `CR-20260816-B-S07-infra-storage-112` | reject | None | BaseException temp cleanup is resource hygiene; ATOMIC_WRITE_EXCEPTIONS already wraps OS errors. | src/bioetl/infrastructure/storage/support/atomic_ops.py |
-| `CR-20260816-B-S07-infra-storage-113` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver_writer.py |
-| `CR-20260816-B-S07-infra-storage-114` | reject | None | TypeError vs ValueError for legacy-arg mismatch is exception-class style. | src/bioetl/infrastructure/storage/silver/writer_runtime_invocation.py |
-| `CR-20260816-B-S07-infra-storage-115` | reject | None | @override decorator is annotation-only. | src/bioetl/infrastructure/storage/silver_writer.py _check_schema_drift |
-| `CR-20260816-B-S07-infra-storage-116` | reject | None | Drop unused payload from pending tuples is DRY. | src/bioetl/infrastructure/storage/support/atomic_group.py |
-| `CR-20260816-B-S07-infra-storage-117` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/support/atomic_group.py |
-| `CR-20260816-B-S07-infra-storage-118` | reject | minor | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/support/checkpoint_writer.py |
-| `CR-20260816-B-S07-infra-storage-119` | reject | None | Integer winerror membership tighten is retry-taxonomy polish; errno fallback remains. | src/bioetl/infrastructure/storage/support/_atomic_replace.py |
-| `CR-20260816-B-S07-infra-storage-120` | reject | None | assert-to-RuntimeError under -O still AttributeErrors on a missing policy. | src/bioetl/infrastructure/storage/silver/writer_runtime_support.py:184 |
-| `CR-20260816-B-S07-infra-storage-121` | reject | None | Rollback leftover temps on success-exit is misuse hygiene; commit() already clears _pending. | src/bioetl/infrastructure/storage/support/atomic_group.py __exit__ |
-| `CR-20260816-B-S07-infra-storage-122` | reject | None | Incremental glob consume is a perf rewrite; limit still raises CheckpointSizeError. | src/bioetl/infrastructure/storage/support/checkpoint_writer.py |
-| `CR-20260816-B-S07-infra-storage-123` | reject | None | Missing version hash keeps the incoming content_hash; no proof that is the wrong identity vs fail-closed. | src/bioetl/infrastructure/storage/silver/writer_runtime_support.py _project_records_for_contract_version |
-| `CR-20260816-B-S07-infra-storage-124` | reject | None | Explicit fsync before replace is durability hardening, not a current torn-write invariant. | src/bioetl/infrastructure/storage/support/atomic_ops.py |
-| `CR-20260816-B-S07-infra-storage-125` | reject | None | Force UTC on completed_at is timestamp-normalization style without a mixed-tz crash on this path. | src/bioetl/infrastructure/storage/silver/writer_runtime_invocation.py _resolve_completed_at |
-| `CR-20260816-B-S07-infra-storage-126` | reject | None | Mixed-type PK sort TypeError is fail-closed; Silver keys are contracted as hashable scalars. | src/bioetl/infrastructure/storage/silver/validation_record_support.py |
-| `CR-20260816-B-S07-infra-storage-127` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/support/_atomic_replace.py |
-| `CR-20260816-B-S07-infra-storage-128` | reject | None | Bounded quarantine batching is a memory rewrite; all orphans are still written. | src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py |
-| `CR-20260816-B-S07-infra-storage-129` | reject | None | Column projection / max-rows is a config/perf expansion, not a wrong orphan decision. | src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py _read_source_rows |
-| `CR-20260816-B-S07-infra-storage-130` | reject | None | Incremental dedup is a memory rewrite; winner selection is already deterministic. | src/bioetl/infrastructure/storage/support/retention_dedup.py |
-| `CR-20260816-B-S07-infra-storage-131` | reject | None | Fail if reader lacks limit is a config expansion; post-read bound already exists. | src/bioetl/infrastructure/storage/workflow_row_reconciliation.py |
-| `CR-20260816-B-S07-infra-storage-132` | confirm | critical | Missing Silver reference table returns [] so destructive FK reconcile treats every source row as an orphan. | src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py _read_reference_rows |
-| `CR-20260816-B-S07-infra-storage-133` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py |
-| `CR-20260816-B-S07-infra-storage-134` | reject | None | Replace post-hoc elapsed check with wait_for is timeout-policy polish. | src/bioetl/infrastructure/storage/support/retention.py |
-| `CR-20260816-B-S07-infra-storage-135` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/workflow_row_reconciliation.py |
-| `CR-20260816-B-S07-infra-storage-136` | reject | None | Reuse orphan_error_code helper is DRY; mapping literals already match. | src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_support.py |
-| `CR-20260816-B-S07-infra-storage-137` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/operations/metadata_write_facade.py |
-| `CR-20260816-B-S07-infra-storage-138` | reject | None | Shared _require_metadata_coordinator helper is DRY. | src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_support.py |
-| `CR-20260816-B-S07-infra-storage-139` | reject | None | Constructor-inject write callable is a refactor/test-seam change. | src/bioetl/infrastructure/storage/silver/operations/metadata_operations.py |
-| `CR-20260816-B-S07-infra-storage-140` | reject | None | Cache inspect.signature is a micro-optimization. | src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py |
-| `CR-20260816-B-S07-infra-storage-141` | confirm | critical | if arrow_data treats an empty table as missing and drops schema/records. | src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py _compute |
-| `CR-20260816-B-S07-infra-storage-142` | reject | None | Failure metric on metadata write is telemetry. | src/bioetl/infrastructure/storage/silver/operations/metadata_write_support.py |
-| `CR-20260816-B-S07-infra-storage-143` | reject | None | Error-string method name typo is diagnostics/docs. | src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py should_skip_silver_metadata_write |
-| `CR-20260816-B-S07-infra-storage-144` | reject | None | Missing _get_delta_version hook is not the production writer surface; return 0 is a test-double fallback. | src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py resolve_version_after |
-| `CR-20260816-B-S07-infra-storage-145` | reject | None | Cap vacuum file-path list is payload-size cleanup. | src/bioetl/infrastructure/storage/silver/operations/maintenance_operations.py |
-| `CR-20260816-B-S07-infra-storage-146` | reject | None | Reorder coordinator require vs prepare is DRY; both already fail closed. | src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_support.py |
-| `CR-20260816-B-S07-infra-storage-147` | reject | None | to_thread for DQ normalize is perf. | src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py resolve_finalization_dq_metrics |
-| `CR-20260816-B-S07-infra-storage-148` | reject | None | VAR_KEYWORD discriminator tighten is typing/dispatch polish without a shown mis-route. | src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py _is_base_path_writer |
-| `CR-20260816-B-S07-infra-storage-149` | confirm | critical | Missing timestamp uses assert instead of fail-closed ValueError. | src/bioetl/infrastructure/storage/support/retention_time_travel.py |
-| `CR-20260816-B-S07-infra-storage-150` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/operations/metadata_context_facade.py |
-| `CR-20260816-B-S07-infra-storage-151` | reject | None | JSON-safe schema/metadata serialization is a representation change, not a retention decision hole. | src/bioetl/infrastructure/storage/support/retention_delta.py build_table_info |
-| `CR-20260816-B-S07-infra-storage-152` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/storage/silver/operations/maintenance_operations.py |
-| `CR-20260816-C-S06-infra-adapters-001` | reject | None | Coverage-inventory refresh is not an invariant hole. | reports/quality/module-coverage-inventory.json |
-| `CR-20260816-C-S06-infra-adapters-002` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/response_parser.py |
-| `CR-20260816-C-S06-infra-adapters-003` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/validation.py |
-| `CR-20260816-C-S06-infra-adapters-004` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/validation.py |
-| `CR-20260816-C-S06-infra-adapters-005` | reject | None | Coverage-inventory refresh is not an invariant hole. | src/bioetl/infrastructure/adapters/__init__.py |
-| `CR-20260816-C-S06-infra-adapters-006` | reject | None | 408 already classifies as 4xx DATA_QUALITY; making it RECOVERABLE is a retry-policy expansion. | src/bioetl/infrastructure/adapters/adapter_error_classifier.py _classify_http_status |
-| `CR-20260816-C-S06-infra-adapters-007` | reject | None | aclose is documented no-op; HTTP client is closed via __aexit__. | src/bioetl/infrastructure/adapters/base.py aclose / __aexit__ |
-| `CR-20260816-C-S06-infra-adapters-008` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/_error_handling_support.py |
-| `CR-20260816-C-S06-infra-adapters-009` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/_base_runtime.py |
-| `CR-20260816-C-S06-infra-adapters-010` | confirm | None | external_api_error logs raw str(error) plus unallowlisted extra, so transport messages can retain secrets. | src/bioetl/infrastructure/adapters/_error_handling_support.py:80-95 |
-| `CR-20260816-C-S06-infra-adapters-011` | reject | None | Reserved-key collision with logger kwargs is telemetry hygiene, not a data/fail-closed hole. | src/bioetl/infrastructure/adapters/_error_handling_support.py |
-| `CR-20260816-C-S06-infra-adapters-012` | confirm | None | health_check_failed logs error_message=str(error) with no redaction. | src/bioetl/infrastructure/adapters/_health_check_observability.py:96-102 |
-| `CR-20260816-C-S06-infra-adapters-013` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/__init__.py |
-| `CR-20260816-C-S06-infra-adapters-014` | reject | None | functools.wraps on a bound iterator is style. | src/bioetl/infrastructure/adapters/common/_fetch_resilience_batch_iter.py |
-| `CR-20260816-C-S06-infra-adapters-015` | reject | None | dict[str, str] return annotation is typing-only. | src/bioetl/infrastructure/adapters/common/_api_request_sanitize.py |
-| `CR-20260816-C-S06-infra-adapters-016` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/response_parser.py |
-| `CR-20260816-C-S06-infra-adapters-017` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/common/_api_request_sanitize.py |
-| `CR-20260816-C-S06-infra-adapters-018` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/crossref/response_mapper.py |
-| `CR-20260816-C-S06-infra-adapters-019` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/decorators/retry.py |
-| `CR-20260816-C-S06-infra-adapters-020` | reject | None | Test-only wrap_with_resilience matrix. | src/bioetl/infrastructure/adapters/decorators/__init__.py |
-| `CR-20260816-C-S06-infra-adapters-021` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/crossref/query_builder.py |
-| `CR-20260816-C-S06-infra-adapters-022` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/decorators/_circuit_breaker_snapshot.py |
-| `CR-20260816-C-S06-infra-adapters-023` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/chembl/health.py |
-| `CR-20260816-C-S06-infra-adapters-024` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/chembl/fetch_multi_filter_mixin.py |
-| `CR-20260816-C-S06-infra-adapters-025` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py |
-| `CR-20260816-C-S06-infra-adapters-026` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/chembl/fetch_multi_filter_mixin.py |
-| `CR-20260816-C-S06-infra-adapters-027` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/chembl/metadata.py |
-| `CR-20260816-C-S06-infra-adapters-028` | confirm | None | Redaction regex consumes only the Bearer scheme as \S+, so the token after Authorization: Bearer remains in retry logs. | src/bioetl/infrastructure/adapters/decorators/_retry_support.py _redact_transport_error_message |
-| `CR-20260816-C-S06-infra-adapters-029` | reject | None | Test-only CrossRef fetch nominal matrix. | src/bioetl/infrastructure/adapters/crossref/fetch_flow.py |
-| `CR-20260816-C-S06-infra-adapters-030` | confirm | None | dois = filter_ids[:limit] if limit else filter_ids treats limit=0 as unlimited, against the established limit is not None contract. | src/bioetl/infrastructure/adapters/crossref/fetch_flow.py:71-79; common/_title_fallback_flow.py:132 |
-| `CR-20260816-C-S06-infra-adapters-031` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/crossref/models.py |
-| `CR-20260816-C-S06-infra-adapters-032` | reject | None | Ownership-flag vs enter-depth is a lifecycle refactor without a shown double-close on the public API. | src/bioetl/infrastructure/adapters/crossref/client.py |
-| `CR-20260816-C-S06-infra-adapters-033` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/chembl/fetch_multi_filter_mixin.py |
-| `CR-20260816-C-S06-infra-adapters-034` | reject | None | cast(Any, None) host-attr is annotation-only. | src/bioetl/infrastructure/adapters/pubchem/_client_fetch_surface.py |
-| `CR-20260816-C-S06-infra-adapters-035` | reject | None | Coverage-inventory refresh is not an invariant hole. | src/bioetl/infrastructure/adapters/pubchem/client.py |
-| `CR-20260816-C-S06-infra-adapters-036` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubchem/_fetch_strategy_identifiers.py |
-| `CR-20260816-C-S06-infra-adapters-037` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/openalex/query_execution.py |
-| `CR-20260816-C-S06-infra-adapters-038` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubchem/_fetch_strategy_search.py |
-| `CR-20260816-C-S06-infra-adapters-039` | reject | None | Collector suppress is telemetry; payload return is unchanged and not a Bronze write. | src/bioetl/infrastructure/adapters/openalex/query_execution.py:51-52 |
-| `CR-20260816-C-S06-infra-adapters-040` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubchem/client_model_mixin.py |
-| `CR-20260816-C-S06-infra-adapters-041` | reject | None | Replace shipped pubchempy transport with UnifiedHTTPClient is ADR/API rewrite for an already-shipped adapter. | src/bioetl/infrastructure/adapters/pubchem/client.py |
-| `CR-20260816-C-S06-infra-adapters-042` | confirm | None | rows = min(limit, 100) if limit else 100 treats limit=0 as unbounded pagination. | src/bioetl/infrastructure/adapters/crossref/_search_paginator.py:109-120 |
-| `CR-20260816-C-S06-infra-adapters-043` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/metadata_adapter_mixin.py |
-| `CR-20260816-C-S06-infra-adapters-044` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/feature_sequence_adapter_mixin.py |
-| `CR-20260816-C-S06-infra-adapters-045` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/query_builder.py |
-| `CR-20260816-C-S06-infra-adapters-046` | confirm | None | if limit and fetched >= limit treats limit=0 as unlimited on UniProt filtered/batched fetch. | src/bioetl/infrastructure/adapters/uniprot/filtering_adapter_mixin.py:41-70 |
-| `CR-20260816-C-S06-infra-adapters-047` | reject | None | Coverage-inventory refresh is not an invariant hole. | src/bioetl/infrastructure/adapters/openalex/client.py |
-| `CR-20260816-C-S06-infra-adapters-048` | reject | None | Test-only OpenAlex fetch nominal matrix. | src/bioetl/infrastructure/adapters/openalex/filter_fetch_adapter_mixin.py |
-| `CR-20260816-C-S06-infra-adapters-049` | confirm | None | Untitled OpenAlex candidates are returned without titles_match, so fallback can bind an unvalidated work. | src/bioetl/infrastructure/adapters/openalex/fallback.py:71-75 |
-| `CR-20260816-C-S06-infra-adapters-050` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/openalex/filter_fetch_adapter_mixin.py |
-| `CR-20260816-C-S06-infra-adapters-051` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/chembl/_client_request_helpers.py |
-| `CR-20260816-C-S06-infra-adapters-052` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/cached_bronze_data_source.py |
-| `CR-20260816-C-S06-infra-adapters-053` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/cached_bronze_data_source.py |
-| `CR-20260816-C-S06-infra-adapters-054` | reject | None | Offset-based ChEMBL stop can under-fetch after dedup; it does not silently exceed the requested page budget. | src/bioetl/infrastructure/adapters/chembl/_fetch_paging_filtered.py:70-107 |
-| `CR-20260816-C-S06-infra-adapters-055` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/openalex/client_helpers_adapter_mixin.py |
-| `CR-20260816-C-S06-infra-adapters-056` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/cached_bronze_data_source.py |
-| `CR-20260816-C-S06-infra-adapters-057` | confirm | None | Semantic Scholar fallback builds headers with skip_placeholder_api_key=False while the primary adapter suppresses your_* keys. | src/bioetl/infrastructure/adapters/semanticscholar/fallback.py:91-95; adapter.py:149 |
-| `CR-20260816-C-S06-infra-adapters-058` | reject | None | Coverage-inventory refresh is not an invariant hole. | src/bioetl/infrastructure/adapters/semanticscholar/adapter.py |
-| `CR-20260816-C-S06-infra-adapters-059` | reject | None | Any->typed fallback handler is annotation-only. | src/bioetl/infrastructure/adapters/semanticscholar/_client_fallback_policy.py |
-| `CR-20260816-C-S06-infra-adapters-060` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/semanticscholar/__init__.py |
-| `CR-20260816-C-S06-infra-adapters-061` | confirm | None | dois = filter_ids[:limit] if limit else filter_ids treats limit=0 as unlimited DOI fetch. | src/bioetl/infrastructure/adapters/semanticscholar/fetch_adapter_mixin.py:133-144 |
-| `CR-20260816-C-S06-infra-adapters-062` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubmed/xml_processor.py |
-| `CR-20260816-C-S06-infra-adapters-063` | confirm | None | page_size = min(100, limit or 100) and if limit treat limit=0 as an unbounded search. | src/bioetl/infrastructure/adapters/semanticscholar/_search_fetch_flow.py:33-50 |
-| `CR-20260816-C-S06-infra-adapters-064` | reject | None | Test-only SemanticScholarAdapter contract suite. | src/bioetl/infrastructure/adapters/semanticscholar/adapter.py |
-| `CR-20260816-C-S06-infra-adapters-065` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/semanticscholar/fallback.py |
-| `CR-20260816-C-S06-infra-adapters-066` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/semanticscholar/batch_request_mixin.py |
-| `CR-20260816-C-S06-infra-adapters-067` | reject | None | if filter_ids: treating [] as omitted search is the current empty-filter contract, not a proven caller hole. | src/bioetl/infrastructure/adapters/semanticscholar/fetch_adapter_mixin.py:61-70 |
-| `CR-20260816-C-S06-infra-adapters-068` | reject | None | Any->optional handler annotation is typing-only. | src/bioetl/infrastructure/adapters/pubmed/_client_fallback_policy.py |
-| `CR-20260816-C-S06-infra-adapters-069` | reject | None | Callable[..., Awaitable] vs Any is annotation-only. | src/bioetl/infrastructure/adapters/pubchem/fetch_strategies.py |
-| `CR-20260816-C-S06-infra-adapters-070` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubchem/entity_mapper.py |
-| `CR-20260816-C-S06-infra-adapters-071` | reject | None | Stricter CID positivity is schema tightening without a shown bool/float producer on this mapper. | src/bioetl/infrastructure/adapters/pubchem/entity_mapper.py _resolve_molecule_id |
-| `CR-20260816-C-S06-infra-adapters-072` | reject | None | kwargs TypedDict is Protocol/typing-only. | src/bioetl/infrastructure/adapters/pubmed/_adapter_support.py |
-| `CR-20260816-C-S06-infra-adapters-073` | reject | None | Test-only PubChem mapper contract suite. | src/bioetl/infrastructure/adapters/pubchem/response_mapper.py |
-| `CR-20260816-C-S06-infra-adapters-074` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubmed/_client_fallback_policy.py |
-| `CR-20260816-C-S06-infra-adapters-075` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubmed/_adapter_support.py |
-| `CR-20260816-C-S06-infra-adapters-076` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubchem/fetch_flow.py |
-| `CR-20260816-C-S06-infra-adapters-077` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubchem/models.py |
-| `CR-20260816-C-S06-infra-adapters-078` | reject | None | Coverage-inventory refresh is not an invariant hole. | src/bioetl/infrastructure/adapters/pubchem/constants.py |
-| `CR-20260816-C-S06-infra-adapters-079` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubmed/__init__.py |
-| `CR-20260816-C-S06-infra-adapters-080` | reject | None | Normalize API null lists to [] is a model-default convenience, not a broken required field. | src/bioetl/infrastructure/adapters/crossref/_publication_record.py |
-| `CR-20260816-C-S06-infra-adapters-081` | reject | None | Comment vs TYPE_CHECKING host-attr declaration is docs/style. | src/bioetl/infrastructure/adapters/crossref/_client_fallback_policy.py |
-| `CR-20260816-C-S06-infra-adapters-082` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/common/title_matching.py |
-| `CR-20260816-C-S06-infra-adapters-083` | reject | None | Shared callable-alias module is DRY. | src/bioetl/infrastructure/adapters/openalex/_client_runtime_factories.py |
-| `CR-20260816-C-S06-infra-adapters-084` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/openalex/__init__.py |
-| `CR-20260816-C-S06-infra-adapters-085` | reject | None | LRU vs insertion-order cache eviction is a perf/cache-policy tweak. | src/bioetl/infrastructure/adapters/openalex/_cursor_lookup.py |
-| `CR-20260816-C-S06-infra-adapters-086` | reject | None | Serialize rate-limit waiters is a thundering-herd perf rewrite; token accounting is already locked. | src/bioetl/infrastructure/adapters/http/rate_limiter.py |
-| `CR-20260816-C-S06-infra-adapters-087` | reject | None | Return fallback service from _require_openalex_runtime is DRY/style. | src/bioetl/infrastructure/adapters/openalex/_client_support.py |
-| `CR-20260816-C-S06-infra-adapters-088` | reject | None | Make CrossRef type optional is a contract expansion. | src/bioetl/infrastructure/adapters/crossref/_publication_record.py |
-| `CR-20260816-C-S06-infra-adapters-089` | reject | None | Unicode-dash normalization is matching-policy expansion; ASCII path already works. | src/bioetl/infrastructure/adapters/common/title_matching.py |
-| `CR-20260816-C-S06-infra-adapters-090` | reject | None | Log/raise unused offset is API-surface expansion; cursor paging is the shipped contract. | src/bioetl/infrastructure/adapters/crossref/_client_port_surface.py |
-| `CR-20260816-C-S06-infra-adapters-091` | reject | None | total_count=len(all_ids) matches the processor, which only appends non-empty IDs/markers. | src/bioetl/infrastructure/adapters/input/csv_filter_reader.py:160-168 |
-| `CR-20260816-C-S06-infra-adapters-092` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/openalex/_cursor_lookup.py |
-| `CR-20260816-C-S06-infra-adapters-093` | reject | None | Truthiness on CSV ID cells is not a demonstrated 0/False identifier path; return-tuple rewrite is API style. | src/bioetl/infrastructure/adapters/input/csv_filter_processor.py:120-141 |
-| `CR-20260816-C-S06-infra-adapters-094` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/pubmed/_search.py |
-| `CR-20260816-C-S06-infra-adapters-095` | reject | None | Reuse validate_publication_entity is DRY; both checks already reject non-publication. | src/bioetl/infrastructure/adapters/pubmed/_filter_fetch_support.py |
-| `CR-20260816-C-S06-infra-adapters-096` | reject | None | Shared placeholder-key helper is DRY; current substring skip is the shipped placeholder policy. | src/bioetl/infrastructure/adapters/pubmed/_fetch.py |
-| `CR-20260816-C-S06-infra-adapters-097` | reject | None | Drop \| None from list fields with default_factory=list is annotation-only. | src/bioetl/infrastructure/adapters/pubmed/_extended_record.py |
-| `CR-20260816-C-S06-infra-adapters-098` | reject | None | Narrow collector suppress is telemetry; fetch still returns. | src/bioetl/infrastructure/adapters/crossref/_batch_support.py |
-| `CR-20260816-C-S06-infra-adapters-099` | reject | None | Single to_thread around CSV load is perf. | src/bioetl/infrastructure/adapters/input/csv_filter_reader.py |
-| `CR-20260816-C-S06-infra-adapters-100` | reject | None | Skip non-positive CIDs is filter tightening; current int() path already drops non-ints. | src/bioetl/infrastructure/adapters/pubchem/policy_helper.py |
-| `CR-20260816-C-S06-infra-adapters-101` | reject | None | Derive expected_keys from dataclass fields is DRY. | src/bioetl/infrastructure/adapters/openalex/_client_runtime_request.py |
-| `CR-20260816-C-S06-infra-adapters-102` | reject | None | DOI path encoding/comma reject is hardening; no shown broken current DOI fetch. | src/bioetl/infrastructure/adapters/crossref/_doi_batch_processor.py |
-| `CR-20260816-C-S06-infra-adapters-103` | confirm | None | build_cid_batch_endpoint interpolates the truncated preview including ',...' into the real PubChem path for batches larger than 3. | src/bioetl/infrastructure/adapters/pubchem/query_builder.py:40-47 |
-| `CR-20260816-C-S06-infra-adapters-104` | reject | None | empty_async_iterator yield style is typing/style. | src/bioetl/infrastructure/adapters/pubmed/_filter_fetch_support.py |
-| `CR-20260816-C-S06-infra-adapters-105` | reject | None | Parse search JSON through PubMedSearchResponse is a validation expansion; current path already reads idlist. | src/bioetl/infrastructure/adapters/pubmed/_search.py |
-| `CR-20260816-C-S06-infra-adapters-106` | confirm | None | if limit and total_fetched >= limit treats PubMed limit=0 as unlimited. | src/bioetl/infrastructure/adapters/pubmed/_fetch.py:96-103 |
-| `CR-20260816-C-S06-infra-adapters-107` | reject | None | Any->Callable annotation is typing-only. | src/bioetl/infrastructure/adapters/pubmed/adapter.py |
-| `CR-20260816-C-S06-infra-adapters-108` | reject | None | Require every OpenAlex factory key is API-hardening; optional defaults already exist. | src/bioetl/infrastructure/adapters/openalex/_client_runtime_request.py |
-| `CR-20260816-C-S06-infra-adapters-109` | reject | None | Log unresolved DOIs / pass normalized list is completeness polish; fallback already runs. | src/bioetl/infrastructure/adapters/crossref/_doi_batch_processor.py |
-| `CR-20260816-C-S06-infra-adapters-110` | confirm | None | PubChem name/AID path segments are interpolated raw, so spaces or slashes break the request path. | src/bioetl/infrastructure/adapters/pubchem/query_builder.py:15-27 |
-| `CR-20260816-C-S06-infra-adapters-111` | confirm | None | Docstring requires a title match, but unmatched PubMed results[0] is still returned. | src/bioetl/infrastructure/adapters/pubmed/fallback.py:75-83 |
-| `CR-20260816-C-S06-infra-adapters-112` | reject | None | Cap/split PubMed 10k window is provider-limit hardening, not a current silent wrap. | src/bioetl/infrastructure/adapters/pubmed/_search.py |
-| `CR-20260816-C-S06-infra-adapters-113` | reject | None | Quote UniProt filter literals is injection hardening; accessions are the contracted input. | src/bioetl/infrastructure/adapters/uniprot/filtering_adapter_mixin.py |
-| `CR-20260816-C-S06-infra-adapters-114` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/http/_health_monitor_models.py |
-| `CR-20260816-C-S06-infra-adapters-115` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/http/_circuit_breaker_support.py |
-| `CR-20260816-C-S06-infra-adapters-116` | reject | None | Share health_check/_collect_probe_outcome is DRY. | src/bioetl/infrastructure/adapters/health_check_mixin.py |
-| `CR-20260816-C-S06-infra-adapters-117` | reject | None | error_type metric label is telemetry taxonomy. | src/bioetl/infrastructure/adapters/http/_client_retry_policy.py |
-| `CR-20260816-C-S06-infra-adapters-118` | reject | None | Preserve unused operation in error context is telemetry. | src/bioetl/infrastructure/adapters/health_check_mixin.py _get_error_context |
-| `CR-20260816-C-S06-infra-adapters-119` | reject | None | Remove redundant AUTH_FAILURE branch is DRY; 500 mapping is an explicit policy choice. | src/bioetl/infrastructure/adapters/health_status_policy.py |
-| `CR-20260816-C-S06-infra-adapters-120` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/common/fallback_policy_mixin.py |
-| `CR-20260816-C-S06-infra-adapters-121` | reject | None | Trim AttributeError/KeyError from the resilience bundle is policy/style. | src/bioetl/infrastructure/adapters/common/error_bundles.py |
-| `CR-20260816-C-S06-infra-adapters-122` | reject | None | Collapse duplicate retry wrappers is DRY. | src/bioetl/infrastructure/adapters/common/fetch_resilience_template.py |
-| `CR-20260816-C-S06-infra-adapters-123` | reject | None | Count unresolved IDs from found_ids vs lookup labels is a metric-definition change. | src/bioetl/infrastructure/adapters/common/fallback_fetch_service.py |
-| `CR-20260816-C-S06-infra-adapters-124` | reject | None | Shared _lookup_method constant is DRY. | src/bioetl/infrastructure/adapters/common/fetch_retry_policy.py |
-| `CR-20260816-C-S06-infra-adapters-125` | reject | None | Remove pass-through sanitizer wrappers is DRY. | src/bioetl/infrastructure/adapters/common/api_request_collector.py |
-| `CR-20260816-C-S06-infra-adapters-126` | confirm | None | any(...) on remaining/limit/retry_after treats remaining=0 as absent and drops RateLimitInfo when the quota is exhausted. | src/bioetl/infrastructure/adapters/common/api_request_collector.py:94-102 |
-| `CR-20260816-C-S06-infra-adapters-127` | reject | None | Add TimeoutException / route RecoverableError through config is retry-policy expansion; Connect/Read timeouts already retry. | src/bioetl/infrastructure/adapters/http/_client_retry_policy.py _is_retryable_error |
-| `CR-20260816-C-S06-infra-adapters-128` | reject | None | Pipe-escape composite dedup keys is a theoretical collision without a shown producer. | src/bioetl/infrastructure/adapters/common/deduplication.py |
-| `CR-20260816-C-S06-infra-adapters-129` | reject | None | Sentinel vs None getattr is Protocol/typing without a host that sets supported_filter_field=None to clear inheritance. | src/bioetl/infrastructure/adapters/common/composable_fallback.py |
-| `CR-20260816-C-S06-infra-adapters-130` | reject | None | Remove retry_error assert is style; exhaustion already recovers. | src/bioetl/infrastructure/adapters/common/fetch_resilience_template.py |
-| `CR-20260816-C-S06-infra-adapters-131` | reject | None | object->HTTP response type is annotation-only. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_retry.py |
-| `CR-20260816-C-S06-infra-adapters-132` | reject | None | Shared /health constant is DRY. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_health.py |
-| `CR-20260816-C-S06-infra-adapters-133` | reject | None | str()-coerce accession before strip is defensive; hook already receives strings. | src/bioetl/infrastructure/adapters/uniprot/client.py |
-| `CR-20260816-C-S06-infra-adapters-134` | reject | None | Reuse description constant is DRY. | src/bioetl/infrastructure/adapters/uniprot/_uniprot_model_structures.py |
-| `CR-20260816-C-S06-infra-adapters-135` | reject | None | Apply limiter/breaker/timeout inside _run_in_executor is policy expansion for an already-shipped sync adapter. | src/bioetl/infrastructure/adapters/sync_base.py |
-| `CR-20260816-C-S06-infra-adapters-136` | reject | None | Route submit/fetch through deps is style; both already hit the same host methods. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_transport.py |
-| `CR-20260816-C-S06-infra-adapters-137` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/_client_support.py |
-| `CR-20260816-C-S06-infra-adapters-138` | reject | None | Derive UNIPROT_RECORD_MODELS from strategies is DRY/test-only coupling. | src/bioetl/infrastructure/adapters/uniprot/_uniprot_model_records.py |
-| `CR-20260816-C-S06-infra-adapters-139` | reject | None | Coerce taxonId/from types is annotation/validation tightening. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_parser.py |
-| `CR-20260816-C-S06-infra-adapters-140` | reject | None | Drop **legacy_ports is an already-shipped constructor API rewrite. | src/bioetl/infrastructure/adapters/uniprot/client.py |
-| `CR-20260816-C-S06-infra-adapters-141` | reject | None | Relax UniProt model required fields is a contract expansion. | src/bioetl/infrastructure/adapters/uniprot/_uniprot_model_structures.py |
-| `CR-20260816-C-S06-infra-adapters-142` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/_uniprot_model_annotations.py |
-| `CR-20260816-C-S06-infra-adapters-143` | reject | None | _closed flag for idempotent close is lifecycle style. | src/bioetl/infrastructure/adapters/sync_base.py |
-| `CR-20260816-C-S06-infra-adapters-144` | reject | None | Test-only UniProt fetch dispatch coverage plus inventory refresh. | src/bioetl/infrastructure/adapters/uniprot/client.py |
-| `CR-20260816-C-S06-infra-adapters-145` | reject | None | HEALTHY fallback for unmapped HealthStatus is policy polish. | src/bioetl/infrastructure/adapters/http/_health_monitor_transitions.py |
-| `CR-20260816-C-S06-infra-adapters-146` | reject | None | Guard missing response.request is defensive; collector is not on the write path. | src/bioetl/infrastructure/adapters/common/api_request_collector.py |
-| `CR-20260816-C-S06-infra-adapters-147` | reject | None | Class-level health thresholds vs instance fields is config/style. | src/bioetl/infrastructure/adapters/http/_health_monitor_transitions.py |
-| `CR-20260816-C-S06-infra-adapters-148` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/http/client_retry_observability.py |
-| `CR-20260816-C-S06-infra-adapters-149` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/client.py |
-| `CR-20260816-C-S06-infra-adapters-150` | reject | None | Return copied health-state snapshots is defensive immutability style. | src/bioetl/infrastructure/adapters/http/health_monitor.py |
-| `CR-20260816-C-S06-infra-adapters-151` | reject | None | Reject unused UniProt offset is API-surface expansion; del offset is the shipped paging contract. | src/bioetl/infrastructure/adapters/uniprot/client.py |
-| `CR-20260816-C-S06-infra-adapters-152` | reject | None | Fail fast on 4xx during poll is timeout-error taxonomy; job still does not succeed. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_retry.py |
-| `CR-20260816-C-S06-infra-adapters-153` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/http/health.py |
-| `CR-20260816-C-S06-infra-adapters-154` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_health.py |
-| `CR-20260816-C-S06-infra-adapters-155` | reject | None | Richer Link-header parser is pagination hardening; current rel="next" form is the UniProt default. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_parser.py _get_next_page_url |
-| `CR-20260816-C-S06-infra-adapters-156` | reject | None | Catch JSON decode in the poll loop is resilience polish; decode errors already escape rather than succeed. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_retry.py |
-| `CR-20260816-C-S06-infra-adapters-157` | reject | None | dataclass field(init=False) for _states is style. | src/bioetl/infrastructure/adapters/http/health_monitor.py |
-| `CR-20260816-C-S06-infra-adapters-158` | reject | None | float() wrap for gauge is telemetry typing. | src/bioetl/infrastructure/adapters/http/_health_monitor_observability.py |
-| `CR-20260816-C-S06-infra-adapters-159` | confirm | None | Non-200 or non-dict ID-mapping pages break pagination and leave empty entry lists, so _resolve_entries reports those IDs as not_found. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_transport.py:132-164 |
-| `CR-20260816-C-S06-infra-adapters-160` | reject | None | Clear _client before aclose is lifecycle style; nested depth already tracked. | src/bioetl/infrastructure/adapters/http/client_context_mixin.py |
-| `CR-20260816-C-S06-infra-adapters-161` | reject | None | Reject unknown factory kwargs is API-hardening. | src/bioetl/infrastructure/adapters/uniprot/_client_support.py |
-| `CR-20260816-C-S06-infra-adapters-162` | reject | None | Explicit default=None on init=False fields is annotation-only. | src/bioetl/infrastructure/adapters/http/client.py |
-| `CR-20260816-C-S06-infra-adapters-163` | reject | None | Offload thread_pool.shutdown is event-loop perf. | src/bioetl/infrastructure/adapters/sync_base.py |
-| `CR-20260816-C-S06-infra-adapters-164` | reject | None | Mark span failed on last_error is telemetry. | src/bioetl/infrastructure/adapters/http/client_retry_observability.py |
-| `CR-20260816-C-S06-infra-adapters-165` | reject | None | HTTP-date Retry-After parsing is retry-policy expansion; numeric path already works. | src/bioetl/infrastructure/adapters/http/client_retry_mixin.py |
-| `CR-20260816-C-S06-infra-adapters-166` | reject | None | Quoted CircuitBreakerSnapshot return annotation is typing-only. | src/bioetl/infrastructure/adapters/http/circuit_breaker.py |
-| `CR-20260816-C-S06-infra-adapters-167` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/adapters/http/client_request_methods_mixin.py |
-| `CR-20260816-C-S06-infra-adapters-168` | reject | None | Copy selected mapping entry / tolerate '5.0' scores is defensive; int() still fail-closes malformed scores. | src/bioetl/infrastructure/adapters/uniprot/_idmapping_parser.py _select_primary_entry |
-| `CR-20260816-C-S06-infra-adapters-169` | reject | critical | start_as_current_span is typed to return SpanLike; extra context-manager wrapper is Protocol expansion. | src/bioetl/infrastructure/adapters/http/client_retry_observability.py start_request_span |
-| `CR-20260816-C-S06-infra-adapters-170` | reject | critical | Annotation-only required fields are a typing/API style request, not an invariant breach. | src/bioetl/infrastructure/adapters/http/client.py |
-| `CR-20260816-C-S08-infra-observability-001` | reject | minor | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/_metrics_defs_core.py |
-| `CR-20260816-C-S08-infra-observability-002` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/__init__.py |
-| `CR-20260816-C-S08-infra-observability-003` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/anomaly/__init__.py |
-| `CR-20260816-C-S08-infra-observability-004` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/anomaly/__init__.py |
-| `CR-20260816-C-S08-infra-observability-005` | confirm | minor | AnomalyDetector accepts min_baseline_samples > baseline_window, so the detector can never accumulate enough samples and silently never fires. | src/bioetl/infrastructure/observability/anomaly/detector.py:48-58 |
-| `CR-20260816-C-S08-infra-observability-006` | reject | major | Skip baseline update on any anomaly is a policy change; current contract skips only CRITICAL. | src/bioetl/infrastructure/observability/anomaly/monitor.py:131-140 |
-| `CR-20260816-C-S08-infra-observability-007` | reject | minor | Reject negative z-threshold / strict > is detector-policy tightening. | src/bioetl/infrastructure/observability/anomaly/detectors/zscore.py |
-| `CR-20260816-C-S08-infra-observability-008` | reject | major | Test-only log_error/log_debug spies. | src/bioetl/infrastructure/observability/logging_helpers.py |
-| `CR-20260816-C-S08-infra-observability-009` | reject | minor | None vs empty enabled_breakpoints is a shipped default-all-breakpoints contract. | src/bioetl/infrastructure/observability/debug_adapters.py |
-| `CR-20260816-C-S08-infra-observability-010` | reject | major | Test-only gateway adapter delegation. | src/bioetl/infrastructure/observability/metrics_publisher_adapter.py |
-| `CR-20260816-C-S08-infra-observability-011` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/metrics_collector.py |
-| `CR-20260816-C-S08-infra-observability-012` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/metrics_server_adapter.py |
-| `CR-20260816-C-S08-infra-observability-013` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/logging.py |
-| `CR-20260816-C-S08-infra-observability-014` | reject | major | Test-only metrics facade export identity. | src/bioetl/infrastructure/observability/metrics.py |
-| `CR-20260816-C-S08-infra-observability-015` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/health_metrics_exposition.py |
-| `CR-20260816-C-S08-infra-observability-016` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/circuit_breaker_mapping.py |
-| `CR-20260816-C-S08-infra-observability-017` | reject | major | Bounded run_type vocabulary is a metric-label policy expansion. | src/bioetl/infrastructure/observability/_prometheus_metric_label_dispatch_policy.py |
-| `CR-20260816-C-S08-infra-observability-018` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/_prometheus_metric_label_normalizers.py |
-| `CR-20260816-C-S08-infra-observability-019` | reject | major | Approved-only grouping labels are a gateway-label policy expansion. | src/bioetl/infrastructure/observability/_metrics_gateway_publication.py |
-| `CR-20260816-C-S08-infra-observability-020` | reject | major | retry_count/retry_delay pre-validation is config hardening of the shipped loop. | src/bioetl/infrastructure/observability/_metrics_server_startup.py |
-| `CR-20260816-C-S08-infra-observability-021` | reject | major | Redact gateway target in delete logs is hardening without a reproduced secret leak on that path. | src/bioetl/infrastructure/observability/_metrics_gateway_publication.py |
-| `CR-20260816-C-S08-infra-observability-022` | confirm | major | Authorization redaction regex consumes only [\w-]+, so 'Authorization: Bearer <token>' redacts Bearer and leaves the token in logs. | src/bioetl/infrastructure/observability/logging_config.py:49-52 |
-| `CR-20260816-C-S08-infra-observability-023` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/prometheus_metrics.py |
-| `CR-20260816-C-S08-infra-observability-024` | reject | major | Coverage-inventory refresh is not an invariant hole. | src/bioetl/infrastructure/observability/noop_logger.py |
-| `CR-20260816-C-S08-infra-observability-025` | reject | major | Changing start_metrics_server default addr from 0.0.0.0 is a shipped-API change. | src/bioetl/infrastructure/observability/server.py:46-48 |
-| `CR-20260816-C-S08-infra-observability-026` | reject | major | Drop run_id/pipeline from extra is bind-context policy; extra already cannot overwrite existing sanitized keys. | src/bioetl/infrastructure/observability/unified_logger.py:176-180 |
-| `CR-20260816-C-S08-infra-observability-027` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/observability/tracing.py |
-| `CR-20260816-C-S08b-infra-residual-001` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/audit/__init__.py |
-| `CR-20260816-C-S08b-infra-residual-002` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/arrow_typed.py |
-| `CR-20260816-C-S08b-infra-residual-003` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/adr/fs_adr_service.py |
-| `CR-20260816-C-S08b-infra-residual-004` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/adr/_adr_file_utils.py |
-| `CR-20260816-C-S08b-infra-residual-005` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/arrow_typed.py |
-| `CR-20260816-C-S08b-infra-residual-006` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/audit/file_audit.py |
-| `CR-20260816-C-S08b-infra-residual-007` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/audit/_file_audit_payloads.py |
-| `CR-20260816-C-S08b-infra-residual-008` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/audit/_file_audit_io.py |
-| `CR-20260816-C-S08b-infra-residual-009` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/audit/_file_audit_io.py |
-| `CR-20260816-C-S08b-infra-residual-010` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/_dq_config_validation_merge.py |
-| `CR-20260816-C-S08b-infra-residual-011` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/_yaml_settings_source.py |
-| `CR-20260816-C-S08b-infra-residual-012` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/config/composite_config_api.py |
-| `CR-20260816-C-S08b-infra-residual-013` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/chembl_policy_registry_loader.py |
-| `CR-20260816-C-S08b-infra-residual-014` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/composite_config_api.py |
-| `CR-20260816-C-S08b-infra-residual-015` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/base_config_loader.py |
-| `CR-20260816-C-S08b-infra-residual-016` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/_retry_settings.py |
-| `CR-20260816-C-S08b-infra-residual-017` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/base_config_loader.py |
-| `CR-20260816-C-S08b-infra-residual-018` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/_settings_validation.py |
-| `CR-20260816-C-S08b-infra-residual-019` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/chembl_policy_registry_loader.py |
-| `CR-20260816-C-S08b-infra-residual-020` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/composite_config_api.py |
-| `CR-20260816-C-S08b-infra-residual-021` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/config/chembl_policy_registry_loader.py |
-| `CR-20260816-C-S08b-infra-residual-022` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/_dq_config_validation_merge.py |
-| `CR-20260816-C-S08b-infra-residual-023` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/config/_yaml_settings_source.py |
-| `CR-20260816-C-S08b-infra-residual-024` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/config/workflow_config_api.py |
-| `CR-20260816-C-S08b-infra-residual-025` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/__init__.py |
-| `CR-20260816-C-S08b-infra-residual-026` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config_loader_filtering.py |
-| `CR-20260816-C-S08b-infra-residual-027` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/semantic_field_registry_loader.py |
-| `CR-20260816-C-S08b-infra-residual-028` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/config/staged_enforcement_policy_loader.py |
-| `CR-20260816-C-S08b-infra-residual-029` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/source_config_loader.py |
-| `CR-20260816-C-S08b-infra-residual-030` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/workflow_config_api.py |
-| `CR-20260816-C-S08b-infra-residual-031` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/config_merge.py |
-| `CR-20260816-C-S08b-infra-residual-032` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/staged_enforcement_policy_loader.py |
-| `CR-20260816-C-S08b-infra-residual-033` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/config/reason_catalog_loader.py |
-| `CR-20260816-C-S08b-infra-residual-034` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/checkpoint/_local_checkpoint_io.py |
-| `CR-20260816-C-S08b-infra-residual-035` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/checkpoint/_local_checkpoint_sync.py |
-| `CR-20260816-C-S08b-infra-residual-036` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/checkpoint/_local_checkpoint_sync.py |
-| `CR-20260816-C-S08b-infra-residual-037` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/_base.py |
-| `CR-20260816-C-S08b-infra-residual-038` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/config/_composite_config_paths.py |
-| `CR-20260816-C-S08b-infra-residual-039` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/checkpoint/local_checkpoint.py |
-| `CR-20260816-C-S08b-infra-residual-040` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/checkpoint/_local_checkpoint_sync.py |
-| `CR-20260816-C-S08b-infra-residual-041` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/checkpoint/_local_checkpoint_sync.py |
-| `CR-20260816-C-S08b-infra-residual-042` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/checkpoint/local_checkpoint.py |
-| `CR-20260816-C-S08b-infra-residual-043` | reject | major | Test-only request; reject class for this campaign. | src/bioetl/infrastructure/config/source_normalizers/source.py |
-| `CR-20260816-C-S08b-infra-residual-044` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/validation/contract_validator.py |
-| `CR-20260816-C-S08b-infra-residual-045` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/validation/contract_validator.py |
-| `CR-20260816-C-S08b-infra-residual-046` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/validation/pandera_validator.py |
-| `CR-20260816-C-S08b-infra-residual-047` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/validation/contract_validator.py |
-| `CR-20260816-C-S08b-infra-residual-048` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/pipeline_contract_policy.py |
-| `CR-20260816-C-S08b-infra-residual-049` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/silver_publication_field_blocks.py |
-| `CR-20260816-C-S08b-infra-residual-050` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/silver_publication_field_blocks.py |
-| `CR-20260816-C-S08b-infra-residual-051` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/silver_common_field_blocks.py |
-| `CR-20260816-C-S08b-infra-residual-052` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_contract_policy.py |
-| `CR-20260816-C-S08b-infra-residual-053` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/source_config.py |
-| `CR-20260816-C-S08b-infra-residual-054` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/silver_chembl_core.py |
-| `CR-20260816-C-S08b-infra-residual-055` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/silver_chembl_core.py |
-| `CR-20260816-C-S08b-infra-residual-056` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/silver_chembl_extended.py |
-| `CR-20260816-C-S08b-infra-residual-057` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/silver_compounds.py |
-| `CR-20260816-C-S08b-infra-residual-058` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/dq_report_writer.py |
-| `CR-20260816-C-S08b-infra-residual-059` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/locking/memory_lock.py |
-| `CR-20260816-C-S08b-infra-residual-060` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/debug_export_ops.py |
-| `CR-20260816-C-S08b-infra-residual-061` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/locking/memory_lock.py |
-| `CR-20260816-C-S08b-infra-residual-062` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/csv_exporter.py |
-| `CR-20260816-C-S08b-infra-residual-063` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/debug_export_adapter.py |
-| `CR-20260816-C-S08b-infra-residual-064` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/export/export_writer_adapter.py |
-| `CR-20260816-C-S08b-infra-residual-065` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/debug_export_adapter.py |
-| `CR-20260816-C-S08b-infra-residual-066` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/export_catalog_adapter.py |
-| `CR-20260816-C-S08b-infra-residual-067` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/csv_exporter_io_ops.py |
-| `CR-20260816-C-S08b-infra-residual-068` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/locking/memory_lock.py |
-| `CR-20260816-C-S08b-infra-residual-069` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/debug_export_ops.py |
-| `CR-20260816-C-S08b-infra-residual-070` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/dq_report_writer.py |
-| `CR-20260816-C-S08b-infra-residual-071` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/csv_exporter_table_ops.py |
-| `CR-20260816-C-S08b-infra-residual-072` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/serialization/encoders.py |
-| `CR-20260816-C-S08b-infra-residual-073` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/system/memory_monitor.py |
-| `CR-20260816-C-S08b-infra-residual-074` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/workflow_config.py |
-| `CR-20260816-C-S08b-infra-residual-075` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/security/pii_hasher.py |
-| `CR-20260816-C-S08b-infra-residual-076` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/serialization/encoders.py |
-| `CR-20260816-C-S08b-infra-residual-077` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/workflow_config.py |
-| `CR-20260816-C-S08b-infra-residual-078` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/workflow_config.py |
-| `CR-20260816-C-S08b-infra-residual-079` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/serialization/encoders.py |
-| `CR-20260816-C-S08b-infra-residual-080` | confirm | critical | source_keys=[] is not None so the pair-present check passes; empty composite keys are accepted for a destructive reconcile. | src/bioetl/infrastructure/schemas/workflow_config_fk.py _normalize_fk_required_names / _require_fk_key_pairs_present |
-| `CR-20260816-C-S08b-infra-residual-081` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/system/memory_monitor.py |
-| `CR-20260816-C-S08b-infra-residual-082` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/source_config.py |
-| `CR-20260816-C-S08b-infra-residual-083` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/security/pii_hasher.py |
-| `CR-20260816-C-S08b-infra-residual-084` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/export/csv_exporter.py |
-| `CR-20260816-C-S08b-infra-residual-085` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/system/memory_monitor.py |
-| `CR-20260816-C-S08b-infra-residual-086` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/security/__init__.py |
-| `CR-20260816-C-S08b-infra-residual-087` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/time/system_clock.py |
-| `CR-20260816-C-S08b-infra-residual-088` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/_composite_config_merge_schema.py |
-| `CR-20260816-C-S08b-infra-residual-089` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/_composite_config_merge_schema.py |
-| `CR-20260816-C-S08b-infra-residual-090` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/filtered_manifest_support.py |
-| `CR-20260816-C-S08b-infra-residual-091` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/filtered_reads.py |
-| `CR-20260816-C-S08b-infra-residual-092` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/unified.py |
-| `CR-20260816-C-S08b-infra-residual-093` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/_timeseries.py |
-| `CR-20260816-C-S08b-infra-residual-094` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/status_events.py |
-| `CR-20260816-C-S08b-infra-residual-095` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/filtered_reads.py |
-| `CR-20260816-C-S08b-infra-residual-096` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/filtered_read_support.py |
-| `CR-20260816-C-S08b-infra-residual-097` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/_composite_config_merge_schema.py |
-| `CR-20260816-C-S08b-infra-residual-098` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/unified.py |
-| `CR-20260816-C-S08b-infra-residual-099` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/system/memory_monitor.py |
-| `CR-20260816-C-S08b-infra-residual-100` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_raw_run_manifest_inspection.py |
-| `CR-20260816-C-S08b-infra-residual-101` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_file_run_ledger_helpers.py |
-| `CR-20260816-C-S08b-infra-residual-102` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/_file_lineage_index.py |
-| `CR-20260816-C-S08b-infra-residual-103` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_runtime_protections.py |
-| `CR-20260816-C-S08b-infra-residual-104` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_manifest_protections.py |
-| `CR-20260816-C-S08b-infra-residual-105` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/_file_lineage_index.py |
-| `CR-20260816-C-S08b-infra-residual-106` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/_file_lineage_queries.py |
-| `CR-20260816-C-S08b-infra-residual-107` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_runtime_protections.py |
-| `CR-20260816-C-S08b-infra-residual-108` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_surfaces.py |
-| `CR-20260816-C-S08b-infra-residual-109` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_file_run_ledger_helpers.py |
-| `CR-20260816-C-S08b-infra-residual-110` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/publication_controlled_vocabulary_loader.py |
-| `CR-20260816-C-S08b-infra-residual-111` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/config/field_group_loader.py |
-| `CR-20260816-C-S08b-infra-residual-112` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/pipeline_normalizers.py |
-| `CR-20260816-C-S08b-infra-residual-113` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/pipeline_normalizers.py |
-| `CR-20260816-C-S08b-infra-residual-114` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/filtered_reads.py |
-| `CR-20260816-C-S08b-infra-residual-115` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/config/pipeline_normalizers.py |
-| `CR-20260816-C-S08b-infra-residual-116` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/pipeline_payload_normalization.py |
-| `CR-20260816-C-S08b-infra-residual-117` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/record_encoding.py |
-| `CR-20260816-C-S08b-infra-residual-118` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_file_run_manifest_persistence.py |
-| `CR-20260816-C-S08b-infra-residual-119` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/pipeline_config_api.py |
-| `CR-20260816-C-S08b-infra-residual-120` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/publication_type_classification_loader.py |
-| `CR-20260816-C-S08b-infra-residual-121` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/config/pipeline_config_api.py |
-| `CR-20260816-C-S08b-infra-residual-122` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/field_group_loader.py |
-| `CR-20260816-C-S08b-infra-residual-123` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_manifest_protections.py |
-| `CR-20260816-C-S08b-infra-residual-124` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_raw_run_manifest_inspection.py |
-| `CR-20260816-C-S08b-infra-residual-125` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/_run_manifest_scope_rebuild.py |
-| `CR-20260816-C-S08b-infra-residual-126` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_reasons.py |
-| `CR-20260816-C-S08b-infra-residual-127` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/artifact_byte_comparison.py |
-| `CR-20260816-C-S08b-infra-residual-128` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py |
-| `CR-20260816-C-S08b-infra-residual-129` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/enum_file_loader.py |
-| `CR-20260816-C-S08b-infra-residual-130` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/statistics_support.py |
-| `CR-20260816-C-S08b-infra-residual-131` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/pipeline_config_loader.py |
-| `CR-20260816-C-S08b-infra-residual-132` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/filtered_manifest_support.py |
-| `CR-20260816-C-S08b-infra-residual-133` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/enum_file_loader.py |
-| `CR-20260816-C-S08b-infra-residual-134` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/pipeline_normalizers.py |
-| `CR-20260816-C-S08b-infra-residual-135` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/field_group_loader.py |
-| `CR-20260816-C-S08b-infra-residual-136` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_contract_registry_store.py |
-| `CR-20260816-C-S08b-infra-residual-137` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_raw_run_manifest_nested_validation.py |
-| `CR-20260816-C-S08b-infra-residual-138` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/enum_loader_adapter.py |
-| `CR-20260816-C-S08b-infra-residual-139` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_file_lineage_index.py |
-| `CR-20260816-C-S08b-infra-residual-140` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_payloads.py |
-| `CR-20260816-C-S08b-infra-residual-141` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py |
-| `CR-20260816-C-S08b-infra-residual-142` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/publication_controlled_vocabulary_loader.py |
-| `CR-20260816-C-S08b-infra-residual-143` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_payloads.py |
-| `CR-20260816-C-S08b-infra-residual-144` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/pipeline_payload_normalization.py |
-| `CR-20260816-C-S08b-infra-residual-145` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_reasons.py |
-| `CR-20260816-C-S08b-infra-residual-146` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py |
-| `CR-20260816-C-S08b-infra-residual-147` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_run_manifest_scope_index.py |
-| `CR-20260816-C-S08b-infra-residual-148` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_store.py |
-| `CR-20260816-C-S08b-infra-residual-149` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/_file_run_manifest_persistence.py |
-| `CR-20260816-C-S08b-infra-residual-150` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/artifact_byte_comparison.py |
-| `CR-20260816-C-S08b-infra-residual-151` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/serialization/encoders.py |
-| `CR-20260816-C-S08b-infra-residual-152` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/filter_config_loader.py |
-| `CR-20260816-C-S08b-infra-residual-153` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_quality_scorecard.py |
-| `CR-20260816-C-S08b-infra-residual-154` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_task_support.py |
-| `CR-20260816-C-S08b-infra-residual-155` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/exemptions_registry_policy.py |
-| `CR-20260816-C-S08b-infra-residual-156` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_quality_scorecard.py |
-| `CR-20260816-C-S08b-infra-residual-157` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py |
-| `CR-20260816-C-S08b-infra-residual-158` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/debt_scorecard.py |
-| `CR-20260816-C-S08b-infra-residual-159` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/exemptions_registry_paths.py |
-| `CR-20260816-C-S08b-infra-residual-160` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_quality_scorecard.py |
-| `CR-20260816-C-S08b-infra-residual-161` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/exemptions_registry_access.py |
-| `CR-20260816-C-S08b-infra-residual-162` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/quarantine/_pyarrow_helpers.py |
-| `CR-20260816-C-S08b-infra-residual-163` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/quarantine/_statistics.py |
-| `CR-20260816-C-S08b-infra-residual-164` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/quarantine/_inspection.py |
-| `CR-20260816-C-S08b-infra-residual-165` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/exemptions_registry_validation.py |
-| `CR-20260816-C-S08b-infra-residual-166` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/_statistics.py |
-| `CR-20260816-C-S08b-infra-residual-167` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/quarantine/_lifecycle.py |
-| `CR-20260816-C-S08b-infra-residual-168` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/exemptions_registry_targets.py |
-| `CR-20260816-C-S08b-infra-residual-169` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/registry_sync_service.py |
-| `CR-20260816-C-S08b-infra-residual-170` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/budget_evaluator.py |
-| `CR-20260816-C-S08b-infra-residual-171` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/inventory.py |
-| `CR-20260816-C-S08b-infra-residual-172` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/scoring.py |
-| `CR-20260816-C-S08b-infra-residual-173` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_task_policy.py |
-| `CR-20260816-C-S08b-infra-residual-174` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/_inspection.py |
-| `CR-20260816-C-S08b-infra-residual-175` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/exemptions_registry_paths.py |
-| `CR-20260816-C-S08b-infra-residual-176` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/scoring.py |
-| `CR-20260816-C-S08b-infra-residual-177` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/scoring.py |
-| `CR-20260816-C-S08b-infra-residual-178` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/_inspection.py |
-| `CR-20260816-C-S08b-infra-residual-179` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/registry_sync_service.py |
-| `CR-20260816-C-S08b-infra-residual-180` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_governance_validation.py |
-| `CR-20260816-C-S08b-infra-residual-181` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/quality/architecture_debt_reduction.py |
-| `CR-20260816-C-S08b-infra-residual-182` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/quality/_quarterly_targets_validation.py |
-| `CR-20260816-C-S08b-infra-residual-183` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_artifact_tasks.py |
-| `CR-20260816-C-S08b-infra-residual-184` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_execution_state_store.py |
-| `CR-20260816-C-S08b-infra-residual-185` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_ledger_store.py |
-| `CR-20260816-C-S08b-infra-residual-186` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/errors/exception_mapper.py |
-| `CR-20260816-C-S08b-infra-residual-187` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_ledger_store.py |
-| `CR-20260816-C-S08b-infra-residual-188` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/errors/exception_mapper.py |
-| `CR-20260816-C-S08b-infra-residual-189` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_manifest_store.py |
-| `CR-20260816-C-S08b-infra-residual-190` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_reduction.py |
-| `CR-20260816-C-S08b-infra-residual-191` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py |
-| `CR-20260816-C-S08b-infra-residual-192` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_execution_state_store.py |
-| `CR-20260816-C-S08b-infra-residual-193` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py |
-| `CR-20260816-C-S08b-infra-residual-194` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_run_manifest_store.py |
-| `CR-20260816-C-S08b-infra-residual-195` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py |
-| `CR-20260816-C-S08b-infra-residual-196` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/errors/exception_mapper.py |
-| `CR-20260816-C-S08b-infra-residual-197` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_baseline_validation.py |
-| `CR-20260816-C-S08b-infra-residual-198` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py |
-| `CR-20260816-C-S08b-infra-residual-199` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_manifest_store.py |
-| `CR-20260816-C-S08b-infra-residual-200` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py |
-| `CR-20260816-C-S08b-infra-residual-201` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_run_ledger_store.py |
-| `CR-20260816-C-S08b-infra-residual-202` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_decomposition_program_policy.py |
-| `CR-20260816-C-S08b-infra-residual-203` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_decomposition_owner_policy.py |
-| `CR-20260816-C-S08b-infra-residual-204` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/debt_scorecard.py |
-| `CR-20260816-C-S08b-infra-residual-205` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_primitives.py |
-| `CR-20260816-C-S08b-infra-residual-206` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_decomposition_owner_policy.py |
-| `CR-20260816-C-S08b-infra-residual-207` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_quarterly_targets_validation.py |
-| `CR-20260816-C-S08b-infra-residual-208` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_artifact_tasks.py |
-| `CR-20260816-C-S08b-infra-residual-209` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/_statistics.py |
-| `CR-20260816-C-S08b-infra-residual-210` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_artifact_tasks.py |
-| `CR-20260816-C-S08b-infra-residual-211` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py |
-| `CR-20260816-C-S08b-infra-residual-212` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_quarterly_targets_validation.py |
-| `CR-20260816-C-S08b-infra-residual-213` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_reduction.py |
-| `CR-20260816-C-S08b-infra-residual-214` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_artifact_tasks.py |
-| `CR-20260816-C-S08b-infra-residual-215` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_grace_windows_validation.py |
-| `CR-20260816-C-S08b-infra-residual-216` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_decomposition_burndown_policy.py |
-| `CR-20260816-C-S08b-infra-residual-217` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_transform_artifact_store.py |
-| `CR-20260816-C-S08b-infra-residual-218` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_workflow_manifest_store.py |
-| `CR-20260816-C-S08b-infra-residual-219` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/report_formatter.py |
-| `CR-20260816-C-S08b-infra-residual-220` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_primitives.py |
-| `CR-20260816-C-S08b-infra-residual-221` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_baseline_validation.py |
-| `CR-20260816-C-S08b-infra-residual-222` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_reduction.py |
-| `CR-20260816-C-S08b-infra-residual-223` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_governance_validation.py |
-| `CR-20260816-C-S08b-infra-residual-224` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/_governance_validation.py |
-| `CR-20260816-C-S08b-infra-residual-225` | reject | critical | overwrite fallback runs only on TableNotFoundError to create the first event table; it does not clobber an existing table. | src/bioetl/infrastructure/quarantine/status_events.py |
-| `CR-20260816-C-S08b-infra-residual-226` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/exemptions_registry_validation.py |
-| `CR-20260816-C-S08b-infra-residual-227` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_task_generation.py |
-| `CR-20260816-C-S08b-infra-residual-228` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/control_plane/file_lineage_store.py |
-| `CR-20260816-C-S08b-infra-residual-229` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/architecture_debt_task_support.py |
-| `CR-20260816-C-S08b-infra-residual-230` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quality/scoring.py |
-| `CR-20260816-C-S08b-infra-residual-231` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/quarantine/_lifecycle.py |
-| `CR-20260816-C-S08b-infra-residual-232` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/entity_filter_metadata_registry.py |
-| `CR-20260816-C-S08b-infra-residual-233` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/config/dq_config_resolution.py |
-| `CR-20260816-C-S08b-infra-residual-234` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/entity_filter_metadata_registry.py |
-| `CR-20260816-C-S08b-infra-residual-235` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_policy_loader.py |
-| `CR-20260816-C-S08b-infra-residual-236` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/config/contract_registry_loader.py |
-| `CR-20260816-C-S08b-infra-residual-237` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/dq_contract_config_loader.py |
-| `CR-20260816-C-S08b-infra-residual-238` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_policy_validation.py |
-| `CR-20260816-C-S08b-infra-residual-239` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/dq_config_loader.py |
-| `CR-20260816-C-S08b-infra-residual-240` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/dq_contract_config_loader.py |
-| `CR-20260816-C-S08b-infra-residual-241` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/dq_config_loader.py |
-| `CR-20260816-C-S08b-infra-residual-242` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_registry_loader.py |
-| `CR-20260816-C-S08b-infra-residual-243` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/config_ci_contract.py |
-| `CR-20260816-C-S08b-infra-residual-244` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/config_ci_contract.py |
-| `CR-20260816-C-S08b-infra-residual-245` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/dq_contract_config_loader.py |
-| `CR-20260816-C-S08b-infra-residual-246` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/config_root.py |
-| `CR-20260816-C-S08b-infra-residual-247` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_policy_loader.py |
-| `CR-20260816-C-S08b-infra-residual-248` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/config/domain_config_resolver.py |
-| `CR-20260816-C-S08b-infra-residual-249` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_policy_validation.py |
-| `CR-20260816-C-S08b-infra-residual-250` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_policy_loader.py |
-| `CR-20260816-C-S08b-infra-residual-251` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/converters.py |
-| `CR-20260816-C-S08b-infra-residual-252` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/dq_config_resolution.py |
-| `CR-20260816-C-S08b-infra-residual-253` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/converters.py |
-| `CR-20260816-C-S08b-infra-residual-254` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/config_root.py |
-| `CR-20260816-C-S08b-infra-residual-255` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_policy_validation.py |
-| `CR-20260816-C-S08b-infra-residual-256` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/config/dq_contract_config_loader.py |
-| `CR-20260816-C-S08b-infra-residual-257` | reject | critical | config_helpers.load_config is an unused placeholder; CLI composite load uses composition.composite_api.load_composite_config. | src/bioetl/interfaces/cli/commands/domains/composite/execution.py load_composite_config |
-| `CR-20260816-C-S08b-infra-residual-258` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/entity_filter_metadata_registry.py |
-| `CR-20260816-C-S08b-infra-residual-259` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/dq_contract_config_loader.py |
-| `CR-20260816-C-S08b-infra-residual-260` | reject | critical | Network-drive YAML load already fail-closes via Future.result(timeout=); OS-level kill is an enhancement. | src/bioetl/infrastructure/config/contract_registry_loader.py _load_yaml_with_timeout |
-| `CR-20260816-C-S08b-infra-residual-261` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/filter_config.py |
-| `CR-20260816-C-S08b-infra-residual-262` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/composite_validation.py |
-| `CR-20260816-C-S08b-infra-residual-263` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/filter_config.py |
-| `CR-20260816-C-S08b-infra-residual-264` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_config.py |
-| `CR-20260816-C-S08b-infra-residual-265` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/composite_config_base.py |
-| `CR-20260816-C-S08b-infra-residual-266` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/dq_config.py |
-| `CR-20260816-C-S08b-infra-residual-267` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/composite_validation.py |
-| `CR-20260816-C-S08b-infra-residual-268` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/base_schemas_chembl.py |
-| `CR-20260816-C-S08b-infra-residual-269` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/composite_config_base.py |
-| `CR-20260816-C-S08b-infra-residual-270` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/composite_config.py |
-| `CR-20260816-C-S08b-infra-residual-271` | reject | major | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/base_schemas.py |
-| `CR-20260816-C-S08b-infra-residual-272` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py |
-| `CR-20260816-C-S08b-infra-residual-273` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/filter_config.py |
-| `CR-20260816-C-S08b-infra-residual-274` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/composite_config.py |
-| `CR-20260816-C-S08b-infra-residual-275` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/dq_report_config.py |
-| `CR-20260816-C-S08b-infra-residual-276` | reject | minor | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py |
-| `CR-20260816-C-S08b-infra-residual-277` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/dq_report_config.py |
-| `CR-20260816-C-S08b-infra-residual-278` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/base_schemas_chembl.py |
-| `CR-20260816-C-S08b-infra-residual-279` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/composite_validation.py |
-| `CR-20260816-C-S08b-infra-residual-280` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/config/contract_registry_loader.py |
-| `CR-20260816-C-S08b-infra-residual-281` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_config.py |
-| `CR-20260816-C-S08b-infra-residual-282` | reject | major | Docs/docstring-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/dq_config.py |
-| `CR-20260816-C-S08b-infra-residual-283` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/base_schemas_pubchem.py |
-| `CR-20260816-C-S08b-infra-residual-284` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py |
-| `CR-20260816-C-S08b-infra-residual-285` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_config_common.py |
-| `CR-20260816-C-S08b-infra-residual-286` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/dq_config.py |
-| `CR-20260816-C-S08b-infra-residual-287` | reject | minor | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | src/bioetl/infrastructure/schemas/filter_config.py |
-| `CR-20260816-C-S08b-infra-residual-288` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/base_schemas_chembl.py |
-| `CR-20260816-C-S08b-infra-residual-289` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py |
-| `CR-20260816-C-S08b-infra-residual-290` | reject | trivial | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/base_schemas.py |
-| `CR-20260816-C-S08b-infra-residual-291` | reject | minor | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_config.py |
-| `CR-20260816-C-S08b-infra-residual-292` | reject | major | Independent S08b triage: no remaining invariant breach after #8916 empty-key confirm; style/DRY/docs/test/Protocol/shipped-API rejected. | src/bioetl/infrastructure/schemas/pipeline_config_common.py |
-| `CR-20260816-D-S-D-security-residual-001` | reject | major | Stricter persisted OPENAI_API_KEY shape is helper-policy tightening. | scripts/ai/codex/helper/codex-auth-lib.sh |
-| `CR-20260816-D-S-D-security-residual-002` | reject | minor | print vs logger in a local patch script is style. | scripts/ai/mcp/_patch_grok_mcp_tokens.py |
-| `CR-20260816-D-S-D-security-residual-003` | reject | major | Section-scoped idempotency check is helper hardening without a reproduced missed patch. | scripts/ai/mcp/_patch_grok_mcp_tokens.py |
-| `CR-20260816-D-S-D-security-residual-004` | confirm | major | _looks_redacted treats any substring in REDACTED_MARKERS as redacted, so real tokens containing test/example/redacted are silently accepted. | scripts/engineering/qa/vcr/check_vcr_secrets.py:27-34 |
-| `CR-20260816-D-S-D-security-residual-005` | reject | major | Test-only bump_timeouts/wire_ref coverage. | scripts/ai/mcp/_patch_grok_mcp_tokens.py |
-| `CR-20260816-D-S-D-security-residual-006` | reject | major | Test-only codex_has_usable_auth coverage. | scripts/ai/codex/helper/codex-auth-lib.sh |
-| `CR-20260816-D-S-D-security-residual-007` | reject | major | Test-only salt-rotation state machine coverage. | scripts/ops/maintenance/security/salt_rotate.py |
-| `CR-20260816-D-S-D-security-residual-008` | reject | major | Operator salt handoff via env_updates is the shipped CLI contract, not a reproduced log leak. | scripts/ops/maintenance/security/salt_rotate.py |
-| `CR-20260816-D-S-D-security-residual-009` | reject | major | Test-only token_validation.sh/.ps1 parity. | scripts/ai/mcp/support/token_validation.ps1 |
-| `CR-20260816-D-S-D-security-residual-010` | reject | major | CLI paths / dry-run / atomic write are feature expansion of a local helper. | scripts/ai/mcp/_patch_grok_mcp_tokens.py |
-| `CR-20260816-D-S-D-security-residual-011` | reject | minor | Docs/docstring-only request; reject class for this campaign. | scripts/ops/maintenance/security/salt_rotate.py |
-| `CR-20260816-D-S-D-security-residual-012` | confirm | major | complete_rotation promotes ENV_SALT_NEXT without enforcing MIN_SALT_LENGTH, so a short next salt becomes current. | scripts/ops/maintenance/security/salt_rotate.py:247-258 |
-| `CR-20260816-D-S-D-security-residual-013` | reject | trivial | Remove unused allowed_files is test-style. | tests/security/test_sql_injection_prevention.py |
-| `CR-20260816-D-S-D-security-residual-014` | reject | major | Move duplicated fixture to conftest is DRY/test-style. | tests/security/test_sql_injection_prevention.py |
-| `CR-20260816-D-S-D-security-residual-015` | reject | trivial | Split excluded_dirs/files is test-style. | tests/security/test_security.py |
-| `CR-20260816-D-S-D-security-residual-016` | reject | trivial | Extend hash-algorithm scan is test-policy expansion. | tests/security/test_security.py |
-| `CR-20260816-D-S-D-security-residual-017` | reject | trivial | Tighten hashing exemption is test-policy expansion. | tests/security/test_security.py |
-| `CR-20260816-D-S-D-security-residual-018` | reject | trivial | Parametrize/consolidate XXE tests is test-style. | tests/security/test_pubmed_xxe_mitigation.py |
-| `CR-20260816-D-S-D-security-residual-019` | reject | trivial | Richer assertion message is test-style. | tests/security/test_security.py |
-| `CR-20260816-D-S-D-security-residual-020` | reject | minor | Email-allowlist scoping is test-policy tightening. | tests/security/test_security.py |
-| `CR-20260816-D-S-D-security-residual-021` | reject | trivial | Path-segment vs substring file filter is test-style. | tests/security/test_xss_prevention.py |
-| `CR-20260816-D-S-D-security-residual-022` | reject | major | Fail/skip on git_grep timeout is test-harness style. | tests/security/test_security.py |
-| `CR-20260816-D-S-D-security-residual-023` | reject | major | Multiline SQL-pattern filter tweak is test-policy without a reproduced missed injection. | tests/security/test_sql_injection_prevention.py |
-| `CR-20260816-D-S-D-security-residual-024` | reject | minor | Delete an unconditional test is test-only. | tests/security/test_xss_prevention.py |
-| `CR-20260816-D-S-D-security-residual-025` | reject | trivial | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | tests/security/test_pubmed_xxe_mitigation.py |
-| `CR-20260816-D-S-D-security-residual-026` | reject | minor | Delete an unconditional inventory test is test-only. | tests/security/test_sql_injection_prevention.py |
-| `CR-20260816-E-S17-docs-00-project-02-001` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/script-testing-standards.md |
-| `CR-20260816-E-S17-docs-00-project-02-002` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/script-documentation-standards.md |
-| `CR-20260816-E-S17-docs-00-project-02-003` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/qodo/README.md |
-| `CR-20260816-E-S17-docs-00-project-02-004` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/root-local-clutter-cleanup.md |
-| `CR-20260816-E-S17-docs-00-project-02-005` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/script-testing-standards.md |
-| `CR-20260816-E-S17-docs-00-project-02-006` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/07-doc-nav-policy.md |
-| `CR-20260816-E-S17-docs-00-project-02-007` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/documentation-update-plan.md |
-| `CR-20260816-E-S17-docs-00-project-02-008` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/06-doc-publication-policy.md |
-| `CR-20260816-E-S17-docs-00-project-02-009` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/ai/skills/local/documentation-audit/references/audit-checklist.md |
-| `CR-20260816-E-S17-docs-00-project-02-010` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/ai/skills/local/agent-debugging/SKILL.md |
-| `CR-20260816-E-S17-docs-00-project-02-011` | reject | minor | Docs-mirror link fix; docs-only reject class. | docs/00-project/ai/skills/global/py-test-bot/SKILL.md |
-| `CR-20260816-E-S17-docs-00-project-02-012` | reject | minor | Markdown table punctuation is docs-only. | docs/00-project/rules-summary.md |
-| `CR-20260816-E-S17-docs-00-project-02-013` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/rules-summary.md |
-| `CR-20260816-E-S17-docs-00-project-02-014` | reject | minor | Docs-mirror template wording; docs-only. | docs/00-project/ai/skills/local/research-workflow/references/brief-template.md |
-| `CR-20260816-E-S17-docs-00-project-02-015` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/ai/skills/local/py-plan-bot/SKILL.md |
-| `CR-20260816-E-S17-docs-00-project-02-016` | reject | minor | Docs-mirror link fix; docs-only reject class. | docs/00-project/ai/skills/local/py-doc-bot/SKILL.md |
-| `CR-20260816-E-S17-docs-00-project-02-017` | reject | minor | Docs-mirror link fix; docs-only reject class. | docs/00-project/ai/skills/local/py-debug-bot/SKILL.md |
-| `CR-20260816-E-S17-docs-00-project-02-018` | reject | minor | Docs-mirror link fix; docs-only reject class. | docs/00-project/ai/skills/local/py-test-bot/SKILL.md |
-| `CR-20260816-E-S17-docs-00-project-02-019` | reject | major | Docs-mirror link fix; docs-only reject class. | docs/00-project/ai/skills/local/py-audit-bot/SKILL.md |
-| `CR-20260816-E-S17-docs-00-project-02-020` | reject | major | Docs-mirror link fix; docs-only reject class. | docs/00-project/ai/skills/local/py-config-bot/SKILL.md |
-| `CR-20260816-E-S17-docs-00-project-02-021` | reject | major | Docs-mirror ownership wording; docs-only. | docs/00-project/ai/skills/local/new-pipeline/SKILL.md |
-| `CR-20260816-E-S17-docs-00-project-02-022` | reject | minor | Docs-mirror checklist wording; docs-only. | docs/00-project/ai/skills/local/research-workflow/references/evidence-object-schema.md |
-| `CR-20260816-E-S17-docs-00-project-02-023` | reject | major | Docs-mirror link fix; docs-only reject class. | docs/00-project/ai/skills/local/new-pipeline/SKILL.md |
-| `CR-20260816-E-S17-docs-00-project-02-024` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/ai/skills/local/research-workflow/references/constraint-rules.md |
-| `CR-20260816-E-S17-docs-00-project-02-025` | reject | major | Docs-mirror Mermaid guidance; docs-only. | docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md |
-| `CR-20260816-E-S17-docs-00-project-02-026` | reject | minor | Docs-mirror path wording; docs-only. | docs/00-project/ai/skills/local/observability-dashboard/SKILL.md |
-| `CR-20260816-E-S17-docs-00-project-02-027` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/04-extending-bioetl.md |
-| `CR-20260816-E-S17-docs-00-project-02-028` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/02-naming-policy.md |
-| `CR-20260816-E-S17-docs-00-project-02-029` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/architecture-index.md |
-| `CR-20260816-E-S17-docs-00-project-02-030` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/02-naming-policy.md |
-| `CR-20260816-E-S17-docs-00-project-02-031` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/extended-docs-index.md |
-| `CR-20260816-E-S17-docs-00-project-02-032` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/ai/skills/local/verify-architecture/SKILL.md |
-| `CR-20260816-E-S17-docs-00-project-02-033` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/ai/skills/local/vcr-record/SKILL.md |
-| `CR-20260816-E-S17-docs-00-project-02-034` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/ai/skills/local/vcr-record/SKILL.md |
-| `CR-20260816-E-S17-docs-00-project-02-035` | reject | major | Glossary wording vs ADR-047 is docs-only. | docs/00-project/glossary.md |
-| `CR-20260816-E-S17-docs-00-project-02-036` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/glossary.md |
-| `CR-20260816-E-S17-docs-00-project-02-037` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/01-documentation-governance-style-guide.md |
-| `CR-20260816-E-S17-docs-00-project-02-038` | reject | minor | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | docs/00-project/governance/02-naming-policy.md |
-| `CR-20260816-E-S17-docs-00-project-02-039` | reject | major | Docs-mirror command wording; docs-only. | docs/00-project/ai/skills/local/verify-architecture/SKILL.md |
-| `CR-20260816-E-S17-docs-00-project-02-040` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/03-file-policy.md |
-| `CR-20260816-E-S17-docs-00-project-02-041` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/03-file-policy.md |
-| `CR-20260816-E-S17-docs-00-project-02-042` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/00-project/governance/04-extending-bioetl.md |
-| `CR-20260816-E-S17-docs-00-project-02-043` | reject | minor | Docs-mirror Mermaid metadata; docs-only. | docs/00-project/ai/skills/local/technical-designer-mermaid/references/patterns.md |
-| `CR-20260816-E-S18-dashboard-docs-001` | reject | minor | Docs-only command typo; reject class for this campaign. | docs/03-guides/dashboards/dashboard-extension-llm.md |
-| `CR-20260816-E-S18-dashboard-docs-002` | reject | major | Docs-only dashboard-count wording. | docs/03-guides/dashboards/dashboard-extension-llm.md |
-| `CR-20260816-E-S18-dashboard-docs-003` | reject | major | Docs-only retired-surface wording. | docs/03-guides/dashboards/design-system.md |
-| `CR-20260816-E-S18-dashboard-docs-004` | reject | major | Docs-only health-endpoint wording. | docs/03-guides/dashboards/dashboard-v2-usage.md |
-| `CR-20260816-E-S18-dashboard-docs-005` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/dashboard-v2-usage.md |
-| `CR-20260816-E-S18-dashboard-docs-006` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/design-system.md |
-| `CR-20260816-E-S18-dashboard-docs-007` | reject | major | Docs-only operator-playbook inventory wording. | docs/03-guides/dashboards/operator-scenarios-s1-s6.md |
-| `CR-20260816-E-S18-dashboard-docs-008` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/dashboard-v2-usage.md |
-| `CR-20260816-E-S18-dashboard-docs-009` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboard-guide.md |
-| `CR-20260816-E-S18-dashboard-docs-010` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/archive/audit-protocols/dux3-audit-selection-notes.md |
-| `CR-20260816-E-S18-dashboard-docs-011` | reject | minor | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | docs/03-guides/dashboards/archive/audit-protocols/dux3-first-screen-inventory.json |
-| `CR-20260816-E-S18-dashboard-docs-012` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboard-guide.md |
-| `CR-20260816-E-S18-dashboard-docs-013` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/reports/dashboard-ux-checks/2026-08-05.md |
-| `CR-20260816-E-S18-dashboard-docs-014` | reject | minor | Docs-only selector alias wording. | docs/03-guides/dashboards/selector-architecture.md |
-| `CR-20260816-E-S18-dashboard-docs-015` | reject | minor | Docs-only nav-bus wording. | docs/03-guides/dashboards/v3.0/template/run-centric-dashboard-template.md |
-| `CR-20260816-E-S18-dashboard-docs-016` | reject | minor | Style/DRY/docs/test/Protocol-only request; reject class for this campaign. | docs/03-guides/dashboards/usability-baseline-protocol.md |
-| `CR-20260816-E-S18-dashboard-docs-017` | reject | major | Docs-only status-panel mapping wording. | docs/03-guides/dashboards/v3.0/template/panel-contract.md |
-| `CR-20260816-E-S18-dashboard-docs-018` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/v3.0/1-overview.md |
-| `CR-20260816-E-S18-dashboard-docs-019` | reject | major | Docs-only dashboard-family list wording. | docs/03-guides/grafana-dashboard-configuration.md |
-| `CR-20260816-E-S18-dashboard-docs-020` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/selector-architecture.md |
-| `CR-20260816-E-S18-dashboard-docs-021` | reject | major | Docs-contract wording; no executable invariant reproduced in this leaf. | docs/03-guides/dashboards/contracts/navigation-links.yaml |
-| `CR-20260816-E-S18-dashboard-docs-022` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/contracts/performance-budgets.yaml |
-| `CR-20260816-E-S18-dashboard-docs-023` | reject | major | Docs-only synthetic-zero guidance. | docs/03-guides/dashboards/dashboard-extension-human.md |
-| `CR-20260816-E-S18-dashboard-docs-024` | reject | minor | Docs-contract primary-count wording. | docs/03-guides/dashboards/contracts/performance-budgets.yaml |
-| `CR-20260816-E-S18-dashboard-docs-025` | reject | trivial | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/dashboard-extension-human.md |
-| `CR-20260816-E-S18-dashboard-docs-026` | reject | major | Docs-contract link-title consistency is docs-only. | docs/03-guides/dashboards/contracts/navigation-links.yaml |
-| `CR-20260816-E-S18-dashboard-docs-027` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md |
-| `CR-20260816-E-S18-dashboard-docs-028` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/operator-ux-v2.md |
-| `CR-20260816-E-S18-dashboard-docs-029` | reject | minor | Docs-only section numbering. | docs/03-guides/dashboards/panels/bioetl-runtime-panels.md |
-| `CR-20260816-E-S18-dashboard-docs-030` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md |
-| `CR-20260816-E-S18-dashboard-docs-031` | reject | major | Docs-only panel-index wording. | docs/03-guides/dashboards/panels/dashboard-panels-guide.md |
-| `CR-20260816-E-S18-dashboard-docs-032` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md |
-| `CR-20260816-E-S18-dashboard-docs-033` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/panels/bioetl-runtime-panels.md |
-| `CR-20260816-E-S18-dashboard-docs-034` | reject | major | Docs-only PromQL wording. | docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md |
-| `CR-20260816-E-S18-dashboard-docs-035` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md |
-| `CR-20260816-E-S18-dashboard-docs-036` | reject | major | Docs-contract selector-registry wording. | docs/03-guides/dashboards/contracts/selector-contracts.yaml |
-| `CR-20260816-E-S18-dashboard-docs-037` | reject | trivial | Docs-only truncated note. | docs/03-guides/dashboards/contracts/performance-budgets.yaml |
-| `CR-20260816-E-S18-dashboard-docs-038` | reject | minor | Docs-contract YAML literal style. | docs/03-guides/dashboards/contracts/synthetic-zero-policy.yaml |
-| `CR-20260816-E-S18-dashboard-docs-039` | reject | major | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/archive/audit-protocols/dux5-copy-dictionary.md |
-| `CR-20260816-E-S18-dashboard-docs-040` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md |
-| `CR-20260816-E-S18-dashboard-docs-041` | reject | minor | Docs-only CLI command wording. | docs/03-guides/dashboards/dashboard-extension-human.md |
-| `CR-20260816-E-S18-dashboard-docs-042` | reject | minor | Docs-only notes punctuation. | docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md |
-| `CR-20260816-E-S19b-github-actions-001` | reject | major | Removing restore-keys is CI-cache policy; exact key already exists and stale restore is the shipped actions/cache fallback, not a reproduced architecture-hash skip. | .github/actions/architecture-governance-cache/action.yml:43-45 |
-| `CR-20260816-E-S19b-github-actions-002` | reject | major | Docs/docstring-only request; reject class for this campaign. | .github/actions/setup-mermaid/action.yml |
-| `CR-20260816-F-S12-tests-architecture-01-001` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-002` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-003` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-004` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-005` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-006` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-007` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-008` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-009` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-010` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-011` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-012` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-013` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-014` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-015` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-016` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-017` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-018` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-019` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-020` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-021` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-022` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-023` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-024` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-025` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-026` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-027` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-028` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-029` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-030` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-031` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-032` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-033` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-034` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-035` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-036` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-037` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-038` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-039` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-040` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-041` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-042` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-043` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-044` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-045` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-046` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-047` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-048` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-049` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-050` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-051` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-052` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-053` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-054` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-055` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-056` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-057` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-058` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-059` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-060` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-061` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-062` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-063` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-064` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-065` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-066` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-067` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-068` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-069` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-070` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-071` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-072` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-073` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-074` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-075` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-076` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-077` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-078` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-079` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-080` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-081` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-082` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-083` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-084` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-085` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-086` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-087` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-088` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-089` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-090` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-091` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-092` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-093` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-094` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-095` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-096` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-097` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-098` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-099` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-100` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-101` | pending | critical | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-102` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-103` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-104` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-105` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-106` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-107` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-108` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-109` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-110` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-111` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-112` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-113` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-114` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-115` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-116` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-117` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-118` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-119` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-120` | pending | critical | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-121` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-122` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-123` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-124` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-125` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-126` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-127` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-128` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-129` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-130` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-131` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-132` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-133` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-134` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-135` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-136` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-137` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-138` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-139` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-140` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-141` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-142` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-143` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-144` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-145` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-146` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-147` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-148` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-149` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-150` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-151` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-152` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-153` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-154` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-155` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-156` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-157` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-158` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-159` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-160` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-161` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-162` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-163` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-164` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-165` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-166` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-167` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-168` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-169` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-170` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-171` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-172` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-173` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-174` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-175` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-176` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-177` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-178` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-179` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-180` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-181` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-182` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-183` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-184` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-185` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-186` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-187` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-188` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-189` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-190` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-191` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-192` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-193` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-194` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-195` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-196` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-197` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-198` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-199` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-200` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-201` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-202` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-203` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-204` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-205` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-206` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-207` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-208` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-209` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-210` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-211` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-212` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-213` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-214` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-215` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-216` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-217` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-218` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-219` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-220` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-221` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-222` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-223` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-224` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-225` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-226` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-227` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-228` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-229` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-230` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-231` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-232` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-233` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-234` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-235` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-236` | pending | critical | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-237` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-238` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-239` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-240` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-241` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-242` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-243` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-244` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-245` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-246` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-247` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-248` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-249` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-250` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-251` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-252` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-253` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-254` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-255` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-256` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-257` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-258` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-259` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-260` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-261` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-262` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-263` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-264` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-265` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-266` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-267` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-268` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-269` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-270` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-271` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-272` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-273` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-274` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-275` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-276` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-277` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-278` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-279` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-280` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-281` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-282` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-283` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-284` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-285` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-286` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-287` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-288` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-289` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-290` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-291` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-292` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-293` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-294` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-295` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-296` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-297` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-298` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-299` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-300` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-301` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-302` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-303` | pending | critical | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-304` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-305` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-306` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-307` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-308` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-309` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-310` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-311` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-312` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-313` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-314` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-315` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-316` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-317` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-318` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-319` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-320` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-321` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-322` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-323` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-324` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-325` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-326` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-327` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-328` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-329` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-330` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-331` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-332` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-333` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-334` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-335` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-336` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-337` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-338` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-339` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-340` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-341` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-342` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-343` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-344` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-345` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-346` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-347` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-348` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-349` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-350` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-351` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-352` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-353` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-354` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-355` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-356` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-357` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-358` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-359` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-360` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-361` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-362` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-363` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-364` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-365` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-366` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-367` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-368` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-369` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-370` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-371` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-372` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-373` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-374` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-375` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-376` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-377` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-378` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-379` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-380` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-381` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-382` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-383` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-384` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-385` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-386` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-387` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-388` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-389` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-390` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-391` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-392` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-393` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-394` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-395` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-396` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-397` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-398` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-399` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-400` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-401` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-402` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-403` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-404` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-405` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-406` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-407` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-408` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-409` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-410` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-411` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-412` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-413` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-414` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-415` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-416` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-417` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-418` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-419` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-420` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-421` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-422` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-423` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-424` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-425` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-426` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-427` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-428` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-429` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-430` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-431` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-432` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-433` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-434` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-435` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-436` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-437` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-438` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-439` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-440` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-441` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-442` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-443` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-444` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-445` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-446` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-447` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-448` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-449` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-450` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-451` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-452` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-453` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-454` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-455` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-456` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-457` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-458` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-459` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-460` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-461` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-462` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-463` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-464` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-465` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-466` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-467` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-F-S12-tests-architecture-01-468` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-R-S-R-scripts-memory-001` | reject | major | Test-only run_workflow.sh wrapper coverage. | scripts/memory/run_workflow.sh |
-| `CR-20260816-R-S-R-scripts-memory-002` | confirm | major | upsert_env_local passes NEO4J_PASSWORD/NEO4J_AUTH as python3 argv, so the secret is visible in process listings. | scripts/memory/setup/wsl_startup.sh:53-63 python3 - "$file_path" "$key" "$value" |
-| `CR-20260816-R-S-R-scripts-memory-003` | reject | major | Removing Docker from the WSL setup helper is a shipped setup-script rewrite, not a BioETL runtime invariant. | scripts/memory/setup/wsl_startup.sh |
-| `CR-20260816-R-S-R-scripts-memory-004` | reject | major | Test-only request; reject class for this campaign. | scripts/memory/__init__.py |
-| `CR-20260816-R-S-R-scripts-memory-005` | reject | major | Force mode 0600 is permission hardening without a reproduced world-readable write path. | scripts/memory/setup/wsl_startup.sh |
-| `CR-20260816-R-S-R-scripts-memory-006` | reject | major | Test-only request; reject class for this campaign. | scripts/memory/__main__.py |
-| `CR-20260816-R-S-R-scripts-memory-007` | reject | major | Test-only print_seed.sh phase dispatch. | scripts/memory/prompts/print_seed.sh |
-| `CR-20260816-R-S-R-scripts-memory-008` | reject | major | Test-only WSL startup coverage. | scripts/memory/setup/wsl_startup.sh |
->>>>>>> Stashed changes
+| `CR-20260816-F-S12-tests-architecture-01-001` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_architecture_dependency_docs_drift.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-002` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_architecture_quality_scorecard.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-003` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_bootstrap_layer_boundaries.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-004` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_behavior_retirement_ledger_governance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-005` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_architecture_debt_agent_surface.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-006` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_bootstrap_layer_boundaries.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-007` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_architecture_quality_scorecard.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-008` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_base_pipeline_purity.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-009` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_architecture_scan_index_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-010` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_boundary_assertions.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-011` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_chembl_derived_vocabulary_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-012` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_checkpoint_runtime_facade_usage.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-013` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_chembl_baseline_smoke_workflow.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-014` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_c901_governance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-015` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_branch_hygiene_workflow.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-016` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_bronze_fixture_replay_baseline.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-017` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_bronze_metadata_builder_guardrails.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-018` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_chembl_json_ordering_hash_migration.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-019` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_control_plane_ownership_boundaries.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-020` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_contract_coverage_matrix_drift.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-021` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_contract_testing_governance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-022` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_coverage_verify_lane_contract.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-023` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-024` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_no_inline_construction_in_adapters.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-025` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_no_batch_tracing_hidden_defaults.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-026` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_no_datetime_now_in_tests.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-027` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_narrow_port_migration.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-028` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_no_logging_getlogger_in_infrastructure.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-029` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_no_postrun_hidden_defaults.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-030` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_no_fstring_in_logs.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-031` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_narrow_port_migration.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-032` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_fixture_governance_ledger.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-033` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_factory_validator_enforcement.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-034` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_fixture_governance_rollout.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-035` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_explicit_gold_scd2_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-036` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_entity_pipeline_intentional_overrides.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-037` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_env_var_centralization.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-038` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_env_var_centralization.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-039` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_env_file_write_governance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-040` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_domain_composite_config_importer_map.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-041` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_domain_ports_inventory_gate.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-042` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_infrastructure_adapter_alias_usage.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-043` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_hotspot_growth_family_ratchets.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-044` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_historical_prompt_docs_stack.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-045` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_grafana_overview_v2_semantics.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-046` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_import_graph_invariants.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-047` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_domain_io_taint_inventory.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-048` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_gold_strict_validation_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-049` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_hotspot_duplication_family_ratchets.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-050` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_domain_ports_inventory_gate.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-051` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_domain_normalization_alias_usage.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-052` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_domain_aggregate_deterministic_identity.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-053` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_domain_aggregate_classification.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-054` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_gold_validator_strict_runtime_paths.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-055` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_domain_no_infrastructure_dependencies.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-056` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-057` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_domain_public_api.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-058` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_domain_aggregate_invariant_registry.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-059` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_governance_freshness_protocol.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-060` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_import_linter_workflow.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-061` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_domain_normalization_guardrails.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-062` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_health_cli_config_seam.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-063` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_domain_factory_restrictions.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-064` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/conftest.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-065` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/conftest.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-066` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_adapter_contracts.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-067` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/domain/test_aggregate_fsm_transitions.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-068` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/_entity_filter_metadata_registry.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-069` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/_test_matrix_policy_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-070` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_adapter_http_client_enforcement.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-071` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/_entity_contract_metadata_registry.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-072` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/datetime_now_policy_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-073` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_adapter_contracts.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-074` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_adapter_contracts.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-075` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_adapter_contracts.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-076` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/datetime_now_policy_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-077` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/conftest.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-078` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/_module_coverage_inventory_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-079` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_adapter_contracts.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-080` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_adapter_contracts.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-081` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/conftest.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-082` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/_entity_contract_metadata_registry.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-083` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/domain/test_aggregate_fsm_transitions.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-084` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/_test_matrix_policy_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-085` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/_module_coverage_inventory_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-086` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/_live_residual.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-087` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/_test_matrix_policy_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-088` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/_module_coverage_inventory_support.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-089` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/conftest.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-090` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_adapter_http_client_enforcement.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-091` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_adapter_contracts.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-092` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/domain/test_aggregate_fsm_transitions.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-093` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_config_discrepancy_metrics_ratchets.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-094` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_composition_runtime_boundary_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-095` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_config_assertion_quality.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-096` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_composition_storage_bootstrap_governance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-097` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_composition_factory_import_boundaries.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-098` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_architecture_audit_closeout_gates.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-099` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_arch_ref_services_bc_root_guard.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-100` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_config_ci_invariants.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-101` | reject | critical | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_arch_ref_services_bc_root_guard.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-102` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_architecture_audit_closeout_gates.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-103` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_application_services_lazy_facade_governance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-104` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_config_ci_invariants.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-105` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_application_services_lazy_facade_governance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-106` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_composition_entrypoints_removed_symbol_guards.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-107` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_config_ci_invariants.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-108` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_config_discrepancy_metrics_ratchets.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-109` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_config_discrepancy_metrics_ratchets.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-110` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_architecture_audit_closeout_gates.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-111` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_composition_entrypoints_removed_symbol_guards.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-112` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_application_services_lazy_facade_governance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-113` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_application_unit_lane_purity.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-114` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_composition_public_entrypoint_freeze.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-115` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_application_constructor_debt.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-116` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_application_composite_top_level_freeze.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-117` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_composition_public_entrypoint_freeze.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-118` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_architecture_acceptance_baseline.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-119` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_config_contract_yaml_parse_gate.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-120` | reject | critical | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_architecture_audit_closeout_gates.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-121` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_config_ci_invariants.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-122` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_composition_application_private_symbol_imports.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-123` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_architecture_closeout_inventory.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-124` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_application_services_facade_usage.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-125` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_observability_metric_naming_contract.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-126` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_owner_scope_consistency.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-127` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_performance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-128` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_pandera_schema_boundary_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-129` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_observability_metric_governance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-130` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_owner_scope_consistency.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-131` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_performance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-132` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_observability_metric_governance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-133` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_gold_reject_taxonomy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-134` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_gold_snapshot_registry.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-135` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_gold_reject_taxonomy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-136` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_gold_schema_contracts.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-137` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_force_full_scan_publication.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-138` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_force_full_scan_publication.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-139` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_forbidden_imports.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-140` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_full_app_duplication_ratchet.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-141` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_interfaces_no_infrastructure.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-142` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_layer_matrix_guards.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-143` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_issue_5265_domain_invariants_closeout.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-144` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_junie_runtime_ci_contract.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-145` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_layer_contract_coverage_matrix.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-146` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_interfaces_no_infrastructure.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-147` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_layer_aware_suffix_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-148` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_integration_dq_fixture_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-149` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_layer_dependencies.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-150` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_issue_5053_pipeline_transformer_closeout.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-151` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_issue_5272_application_core_coverage_closeout.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-152` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_layer_dependencies.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-153` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_full_app_duplication_ratchet.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-154` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_generated_artifact_routing.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-155` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_layer_aware_suffix_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-156` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_github_actions_runtime_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-157` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_generated_artifact_drift_workflow.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-158` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_future_annotations_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-159` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_gold_snapshot_registry.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-160` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_integration_dq_fixture_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-161` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_layer_contract_coverage_matrix.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-162` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_layer_dependencies.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-163` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_junie_runtime_ci_contract.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-164` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_layer_aware_suffix_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-165` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_aggregate_boundaries.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-166` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_antipatterns.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-167` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_integration_vcr_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-168` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_forbidden_imports.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-169` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_interfaces_no_infrastructure.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-170` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_integration_vcr_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-171` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_docs_governance_workflow.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-172` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_regression_workflow.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-173` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_narrative_docs_sync.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-174` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_gha_8618_8619_closeout.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-175` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_adr_enforcement_matrix.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-176` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_ai_memory_program_contracts.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-177` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_aggregate_boundaries.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-178` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_adr_registry_governance_sync.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-179` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_internal_orchestration_docs.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-180` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_regression_workflow.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-181` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_adr_enforcement_matrix.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-182` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_docker_runtime_contracts.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-183` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_doc_crossref_integrity.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-184` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_regression_workflow.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-185` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_antipatterns.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-186` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_docker_runtime_contracts.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-187` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_nightly_suite.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-188` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_docker_runtime_contracts.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-189` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_issues_6205_6211_closeout.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-190` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_any_budget.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-191` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_aggregate_boundaries.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-192` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_adr_registry_governance_sync.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-193` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_issues_6205_6211_closeout.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-194` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_docs_governance_workflow.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-195` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_nightly_suite.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-196` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_application_composite_public_surface_usage.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-197` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_docs_build_site_router.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-198` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_doc_crossref_integrity.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-199` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_quality_budget_security.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-200` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_docker_runtime_contracts.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-201` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_lint_policy_rules.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-202` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_antipatterns.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-203` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_narrative_docs_sync.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-204` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_chembl_publication_subset_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-205` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_nightly_suite.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-206` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_code_metrics.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-207` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_cli_registry_explicit_path.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-208` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_ci_heavy_lane_rebalance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-209` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_ci_coverage_surface_matrix.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-210` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_closeout_ratchet_triage.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-211` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_ci_test_strategy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-212` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_closeout_ratchet_triage.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-213` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_code_metrics.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-214` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_chembl_publication_subset_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-215` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_nightly_workflow.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-216` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_chembl_publication_subset_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-217` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_closeout_json_artifacts_generic.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-218` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_nightly_workflow.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-219` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_ci_heavy_lane_rebalance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-220` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_ci_test_strategy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-221` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_docs_governance_workflow.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-222` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_quality_gates.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-223` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_module_coverage_inventory.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-224` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_mixin_collaborator_metrics.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-225` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_metadata_service_boundary_usage.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-226` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_mixin_collaborator_metrics.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-227` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_metrics_server_wiring.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-228` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_mounted_worktree_skip_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-229` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_metadata_service_boundary_usage.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-230` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_naming_ambiguity_classifier.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-231` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_code_metrics.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-232` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_naming_conventions.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-233` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_mutation_testing_rollout.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-234` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_ci_test_strategy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-235` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_ci_test_strategy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-236` | reject | critical | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_code_formatting.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-237` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_ci_coverage_surface_matrix.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-238` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_column_order.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-239` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_chembl_publication_subset_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-240` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_column_order.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-241` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_quality_gates.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-242` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_codex_native_runtime.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-243` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_codex_agent_catalog_inventory.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-244` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_closeout_ratchet_triage.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-245` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_column_order.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-246` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_composite_dq_externalization.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-247` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_cli_registry_explicit_path.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-248` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_cli_command_import_guards.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-249` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_closeout_json_artifacts_generic.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-250` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_naming_exception_registry_sync.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-251` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_code_metrics.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-252` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_metrics_server_wiring.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-253` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_naming_ambiguity_classifier.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-254` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_composite_cli_runtime_config_boundaries.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-255` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_composite_schema_contract_coverage.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-256` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_ci_heavy_lane_rebalance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-257` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_determinism_identity_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-258` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_deprecation_warnings.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-259` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_curated_source_test_ownership.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-260` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_dashboard_scenes_contract.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-261` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_deterministic_identity_documentation_governance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-262` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_debt_governance_telemetry_reporting.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-263` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_composite_canonical_surfaces.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-264` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_deterministic_sort_policy_coverage.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-265` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_curated_source_test_ownership.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-266` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_ci_coverage_surface_matrix.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-267` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_mutation_testing_rollout.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-268` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_composite_canonical_surfaces.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-269` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_naming_conventions.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-270` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_deterministic_test_identity_builders.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-271` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_degraded_runtime_anchor_boundary.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-272` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_column_ordering_family.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-273` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_deterministic_sort_policy_coverage.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-274` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_mounted_worktree_skip_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-275` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_metrics_server_wiring.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-276` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_doc_crossref_integrity.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-277` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_codex_skill_agent_links.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-278` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_closeout_json_artifacts_generic.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-279` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_dashboard_scenes_contract.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-280` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_code_formatting.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-281` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_cursor_skill_sync_safety.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-282` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_deterministic_identity_documentation_governance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-283` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_composite_dq_externalization.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-284` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_issue_5272_application_core_coverage_closeout.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-285` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_module_coverage_inventory_freshness.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-286` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_naming_exception_registry_sync.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-287` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_debt_governance_telemetry_reporting.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-288` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_deterministic_test_identity_builders.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-289` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_chembl_publication_subset_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-290` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_codex_native_runtime.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-291` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_composite_cli_runtime_config_boundaries.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-292` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_curated_surface_telemetry_reporting.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-293` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_curated_source_test_ownership.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-294` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_medallion_invariants.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-295` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_medallion_invariants.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-296` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_live_residual_snapshot.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-297` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_mcp_token_configuration.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-298` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_determinism_identity_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-299` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_medallion_invariants.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-300` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_degraded_runtime_anchor_boundary.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-301` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_composite_layer_boundaries.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-302` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_medallion_invariants.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-303` | reject | critical | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_composite_layer_boundaries.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-304` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_lazy_export_public_api_inventory.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-305` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_composite_layer_boundaries.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-306` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_composite_canonical_surfaces.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-307` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_codex_skill_agent_links.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-308` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_domain_validation_composition_boundary.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-309` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_duplication_report_governance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-310` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_determinism_identity_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-311` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_low_coverage_targeted_tests_6045.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-312` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_e2e_dq_fixture_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-313` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_domain_service_canonical_imports.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-314` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_lint_terminology_script.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-315` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_low_coverage_targeted_tests_6045.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-316` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_domain_validation_composition_boundary.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-317` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_domain_public_entrypoint_usage.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-318` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_memory_rag_manifest_governance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-319` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_domain_unit_test_purity.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-320` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_medallion_invariants.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-321` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_mcp_token_configuration.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-322` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_forbidden_imports.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-323` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_lock_safety_guard.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-324` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_lazy_export_public_api_inventory.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-325` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_lock_terminology_alignment.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-326` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_live_residual_snapshot.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-327` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_e2e_dq_fixture_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-328` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_lock_safety_guard.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-329` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_medallion_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-330` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_mcp_token_configuration.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-331` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_lock_terminology_alignment.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-332` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_memory_timeline_governance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-333` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_live_residual_snapshot.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-334` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_entity_config_sink_silver_explicit.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-335` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_memory_rag_manifest_governance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-336` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_domain_service_canonical_imports.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-337` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_e2e_skip_rate_slo_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-338` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_e2e_health_mode_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-339` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_deprecation_warnings.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-340` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_dev_run_tests_consolidation.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-341` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_config_golden_master.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-342` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_config_topology_docs_drift.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-343` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_config_root_governance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-344` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_conftest_session_caches.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-345` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_determinism_identity_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-346` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_mixin_collaborator_metrics.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-347` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_config_transition_registry.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-348` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_config_surface_entity_residual_plateau.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-349` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_config_schema_migration_status.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-350` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_duplication_report_governance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-351` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_config_golden_master.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-352` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_consolidation_gates_workflow.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-353` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_config_pipeline_freeze_guards.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-354` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_config_taxonomy_review.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-355` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_domain_purity.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-356` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_config_transition_registry.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-357` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_e2e_skip_rate_slo_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-358` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_documentation_cleanup_inventory.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-359` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_documentation_sync.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-360` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_docs_internal_bootstrap_governance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-361` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_docs_runtime_wrapper_governance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-362` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_documentation_sync.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-363` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_documentation.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-364` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_documentation_residual_keyword_guards.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-365` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_documentation_sync.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-366` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_docs_version_sync.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-367` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_documentation.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-368` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_docs_version_sync.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-369` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_documentation_issues_6497_6498_closeout.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-370` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_documentation_sync.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-371` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_docs_version_sync.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-372` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_documentation_sync.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-373` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_docs_internal_bootstrap_governance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-374` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_docs_root_surface_governance_alignment.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-375` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_documentation_issues_6497_6498_closeout.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-376` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_documentation_residual_keyword_guards.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-377` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_documentation_issues_6487_6488_closeout.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-378` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_documentation_cleanup_inventory.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-379` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_documentation_residual_keyword_guards.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-380` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_documentation.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-381` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_docs_kpi_workflow.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-382` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_documentation_issues_6497_6498_closeout.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-383` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_documentation_issues_6487_6488_closeout.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-384` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_documentation_sync.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-385` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_no_side_effects_in_composition.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-386` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_no_transformer_fallback.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-387` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_normalization_surface_coverage_ratchet.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-388` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_observability_docs_sync.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-389` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_observability_dashboard_contracts.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-390` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_no_structlog_in_application_interfaces.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-391` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_no_transformer_fallback.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-392` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_non_chembl_json_field_typing_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-393` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_no_transformer_fallback.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-394` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_no_transformer_hidden_defaults.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-395` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_observability_dashboard_contracts.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-396` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_normalization_surface_coverage_ratchet.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-397` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_no_transformer_fallback.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-398` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_no_structlog_in_application_interfaces.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-399` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_observability_dashboard_tooling.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-400` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_normalization_fallback_business_ratchet.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-401` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_no_structlog_in_application_interfaces.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-402` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_normalization_evidence_governance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-403` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_observability_docs_sync.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-404` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_observability_dashboard_contracts.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-405` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_no_structlog_in_application_interfaces.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-406` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_observability_docs_drift.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-407` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_normalization_fallback_business_ratchet.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-408` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_observability_dashboard_tooling.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-409` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_documentation_audit_remediation.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-410` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_observability_docs_drift.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-411` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_observability_docs_sync.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-412` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_observability_docs_drift.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-413` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_observability_docs_sync.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-414` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_non_chembl_json_field_typing_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-415` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_observability_dashboard_tooling.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-416` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_observability_dashboard_tooling.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-417` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_no_transformer_fallback.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-418` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_observability_docs_drift.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-419` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_docs_root_surface_governance_alignment.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-420` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_observability_docs_sync.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-421` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_no_side_effects_in_composition.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-422` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_observability_dashboard_tooling.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-423` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_no_side_effects_in_composition.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-424` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_docs_root_surface_governance_alignment.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-425` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_normalization_evidence_governance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-426` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_documentation_cleanup_inventory.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-427` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_non_chembl_json_field_typing_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-428` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_non_chembl_json_field_typing_policy.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-429` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_no_transformer_hidden_defaults.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-430` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_documentation.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-431` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_docs_root_surface_governance_alignment.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-432` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_normalization_surface_coverage_ratchet.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-433` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_observability_docs_drift.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-434` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_observability_dashboard_contracts.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-435` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_config_surface_entity_residual_plateau.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-436` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_documentation_audit_remediation.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-437` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_di_compliance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-438` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_di_runtime_inline_construction.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-439` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_artifact_check.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-440` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_drift_and_embed_guards.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-441` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_drift_and_embed_guards.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-442` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_di_inline_instantiation_budget.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-443` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_di_runtime_inline_construction.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-444` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_di_compliance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-445` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_di_infrastructure_adapters.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-446` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_di_runtime_inline_construction.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-447` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_di_constructors.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-448` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_di_discipline.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-449` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_artifact_check.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-450` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_di_compliance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-451` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_drift_and_embed_guards.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-452` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_bundle_generator_contracts.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-453` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_drift_and_embed_guards.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-454` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_di_runtime_inline_construction.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-455` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_corpus_regression_guards.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-456` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_artifact_check.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-457` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_di_inline_instantiation_budget.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-458` | reject | minor | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_drift_and_embed_guards.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-459` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_di_compliance.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-460` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_corpus_regression_guards.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-461` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_di_constructors.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-462` | reject | trivial | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_description_index_contracts.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-463` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-464` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_corpus_regression_guards.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-465` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-466` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_bundle_generator_contracts.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-467` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_diagram_artifact_check.py; #8859 closeout review 2026-08-17 |
+| `CR-20260816-F-S12-tests-architecture-01-468` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_di_infrastructure_adapters.py; #8859 closeout review 2026-08-17 |

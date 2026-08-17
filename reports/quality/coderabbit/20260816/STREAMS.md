@@ -1,41 +1,30 @@
 # Implementation streams — CR-FULL 20260816
 
-Exclusive stream for accepted (`confirm`) findings from the first five
-successful leaves. Phase-5 product implementation is #8863.
+Exclusive streams for accepted (`confirm`) findings. All listed product
+streams are closed on `main` as of 2026-08-17.
 
-| Stream | Issue | Findings | Priority | Scope |
-|---|---:|---:|---|---|
-| `domain-20260816-five-leaves` | #8863 | 32 | P1 | `{'critical': 1, 'major': 17, 'minor': 13, 'trivial': 1}` |
+| Stream | Issue | Findings | Priority | Scope | State |
+|---|---:|---:|---|---|---|
+| `domain-20260816-five-leaves` | #8863 | 32 | P1 | first-five ok leaves | closed |
+| `domain-20260816-types-criticals` | #8893 | 2 | P1 | types-018 / types-022 | closed |
+| `domain-20260816-identity-json` | #8891 | 8 | P1 | residual-root + normalization identity/JSON | closed |
+| `domain-20260816-freeze-catalogs` | #8888 | 3 | P1 | FrozenList/Dict, PubChem catalog, ReasonCatalog | closed |
+| `domain-20260816-run-report-accounting` | #8889 | 4 | P1 | measured-zero / catalog / top-N | closed |
+| `later-leaf-ok-triage` | #8890 | 756 raw | P2 | independent triage; criticals promoted | closed |
+| `domain-20260816-types-remaining` | #8895 | 13 | P1 | remaining types confirms | closed |
+| `domain-20260816-vo-schemas` | #8905 | 24 | P1 | VO fail-closed + schema | closed |
+| `app-utc-timestamps` | #8908 | 2 | P1 | naive vs aware timestamps | closed |
+| `control-plane-source-refs` | #8907 | 3 | P1 | source-ref sort/normalize | closed |
+| `run-report-fs-safety` | #8909 | 7 | P1 | `_rm_tree` / runtime path | closed |
+| `cli-fail-closed` | #8910 | 14 | P1 | CLI exit semantics | closed |
+| `health-probe` | #8911 | 10 | P1 | `ss` listener parse | closed |
+| `infra-20260816-fail-closed` | #8916 | 16 | P1 | join `.0`, Silver FK, Arrow, time-travel, empty keys | closed |
+| `security-20260816-redaction` | #8917 | 6 | P1 | Bearer/VCR/salt/argv | closed |
+| `app-20260816-fail-closed` | #8918 | 20 | P1 | manifest, replay sort, FK blanks, lock, pmc_id | closed |
 
-## Ordering recommendation
+Unlinked leftover confirms from #8890 bulk triage are bound to closed #8890
+(no new per-finding GitHub issues). Do not reopen #8643 / #8644 / #8645 / #8652
+without a fresh reproduction.
 
-1. Critical `behavior-051` (`validate_composite` deep-preflight fail-closed).
-2. Aggregates `aggregates-014` (`seal_with_counts` vs `mark_committed`).
-3. Remaining behavior / composite / config / contracts confirms, one root
-   cause per task.
-
-Do not reopen #8643 / #8644 / #8645 / #8652 unless a confirm is a proven
-regression. Do not implement the 82 rejected findings from these leaves.
-
-Exact-cover of still-blocked CodeRabbit leaves remains #8859.
-
-| domain-20260816-types-criticals | #8893 | 2 | P1 | types-018 semver pad/trim; types-022 single-mode defaults |
-| domain-20260816-identity-json | #8891 | 8 | P1 | residual-root-006/028/029 + normalization-012/013/039/070/071 |
-| domain-20260816-freeze-catalogs | #8888 | 3 | P1 | residual-root-011/012 + run_reports-002 |
-| domain-20260816-run-report-accounting | #8889 | 4 | P1 | run_reports-005/011/013/014 |
-| later-leaf-ok-triage | #8890 | ~756 raw | P2 | independent triage; types criticals promoted to #8893 |
-| domain-20260816-types-remaining | #8895 | 13 | P1 | remaining types confirms after #8893 |
-| domain-20260816-run-report-accounting | #8889 | 4 | P1 | run_reports-005/011/013/014 |
-| later-leaf-ok-triage | #8890 | ~756 raw | P2 | independent triage; types criticals promoted to #8893 |
-| domain-20260816-types-remaining | #8895 | 13 | P1 | remaining types confirms after #8893 |
-| domain-20260816-vo-schemas | #8905 | 24 | P1 | VO fail-closed/freeze + schema date/dups/json/accession |
-<<<<<<< Updated upstream
-||||||| Stash base
-| infra-20260816-fail-closed | #8916 | 5 | P1 | join `.0` regex; Silver FK empty-ref; empty Arrow table; time-travel assert; empty composite FK keys |
-| app-20260816-fail-closed | #8918 | 11 | P1 | manifest skip; replay sort; PK/FK pairing; lock leak; author/pages strip; pmc_id |
-| security-20260816-redaction | #8917 | 5 | P1 | Bearer/token logs; VCR substring redaction; salt length; password argv |
-=======
-| infra-20260816-fail-closed | #8916 | 5 | P1 | join `.0` regex; Silver FK empty-ref; empty Arrow table; time-travel assert; empty composite FK keys |
-| app-20260816-fail-closed | #8918 | 20 | P1 | manifest skip; replay sort; PK/FK pairing; lock leak; author/pages strip; pmc_id; composition replay/hash/preflight |
-| security-20260816-redaction | #8917 | 5 | P1 | Bearer/token logs; VCR substring redaction; salt length; password argv |
->>>>>>> Stashed changes
+Exact-cover retries of CodeRabbit service-blocked leaves remain documented in
+`BLOCKERS.md` / `FINAL.md`.
