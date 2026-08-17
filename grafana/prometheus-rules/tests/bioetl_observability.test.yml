@@ -874,6 +874,41 @@ tests:
         eval_time: 19m
         exp_samples: []
 
+  - name: gold-contract-exclusions-project-to-dq-warn-not-runtime-crit
+    interval: 1m
+    input_series:
+      - series: 'bioetl_pipeline_runs_total{pipeline="chembl_assay",run_type="backfill",status="success"}'
+        values: "0+0x10 1+0x10"
+      - series: 'bioetl_records_processed_total{pipeline="chembl_assay",stage="bronze",run_type="backfill"}'
+        values: "1000+0x20"
+      - series: 'bioetl_stage_records_total{pipeline="chembl_assay",run_type="backfill",stage="gold",outcome="excluded_by_contract"}'
+        values: "17+0x20"
+      - series: 'bioetl_stage_records_total{pipeline="chembl_assay",run_type="backfill",stage="gold",outcome="written"}'
+        values: "983+0x20"
+      - series: 'bioetl_overview_pipeline_universe{pipeline="chembl_assay"}'
+        values: "1+0x20"
+    promql_expr_test:
+      - expr: bioetl_dq_current_reason{pipeline="chembl_assay",reason="gold_contract_exclusions",severity="warn"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_dq_current_reason",action_target="data_quality",pipeline="chembl_assay",reason="gold_contract_exclusions",severity="warn"}'
+            value: 1
+      - expr: bioetl_dq_current_status{pipeline="chembl_assay"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_dq_current_status",pipeline="chembl_assay"}'
+            value: 1
+      - expr: bioetl_runtime_current_status{pipeline="chembl_assay",run_type="backfill"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_runtime_current_status",pipeline="chembl_assay",run_type="backfill"}'
+            value: 0
+      - expr: bioetl_processed_records_gold_excluded_by_contract_current{pipeline="chembl_assay",run_type="backfill"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_processed_records_gold_excluded_by_contract_current",pipeline="chembl_assay",run_type="backfill"}'
+            value: 17
+
   - name: runtime-trusted-status-fails-closed-on-telemetry-gap
     interval: 1m
     input_series:

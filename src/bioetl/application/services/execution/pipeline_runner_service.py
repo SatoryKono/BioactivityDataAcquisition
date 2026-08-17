@@ -62,25 +62,6 @@ if TYPE_CHECKING:
     )
 
 
-def _record_pipeline_run_metric(
-    metrics: MetricsPort,
-    *,
-    pipeline_name: str,
-    run_type: str,
-    status: str,
-) -> None:
-    """Record pipeline run outcome via the metrics port abstraction."""
-    metrics.increment_counter(
-        "bioetl_pipeline_runs_total",
-        1,
-        {
-            "pipeline": pipeline_name,
-            "run_type": run_type,
-            "status": status,
-        },
-    )
-
-
 async def _record_pipeline_audit_event(
     audit: AuditPort,
     *,
@@ -349,12 +330,8 @@ class PipelineRunnerService:
             started_at=started_at,
             options=options,
         )
-        _record_pipeline_run_metric(
-            self.metrics,
-            pipeline_name=pipeline_name,
-            run_type=run_type,
-            status=result.status.value,
-        )
+        # Terminal run counter is owned by PipelineObserver.__exit__.
+        # Incrementing here double-counts every CLI/service run (OBS-LIFE-001).
         await _record_pipeline_audit_event(
             self.audit,
             event_name="PipelineRunCompleted",

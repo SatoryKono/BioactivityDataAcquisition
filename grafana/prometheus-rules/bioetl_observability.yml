@@ -785,6 +785,12 @@ groups:
           severity: warn
           action_target: data_quality
         expr: max by (pipeline) (max_over_time(bioetl_silver_filter_rejections_total[15m])) > bool 0
+      - record: bioetl_dq_current_reason
+        labels:
+          reason: gold_contract_exclusions
+          severity: warn
+          action_target: data_quality
+        expr: max by (pipeline) (max_over_time(bioetl_stage_records_total{stage="gold",outcome="excluded_by_contract"}[15m])) > bool 0
 
       - record: bioetl_dq_current_status
         expr: >-
