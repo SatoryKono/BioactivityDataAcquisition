@@ -81,6 +81,7 @@ class ControlPlaneEvidenceService:
                 aggregate_scope_unknown=aggregate_scope_unknown,
             ),
             additional_data={"evidence_source": evidence_source},
+            ledger_entries=ledger_entries(self.ledger_port, scope.manifest),
         )
 
     def manifest_validation(self, *, scope: EvidenceScopeContext) -> dict[str, object]:
@@ -99,6 +100,11 @@ class ControlPlaneEvidenceService:
             endpoint="manifest-validation",
             scope=sanitized_manifest_payload_scope(scope, checks),
             checks=checks,
+            ledger_entries=(
+                ledger_entries(self.ledger_port, scope.manifest)
+                if scope.manifest is not None
+                else ()
+            ),
         )
 
     def lineage_validation(self, *, scope: EvidenceScopeContext) -> dict[str, object]:
@@ -143,6 +149,7 @@ class ControlPlaneEvidenceService:
                     {node.node_id for fragment in fragments for node in fragment.nodes}
                 ),
             },
+            ledger_entries=run_ledger_entries,
         )
 
     def retention_compliance(
@@ -170,14 +177,13 @@ class ControlPlaneEvidenceService:
                         "The read-only lifecycle planner is not configured.",
                     ),
                 ),
+                ledger_entries=ledger_entries(self.ledger_port, scope.manifest),
             )
-        plan = self.lifecycle_planner.plan(
-            ControlPlaneArtifactLifecyclePolicy(
-                retention_days=self.retention_days,
-                now=now,
-            ),
-            dry_run=True,
+        policy = ControlPlaneArtifactLifecyclePolicy(
+            retention_days=self.retention_days,
+            now=now,
         )
+        plan = self._bounded_retention_plan(policy, scope.manifest)
         checks, relevant_artifacts = build_retention_checks(
             manifest=scope.manifest,
             plan=plan,
@@ -190,8 +196,22 @@ class ControlPlaneEvidenceService:
                 "retention_days": self.retention_days,
                 "cutoff": plan.cutoff.isoformat(),
                 "artifacts": summarize_retention_artifacts(relevant_artifacts),
+                "retention_plan_scope": "manifest",
             },
+            ledger_entries=ledger_entries(self.ledger_port, scope.manifest),
         )
+
+    def _bounded_retention_plan(
+        self,
+        policy: ControlPlaneArtifactLifecyclePolicy,
+        manifest: object,
+    ) -> object:
+        planner = self.lifecycle_planner
+        assert planner is not None
+        plan_for_manifest = getattr(planner, "plan_for_manifest", None)
+        if callable(plan_for_manifest):
+            return plan_for_manifest(policy, manifest=manifest, dry_run=True)
+        return planner.plan(policy, dry_run=True)
 
     def failure_reasons(self, *, scope: EvidenceScopeContext) -> dict[str, object]:
         """Return only fixed-category failure counts; omit raw errors/messages."""
@@ -239,6 +259,7 @@ class ControlPlaneEvidenceService:
                 "categories": list(FAILURE_REASON_CATEGORIES),
                 "total_failure_count": total,
             },
+            ledger_entries=ledger_entries(self.ledger_port, scope.manifest),
         )
         payload["rows"] = rows
         return payload

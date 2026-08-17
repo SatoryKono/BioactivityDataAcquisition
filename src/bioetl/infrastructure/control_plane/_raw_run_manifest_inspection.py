@@ -71,10 +71,68 @@ class RawRunManifestInspectionMixin:
         if not isinstance(raw_payload, dict):
             return RawManifestInspection(True, ("manifest_payload_not_object",))
         payload = cast("dict[str, object]", raw_payload)
+        evidence = _load_contract_evidence(host.base_path, manifest_id)
         return RawManifestInspection(
             True,
             _raw_schema_errors(payload, expected_manifest_id=manifest_id),
+            contract_comparison_status=_optional_evidence_text(
+                evidence, "contract_comparison_status"
+            ),
+            contract_comparison_reason=_optional_evidence_text(
+                evidence, "contract_comparison_reason"
+            ),
+            resume_contract=_optional_evidence_text(evidence, "resume_contract"),
+            resume_contract_reason=_optional_evidence_text(
+                evidence, "resume_contract_reason"
+            ),
+            lock_owner_id=_optional_evidence_text(evidence, "lock_owner_id"),
+            lock_owner_reason=_optional_evidence_text(evidence, "lock_owner_reason"),
         )
+
+
+def contract_evidence_path(base_path: Path, manifest_id: str) -> Path:
+    """Return the manifest-adjacent forensic comparison sidecar path."""
+    return base_path / f"{manifest_id}.contract-evidence.json"
+
+
+def persist_contract_evidence(
+    base_path: Path,
+    manifest_id: str,
+    evidence: dict[str, object],
+) -> None:
+    """Write one deterministic contract-evidence sidecar."""
+    from bioetl.infrastructure.storage.atomic import atomic_write_text
+
+    path = contract_evidence_path(base_path, manifest_id)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    atomic_write_text(
+        path,
+        json.dumps(evidence, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+    )
+
+
+def _load_contract_evidence(
+    base_path: Path, manifest_id: str
+) -> dict[str, object] | None:
+    path = contract_evidence_path(base_path, manifest_id)
+    if not path.is_file():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _optional_evidence_text(
+    evidence: dict[str, object] | None, key: str
+) -> str | None:
+    if evidence is None:
+        return None
+    value = evidence.get(key)
+    if not isinstance(value, str) or not value.strip():
+        return None
+    return value.strip()
 
 
 def _raw_schema_errors(
@@ -172,4 +230,8 @@ def _invalid_parsed_text(
     return False
 
 
-__all__ = ["RawRunManifestInspectionMixin"]
+__all__ = [
+    "RawRunManifestInspectionMixin",
+    "contract_evidence_path",
+    "persist_contract_evidence",
+]

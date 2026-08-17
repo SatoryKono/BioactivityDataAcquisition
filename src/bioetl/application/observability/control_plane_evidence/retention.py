@@ -29,6 +29,14 @@ class ControlPlaneLifecyclePlanner(Protocol):
         dry_run: bool = True,
     ) -> ControlPlaneArtifactLifecyclePlan: ...
 
+    def plan_for_manifest(
+        self,
+        policy: ControlPlaneArtifactLifecyclePolicy,
+        *,
+        manifest: RunManifest,
+        dry_run: bool = True,
+    ) -> ControlPlaneArtifactLifecyclePlan: ...
+
 
 def build_retention_checks(
     *,

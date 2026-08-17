@@ -827,12 +827,12 @@
       "id": "S16b-configs-other",
       "wave": "B",
       "files": 156,
-      "status": "connection_error",
-      "reason": "CodeRabbit connection/WebSocket failure",
-      "exit_code": 1,
+      "status": "ok",
+      "reason": "",
+      "exit_code": 0,
       "log": "reports/quality/coderabbit/20260816/review_B_S16b-configs-other.log",
-      "bytes": 1787,
-      "elapsed_s": 244.4,
+      "bytes": 95270,
+      "elapsed_s": 615.8,
       "command": [
         "/home/fedor/.local/bin/coderabbit",
         "review",
@@ -1123,5 +1123,5 @@
       ]
     }
   },
-  "updated_utc": "2026-08-17T16:39:50.957365+00:00"
+  "updated_utc": "2026-08-17T16:50:46.863862+00:00"
 }

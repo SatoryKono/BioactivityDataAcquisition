@@ -4,9 +4,19 @@ from __future__ import annotations
 
 from bioetl.application.observability.control_plane_evidence.checks import (
     EvidenceCheckResult,
+    EvidenceFreshness,
     EvidenceStatus,
+    ProcessingStatus,
+    ScopeKind,
+    TrustStatus,
+    aggregate_trust_status,
 )
-from bioetl.domain.control_plane import RunManifest
+from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
+from bioetl.domain.control_plane.run_ledger import (
+    RUN_FAILED_EVENT,
+    RUN_FINISHED_EVENT,
+    RUN_SHUTDOWN_EVENT,
+)
 
 CONTROL_PLANE_EVIDENCE_CONTRACT = "control_plane_validation_evidence_v1"
 
@@ -29,6 +39,7 @@ def evidence_payload(
     resolved_via: str,
     manifest: RunManifest | None,
     additional_fields: dict[str, object] | None = None,
+    ledger_entries: tuple[RunLedgerEntry, ...] = (),
 ) -> dict[str, object]:
     """Build the shared bounded response envelope for validation endpoints."""
     counts = _status_counts(checks)
@@ -38,21 +49,88 @@ def evidence_payload(
         selected_run_types=selected_run_types,
         selected_run_id=selected_run_id,
     )
+    trust_status = aggregate_trust_status(checks)
+    processing_status = _processing_status(manifest, ledger_entries)
+    scope_kind = _scope_kind(resolved_via=resolved_via, manifest=manifest)
+    evidence_freshness = _evidence_freshness(manifest)
     payload: dict[str, object] = {
         "contract": CONTROL_PLANE_EVIDENCE_CONTRACT,
         "endpoint": endpoint,
         "status": _overall_status(checks),
+        "processing_status": processing_status,
+        "trust_status": trust_status,
+        "scope_kind": scope_kind,
+        "evidence_freshness": evidence_freshness,
         "pipeline": pipeline,
         "run_type": run_type,
         "run_id": run_id,
         "manifest_id": manifest_id,
         "resolved_via": resolved_via,
         "summary": _summary(checks, counts),
+        "trust": {
+            "trust_status": trust_status,
+            "processing_status": processing_status,
+            "scope_kind": scope_kind,
+            "evidence_freshness": evidence_freshness,
+            "reasons": _trust_reasons(checks, trust_status),
+            "evidence_observed_at": (
+                manifest.created_at.isoformat() if manifest is not None else None
+            ),
+        },
         "rows": [check.to_dict() for check in checks],
     }
     if additional_fields:
         payload.update(additional_fields)
     return payload
+
+
+def _processing_status(
+    manifest: RunManifest | None,
+    ledger_entries: tuple[RunLedgerEntry, ...],
+) -> ProcessingStatus:
+    if manifest is None:
+        return "unknown"
+    for entry in reversed(ledger_entries):
+        if entry.event_type == RUN_FINISHED_EVENT:
+            return "success"
+        if entry.event_type == RUN_FAILED_EVENT:
+            return "failed"
+        if entry.event_type == RUN_SHUTDOWN_EVENT:
+            return "shutdown"
+    launch_status = manifest.launch_context.get("processing_status")
+    if launch_status in {"success", "failed", "shutdown"}:
+        return launch_status
+    return "unknown"
+
+
+def _scope_kind(*, resolved_via: str, manifest: RunManifest | None) -> ScopeKind:
+    if manifest is None:
+        return "unresolved"
+    if resolved_via in {"selected_run_id", "selected_run_id_not_found"}:
+        return "exact_run" if resolved_via == "selected_run_id" else "unresolved"
+    if "latest" in resolved_via or resolved_via == "pipeline_scope":
+        return "pipeline_current"
+    return "exact_run"
+
+
+def _evidence_freshness(manifest: RunManifest | None) -> EvidenceFreshness:
+    return "observed" if manifest is not None else "unknown"
+
+
+def _trust_reasons(
+    checks: tuple[EvidenceCheckResult, ...],
+    trust_status: TrustStatus,
+) -> list[str]:
+    if trust_status == "OK":
+        return []
+    wanted: set[EvidenceStatus]
+    if trust_status == "ERROR":
+        wanted = {"ERROR"}
+    elif trust_status == "WARNING":
+        wanted = {"WARNING"}
+    else:
+        wanted = {"UNKNOWN"}
+    return [check.reason for check in checks if check.status in wanted][:12]
 
 
 def _overall_status(checks: tuple[EvidenceCheckResult, ...]) -> EvidenceStatus:
