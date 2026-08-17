@@ -240,6 +240,17 @@
       ],
       "transformations": [
         {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "targetField": "completed_at",
+                "destinationType": "time"
+              }
+            ]
+          }
+        },
+        {
           "id": "organize",
           "options": {
             "excludeByName": {
@@ -892,6 +903,19 @@
               },
               "expr": ""
             }
+          ],
+          "transformations": [
+            {
+              "id": "convertFieldType",
+              "options": {
+                "conversions": [
+                  {
+                    "targetField": "completed_at",
+                    "destinationType": "time"
+                  }
+                ]
+              }
+            }
           ]
         },
         {
@@ -1465,6 +1489,17 @@
             }
           ],
           "transformations": [
+            {
+              "id": "convertFieldType",
+              "options": {
+                "conversions": [
+                  {
+                    "targetField": "completed_at",
+                    "destinationType": "time"
+                  }
+                ]
+              }
+            },
             {
               "id": "organize",
               "options": {

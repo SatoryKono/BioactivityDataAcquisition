@@ -52,8 +52,9 @@ also: `docs/reports/dashboard-ux-checks/2026-07-28.md`; canonical baseline:
 
 - Operator-facing date/time on shipped dashboards is `YYYY-MM-DD HH:mm`
   (Grafana custom unit `time:YYYY-MM-DD HH:mm`; `mm` is minutes).
-- Run Explorer `Completed` columns and DQ `Inspect Latest Successful Data`
-  use that unit. Grafana `GF_DATE_FORMATS_*` in
+- Run Explorer `Completed` columns convert ISO `completed_at` strings to
+  a time field, then apply that unit. DQ `Inspect Latest Successful Data`
+  uses the same unit. Grafana `GF_DATE_FORMATS_*` in
   `docker-compose.monitoring.yml` applies the same pattern to the time
   picker and timeseries axes.
 - Do not use `dateTimeAsIso` (ISO-8601 with `T` and offset) on operator
