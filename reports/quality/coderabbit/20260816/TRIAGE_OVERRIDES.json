@@ -28748,5 +28748,933 @@
     "triage_reason": "ADR/docs leaf only. Campaign reject class: docs. No product invariant breach.",
     "evidence": "docs/02-architecture/decisions/ADR-056-proof-or-stop-lifecycle-control.md; #8859 S17-docs-decisions review",
     "finding_id": "CR-20260816-E-S17-docs-decisions-131"
+  },
+  "47386a7113d2174c": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/plugins/bioetl-scenes-app/.config/webpack/BuildModeWebpackPlugin.ts; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-001"
+  },
+  "253556055a97dd6a": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/plugins/bioetl-scenes-app/src/kernel/contracts.ts; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-002"
+  },
+  "1f52f43360d82652": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/plugins/bioetl-scenes-app/src/kernel/presentation.ts; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-003"
+  },
+  "bf646c57baf53173": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/plugins/bioetl-selectorshell-panel/.config/AGENTS/skills/validate-plugin.md; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-004"
+  },
+  "5cd60d7e05435531": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/plugins/bioetl-selectorshell-panel/.config/AGENTS/skills/validate-plugin.md; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-005"
+  },
+  "1cdd3b66e57cf43c": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/plugins/bioetl-selectorshell-panel/.config/bundler/utils.ts; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-006"
+  },
+  "47aaaf76e0735a9e": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-control-plane-v1.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-007"
+  },
+  "88d190a8fbd122a8": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-overview-v2.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-008"
+  },
+  "1f97f35d2f3b410a": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-dq-v2.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-009"
+  },
+  "c0836f5bc806c1c6": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-provider-health-v2.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-010"
+  },
+  "71e94667f0390636": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-run-explorer-v1.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-011"
+  },
+  "6e29480d8f980703": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/README.md; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-012"
+  },
+  "e22630afd56d3f4e": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-incident-v1.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-013"
+  },
+  "551fe4c474704c37": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-provider-health-v2.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-014"
+  },
+  "88f0701511229c8e": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-incident-v1.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-015"
+  },
+  "c990c1e89940f9f9": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-dq-v2.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-016"
+  },
+  "eda9a50aa10e2551": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-provider-health-v2.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-017"
+  },
+  "9757afa3ec785ba0": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-incident-v1.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-018"
+  },
+  "0c994ee13a3e05d8": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-run-explorer-v1.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-019"
+  },
+  "08924ec6f13b063d": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-control-plane-v1.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-020"
+  },
+  "596762ce91efd417": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-provider-health-v2.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-021"
+  },
+  "4b9a940313cf47f6": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-dq-v2.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-022"
+  },
+  "fa649cececff73e2": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-overview-v2.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-023"
+  },
+  "59184ed7ed1196a4": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-control-plane-v1.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-024"
+  },
+  "7734bd1588d54c47": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-control-plane-v1.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-025"
+  },
+  "5c10e0cc7cbf3d05": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-control-plane-v1.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-026"
+  },
+  "8e8cf4295d6c7456": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-overview-v2.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-027"
+  },
+  "9b47eab5e7b8a1c9": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-runtime.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-028"
+  },
+  "1e800154ac438a68": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-runtime.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-029"
+  },
+  "f83c68deb46187fe": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-runtime.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-030"
+  },
+  "40edb9b021403973": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/dashboards/bioetl-runtime.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-031"
+  },
+  "b23b988f10007760": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/plugins/bioetl-scenes-app/package.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-032"
+  },
+  "8e199649ee196373": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/plugins/bioetl-scenes-app/docs/scenes-parity-ledger.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-033"
+  },
+  "83848c86fbd375ab": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/plugins/bioetl-scenes-app/package.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-034"
+  },
+  "db4eb2d3eddba0fc": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/prometheus-rules/bioetl_control_plane_current_status.yml; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-035"
+  },
+  "45f4d2b398e14448": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/plugins/bioetl-selectorshell-panel/src/sync.test.ts; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-036"
+  },
+  "fa6de4b2372e2589": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/plugins/bioetl-selectorshell-panel/src/components/SimplePanel.tsx; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-037"
+  },
+  "0622eb15f549644d": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/plugins/bioetl-selectorshell-panel/src/components/SimplePanel.tsx; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-038"
+  },
+  "bdf4ae579825c79b": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/plugins/bioetl-selectorshell-panel/src/sync.test.ts; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-039"
+  },
+  "59f53d889114602b": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/plugins/bioetl-selectorshell-panel/src/sync.ts; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-040"
+  },
+  "099ab59d4424858b": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/prometheus-rules/bioetl_control_plane_current_status.yml; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-041"
+  },
+  "abc16f3b0e1dcc0d": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/plugins/bioetl-selectorshell-panel/src/sync.ts; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-042"
+  },
+  "a0e39b9ddc9c8ca5": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/plugins/bioetl-selectorshell-panel/src/sync.ts; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-043"
+  },
+  "50a2bdc2fc060ed7": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/plugins/bioetl-selectorshell-panel/package.json; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-044"
+  },
+  "29920ca1af732fd9": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/plugins/bioetl-selectorshell-panel/src/sync.ts; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-045"
+  },
+  "76663225726af1c0": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/plugins/bioetl-selectorshell-panel/src/components/SimplePanel.tsx; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-046"
+  },
+  "d02adbe22b48194f": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/scripts/bootstrap-datasources.sh; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-047"
+  },
+  "8537b3bc07ef3145": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/prometheus-rules/bioetl_observability.yml; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-048"
+  },
+  "ccb5a6228205d420": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/prometheus-rules/tests/bioetl_observability.test.yml; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-049"
+  },
+  "042d279919af88b1": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/provisioning/dashboards/bioetl.yaml; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-050"
+  },
+  "90fc438e5555ccb8": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/scripts/bootstrap-datasources.sh; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-051"
+  },
+  "f3cea9412d4a4107": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/prometheus-rules/bioetl_observability.yml; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-052"
+  },
+  "1fb6f54f2701af7b": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/prometheus-rules/bioetl_observability.yml; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-053"
+  },
+  "ea4e41c20faa7b6e": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/prometheus-rules/bioetl_observability.yml; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-054"
+  },
+  "98dec98f3a3d79f6": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/scripts/bootstrap-datasources.sh; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-055"
+  },
+  "9af8e41b4a4a7003": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/scripts/bootstrap-datasources.sh; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-056"
+  },
+  "e1aee1eb393a3bb5": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/prometheus-rules/bioetl_observability.yml; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-057"
+  },
+  "6acea7b8caf01a3f": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/prometheus-rules/tests/bioetl_observability.test.yml; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-058"
+  },
+  "fbd99a03f7ff780b": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/provisioning/datasources-core/bioetl-ops-http.yml; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-059"
+  },
+  "58721e29f8884bbb": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach.",
+    "evidence": "grafana/prometheus-rules/bioetl_control_plane_current_status.yml; #8859 S18-grafana review",
+    "finding_id": "CR-20260816-E-S18-grafana-060"
+  },
+  "566c84d81c49a0a2": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/dashboard-render-host.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-001"
+  },
+  "451ce8dd97c7ff22": {
+    "status": "reject",
+    "severity": "critical",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/coderabbit.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-002"
+  },
+  "0478f68fef8d85d6": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/contract-tests.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-003"
+  },
+  "ae246f85fb39a016": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/performance-nightly.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-004"
+  },
+  "b5e4eac594e9b876": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/mutation-testing.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-005"
+  },
+  "4f1963bd2837fa2b": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/labeler.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-006"
+  },
+  "313781a178d817cb": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/docs.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-007"
+  },
+  "ab60430041781af4": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/nightly-replay-parity.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-008"
+  },
+  "1a8d50f15be59076": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/nightly-replay-parity.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-009"
+  },
+  "690008a6dc25d583": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/e2e-matrix-health.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-010"
+  },
+  "26441132c0c31251": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/import-linter.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-011"
+  },
+  "ce1fd4a810917b14": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/duplication-complexity.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-012"
+  },
+  "9ceb9162476121a1": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/memory-freshness.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-013"
+  },
+  "6d08eebb7fbb28b4": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/docs.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-014"
+  },
+  "07c0256314882af5": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/docs-kpi-weekly.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-015"
+  },
+  "94052930efe99e8d": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/mutation-testing.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-016"
+  },
+  "c2b7e86bbb0562b9": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/docs-kpi-weekly.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-017"
+  },
+  "b6fb8d0a792d70ca": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/nightly-replay-parity.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-018"
+  },
+  "00239b8f0931b3b0": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/memory-freshness.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-019"
+  },
+  "1842694a4dcb24b2": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/duplication-complexity.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-020"
+  },
+  "c79878a5f188c141": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/memory-freshness.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-021"
+  },
+  "c4b3dac7f1115a8d": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/import-linter.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-022"
+  },
+  "f039190ac1b34436": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/nightly-replay-parity.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-023"
+  },
+  "f8ec59e355397468": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/performance-nightly.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-024"
+  },
+  "168b911e339d4f95": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/import-linter.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-025"
+  },
+  "81ac41e776134a1b": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/docs.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-026"
+  },
+  "d4fe800e2a41395c": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/docker.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-027"
+  },
+  "c7e43b6a8f494d3d": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/import-linter.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-028"
+  },
+  "b9ee000bdf6b5552": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/labeler.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-029"
+  },
+  "2b95a5bd9d2d4057": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/mutation-testing.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-030"
+  },
+  "e6ac9667eea28082": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/type-checking.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-031"
+  },
+  "0ef272741961d9e6": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/tests.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-032"
+  },
+  "fc8f207d2cc4c28c": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/tests.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-033"
+  },
+  "dac158f24abc90f4": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/type-checking.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-034"
+  },
+  "4a997d70d1c0fef8": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/vacuum.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-035"
+  },
+  "34eb2ade9305e1a5": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/tests.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-036"
+  },
+  "24f69136d4436031": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/type-checking.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-037"
+  },
+  "b8f44f292f86b15c": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/tests.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-038"
+  },
+  "c733d7f30590f205": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/vacuum.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-039"
+  },
+  "e658d952f67ca6af": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/vacuum.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-040"
+  },
+  "b1d79395e8e0054d": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/reusable-mermaid-setup.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-041"
+  },
+  "ff9d03de259e251f": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/schema-governance.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-042"
+  },
+  "0bc655d75c7176e9": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/quality-debt-weekly.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-043"
+  },
+  "e826d75d54775e93": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/pr-hygiene.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-044"
+  },
+  "bca8cb80f297a9ae": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/root-hygiene.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-045"
+  },
+  "bddad4b76626f542": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/schema-governance.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-046"
+  },
+  "584a4748101feea6": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/skills-consistency.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-047"
+  },
+  "485e10d79d9739aa": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/release.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-048"
+  },
+  "73423cf519bd40e0": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/skills-consistency.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-049"
+  },
+  "44085818a9862c31": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/security.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-050"
+  },
+  "661d804919a710a5": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/pr-hygiene.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-051"
+  },
+  "66b6ef67a694e02e": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/root-hygiene.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-052"
+  },
+  "53a6467c9b780237": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/pr-hygiene.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-053"
+  },
+  "72844d073826f8cc": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/port-contracts.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-054"
+  },
+  "6e6527f11beca3e5": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/security.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-055"
+  },
+  "37065b84b9bae7e9": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "CI workflow hygiene. coderabbit.yml already avoids curl|sh with local persist + content checks; remaining asks are pin/vendor hardening.",
+    "evidence": ".github/workflows/reusable-mermaid-setup.yml; #8859 S19-github-workflows review",
+    "finding_id": "CR-20260816-E-S19-github-workflows-056"
   }
 }

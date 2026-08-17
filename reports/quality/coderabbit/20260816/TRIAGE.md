@@ -3254,122 +3254,122 @@ Code/config/contracts and executable gates outrank CodeRabbit output.
 | `CR-20260816-E-S18-dashboard-docs-040` | reject | minor | Docs/docstring-only request; reject class for this campaign. | docs/03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md |
 | `CR-20260816-E-S18-dashboard-docs-041` | reject | minor | Docs-only CLI command wording. | docs/03-guides/dashboards/dashboard-extension-human.md |
 | `CR-20260816-E-S18-dashboard-docs-042` | reject | minor | Docs-only notes punctuation. | docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md |
-| `CR-20260816-E-S18-grafana-001` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-002` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-003` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-004` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-005` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-006` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-007` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-008` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-009` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-010` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-011` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-012` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-013` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-014` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-015` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-016` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-017` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-018` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-019` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-020` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-021` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-022` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-023` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-024` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-025` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-026` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-027` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-028` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-029` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-030` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-031` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-032` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-033` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-034` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-035` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-036` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-037` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-038` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-039` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-040` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-041` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-042` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-043` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-044` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-045` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-046` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-047` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-048` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-049` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-050` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-051` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-052` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-053` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-054` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-055` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-056` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-057` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-058` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-059` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S18-grafana-060` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-001` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-002` | pending | critical | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-003` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-004` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-005` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-006` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-007` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-008` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-009` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-010` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-011` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-012` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-013` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-014` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-015` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-016` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-017` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-018` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-019` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-020` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-021` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-022` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-023` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-024` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-025` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-026` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-027` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-028` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-029` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-030` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-031` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-032` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-033` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-034` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-035` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-036` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-037` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-038` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-039` | pending | minor | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-040` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-041` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-042` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-043` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-044` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-045` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-046` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-047` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-048` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-049` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-050` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-051` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-052` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-053` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-054` | pending | trivial | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-055` | pending | major | pending ground-truth reconciliation |  |
-| `CR-20260816-E-S19-github-workflows-056` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-E-S18-grafana-001` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/plugins/bioetl-scenes-app/.config/webpack/BuildModeWebpackPlugin.ts; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-002` | reject | minor | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/plugins/bioetl-scenes-app/src/kernel/contracts.ts; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-003` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/plugins/bioetl-scenes-app/src/kernel/presentation.ts; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-004` | reject | minor | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/plugins/bioetl-selectorshell-panel/.config/AGENTS/skills/validate-plugin.md; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-005` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/plugins/bioetl-selectorshell-panel/.config/AGENTS/skills/validate-plugin.md; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-006` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/plugins/bioetl-selectorshell-panel/.config/bundler/utils.ts; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-007` | reject | minor | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-control-plane-v1.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-008` | reject | minor | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-overview-v2.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-009` | reject | minor | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-dq-v2.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-010` | reject | minor | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-provider-health-v2.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-011` | reject | trivial | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-run-explorer-v1.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-012` | reject | minor | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/README.md; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-013` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-incident-v1.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-014` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-provider-health-v2.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-015` | reject | minor | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-incident-v1.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-016` | reject | minor | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-dq-v2.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-017` | reject | minor | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-provider-health-v2.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-018` | reject | trivial | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-incident-v1.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-019` | reject | minor | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-run-explorer-v1.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-020` | reject | minor | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-control-plane-v1.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-021` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-provider-health-v2.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-022` | reject | minor | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-dq-v2.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-023` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-overview-v2.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-024` | reject | minor | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-control-plane-v1.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-025` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-control-plane-v1.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-026` | reject | trivial | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-control-plane-v1.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-027` | reject | minor | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-overview-v2.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-028` | reject | trivial | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-runtime.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-029` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-runtime.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-030` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-runtime.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-031` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/dashboards/bioetl-runtime.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-032` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/plugins/bioetl-scenes-app/package.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-033` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/plugins/bioetl-scenes-app/docs/scenes-parity-ledger.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-034` | reject | trivial | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/plugins/bioetl-scenes-app/package.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-035` | reject | trivial | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/prometheus-rules/bioetl_control_plane_current_status.yml; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-036` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/plugins/bioetl-selectorshell-panel/src/sync.test.ts; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-037` | reject | trivial | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/plugins/bioetl-selectorshell-panel/src/components/SimplePanel.tsx; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-038` | reject | minor | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/plugins/bioetl-selectorshell-panel/src/components/SimplePanel.tsx; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-039` | reject | trivial | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/plugins/bioetl-selectorshell-panel/src/sync.test.ts; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-040` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/plugins/bioetl-selectorshell-panel/src/sync.ts; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-041` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/prometheus-rules/bioetl_control_plane_current_status.yml; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-042` | reject | trivial | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/plugins/bioetl-selectorshell-panel/src/sync.ts; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-043` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/plugins/bioetl-selectorshell-panel/src/sync.ts; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-044` | reject | trivial | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/plugins/bioetl-selectorshell-panel/package.json; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-045` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/plugins/bioetl-selectorshell-panel/src/sync.ts; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-046` | reject | trivial | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/plugins/bioetl-selectorshell-panel/src/components/SimplePanel.tsx; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-047` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/scripts/bootstrap-datasources.sh; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-048` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/prometheus-rules/bioetl_observability.yml; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-049` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/prometheus-rules/tests/bioetl_observability.test.yml; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-050` | reject | minor | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/provisioning/dashboards/bioetl.yaml; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-051` | reject | minor | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/scripts/bootstrap-datasources.sh; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-052` | reject | minor | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/prometheus-rules/bioetl_observability.yml; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-053` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/prometheus-rules/bioetl_observability.yml; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-054` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/prometheus-rules/bioetl_observability.yml; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-055` | reject | minor | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/scripts/bootstrap-datasources.sh; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-056` | reject | trivial | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/scripts/bootstrap-datasources.sh; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-057` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/prometheus-rules/bioetl_observability.yml; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-058` | reject | minor | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/prometheus-rules/tests/bioetl_observability.test.yml; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-059` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/provisioning/datasources-core/bioetl-ops-http.yml; #8859 S18-grafana review |
+| `CR-20260816-E-S18-grafana-060` | reject | major | Grafana/dashboard leaf. ADR-010 monitoring is optional; no product invariant breach. | grafana/prometheus-rules/bioetl_control_plane_current_status.yml; #8859 S18-grafana review |
+| `CR-20260816-E-S19-github-workflows-001` | reject | major | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/dashboard-render-host.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-002` | reject | critical | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/coderabbit.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-003` | reject | major | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/contract-tests.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-004` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/performance-nightly.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-005` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/mutation-testing.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-006` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/labeler.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-007` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/docs.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-008` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/nightly-replay-parity.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-009` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/nightly-replay-parity.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-010` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/e2e-matrix-health.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-011` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/import-linter.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-012` | reject | major | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/duplication-complexity.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-013` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/memory-freshness.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-014` | reject | major | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/docs.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-015` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/docs-kpi-weekly.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-016` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/mutation-testing.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-017` | reject | minor | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/docs-kpi-weekly.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-018` | reject | major | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/nightly-replay-parity.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-019` | reject | major | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/memory-freshness.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-020` | reject | minor | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/duplication-complexity.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-021` | reject | minor | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/memory-freshness.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-022` | reject | major | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/import-linter.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-023` | reject | minor | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/nightly-replay-parity.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-024` | reject | major | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/performance-nightly.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-025` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/import-linter.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-026` | reject | major | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/docs.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-027` | reject | major | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/docker.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-028` | reject | major | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/import-linter.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-029` | reject | major | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/labeler.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-030` | reject | minor | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/mutation-testing.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-031` | reject | minor | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/type-checking.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-032` | reject | major | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/tests.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-033` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/tests.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-034` | reject | major | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/type-checking.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-035` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/vacuum.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-036` | reject | minor | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/tests.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-037` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/type-checking.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-038` | reject | major | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/tests.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-039` | reject | minor | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/vacuum.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-040` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/vacuum.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-041` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/reusable-mermaid-setup.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-042` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/schema-governance.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-043` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/quality-debt-weekly.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-044` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/pr-hygiene.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-045` | reject | major | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/root-hygiene.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-046` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/schema-governance.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-047` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/skills-consistency.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-048` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/release.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-049` | reject | major | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/skills-consistency.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-050` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/security.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-051` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/pr-hygiene.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-052` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/root-hygiene.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-053` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/pr-hygiene.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-054` | reject | trivial | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/port-contracts.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-055` | reject | major | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/security.yml; #8859 S19-github-workflows review |
+| `CR-20260816-E-S19-github-workflows-056` | reject | major | CI workflow hygiene. coderabbit.yml already avoids curl\|sh with local persist + content checks; remaining asks are pin/vendor hardening. | .github/workflows/reusable-mermaid-setup.yml; #8859 S19-github-workflows review |
 | `CR-20260816-E-S19b-github-actions-001` | reject | major | Removing restore-keys is CI-cache policy; exact key already exists and stale restore is the shipped actions/cache fallback, not a reproduced architecture-hash skip. | .github/actions/architecture-governance-cache/action.yml:43-45 |
 | `CR-20260816-E-S19b-github-actions-002` | reject | major | Docs/docstring-only request; reject class for this campaign. | .github/actions/setup-mermaid/action.yml |
 | `CR-20260816-F-S12-tests-architecture-01-001` | reject | major | Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced. | tests/architecture/test_architecture_dependency_docs_drift.py; #8859 closeout review 2026-08-17 |
