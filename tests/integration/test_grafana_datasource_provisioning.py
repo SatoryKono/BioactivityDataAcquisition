@@ -74,6 +74,9 @@ def test_ops_http_compose_targets_main_health_server() -> None:
         str(item).startswith("BIOETL_EXPECTED_RUNTIME_SOURCE_ID=")
         for item in grafana["environment"]
     )
+    assert "GF_DATE_FORMATS_FULL_DATE=YYYY-MM-DD HH:mm" in [
+        str(item) for item in grafana["environment"]
+    ]
     assert "host.docker.internal:host-gateway" in grafana["extra_hosts"]
     for name in _REMOVED_MONITORING_SERVICES:
         assert name not in monitoring["services"]
