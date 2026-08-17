@@ -46,6 +46,9 @@ also: `docs/reports/dashboard-ux-checks/2026-07-28.md`; canonical baseline:
 - Trust `Review Recovery Action` (`id=906`) omits native Grafana title chrome
   (`bioetlDisplayTitle`) and keeps a one-line 16px rail so `gridPos.h=2`
   does not internally scroll (`DASH-FIT-004`). Caveats stay in the description.
+- Trust authored HTML uses inline copy roles: numbered bold dashboard names,
+  italic panel titles, CAPS status/scope, `<code>` 16px fields, regular 16px
+  body (`design-system.md` §9.1).
 - Pipeline Diagnostics no longer treats SCRAPING as proof of delivery health.
 
 ## Dashboard clock format (2026-08-17)

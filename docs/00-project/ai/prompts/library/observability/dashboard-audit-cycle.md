@@ -110,7 +110,7 @@ PROVEN P0/P1 и без regression.
 | `ALLOW_PUSH` | `true` |
 | `ALLOW_MERGE` | `true` |
 | `ALLOW_CLOSE` | `true` |
-| `MAX_ISSUES_PER_ITERATION` | `5` |
+| `MAX_ISSUES_PER_ITERATION` | `10` |
 | `LANGUAGE` | `ru` |
 
 ## BioETL anchors

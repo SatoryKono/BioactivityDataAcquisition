@@ -700,3 +700,26 @@ The screenshot protocol remains available at
 and the historical copy dictionary remains at
 [dux5-copy-dictionary.md](archive/audit-protocols/dux5-copy-dictionary.md),
 but its former smaller floors are superseded.
+
+### 9.1 Inline copy roles in authored HTML
+
+Operator-facing HTML in text panels MUST distinguish five inline roles so
+dashboard names, panel titles, and status tokens do not share one bold style.
+Color MUST NOT be the only carrier of the role. Navigation-bus chips stay on
+the existing theme-safe chip contract and are not this inline rule.
+
+| Role | Visible form | HTML | Example |
+| --- | --- | --- | --- |
+| Dashboard | numbered title, bold | `<b>0. Trust</b>` | `0. Trust`, `6. Run Explorer` |
+| Panel | Title Case, italic, not bold | `<em>Review Selected-Run Trust</em>` | first-screen and rail references |
+| Status / scope | CAPS, not bold | plain `INCOMPLETE` | `OK`, `WARN`, `CRIT`, `UNKNOWN`, `INCOMPLETE`, `CURRENT`, `SELECTED RUN`, `TIME RANGE` |
+| Field / API token | monospace, `16px` | `<code style="font-size:16px">trust_status</code>` | `run_id`, `processing_status` |
+| Body | regular `16px` | no wrapper | sentences and actions |
+
+Exceptions: the 18px operator-question line on `Inspect Scope & Evidence` keeps
+`font-weight:700` as a heading, not as an inline role. Native Grafana panel
+titles stay on the pinned theme token. Do not wrap panel titles in `<code>` or
+status tokens in `<b>` / `<strong>`.
+
+Pilot surface: `bioetl-control-plane-v1` authored text panels. Other shipped
+dashboards keep their current markup until the same pass lands there.

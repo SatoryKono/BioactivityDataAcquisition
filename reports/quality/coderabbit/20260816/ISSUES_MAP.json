@@ -294,22 +294,22 @@
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8905"
   },
   "CR-20260816-A-S01-domain-transformations-004": {
-    "issue": 8890,
+    "issue": 8958,
     "severity": "minor",
     "path": "src/bioetl/domain/transformations/coercion.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8958"
   },
   "CR-20260816-A-S01-domain-transformations-005": {
-    "issue": 8890,
+    "issue": 8958,
     "severity": "major",
     "path": "src/bioetl/domain/transformations/hashing.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8958"
   },
   "CR-20260816-A-S01-domain-transformations-006": {
-    "issue": 8890,
+    "issue": 8958,
     "severity": "major",
     "path": "src/bioetl/domain/transformations/quality.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8958"
   },
   "CR-20260816-A-S01-domain-types-004": {
     "issue": 8895,
@@ -402,16 +402,16 @@
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8895"
   },
   "CR-20260816-A-S01-domain-validation-003": {
-    "issue": 8890,
+    "issue": 8958,
     "severity": "major",
     "path": "src/bioetl/domain/validation/primitives.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8958"
   },
   "CR-20260816-A-S01-domain-validation-007": {
-    "issue": 8890,
+    "issue": 8958,
     "severity": "minor",
     "path": "src/bioetl/domain/validation/chemical.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8958"
   },
   "CR-20260816-A-S01-domain-value_objects-003": {
     "issue": 8905,
@@ -522,490 +522,490 @@
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8905"
   },
   "CR-20260816-A-S01-domain-workflow-002": {
-    "issue": 8890,
+    "issue": 8958,
     "severity": "major",
     "path": "src/bioetl/domain/workflow/config.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8958"
   },
   "CR-20260816-A-S01-domain-workflow-005": {
-    "issue": 8890,
+    "issue": 8958,
     "severity": "major",
     "path": "src/bioetl/domain/workflow/step_transition.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8958"
   },
   "CR-20260816-A-S02-app-core-009": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/batch_writer_io_mixin.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-011": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/batch_writer_columns_mixin.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-012": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "minor",
     "path": "src/bioetl/application/core/data_sources/idmapping.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-014": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/config.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-016": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/batch_writer_io_mixin.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-018": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/_filtered_data_source_fetch_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-023": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "trivial",
     "path": "src/bioetl/application/core/_base_transformer_structural_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-026": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/_batch_writer_gold_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-027": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/_filtered_data_source_fetch_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-028": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/_batch_processing_layer_write_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-036": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/idmapping_fetch_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-038": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/data_sources/publication_term.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-040": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/data_sources/subcellular_fraction.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-047": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/entity_id.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-049": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/lifecycle/lock_lifecycle.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-054": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/lifecycle/lock_lifecycle.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-058": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/preflight/medallion_validator_runtime.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-060": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/runner_flow.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-064": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "minor",
     "path": "src/bioetl/application/core/runner_flow.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-065": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "minor",
     "path": "src/bioetl/application/core/runner_flow_metrics.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-067": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "minor",
     "path": "src/bioetl/application/core/subcellular_fraction_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-071": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/batch_processing_runtime.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-072": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "minor",
     "path": "src/bioetl/application/core/batch_operation_errors.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-073": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/runner_flow.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-075": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "trivial",
     "path": "src/bioetl/application/core/batch_metrics_accounting.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-078": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/batch_memory_metrics.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-082": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/lifecycle/batch_fsm.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-090": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/preflight/health_aggregator.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-091": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "minor",
     "path": "src/bioetl/application/core/batch_metrics_accounting.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-100": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/_record_processor_span_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-102": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "minor",
     "path": "src/bioetl/application/core/batch_transformer_attempt_success.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-103": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "minor",
     "path": "src/bioetl/application/core/_record_normalization_mapping.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-104": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "minor",
     "path": "src/bioetl/application/core/batch_transformer_attempts.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-116": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "minor",
     "path": "src/bioetl/application/core/_record_normalization_runtime_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-117": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "trivial",
     "path": "src/bioetl/application/core/_filtered_data_source_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-124": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/base_transformer_execution_mixin.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-125": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "minor",
     "path": "src/bioetl/application/core/base_transformer_dependency_helpers_mixin.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-128": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "trivial",
     "path": "src/bioetl/application/core/postrun/compact_orchestrator.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-135": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "trivial",
     "path": "src/bioetl/application/core/batch_execution/lifecycle.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-137": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/batch_execution/run_service.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-148": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/base_transformer/_structural_policy_contracts.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-150": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/base_transformer/_structural_policy_events.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-153": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "trivial",
     "path": "src/bioetl/application/core/base_transformer/_structural_policy_events.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S02-app-core-156": {
-    "issue": 8890,
+    "issue": 8952,
     "severity": "major",
     "path": "src/bioetl/application/core/base_transformer/_structural_policy_coercion.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8952"
   },
   "CR-20260816-A-S03-app-control-plane-004": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/effective_config/runtime_overrides.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-009": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "minor",
     "path": "src/bioetl/application/services/control_plane/forensic/diagnostics_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-012": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/effective_config/context.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-016": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/workflow/execution_recording_payloads.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-017": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/workflow/manifest_service.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-020": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "minor",
     "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/replay_refresh_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-022": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/snapshot_summary.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-023": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "minor",
     "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/resume_contract.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-026": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "minor",
     "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/snapshot_ledger.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-031": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "minor",
     "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/checkpoint_projection.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-033": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "minor",
     "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/composite_projection.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-034": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "minor",
     "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/base_provenance_payloads.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-035": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "minor",
     "path": "src/bioetl/application/services/control_plane/manifest/_service_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-041": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "minor",
     "path": "src/bioetl/application/services/control_plane/replay/reproducibility_score_cards_category_scores_extended.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-043": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "minor",
     "path": "src/bioetl/application/services/control_plane/replay/historical_universe_service.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-045": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/replay/historical_corpus_service.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-046": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/replay/historical_universe_service.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-050": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/ledger_processing.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-051": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/persistence_profile_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-052": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/persistence_profiles.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-053": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/run_manifest_reproducibility_scoring.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-054": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/run_manifest_reproducibility_claims.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-057": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/workflow/execution_preparation_incremental.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-066": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/replay/closure_claims.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-067": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/workflow/execution_recording.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-069": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "minor",
     "path": "src/bioetl/application/services/control_plane/replay/historical_closure_policy.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-072": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "trivial",
     "path": "src/bioetl/application/services/control_plane/manifest/_reference_hydration.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-078": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/replay/_historical_certification_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-079": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/replay/_historical_certification_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-083": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/replay/historical_closure_policy.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-085": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "minor",
     "path": "src/bioetl/application/services/control_plane/manifest/_inspection_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-087": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "minor",
     "path": "src/bioetl/application/services/control_plane/ledger/diagnostic_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-098": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/manifest/inspection_dossier.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-099": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/manifest/inspection_dossier.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-100": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/manifest/inspection_models.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-103": {
     "issue": 8907,
@@ -1014,34 +1014,34 @@
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8907"
   },
   "CR-20260816-A-S03-app-control-plane-109": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/manifest/validation_provenance.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-111": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "minor",
     "path": "src/bioetl/application/services/control_plane/replay/_bundle_descriptor_payloads.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-112": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/manifest/identity_graph_assembly.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-113": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/manifest/inspection_helpers.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-114": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/manifest/replay_taxonomy.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-115": {
     "issue": 8907,
@@ -1056,112 +1056,112 @@
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8907"
   },
   "CR-20260816-A-S03-app-control-plane-121": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "trivial",
     "path": "src/bioetl/application/services/control_plane/manifest/inspection_artifact_refs.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-124": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/manifest/validation.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-126": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "major",
     "path": "src/bioetl/application/services/control_plane/manifest/replay_taxonomy.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S03-app-control-plane-127": {
-    "issue": 8890,
+    "issue": 8953,
     "severity": "minor",
     "path": "src/bioetl/application/services/control_plane/manifest/inspection_result_model.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8953"
   },
   "CR-20260816-A-S04-app-services-other-002": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/ops/config_service.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-012": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/medallion/medallion_maintenance_mixin.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-014": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/checkpoint/_checkpoint_compatibility_message_helpers.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-020": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/checkpoint/checkpoint_compatibility_results.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-022": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/checkpoint/_checkpoint_execution_identity_payload.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-023": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/checkpoint/_checkpoint_compatibility_message_helpers.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-024": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/checkpoint/checkpoint_compatibility_results.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-026": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/checkpoint/_checkpoint_compatibility_execution_validation.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-028": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/checkpoint/_checkpoint_service_runtime.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-031": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "trivial",
     "path": "src/bioetl/application/services/workflow/workflow_transform_artifacts.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-033": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/workflow/workflow_runner_reports.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-043": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/workflow/workflow_runner_reports.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-045": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/lineage/metadata_lineage_anchor_nodes.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-047": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/lineage/metadata_lineage_fragment_ids.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-049": {
     "issue": 8908,
@@ -1170,94 +1170,94 @@
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8908"
   },
   "CR-20260816-A-S04-app-services-other-050": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/dq/_checks_basic.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-051": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "minor",
     "path": "src/bioetl/application/services/contracts/contract_migration_service.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-053": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/dq/_checks_integrity.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-055": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "minor",
     "path": "src/bioetl/application/services/workflow/_observability_workflow_status_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-056": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "minor",
     "path": "src/bioetl/application/services/workflow/_observability_workflow_models.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-058": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "minor",
     "path": "src/bioetl/application/services/workflow/_observability_workflow_checkpoint_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-059": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/execution/cli_run_orchestration_service.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-061": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "minor",
     "path": "src/bioetl/application/services/execution/cli_run_orchestration_service.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-064": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "minor",
     "path": "src/bioetl/application/services/workflow/_observability_workflow_evidence_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-066": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "minor",
     "path": "src/bioetl/application/services/execution/pipeline_run_execution_service.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-067": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "minor",
     "path": "src/bioetl/application/services/export_lineage/audit_inspection_service.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-069": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/workflow/_observability_workflow_quarantine_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-070": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/workflow/_observability_trace_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-072": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/execution/pipeline_runner_service.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-077": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/quality/_quarantine_service_filtered_helpers.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-083": {
     "issue": 8908,
@@ -1266,148 +1266,148 @@
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8908"
   },
   "CR-20260816-A-S04-app-services-other-090": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "trivial",
     "path": "src/bioetl/application/services/lineage/metadata_assembler_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-097": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/export_lineage/export_service.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-100": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/lineage/metadata_assemblers.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-103": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "trivial",
     "path": "src/bioetl/application/services/lineage/lineage_inspection_service.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-105": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/quality/_quarantine_service_status_sync.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-109": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/lineage/metadata_assembler_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-112": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "trivial",
     "path": "src/bioetl/application/services/export_lineage/export_manifests.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-117": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "trivial",
     "path": "src/bioetl/application/services/export_lineage/debug_export_collector_helpers.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-129": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/dq/silver_statistics_helpers.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-130": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "trivial",
     "path": "src/bioetl/application/services/dq/silver_threshold.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-131": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/dq/silver_threshold.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-134": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/dq/silver_check_executor.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-135": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "minor",
     "path": "src/bioetl/application/services/dq/_checks_statistical.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-138": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "minor",
     "path": "src/bioetl/application/services/ops/shutdown_service.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-139": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "minor",
     "path": "src/bioetl/application/services/ops/error_handler.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-143": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "minor",
     "path": "src/bioetl/application/services/quality/_quarantine_service_async_mixin.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-144": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "minor",
     "path": "src/bioetl/application/services/ops/shutdown_service.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-151": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "minor",
     "path": "src/bioetl/application/services/export_lineage/export_execution.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-152": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/ops/metrics_service.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-153": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/protein/classification_resolution.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-154": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/ops/error_handler.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-155": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/ops/lock_service.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-156": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/ops/vacuum_service.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-157": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "major",
     "path": "src/bioetl/application/services/ops/error_handler.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-167": {
     "issue": 8909,
@@ -1416,10 +1416,10 @@
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8909"
   },
   "CR-20260816-A-S04-app-services-other-168": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "trivial",
     "path": "src/bioetl/application/services/run_reports/markdown.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-169": {
     "issue": 8909,
@@ -1428,10 +1428,10 @@
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8909"
   },
   "CR-20260816-A-S04-app-services-other-170": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "minor",
     "path": "src/bioetl/application/services/dq/dq_report_builders.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-171": {
     "issue": 8909,
@@ -1446,10 +1446,10 @@
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8909"
   },
   "CR-20260816-A-S04-app-services-other-177": {
-    "issue": 8890,
+    "issue": 8954,
     "severity": "minor",
     "path": "src/bioetl/application/services/run_reports/markdown.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8954"
   },
   "CR-20260816-A-S04-app-services-other-180": {
     "issue": 8909,
@@ -1560,16 +1560,16 @@
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8918"
   },
   "CR-20260816-A-S10-interfaces-cli-001": {
-    "issue": 8890,
+    "issue": 8957,
     "severity": "major",
     "path": "src/bioetl/interfaces/cli/commands/_workflow_override_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8957"
   },
   "CR-20260816-A-S10-interfaces-cli-004": {
-    "issue": 8890,
+    "issue": 8957,
     "severity": "major",
     "path": "src/bioetl/interfaces/cli/commands/_run_manifest_historical_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8957"
   },
   "CR-20260816-A-S10-interfaces-cli-008": {
     "issue": 8910,
@@ -1584,16 +1584,16 @@
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910"
   },
   "CR-20260816-A-S10-interfaces-cli-011": {
-    "issue": 8890,
+    "issue": 8957,
     "severity": "major",
     "path": "src/bioetl/interfaces/cli/commands/diagnostics.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8957"
   },
   "CR-20260816-A-S10-interfaces-cli-013": {
-    "issue": 8890,
+    "issue": 8957,
     "severity": "major",
     "path": "src/bioetl/interfaces/cli/commands/debug.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8957"
   },
   "CR-20260816-A-S10-interfaces-cli-015": {
     "issue": 8910,
@@ -1608,10 +1608,10 @@
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910"
   },
   "CR-20260816-A-S10-interfaces-cli-018": {
-    "issue": 8890,
+    "issue": 8957,
     "severity": "minor",
     "path": "src/bioetl/interfaces/cli/commands/config_dq.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8957"
   },
   "CR-20260816-A-S10-interfaces-cli-019": {
     "issue": 8910,
@@ -1620,28 +1620,28 @@
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910"
   },
   "CR-20260816-A-S10-interfaces-cli-020": {
-    "issue": 8890,
+    "issue": 8957,
     "severity": "trivial",
     "path": "src/bioetl/interfaces/cli/commands/config.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8957"
   },
   "CR-20260816-A-S10-interfaces-cli-022": {
-    "issue": 8890,
+    "issue": 8957,
     "severity": "trivial",
     "path": "src/bioetl/interfaces/cli/commands/domains/maintenance/control_plane_lifecycle.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8957"
   },
   "CR-20260816-A-S10-interfaces-cli-023": {
-    "issue": 8890,
+    "issue": 8957,
     "severity": "minor",
     "path": "src/bioetl/interfaces/cli/commands/domains/quarantine/rendering.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8957"
   },
   "CR-20260816-A-S10-interfaces-cli-024": {
-    "issue": 8890,
+    "issue": 8957,
     "severity": "minor",
     "path": "src/bioetl/interfaces/cli/commands/domains/maintenance/command_group.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8957"
   },
   "CR-20260816-A-S10-interfaces-cli-031": {
     "issue": 8910,
@@ -1650,10 +1650,10 @@
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910"
   },
   "CR-20260816-A-S10-interfaces-cli-032": {
-    "issue": 8890,
+    "issue": 8957,
     "severity": "major",
     "path": "src/bioetl/interfaces/cli/commands/domains/run_all/command_policy.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8957"
   },
   "CR-20260816-A-S10-interfaces-cli-034": {
     "issue": 8910,
@@ -1668,22 +1668,22 @@
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910"
   },
   "CR-20260816-A-S10-interfaces-cli-038": {
-    "issue": 8890,
+    "issue": 8957,
     "severity": "major",
     "path": "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8957"
   },
   "CR-20260816-A-S10-interfaces-cli-045": {
-    "issue": 8890,
+    "issue": 8957,
     "severity": "minor",
     "path": "src/bioetl/interfaces/cli/commands/domains/composite/runtime.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8957"
   },
   "CR-20260816-A-S10-interfaces-cli-046": {
-    "issue": 8890,
+    "issue": 8957,
     "severity": "minor",
     "path": "src/bioetl/interfaces/cli/commands/vacuum.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8957"
   },
   "CR-20260816-A-S10-interfaces-cli-049": {
     "issue": 8910,
@@ -1710,10 +1710,10 @@
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910"
   },
   "CR-20260816-A-S10-interfaces-cli-060": {
-    "issue": 8890,
+    "issue": 8957,
     "severity": "major",
     "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8957"
   },
   "CR-20260816-A-S10-interfaces-cli-061": {
     "issue": 8910,
@@ -1722,10 +1722,10 @@
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910"
   },
   "CR-20260816-A-S10-interfaces-cli-062": {
-    "issue": 8890,
+    "issue": 8957,
     "severity": "major",
     "path": "src/bioetl/interfaces/cli/commands/lineage.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8957"
   },
   "CR-20260816-A-S10-interfaces-cli-063": {
     "issue": 8910,
@@ -1794,184 +1794,184 @@
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8911"
   },
   "CR-20260816-A-S11-interfaces-http-006": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "major",
     "path": "src/bioetl/interfaces/http/_health_server_control_plane_evidence_scope.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-007": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "trivial",
     "path": "src/bioetl/interfaces/http/_health_server_control_plane_metrics_refresh.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-010": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "minor",
     "path": "src/bioetl/interfaces/http/_health_server_control_plane_scope.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-012": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "minor",
     "path": "src/bioetl/interfaces/http/_forensic_request_budget.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-013": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "major",
     "path": "src/bioetl/interfaces/http/_control_plane_selector_records.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-024": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "minor",
     "path": "src/bioetl/interfaces/http/control_plane_identity/formatting.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-026": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "trivial",
     "path": "src/bioetl/interfaces/http/_health_server_quarantine_routing.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-027": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "major",
     "path": "src/bioetl/interfaces/http/_health_server_routing_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-028": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "trivial",
     "path": "src/bioetl/interfaces/http/_health_server_observability_routing.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-029": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "trivial",
     "path": "src/bioetl/interfaces/http/_health_server_identity_routing_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-035": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "trivial",
     "path": "src/bioetl/interfaces/http/_health_server_identity_routing_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-037": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "trivial",
     "path": "src/bioetl/interfaces/http/control_plane_identity/anchor_values.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-038": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "major",
     "path": "src/bioetl/interfaces/http/_health_server_routing_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-040": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "minor",
     "path": "src/bioetl/interfaces/http/control_plane_identity/anchor_values.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-041": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "minor",
     "path": "src/bioetl/interfaces/http/_processed_records_http.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-042": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "minor",
     "path": "src/bioetl/interfaces/http/_pipeline_run_report_table.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-044": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "major",
     "path": "src/bioetl/interfaces/http/_health_server_quarantine_routing.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-045": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "minor",
     "path": "src/bioetl/interfaces/http/_health_server_identity_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-046": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "major",
     "path": "src/bioetl/interfaces/http/_processed_records_value_support.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-047": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "minor",
     "path": "src/bioetl/interfaces/http/_health_server_observability_routing.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-049": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "trivial",
     "path": "src/bioetl/interfaces/http/control_plane_identity/severity.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-050": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "major",
     "path": "src/bioetl/interfaces/http/report_root_config.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-051": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "minor",
     "path": "src/bioetl/interfaces/http/health_server.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-055": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "major",
     "path": "src/bioetl/interfaces/http/health_server.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-056": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "major",
     "path": "src/bioetl/interfaces/http/control_plane_identity/specs.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-058": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "trivial",
     "path": "src/bioetl/interfaces/http/health_server_http_mixin.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-059": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "major",
     "path": "src/bioetl/interfaces/http/health_server_routing_mixin.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-061": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "trivial",
     "path": "src/bioetl/interfaces/http/health_server_http_mixin.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-062": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "major",
     "path": "src/bioetl/interfaces/http/health_server_http_mixin.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-A-S11-interfaces-http-064": {
-    "issue": 8890,
+    "issue": 8956,
     "severity": "major",
     "path": "src/bioetl/interfaces/http/control_plane_identity/types.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8956"
   },
   "CR-20260816-B-S05-app-pipelines-008": {
     "issue": 8918,
@@ -2130,16 +2130,16 @@
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8916"
   },
   "CR-20260816-C-S06-infra-adapters-049": {
-    "issue": 8890,
+    "issue": 8955,
     "severity": null,
     "path": "src/bioetl/infrastructure/adapters/openalex/fallback.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8955"
   },
   "CR-20260816-C-S06-infra-adapters-057": {
-    "issue": 8890,
+    "issue": 8955,
     "severity": null,
     "path": "src/bioetl/infrastructure/adapters/semanticscholar/fallback.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8955"
   },
   "CR-20260816-C-S06-infra-adapters-061": {
     "issue": 8916,
@@ -2154,10 +2154,10 @@
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8916"
   },
   "CR-20260816-C-S06-infra-adapters-103": {
-    "issue": 8890,
+    "issue": 8955,
     "severity": null,
     "path": "src/bioetl/infrastructure/adapters/pubchem/query_builder.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8955"
   },
   "CR-20260816-C-S06-infra-adapters-106": {
     "issue": 8916,
@@ -2166,16 +2166,16 @@
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8916"
   },
   "CR-20260816-C-S06-infra-adapters-110": {
-    "issue": 8890,
+    "issue": 8955,
     "severity": null,
     "path": "src/bioetl/infrastructure/adapters/pubchem/query_builder.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8955"
   },
   "CR-20260816-C-S06-infra-adapters-111": {
-    "issue": 8890,
+    "issue": 8955,
     "severity": null,
     "path": "src/bioetl/infrastructure/adapters/pubmed/fallback.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8955"
   },
   "CR-20260816-C-S06-infra-adapters-126": {
     "issue": 8916,
@@ -2190,10 +2190,10 @@
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8916"
   },
   "CR-20260816-C-S08-infra-observability-005": {
-    "issue": 8890,
+    "issue": 8955,
     "severity": "minor",
     "path": "src/bioetl/infrastructure/observability/anomaly/detector.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8890"
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8955"
   },
   "CR-20260816-C-S08-infra-observability-022": {
     "issue": 8917,

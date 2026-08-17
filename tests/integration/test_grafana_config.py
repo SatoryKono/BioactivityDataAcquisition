@@ -1181,10 +1181,13 @@ def test_control_plane_l1_has_single_next_step_panel_with_expected_target() -> N
     assert len(panels) == 1
 
     links = panels[0].get("options", {}).get("dataLinks", [])
-    assert len(links) == 1
-    url = str(links[0].get("url", ""))
-    assert "/d/bioetl-control-plane-v1/bioetl-control-plane-v1" in url
-    assert "viewPanel=130" in url
+    urls = [str(link.get("url", "")) for link in links]
+    assert urls
+    assert any("viewPanel=130" in url for url in urls)
+    assert any("viewPanel=9418" in url for url in urls)
+    assert any("viewPanel=9415" in url for url in urls)
+    assert any("viewPanel=9416" in url for url in urls)
+    assert all("/d/bioetl-control-plane-v1/bioetl-control-plane-v1" in url for url in urls)
 
 
 def test_control_plane_has_replay_resume_blockers_panel() -> None:

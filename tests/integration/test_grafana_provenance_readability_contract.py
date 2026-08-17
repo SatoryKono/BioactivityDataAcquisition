@@ -18,7 +18,8 @@ _SPECS = {
         "Inspect Scope & Evidence",
         (
             "Can this run be replayed safely?",
-            "replay status/reason/action",
+            "SELECTED RUN",
+            "not this run",
             "incomplete evidence — not OK",
         ),
     ),

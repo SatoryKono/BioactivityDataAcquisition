@@ -240,7 +240,14 @@ def test_trust_primary_recovery_ssot_title_and_link() -> None:
     content = str((panels[0].get("options") or {}).get("content") or "")
     assert "overflow:hidden" not in content
     assert "overflow-wrap:anywhere" in content
-    assert "Do not replay on INCOMPLETE/UNKNOWN" in content
+    assert "Do not replay this run" in content
+    assert "Trust status" in content
+    assert "INCOMPLETE" in content
+    assert "UNKNOWN" in content
+    assert "<em>Review Selected-Run Trust</em>" in content
+    assert "<em>Inspect Audit" in content
+    assert "<b>INCOMPLETE" not in content
+    assert "<strong>Do not replay" not in content
     assert panels[0].get("gridPos", {}).get("h") == 2
 
 
