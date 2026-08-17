@@ -1,11 +1,4 @@
-"""Canonical runtime/report source identity primitives.
-
-The module is deliberately independent from process-global configuration.  It
-normalizes host paths, computes the deterministic runtime identity, resolves
-identity candidates in one documented order, and compares an observed value
-with the expected value.  Interfaces and operator scripts provide the concrete
-process, repository, or container mappings.
-"""
+"""Canonical process-independent runtime/report source identity primitives."""
 
 from __future__ import annotations
 
@@ -157,13 +150,7 @@ def _canonical_drive_path(drive: str, suffix: str | None) -> str:
 
 
 def normalize_runtime_path(path: str | Path, *, root: str | Path) -> str:
-    """Normalize Windows, WSL, and Docker Desktop spellings for comparison.
-
-    Drive-backed paths use the canonical ``/mnt/<drive>`` spelling and are
-    case-folded because the underlying Windows filesystem is case-insensitive.
-    Native Linux/WSL suffixes preserve case.  Docker Desktop's WSL bind prefix
-    maps to the equivalent ``/mnt/wsl`` path used by host-side tooling.
-    """
+    """Normalize Windows, WSL, and Docker Desktop paths for comparison."""
     value = _clean_path_text(path)
     if not value:
         return ""

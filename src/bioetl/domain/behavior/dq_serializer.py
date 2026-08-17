@@ -12,12 +12,7 @@ from typing import Any, cast  # Any: needed for _serialize_value recursive retur
 import orjson
 
 from bioetl.domain.behavior._dq_serializer_html import (
-    format_detail_value,
-    generate_html_report,
-    render_check_details_html,
-    render_checks_html,
-    render_thresholds_html,
-    status_color_class,
+    DQSerializerHtmlCompatibilityMixin,
 )
 from bioetl.domain.behavior._dq_serializer_yaml import format_yaml_scalar
 from bioetl.domain.types import JsonDict
@@ -118,7 +113,7 @@ def _serialize_scalar(value: Any) -> Any:  # Any: heterogeneous scalar passthrou
     return value
 
 
-class DQReportSerializer:
+class DQReportSerializer(DQSerializerHtmlCompatibilityMixin):
     """Serializer for DQ reports to various formats.
 
     Converts DQ report value objects to JSON, YAML, or HTML strings.
@@ -262,35 +257,6 @@ class DQReportSerializer:
     def _quote_yaml_string(self, value: str) -> str:
         """Quote a YAML string when plain-scalar syntax would be ambiguous."""
         return self._yaml_value(value)
-
-    def _generate_html(
-        self,
-        data: JsonDict,
-        report: BronzeDQReport | SilverDQReport | GoldDQReport,
-    ) -> str:
-        """Generate HTML report."""
-        del report
-        return generate_html_report(data)
-
-    def _status_color(self, status: str) -> str:
-        """Get CSS class for status."""
-        return status_color_class(status)
-
-    def _render_checks_html(self, checks: JsonDict) -> str:
-        """Render checks as HTML."""
-        return render_checks_html(checks)
-
-    def _render_check_details(self, data: JsonDict) -> str:
-        """Render check details as HTML table."""
-        return render_check_details_html(data)
-
-    def _format_detail_value(self, value: object) -> str:
-        """Format a detail value for HTML display."""
-        return format_detail_value(value)
-
-    def _render_thresholds_html(self, thresholds: JsonDict) -> str:
-        """Render thresholds card as HTML."""
-        return render_thresholds_html(thresholds)
 
 
 __all__ = ["DQReportSerializer"]

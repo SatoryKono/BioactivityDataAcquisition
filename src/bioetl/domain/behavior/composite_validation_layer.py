@@ -14,6 +14,9 @@ from bioetl.domain.behavior.composite_validation_helpers import (
     _extract_priority,
     _is_valid_field_priorities,
     _is_valid_lineage_config,
+    append_invalid_config_section,
+    as_output_schema,
+    as_source_names,
 )
 from bioetl.domain.behavior.composite_validation_shapes import (
     as_output_schema,
@@ -44,6 +47,11 @@ from bioetl.domain.types.validation_severity import (
 
 class CompositeValidator:
     """Validator for structural and deep-preflight composite checks."""
+
+    _as_output_schema = staticmethod(as_output_schema)
+    _as_source_names = staticmethod(as_source_names)
+    _extract_priority = staticmethod(_extract_priority)
+    _is_valid_lineage_config = staticmethod(_is_valid_lineage_config)
 
     def __init__(
         self,
@@ -89,10 +97,9 @@ class CompositeValidator:
             execution_context=config.execution_context,
             config=governance_config,
         )
-        from dataclasses import replace
-
-        # NOSONAR - mypy infers correct type; Sonar S5886 false positive on dataclass.replace()
-        return replace(validation_report, execution_decision=governance_decision)
+        return replace(
+            validation_report, execution_decision=governance_decision
+        )  # NOSONAR
 
     def _run_structural_validation(
         self,
@@ -120,7 +127,7 @@ class CompositeValidator:
     ) -> list[ValidationIssue]:
         if not isinstance(composite_config, dict):
             return [
-                self._create_issue(
+                _create_issue(
                     IssueCode.CMP_STR_SCHEMA_001,
                     ValidationSeverity.BLOCKER,
                     "Composite config must be a dictionary",
@@ -129,21 +136,21 @@ class CompositeValidator:
             ]
         issues = self._aggregation_preflight_issues(composite_config)
         issues.extend(self._cross_validation_preflight_issues(composite_config))
-        self._append_config_issue_if_invalid(
+        append_invalid_config_section(
             issues=issues,
             composite_config=composite_config,
             config_key="field_priorities",
-            validator=self._is_valid_field_priorities,
+            validator=_is_valid_field_priorities,
             code=IssueCode.CMP_PF_FIELD_001,
             severity=ValidationSeverity.WARNING,
             message="Conflicting or invalid field priorities detected",
             details_key="priorities",
         )
-        self._append_config_issue_if_invalid(
+        append_invalid_config_section(
             issues=issues,
             composite_config=composite_config,
             config_key="lineage",
-            validator=self._is_valid_lineage_config,
+            validator=_is_valid_lineage_config,
             code=IssueCode.CMP_PF_LIN_001,
             severity=ValidationSeverity.BLOCKER,
             message="Insufficient lineage tracking configuration",
