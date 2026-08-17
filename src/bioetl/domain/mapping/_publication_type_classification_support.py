@@ -159,7 +159,12 @@ def classify_chembl_publication_type[
     entry_by_unified_type: Mapping[str, PublicationTypeEntryT],
     raw_type: str,
 ) -> PublicationTypeEntryT | None:
-    return entry_by_unified_type.get(canonical_publication_type_key(raw_type))
+    from bioetl.domain.mapping.publication_type_mapping import (
+        normalize_publication_type,
+    )
+
+    normalized = normalize_publication_type(raw_type)
+    return None if normalized is None else entry_by_unified_type.get(normalized)
 
 
 def best_chembl_match[PublicationTypeEntryT: PublicationTypeEntryProtocol](
