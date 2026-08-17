@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 
 import pytest
@@ -214,6 +215,7 @@ def test_direct_codex_command_installer_is_bounded_and_secret_free(
 
     direct_env = {
         **env,
+        "CODEX_SKIP_MCP_SETUP": "1",
         "REF_TOOL_API_KEY": "synthetic-ref-key",
     }
     direct = subprocess.run(
@@ -231,6 +233,68 @@ def test_direct_codex_command_installer_is_bounded_and_secret_free(
         "arg=mcp",
         "arg=get",
         "arg=ref",
+    ]
+
+
+def test_direct_codex_command_ensures_mcp_before_exec(tmp_path: Path) -> None:
+    """The PATH shim must reconcile the shared MCP plane before Codex starts."""
+    root = _project_root()
+    source_helper_dir = root / "scripts" / "ai" / "codex" / "helper"
+    helper_dir = tmp_path / "helper"
+    helper_dir.mkdir()
+    launcher = helper_dir / "run-codex-impl.sh"
+    shutil.copy2(source_helper_dir / launcher.name, launcher)
+    shutil.copy2(source_helper_dir / "codex-auth-lib.sh", helper_dir)
+
+    marker = tmp_path / "mcp-ready"
+    capture = tmp_path / "ensure-args.txt"
+    ensure_mcp = helper_dir / "ensure-mcp.sh"
+    ensure_mcp.write_text(
+        "#!/usr/bin/env bash\n"
+        "set -euo pipefail\n"
+        ': >"${BIOETL_TEST_MCP_MARKER:?}"\n'
+        "printf 'arg=%s\\n' \"$@\" >\"${BIOETL_TEST_MCP_CAPTURE:?}\"\n",
+        encoding="utf-8",
+    )
+    ensure_mcp.chmod(0o700)
+
+    fake_codex = tmp_path / "codex-real"
+    fake_codex.write_text(
+        "#!/usr/bin/env bash\n"
+        "set -euo pipefail\n"
+        '[[ -f "${BIOETL_TEST_MCP_MARKER:?}" ]]\n'
+        "printf 'codex-arg=%s\\n' \"$@\"\n",
+        encoding="utf-8",
+    )
+    fake_codex.chmod(0o700)
+
+    env = {
+        **os.environ,
+        "BIOETL_CODEX_DIRECT_BIN": str(fake_codex),
+        "BIOETL_TEST_MCP_CAPTURE": str(capture),
+        "BIOETL_TEST_MCP_MARKER": str(marker),
+        "REPO_ROOT": str(tmp_path),
+    }
+    completed = subprocess.run(
+        ["bash", str(launcher), "mcp", "list"],
+        cwd=tmp_path,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=10,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert completed.stdout.splitlines() == [
+        "codex-arg=mcp",
+        "codex-arg=list",
+    ]
+    assert completed.stderr.splitlines() == ["[INFO] MCP configuration ready"]
+    assert capture.read_text(encoding="utf-8").splitlines() == [
+        "arg=--ensure",
+        "arg=--codex-bin",
+        f"arg={fake_codex}",
     ]
 
 
@@ -334,9 +398,16 @@ def test_setup_delegates_shared_start_timeout_to_mcp_ensure() -> None:
     ensure_helper = (
         root / "scripts" / "ai" / "codex" / "helper" / "ensure-mcp.sh"
     ).read_text(encoding="utf-8")
+    launcher_helper = (
+        root / "scripts" / "ai" / "codex" / "helper" / "run-codex-impl.sh"
+    ).read_text(encoding="utf-8")
 
     assert 'bash "${ENSURE_MCP_SCRIPT}" --ensure' in setup_helper
     assert "timeout 30 bash -c" not in setup_helper
+    assert 'timeout 60 "${ENSURE_MCP_SCRIPT}"' not in launcher_helper
+    assert '"${ENSURE_MCP_SCRIPT}" --ensure --codex-bin "${codex_bin}"' in (
+        launcher_helper
+    )
     assert "CODEX_MCP_SHARED_START_TIMEOUT:-360" in ensure_helper
     assert 'timeout "${timeout_seconds}" bash "${launcher}"' in ensure_helper
     assert "Shared-plane start phase failed" in ensure_helper
