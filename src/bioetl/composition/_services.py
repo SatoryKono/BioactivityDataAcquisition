@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from importlib import import_module
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal, overload
+from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from bioetl.composition._service_types import (
@@ -87,182 +87,6 @@ def resolve_bootstrap_attr(name: str) -> object:
     return bootstrap_attr
 
 
-@overload
-def _invoke_bootstrap(
-    name: Literal["bootstrap_adr_service"],
-    *args: object,
-    **kwargs: object,
-) -> AdrServicePort: ...
-
-
-@overload
-def _invoke_bootstrap(
-    name: Literal["bootstrap_audit_inspection_service"],
-    *args: object,
-    **kwargs: object,
-) -> AuditInspectionService: ...
-
-
-@overload
-def _invoke_bootstrap(
-    name: Literal["bootstrap_bronze_cleanup_service"],
-    *args: object,
-    **kwargs: object,
-) -> BronzeCleanupService: ...
-
-
-@overload
-def _invoke_bootstrap(
-    name: Literal["bootstrap_checkpoint_service"],
-    *args: object,
-    **kwargs: object,
-) -> CheckpointService: ...
-
-
-@overload
-def _invoke_bootstrap(
-    name: Literal["bootstrap_config_service"],
-    *args: object,
-    **kwargs: object,
-) -> ConfigService: ...
-
-
-@overload
-def _invoke_bootstrap(
-    name: Literal["bootstrap_contract_migration_service"],
-    *args: object,
-    **kwargs: object,
-) -> ContractMigrationService: ...
-
-
-@overload
-def _invoke_bootstrap(
-    name: Literal["bootstrap_export_service"],
-    *args: object,
-    **kwargs: object,
-) -> ExportService: ...
-
-
-@overload
-def _invoke_bootstrap(
-    name: Literal["bootstrap_forensic_run_diff_service"],
-    *args: object,
-    **kwargs: object,
-) -> ForensicRunDiffService: ...
-
-
-@overload
-def _invoke_bootstrap(
-    name: Literal["bootstrap_historical_replay_closure_service"],
-    *args: object,
-    **kwargs: object,
-) -> HistoricalReplayClosureService: ...
-
-
-@overload
-def _invoke_bootstrap(
-    name: Literal["bootstrap_historical_replay_corpus_service"],
-    *args: object,
-    **kwargs: object,
-) -> HistoricalReplayCorpusService: ...
-
-
-@overload
-def _invoke_bootstrap(
-    name: Literal["bootstrap_historical_replay_universe_service"],
-    *args: object,
-    **kwargs: object,
-) -> HistoricalReplayUniverseService: ...
-
-
-@overload
-def _invoke_bootstrap(
-    name: Literal["bootstrap_health_server_dependencies"],
-    *args: object,
-    **kwargs: object,
-) -> HealthServerDependencies: ...
-
-
-@overload
-def _invoke_bootstrap(
-    name: Literal["bootstrap_health_service"],
-    *args: object,
-    **kwargs: object,
-) -> HealthService: ...
-
-
-@overload
-def _invoke_bootstrap(
-    name: Literal["bootstrap_lineage_service"],
-    *args: object,
-    **kwargs: object,
-) -> LineageInspectionService: ...
-
-
-@overload
-def _invoke_bootstrap(
-    name: Literal["bootstrap_lock_service"],
-    *args: object,
-    **kwargs: object,
-) -> LockService: ...
-
-
-@overload
-def _invoke_bootstrap(
-    name: Literal["bootstrap_metrics_service"],
-    *args: object,
-    **kwargs: object,
-) -> MetricsService: ...
-
-
-@overload
-def _invoke_bootstrap(
-    name: Literal["bootstrap_observability_workflow_service"],
-    *args: object,
-    **kwargs: object,
-) -> ObservabilityWorkflowService: ...
-
-
-@overload
-def _invoke_bootstrap(
-    name: Literal["bootstrap_pipeline_runner_service"],
-    *args: object,
-    **kwargs: object,
-) -> PipelineRunnerService: ...
-
-
-@overload
-def _invoke_bootstrap(
-    name: Literal["bootstrap_quarantine_adapter"],
-    *args: object,
-    **kwargs: object,
-) -> QuarantinePort: ...
-
-
-@overload
-def _invoke_bootstrap(
-    name: Literal["bootstrap_quarantine_service"],
-    *args: object,
-    **kwargs: object,
-) -> QuarantineService: ...
-
-
-@overload
-def _invoke_bootstrap(
-    name: Literal["bootstrap_run_manifest_service"],
-    *args: object,
-    **kwargs: object,
-) -> RunManifestInspectionService: ...
-
-
-@overload
-def _invoke_bootstrap(
-    name: Literal["bootstrap_vacuum_service"],
-    *args: object,
-    **kwargs: object,
-) -> VacuumService: ...
-
-
 def _invoke_bootstrap(name: str, *args: object, **kwargs: object) -> object:
     """Resolve one bootstrap owner lazily and invoke it as a callable."""
     bootstrap_fn = resolve_bootstrap_attr(name)
@@ -295,32 +119,42 @@ def _ensure_pipeline_registrations(registry: PipelineRegistry | None = None) -> 
 def get_checkpoint_service() -> CheckpointService:
     """Get checkpoint administration service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_checkpoint_service")
+    return cast("CheckpointService", _invoke_bootstrap("bootstrap_checkpoint_service"))
 
 
 def get_audit_service() -> AuditInspectionService:
     """Get an audit inspection service for operator diagnostics operations."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_audit_inspection_service")
+    return cast(
+        "AuditInspectionService",
+        _invoke_bootstrap("bootstrap_audit_inspection_service"),
+    )
 
 
 def get_quarantine_service(*, data_root: Path | None = None) -> QuarantineService:
     """Get quarantine administration service without pipeline registration."""
     if data_root is None:
-        return _invoke_bootstrap("bootstrap_quarantine_service")
-    return _invoke_bootstrap("bootstrap_quarantine_service", data_root=data_root)
+        return cast(
+            "QuarantineService", _invoke_bootstrap("bootstrap_quarantine_service")
+        )
+    return cast(
+        "QuarantineService",
+        _invoke_bootstrap("bootstrap_quarantine_service", data_root=data_root),
+    )
 
 
 def get_bronze_cleanup_service() -> BronzeCleanupService:
     """Get Bronze cleanup service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_bronze_cleanup_service")
+    return cast(
+        "BronzeCleanupService", _invoke_bootstrap("bootstrap_bronze_cleanup_service")
+    )
 
 
 def get_vacuum_service() -> VacuumService:
     """Get batch vacuum service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_vacuum_service")
+    return cast("VacuumService", _invoke_bootstrap("bootstrap_vacuum_service"))
 
 
 async def cleanup_bronze(
@@ -340,7 +174,10 @@ def get_pipeline_runner_service(
 ) -> PipelineRunnerService:
     """Get universal pipeline runner service."""
     _ensure_pipeline_registrations(registry=registry)
-    return _invoke_bootstrap("bootstrap_pipeline_runner_service", registry=registry)
+    return cast(
+        "PipelineRunnerService",
+        _invoke_bootstrap("bootstrap_pipeline_runner_service", registry=registry),
+    )
 
 
 def get_workflow_runner_service(
@@ -382,19 +219,25 @@ def load_workflow_config(name: str) -> WorkflowConfig:
 def get_contract_migration_service() -> ContractMigrationService:
     """Get the contract migration planner service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_contract_migration_service")
+    return cast(
+        "ContractMigrationService",
+        _invoke_bootstrap("bootstrap_contract_migration_service"),
+    )
 
 
 def get_health_service() -> HealthService:
     """Get provider health service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_health_service")
+    return cast("HealthService", _invoke_bootstrap("bootstrap_health_service"))
 
 
 def get_observability_workflow_service() -> ObservabilityWorkflowService:
     """Get workflow-level observability diagnostics helpers."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_observability_workflow_service")
+    return cast(
+        "ObservabilityWorkflowService",
+        _invoke_bootstrap("bootstrap_observability_workflow_service"),
+    )
 
 
 def get_health_server_dependencies(
@@ -403,79 +246,102 @@ def get_health_server_dependencies(
 ) -> HealthServerDependencies:
     """Get health-server dependencies without pipeline registration."""
     if data_root is None:
-        return _invoke_bootstrap("bootstrap_health_server_dependencies")
-    return _invoke_bootstrap(
-        "bootstrap_health_server_dependencies",
-        data_root=data_root,
+        return cast(
+            "HealthServerDependencies",
+            _invoke_bootstrap("bootstrap_health_server_dependencies"),
+        )
+    return cast(
+        "HealthServerDependencies",
+        _invoke_bootstrap(
+            "bootstrap_health_server_dependencies",
+            data_root=data_root,
+        ),
     )
 
 
 def get_metrics_service() -> MetricsService:
     """Get metrics administration service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_metrics_service")
+    return cast("MetricsService", _invoke_bootstrap("bootstrap_metrics_service"))
 
 
 def get_quarantine_port() -> QuarantinePort:
     """Get the shared low-level quarantine port without pipeline registration."""
-    return _invoke_bootstrap("bootstrap_quarantine_adapter")
+    return cast("QuarantinePort", _invoke_bootstrap("bootstrap_quarantine_adapter"))
 
 
 def get_adr_service() -> AdrServicePort:
     """Get ADR management port."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_adr_service")
+    return cast("AdrServicePort", _invoke_bootstrap("bootstrap_adr_service"))
 
 
 def get_config_service() -> ConfigService:
     """Get application configuration service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_config_service")
+    return cast("ConfigService", _invoke_bootstrap("bootstrap_config_service"))
 
 
 def get_export_service() -> ExportService:
     """Get Delta export service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_export_service")
+    return cast("ExportService", _invoke_bootstrap("bootstrap_export_service"))
 
 
 def get_forensic_run_diff_service() -> ForensicRunDiffService:
     """Get forensic run diff service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_forensic_run_diff_service")
+    return cast(
+        "ForensicRunDiffService",
+        _invoke_bootstrap("bootstrap_forensic_run_diff_service"),
+    )
 
 
 def get_historical_replay_closure_service() -> HistoricalReplayClosureService:
     """Get historical replay closure service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_historical_replay_closure_service")
+    return cast(
+        "HistoricalReplayClosureService",
+        _invoke_bootstrap("bootstrap_historical_replay_closure_service"),
+    )
 
 
 def get_historical_replay_corpus_service() -> HistoricalReplayCorpusService:
     """Get historical replay corpus service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_historical_replay_corpus_service")
+    return cast(
+        "HistoricalReplayCorpusService",
+        _invoke_bootstrap("bootstrap_historical_replay_corpus_service"),
+    )
 
 
 def get_historical_replay_universe_service() -> HistoricalReplayUniverseService:
     """Get historical replay universe service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_historical_replay_universe_service")
+    return cast(
+        "HistoricalReplayUniverseService",
+        _invoke_bootstrap("bootstrap_historical_replay_universe_service"),
+    )
 
 
 def get_lineage_service() -> LineageInspectionService:
     """Get lineage service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_lineage_service")
+    return cast(
+        "LineageInspectionService", _invoke_bootstrap("bootstrap_lineage_service")
+    )
 
 
 def get_lock_service() -> LockService:
     """Get administrative lock service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_lock_service")
+    return cast("LockService", _invoke_bootstrap("bootstrap_lock_service"))
 
 
 def get_run_manifest_service() -> RunManifestInspectionService:
     """Get run-manifest service without full pipeline registration."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_run_manifest_service")
+    return cast(
+        "RunManifestInspectionService",
+        _invoke_bootstrap("bootstrap_run_manifest_service"),
+    )

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
 from typing import cast
 
 from bioetl.domain.behavior.aggregation_validator import AggregationConfig
@@ -36,6 +37,65 @@ def _append_config_issue_if_invalid(
             details=details or {},
         )
     )
+
+
+def append_invalid_config_section(
+    *,
+    issues: list[ValidationIssue],
+    composite_config: JsonDict,
+    config_key: str,
+    validator: Callable[[JsonDict], bool],
+    code: IssueCode,
+    severity: ValidationSeverity,
+    message: str,
+    details_key: str,
+) -> None:
+    """Append an issue when an optional composite section is malformed."""
+    section_value = composite_config.get(config_key)
+    if section_value is None:
+        return
+    if isinstance(section_value, dict) and validator(section_value):
+        return
+    _append_config_issue_if_invalid(
+        issues=issues,
+        is_valid=False,
+        code=code,
+        severity=severity,
+        message=message,
+        details={details_key: section_value},
+    )
+
+
+def as_output_schema(
+    raw: object,
+) -> tuple[JsonDict | None, list[ValidationIssue]]:
+    """Accept only a mapping output schema."""
+    if isinstance(raw, dict):
+        return raw, []
+    return None, [
+        _create_issue(
+            IssueCode.CMP_STR_SCHEMA_001,
+            ValidationSeverity.BLOCKER,
+            "output_schema must be a mapping",
+            {"actual_type": type(raw).__name__},
+        )
+    ]
+
+
+def as_source_names(
+    raw: object,
+) -> tuple[list[str] | None, list[ValidationIssue]]:
+    """Accept only a list of source name strings."""
+    if isinstance(raw, list) and all(isinstance(item, str) for item in raw):
+        return list(raw), []
+    return None, [
+        _create_issue(
+            IssueCode.CMP_STR_FORMAT_003,
+            ValidationSeverity.BLOCKER,
+            "sources must be a list of strings",
+            {"actual_type": type(raw).__name__},
+        )
+    ]
 
 
 def _create_issue(

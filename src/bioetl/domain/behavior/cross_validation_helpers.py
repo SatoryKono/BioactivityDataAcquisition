@@ -7,32 +7,26 @@ from typing import cast
 from bioetl.domain.behavior.cross_validation_source_helpers import (
     comparison_source_list as _comparison_source_list,
 )
-from bioetl.domain.types import JsonDict
+from bioetl.domain.behavior.cross_validation_source_helpers import (
+    create_cross_validation_issue,
+)
+from bioetl.domain.behavior.cross_validation_source_helpers import (
+    normalize_comparison_sources as _normalize_comparison_sources,
+)
+from bioetl.domain.behavior.cross_validation_source_helpers import (
+    validate_comparison_sources as _validate_comparison_sources,
+)
+from bioetl.domain.behavior.cross_validation_source_helpers import (
+    validate_source_name as _validate_source_name,
+)
 from bioetl.domain.types.validation_result import ValidationIssue
 from bioetl.domain.types.validation_severity import (
     IssueCode,
-    ValidationLayer,
     ValidationSeverity,
 )
 
 _SUPPORTED_RULE_TYPES = frozenset({"strict", "lenient", "warn", "custom"})
-
-
-def _create_issue(
-    code: IssueCode,
-    severity: ValidationSeverity,
-    message: str,
-    details: JsonDict | None = None,
-    location: str | None = None,
-) -> ValidationIssue:
-    return ValidationIssue(
-        code=code,
-        severity=severity,
-        layer=ValidationLayer.DEEP_PREFLIGHT,
-        message=message,
-        details=details or {},
-        location=location,
-    )
+_create_issue = create_cross_validation_issue
 
 
 def _validate_pairs(
@@ -111,118 +105,6 @@ def _validate_pair_shape(pair: object, index: int) -> ValidationIssue | None:
             {"pair": pair, "index": index},
         )
     return None
-
-
-def _validate_source_name(
-    source_name: object,
-    index: int,
-    valid_sources: set[str],
-) -> list[ValidationIssue]:
-    if not isinstance(source_name, str):
-        return [
-            _create_issue(
-                IssueCode.CMP_PF_CV_005,
-                ValidationSeverity.BLOCKER,
-                f"Cross-validation source at index {index} must be a string",
-                {"source_name": source_name, "index": index},
-            )
-        ]
-    if source_name in valid_sources:
-        return []
-    return [
-        _create_issue(
-            IssueCode.CMP_PF_CV_005,
-            ValidationSeverity.BLOCKER,
-            f"Cross-validation source '{source_name}' not found in pipeline sources",
-            {
-                "source_name": source_name,
-                "available_sources": sorted(valid_sources),
-                "pair_index": index,
-            },
-        )
-    ]
-
-
-def _normalize_comparison_sources(
-    *,
-    source_name: object,
-    comparison_sources: object,
-) -> tuple[list[str], ValidationIssue | None]:
-    if isinstance(comparison_sources, str):
-        return [comparison_sources], None
-    if isinstance(comparison_sources, list):
-        if all(isinstance(item, str) for item in comparison_sources):
-            return comparison_sources, None
-        return [], _create_issue(
-            IssueCode.CMP_PF_CV_006,
-            ValidationSeverity.BLOCKER,
-            f"Comparison sources for '{source_name}' must contain only strings",
-            {"source_name": source_name, "comparison_sources": comparison_sources},
-        )
-
-    return [], _create_issue(
-        IssueCode.CMP_PF_CV_006,
-        ValidationSeverity.BLOCKER,
-        f"Comparison sources for '{source_name}' must be string or list",
-        {"source_name": source_name, "comparison_sources": comparison_sources},
-    )
-
-
-def _validate_comparison_sources(
-    *,
-    comparison_sources: list[str],
-    source_name: object,
-    valid_sources: set[str],
-) -> list[ValidationIssue]:
-    if _is_self_only_comparison(comparison_sources, source_name):
-        comparison_source = comparison_sources[0]
-        return [
-            _create_issue(
-                IssueCode.CMP_PF_CV_007,
-                ValidationSeverity.BLOCKER,
-                f"Comparison source '{comparison_source}' cannot compare to itself",
-                {
-                    "comparison_source": comparison_source,
-                    "source_name": source_name,
-                },
-            )
-        ]
-    return [
-        _unknown_comparison_source_issue(comparison_source, source_name, valid_sources)
-        for comparison_source in comparison_sources
-        if comparison_source != source_name and comparison_source not in valid_sources
-    ]
-
-
-def _is_self_only_comparison(
-    comparison_sources: list[str], source_name: object
-) -> bool:
-    return bool(comparison_sources) and set(comparison_sources) == {source_name}
-
-
-def _unknown_comparison_source_issue(
-    comparison_source: str,
-    source_name: object,
-    valid_sources: set[str],
-) -> ValidationIssue:
-    return _create_issue(
-        IssueCode.CMP_PF_CV_007,
-        ValidationSeverity.BLOCKER,
-        f"Comparison source '{comparison_source}' not found in pipeline sources",
-        {
-            "comparison_source": comparison_source,
-            "source_name": source_name,
-            "available_sources": sorted(valid_sources),
-        },
-    )
-
-
-def _compares_only_to_self(source_name: object, comparison_sources: list[str]) -> bool:
-    if not isinstance(source_name, str):
-        return False
-    if not comparison_sources:
-        return False
-    return set(comparison_sources) == {source_name}
 
 
 def _validate_rules(rules: dict[str, str]) -> list[ValidationIssue]:

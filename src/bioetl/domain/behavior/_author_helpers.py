@@ -33,15 +33,7 @@ _AFFILIATION_KEYS = ("name", "display_name", "affiliation")
 
 
 def hash_author_name(name: str, salt: str) -> str:
-    """Hash author name with SHA-256: sha256(lowercase(name) + salt).
-
-    Args:
-        name: Author name string to hash (stripped and lowercased before hashing).
-        salt: Cryptographic salt appended before hashing for PII compliance.
-
-    Returns:
-        SHA-256 hex digest string of the normalized author name and salt.
-    """
+    """Hash the normalized author name and salt with SHA-256."""
     normalized = name.strip().lower()
     return hashlib.sha256(f"{normalized}{salt}".encode()).hexdigest()
 
