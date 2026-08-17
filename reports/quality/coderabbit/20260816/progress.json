@@ -745,12 +745,36 @@
       "id": "S07-infra-storage",
       "wave": "B",
       "files": 146,
-      "status": "rate_limit",
-      "reason": "CodeRabbit rate limit (waitTime=5s)",
-      "exit_code": 1,
+      "status": "ok",
+      "reason": "",
+      "exit_code": 0,
       "log": "reports/quality/coderabbit/20260816/review_B_S07-infra-storage.log",
-      "bytes": 938,
-      "elapsed_s": 46.1,
+      "bytes": 178650,
+      "elapsed_s": 543.3,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ]
+    },
+    "S16-configs-quality": {
+      "id": "S16-configs-quality",
+      "wave": "B",
+      "files": 100,
+      "status": "connection_error",
+      "reason": "CodeRabbit connection/WebSocket failure",
+      "exit_code": 1,
+      "log": "reports/quality/coderabbit/20260816/review_B_S16-configs-quality.log",
+      "bytes": 453,
+      "elapsed_s": 70.5,
       "command": [
         "/home/fedor/.local/bin/coderabbit",
         "review",
@@ -766,5 +790,5 @@
       ]
     }
   },
-  "updated_utc": "2026-08-17T05:40:08.319919+00:00"
+  "updated_utc": "2026-08-17T06:22:04.489333+00:00"
 }
