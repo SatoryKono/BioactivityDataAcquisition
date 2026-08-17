@@ -140,7 +140,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-overview-v2.json | 9020 | Track Gold Lifecycle |
 | bioetl-overview-v2.json | 9009 | Inspect Range Evidence |
 | bioetl-overview-v2.json | 9010 | Review Failed Runs |
-| bioetl-overview-v2.json | 9011 | Review Recent Terminal Runs |
+| bioetl-overview-v2.json | 9011 | Review Recent Non-success Terminal Runs |
 | bioetl-overview-v2.json | 9015 | Track Silver Rejects |
 | bioetl-overview-v2.json | 9012 | Inspect Domain Diagnostics |
 | bioetl-overview-v2.json | 9006 | Review Control Plane Status |

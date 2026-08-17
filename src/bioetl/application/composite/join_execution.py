@@ -88,12 +88,12 @@ class JoinExecutorService:
             left_df = left_df.with_columns(
                 pl.col(left_key)
                 .cast(pl.String)
-                .str.replace(r"\\.0$", "", literal=False)
+                .str.replace(r"\.0$", "", literal=False)
             )
             right_df = right_df.with_columns(
                 pl.col(right_key)
                 .cast(pl.String)
-                .str.replace(r"\\.0$", "", literal=False)
+                .str.replace(r"\.0$", "", literal=False)
             )
 
         if left_key != right_key:

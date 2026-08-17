@@ -17,6 +17,8 @@ def _normalize_fk_optional_name(value: str | None, field_name: str) -> str | Non
 
 
 def _normalize_fk_required_names(values: list[str], field_name: str) -> list[str]:
+    if not values:
+        raise ValueError(f"reconcile_foreign_keys {field_name} cannot be empty")
     normalized = [_normalize_fk_required_name(value, field_name) for value in values]
     if len(set(normalized)) != len(normalized):
         raise ValueError(
@@ -42,7 +44,7 @@ def _require_fk_key_pairs_present(
     reference_keys: list[str] | None,
 ) -> None:
     single_pair_present = source_key is not None or reference_key is not None
-    composite_pair_present = source_keys is not None or reference_keys is not None
+    composite_pair_present = bool(source_keys) or bool(reference_keys)
     if not single_pair_present and not composite_pair_present:
         raise ValueError(
             "reconcile_foreign_keys requires source_key/reference_key or "

@@ -2120,7 +2120,7 @@
     {
       "dashboard_uid": "bioetl-overview-v2",
       "panel_id": 9011,
-      "panel_title": "Review Recent Terminal Runs",
+      "panel_title": "Review Recent Non-success Terminal Runs",
       "route": "operations-home",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",

@@ -445,7 +445,7 @@ def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
     ("dashboard_file", "panel_title"),
     [
         ("bioetl-overview-v2.json", "Review Failed Runs"),
-        ("bioetl-overview-v2.json", "Review Recent Terminal Runs"),
+        ("bioetl-overview-v2.json", "Review Recent Non-success Terminal Runs"),
         ("bioetl-control-plane-v1.json", "Track Global Read Failures"),
         (
             "bioetl-control-plane-v1.json",

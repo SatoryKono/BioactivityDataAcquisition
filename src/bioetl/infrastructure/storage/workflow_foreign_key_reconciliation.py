@@ -260,12 +260,10 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
                 current_only=True,
             )
         except FileNotFoundError as exc:
-            if request.reference_layer == "gold":
-                raise ValueError(
-                    "Gold foreign-key reconciliation reference table not found: "
-                    f"{request.reference_table}"
-                ) from exc
-            return []
+            raise ValueError(
+                "foreign-key reconciliation reference table not found: "
+                f"{request.reference_table} ({request.reference_layer})"
+            ) from exc
 
     async def _read_rows(
         self,

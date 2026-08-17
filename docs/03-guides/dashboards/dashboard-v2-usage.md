@@ -415,9 +415,10 @@ Compact evidence ниже первого экрана:
 - `Historical Failures` (`id=9010`): selected-range historical failure table
   over `bioetl_pipeline_runs_total`; zero matching rows only means no failed-run
   samples in the selected range, not current OK; handoff `Open Runtime`.
-- `Recent Terminal Runs` (`id=9011`): selected-range non-success terminal-run
-  table over `bioetl_pipeline_runs_total`; no terminal rows is not proof of
-  current OK; handoffs `Open Control Plane` and `Open Runtime`.
+- `Recent Non-success Terminal Runs` (`id=9011`): selected-range non-success
+  terminal-run table over `bioetl_pipeline_runs_total`; no rows means no
+  matching non-success terminal evidence, not proof of current OK; handoffs
+  `Open Control Plane` and `Open Runtime`.
 
 Эти пять panels retained intentionally. Current verdict по-прежнему определяется
 только first-screen `Status`, `First Action`, `Inputs` и current L1 cards.
@@ -731,10 +732,10 @@ Variable handoff policy for dashboard links remains strict and bounded:
   `max_over_time(...)` evidence so short-lived successful workflow runs remain
   visible after the CLI process exits. `UNKNOWN` is valid only when the
   selected scope has no recent workflow evidence at all.
-- `overview.Recent Terminal Runs`: range-evidence table now
+- `overview.Recent Non-success Terminal Runs`: range-evidence table now
   shows only non-success terminal statuses grouped by `pipeline/status`; success
   completions are intentionally omitted because they create scroll without
-  improving first-click triage.
+  improving first-click triage. The panel title matches that query scope.
 - `control-plane.Track Replay Blockers in Range`: selected-range blocker
   count. Нулевое значение само по себе не доказывает safety; его нужно читать
   вместе с current trust cards и `Monitor Telemetry = 0`.

@@ -442,7 +442,7 @@ datasource/query failure по роли панели.
 ### 4.5.6 Compact Overview selected-range evidence
 
 - `Runtime Blockers Trend`, `DQ Status Trend`, `Gold Lifecycle Trend`,
-  `Historical Failures`, and `Recent Terminal Runs` on `bioetl-overview-v2`
+  `Historical Failures`, and `Recent Non-success Terminal Runs` on `bioetl-overview-v2`
   are retained as compact below-fold evidence panels.
 - They MUST stay below the current L0 verdict path and MUST NOT be referenced as
   current `Status` / `Next Action` inputs.
