@@ -12,10 +12,24 @@ from bioetl.domain.normalization import (
 )
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types._checkpoint_metadata_support import (
+    coerce_json_dict_sequence as _coerce_json_dict_sequence,
+)
+from bioetl.domain.types._checkpoint_metadata_support import (
+    coerce_records_processed as _coerce_records_processed,
+)
+from bioetl.domain.types._checkpoint_metadata_support import (
     coerce_snapshot_ids,
     coerce_snapshot_refs,
-    extract_run_context_anchor,
     is_empty_checkpoint_metadata_value,
+)
+from bioetl.domain.types._checkpoint_metadata_support import (
+    extract_checkpoint_anchor as _extract_anchor,
+)
+from bioetl.domain.types._checkpoint_metadata_support import (
+    optional_stripped_text as _optional_stripped_text,
+)
+from bioetl.domain.types._checkpoint_metadata_support import (
+    snapshot_fingerprint_inputs as _snapshot_fingerprint_inputs,
 )
 from bioetl.domain.types.checkpoint_compatibility_result import (
     CheckpointCompatibilityResult,
@@ -23,57 +37,6 @@ from bioetl.domain.types.checkpoint_compatibility_result import (
 
 _OPTIONAL_STR = str | None
 _OPTIONAL_BOOL = bool | None
-
-
-def _optional_stripped_text(value: object) -> str | None:
-    if value is None:
-        return None
-    text = str(value).strip()
-    return text or None
-
-
-def _coerce_records_processed(value: object) -> int:
-    if value is None:
-        return 0
-    if isinstance(value, int) and not isinstance(value, bool):
-        return value
-    return _parse_records_processed_text(value)
-
-
-def _parse_records_processed_text(value: object) -> int:
-    if not isinstance(value, str):
-        raise ValueError("records_processed must be an integer")
-    text = value.strip()
-    if not text or not text.lstrip("-").isdigit():
-        raise ValueError("records_processed must be an integer")
-    return int(text)
-
-
-def _extract_with_fallback(
-    data: JsonDict,
-    key: str,
-    fallback_key: str | None = None,
-) -> _OPTIONAL_STR:
-    """Extract optional string with fallback to run_context anchor."""
-    value = data.get(key)
-    if value is not None:
-        return _optional_stripped_text(value)
-    if fallback_key:
-        return extract_run_context_anchor(data, fallback_key)
-    return None
-
-
-def _extract_anchor(data: JsonDict, key: str) -> _OPTIONAL_STR:
-    """Extract optional string with like-named run-context fallback."""
-    return _extract_with_fallback(data, key, key)
-
-
-def _coerce_json_dict_sequence(value: object) -> tuple[JsonDict, ...]:
-    """Coerce persisted JSON objects into an immutable tuple."""
-    if not isinstance(value, list | tuple):
-        return ()
-    return tuple(item for item in value if isinstance(item, dict))
-
 
 @dataclass(frozen=True, slots=True)
 class CheckpointMetadata:
@@ -331,12 +294,3 @@ __all__ = [
     "CheckpointCompatibilityResult",
     "CheckpointMetadata",
 ]
-
-
-def _snapshot_fingerprint_inputs(
-    refs: tuple[JsonDict, ...],
-    ids: tuple[str, ...],
-) -> list[object]:
-    if refs:
-        return list(refs)
-    return [{"snapshot_id": snapshot_id} for snapshot_id in ids]

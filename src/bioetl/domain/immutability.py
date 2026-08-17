@@ -139,7 +139,7 @@ def _mapping_init_data(
     return data
 
 
-def _freeze_mapping_items(data: Mapping[object, object]) -> dict[str, object]:
+def _freeze_mapping_items(data: Mapping[str, object]) -> dict[str, object]:
     frozen: dict[str, object] = {}
     for key, item in data.items():
         if not isinstance(key, str):

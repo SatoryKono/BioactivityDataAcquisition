@@ -14,8 +14,12 @@ from bioetl.domain.schemas.uniprot._core import UniprotCoreSchema
 from bioetl.domain.schemas.validators import rows_are_valid_json, str_matches_pattern
 from bioetl.domain.value_objects._molecular_weight import MolecularWeight
 from bioetl.domain.value_objects._publication_year import PublicationYear
-from bioetl.domain.value_objects.activity_concentration import Concentration, ConcentrationUnit
-from bioetl.domain.value_objects.activity_type import ActivityType
+from bioetl.domain.value_objects import (
+    ActivityType,
+    Concentration,
+    ConcentrationUnit,
+    PChemblValue,
+)
 from bioetl.domain.value_objects.column_order import ColumnOrderConfig
 from bioetl.domain.value_objects.column_qualifier import ColumnQualifier
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
@@ -28,7 +32,6 @@ from bioetl.domain.value_objects.export_identity import format_utc
 from bioetl.domain.value_objects.identifiers import PubChemCid
 from bioetl.domain.value_objects.inchi import InChI
 from bioetl.domain.value_objects.molecular_descriptors import _coerce_int
-from bioetl.domain.value_objects.pchembl_value import PChemblValue
 
 pytestmark = pytest.mark.unit
 

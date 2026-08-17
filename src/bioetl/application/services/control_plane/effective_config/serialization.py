@@ -54,9 +54,7 @@ def stable_hash(payload: object) -> str:
     return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
 
-def _source_ref_sort_key(
-    src: ConfigSourceRef,
-) -> tuple[int, str, str, str, str]:
+def _source_ref_sort_key(src: ConfigSourceRef) -> tuple[int, str, str, str, str]:
     return (
         src.priority,
         src.source_type,

@@ -227,21 +227,21 @@
     },
     {
       "kind": "attribute_call:resolve",
-      "line": 193,
+      "line": 197,
       "path": "src/bioetl/domain/run_reports/accounting_snapshots.py",
       "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
       "symbol": "StageAccountingSnapshotsMixin._removals_for_bucket"
     },
     {
       "kind": "attribute_call:resolve",
-      "line": 117,
+      "line": 121,
       "path": "src/bioetl/domain/run_reports/reason_catalog.py",
       "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
       "symbol": "ReasonCatalog.family_for"
     },
     {
       "kind": "attribute_call:resolve",
-      "line": 120,
+      "line": 124,
       "path": "src/bioetl/domain/run_reports/reason_catalog.py",
       "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
       "symbol": "ReasonCatalog.default_outcome_for"
@@ -395,21 +395,21 @@
     },
     {
       "kind": "import:pandas",
-      "line": 8,
+      "line": 11,
       "path": "src/bioetl/domain/schemas/chembl/publication.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
     },
     {
       "kind": "import:pandera",
-      "line": 9,
+      "line": 12,
       "path": "src/bioetl/domain/schemas/chembl/publication.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
     },
     {
       "kind": "import:pandera",
-      "line": 10,
+      "line": 13,
       "path": "src/bioetl/domain/schemas/chembl/publication.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
@@ -837,7 +837,7 @@
   ],
   "domain_root": "src/bioetl/domain",
   "generated_by": "scripts.engineering.qa.report_domain_io_taint_inventory",
-  "scanned_file_count": 608,
+  "scanned_file_count": 609,
   "schema_version": 1,
   "violation_count": 0,
   "violations": []

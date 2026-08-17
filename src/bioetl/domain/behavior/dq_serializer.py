@@ -14,6 +14,9 @@ import orjson
 from bioetl.domain.behavior._dq_serializer_html import (
     DQSerializerHtmlCompatibilityMixin,
 )
+from bioetl.domain.behavior._dq_serializer_html import (
+    generate_html_report as generate_html_report,
+)
 from bioetl.domain.behavior._dq_serializer_yaml import format_yaml_scalar
 from bioetl.domain.types import JsonDict
 from bioetl.domain.value_objects.dq_report import (
