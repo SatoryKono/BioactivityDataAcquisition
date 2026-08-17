@@ -51,7 +51,7 @@ dashboards:
       - Prometheus
       - BioETL Ops HTTP
       - Grafana
-    panel_count: 26
+    panel_count: 27
     key_panels:
       - id: 214
         title: Monitor Fleet Health

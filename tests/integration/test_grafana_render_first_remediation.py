@@ -493,7 +493,14 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
     domain_tracks = _panel(overview, 9030)
     assert domain_tracks.get("type") == "row"
     assert domain_tracks.get("collapsed") is True
-    assert len(domain_tracks.get("panels") or []) == 3
+    assert len(domain_tracks.get("panels") or []) == 4
+    full_matrix = next(
+        panel
+        for panel in (domain_tracks.get("panels") or [])
+        if panel.get("id") == 9031
+    )
+    assert full_matrix.get("title") == "Review All Domain Status"
+    assert "topk(" not in str(full_matrix.get("targets"))
     for row_id in (9009, 9012):
         row = _panel(overview, row_id)
         assert row.get("type") == "row"
