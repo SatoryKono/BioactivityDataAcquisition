@@ -1270,7 +1270,6 @@ class TestDeduplicateEnricher:
         assert without_c == ["same"]
 
     def test_all_null_remains_null(self, deduplicator):
-
         """Test all null values remain null (no conflict when all identical)."""
         import polars as pl
 
