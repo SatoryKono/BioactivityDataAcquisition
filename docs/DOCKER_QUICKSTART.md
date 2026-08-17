@@ -214,7 +214,7 @@ container. `runtime_manager status --stack main` now re-runs the same bind gate.
 
 `runtime_manager.py` binds the explicitly selected `data/` and `reports/`
 directories and injects a managed `BIOETL_RUNTIME_SOURCE_ID`. Absolute Windows,
-WSL (`/mnt/<drive>/...`), and Docker Desktop host path spellings normalize to
+WSL (the `/mnt` drive prefix), and Docker Desktop host path spellings normalize to
 one comparison identity; transient `docker-desktop-bind-mounts/<hash>` origins
 remain rejected. Check the dashboard data-plane identity with:
 
