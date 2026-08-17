@@ -190,3 +190,13 @@ class TestFormatDateParts:
     ) -> None:
         """Test various date parts formatting cases."""
         assert format_date_parts(date_parts) == expected
+
+    @pytest.mark.parametrize(
+        "date_parts",
+        [[[2024, 13]], [[2024, 2, 31]], [[2024, 2, 32]], [[2023, 2, 29]]],
+    )
+    def test_format_date_parts_rejects_invalid_calendar_dates(
+        self,
+        date_parts: list[list[int]],
+    ) -> None:
+        assert format_date_parts(date_parts) is None
