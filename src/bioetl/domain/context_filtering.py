@@ -131,6 +131,18 @@ class InputFilterContext:
 
     def __post_init__(self) -> None:
         """Validate filter configuration."""
+        self._detach_owned_mappings()
+        if not self.enabled:
+            return
+        if self.multi_filter_ids is not None:
+            self._validate_multi_ids_mode()
+        elif self.filter_ids is not None:
+            self._validate_direct_ids_mode()
+        else:
+            self._validate_csv_mode()
+
+    def _detach_owned_mappings(self) -> None:
+        """Detach caller-owned filter mappings before storing them."""
         if self.multi_filter_ids is not None:
             object.__setattr__(
                 self,
@@ -142,14 +154,6 @@ class InputFilterContext:
             )
         if self.fallback_mapping is not None:
             object.__setattr__(self, "fallback_mapping", dict(self.fallback_mapping))
-        if not self.enabled:
-            return
-        if self.multi_filter_ids is not None:
-            self._validate_multi_ids_mode()
-        elif self.filter_ids is not None:
-            self._validate_direct_ids_mode()
-        else:
-            self._validate_csv_mode()
 
     def _validate_multi_ids_mode(self) -> None:
         """Validate multi-field IDs mode configuration."""
