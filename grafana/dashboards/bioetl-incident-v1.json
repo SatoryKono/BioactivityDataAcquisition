@@ -296,7 +296,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "noValue": "None observed",
+          "noValue": "EMPTY DOMAIN — no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
           "custom": {
             "align": "left",
             "cellOptions": {
@@ -477,7 +477,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "None observed",
+              "noValue": "EMPTY DOMAIN — no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
               "custom": {
                 "align": "left",
                 "cellOptions": {
@@ -570,7 +570,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "None observed",
+              "noValue": "EMPTY DOMAIN — no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
               "custom": {
                 "fillOpacity": 0,
                 "lineWidth": 0
@@ -736,7 +736,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "None observed",
+              "noValue": "EMPTY DOMAIN — no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
               "custom": {
                 "align": "left",
                 "cellOptions": {
@@ -914,7 +914,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "None observed",
+              "noValue": "EMPTY DOMAIN — no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
               "custom": {
                 "align": "left",
                 "cellOptions": {
@@ -1074,7 +1074,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "None observed",
+              "noValue": "EMPTY DOMAIN — no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
               "custom": {
                 "align": "left",
                 "cellOptions": {

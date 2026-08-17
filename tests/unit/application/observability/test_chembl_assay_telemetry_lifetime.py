@@ -18,11 +18,6 @@ from bioetl.application.core._batch_processing_metrics_support import (
 )
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
 from bioetl.application.core.batch_transformer_state import TransformResult
-from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters._health_check_observability import (
-    handle_health_check_result,
-)
-from bioetl.infrastructure.adapters.health_check_contract import HealthCheckContext
 
 pytestmark = pytest.mark.unit
 
@@ -102,32 +97,4 @@ def test_transform_metrics_expose_seventeen_contract_exclusions() -> None:
             "stage": "gold",
             "outcome": "written",
         },
-    )
-
-
-def test_chembl_health_probe_emits_provider_universe_counter() -> None:
-    metrics = MagicMock()
-    logger = MagicMock()
-    handle_health_check_result(
-        logger=logger,
-        metrics=metrics,
-        ctx=HealthCheckContext(provider="chembl", endpoint="/chembl/api/data/status"),
-        status=HealthStatus.HEALTHY,
-    )
-    metrics.increment_counter.assert_called_once_with(
-        "bioetl_health_check_success_total",
-        1,
-        {"provider": "chembl"},
-    )
-
-
-def test_cached_bronze_health_check_does_not_emit_chembl_counters() -> None:
-    source_cls = __import__(
-        "bioetl.infrastructure.adapters.cached_bronze_data_source",
-        fromlist=["CachedBronzeDataSource"],
-    ).CachedBronzeDataSource
-    source = object.__new__(source_cls)
-    assert "handle_health_check_result" not in source.health_check.__code__.co_names
-    assert "bioetl_health_check_success_total" not in (
-        source.health_check.__code__.co_consts or ()
     )

@@ -26,7 +26,7 @@ from bioetl.application.workflow.transforms.reconcile_foreign_keys import (
     _optional_key_tuple,
     _required_primary_keys,
 )
-from bioetl.domain.composite.result import DependencyResult, DependencyStatus, DependencyStatus
+from bioetl.domain.composite.result import DependencyResult, DependencyStatus
 from bioetl.domain.control_plane._run_ledger_runtime import RunLedgerEntry
 from bioetl.domain.control_plane._run_manifest_deserialization import (
     _load_artifacts,
@@ -35,13 +35,6 @@ from bioetl.domain.control_plane._run_manifest_deserialization import (
 from bioetl.domain.control_plane.run_ledger_replay import (
     RunLedgerReplayProjection,
     _mark_projection_unsupported,
-)
-from bioetl.infrastructure.schemas.workflow_config_fk import (
-    _normalize_fk_required_names,
-    _require_fk_key_pairs_present,
-)
-from bioetl.infrastructure.storage.support.retention_time_travel import (
-    load_time_travel_table,
 )
 
 pytestmark = pytest.mark.unit
@@ -65,6 +58,11 @@ def test_join_key_strips_literal_dot_zero_after_string_cast() -> None:
 
 
 def test_empty_composite_fk_keys_fail_closed() -> None:
+    from bioetl.infrastructure.schemas.workflow_config_fk import (
+        _normalize_fk_required_names,
+        _require_fk_key_pairs_present,
+    )
+
     with pytest.raises(ValueError, match="cannot be empty"):
         _normalize_fk_required_names([], "source_keys")
     with pytest.raises(ValueError, match="source_key/reference_key"):
@@ -190,5 +188,9 @@ async def test_heartbeat_stop_exception_still_releases_lock() -> None:
 
 @pytest.mark.asyncio
 async def test_time_travel_missing_timestamp_raises_value_error() -> None:
+    from bioetl.infrastructure.storage.support.retention_time_travel import (
+        load_time_travel_table,
+    )
+
     with pytest.raises(ValueError, match="Must specify either version or timestamp"):
         await load_time_travel_table(base_path="/tmp", table_name="demo")

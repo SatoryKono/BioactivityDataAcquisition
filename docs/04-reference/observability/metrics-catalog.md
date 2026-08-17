@@ -4,7 +4,7 @@ Complete catalog of all Prometheus metrics defined in BioETL observability syste
 
 **Runtime Metrics: 163** (excluding aliases; derived from
 `REGISTERED_PROMETHEUS_METRIC_NAMES`)
-**Governed Recording/Current-State Metrics: 40**
+**Governed Recording/Current-State Metrics: 41**
 
 Canonical reconciliation command:
 `python -m scripts.engineering.qa report-observability-metric-inventory --json`.
@@ -25,7 +25,7 @@ Canonical reconciliation command:
 - [Pipeline Transform Metrics](#pipeline-transform-metrics) - 3 metrics
 - [Pipeline Workflow Metrics](#pipeline-workflow-metrics) - 13 metrics
 - [Storage Metrics](#storage-metrics) - 30 metrics
-- [Governed Recording And Current-State Metrics](#governed-recording-and-current-state-metrics) - 40 metrics
+- [Governed Recording And Current-State Metrics](#governed-recording-and-current-state-metrics) - 41 metrics
 
 ---
 
@@ -403,7 +403,7 @@ separate from actual `record:` outputs and direct runtime collector families.
 ## Summary
 
 - **Runtime Metrics**: 163 (excluding aliases; canonical registry-backed count)
-- **Governed Recording/Current-State Metrics**: 40
+- **Governed Recording/Current-State Metrics**: 41
 - **Total Categories**: 15
 - **Metric Types Distribution**:
   - Counter: 112 metrics
