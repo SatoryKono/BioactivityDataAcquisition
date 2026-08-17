@@ -1162,8 +1162,9 @@ def test_control_plane_l1_triage_row_has_3_to_5_kpis_and_one_next_step() -> None
     next_step_title = "Review Recovery Action"
     first_screen_titles = {
         panel_display_title(panel)
-        for panel in panels[:13]
+        for panel in panels
         if panel.get("type") != "row"
+        and int((panel.get("gridPos") or {}).get("y", 999)) < 18
     }
 
     assert kpi_titles.issubset(first_screen_titles)

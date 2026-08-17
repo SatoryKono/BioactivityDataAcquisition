@@ -275,6 +275,43 @@ def test_control_plane_row_sequence_matches_operator_flow() -> None:
     assert all(panel.get("panels") for panel in row_panels)
 
 
+def test_control_plane_named_review_surfaces_are_findable() -> None:
+    """Operator-named Review* surfaces must not hide inside a differently named row."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    root = {
+        panel.get("id"): panel
+        for panel in dashboard.get("panels", [])
+        if isinstance(panel, dict)
+    }
+    trust = root[9418]
+    retention = root[9416]
+    lineage_row = root[9419]
+    assert trust.get("title") == "Review Selected-Run Trust"
+    assert retention.get("title") == "Review Retention Compliance"
+    assert lineage_row.get("title") == "Review Lineage Validation"
+    assert lineage_row.get("type") == "row"
+    assert lineage_row.get("collapsed") is True
+    assert trust.get("gridPos", {}).get("y", 99) < 18
+    assert retention.get("gridPos", {}).get("y", 99) < 18
+    assert lineage_row.get("gridPos", {}).get("y") == 18
+    child_ids = [child.get("id") for child in lineage_row.get("panels") or []]
+    assert 9415 in child_ids
+    lineage = next(
+        child
+        for child in lineage_row.get("panels") or []
+        if child.get("id") == 9415
+    )
+    assert lineage.get("title") == "Review Lineage Validation"
+    audit_ids = {
+        child.get("id")
+        for child in (root[904].get("panels") or [])
+        if isinstance(child, dict)
+    }
+    assert 9415 not in audit_ids
+    assert 9416 not in audit_ids
+    assert 9418 not in audit_ids
+
+
 def test_control_plane_first_evidence_panel_stays_close_to_answer_row() -> None:
     """Selected-range blocker evidence stays close to the replay drilldown row."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
