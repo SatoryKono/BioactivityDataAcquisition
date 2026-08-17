@@ -202,3 +202,24 @@ def test_plain_value_serializes_sets_with_stable_order() -> None:
     assert frozen_payload["tags"] == ["a", "b"]
     # repeated conversion is stable
     assert mapping_to_plain({"tags": {"zeta", "alpha", "mu"}}) == payload
+
+
+def test_plain_value_serializes_supported_scalars_and_rejects_objects() -> None:
+    from datetime import UTC, datetime
+    from uuid import UUID
+
+    from bioetl.domain.lineage._shared import mapping_to_plain
+
+    stamped = datetime(2024, 6, 1, 12, 0, tzinfo=UTC)
+    payload = mapping_to_plain(
+        {
+            "when": stamped,
+            "id": UUID("12345678-1234-5678-1234-567812345678"),
+            "blob": b"\x0f",
+        }
+    )
+    assert payload["when"] == stamped.isoformat()
+    assert payload["id"] == "12345678-1234-5678-1234-567812345678"
+    assert payload["blob"] == "0f"
+    with pytest.raises(TypeError, match="cannot serialize"):
+        mapping_to_plain({"bad": object()})
