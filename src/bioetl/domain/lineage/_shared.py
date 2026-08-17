@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from datetime import datetime
+from datetime import date, datetime
+from enum import Enum
 from types import MappingProxyType
+from uuid import UUID
 
 __all__ = [
     "load_attributes",
@@ -69,7 +71,21 @@ def _plain_value(value: object) -> object:
         return _plain_sequence(value)
     if isinstance(value, (set, frozenset)):
         return _plain_set(value)
-    return value
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, date):
+        return value.isoformat()
+    if isinstance(value, UUID):
+        return str(value)
+    if isinstance(value, Enum):
+        return value.value
+    if isinstance(value, bytes):
+        return value.hex()
+    if isinstance(value, (str, int, float, bool)) or value is None:
+        return value
+    raise TypeError(
+        f"lineage mapping_to_plain cannot serialize {type(value).__name__}"
+    )
 
 
 def normalize_mapping(values: Mapping[str, object]) -> Mapping[str, object]:
