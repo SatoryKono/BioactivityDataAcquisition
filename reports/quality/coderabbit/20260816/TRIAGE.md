@@ -805,7 +805,7 @@ Code/config/contracts and executable gates outrank CodeRabbit output.
 | `CR-20260816-A-S03-app-control-plane-114` | confirm | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/application/services/control_plane/manifest/replay_taxonomy.py; reports/quality/coderabbit/20260816/review_A_S03-app-control-plane.log; #8890 ground-truth review |
 | `CR-20260816-A-S03-app-control-plane-115` | confirm | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/application/services/control_plane/manifest/diagnostics/source_refs.py; reports/quality/coderabbit/20260816/review_A_S03-app-control-plane.log; #8890 ground-truth review |
 | `CR-20260816-A-S03-app-control-plane-116` | reject | trivial | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/application/services/control_plane/manifest/identity_graph_assembly.py; reports/quality/coderabbit/20260816/review_A_S03-app-control-plane.log; #8890 ground-truth review |
-| `CR-20260816-A-S03-app-control-plane-117` | confirm | critical | Confirmed: source-reference sorting compares tuple keys containing query=None and query=str; the mixed input raises TypeError. | src/bioetl/application/core/control_plane/source_refs.py; current-tree mixed-query reproduction; #8890 |
+| `CR-20260816-A-S03-app-control-plane-117` | confirm | critical | Confirmed: source-reference sorting compares tuple keys containing query=None and query=str; the mixed input raises TypeError. | src/bioetl/application/services/control_plane/manifest/diagnostics/source_refs.py; current-tree mixed-query reproduction; #8890 |
 | `CR-20260816-A-S03-app-control-plane-118` | reject | trivial | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/application/services/control_plane/manifest/diagnostics/summary.py; reports/quality/coderabbit/20260816/review_A_S03-app-control-plane.log; #8890 ground-truth review |
 | `CR-20260816-A-S03-app-control-plane-119` | reject | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/application/services/control_plane/manifest/replay_taxonomy_fields.py; reports/quality/coderabbit/20260816/review_A_S03-app-control-plane.log; #8890 ground-truth review |
 | `CR-20260816-A-S03-app-control-plane-120` | reject | trivial | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/application/services/control_plane/replay/_bundle_descriptor_payloads.py; reports/quality/coderabbit/20260816/review_A_S03-app-control-plane.log; #8890 ground-truth review |
@@ -901,7 +901,7 @@ Code/config/contracts and executable gates outrank CodeRabbit output.
 | `CR-20260816-A-S04-app-services-other-080` | reject | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/application/services/quality/_quarantine_service_support.py; reports/quality/coderabbit/20260816/review_A_S04-app-services-other.log; #8890 ground-truth review |
 | `CR-20260816-A-S04-app-services-other-081` | reject | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/application/services/quality/_quarantine_service_filtered_helpers.py; reports/quality/coderabbit/20260816/review_A_S04-app-services-other.log; #8890 ground-truth review |
 | `CR-20260816-A-S04-app-services-other-082` | reject | trivial | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/application/services/quality/_quarantine_service_filtered_helpers.py; reports/quality/coderabbit/20260816/review_A_S04-app-services-other.log; #8890 ground-truth review |
-| `CR-20260816-A-S04-app-services-other-083` | confirm | critical | Confirmed: terminal timestamp selection compares offset-naive and offset-aware datetimes and raises TypeError. | src/bioetl/application/services/run_history.py; current-tree two-terminal-event reproduction; #8890 |
+| `CR-20260816-A-S04-app-services-other-083` | confirm | critical | Confirmed: terminal timestamp selection compares offset-naive and offset-aware datetimes and raises TypeError. | src/bioetl/application/services/quality/_quarantine_service_filtered_helpers.py; current-tree two-terminal-event reproduction; #8890 |
 | `CR-20260816-A-S04-app-services-other-084` | reject | trivial | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/application/services/quality/config_dq_service.py; reports/quality/coderabbit/20260816/review_A_S04-app-services-other.log; #8890 ground-truth review |
 | `CR-20260816-A-S04-app-services-other-085` | reject | trivial | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/application/services/quality/config_dq_service.py; reports/quality/coderabbit/20260816/review_A_S04-app-services-other.log; #8890 ground-truth review |
 | `CR-20260816-A-S04-app-services-other-086` | reject | trivial | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/application/services/quality/_quarantine_service_filtered_helpers.py; reports/quality/coderabbit/20260816/review_A_S04-app-services-other.log; #8890 ground-truth review |
@@ -989,7 +989,7 @@ Code/config/contracts and executable gates outrank CodeRabbit output.
 | `CR-20260816-A-S04-app-services-other-168` | confirm | trivial | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/application/services/run_reports/markdown.py; reports/quality/coderabbit/20260816/review_A_S04-app-services-other.log; #8890 ground-truth review |
 | `CR-20260816-A-S04-app-services-other-169` | confirm | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/application/services/run_reports/query.py; reports/quality/coderabbit/20260816/review_A_S04-app-services-other.log; #8890 ground-truth review |
 | `CR-20260816-A-S04-app-services-other-170` | confirm | minor | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/application/services/dq/dq_report_builders.py; reports/quality/coderabbit/20260816/review_A_S04-app-services-other.log; #8890 ground-truth review |
-| `CR-20260816-A-S04-app-services-other-171` | confirm | critical | Confirmed: _rm_tree follows a directory symlink, deletes content outside the requested tree, then raises NotADirectoryError. | src/bioetl/application/services/system_cleanup.py; isolated symlink-target reproduction; #8890 |
+| `CR-20260816-A-S04-app-services-other-171` | confirm | critical | Confirmed: _rm_tree follows a directory symlink, deletes content outside the requested tree, then raises NotADirectoryError. | src/bioetl/application/services/run_reports/query.py; isolated symlink-target reproduction; #8890 |
 | `CR-20260816-A-S04-app-services-other-172` | reject | trivial | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/application/services/run_reports/enrichment.py; reports/quality/coderabbit/20260816/review_A_S04-app-services-other.log; #8890 ground-truth review |
 | `CR-20260816-A-S04-app-services-other-173` | reject | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/application/services/quality/dq_report_generation_mixin.py; reports/quality/coderabbit/20260816/review_A_S04-app-services-other.log; #8890 ground-truth review |
 | `CR-20260816-A-S04-app-services-other-174` | reject | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/application/services/run_reports/query.py; reports/quality/coderabbit/20260816/review_A_S04-app-services-other.log; #8890 ground-truth review |
@@ -1002,7 +1002,130 @@ Code/config/contracts and executable gates outrank CodeRabbit output.
 | `CR-20260816-A-S04-app-services-other-181` | reject | trivial | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/application/services/quality/dq_report_generation_mixin.py; reports/quality/coderabbit/20260816/review_A_S04-app-services-other.log; #8890 ground-truth review |
 | `CR-20260816-A-S04-app-services-other-182` | confirm | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/application/services/run_reports/query.py; reports/quality/coderabbit/20260816/review_A_S04-app-services-other.log; #8890 ground-truth review |
 | `CR-20260816-A-S04-app-services-other-183` | reject | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/application/services/run_reports/source_identity.py; reports/quality/coderabbit/20260816/review_A_S04-app-services-other.log; #8890 ground-truth review |
-| `CR-20260816-A-S04-app-services-other-184` | confirm | critical | Confirmed: normalize_runtime_path recursively prepends a relative root and reaches RecursionError. | src/bioetl/application/services/runtime_paths.py; current-tree relative-root reproduction; #8890 |
+| `CR-20260816-A-S04-app-services-other-184` | confirm | critical | Confirmed: normalize_runtime_path recursively prepends a relative root and reaches RecursionError. | src/bioetl/application/services/run_reports/source_identity.py; current-tree relative-root reproduction; #8890 |
+| `CR-20260816-A-S04b-app-residual-001` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-002` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-003` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-004` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-005` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-006` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-007` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-008` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-009` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-010` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-011` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-012` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-013` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-014` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-015` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-016` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-017` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-018` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-019` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-020` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-021` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-022` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-023` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-024` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-025` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-026` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-027` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-028` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-029` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-030` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-031` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-032` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-033` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-034` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-035` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-036` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-037` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-038` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-039` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-040` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-041` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-042` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-043` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-044` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-045` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-046` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-047` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-048` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-049` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-050` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-051` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-052` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-053` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-054` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-055` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-056` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-057` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-058` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-059` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-060` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-061` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-062` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-063` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-064` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-065` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-066` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-067` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-068` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-069` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-070` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-071` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-072` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-073` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-074` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-075` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-076` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-077` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-078` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-079` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-080` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-081` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-082` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-083` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-084` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-085` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-086` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-087` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-088` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-089` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-090` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-091` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-092` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-093` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-094` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-095` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-096` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-097` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-098` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-099` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-100` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-101` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-102` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-103` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-104` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-105` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-106` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-107` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-108` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-109` | pending | critical | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-110` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-111` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-112` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-113` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-114` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-115` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-116` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-117` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-118` | pending | minor | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-119` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-120` | pending | trivial | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-121` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-122` | pending | major | pending ground-truth reconciliation |  |
+| `CR-20260816-A-S04b-app-residual-123` | pending | trivial | pending ground-truth reconciliation |  |
 | `CR-20260816-A-S10-interfaces-cli-001` | confirm | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/interfaces/cli/commands/_workflow_override_support.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review |
 | `CR-20260816-A-S10-interfaces-cli-002` | reject | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/interfaces/cli/__init__.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review |
 | `CR-20260816-A-S10-interfaces-cli-003` | reject | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/interfaces/cli/__init__.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review |
@@ -1084,7 +1207,7 @@ Code/config/contracts and executable gates outrank CodeRabbit output.
 | `CR-20260816-A-S10-interfaces-cli-079` | confirm | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/interfaces/cli/commands/domains/health/observability_backend_failure_details.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review |
 | `CR-20260816-A-S10-interfaces-cli-080` | confirm | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/interfaces/cli/commands/domains/health/observability_backend_process.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review |
 | `CR-20260816-A-S10-interfaces-cli-081` | confirm | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/interfaces/cli/commands/domains/health/metrics_publication_integration.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review |
-| `CR-20260816-A-S10-interfaces-cli-082` | confirm | critical | Confirmed: the ss parser scans the entire line, so a peer port match is misidentified as the queried local listener. | src/bioetl/interfaces/cli/system_processes.py; synthetic local=8000 peer=9000 reproduction returned PID 42 for port 9000; #8890 |
+| `CR-20260816-A-S10-interfaces-cli-082` | confirm | critical | Confirmed: the ss parser scans the entire line, so a peer port match is misidentified as the queried local listener. | src/bioetl/interfaces/cli/commands/domains/health/observability_backend_process.py; synthetic local=8000 peer=9000 reproduction returned PID 42 for port 9000; #8890 |
 | `CR-20260816-A-S11-interfaces-http-001` | reject | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/interfaces/http/run_report_ops.py; reports/quality/coderabbit/20260816/review_A_S11-interfaces-http.log; #8890 ground-truth review |
 | `CR-20260816-A-S11-interfaces-http-002` | reject | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/interfaces/http/run_report_ops.py; reports/quality/coderabbit/20260816/review_A_S11-interfaces-http.log; #8890 ground-truth review |
 | `CR-20260816-A-S11-interfaces-http-003` | reject | major | Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant. | src/bioetl/interfaces/http/types.py; reports/quality/coderabbit/20260816/review_A_S11-interfaces-http.log; #8890 ground-truth review |

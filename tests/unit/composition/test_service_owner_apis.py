@@ -44,6 +44,22 @@ def test_retired_services_api_module_stays_absent() -> None:
     assert not (ROOT / "src" / "bioetl" / "composition" / "services_api.py").exists()
 
 
+def test_get_metrics_service_runtime_cast_is_bound(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Facade getters must keep typing.cast imported for runtime use."""
+    from bioetl.composition import _services
+
+    monkeypatch.setattr(_services, "_ensure_provider_registrations", lambda: None)
+    monkeypatch.setattr(
+        _services,
+        "_invoke_bootstrap",
+        lambda name, *args, **kwargs: (name, args, kwargs),
+    )
+
+    assert _services.get_metrics_service() == ("bootstrap_metrics_service", (), {})
+
+
 @pytest.mark.parametrize(
     ("module_name", "expected_exports"),
     [
