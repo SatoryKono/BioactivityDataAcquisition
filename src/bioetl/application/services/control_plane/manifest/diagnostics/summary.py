@@ -25,9 +25,6 @@ from bioetl.application.services.control_plane.manifest.diagnostics.summary_supp
     build_identity_graph as _build_identity_graph,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
-    build_runtime_views as _build_runtime_views,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
     build_runtime_views as build_runtime_views,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
@@ -36,6 +33,8 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.manifest.diagnostics.dq_details import (
         DQDetailsSummary,
     )
+
+_build_runtime_views = build_runtime_views
 
 
 @dataclass(frozen=True, slots=True)
