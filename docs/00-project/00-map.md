@@ -241,6 +241,16 @@ ______________________________________________________________________
 | [ADR-047: Workflow Control Plane](../02-architecture/decisions/ADR-047-workflow-control-plane.md)                                         | Workflow orchestration and recovery control plane      | §2.4, §5.5 |
 | [ADR-048: Domain Schema Boundary and Runtime Pandera Compatibility](../02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md) | Pandera in domain layer boundary                      | §2.8       |
 | [ADR-049: Context-Aware LOC Target Policy](../02-architecture/decisions/ADR-049-context-aware-loc-target-policy.md)                                   | Context-aware LOC reduction targets                    | §7.5       |
+| [ADR-050: Silver/Gold Filter Boundary](../02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md) | Silver structural vs Gold semantic filters             | §2.8       |
+| [ADR-051: Quarantine Entry Aggregate](../02-architecture/decisions/ADR-051-quarantine-entry-aggregate-surface.md)               | QuarantineEntry wide constructor surface               | §2.6       |
+| [ADR-052: infrastructure.config Public API](../02-architecture/decisions/ADR-052-infrastructure-config-package-root-public-api.md) | Config package-root as external public API          | §1         |
+| [ADR-053: Optional Grafana Scenes Shell](../02-architecture/decisions/ADR-053-optional-grafana-scenes-app-shell.md)             | Optional Grafana Scenes presentation adapter           | §3.2       |
+| [ADR-054: Passport Documentation Projections](../02-architecture/decisions/ADR-054-passport-documentation-projections.md)       | Evidence-backed passport documentation projections     | §7         |
+| [ADR-055: Workflow Reconciliation Step](../02-architecture/decisions/ADR-055-workflow-reconciliation-data-step-ownership.md)    | Foreign-key reconciliation as governed data step       | §2.4       |
+| [ADR-056: Proof-or-Stop Lifecycle](../02-architecture/decisions/ADR-056-proof-or-stop-lifecycle-control.md)                     | Proof-or-Stop lifecycle control                        | §5.5       |
+| [ADR-057: Deterministic Runtime Config](../02-architecture/decisions/ADR-057-deterministic-runtime-config-authority-and-identity.md) | Runtime config authority and identity              | -          |
+
+The complete generated ADR index is [adr-registry.md](../02-architecture/adr-registry.md). The table above is a navigator excerpt and must not replace that registry.
 
 ### Data Management
 

@@ -20,9 +20,9 @@ help:
 	@echo "BioETL Local-First Commands"
 	@echo ""
 	@echo "Local development:"
-	@echo "  make install               Sync local development dependencies
+	@echo "  make install               Sync local development dependencies"
 	@echo "  make test-deps             Verify test extras import"
-	@echo "  make setup-plugins         Install local pytest/pre-commit plugins""
+	@echo "  make setup-plugins         Install local pytest/pre-commit plugins"
 	@echo "  make test                  Run stable local tests with coverage"
 	@echo "  make lint                  Run ruff and mypy checks"
 	@echo "  make test-fast             Run fast non-slow tests"
