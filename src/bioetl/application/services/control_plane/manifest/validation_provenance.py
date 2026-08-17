@@ -53,7 +53,7 @@ def _validate_executable_code_provenance(
     code_provenance: RunCodeProvenance,
 ) -> None:
     """Fail closed when executable runs cannot pin code and dependency state."""
-    required_profile = str(
+    required_profile = normalize_required_persistence_profile(
         request.launch_context.get("required_persistence_profile")
         or "degraded_observable"
     )

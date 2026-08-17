@@ -25,14 +25,15 @@ class RunManifestIdentityGraphAssembler:
     ) -> dict[str, object]:
         existing = diagnostics.get("identity_graph")
         if isinstance(existing, dict):
+            identity_graph = dict(existing)
             artifact_refs = diagnostics.get("artifact_refs")
             if isinstance(artifact_refs, list):
-                existing["published_artifacts"] = [
-                    artifact_ref
+                identity_graph["published_artifacts"] = [
+                    dict(artifact_ref)
                     for artifact_ref in artifact_refs
                     if isinstance(artifact_ref, dict)
                 ]
-            return existing
+            return identity_graph
         return RunManifestIdentityGraphAssembler._build_fallback_identity_graph(
             manifest,
             diagnostics,

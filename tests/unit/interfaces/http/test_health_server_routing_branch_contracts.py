@@ -529,6 +529,54 @@ async def test_control_plane_dispatch_fails_closed_for_missing_dependencies(
     )
     assert host.sent[-1] == ("text", 400, "invalid evidence scope")
 
+    async def unavailable_evidence(*_args: object, **_kwargs: object) -> bool:
+        raise RuntimeError("control-plane evidence service is unavailable")
+
+    monkeypatch.setattr(
+        routing_support,
+        "dispatch_control_plane_evidence_request",
+        unavailable_evidence,
+    )
+    await routing_support.dispatch_control_plane_request(
+        host,
+        writer=writer,
+        path="/ops/control-plane/manifest-validation",
+        query={},
+    )
+    assert host.sent[-1] == (
+        "text",
+        503,
+        "control-plane evidence service is unavailable",
+    )
+
+
+@pytest.mark.asyncio
+async def test_control_plane_ops_dispatch_maps_runtime_errors_to_503(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    host = _RoutingHost()
+    writer = _writer()
+
+    async def not_evidence(*_args: object, **_kwargs: object) -> bool:
+        return False
+
+    async def boom(*_args: object, **_kwargs: object) -> bool:
+        raise OSError("selector catalog offline")
+
+    monkeypatch.setattr(
+        routing_support,
+        "dispatch_control_plane_evidence_request",
+        not_evidence,
+    )
+    monkeypatch.setattr(routing_support, "_dispatch_ops_endpoints", boom)
+    await routing_support.dispatch_control_plane_request(
+        host,
+        writer=writer,
+        path="/ops/control-plane/ready",
+        query={},
+    )
+    assert host.sent[-1] == ("text", 503, "selector catalog offline")
+
 
 @pytest.mark.asyncio
 async def test_control_plane_ops_dispatch_delegates_every_endpoint(

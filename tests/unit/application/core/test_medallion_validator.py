@@ -203,6 +203,21 @@ class TestMedallionConfigValidator:
         assert len(errors) == 1
         assert "silver_path == gold_path" in errors[0].actual
 
+    def test_validate_path_uniqueness_trailing_slash_variants(
+        self,
+        validator: MedallionConfigValidator,
+        mock_runtime: Mock,
+    ) -> None:
+        """Trailing-slash variants of the same path are not distinct layers."""
+        errors = validator.validate_medallion_config(
+            runtime=mock_runtime,
+            bronze_path="/data/bronze/",
+            silver_path="/data/bronze",
+            gold_path="/gold",
+        )
+        assert len(errors) == 1
+        assert "bronze_path == silver_path" in errors[0].actual
+
     def test_validate_medallion_policy_incremental(
         self,
         validator: MedallionConfigValidator,

@@ -370,6 +370,30 @@ class TestCheckPressure:
             "status": "reduced",
         }
 
+    def test_unsupported_monitor_mode_is_normalized_to_unknown(self):
+        """Unsupported monitor_mode labels collapse to the fallback category."""
+        from bioetl.application.core.batch_memory_metrics import emit_decision_metrics
+
+        metrics = MagicMock()
+        emit_decision_metrics(
+            metrics,
+            pipeline_name="chembl_activity",
+            stage="pressure_check",
+            old_size=500,
+            new_size=250,
+            pressure_state=True,
+            monitor_mode="host-specific-cgroup",
+            reason="monitor_recommended_reduction",
+        )
+        labels = metrics.set_gauge.call_args.args[2]
+        assert labels["monitor_mode"] == "unknown"
+        fallback_call = next(
+            call
+            for call in metrics.increment_counter.call_args_list
+            if call.args[0] == "bioetl_memory_monitor_fallback_events_total"
+        )
+        assert fallback_call.args[2]["monitor_mode"] == "unknown"
+
 
 # ---------------------------------------------------------------------------
 # maybe_recover

@@ -69,6 +69,15 @@ class BatchWriterIOMixin:
     _apply_renames_to_records: Callable[
         [list[GoldRecord], dict[str, str]], list[GoldRecord]
     ]
+    _apply_layer_renames: Callable[
+        [
+            list[GoldRecord],
+            Sequence[str] | None,
+            object,
+            dict[str, str],
+        ],
+        tuple[list[GoldRecord], list[str] | None, object],
+    ]
     _get_schema_columns: Callable[[object], set[str] | None]
 
     def _resolve_gold_ingestion_ts(self) -> datetime:
@@ -137,11 +146,12 @@ class BatchWriterIOMixin:
             column_order, rename_map = self._resolve_layer_columns(
                 "silver", available_cols
             )
+            records, column_order, silver_schema = self._apply_layer_renames(
+                records, column_order, silver_schema, rename_map
+            )
             silver_schema = self._project_schema_for_layer(
                 "silver", silver_schema, column_order
             )
-            if rename_map:
-                records = self._apply_renames_to_records(records, rename_map)
 
             request = SilverWriteRequest(
                 table_name=self._silver_table_name,
@@ -213,8 +223,9 @@ class BatchWriterIOMixin:
             column_order, rename_map = self._resolve_layer_columns(
                 "gold", available_cols
             )
-            if rename_map:
-                records = self._apply_renames_to_records(records, rename_map)
+            records, column_order, schema_payload = self._apply_layer_renames(
+                records, column_order, schema_payload, rename_map
+            )
 
             await self._storage.write_gold(
                 table_name=self._gold_table_name,

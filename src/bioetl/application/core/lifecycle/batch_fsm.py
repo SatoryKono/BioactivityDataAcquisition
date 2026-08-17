@@ -183,6 +183,13 @@ _TRANSITIONS: dict[
         BatchExecutionState.FAILED,
         BatchExecutionCommandTask.PROPAGATE_ERROR,
     ),
+    (
+        BatchExecutionState.SHUTTING_DOWN,
+        BatchExecutionEventSignal.CHECKPOINT_FAILED,
+    ): _transition(
+        BatchExecutionState.FAILED,
+        BatchExecutionCommandTask.PROPAGATE_ERROR,
+    ),
 }
 
 

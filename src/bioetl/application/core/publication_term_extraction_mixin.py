@@ -123,6 +123,7 @@ class PublicationTermExtractionMixin:
         limit: int | None,
         filter_ids: list[str] | None,
         filter_field: str | None,
+        query: str | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch publications from wrapped source and yield extracted terms."""
         resolved = resolve_publication_upstream_limit(
@@ -134,6 +135,7 @@ class PublicationTermExtractionMixin:
         publications = self._data_source.fetch(
             entity_type=self.SOURCE_ENTITY_TYPE,
             limit=publication_limit,
+            query=query,
             filter_ids=filter_ids,
             filter_field=filter_field,
         )

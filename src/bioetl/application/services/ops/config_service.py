@@ -184,12 +184,13 @@ class ConfigService:
         """Validate pipeline configuration and return summary info."""
         self.logger.debug("Validating pipeline config", pipeline=pipeline_name)
         yaml_config = self._pipeline_config_loader(pipeline_name)
+        domain_config = self._domain_config_mapper(yaml_config)
         info = PipelineInfo(
             name=pipeline_name,
-            provider=yaml_config.provider,
-            entity_type=yaml_config.entity_type,
-            silver_table=yaml_config.silver_table,
-            gold_table=yaml_config.gold_table,
+            provider=domain_config.provider,
+            entity_type=domain_config.entity_type,
+            silver_table=domain_config.effective_silver_table,
+            gold_table=domain_config.table.gold_table,
         )
         self.logger.info(
             "Validated pipeline config",

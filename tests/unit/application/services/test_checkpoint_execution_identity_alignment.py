@@ -240,17 +240,54 @@ def test_checkpoint_execution_identity_payload_helper_can_fail_closed_empty() ->
             effective_config_artifact_id=None,
             exact_replay=None,
             input_snapshot_fingerprint=None,
-            silver_filter_compatibility_mode=None,
+        )
+        == {}
+    )
+    assert (
+        build_checkpoint_execution_identity_payload(
+            pipeline_name=None,
+            run_type=None,
+            pipeline_version=None,
+            git_commit=None,
+            dependency_lock_hash=None,
+            effective_config_hash=None,
+            dq_contract_compatibility_hash=None,
+            contract=(None, None),
+            normalization_profile=(None, None, None),
+            effective_config_artifact_id=None,
+            exact_replay=None,
+            input_snapshot_fingerprint=None,
+            silver_filter_compatibility_mode="structural_only_compat",
         )
         == {}
     )
 
 
+def test_initial_execution_identity_outcome_honors_compatible_flag() -> None:
+    from bioetl.application.services.checkpoint._checkpoint_compatibility_execution_validation import (
+        _initial_execution_identity_outcome,
+    )
+
+    compatible, continuity_proven, messages = _initial_execution_identity_outcome(
+        {
+            "compatible": False,
+            "reason": "execution_fingerprint_mismatch",
+        }
+    )
+
+    assert compatible is False
+    assert continuity_proven is True
+    assert messages == []
+
+
 def test_has_canonical_checkpoint_execution_identity_fields_detects_resume_fields() -> (
     None
 ):
-    assert has_canonical_checkpoint_execution_identity_fields(
+    assert not has_canonical_checkpoint_execution_identity_fields(
         {"silver_filter_compatibility_mode": "structural_only_compat"}
+    )
+    assert has_canonical_checkpoint_execution_identity_fields(
+        {"silver_filter_compatibility_mode": "structural_only_auto_promote"}
     )
     assert not has_canonical_checkpoint_execution_identity_fields(
         {"effective_config_hash": "a" * 64}

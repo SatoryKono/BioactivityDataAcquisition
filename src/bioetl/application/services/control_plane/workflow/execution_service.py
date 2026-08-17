@@ -220,18 +220,21 @@ async def _run_locked_workflow(
         created_at_factory=now_factory,
     )
 
-    # Extract offset/limit for saving only if incremental is enabled
-    last_offset, last_limit = (None, None)
     if incremental:
         last_offset, last_limit = extract_incremental_metadata(config)
-
-    record_workflow_finished(
-        recorder,
-        result,
-        completed_at=now_factory(),
-        last_start_offset=last_offset,
-        last_limit=last_limit,
-    )
+        record_workflow_finished(
+            recorder,
+            result,
+            completed_at=now_factory(),
+            last_start_offset=last_offset,
+            last_limit=last_limit,
+        )
+    else:
+        record_workflow_finished(
+            recorder,
+            result,
+            completed_at=now_factory(),
+        )
     return replace(
         result,
         workflow_run_id=str(prepared_manifest.workflow_run_id),

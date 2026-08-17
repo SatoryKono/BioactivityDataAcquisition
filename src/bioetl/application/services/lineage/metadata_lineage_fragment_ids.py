@@ -22,7 +22,9 @@ def fragment_timestamp(*values: datetime | None) -> datetime:
 def build_fragment_id(prefix: str, *parts: object) -> str:
     """Build a stable compact fragment identifier from semantic parts."""
     digest = hashlib.sha256(
-        "|".join(str(part) for part in parts if part is not None).encode("utf-8")
+        "|".join("\x00" if part is None else str(part) for part in parts).encode(
+            "utf-8"
+        )
     ).hexdigest()[:12]
     return f"{prefix}:{digest}"
 

@@ -262,22 +262,14 @@ class TestCompletenessCheck:
         assert result.reject_reasons[0].rule_id == "gold.contract.required.name"
 
     def test_completeness_missing_field(self) -> None:
-        """Completeness check handles missing required field.
-
-        Note: The implementation only counts existing columns in overall score,
-        so missing fields result in 0.0 fill rate but don't reduce overall score
-        if other fields have high fill rates. The missing field is still tracked.
-        """
+        """Missing required fields count in the completeness denominator."""
         df = pl.DataFrame({"id": [1, 2, 3]})
 
         result = check_completeness(df, ["id", "missing_field"], 0.9)
 
-        # Missing field is tracked with 0.0 fill rate
         assert result.required_fields["missing_field"] == pytest.approx(0.0)
-        # But overall score only considers existing columns (id has 100% fill)
-        # This is expected behavior - overall score = 1.0 / 1 = 1.0
-        assert result.overall_completeness_score == pytest.approx(1.0)
-        assert result.status == DQCheckStatus.PASS
+        assert result.overall_completeness_score == pytest.approx(0.5)
+        assert result.status == DQCheckStatus.FAIL
 
     def test_completeness_no_required_fields(self) -> None:
         """Completeness check passes when no required fields specified."""

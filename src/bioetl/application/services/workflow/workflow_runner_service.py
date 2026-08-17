@@ -135,7 +135,11 @@ class WorkflowRunnerService:
             workflow_run_id=workflow_run_id,
             manifest_id=manifest_id,
         )
-        return attach_workflow_run_report(config=config, result=result)
+        return attach_workflow_run_report(
+            config=config,
+            result=result,
+            logger=getattr(self.pipeline_runner, "logger", None),
+        )
 
     def record_expected_pipeline_metrics(self, config: WorkflowConfig) -> None:
         """Record planned pipeline scopes before workflow step execution."""

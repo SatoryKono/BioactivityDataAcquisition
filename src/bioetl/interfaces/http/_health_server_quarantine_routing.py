@@ -98,6 +98,16 @@ async def dispatch_quarantine_request(
         await host._send_response(writer, 404, _NOT_FOUND_MESSAGE)
     except ValueError as exc:
         await host._send_response(writer, 400, str(exc))
+    except (ConnectionError, OSError, RuntimeError):
+        endpoint = path.rsplit("/", maxsplit=1)[-1] or "quarantine"
+        await host._send_payload_response(
+            writer,
+            503,
+            forensic_unavailable_payload(
+                endpoint=endpoint,
+                reason="backend_unavailable",
+            ),
+        )
 
 
 async def handle_filtered_records(

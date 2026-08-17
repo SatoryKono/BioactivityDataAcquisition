@@ -76,6 +76,34 @@ class TestMedallionMaintenanceMixin:
         logger.error.assert_called_once()
 
     @pytest.mark.asyncio
+    async def test_vacuum_rejects_negative_retention_days(self) -> None:
+        storage = MagicMock()
+        storage.vacuum = AsyncMock(return_value=0)
+        logger = MagicMock()
+        service = _MaintenanceHarness(storage=storage, logger=logger)
+
+        with pytest.raises(ValueError, match="retention_days must be >= 0"):
+            await service.vacuum("silver.activity", retention_days=-1)
+
+        storage.vacuum.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_vacuum_allows_zero_retention_days(self) -> None:
+        storage = MagicMock()
+        storage.vacuum = AsyncMock(return_value=1)
+        logger = MagicMock()
+        service = _MaintenanceHarness(storage=storage, logger=logger)
+
+        result = await service.vacuum("silver.activity", retention_days=0)
+
+        assert result == 1
+        storage.vacuum.assert_awaited_once_with(
+            table_name="silver.activity",
+            retention_hours=0,
+            dry_run=False,
+        )
+
+    @pytest.mark.asyncio
     async def test_archive_delegates_to_storage_and_logs(self) -> None:
         storage = MagicMock()
         storage.archive = AsyncMock(return_value=12)

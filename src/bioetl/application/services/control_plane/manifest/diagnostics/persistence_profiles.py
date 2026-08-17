@@ -63,7 +63,9 @@ def resolve_required_profile_requirements(
         return required_profile, list(forensic_grade_missing_requirements)
     if required_profile == "replay_ready":
         return required_profile, list(replay_ready_missing_requirements)
-    return "degraded_observable", []
+    if required_profile == "degraded_observable":
+        return required_profile, []
+    return required_profile, ["unknown_required_persistence_profile"]
 
 
 def claims_payload(

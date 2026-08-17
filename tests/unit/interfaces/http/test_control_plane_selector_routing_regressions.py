@@ -316,6 +316,36 @@ async def test_routing_mixin_health_lifecycle_is_deterministic_and_fail_closed(
     assert host._handle_metrics() == "bioetl_health_server_scrape_up 1\n"
 
 
+@pytest.mark.asyncio
+async def test_readiness_offloads_report_root_filesystem_io(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    host = _RoutingHost()
+    offloaded: list[object] = []
+
+    def fake_check() -> dict[str, object]:
+        return {"status": "healthy", "marker": "valid"}
+
+    async def fake_to_thread(
+        function: object,
+        /,
+        *args: object,
+        **kwargs: object,
+    ) -> object:
+        offloaded.append(function)
+        assert callable(function)
+        return function(*args, **kwargs)
+
+    monkeypatch.setattr(report_root_config, "report_root_readiness_check", fake_check)
+    monkeypatch.setattr(report_root_config, "enforce_report_root_marker", lambda: False)
+    monkeypatch.setattr(routing_module.asyncio, "to_thread", fake_to_thread)
+
+    ready = await host._handle_readiness()
+
+    assert ready.status == "healthy"
+    assert offloaded == [fake_check]
+
+
 def test_routing_mixin_base_uptime_contract_is_abstract_by_behavior() -> None:
     with pytest.raises(NotImplementedError):
         _ = HealthServerRoutingMixin().uptime_seconds

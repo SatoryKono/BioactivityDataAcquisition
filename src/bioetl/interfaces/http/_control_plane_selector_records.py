@@ -14,24 +14,15 @@ from bioetl.domain.control_plane.run_ledger import (
     RUN_STARTED_EVENT,
 )
 from bioetl.domain.types import RunID
+from bioetl.interfaces.http._processed_records_value_support import (
+    _is_all_scope as _is_all_scope_token,
+)
 
 ALL_SCOPE = "All"
-_ALL_SCOPE_TOKENS = frozenset({ALL_SCOPE, "$__all", "__all", "*", "all", ".*"})
 _TERMINAL_EVENT_TYPES = frozenset(
     {RUN_FINISHED_EVENT, RUN_FAILED_EVENT, RUN_SHUTDOWN_EVENT}
 )
 WorkflowAliasMap = dict[tuple[str, str | None], tuple[str, ...]]
-
-
-def _is_all_scope_token(value: str | None) -> bool:
-    """Return True for Grafana All-scope tokens (case-insensitive for ``all``)."""
-    if value is None:
-        return False
-    normalized = value.strip()
-    if not normalized:
-        return False
-    lowered = normalized.casefold()
-    return lowered in {"all", "*"} or normalized in {"$__all", "__all", ALL_SCOPE}
 
 
 class RunLedgerLookup(Protocol):
@@ -102,6 +93,8 @@ def narrow_manifest_catalog(
             workflow_aliases=workflow_aliases,
         )
     )
+    if selected_run_id is not None:
+        return narrowed
     if narrowed or not fail_open_when_empty:
         return narrowed
     return manifests

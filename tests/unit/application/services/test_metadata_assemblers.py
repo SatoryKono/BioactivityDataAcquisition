@@ -323,3 +323,31 @@ class TestGoldMetadataService:
         assert result.scd.enabled is True
         assert result.scd.effective_date_column == "_valid_from"
         assert result.dq_report_path == GOLD_DQ_REPORT_PATH
+
+    def test_assemble_uses_started_at_for_gold_duration(self) -> None:
+        run_context = _make_run_context()
+        runtime_builder, calls = _make_runtime_builder(run_context)
+        service = GoldMetadataService(
+            run_context=run_context,
+            runtime_metadata_builder=runtime_builder,
+            pipeline_metadata_builder=_make_pipeline_builder(run_context),
+            environment_metadata=_make_environment(),
+        )
+        started_at = datetime(2026, 3, 19, 10, 55, tzinfo=UTC)
+        completed_at = datetime(2026, 3, 19, 11, 0, tzinfo=UTC)
+        input_data = GoldMetadataInput(
+            table_path=GOLD_TABLE_PATH,
+            table_name="gold.activity",
+            mode=GoldWriteMode.SCD2,
+            records=[{"activity_id": 1}],
+            silver_refs=[SilverRef("silver.activity", SILVER_TABLE_PATH, 9)],
+            started_at=started_at,
+            completed_at=completed_at,
+        )
+
+        result = service.assemble(input_data)
+
+        assert calls[0]["started_at"] == started_at
+        assert calls[0]["completed_at"] == completed_at
+        assert calls[0]["duration_seconds"] == pytest.approx(300.0)
+        assert result.runtime.duration_seconds == pytest.approx(300.0)

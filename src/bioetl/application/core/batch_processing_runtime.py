@@ -77,11 +77,17 @@ async def execute_with_pipeline_failure_policy[ResultT](
     work_coro: Awaitable[ResultT],
 ) -> ResultT:
     """Finish the batch span consistently across runtime failure cases."""
+    policy_error: Exception | None = None
     try:
         return await work_coro
     except PIPELINE_EXECUTION_ERRORS as error:
-        tracing.end_span(span, error)
+        policy_error = error
         raise
+    finally:
+        if policy_error is not None:
+            tracing.end_span(span, policy_error)
+        else:
+            tracing.end_span(span)
 
 
 async def execute_with_layer_span[ResultT](
@@ -95,15 +101,19 @@ async def execute_with_layer_span[ResultT](
 ) -> ResultT:
     """Execute a coroutine wrapped with a per-layer tracing span."""
     span = tracing.start_layer_span(name, batch_id, count)
+    policy_error: Exception | None = None
     try:
-        result = await coro
-        tracing.end_span(span)
-        return result
+        return await coro
     except PIPELINE_EXECUTION_ERRORS as error:
-        tracing.end_span(span, error)
+        policy_error = error
         if on_error is not None:
             on_error(error)
         raise
+    finally:
+        if policy_error is not None:
+            tracing.end_span(span, policy_error)
+        else:
+            tracing.end_span(span)
 
 
 async def execute_transform_with_span(
@@ -121,6 +131,7 @@ async def execute_transform_with_span(
         len(records),
         input_count=True,
     )
+    policy_error: Exception | None = None
     try:
         result = await _run_transform_batch(
             transformer=transformer,
@@ -134,11 +145,15 @@ async def execute_transform_with_span(
             gold_count=len(result.gold_records),
             quarantined_count=result.quarantined_count,
         )
-        tracing.end_span(span)
         return result
     except PIPELINE_EXECUTION_ERRORS as error:
-        tracing.end_span(span, error)
+        policy_error = error
         raise
+    finally:
+        if policy_error is not None:
+            tracing.end_span(span, policy_error)
+        else:
+            tracing.end_span(span)
 
 
 async def _run_transform_batch(

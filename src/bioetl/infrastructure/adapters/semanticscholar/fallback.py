@@ -91,7 +91,7 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
         return build_semanticscholar_headers(
             self._api_key,
             include_content_type=False,
-            skip_placeholder_api_key=False,
+            skip_placeholder_api_key=True,
         )
 
     @property

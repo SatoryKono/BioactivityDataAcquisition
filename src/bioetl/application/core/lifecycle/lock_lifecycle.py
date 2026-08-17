@@ -84,7 +84,9 @@ async def release_lock(host: _LockRuntimeHostProtocol) -> None:
 
 async def start_heartbeat(host: _LockRuntimeHostProtocol) -> None:
     """Start the background heartbeat task for the acquired lock."""
-    host._heartbeat = heartbeat = host._heartbeat_factory(
+    if host._heartbeat is not None:
+        raise RuntimeError("heartbeat already running")
+    heartbeat = host._heartbeat_factory(
         lock_port=host._lock,
         lock_key=host._config.lock_key,
         owner_id=host._run_id,
@@ -93,6 +95,7 @@ async def start_heartbeat(host: _LockRuntimeHostProtocol) -> None:
         shutdown_signal=host._shutdown_signal,
         logger=host._logger,
     )
+    host._heartbeat = heartbeat
     await heartbeat.start()
 
 
@@ -103,5 +106,9 @@ async def enter_lock_context[LockRuntimeHostT: _LockRuntimeHostProtocol](
     token = await acquire_lock(host)
     if token is None:
         raise PipelineShutdownError(f"Lock acquisition failed: {host._config.lock_key}")
-    await start_heartbeat(host)
+    try:
+        await start_heartbeat(host)
+    except BaseException:
+        await release_lock(host)
+        raise
     return host

@@ -70,7 +70,7 @@
   },
   "runtime": {
     "completed_at_utc": "2025-01-01T12:00:07Z",
-    "duration_seconds": 0.0,
+    "duration_seconds": 7.0,
     "exact_replay": false,
     "input_snapshot_fingerprint": null,
     "manifest_id": "manifest-golden-001",

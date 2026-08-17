@@ -123,8 +123,8 @@ class _FilteredDataSourceFetchMixin(
             entity_type: Entity type string passed through to the underlying adapter.
             limit: Maximum number of records to fetch, or None for all.
             query: Optional query string passed through to the adapter.
-            filter_ids: Ignored; filtering is driven by internal config filter_ids.
-            filter_field: Ignored; filtering is driven by internal config filter_field.
+            filter_ids: Must be omitted; filtering uses preloaded filter_ids.
+            filter_field: Must be omitted; filtering uses preloaded filter_field.
             offset: Optional pagination offset passed through to the adapter.
         """
         return fetch_support.fetch_records(

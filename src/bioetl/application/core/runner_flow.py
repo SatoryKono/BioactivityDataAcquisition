@@ -183,8 +183,6 @@ def record_stage_completed(
 
 def record_run_finished(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Append successful completion ledger entry."""
-    _record_output_ready(host)
-    _record_flow_invariants(host)
 
     def _record_finished(
         ledger_service: RunLedgerService,
@@ -201,6 +199,14 @@ def record_run_finished(host: _PipelineRunnerFlowHostProtocol) -> None:
         )
 
     _record_run_metrics_event(host, _record_finished)
+    try:
+        _record_output_ready(host)
+        _record_flow_invariants(host)
+    except _FLOW_ERRORS:
+        host._logger.warning(
+            "finished_flow_projections_failed",
+            run_id=str(host._context.run_id),
+        )
 
 
 def _record_output_ready(host: _PipelineRunnerFlowHostProtocol) -> None:
@@ -232,7 +238,13 @@ def record_run_failed(
     exc: Exception,
 ) -> None:
     """Append failed completion ledger entry."""
-    _record_flow_invariants(host)
+    try:
+        _record_flow_invariants(host)
+    except _FLOW_ERRORS:
+        host._logger.warning(
+            "failed_flow_invariants_failed",
+            run_id=str(host._context.run_id),
+        )
     _record_run_metrics_event(
         host,
         lambda ledger_service, metrics_snapshot, details: (

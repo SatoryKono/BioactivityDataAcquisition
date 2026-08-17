@@ -4,11 +4,10 @@
 from __future__ import annotations
 
 import itertools
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any, Literal, cast
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     from bioetl.domain.types import GoldRecord
 
 _SCHEMA_EXTRACTION_ERRORS = (
@@ -116,17 +115,78 @@ class BatchWriterColumnsMixin:
         ordered = self._column_orderer.order_column_names(columns)
         return self._apply_system_prefix_order(ordered)
 
+    def _apply_renames_to_column_order(
+        self,
+        column_order: Sequence[str] | None,
+        rename_map: dict[str, str],
+    ) -> list[str] | None:
+        """Map a column-order list through rename_map, preserving order."""
+        if column_order is None or not rename_map:
+            return list(column_order) if column_order is not None else None
+        return [rename_map.get(name, name) for name in column_order]
+
+    def _apply_renames_to_schema(
+        self,
+        schema: object,
+        rename_map: dict[str, str],
+    ) -> object:
+        """Rename schema field names when the adapter exposes rename_columns."""
+        if schema is None or not rename_map:
+            return schema
+        names = getattr(schema, "names", None)
+        rename_columns = getattr(schema, "rename_columns", None)
+        if names is None or not callable(rename_columns):
+            return schema
+        try:
+            name_list = list(names)
+            dest_names = [rename_map.get(name, name) for name in name_list]
+            if dest_names == name_list:
+                return schema
+            return cast(object, rename_columns(dest_names))
+        except _SCHEMA_EXTRACTION_ERRORS:
+            return schema
+
+    def _apply_layer_renames(
+        self,
+        records: list[GoldRecord],
+        column_order: Sequence[str] | None,
+        schema: object,
+        rename_map: dict[str, str],
+    ) -> tuple[list[GoldRecord], list[str] | None, object]:
+        """Apply rename_map to records, column order, and schema consistently."""
+        if not rename_map:
+            return (
+                records,
+                list(column_order) if column_order is not None else None,
+                schema,
+            )
+        return (
+            self._apply_renames_to_records(records, rename_map),
+            self._apply_renames_to_column_order(column_order, rename_map),
+            self._apply_renames_to_schema(schema, rename_map),
+        )
+
     def _apply_renames_to_records(
         self, records: list[GoldRecord], rename_map: dict[str, str]
     ) -> list[GoldRecord]:
-        """Apply column renames to record dictionaries."""
+        """Apply column renames to record dictionaries.
+
+        Rejects a record when two source keys, or a source key and an existing
+        destination column, resolve to the same destination name.
+        """
         if not rename_map:
             return records
         renamed_records = []
         for record in records:
-            renamed = {}
+            renamed: dict[str, object] = {}
             for key, value in record.items():
-                renamed[rename_map.get(key, key)] = value
+                dest = rename_map.get(key, key)
+                if dest in renamed:
+                    raise ValueError(
+                        f"Column rename collision: {key!r} and an existing field "
+                        f"both resolve to {dest!r}"
+                    )
+                renamed[dest] = value
             renamed_records.append(renamed)
         return renamed_records
 

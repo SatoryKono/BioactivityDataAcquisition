@@ -52,6 +52,18 @@ def test_enforce_flag(monkeypatch: pytest.MonkeyPatch) -> None:
     assert enforce_report_root_marker() is False
 
 
+def test_readiness_env_set_tracks_process_environment(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.delenv(REPORT_ROOT_ENV, raising=False)
+    unset = report_root_readiness_check(root=tmp_path)
+    assert unset["env_set"] is False
+
+    monkeypatch.setenv(REPORT_ROOT_ENV, str(tmp_path / "run-reports"))
+    set_check = report_root_readiness_check(root=tmp_path)
+    assert set_check["env_set"] is True
+
+
 def test_readiness_check_with_marker(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

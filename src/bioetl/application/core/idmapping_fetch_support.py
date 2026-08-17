@@ -39,9 +39,11 @@ async def fetch_records(
     offset: int | None = None,
 ) -> AsyncIterator[JsonDict]:  # Any: record values are heterogeneous
     """Fetch ID mapping records for the requested source IDs."""
-    _ = query, filter_field, offset
+    _ = query, filter_field
     warn_unexpected_entity_type(state, entity_type)
-    chembl_ids, source = await resolve_chembl_ids(state, filter_ids, limit)
+    chembl_ids, source = await resolve_chembl_ids(
+        state, filter_ids, limit, offset
+    )
     if not chembl_ids:
         state._logger.warning("no_ids_to_map", input_path=str(state._input_path))
         return
@@ -88,6 +90,7 @@ async def resolve_chembl_ids(
     state: _IDMappingFetchState,
     filter_ids: list[str] | None,
     limit: int | None,
+    offset: int | None = None,
 ) -> tuple[list[str], str]:
     """Resolve ChEMBL IDs from seed data, direct filters, or configured input."""
     if state._seed_ids:
@@ -101,7 +104,7 @@ async def resolve_chembl_ids(
     else:
         chembl_ids = await read_chembl_ids(state)
         source = "csv"
-    return apply_limit(chembl_ids, limit), source
+    return apply_offset_and_limit(chembl_ids, offset, limit), source
 
 
 def apply_limit(ids: list[str], limit: int | None) -> list[str]:
@@ -109,6 +112,16 @@ def apply_limit(ids: list[str], limit: int | None) -> list[str]:
     if limit is None:
         return ids
     return ids[:limit]
+
+
+def apply_offset_and_limit(
+    ids: list[str],
+    offset: int | None,
+    limit: int | None,
+) -> list[str]:
+    """Apply offset first, then limit, so later pages do not repeat earlier IDs."""
+    start = max(offset or 0, 0)
+    return apply_limit(ids[start:], limit)
 
 
 def build_mapping_record(

@@ -115,10 +115,12 @@ class HistoricalReplayUniverseService:
         external_records: tuple[HistoricalReplayUniverseExternalRecord, ...] = (),
     ) -> HistoricalReplayUniverseInventorySnapshot:
         local_inventory = self.corpus_service.build_certifiability_inventory()
-        records = [
-            *self._build_local_records(local_inventory),
-            *self._build_external_records(external_records),
-        ]
+        records_by_manifest_id: dict[str, HistoricalReplayUniverseRecord] = {}
+        for record in self._build_local_records(local_inventory):
+            records_by_manifest_id[record.manifest_id] = record
+        for record in self._build_external_records(external_records):
+            records_by_manifest_id.setdefault(record.manifest_id, record)
+        records = list(records_by_manifest_id.values())
         records.sort(
             key=lambda item: (
                 item.pipeline_name,

@@ -72,20 +72,32 @@ def track_storage_write_metrics(
     batch_metrics: BatchMetricsRecorderService,
     *,
     transform_result: TransformResult,
+    silver_written: int | None = None,
+    gold_written: int | None = None,
 ) -> None:
     """Record Silver/Gold storage-stage metrics after writes complete."""
+    silver_count = (
+        silver_written
+        if silver_written is not None
+        else len(transform_result.silver_records)
+    )
+    gold_count = (
+        gold_written
+        if gold_written is not None
+        else len(transform_result.gold_records)
+    )
     batch_metrics.track_stage_records(
         stage="storage",
         outcome="silver_written",
-        count=len(transform_result.silver_records),
+        count=silver_count,
     )
     batch_metrics.track_stage_records(
         stage="storage",
         outcome="gold_written",
-        count=len(transform_result.gold_records),
+        count=gold_count,
     )
     batch_metrics.track_stage_records(
         stage="gold",
         outcome="written",
-        count=len(transform_result.gold_records),
+        count=gold_count,
     )

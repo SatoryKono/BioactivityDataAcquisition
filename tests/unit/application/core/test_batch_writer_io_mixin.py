@@ -377,6 +377,9 @@ class TestBatchWriterIOMixinSilver:
         record = request.records[0]
         assert "new_name" in record
         assert "old_name" not in record
+        if request.column_order is not None:
+            assert "new_name" in request.column_order
+            assert "old_name" not in request.column_order
 
     async def test_write_silver_reraises_oserror(
         self, mock_storage, mock_context, mock_gold_validator
@@ -717,6 +720,43 @@ class TestPrepareGoldRecords:
         assert projected == [{"keep": "yes"}]
         assert cols == ["keep"]
 
+    def test_projects_schema_columns_in_sorted_order(
+        self, mock_storage, mock_context
+    ) -> None:
+        """Gold projection iterates schema columns in deterministic sorted order."""
+
+        class _Schema:
+            @staticmethod
+            def to_schema():
+                s = MagicMock()
+                s.columns = {"zeta": object(), "alpha": object(), "mu": object()}
+                return s
+
+        config = RecordProcessorConfig(
+            pipeline_name="p",
+            provider="prov",
+            entity_type="ent",
+            silver_schema=MagicMock(),
+            gold_schema=_Schema,
+        )
+        writer = BatchWriter(
+            storage=mock_storage,
+            context=mock_context,
+            config=config,
+            gold_validator=MagicMock(
+                validate=MagicMock(return_value=ValidationResult(valid=True))
+            ),
+            error_classifier=ErrorClassifier(),
+            batch_metrics=MagicMock(spec=BatchMetricsRecorder),
+        )
+
+        projected, cols = writer._prepare_gold_records(
+            [{"zeta": 1, "alpha": 2, "mu": 3}]
+        )
+
+        assert cols == ["alpha", "mu", "zeta"]
+        assert list(projected[0].keys()) == ["alpha", "mu", "zeta"]
+
 
 @pytest.mark.unit
 class TestGoldValidationSupport:
@@ -924,6 +964,8 @@ class TestBatchWriterIOMixinFailureAndProjectionPaths:
 
         await writer.write_gold([{"entity_id": "e1"}])
 
-        assert mock_storage.write_gold.call_args.kwargs["records"] == [
-            {"record_id": "e1"}
-        ]
+        gold_kwargs = mock_storage.write_gold.call_args.kwargs
+        assert gold_kwargs["records"] == [{"record_id": "e1"}]
+        if gold_kwargs["column_order"] is not None:
+            assert "record_id" in gold_kwargs["column_order"]
+            assert "entity_id" not in gold_kwargs["column_order"]

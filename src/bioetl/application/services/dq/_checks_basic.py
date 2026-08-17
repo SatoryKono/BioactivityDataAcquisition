@@ -104,7 +104,6 @@ def check_completeness(
 
     field_rates: dict[str, float] = {}
     total_rate = 0.0
-    count = 0
 
     for field in required_fields:
         if field in df.columns:
@@ -112,11 +111,10 @@ def check_completeness(
             rate = 1.0 - (null_count / len(df)) if len(df) > 0 else 0.0
             field_rates[field] = round(rate, 4)
             total_rate += rate
-            count += 1
         else:
             field_rates[field] = 0.0
 
-    overall_score = total_rate / count if count > 0 else 0.0
+    overall_score = total_rate / len(required_fields)
 
     status = DQCheckStatus.PASS if overall_score >= threshold else DQCheckStatus.FAIL
     reject_reasons: tuple[GoldRejectReason, ...] = ()

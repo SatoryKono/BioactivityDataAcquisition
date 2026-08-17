@@ -153,7 +153,7 @@ def validate_required_checkpoint_anchors(
     ]
     if "manifest_id" in missing:
         messages.append("checkpoint_missing_manifest_anchor")
-    if "input_snapshot_ids" in missing or "input_snapshot_fingerprint" in missing:
+    if "input_snapshot_fingerprint" in missing:
         messages.append("checkpoint_missing_snapshot_anchor")
     return False, messages
 

@@ -74,7 +74,7 @@ def quarantine() -> None:
 @typed_group_command(quarantine, "serve")
 @typed_click_option(
     "--host",
-    default="0.0.0.0",
+    default="127.0.0.1",
     help=(
         "Host to bind the legacy quarantine serve backend to. "
         "Prefer `bioetl health server` on :8000 for Grafana Ops HTTP."

@@ -156,6 +156,20 @@ class TestHealthAggregatorCheckAll:
         assert isinstance(report, HealthReport)
 
     @pytest.mark.asyncio
+    async def test_check_all_reraises_cancelled_error(
+        self, health_aggregator: _HealthAggregator, mock_services: MagicMock
+    ) -> None:
+        """Cancellation from a gathered check must propagate, not become UNHEALTHY."""
+        import asyncio
+
+        mock_services.storage.health_check = AsyncMock(
+            side_effect=asyncio.CancelledError()
+        )
+
+        with pytest.raises(asyncio.CancelledError):
+            await health_aggregator.check_all(mock_services)
+
+    @pytest.mark.asyncio
     async def test_report_contains_storage_result(
         self, health_aggregator: _HealthAggregator, mock_services: MagicMock
     ) -> None:

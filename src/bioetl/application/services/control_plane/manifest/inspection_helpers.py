@@ -171,11 +171,10 @@ def build_run_artifact_diff_payload(
         "left_planned_artifact_count": len(left_artifacts),
         "right_planned_artifact_count": len(right_artifacts),
     }
-    if left_artifact_refs or right_artifact_refs:
-        payload.update(
-            build_artifact_ref_semantic_diff(
-                left_artifact_refs=left_artifact_refs,
-                right_artifact_refs=right_artifact_refs,
-            )
+    payload.update(
+        build_artifact_ref_semantic_diff(
+            left_artifact_refs=left_artifact_refs,
+            right_artifact_refs=right_artifact_refs,
         )
+    )
     return payload

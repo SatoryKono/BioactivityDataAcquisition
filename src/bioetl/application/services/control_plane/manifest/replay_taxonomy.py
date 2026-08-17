@@ -63,7 +63,9 @@ def resolve_replay_resume_rebuild_verdict(
 
     if _is_exact_replay_ready(capability, readiness, mode, continuation):
         return "exact_replay_ready"
-    if _has_missing_anchors(missing_anchors):
+    if _has_missing_anchors(missing_anchors) and _is_resume_only(
+        capability, mode, continuation
+    ):
         return "resume_only_degraded"
     if _is_resume_only(capability, mode, continuation):
         return "resume_only"
@@ -123,6 +125,11 @@ def _has_missing_anchors(value: object) -> bool:
     return bool(value)
 
 
+def _deterministic_sort_key(value: object) -> tuple[str, str]:
+    """Return a stable sort key for mixed-type set projection values."""
+    return (type(value).__qualname__, repr(value))
+
+
 def _copy_projection_value(field: str, value: object) -> object:
     """Copy mutable replay-taxonomy values to avoid shared references."""
     if field in LIST_DEFAULTS:
@@ -130,7 +137,12 @@ def _copy_projection_value(field: str, value: object) -> object:
             return list(value)
         if isinstance(value, list):
             return list(value)
-        return list(LIST_DEFAULTS[field])
+        if isinstance(value, set | frozenset):
+            return sorted(value, key=_deterministic_sort_key)
+        raise TypeError(
+            f"replay taxonomy field {field!r} must be a list, tuple, set, or "
+            f"frozenset, got {type(value).__name__}"
+        )
     if isinstance(value, dict):
         return dict(value)
     if isinstance(value, list):

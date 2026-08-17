@@ -52,3 +52,12 @@ def test_fragment_timestamp_falls_back_to_current_time(monkeypatch) -> None:
     monkeypatch.setattr(fragment_ids, "current_utc_time", lambda: now)
 
     assert fragment_ids.fragment_timestamp(None, None) == now
+
+
+def test_build_fragment_id_preserves_none_slots() -> None:
+    left = fragment_ids.build_fragment_id("src", "a", None)
+    right = fragment_ids.build_fragment_id("src", None, "a")
+    empty = fragment_ids.build_fragment_id("src", "a", "")
+
+    assert left != right
+    assert left != empty

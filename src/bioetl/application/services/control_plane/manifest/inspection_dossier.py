@@ -9,14 +9,14 @@ from bioetl.application.services.control_plane.manifest.execution_identity_suppo
 )
 from bioetl.domain.control_plane import RunManifest
 
-_AUTHORITATIVE_REPLAY_ARTIFACTS = [
+_AUTHORITATIVE_REPLAY_ARTIFACTS = (
     "run_manifest",
     "effective_config_artifact",
     "lineage_fragment",
     "layer_metadata",
     "checkpoint_metadata",
     "input_snapshot_envelope",
-]
+)
 _PUBLISHED_ARTIFACT_REF_KEYS = {
     "stage",
     "dataset_ref",
@@ -34,7 +34,7 @@ def _list_payload_values(
     key: str,
 ) -> list[object]:
     value = diagnostics.get(key)
-    return value if isinstance(value, list) else []
+    return list(value) if isinstance(value, list) else []
 
 
 def _published_artifact_dossier_refs(
@@ -93,7 +93,7 @@ def build_authoritative_replay_dossier(
     )
     return {
         "truth_boundary": "authoritative_replay_artifacts_only",
-        "authoritative_replay_artifacts": _AUTHORITATIVE_REPLAY_ARTIFACTS,
+        "authoritative_replay_artifacts": list(_AUTHORITATIVE_REPLAY_ARTIFACTS),
         "manifest_id": manifest.manifest_id,
         "run_id": str(manifest.run_id),
         "execution_fingerprint": manifest.execution_fingerprint,

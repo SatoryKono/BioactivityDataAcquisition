@@ -1314,3 +1314,44 @@ class TestFilteredDataSourceValidCombinations:
 
         with pytest.raises(ValueError, match="filter_field must be specified"):
             await _drain_async_iter(filtered.fetch("activity"))
+
+    @pytest.mark.asyncio
+    async def test_fetch_rejects_explicit_filter_ids_argument(
+        self, mock_data_source, disabled_filter_config
+    ):
+        """Call-site filter_ids must not be silently discarded."""
+        filtered = FilteredDataSource(
+            data_source=mock_data_source,
+            filter_reader=None,
+            filter_config=disabled_filter_config,
+        )
+
+        with pytest.raises(ValueError, match="filter_ids and filter_field"):
+            await _drain_async_iter(
+                filtered.fetch("activity", filter_ids=["CHEMBL1"])
+            )
+
+    @pytest.mark.asyncio
+    async def test_fetch_single_column_raises_without_filter_ids(self):
+        """Missing preloaded filter_ids fail closed with ValueError, not assert."""
+        from bioetl.application.core._filtered_data_source_fetch_support import (
+            fetch_single_column,
+        )
+
+        config = InputFilterConfig(
+            enabled=True,
+            source_path="data/test.csv",
+            column_name="molecule_id",
+            filter_field="molecule_id",
+        )
+        filtered = FilteredDataSource(
+            data_source=MockFilterableDataSource(),
+            filter_reader=None,
+            filter_config=config,
+        )
+        filtered._filter_ids = None
+
+        with pytest.raises(ValueError, match="filter_ids must be loaded"):
+            await _drain_async_iter(
+                fetch_single_column(filtered, "activity", limit=None)
+            )

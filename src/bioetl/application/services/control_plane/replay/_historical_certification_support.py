@@ -123,6 +123,12 @@ class HistoricalReplayCertificationValidator:
         matching_queries = self._find_matching_queries(manifest, certification)
         if len(matching_queries) == 1:
             return matching_queries[0]
+        if len(matching_queries) > 1:
+            raise ValueError(
+                "Historical replay certification query is ambiguous for "
+                f"{certification.provider}/{certification.entity}/"
+                f"{certification.pipeline_name}: {', '.join(matching_queries)}"
+            )
         return None
 
     @staticmethod
@@ -195,11 +201,15 @@ class HistoricalReplayCertificationValidator:
         expected: set[tuple[str, str, str, str | None]],
         actual: set[tuple[str, str, str, str | None]],
     ) -> list[tuple[str, str, str, str | None]]:
-        actual_without_query = {(a, b, c) for a, b, c, _ in actual}
+        actual_unscoped = {
+            (provider, entity, pipeline)
+            for provider, entity, pipeline, query in actual
+            if query is None
+        }
         return sorted(
             key
             for key in expected
-            if key not in actual and key[:3] not in actual_without_query
+            if key not in actual and key[:3] not in actual_unscoped
         )
 
     @staticmethod

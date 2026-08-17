@@ -195,10 +195,14 @@ class GoldMetadataService:
         scd = _build_gold_scd(input_data)
 
         schema_info = extract_schema_metadata(input_data.schema_inspection)
+        duration_seconds = _build_runtime_duration(
+            input_data.started_at, input_data.completed_at
+        )
         return GoldMetadata(
             runtime=self.runtime_metadata_builder(
+                started_at=input_data.started_at,
                 completed_at=input_data.completed_at,
-                duration_seconds=0.0,
+                duration_seconds=duration_seconds,
             ),
             pipeline=self.pipeline_metadata_builder(),
             lineage=lineage,

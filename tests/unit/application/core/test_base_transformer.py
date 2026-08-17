@@ -359,6 +359,31 @@ class TestTemplateMethodPattern:
     """Tests for Template Method pattern in transform()."""
 
     @pytest.mark.asyncio
+    async def test_transform_dispatches_structural_policy_through_instance_override(
+        self, mock_context: PipelineContext
+    ) -> None:
+        """transform() must call the instance _apply_structural_policy hook."""
+
+        class OverrideTransformer(ConcreteTransformer):
+            def __init__(self, *args, **kwargs) -> None:
+                super().__init__(*args, **kwargs)
+                self.policy_calls = 0
+
+            def _apply_structural_policy(self, context, result, index):
+                self.policy_calls += 1
+                return result
+
+        transformer = OverrideTransformer(
+            provider="test",
+            dependencies=build_test_transformer_dependencies(),
+        )
+        result = await transformer.transform(
+            mock_context, {"id": "123", "value": "ok"}, index=0
+        )
+        assert result == {"id": "123", "value": "ok"}
+        assert transformer.policy_calls == 1
+
+    @pytest.mark.asyncio
     async def test_transform_calls_transform_impl(
         self, transformer: ConcreteTransformer, mock_context: PipelineContext
     ) -> None:

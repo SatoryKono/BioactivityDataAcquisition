@@ -62,7 +62,9 @@ def _optional_str(values: Mapping[str, object], key: str) -> str | None:
 
 def _optional_int(values: Mapping[str, object], key: str) -> int | None:
     value = values.get(key)
-    return value if isinstance(value, int) else None
+    if isinstance(value, bool) or not isinstance(value, int):
+        return None
+    return value
 
 
 def _optional_bool(values: Mapping[str, object], key: str) -> bool | None:
@@ -87,7 +89,7 @@ def build_workflow_run_options_override_from_mapping(
         "debug_export_formats",
     )
     return WorkflowRunOptionsConfig(
-        dry_run=True if bool(override_values.get("dry_run")) else None,
+        dry_run=_optional_bool(override_values, "dry_run"),
         run_type=_optional_str(override_values, "run_type"),
         start_offset=_optional_int(override_values, "start_offset"),
         limit=_optional_int(override_values, "limit"),

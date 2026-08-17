@@ -354,6 +354,38 @@ class TestCheckpointServiceExtendedLookupCoverage:
             status="success",
         )
 
+    @pytest.mark.asyncio
+    async def test_get_checkpoint_for_manifest_id_uses_payload_owner(
+        self, checkpoint_service, mock_checkpoint_port
+    ) -> None:
+        run_id = str(deterministic_uuid_from_callsite("checkpoint-service-owner"))
+        mock_checkpoint_port.load_for_manifest_id = AsyncMock(
+            return_value=(run_id, {"pipeline_name": "owned_pipeline"})
+        )
+
+        result = await checkpoint_service.get_checkpoint_for_manifest_id(
+            "owned_pipeline",
+            "manifest-1",
+        )
+
+        assert result is not None
+        assert result.pipeline_name == "owned_pipeline"
+
+    @pytest.mark.asyncio
+    async def test_get_checkpoint_for_manifest_id_rejects_owner_mismatch(
+        self, checkpoint_service, mock_checkpoint_port
+    ) -> None:
+        run_id = str(deterministic_uuid_from_callsite("checkpoint-service-mismatch"))
+        mock_checkpoint_port.load_for_manifest_id = AsyncMock(
+            return_value=(run_id, {"pipeline_name": "owned_pipeline"})
+        )
+
+        with pytest.raises(ValueError, match="Checkpoint pipeline owner mismatch"):
+            await checkpoint_service.get_checkpoint_for_manifest_id(
+                "caller_pipeline",
+                "manifest-1",
+            )
+
     def test_trace_attributes_include_pipeline_and_extras(
         self,
         checkpoint_service,
