@@ -271,12 +271,12 @@ class HealthServerRoutingMixin:
     async def _handle_readiness(self) -> HealthResponse:
         """Handle /health/ready endpoint."""
         await asyncio.sleep(0)
+        from bioetl.application.observability.current_metrics_reconciliation import (
+            current_metrics_reconciliation_check,
+        )
         from bioetl.interfaces.http.report_root_config import (
             enforce_report_root_marker,
             report_root_readiness_check,
-        )
-        from bioetl.application.observability.current_metrics_reconciliation import (
-            current_metrics_reconciliation_check,
         )
 
         report_root_check = report_root_readiness_check()
