@@ -191,6 +191,23 @@ class TestFormatDateParts:
         assert format_date_parts([[2020, 2]]) == "2020-02-29"  # Leap year
         assert format_date_parts([[2021, 2]]) == "2021-02-28"  # Not leap year
 
+    @pytest.mark.parametrize(
+        "date_parts",
+        [
+            [[0]],
+            [[2024, 0]],
+            [[2024, 13]],
+            [[2024, 2, 30]],
+            [[2023, 2, 29]],
+            [[2024, True]],
+        ],
+    )
+    def test_format_date_parts_rejects_invalid_components(
+        self, date_parts: list[list[int]]
+    ) -> None:
+        """Invalid date parts fail closed instead of raising or emitting junk."""
+        assert format_date_parts(date_parts) is None
+
 
 class TestNormalizePmid:
     """Tests for normalize_pmid function."""
@@ -233,6 +250,7 @@ class TestNormalizePartialDate:
             ("2024", "2024-12-31"),
             ("  2024-03  ", "2024-03-31"),
             ("2024/03", None),
+            ("٢٠٢٤", None),
             (None, None),
         ],
     )

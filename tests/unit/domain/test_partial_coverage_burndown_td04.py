@@ -490,6 +490,7 @@ def test_noop_metadata_writer__attach_artifact_recorder_accepts_none() -> None:
 def test_filter_load_result__is_multi_column_true() -> None:
     result = FilterLoadResult(
         column_ids={"col_a": ("1",), "col_b": ("2",)},
+        filter_fields=("col_a", "col_b"),
     )
     assert result.is_multi_column is True
 

@@ -30,15 +30,19 @@
 
 from __future__ import annotations
 
+import json
 import pytest
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
+from pathlib import PurePosixPath
+from uuid import UUID
 
 from bioetl.domain.lineage import (
     DatasetRef,
     LineageEdge,
     LineageEdgeType,
     LineageGraphFragment,
+    LineageNodeRef,
     LineageNodeType,
     SchemaRef,
     TransformRef,
@@ -48,6 +52,7 @@ from bioetl.domain.lineage._shared import (
     load_mapping,
     load_optional_int,
     load_optional_version,
+    mapping_to_plain,
 )
 from bioetl.domain.medallion import Layer
 
@@ -194,11 +199,57 @@ def test_normalize_mapping_is_immutable_and_detached() -> None:
 
 def test_plain_value_serializes_sets_with_stable_order() -> None:
     """Set/frozenset attributes must serialize deterministically (#8273)."""
-    from bioetl.domain.lineage._shared import mapping_to_plain
-
     payload = mapping_to_plain({"tags": {"zeta", "alpha", "mu"}})
     assert payload["tags"] == ["alpha", "mu", "zeta"]
     frozen_payload = mapping_to_plain({"tags": frozenset({"b", "a"})})
     assert frozen_payload["tags"] == ["a", "b"]
     # repeated conversion is stable
     assert mapping_to_plain({"tags": {"zeta", "alpha", "mu"}}) == payload
+
+
+def test_lineage_attributes_are_json_safe_and_roundtrip() -> None:
+    """Structured attribute leaves normalize before persistence and hydration."""
+    node = LineageNodeRef(
+        node_type=LineageNodeType.TRANSFORM,
+        node_id="transform:test",
+        attributes={
+            "nested": {
+                "when": datetime(2026, 8, 17, 12, 30, tzinfo=UTC),
+                "day": date(2026, 8, 17),
+                "identity": UUID("12345678-1234-5678-1234-567812345678"),
+                "path": PurePosixPath("lineage/fragments/one.json"),
+            }
+        },
+    )
+    fragment = LineageGraphFragment(fragment_id="fragment-json-safe", nodes=(node,))
+
+    payload = fragment.to_dict()
+    json.dumps(payload, allow_nan=False)
+    restored = LineageGraphFragment.from_dict(payload)
+    nested = restored.nodes[0].attributes["nested"]
+
+    assert nested["when"] == "2026-08-17T12:30:00Z"
+    assert nested["day"] == "2026-08-17"
+    assert nested["identity"] == "12345678-1234-5678-1234-567812345678"
+    assert nested["path"] == "lineage/fragments/one.json"
+
+
+def test_lineage_set_order_uses_canonical_json_values() -> None:
+    """Mixed-type sets sort by their permitted canonical JSON representation."""
+    payload = mapping_to_plain({"values": frozenset({None, False, 2, "1"})})
+
+    assert payload["values"] == ["1", 2, False, None]
+
+
+@pytest.mark.parametrize("value", [object(), b"bytes"])
+def test_lineage_attributes_reject_unsupported_leaves(value: object) -> None:
+    """Arbitrary Python objects cannot leak into persisted lineage payloads."""
+    with pytest.raises(TypeError, match="require JSON-safe values"):
+        mapping_to_plain({"value": value})
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+def test_lineage_attributes_reject_non_finite_floats(value: float) -> None:
+    """Non-finite values fail before strict JSON persistence."""
+    with pytest.raises(ValueError, match="do not allow NaN or Infinity"):
+        mapping_to_plain({"value": value})
