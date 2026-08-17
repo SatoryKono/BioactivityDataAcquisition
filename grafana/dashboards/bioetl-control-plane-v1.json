@@ -240,7 +240,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 8
+        "y": 14
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN HTTP trust summary. processing_status is the data-processing outcome; trust_status is fail-closed exact-run evidence (INCOMPLETE/ERROR are not OK). Scope is exact_run when run_id resolves. No-data or backend unavailable is not a health verdict.",
