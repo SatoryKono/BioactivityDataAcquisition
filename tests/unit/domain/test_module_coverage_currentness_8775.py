@@ -114,9 +114,8 @@ def test_dq_serializer_handles_binary_and_nested_empty_collections() -> None:
 
 
 def test_explainability_ids_handle_mixed_keys_and_fallback_scalars() -> None:
-    first = _deterministic_record_id({1: "one", "2": "two"})  # type: ignore[dict-item]
-
-    assert len(first) == 64
+    with pytest.raises(TypeError):
+        _deterministic_record_id({1: "one", "2": "two"})  # type: ignore[dict-item]
     assert _json_fallback(b"\x0f") == "0f"
     with pytest.raises(TypeError, match="Unsupported value"):
         _json_fallback(object())

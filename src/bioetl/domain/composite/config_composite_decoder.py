@@ -112,20 +112,17 @@ def _build_enricher_configs[ConfigT](
 
 def _parse_field_priorities(raw: object) -> dict[str, tuple[str, ...]]:
     priorities_raw = str_key_mapping(raw, "merge.field_priorities")
-    priorities: dict[str, tuple[str, ...]] = {}
+    result: dict[str, tuple[str, ...]] = {}
     for key, value in priorities_raw.items():
-        if isinstance(value, str):
-            values: object = (value,)
-        else:
-            values = value
-        priorities[key] = require_str_tuple(
+        values = value if isinstance(value, list | tuple) else (value,)
+        result[key] = require_str_tuple(
             values,
             f"merge.field_priorities[{key!r}]",
         )
-    return priorities
+    return result
 
 
-def _optional_column_groups(raw: object) -> object:
+def _optional_column_groups(raw: object) -> tuple[dict[str, object], ...]:
     if raw is None:
         return ()
     return require_object_dict_sequence(raw, "merge.column_groups")

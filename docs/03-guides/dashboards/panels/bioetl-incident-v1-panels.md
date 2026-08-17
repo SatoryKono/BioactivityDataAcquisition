@@ -11,11 +11,6 @@ rules only. Not a persistent working record. Not Grafana Drilldown Investigation
 
 ## Key Panels
 
-### 1. Navigate Dashboards
-- **Type:** Text
-- **Purpose:** Full portfolio bus 0–6; current disabled.
-- **Data sources:** Static HTML + panel links.
-
 ### 2. Understand Incident Scope
 - **Type:** Text
 - **Purpose:** Incident scope summary (workflow/pipeline/run_type/provider filters).
@@ -57,6 +52,12 @@ rules only. Not a persistent working record. Not Grafana Drilldown Investigation
 | 2002 | Inspect Runtime Suspects |
 | 2003 | Inspect Provider Suspects |
 | 2004 | Inspect DQ Suspects |
+
+### 7. Review Alert Evidence
+- **Type:** Row (**collapsed by default**, `id=2020`)
+- **Purpose:** Progressive disclosure for the current alert table, range alert
+  history, and impact/confidence guidance after ranked-suspect triage.
+- **Data sources:** Nested Prometheus and static evidence panels below.
 
 ### 8. Monitor Current Alerts
 - **Type:** Table

@@ -134,8 +134,10 @@ def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> Non
 
     assert len(root_files) <= payload["outcomes"]["5847"]["tracked_root_files_after"]
     assert ".devin" in approved_tooling_roots
+    # Devin and Zed were accepted as governed tooling roots after this debt
+    # baseline; neither represents the root clutter measured by #5847.
     assert (
-        len(root_dirs - {".devin"})
+        len(root_dirs - {".devin", ".zed"})
         == payload["outcomes"]["5847"]["tracked_root_dirs_after"]
     )
     assert (

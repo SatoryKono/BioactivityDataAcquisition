@@ -135,8 +135,8 @@ def changed_field_changes(
 
 
 def _required_names(value: object) -> set[str]:
-    """Return string names from a valid required-field collection."""
-    if isinstance(value, (str, bytes, Mapping)) or not isinstance(value, Iterable):
+    """Return strings from a valid required-field collection."""
+    if isinstance(value, str | bytes | Mapping) or not isinstance(value, Iterable):
         return set()
     return {item for item in value if isinstance(item, str)}
 

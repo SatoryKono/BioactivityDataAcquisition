@@ -253,15 +253,7 @@ class ValueValidator:
         pchembl_value: float,
         threshold: float = 5.0,
     ) -> bool:
-        """Check if pChEMBL value indicates potent activity.
-
-        Args:
-            pchembl_value: pChEMBL value to check.
-            threshold: Potency threshold (default 5.0 = 10 µM).
-
-        Returns:
-            True if pChEMBL >= threshold.
-        """
+        """Return whether pChEMBL reaches the potency threshold."""
         return pchembl_value >= threshold
 
     def is_highly_potent(
@@ -269,15 +261,7 @@ class ValueValidator:
         pchembl_value: float,
         threshold: float = 7.0,
     ) -> bool:
-        """Check if pChEMBL value indicates highly potent activity.
-
-        Args:
-            pchembl_value: pChEMBL value to check.
-            threshold: High potency threshold (default 7.0 = 100 nM).
-
-        Returns:
-            True if pChEMBL >= threshold.
-        """
+        """Return whether pChEMBL reaches the high-potency threshold."""
         return pchembl_value >= threshold
 
     def set_concentration_range(

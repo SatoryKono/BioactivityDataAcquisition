@@ -29,7 +29,6 @@ absence.
 
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1000 | Navigate Dashboards | text | Static | Static navigation handoff into related dashboards and incident paths. | shared shell | No thresholds; operator routing only. |
 | 9400 | Inspect Scope & Evidence | text | Static | Replay-safety question plus plain-language definitions of current, selected-run, and unknown evidence. | shared shell | No thresholds; interpretive guidance only. |
 | 9401 | Monitor Replay Readiness | stat | Prometheus | Evidence-aware replay/resume verdict from `bioetl_control_plane_current_status_trusted`; gates replay blockers, checkpoint freshness/presence, and required telemetry. | shared shell | `0=OK`, `1=WARN`, `2=CRIT`, `3=INCOMPLETE`, `null=UNKNOWN`. `INCOMPLETE` blocks replay/resume approval. |
 | 9402 | Review Run Summary | table | BioETL Ops HTTP | Identity anchors for the selected workflow/pipeline/run scope. | shared shell | No numeric threshold; forensic handoff table. |

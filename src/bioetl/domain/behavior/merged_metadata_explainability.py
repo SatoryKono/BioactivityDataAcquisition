@@ -2,14 +2,33 @@
 
 from __future__ import annotations
 
-import hashlib
-import json
 from dataclasses import dataclass
-from datetime import date, datetime
-from decimal import Decimal
 from typing import TYPE_CHECKING
 
+from bioetl.domain.behavior.merged_metadata_helpers import (
+    deterministic_record_id as _deterministic_record_id,
+)
+from bioetl.domain.behavior.merged_metadata_helpers import (
+    extract_applied_enrichments as _extract_applied_enrichments,
+)
+from bioetl.domain.behavior.merged_metadata_helpers import (
+    json_fallback as _json_fallback,
+)
+from bioetl.domain.behavior.merged_metadata_helpers import (
+    public_field_names as _public_field_names,
+)
+from bioetl.domain.behavior.merged_metadata_helpers import (
+    resolve_final_value_source as _resolve_final_value_source,
+)
+from bioetl.domain.behavior.merged_metadata_helpers import (
+    resolve_priority_order as _resolve_priority_order,
+)
+from bioetl.domain.behavior.merged_metadata_helpers import (
+    resolve_record_id as _resolve_record_id,
+)
 from bioetl.domain.types import JsonDict
+
+__all__ = ["_deterministic_record_id", "_json_fallback"]
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import CompositeOutputExt
@@ -28,7 +47,7 @@ class MergedFieldExplanation:
     enrichment_applied: tuple[str, ...] | None = None
 
     def __post_init__(self) -> None:
-        """Freeze all nested collections supplied by callers."""
+        """Freeze caller-provided collections for deep immutability."""
         object.__setattr__(self, "source_providers", tuple(self.source_providers))
         if self.priority_order is not None:
             object.__setattr__(self, "priority_order", tuple(self.priority_order))
@@ -53,7 +72,7 @@ class MergedRecordExplanation:
     enrichment_count: int = 0
 
     def __post_init__(self) -> None:
-        """Freeze all nested collections supplied by callers."""
+        """Freeze caller-provided collections for deep immutability."""
         object.__setattr__(self, "source_providers", tuple(self.source_providers))
         object.__setattr__(self, "field_explanations", tuple(self.field_explanations))
 
@@ -166,56 +185,6 @@ class MergedMetadataExplainer:
         ]
 
 
-def _resolve_priority_order(
-    field_name: str,
-    field_priorities: dict[str, JsonDict] | None,
-) -> tuple[str, ...] | None:
-    if not field_priorities or field_name not in field_priorities:
-        return None
-    priority = field_priorities[field_name].get("priority")
-    if not isinstance(priority, list):
-        return ()
-    return tuple(str(item) for item in priority)
-
-
-def _resolve_final_value_source(
-    *,
-    source_providers: tuple[str, ...],
-    priority_order: tuple[str, ...] | None,
-) -> str | None:
-    """Select final value source honoring priority_order when available.
-
-    Priority order is highest-first (first item = highest priority).
-    Returns the highest-priority provider that exists in source_providers.
-    """
-    if not source_providers:
-        return None
-    if priority_order:
-        provider_set = set(source_providers)
-        # Return the first (highest priority) provider from priority_order that exists in source_providers
-        for provider in priority_order:
-            if provider in provider_set:
-                return provider
-    return source_providers[0]
-
-
-def _extract_applied_enrichments(
-    composite_metadata: CompositeOutputExt,
-) -> tuple[str, ...] | None:
-    if not composite_metadata.enrichment_status:
-        return None
-    applied = [
-        enricher
-        for enricher, status in composite_metadata.enrichment_status.items()
-        if status == "applied"
-    ]
-    return tuple(applied) or None
-
-
-def _public_field_names(record_data: JsonDict) -> list[str]:
-    return [name for name in record_data if not name.startswith("_")]
-
-
 def _count_conflicts_and_enrichments(
     field_explanations: tuple[MergedFieldExplanation, ...],
 ) -> tuple[int, int]:
@@ -226,96 +195,6 @@ def _count_conflicts_and_enrichments(
         if exp.enrichment_applied:
             enrichers.update(exp.enrichment_applied)
     return conflict_count, len(enrichers)
-
-
-def _resolve_record_id(record: JsonDict) -> str:
-    """Resolve a stable record id, preserving valid falsy identifiers."""
-    for key in ("_record_id", "id", "molecule_id"):
-        if key in record and record[key] is not None:
-            return str(record[key])
-    return _deterministic_record_id(record)
-
-
-def _deterministic_record_id(record: JsonDict) -> str:
-    """Produce a deterministic id even for non-JSON-native supported values."""
-    payload = _canonical_json_text(record)
-    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
-
-
-def _canonical_json_text(value: object) -> str:
-    """Serialize supported values without identity-bearing repr fallbacks."""
-    return json.dumps(
-        _canonical_json_value(value),
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=False,
-        allow_nan=False,
-        default=_json_fallback,
-    )
-
-
-def _canonical_json_value(value: object) -> object:
-    """Normalize containers, including mappings with mixed scalar key types."""
-    if isinstance(value, dict):
-        return _canonical_json_mapping(value)
-    if isinstance(value, list | tuple):
-        return [_canonical_json_value(item) for item in value]
-    return value
-
-
-def _canonical_json_mapping(value: dict[object, object]) -> object:
-    if all(isinstance(key, str) for key in value):
-        return {
-            key: _canonical_json_value(item)
-            for key, item in value.items()
-            if isinstance(key, str)
-        }
-    return {"\u0000bioetl:typed-mapping:v1": _typed_mapping_items(value)}
-
-
-def _typed_mapping_items(
-    value: dict[object, object],
-) -> list[tuple[dict[str, object], object]]:
-    items = [
-        (
-            {"type": type(key).__name__, "value": _canonical_json_value(key)},
-            _canonical_json_value(item),
-        )
-        for key, item in value.items()
-    ]
-    return sorted(items, key=lambda item: _canonical_json_text(item[0]))
-
-
-def _json_fallback(value: object) -> object:
-    converted = _temporal_or_decimal(value)
-    if converted is not None:
-        return converted
-    if isinstance(value, (set, frozenset)):
-        return _canonical_set_members(value)
-    return _bytes_or_reject(value)
-
-
-def _temporal_or_decimal(value: object) -> object | None:
-    if isinstance(value, (datetime, date)):
-        return value.isoformat()
-    if isinstance(value, Decimal):
-        return str(value)
-    if isinstance(value, (set, frozenset)):
-        return _canonical_set_members(value)
-    return _bytes_or_reject(value)
-
-
-def _canonical_set_members(value: set[object] | frozenset[object]) -> list[object]:
-    canonical_items = sorted(_canonical_json_text(item) for item in value)
-    return [json.loads(item) for item in canonical_items]
-
-
-def _bytes_or_reject(value: object) -> str:
-    if isinstance(value, bytes):
-        return value.hex()
-    raise TypeError(
-        f"Unsupported value for deterministic record identity: {type(value).__name__}"
-    )
 
 
 def _empty_explainability_summary() -> JsonDict:
@@ -396,6 +275,7 @@ def _enrichment_summary(
     explanations: list[MergedRecordExplanation],
     totals: dict[str, int],
 ) -> JsonDict:
+    # enrichment_count is now distinct enrichers per record; rate uses records.
     records_with_enrichments = sum(
         1 for exp in explanations if exp.enrichment_count > 0
     )

@@ -4,10 +4,9 @@ from __future__ import annotations
 
 import ast
 import json
-import threading
-from http.client import HTTPConnection
 from pathlib import Path
 from typing import Any
+from unittest import mock
 
 import pytest
 
@@ -132,39 +131,28 @@ def test_fixture_server_serves_populated_and_503_states(
     tmp_path: Path,
 ) -> None:
     """#8593: request path returns fixture payloads with correct HTTP status."""
-    from http.server import ThreadingHTTPServer
-
-    # Point handler at tracked fixtures.
+    del tmp_path
     FixtureHandler.fixture_root = ROOT
     FixtureHandler.default_state = "populated"
-    server = ThreadingHTTPServer(("127.0.0.1", 0), FixtureHandler)
-    thread = threading.Thread(target=server.serve_forever, daemon=True)
-    thread.start()
-    host, port = server.server_address[:2]
-    try:
-        conn = HTTPConnection(str(host), int(port), timeout=5)
-        conn.request(
-            "GET",
-            "/ops/control-plane/checkpoint-validation?fixture_state=populated",
+    handler = object.__new__(FixtureHandler)
+    with mock.patch.object(FixtureHandler, "_send", autospec=True) as send:
+        handler.path = (
+            "/ops/control-plane/checkpoint-validation?fixture_state=populated"
         )
-        populated = conn.getresponse()
-        body = json.loads(populated.read().decode("utf-8"))
-        assert populated.status == 200
+        handler.do_GET()
+        _, populated_status, body = send.call_args.args
+        assert populated_status == 200
         assert body["status"] == "OK"
         assert body["endpoint"] == "checkpoint-validation"
 
-        conn.request(
-            "GET",
-            "/ops/control-plane/failure-reasons?fixture_state=service_unavailable",
+        send.reset_mock()
+        handler.path = (
+            "/ops/control-plane/failure-reasons?fixture_state=service_unavailable"
         )
-        unavailable = conn.getresponse()
-        err_body = json.loads(unavailable.read().decode("utf-8"))
-        assert unavailable.status == 503
+        handler.do_GET()
+        _, unavailable_status, err_body = send.call_args.args
+        assert unavailable_status == 503
         assert err_body["status"] == "ERROR"
-    finally:
-        server.shutdown()
-        server.server_close()
-        thread.join(timeout=5)
 
 
 def test_materialize_writes_outside_grafana_tooling_boundary(tmp_path: Path) -> None:
