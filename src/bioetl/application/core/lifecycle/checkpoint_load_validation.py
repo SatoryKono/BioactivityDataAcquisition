@@ -14,8 +14,10 @@ from bioetl.application.core.lifecycle.checkpoint_runtime import (
     handle_missing_compatibility_context,
     resolve_current_metadata,
     resolve_incompatible_checkpoint_disposition,
-    resolve_missing_compatibility_context_disposition,
     strict_checkpoint_resume_required,
+)
+from bioetl.application.core.lifecycle.checkpoint_runtime import (
+    resolve_missing_compatibility_context_disposition as resolve_missing_disposition,
 )
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import JsonDict, RunID
@@ -61,9 +63,7 @@ def _handle_missing_compatibility_context_result(
     emit_checkpoint_load_status: Callable[[str], None],
 ) -> CheckpointMetadata | None:
     """Apply the configured disposition when resume validation is unavailable."""
-    disposition = resolve_missing_compatibility_context_disposition(
-        compatibility_policy=compatibility_policy,
-    )
+    mode = resolve_missing_disposition(compatibility_policy=compatibility_policy)
     try:
         result = handle_missing_compatibility_context(
             logger=logger,
@@ -76,7 +76,7 @@ def _handle_missing_compatibility_context_result(
     except operation_errors:
         emit_checkpoint_load_status(
             "missing_compatibility_context_hard_fail"
-            if disposition == "missing_context_hard_fail_raised"
+            if mode == "missing_context_hard_fail_raised"
             else "missing_compatibility_context"
         )
         raise
@@ -94,12 +94,11 @@ def validate_loaded_checkpoint(
     current_metadata: CheckpointMetadata | None,
 ) -> tuple[CheckpointMetadata | None, bool]:
     """Validate a loaded checkpoint against runtime execution identity."""
-    effective_current_metadata = resolve_current_metadata(
-        current_metadata,
-        default_metadata=host._current_metadata,
+    current = resolve_current_metadata(
+        current_metadata, default_metadata=host._current_metadata
     )
     missing_context: list[str] = []
-    if effective_current_metadata is None:
+    if current is None:
         missing_context.append("current_metadata")
     if host._compatibility_service is None:
         missing_context.append("checkpoint_compatibility_service")
@@ -110,34 +109,32 @@ def validate_loaded_checkpoint(
                 pipeline_name=host._pipeline_name,
                 compatibility_policy=host._compatibility_policy,
                 checkpoint_metadata=checkpoint_metadata,
-                current_metadata=effective_current_metadata,
+                current_metadata=current,
                 service_available=host._compatibility_service is not None,
                 operation_errors=host._operation_errors,
                 emit_checkpoint_load_status=host._emit_checkpoint_load_status,
             ),
             True,
         )
-    assert effective_current_metadata is not None
+    assert current is not None
     assert host._compatibility_service is not None
-    compatibility_result = (
-        host._compatibility_service.validate_checkpoint_compatibility(
-            effective_current_metadata,
-            checkpoint_metadata,
-        )
+    result = host._compatibility_service.validate_checkpoint_compatibility(
+        current,
+        checkpoint_metadata,
     )
-    if compatibility_result.compatible:
+    if result.compatible:
         host._logger.info(
             "Checkpoint compatibility validation passed.",
             pipeline=host._pipeline_name,
-            messages=list(compatibility_result.messages),
+            messages=list(result.messages),
         )
         return checkpoint_metadata, False
     return (
         handle_incompatible_checkpoint_result(
             host=host,
             checkpoint_metadata=checkpoint_metadata,
-            current_metadata=effective_current_metadata,
-            compatibility_result=compatibility_result,
+            current_metadata=current,
+            result=result,
         ),
         True,
     )
@@ -148,55 +145,42 @@ def handle_incompatible_checkpoint_result(
     host: CheckpointValidationProtocol,
     checkpoint_metadata: CheckpointMetadata,
     current_metadata: CheckpointMetadata,
-    compatibility_result: CheckpointCompatibilityResult,
+    result: CheckpointCompatibilityResult,
 ) -> CheckpointMetadata | None:
     """Apply the configured disposition for an incompatible checkpoint."""
-    disposition = resolve_incompatible_checkpoint_disposition(
+    mode = resolve_incompatible_checkpoint_disposition(
         compatibility_policy=host._compatibility_policy,
-        execution_identity_compatible=(
-            compatibility_result.execution_identity_compatible
-        ),
-        identity_continuity_proven=compatibility_result.identity_continuity_proven,
+        execution_identity_compatible=result.execution_identity_compatible,
+        identity_continuity_proven=result.identity_continuity_proven,
         strict_persistence_required=strict_checkpoint_resume_required(
             current_metadata=current_metadata,
             checkpoint_metadata=checkpoint_metadata,
         ),
     )
     try:
-        result = handle_incompatible_checkpoint(
+        loaded = handle_incompatible_checkpoint(
             logger=host._logger,
             pipeline_name=host._pipeline_name,
             compatibility_policy=host._compatibility_policy,
             current_metadata=current_metadata,
             checkpoint_metadata=checkpoint_metadata,
-            execution_identity_compatible=(
-                compatibility_result.execution_identity_compatible
-            ),
-            identity_continuity_proven=(
-                compatibility_result.identity_continuity_proven
-            ),
-            messages=list(compatibility_result.messages),
+            execution_identity_compatible=result.execution_identity_compatible,
+            identity_continuity_proven=result.identity_continuity_proven,
+            messages=list(result.messages),
         )
     except host._operation_errors:
-        host._emit_checkpoint_load_status(
-            "incompatible_hard_fail"
-            if disposition == "hard_fail_raised"
-            else "incompatible"
+        status = (
+            "incompatible_hard_fail" if mode == "hard_fail_raised" else "incompatible"
         )
+        host._emit_checkpoint_load_status(status)
         raise
-    if result is None:
-        host._emit_checkpoint_load_status(
-            "observe_blocked_identity"
-            if disposition == "observe_blocked_identity"
-            else "incompatible"
-        )
+    if loaded is None:
+        status = mode if mode == "observe_blocked_identity" else "incompatible"
+        host._emit_checkpoint_load_status(status)
         return None
-    host._emit_checkpoint_load_status(
-        "observe_loaded_degraded"
-        if disposition == "observe_loaded_degraded"
-        else "loaded"
-    )
-    return result
+    status = mode if mode == "observe_loaded_degraded" else "loaded"
+    host._emit_checkpoint_load_status(status)
+    return loaded
 
 
 __all__ = [

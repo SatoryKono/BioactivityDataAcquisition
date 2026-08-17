@@ -10,27 +10,72 @@ from bioetl.domain.behavior._preflight_governance_types import (
     PreflightGovernanceConfig,
 )
 from bioetl.domain.behavior.aggregation_validator import AggregationValidator
+from bioetl.domain.behavior.composite_metadata_cv import (
+    _is_truthy_marker,
+    build_explainability_summary,
+    empty_explainability_summary,
+    safe_ratio,
+)
+from bioetl.domain.behavior.composite_metadata_helpers import (
+    extract_composite_lineage_metadata,
+    extract_composite_output_ext,
+    resolve_final_value_source,
+    resolve_priority_order,
+)
 from bioetl.domain.behavior.composite_validation_helpers import (
+    _append_config_issue_if_invalid,
+    _append_named_config_issue_if_invalid,
     _convert_to_aggregation_config,
     _convert_to_cross_validation_config,
+    _get_layer_for_code,
+    as_output_schema,
+    as_source_names,
 )
+from bioetl.domain.behavior.composite_validation_layer import CompositeValidator
+from bioetl.domain.behavior.cross_validation_source_helpers import compares_only_to_self
+from bioetl.domain.behavior.cross_validation_validator import CrossValidationValidator
 from bioetl.domain.behavior.dq_serializer import DQReportSerializer, to_dict
+from bioetl.domain.behavior.merged_metadata_explainability import (
+    MergedRecordExplanation,
+)
 from bioetl.domain.behavior.merged_metadata_explainability import (
     _deterministic_record_id,
     _json_fallback,
 )
 from bioetl.domain.behavior.normalization_config import NormalizationConfig
+from bioetl.domain.behavior.preflight_governance import PreflightGovernor
+from bioetl.domain.behavior.validation_helpers import (
+    aggregation_field_name,
+    aggregation_group_key,
+)
 from bioetl.domain.composite.config_composite_section_decoders import (
     _enricher_field_pairings,
     _field_comparison_specs,
 )
+from bioetl.domain.composite.aggregation import _coerce_text_tuple
 from bioetl.domain.config.dq import DQReportConfig
 from bioetl.domain.config.validation_rules import FieldValidation
 from bioetl.domain.models.metadata import (
     SchemaColumnInspection,
     SchemaInspectionResult,
 )
-from bioetl.domain.types.validation_severity import ValidationSeverity
+from bioetl.domain.lineage._shared import normalize_mapping
+from bioetl.domain.mapping.publication_type_mapping import _normalize_pipe_separated
+from bioetl.domain.normalization._control_plane_payloads import (
+    _normalize_manifest_code_provenance,
+)
+from bioetl.domain.schemas.chembl.publication import _is_iso_calendar_date
+from bioetl.domain.schemas.validators import _is_scalar_missing
+from bioetl.domain.types._checkpoint_metadata_support import coerce_records_processed
+from bioetl.domain.types.contract_identity import (
+    _normalization_profile_identity_issues,
+    _normalize_semver,
+)
+from bioetl.domain.types.validation_severity import (
+    IssueCode,
+    ValidationLayer,
+    ValidationSeverity,
+)
 from bioetl.domain.value_objects._run_context_create_support import (
     _coerce_transform_step_sequence,
     _resolve_create_input_value,
@@ -177,3 +222,166 @@ def test_run_context_create_coercion_rejects_invalid_vectors() -> None:
             inputs=None,
             overrides={},
         )
+
+
+def test_composite_metadata_summary_helpers_cover_empty_and_populated_shapes() -> None:
+    explanation = MergedRecordExplanation(
+        record_id="record-1",
+        composite_run_id="run-1",
+        source_providers=("chembl",),
+        field_explanations=(object(),),
+        merge_strategy="prioritize",
+        conflict_count=1,
+        enrichment_count=1,
+    )
+
+    assert empty_explainability_summary()["record_count"] == 0
+    assert safe_ratio(1, 0) == 0.0
+    assert build_explainability_summary([explanation]) == {
+        "record_count": 1,
+        "field_count": 1,
+        "avg_fields_per_record": 1.0,
+        "source_provider_distribution": {"chembl": 1},
+        "merge_strategy_distribution": {"prioritize": 1},
+        "conflict_summary": {
+            "total_conflicts": 1,
+            "conflict_rate": 1.0,
+            "records_with_conflicts": 1,
+        },
+        "enrichment_summary": {
+            "total_enrichments": 1,
+            "enrichment_rate": 1.0,
+            "records_with_enrichments": 1,
+        },
+    }
+    assert _is_truthy_marker(" yes ")
+    assert _is_truthy_marker(1)
+
+
+def test_composite_metadata_resolution_helpers_cover_priority_fallbacks() -> None:
+    assert resolve_priority_order("title", None) is None
+    assert resolve_priority_order("title", {"title": {"priority": "chembl"}}) == ()
+    assert resolve_priority_order(
+        "title", {"title": {"priority": ["pubmed", "chembl"]}}
+    ) == ("pubmed", "chembl")
+    assert resolve_final_value_source(source_providers=(), priority_order=None) is None
+    assert (
+        resolve_final_value_source(
+            source_providers=("chembl", "pubmed"),
+            priority_order=("pubmed", "chembl"),
+        )
+        == "pubmed"
+    )
+    assert (
+        resolve_final_value_source(
+            source_providers=("chembl",), priority_order=("pubmed",)
+        )
+        == "chembl"
+    )
+    assert (
+        extract_composite_output_ext(
+            [{"_source_providers": ["chembl"]}], partition_count=None
+        )
+        is not None
+    )
+    assert extract_composite_lineage_metadata([], composite_name="empty") is None
+
+
+def test_composite_validation_compatibility_delegates_cover_all_shapes() -> None:
+    issues = []
+    _append_config_issue_if_invalid(
+        issues=issues,
+        is_valid=True,
+        code=IssueCode.CMP_PF_FIELD_001,
+        severity=ValidationSeverity.WARNING,
+        message="unused",
+    )
+    assert issues == []
+    assert as_output_schema({"properties": {}}) == ({"properties": {}}, [])
+    assert as_output_schema("bad")[0] is None
+    assert as_source_names(["chembl"]) == (["chembl"], [])
+    assert as_source_names([1])[0] is None
+    _append_named_config_issue_if_invalid(
+        issues=issues,
+        composite_config={},
+        config_key="field_priorities",
+        validator=lambda _value: True,
+        code=IssueCode.CMP_PF_FIELD_001,
+        severity=ValidationSeverity.WARNING,
+        message="invalid",
+        details_key="priorities",
+    )
+    _append_named_config_issue_if_invalid(
+        issues=issues,
+        composite_config={"field_priorities": "bad"},
+        config_key="field_priorities",
+        validator=lambda _value: True,
+        code=IssueCode.CMP_PF_FIELD_001,
+        severity=ValidationSeverity.WARNING,
+        message="invalid",
+        details_key="priorities",
+    )
+    assert len(issues) == 1
+    assert (
+        _get_layer_for_code(IssueCode.CMP_RT_CARD_001) is ValidationLayer.RUNTIME_GUARD
+    )
+
+
+def test_composite_validator_compatibility_methods_remain_wired() -> None:
+    validator = CompositeValidator(
+        aggregation_validator=AggregationValidator(),
+        cross_validation_validator=CrossValidationValidator(),
+        preflight_governance=PreflightGovernor(),
+    )
+    assert validator._deep_preflight_issues("bad")  # type: ignore[arg-type]
+    issues = []
+    validator._append_config_issue_if_invalid(
+        issues=issues,
+        composite_config={"field_priorities": "bad"},
+        config_key="field_priorities",
+        validator=lambda _value: True,
+        code=IssueCode.CMP_PF_FIELD_001,
+        severity=ValidationSeverity.WARNING,
+        message="invalid",
+        details_key="priorities",
+    )
+    assert (
+        validator._create_issue(
+            IssueCode.CMP_RT_CARD_001, ValidationSeverity.BLOCKER, "runtime"
+        ).layer
+        is ValidationLayer.RUNTIME_GUARD
+    )
+    assert validator._is_valid_field_priorities({}) is True
+    assert issues
+
+
+def test_low_level_group_key_and_self_comparison_helpers_preserve_types() -> None:
+    assert aggregation_field_name(1) is None
+    assert aggregation_group_key(
+        {"none": None, "value": 1}, ["missing", "none", "value"]
+    ) == (
+        ("absent", "", ""),
+        ("present", "NoneType", "null"),
+        ("present", "int", "1"),
+    )
+    assert compares_only_to_self("chembl", ["chembl"])
+
+
+def test_domain_normalization_edge_vectors_remain_fail_closed() -> None:
+    assert _coerce_text_tuple(None, "group_by") == ()
+    assert normalize_mapping({"tags": {"a"}})["tags"] == frozenset({"a"})
+    assert _normalize_pipe_separated(" | ") is None
+    assert _normalize_manifest_code_provenance(None) == {}
+    assert _is_iso_calendar_date(20260817) is False
+    with pytest.raises(ValueError, match="records_processed"):
+        coerce_records_processed("")
+    assert _normalize_semver("release") == "release"
+    assert len(_normalization_profile_identity_issues("profile", None, "bad")) == 2
+
+
+def test_scalar_missing_guard_handles_array_protocol_errors() -> None:
+    class BrokenArray:
+        def __array__(self) -> object:
+            raise ValueError("broken array protocol")
+
+    assert _is_scalar_missing(BrokenArray()) is False

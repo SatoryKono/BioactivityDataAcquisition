@@ -32,7 +32,7 @@ trend evidence only.
 - Source run id: `local-release-closeout-8848-8858-20260817`
 - Source tree sha256: `fa17fdcea3a59ea7aef0810ea1393e245654159736cd112a467627da62f66497`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-08-17T13:16:10.858945+00:00`
+- Refreshed at (UTC): `2026-08-17T13:35:47.767797+00:00`
 
 ## Branch-accurate provenance (#5729)
 

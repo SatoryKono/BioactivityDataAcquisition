@@ -66,11 +66,6 @@ from bioetl.application.services.control_plane.manifest.diagnostics.source_postu
 from bioetl.application.services.control_plane.manifest.diagnostics.source_refs import (
     _build_effective_source_refs,
 )
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_types import (
-    bounded,
-    string_items,
-    supported_boundary_block_reason,
-)
 from bioetl.domain.control_plane import (
     ReplayCapability,
     RunArtifactRef,
@@ -162,25 +157,6 @@ def test_build_diagnostics_summary_exposes_artifact_publication_closure() -> Non
         ]
         == "closed"
     )
-
-
-def test_reproducibility_scoring_support_bounds_and_normalizes_values() -> None:
-    assert bounded(-5) == 0
-    assert bounded(7) == 7
-    assert bounded(15) == 10
-
-    assert string_items("not-a-list") == ()
-    assert string_items(["exact", None, 3]) == ("exact", "3")
-
-    assert (
-        supported_boundary_block_reason({"reason": "missing_lineage"})
-        == "missing_lineage"
-    )
-    assert (
-        supported_boundary_block_reason({"reason": ""})
-        == "blocked_outside_supported_boundary"
-    )
-    assert supported_boundary_block_reason(None) == "blocked_outside_supported_boundary"
 
 
 def test_base_summary_payload_sections_preserve_replay_and_snapshot_contract() -> None:

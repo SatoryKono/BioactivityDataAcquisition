@@ -48,4 +48,3 @@ Freshness guard: `<=45 days`
 | 8 | `tests.unit.composition.factories.pipeline.test_registry` | 1 | 6.917 | 6.917 |
 | 9 | `tests.unit.composition.bootstrap.test_runner_bootstrap.TestBootstrapPipelineRunnerServiceIntegration` | 1 | 6.731 | 6.731 |
 | 10 | `tests.unit.scripts.ops.test_recover_renderer` | 1 | 6.004 | 6.004 |
-

@@ -49,6 +49,28 @@ class _LedgerProcessingState:
     )
 
 
+LedgerProcessingResult = tuple[
+    Counter[str],
+    Counter[str],
+    list[dict[str, object]],
+    set[str],
+    set[str],
+    set[str],
+    set[str],
+    set[str],
+    set[str],
+    set[str],
+    set[str],
+    set[str],
+    set[str],
+    bool,
+    bool,
+    int,
+    dict[str, int],
+    dict[str, object] | None,
+]
+
+
 def _resume_diagnostics_present(details: Mapping[str, object]) -> bool:
     """Return whether one ledger detail payload carries resume diagnostics."""
     return any(
@@ -108,26 +130,7 @@ def _extract_resume_diagnostics(
 
 def _process_ledger_entries(
     ledger_entries: tuple[RunLedgerEntry, ...],
-) -> tuple[
-    Counter[str],
-    Counter[str],
-    list[dict[str, object]],
-    set[str],
-    set[str],
-    set[str],
-    set[str],
-    set[str],
-    set[str],
-    set[str],
-    set[str],
-    set[str],
-    set[str],
-    bool,
-    bool,
-    int,
-    dict[str, int],
-    dict[str, object] | None,
-]:
+) -> LedgerProcessingResult:
     """Process ledger entries and extract statistics."""
     state = _LedgerProcessingState()
     resume_diagnostics = _extract_resume_diagnostics(ledger_entries)
@@ -201,26 +204,7 @@ def _update_dq_statistics(
 def _freeze_ledger_processing_state(
     state: _LedgerProcessingState,
     resume_diagnostics: dict[str, object] | None,
-) -> tuple[
-    Counter[str],
-    Counter[str],
-    list[dict[str, object]],
-    set[str],
-    set[str],
-    set[str],
-    set[str],
-    set[str],
-    set[str],
-    set[str],
-    set[str],
-    set[str],
-    set[str],
-    bool,
-    bool,
-    int,
-    dict[str, int],
-    dict[str, object] | None,
-]:
+) -> LedgerProcessingResult:
     """Return the legacy tuple payload expected by diagnostics callers."""
     return (
         state.family_counter,
