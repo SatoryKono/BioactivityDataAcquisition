@@ -222,3 +222,11 @@ billing was not enabled.
 - Detail: CodeRabbit rate limit (waitTime=1680s)
 - GitHub issue: pending reconciliation
 
+## S13-tests-unit-domain-01 — error
+
+- UTC: `2026-08-17T18:57:31.347135+00:00`
+- Wave: `F`
+- Files: `300`
+- Detail: CodeRabbit exit code 1
+- GitHub issue: pending reconciliation
+

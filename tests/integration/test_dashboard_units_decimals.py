@@ -41,19 +41,58 @@ def test_event_counters_have_correct_units_decimals():
                 )
 
 
-def test_timestamp_kpi_has_datetimeasiso_unit():
-    """Timestamp KPI must have unit=dateTimeAsIso."""
+DASHBOARD_DATETIME_UNIT = "time:YYYY-MM-DD HH:mm"
+
+
+def _iter_field_units(panel: dict) -> list[str]:
+    """Collect default and override unit strings from one panel."""
+    units: list[str] = []
+    defaults = (panel.get("fieldConfig") or {}).get("defaults") or {}
+    default_unit = defaults.get("unit")
+    if isinstance(default_unit, str) and default_unit:
+        units.append(default_unit)
+    for override in (panel.get("fieldConfig") or {}).get("overrides") or []:
+        if not isinstance(override, dict):
+            continue
+        for prop in override.get("properties") or []:
+            if isinstance(prop, dict) and prop.get("id") == "unit":
+                value = prop.get("value")
+                if isinstance(value, str) and value:
+                    units.append(value)
+    return units
+
+
+def test_timestamp_kpi_uses_compact_datetime_unit():
+    """Timestamp KPI must render as YYYY-MM-DD HH:mm."""
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
         for panel in get_dashboard_panels(dashboard):
             title = panel.get("title", "")
-            if "Timestamp" in title:
+            if "Timestamp" in title or title == "Inspect Latest Successful Data":
                 field_config = panel.get("fieldConfig", {})
                 defaults = field_config.get("defaults", {})
                 unit = defaults.get("unit")
-                assert unit == "dateTimeAsIso", (
-                    f"{dashboard_path.name}:{title} must have unit=dateTimeAsIso, got {unit!r}"
+                assert unit == DASHBOARD_DATETIME_UNIT, (
+                    f"{dashboard_path.name}:{title} must have unit="
+                    f"{DASHBOARD_DATETIME_UNIT}, got {unit!r}"
                 )
+
+
+def test_shipped_dashboards_do_not_use_iso_datetime_unit():
+    """Operator clocks must not use dateTimeAsIso (ISO-8601 with T/offset)."""
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        for panel in get_dashboard_panels(dashboard):
+            for unit in _iter_field_units(panel):
+                assert unit != "dateTimeAsIso", (
+                    f"{dashboard_path.name}:panel={panel.get('id')} "
+                    f"{panel.get('title')!r} still uses dateTimeAsIso"
+                )
+                if unit.startswith("time:") or unit.startswith("dateTime"):
+                    assert unit == DASHBOARD_DATETIME_UNIT, (
+                        f"{dashboard_path.name}:panel={panel.get('id')} "
+                        f"datetime unit must be {DASHBOARD_DATETIME_UNIT}, got {unit!r}"
+                    )
 
 
 def test_fraction_panels_have_consistent_units():

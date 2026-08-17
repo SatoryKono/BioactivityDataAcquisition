@@ -454,7 +454,7 @@ datasource/query failure по роли панели.
 ## 5) Единый unit/decimals для схожих KPI (обязательно)
 
 - Для счётчиков событий (`... Missing`, `... Incompatibilities`, `... Failures`) использовать `unit=short`, `decimals=0`.
-- Для timestamp KPI (`Latest Successful Data Timestamp` и аналогичные) использовать `unit=dateTimeAsIso`, `decimals=0`.
+- Для timestamp KPI (`Latest Successful Data Timestamp` и аналогичные) использовать `unit=time:YYYY-MM-DD HH:mm`, `decimals=0`.
 - Для долей/процентов (`... Rate`, `... Ratio`) использовать единый unit внутри dashboard-семейства (`percentunit` или `percent`) и согласованный `decimals` (обычно `0` или `2`).
 - Схожий KPI в разных dashboards MUST иметь одинаковую пару `unit/decimals`.
 
