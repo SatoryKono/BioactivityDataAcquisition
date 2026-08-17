@@ -345,7 +345,5 @@ def _optional_key_tuple(
         )
     keys = tuple(str(item).strip() for item in value)
     if any(not item for item in keys):
-        raise ValueError(
-            f"reconcile_foreign_keys {key} cannot contain blank entries"
-        )
+        raise ValueError(f"reconcile_foreign_keys {key} cannot contain blank entries")
     return keys

@@ -28,7 +28,9 @@ def build_manifest_checks(
         _optional_anchor_check(
             check="resume_contract",
             value=None if inspection is None else inspection.resume_contract,
-            reason_value=None if inspection is None else inspection.resume_contract_reason,
+            reason_value=None
+            if inspection is None
+            else inspection.resume_contract_reason,
             missing_reason="resume_contract_not_recorded",
             missing_detail="Resume contract is absent without an explicit N/A reason.",
             ok_reason="resume_contract_recorded",
@@ -194,9 +196,7 @@ def _contract_check(
             "manifest_contract_anchors_incomplete",
             "Required contract anchors are absent: " + ", ".join(sorted(set(missing))),
         )
-    comparison = (
-        None if inspection is None else inspection.contract_comparison_status
-    )
+    comparison = None if inspection is None else inspection.contract_comparison_status
     comparison_reason = (
         None if inspection is None else inspection.contract_comparison_reason
     )

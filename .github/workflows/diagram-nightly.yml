@@ -179,13 +179,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # 11.x canary stays deferred until setup-mermaid has a lockfile-backed
+        # pin. Unpinned npm installs are refused (Sonar S8543).
         include:
           - mermaid_version: '10.6.1'
             label: stable
             allow_failure: false
-          - mermaid_version: '11.4.0'
-            label: canary
-            allow_failure: true
     continue-on-error: ${{ matrix.allow_failure }}
     steps:
       - name: Checkout code
@@ -210,7 +209,7 @@ jobs:
 
       - name: Canary render of reference source pool (DIAG-T030)
         run: |
-          mkdir -p /tmp/diagram-canary/svg
+          mkdir -p reports/diagrams/canary/svg
           manifest="docs/02-architecture/diagrams/manifests/quality-gates.txt"
           while IFS= read -r src; do
             [ -z "$src" ] && continue
@@ -218,7 +217,7 @@ jobs:
               \#*) continue ;;
             esac
             stem="$(basename "${src%.*}")"
-            out="/tmp/diagram-canary/svg/${stem}-${{ matrix.label }}.svg"
+            out="reports/diagrams/canary/svg/${stem}-${{ matrix.label }}.svg"
             mmdc -i "$src" -o "$out" \
               -c docs/02-architecture/diagrams/theme/mermaid-config.json \
               --cssFile docs/02-architecture/diagrams/theme/custom.css \
@@ -227,8 +226,8 @@ jobs:
 
       - name: Validate canary SVG text visibility
         run: |
-          manifest_tmp="/tmp/diagram-canary-manifest.txt"
-          find /tmp/diagram-canary/svg -type f -name '*.svg' | sort > "$manifest_tmp"
+          manifest_tmp="reports/diagrams/canary/manifest-${{ matrix.label }}.txt"
+          find reports/diagrams/canary/svg -type f -name '*.svg' | sort > "$manifest_tmp"
           python3 scripts/diagrams/check/check_svg_text_visibility.py --manifest "$manifest_tmp"
 
       - name: Upload canary report artifacts
@@ -237,7 +236,7 @@ jobs:
         with:
           name: diagrams-canary-${{ matrix.label }}
           path: |
-            /tmp/diagram-canary/svg/*.svg
+            reports/diagrams/canary/svg/*.svg
           retention-days: 7
 
       - name: Publish canary summary

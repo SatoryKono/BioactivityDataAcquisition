@@ -549,9 +549,7 @@ class TestExtractAuthorDetails:
     """Tests for extract_author_details function."""
 
     def test_build_author_detail_null_fields_do_not_raise(self) -> None:
-        result = _build_author_detail(
-            {"given": None, "family": None, "name": None}
-        )
+        result = _build_author_detail({"given": None, "family": None, "name": None})
         assert result is None
 
     def test_extract_full_author_details(self) -> None:

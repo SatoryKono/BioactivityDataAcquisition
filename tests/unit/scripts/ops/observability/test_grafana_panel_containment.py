@@ -191,6 +191,4 @@ def test_python_preflight_fails_closed_on_recorded_overflow() -> None:
     )
     assert error is not None
     assert "2010" in error
-    assert (
-        preflight._validate_dashboard_panel_containment("bioetl-runtime", {}) is None
-    )
+    assert preflight._validate_dashboard_panel_containment("bioetl-runtime", {}) is None

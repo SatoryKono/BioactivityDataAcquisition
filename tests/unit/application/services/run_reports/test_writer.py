@@ -158,7 +158,9 @@ def test_latest_pointer_uses_sanitized_identity_owner_with_custom_directory(
     )
 
     assert written.json_path.parent == custom_directory
-    assert written.latest_path == tmp_path / "workflow" / "unsafe_owner" / "_latest.json"
+    assert (
+        written.latest_path == tmp_path / "workflow" / "unsafe_owner" / "_latest.json"
+    )
     assert written.latest_path.is_file()
 
 

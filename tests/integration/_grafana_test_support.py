@@ -92,9 +92,7 @@ def index_panels_by_base_title(
 ) -> dict[str, dict[str, Any]]:
     """Map base titles to panels (last wins on duplicates)."""
     return {
-        panel_base_title(panel): panel
-        for panel in panels
-        if panel_display_title(panel)
+        panel_base_title(panel): panel for panel in panels if panel_display_title(panel)
     }
 
 

@@ -79,3 +79,12 @@ def test_nightly_stale_alert_uses_job_scoped_least_permissions() -> None:
 
     assert "permissions:\n      contents: read\n      issues: write" in job_prefix
     assert workflow.count("issues: write") == 1
+
+
+def test_nightly_canary_manifest_stays_inside_repo() -> None:
+    """check_svg_text_visibility refuses paths outside the checkout."""
+    workflow = Path(".github/workflows/diagram-nightly.yml").read_text(encoding="utf-8")
+
+    assert "reports/diagrams/canary/manifest-" in workflow
+    assert "/tmp/diagram-canary-manifest.txt" not in workflow
+    assert "11.4.0" not in workflow

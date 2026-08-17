@@ -14,7 +14,12 @@ import yaml
 ROOT = Path(__file__).resolve().parents[3]
 DASHBOARD_DIR = ROOT / "grafana" / "dashboards"
 INVENTORY_CONTRACT = (
-    ROOT / "docs" / "03-guides" / "dashboards" / "contracts" / "dashboard-inventory.yaml"
+    ROOT
+    / "docs"
+    / "03-guides"
+    / "dashboards"
+    / "contracts"
+    / "dashboard-inventory.yaml"
 )
 HTTP_DATASOURCE_HINTS = (
     "quarantine explorer",

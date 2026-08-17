@@ -124,9 +124,7 @@ def _load_contract_evidence(
     return payload if isinstance(payload, dict) else None
 
 
-def _optional_evidence_text(
-    evidence: dict[str, object] | None, key: str
-) -> str | None:
+def _optional_evidence_text(evidence: dict[str, object] | None, key: str) -> str | None:
     if evidence is None:
         return None
     value = evidence.get(key)

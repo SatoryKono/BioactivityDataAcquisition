@@ -120,7 +120,9 @@ def test_finalize_lineage_fragment_rejects_dangling_edge_endpoints() -> None:
         node_type=LineageNodeType.RUN,
         node_id=f"run:{run_context.run_id}",
     )
-    missing = LineageNodeRef(node_type=LineageNodeType.DATASET, node_id="dataset:missing")
+    missing = LineageNodeRef(
+        node_type=LineageNodeType.DATASET, node_id="dataset:missing"
+    )
     with pytest.raises(ValueError, match="dataset:missing"):
         finalize_lineage_fragment(
             fragment_name="bronze",

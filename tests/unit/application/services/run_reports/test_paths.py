@@ -83,7 +83,9 @@ def test_inspect_marker_token_mismatch(tmp_path: Path) -> None:
     assert check["marker"] == "mismatch"
 
 
-def test_inspect_marker_bounds_reads_and_handles_invalid_encoding(tmp_path: Path) -> None:
+def test_inspect_marker_bounds_reads_and_handles_invalid_encoding(
+    tmp_path: Path,
+) -> None:
     root = tmp_path / "run-reports"
     root.mkdir()
     marker = tmp_path / REPORT_ROOT_MARKER_NAME

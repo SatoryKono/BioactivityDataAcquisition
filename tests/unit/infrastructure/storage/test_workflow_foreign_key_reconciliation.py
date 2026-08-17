@@ -350,7 +350,11 @@ class _MissingSilverWriter:
         columns: list[str] | None = None,
     ) -> list[dict[str, object]]:
         if table_name == "chembl.assay":
-            row = {"assay_id": "CHEMBL_A1", "target_id": "CHEMBL_T1", "_is_current": True}
+            row = {
+                "assay_id": "CHEMBL_A1",
+                "target_id": "CHEMBL_T1",
+                "_is_current": True,
+            }
             if columns is None:
                 return [row]
             return [{column: row[column] for column in columns if column in row}]

@@ -868,7 +868,9 @@ def test_diagnostics_manifest_value_error_exits_nonzero(
     cli_runner: CliRunner,
     monkeypatch: Any,
 ) -> None:
-    service = SimpleNamespace(show=MagicMock(side_effect=ValueError("missing manifest")))
+    service = SimpleNamespace(
+        show=MagicMock(side_effect=ValueError("missing manifest"))
+    )
     bundle = _build_bundle(run_manifest_service=service)
     import bioetl.interfaces.cli.commands.diagnostics as diagnostics_module
 
