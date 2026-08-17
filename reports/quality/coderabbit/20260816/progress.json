@@ -194,7 +194,127 @@
         "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
         "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
       ]
+    },
+    "S01-domain-filtering": {
+      "id": "S01-domain-filtering",
+      "wave": "A",
+      "files": 13,
+      "status": "ok",
+      "reason": "",
+      "exit_code": 0,
+      "log": "reports/quality/coderabbit/20260816/review_A_S01-domain-filtering.log",
+      "bytes": 9928,
+      "elapsed_s": 159.2,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ]
+    },
+    "S01-domain-lineage": {
+      "id": "S01-domain-lineage",
+      "wave": "A",
+      "files": 6,
+      "status": "ok",
+      "reason": "",
+      "exit_code": 0,
+      "log": "reports/quality/coderabbit/20260816/review_A_S01-domain-lineage.log",
+      "bytes": 4922,
+      "elapsed_s": 159.7,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ]
+    },
+    "S01-domain-mapping": {
+      "id": "S01-domain-mapping",
+      "wave": "A",
+      "files": 15,
+      "status": "ok",
+      "reason": "",
+      "exit_code": 0,
+      "log": "reports/quality/coderabbit/20260816/review_A_S01-domain-mapping.log",
+      "bytes": 13446,
+      "elapsed_s": 219.7,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ]
+    },
+    "S01-domain-models": {
+      "id": "S01-domain-models",
+      "wave": "A",
+      "files": 7,
+      "status": "ok",
+      "reason": "",
+      "exit_code": 0,
+      "log": "reports/quality/coderabbit/20260816/review_A_S01-domain-models.log",
+      "bytes": 4363,
+      "elapsed_s": 206.5,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ]
+    },
+    "S01-domain-normalization": {
+      "id": "S01-domain-normalization",
+      "wave": "A",
+      "files": 88,
+      "status": "rate_limit",
+      "reason": "CodeRabbit rate limit (waitTime=2220s)",
+      "exit_code": 1,
+      "log": "reports/quality/coderabbit/20260816/review_A_S01-domain-normalization.log",
+      "bytes": 946,
+      "elapsed_s": 36.9,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ]
     }
   },
-  "updated_utc": "2026-08-16T23:43:17.073249+00:00"
+  "updated_utc": "2026-08-17T00:02:40.633770+00:00"
 }
