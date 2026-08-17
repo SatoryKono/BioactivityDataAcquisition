@@ -139,3 +139,36 @@ class TestFilterLoadResult:
         )
         assert len(result.ids) == 0
         assert result.has_duplicates is False
+
+    def test_multi_column_valid_combinations(self) -> None:
+        result = FilterLoadResult(
+            column_ids={
+                "molecule_chembl_id": ("CHEMBL1", "CHEMBL2"),
+                "target_chembl_id": ("CHEMBL240",),
+            },
+            filter_fields=("molecule_chembl_id", "target_chembl_id"),
+            valid_combinations=frozenset({("CHEMBL1", "CHEMBL240")}),
+        )
+        assert result.is_multi_column is True
+
+    def test_multi_column_rejects_unknown_combination_value(self) -> None:
+        with pytest.raises(ValueError, match="not in column_ids"):
+            FilterLoadResult(
+                column_ids={
+                    "molecule_chembl_id": ("CHEMBL1",),
+                    "target_chembl_id": ("CHEMBL240",),
+                },
+                filter_fields=("molecule_chembl_id", "target_chembl_id"),
+                valid_combinations=frozenset({("CHEMBL9", "CHEMBL240")}),
+            )
+
+    def test_multi_column_rejects_arity_mismatch(self) -> None:
+        with pytest.raises(ValueError, match="must have length 2"):
+            FilterLoadResult(
+                column_ids={
+                    "molecule_chembl_id": ("CHEMBL1",),
+                    "target_chembl_id": ("CHEMBL240",),
+                },
+                filter_fields=("molecule_chembl_id", "target_chembl_id"),
+                valid_combinations=frozenset({("CHEMBL1",)}),
+            )
