@@ -10,6 +10,11 @@ from bioetl.domain.control_plane import (
     ControlPlaneArtifactRef,
     ControlPlaneArtifactReplayImpact,
     ControlPlaneArtifactSurface,
+    RunManifest,
+)
+from bioetl.infrastructure.control_plane._file_lineage_index import (
+    load_fragment_ids,
+    stable_key_filename,
 )
 from bioetl.infrastructure.control_plane._file_artifact_lifecycle_surfaces import (
     iter_surface_files,
@@ -46,6 +51,86 @@ def iter_artifact_refs(
                 )
             )
     return tuple(refs)
+
+
+def iter_artifact_refs_for_manifest(
+    *,
+    base_path: Path,
+    cutoff: datetime,
+    protected_refs: _ProtectedRefs,
+    manifest: RunManifest,
+) -> tuple[ControlPlaneArtifactRef, ...]:
+    """Build a bounded plan for one manifest without walking the full catalog."""
+    refs = [
+        build_artifact_ref(
+            surface=surface,
+            path=path,
+            cutoff=cutoff,
+            protected_refs=protected_refs,
+        )
+        for surface, path in _manifest_candidate_paths(base_path, manifest)
+        if path.is_file()
+    ]
+    return tuple(sorted(refs, key=lambda ref: (ref.surface.value, ref.path)))
+
+
+def _manifest_candidate_paths(
+    base_path: Path, manifest: RunManifest
+) -> list[tuple[ControlPlaneArtifactSurface, Path]]:
+    candidates: list[tuple[ControlPlaneArtifactSurface, Path]] = [
+        (
+            ControlPlaneArtifactSurface.RUN_MANIFEST,
+            base_path / "run_manifest" / f"{manifest.manifest_id}.json",
+        ),
+        (
+            ControlPlaneArtifactSurface.RUN_MANIFEST,
+            base_path / "run_manifest" / f"{manifest.manifest_id}.contract-evidence.json",
+        ),
+        (
+            ControlPlaneArtifactSurface.RUN_LEDGER,
+            base_path / "run_ledger" / f"{manifest.manifest_id}.jsonl",
+        ),
+    ]
+    config_id = manifest.code_provenance.effective_config_artifact_id
+    if config_id:
+        candidates.append(
+            (
+                ControlPlaneArtifactSurface.EFFECTIVE_CONFIG,
+                base_path / "effective_config" / f"{config_id}.json",
+            )
+        )
+    lineage_index = (
+        base_path
+        / "lineage"
+        / "_by_manifest_id"
+        / f"{stable_key_filename(manifest.manifest_id)}.jsonl"
+    )
+    for fragment_id in load_fragment_ids(lineage_index, key=manifest.manifest_id):
+        candidates.append(
+            (
+                ControlPlaneArtifactSurface.LINEAGE,
+                base_path / "lineage" / "fragments" / f"{fragment_id}.json",
+            )
+        )
+    checkpoint_root = base_path.parent / "checkpoints"
+    if checkpoint_root.exists():
+        for path in checkpoint_root.rglob(f"*{manifest.run_id}*"):
+            if path.is_file():
+                candidates.append((ControlPlaneArtifactSurface.CHECKPOINT, path))
+    bronze_root = base_path.parent / "bronze"
+    snapshot_ids = {
+        snapshot.snapshot_id
+        for source in manifest.source_refs
+        for snapshot in source.input_snapshots
+        if snapshot.snapshot_id
+    }
+    if bronze_root.exists():
+        for snapshot_id in snapshot_ids:
+            safe = snapshot_id.replace(":", "_")
+            for path in bronze_root.rglob(f"*{safe}*"):
+                if path.is_file():
+                    candidates.append((ControlPlaneArtifactSurface.CACHED_BRONZE, path))
+    return candidates
 
 
 def build_artifact_ref(

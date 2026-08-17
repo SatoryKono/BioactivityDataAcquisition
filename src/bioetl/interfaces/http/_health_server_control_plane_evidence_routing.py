@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable, Coroutine
+from time import perf_counter
 from typing import Protocol
 
 from bioetl.application.observability.control_plane_evidence import (
@@ -15,6 +16,7 @@ from bioetl.application.observability.control_plane_evidence.service_support imp
 from bioetl.application.runtime_clock import current_utc_time
 from bioetl.domain.ports import CheckpointPort
 from bioetl.interfaces.http._forensic_request_budget import (
+    FORENSIC_ENDPOINT_TIMEOUT_SECONDS,
     ForensicEndpointUnavailable,
     forensic_unavailable_payload,
     run_bounded_forensic_operation,
@@ -194,11 +196,15 @@ async def _service_payload(
     evidence_scope = to_evidence_scope(scope)
     try:
         if endpoint == "retention-compliance":
-            return await asyncio.to_thread(
+            started = perf_counter()
+            payload = await asyncio.to_thread(
                 service.retention_compliance,
                 scope=evidence_scope,
                 now=current_utc_time(),
             )
+            payload["forensic_elapsed_seconds"] = round(perf_counter() - started, 4)
+            payload["forensic_deadline_seconds"] = FORENSIC_ENDPOINT_TIMEOUT_SECONDS
+            return payload
         if endpoint == "manifest-validation":
             return await asyncio.to_thread(
                 service.manifest_validation,

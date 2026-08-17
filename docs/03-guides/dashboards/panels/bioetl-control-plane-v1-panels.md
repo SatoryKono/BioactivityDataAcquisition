@@ -29,8 +29,9 @@ absence.
 
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
-| 9400 | Inspect Scope & Evidence | text | Static | Replay-safety question plus plain-language definitions of current, selected-run, and unknown evidence. | shared shell | No thresholds; interpretive guidance only. |
-| 9401 | Monitor Replay Readiness | stat | Prometheus | Evidence-aware replay/resume verdict from `bioetl_control_plane_current_status_trusted`; gates replay blockers, checkpoint freshness/presence, and required telemetry. | shared shell | `0=OK`, `1=WARN`, `2=CRIT`, `3=INCOMPLETE`, `null=UNKNOWN`. `INCOMPLETE` blocks replay/resume approval. |
+| 9400 | Inspect Scope & Evidence | text | Static | Replay-safety question plus processing_status vs trust_status vs CURRENT Prom readiness. | shared shell | No thresholds; interpretive guidance only. |
+| 9401 | Monitor Replay Readiness | stat | Prometheus | CURRENT Prometheus replay/resume verdict from `bioetl_control_plane_current_status_trusted` (not selected-run HTTP trust). | shared shell | `0=OK`, `1=WARN`, `2=CRIT`, `3=INCOMPLETE`, `null=UNKNOWN`. `INCOMPLETE` blocks Prom-current replay approval. |
+| 9418 | Review Selected-Run Trust | table | BioETL Ops HTTP | Exact-run `processing_status`, `trust_status`, `scope_kind`, and `evidence_freshness` from manifest-validation. | shared shell | `INCOMPLETE`/`ERROR`/`UNAVAILABLE` are not OK. |
 | 9402 | Review Run Summary | table | BioETL Ops HTTP | Identity anchors for the selected workflow/pipeline/run scope. | shared shell | No numeric threshold; forensic handoff table. |
 | 9403 | Review Processed Records | table | BioETL Ops HTTP | Current processed-record evidence for the selected run scope. | shared shell | No numeric threshold; read-path evidence table. |
 | 9410 | Explain Missing Identity Data | text | Static | Neutral visible fallback when the Control Plane identity table returns no visible rows. | shared shell | No thresholds; prevents blank first-screen identity space. |

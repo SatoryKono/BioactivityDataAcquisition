@@ -2033,6 +2033,66 @@
     "path": "src/bioetl/infrastructure/storage/support/retention_time_travel.py",
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8916"
   },
+  "CR-20260816-B-S16b-configs-other-001": {
+    "issue": 8942,
+    "severity": "major",
+    "path": "configs/workflows/chembl_core.yaml",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942"
+  },
+  "CR-20260816-B-S16b-configs-other-059": {
+    "issue": 8942,
+    "severity": "major",
+    "path": "configs/entities/uniprot/idmapping.yaml",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942"
+  },
+  "CR-20260816-B-S16b-configs-other-071": {
+    "issue": 8942,
+    "severity": "minor",
+    "path": "configs/entities/chembl/tissue.yaml",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942"
+  },
+  "CR-20260816-B-S16b-configs-other-077": {
+    "issue": 8942,
+    "severity": "critical",
+    "path": "configs/entities/chembl/assay_parameters.yaml",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942"
+  },
+  "CR-20260816-B-S16b-configs-other-091": {
+    "issue": 8942,
+    "severity": "major",
+    "path": "configs/entities/chembl/publication_similarity.yaml",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942"
+  },
+  "CR-20260816-B-S16b-configs-other-093": {
+    "issue": 8942,
+    "severity": "major",
+    "path": "configs/entities/chembl/protein_class.yaml",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942"
+  },
+  "CR-20260816-B-S16b-configs-other-094": {
+    "issue": 8942,
+    "severity": "major",
+    "path": "configs/entities/chembl/publication_term.yaml",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942"
+  },
+  "CR-20260816-B-S16b-configs-other-097": {
+    "issue": 8942,
+    "severity": "major",
+    "path": "configs/entities/chembl/assay_parameters.yaml",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942"
+  },
+  "CR-20260816-B-S16b-configs-other-098": {
+    "issue": 8942,
+    "severity": "major",
+    "path": "configs/entities/chembl/molecule.yaml",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942"
+  },
+  "CR-20260816-B-S16b-configs-other-100": {
+    "issue": 8942,
+    "severity": "major",
+    "path": "configs/entities/chembl/subcellular_fraction.yaml",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942"
+  },
   "CR-20260816-C-S06-infra-adapters-010": {
     "issue": 8917,
     "severity": null,

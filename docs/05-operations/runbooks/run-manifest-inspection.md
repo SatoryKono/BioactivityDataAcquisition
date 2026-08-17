@@ -37,6 +37,18 @@ ______________________________________________________________________
 
 ## Procedure
 
+### 0. Triage order
+
+Do not treat terminal processing success as replay readiness.
+
+1. Run outcome (`processing_status`) — data-processing result.
+2. Trust readiness (`trust_status` on `/ops/control-plane/*-validation`) — fail-closed exact-run evidence.
+3. Lineage validation — closure, identity, cycle.
+4. Retention compliance — run-scoped evidence floor, not a full catalog scan.
+5. Replay decision — only after Trust is OK and required evidence cards are complete.
+
+`INCOMPLETE` and `UNKNOWN` mean missing or unverified evidence. They are not healthy zeros.
+
 ### 1. Confirm rollout flags
 
 Verify the active rollout semantics:

@@ -12,9 +12,11 @@ from bioetl.domain.control_plane import (
     ControlPlaneArtifactLifecyclePlan,
     ControlPlaneArtifactLifecyclePolicy,
     ControlPlaneArtifactRef,
+    RunManifest,
 )
 from bioetl.infrastructure.control_plane.file_artifact_lifecycle_planning import (
     _iter_artifact_refs,
+    _iter_artifact_refs_for_manifest,
     _resolve_protected_refs,
 )
 
@@ -54,6 +56,33 @@ class FileControlPlaneArtifactLifecycleStore:
                 ),
                 key=lambda ref: (ref.surface.value, ref.path),
             )
+        )
+        return ControlPlaneArtifactLifecyclePlan(
+            generated_at=policy.now,
+            cutoff=cutoff,
+            dry_run=dry_run,
+            artifacts=artifacts,
+        )
+
+    def plan_for_manifest(
+        self,
+        policy: ControlPlaneArtifactLifecyclePolicy,
+        *,
+        manifest: RunManifest,
+        dry_run: bool = True,
+    ) -> ControlPlaneArtifactLifecyclePlan:
+        """Build a deterministic retention plan for one manifest/run only."""
+        cutoff = policy.now - timedelta(days=policy.retention_days)
+        protected_refs = _resolve_protected_refs(
+            base_path=self.base_path,
+            policy=policy,
+            cutoff=cutoff,
+        )
+        artifacts = _iter_artifact_refs_for_manifest(
+            base_path=self.base_path,
+            cutoff=cutoff,
+            protected_refs=protected_refs,
+            manifest=manifest,
         )
         return ControlPlaneArtifactLifecyclePlan(
             generated_at=policy.now,

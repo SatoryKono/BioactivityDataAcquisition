@@ -24632,5 +24632,873 @@
     "triage_reason": "Architecture-test leaf only. Campaign reject class: test-only. No product invariant breach independently reproduced.",
     "evidence": "tests/architecture/test_di_infrastructure_adapters.py; #8859 closeout review 2026-08-17",
     "finding_id": "CR-20260816-F-S12-tests-architecture-01-468"
+  },
+  "fa141b7a76842d82": {
+    "status": "confirm",
+    "severity": "major",
+    "confidence": "high",
+    "triage_reason": "Bounded chembl_core ingest + delete_orphans can drop assays whose target is outside the 250-row target batch.",
+    "evidence": "configs/workflows/chembl_core.yaml; review_B_S16b-configs-other.log; current configs on origin/main",
+    "gh_issue": 8942,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942",
+    "finding_id": "CR-20260816-B-S16b-configs-other-001"
+  },
+  "9775d3f6f6ead93c": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/contracts/uniprot/idmapping.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-002"
+  },
+  "7f4ef51406f0cd3a": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/contracts/pubmed/publication.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-003"
+  },
+  "1573a7ceacc4aeb6": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/contracts/openalex/publication.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-004"
+  },
+  "5274fd25d3692200": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/contracts/reports/workflow_run_report.v1.json; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-005"
+  },
+  "6b9846bd4af89d7f": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/contracts/errors/error_catalog.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-006"
+  },
+  "e8a2dbefe30c4a55": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/contracts/semanticscholar/publication.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-007"
+  },
+  "eb9b7b6c6768a537": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/contracts/reports/reason_catalog.v1.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-008"
+  },
+  "faf3157379cacc6f": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/contracts/crossref/publication.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-009"
+  },
+  "cc21d60a7e142c4f": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/contracts/uniprot/protein.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-010"
+  },
+  "a31ac78793279071": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/contracts/pubchem/compound.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-011"
+  },
+  "d94219cdc2d04a22": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/contracts/reports/pipeline_run_report.v1.json; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-012"
+  },
+  "a7515f01f0e0d1ae": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/composites/assay.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-013"
+  },
+  "3c98bf9d89be01de": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/README.md; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-014"
+  },
+  "6194fa8b054fdc22": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/composites/activity.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-015"
+  },
+  "e41f5910876a20bd": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/_schema/pipeline.json; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-016"
+  },
+  "0308502e6ea20285": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/base/bronze_fixture_manifest.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-017"
+  },
+  "5490357fd31ab8db": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/composites/activity.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-018"
+  },
+  "3ffd06c973ddda75": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/composites/activity.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-019"
+  },
+  "19fbf0233550701f": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/README.md; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-020"
+  },
+  "700229edd31d386b": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/base/contract_registry.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-021"
+  },
+  "f3a8c1496e5a5d82": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/composites/assay.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-022"
+  },
+  "1f90b63a657ac0e5": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/base/contract_registry.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-023"
+  },
+  "6043ce6c125806d8": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/_schema/dq.json; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-024"
+  },
+  "5d48b03c9c3ec48a": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/_schema/pipeline.json; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-025"
+  },
+  "20e44afbe2429eb5": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/_schema/composite.json; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-026"
+  },
+  "1eeb38878b5fe6e7": {
+    "status": "reject",
+    "severity": "critical",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/composites/activity.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-027"
+  },
+  "0b0de4be55717b10": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/composites/assay.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-028"
+  },
+  "0cfa630e46408648": {
+    "status": "reject",
+    "severity": "critical",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/_schema/pipeline.json; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-029"
+  },
+  "dfccc603144401a7": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/composites/assay.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-030"
+  },
+  "af927fed3ee28b22": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/base/contract_registry.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-031"
+  },
+  "347a752da5b8e29a": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/composites/assay.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-032"
+  },
+  "44c6073b222b8f55": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/base/pipeline.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-033"
+  },
+  "638acc610b54b0a6": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/_schema/source.json; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-034"
+  },
+  "108176949061aa67": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/typing-stubs/pyarrow/__init__.pyi; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-035"
+  },
+  "08feca1701fc3106": {
+    "status": "reject",
+    "severity": "critical",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/composites/target.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-036"
+  },
+  "764bda97973fb14f": {
+    "status": "reject",
+    "severity": "critical",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/composites/molecule.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-037"
+  },
+  "1f86fea57a6eb0f5": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/field_registry/semantic_pair_matrix_budget.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-038"
+  },
+  "fcec56d5d20fe952": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/field_registry/semantic_audit_review_registry.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-039"
+  },
+  "9a2b62c0ac1d181d": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/field_registry/partial_identifier_owner_roles.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-040"
+  },
+  "8e108e7357d1d7da": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/ide/pycharm/inspectionProfiles/Project_Default.xml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-041"
+  },
+  "2ff4946b4f44f1f7": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/uniprot/protein.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-042"
+  },
+  "6322cdfc4116ca93": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/uniprot/protein.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-043"
+  },
+  "418ff22857095f4d": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/enums/uniprot.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-044"
+  },
+  "b9414ba00e760570": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/enums/pubchem.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-045"
+  },
+  "a0c0d7b354b8e927": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/enums/chembl.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-046"
+  },
+  "e2d1a2a95cc57ccb": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/enums/publication_type_classification.asset.v1.json; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-047"
+  },
+  "e6f5ea3e3cc1a0f3": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/field_registry/README.md; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-048"
+  },
+  "ed5b05f86474c642": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/enums/publication_type_classification.asset.v1.json; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-049"
+  },
+  "756b1e2deae1497a": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/semanticscholar/publication.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-050"
+  },
+  "d048d5e2dc3498e1": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/field_registry/assay_metadata_semantic_registry.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-051"
+  },
+  "342babacffb25864": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/uniprot/idmapping.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-052"
+  },
+  "7a16577f7b629be1": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/uniprot/protein.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-053"
+  },
+  "04260caf126b9aee": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/enums/publication_type_classification.asset.v1.json; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-054"
+  },
+  "c7937976104b0695": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/semanticscholar/publication.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-055"
+  },
+  "26e5030dd837eab5": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/enums/uniprot.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-056"
+  },
+  "de98ba3bb64c2f52": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/uniprot/protein.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-057"
+  },
+  "73c5952424c74c8e": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/semanticscholar/publication.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-058"
+  },
+  "ef88712882729085": {
+    "status": "confirm",
+    "severity": "major",
+    "confidence": "high",
+    "triage_reason": "gold_filters.publication_year on an entity without that column.",
+    "evidence": "configs/entities/uniprot/idmapping.yaml; review_B_S16b-configs-other.log; current configs on origin/main",
+    "gh_issue": 8942,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942",
+    "finding_id": "CR-20260816-B-S16b-configs-other-059"
+  },
+  "bd165e56140300e8": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/enums/chembl.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-060"
+  },
+  "f038c280be79929d": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/pubchem/compound.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-061"
+  },
+  "76f07d0ffba5937a": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/openalex/publication.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-062"
+  },
+  "5e46218cffe3e935": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/openalex/publication.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-063"
+  },
+  "133ea12e415b1724": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/crossref/publication.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-064"
+  },
+  "a7bfb287ff1af933": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/pubmed/publication.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-065"
+  },
+  "6c6c7a62d6a8fe97": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/composite/activity.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-066"
+  },
+  "b41e7f98398912aa": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/composite/assay.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-067"
+  },
+  "a47d349353385165": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/target_component.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-068"
+  },
+  "b41f3593320c4575": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/target_protein_classification.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-069"
+  },
+  "24424b51f0986bdb": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/pubchem/compound.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-070"
+  },
+  "5de255c6485349cc": {
+    "status": "confirm",
+    "severity": "minor",
+    "confidence": "high",
+    "triage_reason": "gold_filters.publication_year on tissue without that column.",
+    "evidence": "configs/entities/chembl/tissue.yaml; review_B_S16b-configs-other.log; current configs on origin/main",
+    "gh_issue": 8942,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942",
+    "finding_id": "CR-20260816-B-S16b-configs-other-071"
+  },
+  "4458e3e4aa9f6692": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/composite/activity.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-072"
+  },
+  "5dbbd4acefdc07e5": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/tissue.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-073"
+  },
+  "afdde736e58e7192": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/protein_class.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-074"
+  },
+  "155b80c4c0b47952": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/molecule.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-075"
+  },
+  "a21bc533bd6bc280": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/compound_record.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-076"
+  },
+  "8c37aa87b517152a": {
+    "status": "confirm",
+    "severity": "critical",
+    "confidence": "high",
+    "triage_reason": "YAML single-quoted [^\\s] is a backslash/s class, not non-whitespace.",
+    "evidence": "configs/entities/chembl/assay_parameters.yaml; review_B_S16b-configs-other.log; current configs on origin/main",
+    "gh_issue": 8942,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942",
+    "finding_id": "CR-20260816-B-S16b-configs-other-077"
+  },
+  "f1b2a49e995b2b68": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/publication_similarity.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-078"
+  },
+  "48c30fcf06bfd600": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/cell_line.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-079"
+  },
+  "9756e0b78d029455": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/cell_line.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-080"
+  },
+  "2fa6077f47122cd8": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/subcellular_fraction.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-081"
+  },
+  "1e11a4090d9208eb": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/assay_parameters.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-082"
+  },
+  "b9d4e9e89f05b87f": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/target.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-083"
+  },
+  "683a719a8d9d4ff2": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/subcellular_fraction.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-084"
+  },
+  "4468b73f0ff6a96d": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/activity.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-085"
+  },
+  "8299d668504b0d15": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/publication.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-086"
+  },
+  "eae8a4dd86602953": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/publication.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-087"
+  },
+  "5bc35a950dd5b1a4": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/assay.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-088"
+  },
+  "9d186bdd5f3f6157": {
+    "status": "reject",
+    "severity": "critical",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/assay_parameters.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-089"
+  },
+  "d0140b8dd5792990": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/publication_term.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-090"
+  },
+  "63bd3ef2b76ae47f": {
+    "status": "confirm",
+    "severity": "major",
+    "confidence": "high",
+    "triage_reason": "gold_filters.publication_year on publication_similarity without that column.",
+    "evidence": "configs/entities/chembl/publication_similarity.yaml; review_B_S16b-configs-other.log; current configs on origin/main",
+    "gh_issue": 8942,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942",
+    "finding_id": "CR-20260816-B-S16b-configs-other-091"
+  },
+  "0687f7e64b2b62e3": {
+    "status": "reject",
+    "severity": "trivial",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/target.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-092"
+  },
+  "81842810b236e78b": {
+    "status": "confirm",
+    "severity": "major",
+    "confidence": "high",
+    "triage_reason": "gold_filters.publication_year on protein_class without that column.",
+    "evidence": "configs/entities/chembl/protein_class.yaml; review_B_S16b-configs-other.log; current configs on origin/main",
+    "gh_issue": 8942,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942",
+    "finding_id": "CR-20260816-B-S16b-configs-other-093"
+  },
+  "c0daea4ab1b29e51": {
+    "status": "confirm",
+    "severity": "major",
+    "confidence": "high",
+    "triage_reason": "gold_filters.publication_year on publication_term without that column.",
+    "evidence": "configs/entities/chembl/publication_term.yaml; review_B_S16b-configs-other.log; current configs on origin/main",
+    "gh_issue": 8942,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942",
+    "finding_id": "CR-20260816-B-S16b-configs-other-094"
+  },
+  "ae332ed4c7929b27": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/assay.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-095"
+  },
+  "cb64417f00f48032": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/publication_similarity.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-096"
+  },
+  "1f43151d7ebeb34b": {
+    "status": "confirm",
+    "severity": "major",
+    "confidence": "high",
+    "triage_reason": "gold_filters.publication_year on assay_parameters without that column.",
+    "evidence": "configs/entities/chembl/assay_parameters.yaml; review_B_S16b-configs-other.log; current configs on origin/main",
+    "gh_issue": 8942,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942",
+    "finding_id": "CR-20260816-B-S16b-configs-other-097"
+  },
+  "6749f3326a639903": {
+    "status": "confirm",
+    "severity": "major",
+    "confidence": "high",
+    "triage_reason": "gold_filters.publication_year / potential_duplicate on molecule without those columns.",
+    "evidence": "configs/entities/chembl/molecule.yaml; review_B_S16b-configs-other.log; current configs on origin/main",
+    "gh_issue": 8942,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942",
+    "finding_id": "CR-20260816-B-S16b-configs-other-098"
+  },
+  "99898fa45fd56f5e": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/molecule.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-099"
+  },
+  "1bf534b3b85edbc9": {
+    "status": "confirm",
+    "severity": "major",
+    "confidence": "high",
+    "triage_reason": "gold_filters.publication_year on subcellular_fraction without that column.",
+    "evidence": "configs/entities/chembl/subcellular_fraction.yaml; review_B_S16b-configs-other.log; current configs on origin/main",
+    "gh_issue": 8942,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942",
+    "finding_id": "CR-20260816-B-S16b-configs-other-100"
+  },
+  "5ebe7b84c49b53f2": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/publication_term.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-101"
+  },
+  "71c4195b212f19e7": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/activity.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-102"
+  },
+  "b695e389a777f581": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/publication.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-103"
+  },
+  "a1a29351536b41b9": {
+    "status": "reject",
+    "severity": "major",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/assay.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-104"
+  },
+  "e7557bf362de3918": {
+    "status": "reject",
+    "severity": "critical",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/target.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-105"
+  },
+  "7a62a1733e5f9554": {
+    "status": "reject",
+    "severity": "minor",
+    "confidence": "medium",
+    "triage_reason": "Independent review: test-only coverage ask, comment/README, schema-expansion, stub-typing, or already-shipped contract nit. No new product invariant beyond #8942.",
+    "evidence": "configs/entities/chembl/target.yaml; #8859 S16b closeout review",
+    "finding_id": "CR-20260816-B-S16b-configs-other-106"
   }
 }

@@ -341,6 +341,16 @@
 | `CR-20260816-B-S07-infra-storage-132` | critical | [#8916](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8916) | `src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py` |
 | `CR-20260816-B-S07-infra-storage-141` | critical | [#8916](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8916) | `src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py` |
 | `CR-20260816-B-S07-infra-storage-149` | critical | [#8916](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8916) | `src/bioetl/infrastructure/storage/support/retention_time_travel.py` |
+| `CR-20260816-B-S16b-configs-other-001` | major | [#8942](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942) | `configs/workflows/chembl_core.yaml` |
+| `CR-20260816-B-S16b-configs-other-059` | major | [#8942](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942) | `configs/entities/uniprot/idmapping.yaml` |
+| `CR-20260816-B-S16b-configs-other-071` | minor | [#8942](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942) | `configs/entities/chembl/tissue.yaml` |
+| `CR-20260816-B-S16b-configs-other-077` | critical | [#8942](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942) | `configs/entities/chembl/assay_parameters.yaml` |
+| `CR-20260816-B-S16b-configs-other-091` | major | [#8942](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942) | `configs/entities/chembl/publication_similarity.yaml` |
+| `CR-20260816-B-S16b-configs-other-093` | major | [#8942](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942) | `configs/entities/chembl/protein_class.yaml` |
+| `CR-20260816-B-S16b-configs-other-094` | major | [#8942](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942) | `configs/entities/chembl/publication_term.yaml` |
+| `CR-20260816-B-S16b-configs-other-097` | major | [#8942](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942) | `configs/entities/chembl/assay_parameters.yaml` |
+| `CR-20260816-B-S16b-configs-other-098` | major | [#8942](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942) | `configs/entities/chembl/molecule.yaml` |
+| `CR-20260816-B-S16b-configs-other-100` | major | [#8942](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8942) | `configs/entities/chembl/subcellular_fraction.yaml` |
 | `CR-20260816-C-S06-infra-adapters-010` | None | [#8917](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8917) | `src/bioetl/infrastructure/adapters/_error_handling_support.py` |
 | `CR-20260816-C-S06-infra-adapters-012` | None | [#8917](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8917) | `src/bioetl/infrastructure/adapters/_health_check_observability.py` |
 | `CR-20260816-C-S06-infra-adapters-028` | None | [#8917](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8917) | `src/bioetl/infrastructure/adapters/decorators/_retry_support.py` |

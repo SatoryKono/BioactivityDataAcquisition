@@ -22,6 +22,20 @@ def finalize_lineage_fragment(
 ) -> LineageGraphFragment:
     """Build the canonical lineage fragment envelope for one layer."""
     deduped_nodes = dedupe_nodes(nodes)
+    node_ids = {node.node_id for node in deduped_nodes}
+    dangling = sorted(
+        {
+            node_id
+            for edge in edges
+            for node_id in (edge.source.node_id, edge.target.node_id)
+            if node_id not in node_ids
+        }
+    )
+    if dangling:
+        raise ValueError(
+            "lineage fragment has local references missing from nodes: "
+            + ", ".join(dangling)
+        )
     return LineageGraphFragment(
         fragment_id=build_semantic_fragment_id(
             fragment_name,
