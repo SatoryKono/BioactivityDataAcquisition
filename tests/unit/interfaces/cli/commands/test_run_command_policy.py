@@ -315,7 +315,7 @@ class TestHandleDestructiveStep:
                 yes=False,
             )
 
-    def test_bioetl_error_calls_handle_failure_and_exits(
+    def test_destructive_preview_bioetl_error_calls_handle_failure_and_exits(
         self, capsys: pytest.CaptureFixture[str]
     ) -> None:
         """BioETLError in cleanup preview remains a failed execution."""
