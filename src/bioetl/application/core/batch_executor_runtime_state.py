@@ -27,7 +27,7 @@ class BatchExecutorRuntimeState:
     silver_records_for_dq: list[BronzeRecord] = field(default_factory=list)
     gold_records_for_dq: list[GoldRecord] = field(default_factory=list)
     dq_total_seen: int = 0
-    # Stage-keyed ranks ("bronze"/"silver"/"gold") — not id(list).
+    # Stage-keyed ranks ("bronze"/"silver"/"gold") ? not id(list).
     dq_reservoir_ranks: dict[str, list[str]] = field(default_factory=dict)
     source_batch_ids: list[str] = field(default_factory=list)
     last_bronze_path: str | None = None
@@ -46,58 +46,72 @@ class BatchExecutorRuntimeStateMixin:
 
     @property
     def records_fetched(self) -> int:
+        """Number of source records fetched in the current executor run."""
         return self._runtime_state.records_fetched
 
     @records_fetched.setter
     def records_fetched(self, value: int) -> None:
+        """Replace the fetched-record counter for the current executor run."""
         self._runtime_state.records_fetched = value
 
     @property
     def records_bronze(self) -> int:
+        """Number of records accepted into the Bronze stage of this run."""
         return self._runtime_state.records_bronze
 
     @records_bronze.setter
     def records_bronze(self, value: int) -> None:
+        """Replace the Bronze-stage record counter for the current run."""
         self._runtime_state.records_bronze = value
 
     @property
     def records_silver(self) -> int:
+        """Number of records accepted into the Silver stage of this run."""
         return self._runtime_state.records_silver
 
     @records_silver.setter
     def records_silver(self, value: int) -> None:
+        """Replace the Silver-stage record counter for the current run."""
         self._runtime_state.records_silver = value
 
     @property
     def records_gold(self) -> int:
+        """Number of records accepted into the Gold stage of this run."""
         return self._runtime_state.records_gold
 
     @records_gold.setter
     def records_gold(self, value: int) -> None:
+        """Replace the Gold-stage record counter for the current run."""
         self._runtime_state.records_gold = value
 
     @property
     def records_gold_excluded_by_contract(self) -> int:
+        """Number of Gold candidates dropped by the pipeline contract policy."""
         return self._runtime_state.records_gold_excluded_by_contract
 
     @records_gold_excluded_by_contract.setter
     def records_gold_excluded_by_contract(self, value: int) -> None:
+        """Replace the contract-exclusion counter for Gold candidates."""
         self._runtime_state.records_gold_excluded_by_contract = value
 
     @property
     def records_quarantined(self) -> int:
+        """Number of records written to quarantine during this run."""
         return self._runtime_state.records_quarantined
 
     @records_quarantined.setter
     def records_quarantined(self, value: int) -> None:
+        """Replace the quarantined-record counter for the current run."""
         self._runtime_state.records_quarantined = value
 
     @property
     def records_filtered_out(self) -> int:
+        """Number of records dropped by stage filters during this run."""
         return self._runtime_state.records_filtered_out
 
     @records_filtered_out.setter
     def records_filtered_out(self, value: int) -> None:
+        """Replace the filter-drop counter for the current run."""
         self._runtime_state.records_filtered_out = value
 
     @property
@@ -147,6 +161,7 @@ class BatchExecutorRuntimeStateMixin:
 
     @source_batch_ids.setter
     def source_batch_ids(self, value: list[str]) -> None:
+        """Replace the accumulated source-batch identity list for this run."""
         self._runtime_state.source_batch_ids = value
 
     @property

@@ -1,8 +1,9 @@
 %% BioETL — Port Contracts: Storage
 %% Covers BronzeStoragePort, SilverStoragePort, GoldStoragePort, MergedStoragePort, DeltaReaderPort, and layer-specific MetadataWriterPort implementations.
+%% Re-verified 2026-08-17 against live src/bioetl symbols
 
-%% @version 1.1.0
-%% @date    2026-03-19
+%% @version 1.1.1
+%% @date    2026-08-17
 %% @type    flowchart
 %% @level   System / Component
 %% @view    storage
@@ -30,8 +31,11 @@ graph LR
 
     subgraph Infrastructure["Infrastructure Layer"]
         BW["BronzeWriter"]:::size-sm
+        SW["SilverWriter"]:::size-sm
+        GW["GoldWriter"]:::size-sm
         DR_I["DeltaReader"]:::size-sm
         MW_I["MetadataWriter<br/>atomic metadata sidecars"]:::size-sm
+        NOMW["NoOpMetadataWriter"]:::size-sm
     end
 
     STP --- BW & SW & GW

@@ -1,8 +1,9 @@
 %% BioETL — Storage Layer Components
 %% Shows Bronze/Silver/Gold writers, metadata sidecar zones, Delta Lake, and validation.
+%% Re-verified 2026-08-17 against live src/bioetl symbols
 
-%% @version 1.1.0
-%% @date    2026-03-19
+%% @version 1.1.1
+%% @date    2026-08-17
 %% @type    flowchart
 %% @level   System / Component
 %% @nodes   23
@@ -42,6 +43,7 @@ graph LR
         end
 
         subgraph Reader["Delta Reader"]
+            DR["DeltaReader<br/>read_table / get_schema / get_row_count"]:::size-lg
         end
     end
 
@@ -96,11 +98,10 @@ graph LR
     GWR -.-> FS_G
 
     subgraph Metadata["Metadata Builders"]
-        BMB["BronzeMetadataBuilder"]:::size-lg
-        SMB["SilverMetadataBuilder"]:::size-lg
-        GMB["GoldMetadataBuilder"]:::size-lg
+        BMB["BronzeWriterMetadataMixin"]:::size-lg
+        SMB["SilverWriterMetadataMixin"]:::size-lg
+        GMB["GoldWriterMetadataMixin"]:::size-lg
         CMH["composite_metadata_helpers<br/>canonical shared parsing seam"]:::size-lg
-        CMW["metadata_builder_composite_helpers<br/>compat wrapper"]:::size-lg
     end
 
     BW --> BMB
@@ -108,7 +109,6 @@ graph LR
     GWR --> GMB
     SMB --> CMH
     GMB --> CMH
-    CMW -.-> CMH
 
     classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     classDef writer fill:#fff1f2,stroke:#dc2626,stroke-width:2px
@@ -118,6 +118,6 @@ graph LR
 
     class SP port
     class BW,SWR,GWR,DR,BDW writer
-    class AC,RM,MW,MWO,CSV,DQW,BMB,SMB,GMB,CMH,CMW,AWG support
+    class AC,RM,MW,MWO,CSV,DQW,BMB,SMB,GMB,CMH,AWG support
     class PSV,PGV,NOV valid
     class FS_B,FS_S,FS_G fs

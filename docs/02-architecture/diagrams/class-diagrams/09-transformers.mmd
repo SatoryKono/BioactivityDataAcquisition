@@ -1,8 +1,9 @@
 %% BioETL — Class Diagram: Transformers
 %% BaseTransformer hierarchy and provider-specific implementations.
+%% Re-verified 2026-08-17 against live src/bioetl symbols
 
-%% @version 1.2.0
-%% @date    2026-03-19
+%% @version 1.2.1
+%% @date    2026-08-17
 %% @type    classDiagram
 %% @level   Class / Interface
 %% @nodes   20
@@ -26,7 +27,7 @@ classDiagram
             #_metrics: MetricsPort
             #_silver_filters: SilverFilterConfig | None
             #_gold_filters: GoldFilterConfig | None
-            #_identity: IdentityService
+            #_identity: EntityIdentityGenerator
             #_pii_hasher: PiiHasherPort
             #_data_normalizer: DataNormalizationPort
             #_contract_policy: PipelineContractPolicy
