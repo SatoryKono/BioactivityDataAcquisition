@@ -129,6 +129,30 @@ def _is_absolute_runtime_path(value: str) -> bool:
     )
 
 
+def _drive_path_to_mnt(value: str) -> str | None:
+    """Translate Windows and Docker Desktop drive paths to ``/mnt``."""
+    for pattern in (_WINDOWS_DRIVE_PATTERN, _DOCKER_DESKTOP_DRIVE_PATTERN):
+        match = pattern.match(value)
+        if match is None:
+            continue
+        drive, suffix = match.groups()
+        normalized = f"/mnt/{drive.lower()}"
+        return f"{normalized}/{suffix.lstrip('/')}" if suffix else normalized
+    return None
+
+
+def _normalize_wsl_runtime_path(value: str) -> str:
+    """Translate WSL UNC and Docker Desktop WSL spellings to local paths."""
+    wsl_unc_match = _WSL_UNC_PATTERN.match(value)
+    if wsl_unc_match:
+        return wsl_unc_match.group(1)
+    desktop_wsl_match = _DOCKER_DESKTOP_WSL_PATTERN.match(value)
+    if desktop_wsl_match:
+        suffix = desktop_wsl_match.group(1) or ""
+        return f"/mnt/wsl/{suffix.lstrip('/')}"
+    return value
+
+
 def normalize_runtime_path(path: str | Path, *, root: str | Path) -> str:
     """Normalize Windows, WSL, and Docker Desktop spellings for comparison.
 
@@ -141,30 +165,10 @@ def normalize_runtime_path(path: str | Path, *, root: str | Path) -> str:
     if not value:
         return ""
 
-    wsl_unc_match = _WSL_UNC_PATTERN.match(value)
-    if wsl_unc_match:
-        value = wsl_unc_match.group(1)
-
-    drive_match = _WINDOWS_DRIVE_PATTERN.match(value)
-    if drive_match:
-        drive, suffix = drive_match.groups()
-        normalized = f"/mnt/{drive.lower()}"
-        if suffix:
-            normalized += f"/{suffix.lstrip('/')}"
-        return posixpath.normpath(normalized).casefold()
-
-    desktop_drive_match = _DOCKER_DESKTOP_DRIVE_PATTERN.match(value)
-    if desktop_drive_match:
-        drive, suffix = desktop_drive_match.groups()
-        normalized = f"/mnt/{drive.lower()}"
-        if suffix:
-            normalized += f"/{suffix.lstrip('/')}"
-        return posixpath.normpath(normalized).casefold()
-
-    desktop_wsl_match = _DOCKER_DESKTOP_WSL_PATTERN.match(value)
-    if desktop_wsl_match:
-        suffix = desktop_wsl_match.group(1) or ""
-        value = f"/mnt/wsl/{suffix.lstrip('/')}"
+    value = _normalize_wsl_runtime_path(value)
+    drive_path = _drive_path_to_mnt(value)
+    if drive_path is not None:
+        return posixpath.normpath(drive_path).casefold()
 
     if not _is_absolute_runtime_path(value):
         root_text = _clean_path_text(root)
@@ -177,27 +181,24 @@ def normalize_runtime_path(path: str | Path, *, root: str | Path) -> str:
     return normalized
 
 
+def _non_windows_runtime_path_to_local_path(value: str) -> Path | None:
+    """Translate one Windows-origin runtime spelling on POSIX hosts."""
+    drive_path = _drive_path_to_mnt(value)
+    if drive_path is not None:
+        return Path(drive_path)
+    wsl_path = _normalize_wsl_runtime_path(value)
+    return Path(wsl_path) if wsl_path != value else None
+
+
 def runtime_path_to_local_path(path: str | Path, *, root: str | Path) -> Path:
     """Return the locally readable form of one host/runtime path spelling."""
     value = _clean_path_text(path)
     if not value:
         return Path(root)
     if os.name != "nt":
-        drive_match = _WINDOWS_DRIVE_PATTERN.match(value)
-        if drive_match:
-            drive, suffix = drive_match.groups()
-            return Path(f"/mnt/{drive.lower()}/{(suffix or '').lstrip('/')}")
-        desktop_drive_match = _DOCKER_DESKTOP_DRIVE_PATTERN.match(value)
-        if desktop_drive_match:
-            drive, suffix = desktop_drive_match.groups()
-            return Path(f"/mnt/{drive.lower()}/{(suffix or '').lstrip('/')}")
-        desktop_wsl_match = _DOCKER_DESKTOP_WSL_PATTERN.match(value)
-        if desktop_wsl_match:
-            suffix = desktop_wsl_match.group(1) or ""
-            return Path(f"/mnt/wsl/{suffix.lstrip('/')}")
-        wsl_unc_match = _WSL_UNC_PATTERN.match(value)
-        if wsl_unc_match:
-            return Path(wsl_unc_match.group(1))
+        translated = _non_windows_runtime_path_to_local_path(value)
+        if translated is not None:
+            return translated
     candidate = Path(value).expanduser()
     return candidate if candidate.is_absolute() else (Path(root) / candidate).resolve()
 
@@ -341,6 +342,50 @@ def compare_runtime_source_identity(
     )
 
 
+def _repository_env_paths(
+    *,
+    root: Path,
+    process_environment: Mapping[str, object],
+) -> tuple[Path, ...]:
+    """Resolve repository env paths without mutating process state."""
+    configured_env = str(process_environment.get("BIOETL_ENV_FILE") or "").strip()
+    env_path = Path(configured_env) if configured_env else root / ".env"
+    if not env_path.is_absolute():
+        env_path = root / env_path
+    paths = [env_path]
+    if str(process_environment.get("BIOETL_SKIP_ENV_LOCAL") or "0").strip() != "1":
+        paths.append(root / ".env.local")
+    return tuple(paths)
+
+
+def _normalize_repository_env_value(value: str) -> str:
+    """Apply canonical repository-env quote and inline-comment semantics."""
+    stripped = value.strip()
+    if len(stripped) >= 2 and stripped[0] in {"'", '"'} and stripped[-1] == stripped[0]:
+        return stripped[1:-1]
+    return re.sub(r"\s+#.*$", "", stripped).rstrip()
+
+
+def _parse_repository_env_line(
+    raw: str,
+    *,
+    allowed: set[str],
+) -> tuple[str, str] | None:
+    """Return one whitelisted env assignment, or ``None`` when ignored."""
+    stripped = raw.strip()
+    if not stripped:
+        return None
+    if stripped.startswith("#"):
+        return None
+    if "=" not in raw:
+        return None
+    key, value = raw.split("=", 1)
+    key = key.strip()
+    if key not in allowed:
+        return None
+    return key, _normalize_repository_env_value(value)
+
+
 def load_repository_source_environment(
     root: str | Path,
     *,
@@ -357,30 +402,18 @@ def load_repository_source_environment(
     root_path = Path(root)
     allowed = {str(name) for name in names if str(name)}
     process = process_environment or {}
-    configured_env = str(process.get("BIOETL_ENV_FILE") or "").strip()
-    env_path = Path(configured_env) if configured_env else root_path / ".env"
-    if not env_path.is_absolute():
-        env_path = root_path / env_path
-    paths = [env_path]
-    if str(process.get("BIOETL_SKIP_ENV_LOCAL") or "0").strip() != "1":
-        paths.append(root_path / ".env.local")
 
     values: dict[str, str] = {}
-    for path in paths:
+    for path in _repository_env_paths(
+        root=root_path,
+        process_environment=process,
+    ):
         if not path.is_file():
             continue
         for raw in path.read_text(encoding="utf-8").splitlines():
-            stripped = raw.strip()
-            if not stripped or stripped.startswith("#") or "=" not in raw:
+            parsed = _parse_repository_env_line(raw, allowed=allowed)
+            if parsed is None:
                 continue
-            key, value = raw.split("=", 1)
-            key = key.strip()
-            if key not in allowed:
-                continue
-            value = value.strip()
-            if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
-                value = value[1:-1]
-            else:
-                value = re.sub(r"\s+#.*$", "", value).rstrip()
+            key, value = parsed
             values[key] = value
     return values

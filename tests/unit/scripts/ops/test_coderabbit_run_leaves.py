@@ -66,7 +66,9 @@ def test_has_review_completion_detects_terminal_event() -> None:
     output = "\n".join(
         (
             json.dumps({"type": "status", "phase": "analyzing"}),
-            json.dumps({"type": "complete", "status": "review_completed", "findings": 0}),
+            json.dumps(
+                {"type": "complete", "status": "review_completed", "findings": 0}
+            ),
         )
     )
     assert has_review_completion(output) is True

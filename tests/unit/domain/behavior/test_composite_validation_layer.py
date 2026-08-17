@@ -130,3 +130,53 @@ def test_aggregation_and_cross_validation_config_conversion_paths() -> None:
     assert validator._is_valid_lineage_config(
         {"tracking_level": "record", "source_fields": ["id"]}
     )
+
+
+def test_validate_composite_non_mapping_does_not_raise() -> None:
+    """CR-20260816-A-S01-domain-behavior-051: skip deep probe on non-dict config."""
+    report = _validator().validate_composite(
+        CompositeValidationConfig(
+            pipeline_name="composite",
+            composite_config=[],  # type: ignore[arg-type]
+        )
+    )
+
+    structural_codes = [issue.code for issue in report.structural_result.issues]
+    assert structural_codes == [IssueCode.CMP_STR_SCHEMA_001]
+    assert report.deep_preflight_result.issues == []
+    assert report.execution_decision is not None
+
+
+def test_deep_preflight_rejects_non_mapping_output_schema() -> None:
+    result = _validator()._run_deep_preflight_validation(
+        CompositeValidationConfig(
+            pipeline_name="composite",
+            composite_config={
+                "sources": ["chembl"],
+                "merge_strategy": "prioritize",
+                "output_schema": "not-a-mapping",
+                "aggregation": {"group_by": ["id"], "aggregations": {"value": "avg"}},
+            },
+        )
+    )
+
+    codes = [issue.code for issue in result.issues]
+    assert IssueCode.CMP_STR_SCHEMA_001 in codes
+    assert all(issue.code != IssueCode.CMP_PF_AGG_002 for issue in result.issues)
+
+
+def test_deep_preflight_rejects_string_sources() -> None:
+    result = _validator()._run_deep_preflight_validation(
+        CompositeValidationConfig(
+            pipeline_name="composite",
+            composite_config={
+                "sources": "chembl",
+                "merge_strategy": "prioritize",
+                "output_schema": {"properties": {"id": {}}},
+                "cross_validation": {"rules": {"identity": "strict"}},
+            },
+        )
+    )
+
+    codes = [issue.code for issue in result.issues]
+    assert IssueCode.CMP_STR_FORMAT_003 in codes

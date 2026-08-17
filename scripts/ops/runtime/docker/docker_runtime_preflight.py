@@ -458,6 +458,30 @@ def _project_origin_findings(
                     {"project": project_name, "config_files": bad_config_files},
                 )
             )
+        transient_prefixes = tuple(
+            contract.get("path_policy", {}).get(
+                "discouraged_compose_working_dir_prefixes"
+            )
+            or []
+        )
+        transient_files = [
+            path
+            for path in config_files
+            if _is_discouraged_bind_source(path, transient_prefixes)
+        ]
+        if transient_files:
+            findings.append(
+                Finding(
+                    "TRANSIENT_ORIGIN",
+                    "error",
+                    "Live Compose project originates from a transient issue worktree",
+                    {
+                        "project": project_name,
+                        "stack": stack_name,
+                        "config_files": transient_files,
+                    },
+                )
+            )
     return findings
 
 

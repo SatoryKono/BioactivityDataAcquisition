@@ -26,6 +26,7 @@ class _BatchAttrs:
         "_records",
         "_run_id",
         "_sealed_at",
+        "_sealed_valid_count",
         "_start_index",
         "_status",
     )
@@ -38,6 +39,7 @@ class _BatchAttrs:
     _start_index: int  # pyright: ignore[reportUninitializedInstanceVariable]
     _created_at: datetime  # pyright: ignore[reportUninitializedInstanceVariable]
     _sealed_at: datetime | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    _sealed_valid_count: int | None  # pyright: ignore[reportUninitializedInstanceVariable]
     _events: list[DomainEvent]  # pyright: ignore[reportUninitializedInstanceVariable]
     _metadata: MetaDict  # pyright: ignore[reportUninitializedInstanceVariable]
 

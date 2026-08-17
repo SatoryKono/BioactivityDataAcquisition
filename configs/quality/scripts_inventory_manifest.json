@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-16T21:43:23.066401+00:00",
+  "generated_at": "2026-08-16T22:37:07.214731+00:00",
   "summary": {
     "total_scripts": 601,
     "status_counts": {
@@ -12,9 +12,9 @@
       "build": 17,
       "ci": 81,
       "docs": 256,
-      "other": 76,
+      "other": 77,
       "scripts": 499,
-      "skills": 11,
+      "skills": 12,
       "tests": 390
     }
   },
@@ -228,7 +228,7 @@
       "references": [
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 290,
+          "line": 286,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.bat\").exists()"
         }
@@ -249,7 +249,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 289,
+          "line": 285,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.ps1\").exists()"
         }
@@ -288,19 +288,19 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 285,
+          "line": 281,
           "source_group": "tests",
           "text": "assert \"../ai/codex/diagnose_wsl.sh\" in ops_router"
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 288,
+          "line": 284,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.sh\").exists()"
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 303,
+          "line": 299,
           "source_group": "tests",
           "text": "assert 'bash \"${SCRIPT_DIR}/diagnose_wsl.sh\"' in launcher"
         }
@@ -380,7 +380,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 302,
+          "line": 298,
           "source_group": "tests",
           "text": "assert 'python3 \"${SCRIPT_DIR}/efficiency_baseline.py\"' in launcher"
         },
@@ -440,7 +440,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 311,
+          "line": 307,
           "source_group": "tests",
           "text": "headless = (root / \"scripts/ai/codex/headless.sh\").read_text(encoding=\"utf-8\")"
         }
@@ -498,7 +498,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 323,
+          "line": 319,
           "source_group": "tests",
           "text": "helper = (root / \"scripts/ai/codex/helper/check-env.sh\").read_text(encoding=\"utf-8\")"
         }
@@ -1145,7 +1145,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 318,
+          "line": 314,
           "source_group": "tests",
           "text": "assert 'local_state_audit.py\" audit' in launcher"
         },
@@ -3582,7 +3582,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 853,
+          "line": 886,
           "source_group": "tests",
           "text": "powershell_wrapper = (ROOT / \"scripts/ai/mcp/mcp_docker_wrapper.ps1\").read_text("
         }
@@ -4436,7 +4436,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 833,
+          "line": 866,
           "source_group": "tests",
           "text": "smoke = ROOT / \"scripts/ai/mcp/protocol_smoke.py\""
         },
@@ -4473,7 +4473,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 843,
+          "line": 876,
           "source_group": "tests",
           "text": "powershell = (ROOT / \"scripts/ai/mcp/support/docker_cli_resolver.ps1\").read_text("
         }
@@ -9998,7 +9998,7 @@
         },
         {
           "path": "scripts/engineering/qa/debt_governance_gate_evaluators.py",
-          "line": 901,
+          "line": 902,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py::\""
         },
@@ -12598,7 +12598,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/docker_runtime_preflight.py",
-          "line": 824,
+          "line": 848,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa import check_prometheus_rules as cpr"
         },
@@ -13058,7 +13058,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/report_debt_governance_gates.py",
-          "line": 225,
+          "line": 224,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.debt_governance_gate_evaluators import ("
         },
@@ -13083,7 +13083,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/report_debt_governance_gates.py",
-          "line": 475,
+          "line": 474,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.debt_governance_gate_report import ("
         }
@@ -14073,13 +14073,13 @@
       "references": [
         {
           "path": "scripts/engineering/qa/run_observability_closure_campaign.py",
-          "line": 1817,
+          "line": 1816,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa import observability_closure_campaign_cli as _campaign_cli"
         },
         {
           "path": "scripts/engineering/qa/run_observability_closure_campaign.py",
-          "line": 1818,
+          "line": 1817,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_closure_campaign_cli import ("
         }
@@ -14098,7 +14098,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/run_observability_closure_campaign.py",
-          "line": 1661,
+          "line": 1660,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_closure_campaign_validation import ("
         }
@@ -14148,7 +14148,7 @@
         },
         {
           "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 398,
+          "line": 396,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_report import ("
         }
@@ -14173,9 +14173,9 @@
         },
         {
           "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 441,
+          "line": 439,
           "source_group": "scripts",
-          "text": "from scripts.engineering.qa import observability_metric_inventory_runtime as _metric_runtime"
+          "text": "from scripts.engineering.qa import ("
         },
         {
           "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
@@ -19260,7 +19260,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 165,
+          "line": 169,
           "source_group": "other",
           "text": "> `bash scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh`."
         }
@@ -19279,7 +19279,7 @@
       "references": [
         {
           "path": "docs/01-requirements/DASHBOARD_REQUIREMENTS.md",
-          "line": 237,
+          "line": 256,
           "source_group": "docs",
           "text": "| Computed title/body font floors | `scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs` plus `check_grafana_dashboard_audit_preflight.py` and their unit tests |"
         },
@@ -19455,13 +19455,13 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 393,
+          "line": 399,
           "source_group": "docs",
           "text": "# .\\scripts\\ops\\observability\\grafana\\recover_renderer.ps1"
         },
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 244,
+          "line": 241,
           "source_group": "tests",
           "text": "recover_ps1 = Path(\"scripts/ops/observability/grafana/recover_renderer.ps1\")"
         }
@@ -19480,13 +19480,13 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 389,
+          "line": 395,
           "source_group": "docs",
           "text": "python scripts/ops/observability/grafana/recover_renderer.py"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 395,
+          "line": 401,
           "source_group": "docs",
           "text": "3. Check only: `python scripts/ops/observability/grafana/recover_renderer.py --check-only`"
         },
@@ -19504,7 +19504,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 1872,
+          "line": 2011,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import recover_renderer as rr"
         },
@@ -19529,7 +19529,7 @@
       "references": [
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 245,
+          "line": 242,
           "source_group": "tests",
           "text": "recover_sh = Path(\"scripts/ops/observability/grafana/recover_renderer.sh\")"
         }
@@ -19548,7 +19548,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 167,
+          "line": 171,
           "source_group": "other",
           "text": "> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1`."
         }
@@ -19746,7 +19746,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
-          "line": 922,
+          "line": 924,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/run_grafana_dashboard_audit_cycle.py\","
         }
@@ -19836,7 +19836,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 151,
+          "line": 155,
           "source_group": "other",
           "text": "> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1`."
         },
@@ -19879,7 +19879,7 @@
         },
         {
           "path": "grafana/README.md",
-          "line": 142,
+          "line": 146,
           "source_group": "other",
           "text": "> `bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh`."
         },
@@ -20233,13 +20233,13 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 322,
+          "line": 328,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\apply-docker-stable-mcp.ps1 -Profile stable -WithNeo4j"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 331,
+          "line": 337,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\apply-docker-stable-mcp.ps1 -Profile shared -TransportMode shared -WithSharedMcp -SkipEnsureStable"
         }
@@ -20313,7 +20313,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 323,
+          "line": 329,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\cleanup-mcp-orphans.ps1 -IncludeGatewayHint"
         },
@@ -20342,7 +20342,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 16,
       "references": [
         {
           "path": "docs/05-operations/runbooks/docker-compose-project-migration.md",
@@ -20376,7 +20376,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 544,
+          "line": 597,
           "source_group": "scripts",
           "text": "str(ROOT / \"scripts/ops/runtime/docker/docker_runtime_preflight.py\"),"
         },
@@ -20415,7 +20415,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1054,
+          "line": 1098,
           "source_group": "tests",
           "text": "probe = (ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\").read_text("
         },
@@ -20458,13 +20458,13 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 313,
+          "line": 319,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\ensure-stable.ps1 -WithNeo4j"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 316,
+          "line": 322,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\ensure-stable.ps1 -RestartWsl -WithNeo4j"
         },
@@ -20497,13 +20497,13 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 319,
+          "line": 325,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\harden-desktop-host.ps1 -RegisterWatchdog"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 338,
+          "line": 344,
           "source_group": "docs",
           "text": "`harden-desktop-host.ps1` sets Resource Saver effectively off"
         },
@@ -20592,7 +20592,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 326,
+          "line": 332,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\reset-mcp-host-sessions.ps1"
         }
@@ -20607,7 +20607,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 15,
       "references": [
         {
           "path": "docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md",
@@ -20641,7 +20641,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 296,
+          "line": 302,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\restart-docker.ps1 -TimeoutSeconds 180"
         },
@@ -20680,7 +20680,7 @@
         },
         {
           "path": "docs/04-reference/reports/run-reports.md",
-          "line": 172,
+          "line": 180,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/runtime_manager.py start --stack main --timeout 180"
         },
@@ -20724,9 +20724,17 @@
       "path": "scripts/ops/runtime/docker/verify_report_bind.py",
       "type": "py",
       "status": "active",
-      "agent_usage": [],
-      "reference_count": 9,
+      "agent_usage": [
+        "observability-dashboard"
+      ],
+      "reference_count": 15,
       "references": [
+        {
+          "path": ".codex/skills/observability-dashboard/SKILL.md",
+          "line": 38,
+          "source_group": "skills",
+          "text": "`python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay`."
+        },
         {
           "path": "docs/03-guides/dashboards/archive/audit-protocols/dux4-field-override-inventory.json",
           "line": 4082,
@@ -20735,25 +20743,25 @@
         },
         {
           "path": "docs/03-guides/dashboards/panels/bioetl-run-explorer-v1-panels.md",
-          "line": 49,
+          "line": 51,
           "source_group": "docs",
-          "text": "and report-root bind (`python scripts/ops/runtime/docker/verify_report_bind.py`)."
+          "text": "`python scripts/ops/runtime/docker/verify_report_bind.py` from the checkout"
         },
         {
           "path": "docs/04-reference/reports/run-reports.md",
-          "line": 129,
+          "line": 137,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay"
         },
         {
           "path": "docs/04-reference/reports/run-reports.md",
-          "line": 156,
+          "line": 164,
           "source_group": "docs",
           "text": "`verify_report_bind.py`. The verifier compares the normalized bind path,"
         },
         {
           "path": "docs/04-reference/reports/run-reports.md",
-          "line": 160,
+          "line": 168,
           "source_group": "docs",
           "text": "6. Operator re-check: `python scripts/ops/runtime/docker/verify_report_bind.py`."
         },
@@ -20764,16 +20772,10 @@
           "text": "python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay"
         },
         {
-          "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 1495,
-          "source_group": "scripts",
-          "text": "from scripts.ops.runtime.docker import verify_report_bind as bind_verify"
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
-          "line": 250,
-          "source_group": "tests",
-          "text": "from scripts.ops.runtime.docker import verify_report_bind"
+          "path": "grafana/README.md",
+          "line": 2615,
+          "source_group": "other",
+          "text": "`python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay`."
         }
       ]
     },
@@ -20879,7 +20881,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 333,
+          "line": 339,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\apply-shared-to-grok.ps1 -DisableDockerGateways"
         },
@@ -20934,7 +20936,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 332,
+          "line": 338,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\health-shared.ps1"
         },
@@ -21034,7 +21036,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 330,
+          "line": 336,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\start-shared.ps1"
         },
@@ -21249,7 +21251,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 604,
+          "line": 637,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1\","
         }
@@ -21310,7 +21312,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 603,
+          "line": 636,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/runtime/neo4j/neo4j_quick_start.sh\","
         }
@@ -22533,13 +22535,13 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 828,
+          "line": 861,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 991,
+          "line": 1035,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -22570,7 +22572,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 828,
+          "line": 861,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },
@@ -22601,13 +22603,13 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 828,
+          "line": 861,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 991,
+          "line": 1035,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -22638,7 +22640,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 828,
+          "line": 861,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },

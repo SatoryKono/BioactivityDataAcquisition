@@ -118,7 +118,8 @@ def test_explainability_ids_handle_mixed_keys_and_fallback_scalars() -> None:
 
     assert len(first) == 64
     assert _json_fallback(b"\x0f") == "0f"
-    assert "object" in str(_json_fallback(object()))
+    with pytest.raises(TypeError, match="Unsupported value"):
+        _json_fallback(object())
 
 
 def test_normalization_rejects_negative_high_potency_threshold() -> None:

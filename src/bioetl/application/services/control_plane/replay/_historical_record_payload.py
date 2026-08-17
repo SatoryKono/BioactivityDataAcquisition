@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 from bioetl.application.services.control_plane.replay.historical_identity_models import (
-    HistoricalReplayRunIdentity,
-    build_historical_certified_identity_payload_from_record,
+    HistoricalReplayRunIdentity as HistoricalReplayRunIdentity,
+)
+from bioetl.application.services.control_plane.replay.historical_identity_models import (
+    build_historical_certified_identity_payload_from_record as build_historical_certified_identity_payload_from_record,
 )
 
 

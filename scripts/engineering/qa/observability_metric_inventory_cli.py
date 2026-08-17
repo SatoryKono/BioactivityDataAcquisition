@@ -26,6 +26,7 @@ from scripts.engineering.qa.report_observability_metric_inventory import (
     collect_metric_inventory as collect_metric_inventory,
 )
 
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true", help="Emit JSON report")
@@ -474,4 +475,3 @@ def main(argv: list[str] | None = None) -> int:
     if live_review_failed or live_review_degraded:
         return 1
     return exit_code
-

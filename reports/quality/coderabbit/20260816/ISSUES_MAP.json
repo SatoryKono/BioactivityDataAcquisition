@@ -1,0 +1,194 @@
+{
+  "CR-20260816-A-S01-domain-aggregates-014": {
+    "issue": 8863,
+    "severity": "major",
+    "path": "src/bioetl/domain/aggregates/_batch_mixins.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-behavior-008": {
+    "issue": 8863,
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/value_validator.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-behavior-010": {
+    "issue": 8863,
+    "severity": "minor",
+    "path": "src/bioetl/domain/behavior/_dq_serializer_html/_renderers.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-behavior-011": {
+    "issue": 8863,
+    "severity": "minor",
+    "path": "src/bioetl/domain/behavior/_author_helpers.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-behavior-017": {
+    "issue": 8863,
+    "severity": "minor",
+    "path": "src/bioetl/domain/behavior/schema_classifier_helpers.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-behavior-018": {
+    "issue": 8863,
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/normalization_service.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-behavior-019": {
+    "issue": 8863,
+    "severity": "minor",
+    "path": "src/bioetl/domain/behavior/schema_classifier.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-behavior-023": {
+    "issue": 8863,
+    "severity": "minor",
+    "path": "src/bioetl/domain/behavior/merged_metadata_explainability.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-behavior-024": {
+    "issue": 8863,
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/merged_metadata_explainability.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-behavior-028": {
+    "issue": 8863,
+    "severity": "minor",
+    "path": "src/bioetl/domain/behavior/cross_validation_helpers.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-behavior-032": {
+    "issue": 8863,
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/cross_validation_validator.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-behavior-033": {
+    "issue": 8863,
+    "severity": "minor",
+    "path": "src/bioetl/domain/behavior/composite_validation_layer.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-behavior-037": {
+    "issue": 8863,
+    "severity": "minor",
+    "path": "src/bioetl/domain/behavior/aggregation_validator.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-behavior-038": {
+    "issue": 8863,
+    "severity": "minor",
+    "path": "src/bioetl/domain/behavior/dq_metrics_calculator.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-behavior-039": {
+    "issue": 8863,
+    "severity": "minor",
+    "path": "src/bioetl/domain/behavior/merged_metadata_explainability.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-behavior-040": {
+    "issue": 8863,
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/merged_metadata_explainability.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-behavior-044": {
+    "issue": 8863,
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/composite_validation_helpers.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-behavior-049": {
+    "issue": 8863,
+    "severity": "minor",
+    "path": "src/bioetl/domain/behavior/aggregation_validator.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-behavior-051": {
+    "issue": 8863,
+    "severity": "critical",
+    "path": "src/bioetl/domain/behavior/composite_validation_layer.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-composite-006": {
+    "issue": 8863,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/composite/config_composite_decoder.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-composite-007": {
+    "issue": 8863,
+    "severity": "minor",
+    "path": "src/bioetl/domain/composite/config_composite_section_decoders.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-composite-010": {
+    "issue": 8863,
+    "severity": "major",
+    "path": "src/bioetl/domain/composite/aggregation_filters.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-composite-011": {
+    "issue": 8863,
+    "severity": "major",
+    "path": "src/bioetl/domain/composite/config_composite_decoder.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-composite-012": {
+    "issue": 8863,
+    "severity": "major",
+    "path": "src/bioetl/domain/composite/aggregation_filters.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-composite-014": {
+    "issue": 8863,
+    "severity": "minor",
+    "path": "src/bioetl/domain/composite/aggregation.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-composite-016": {
+    "issue": 8863,
+    "severity": "major",
+    "path": "src/bioetl/domain/composite/aggregation.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-composite-017": {
+    "issue": 8863,
+    "severity": "major",
+    "path": "src/bioetl/domain/composite/config_composite_section_decoders.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-composite-019": {
+    "issue": 8863,
+    "severity": "major",
+    "path": "src/bioetl/domain/composite/result_merge.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-config-001": {
+    "issue": 8863,
+    "severity": "major",
+    "path": "src/bioetl/domain/config/table.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-contracts-002": {
+    "issue": 8863,
+    "severity": "major",
+    "path": "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-contracts-005": {
+    "issue": 8863,
+    "severity": "major",
+    "path": "src/bioetl/domain/contracts/gold/publications_pubmed.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  },
+  "CR-20260816-A-S01-domain-contracts-006": {
+    "issue": 8863,
+    "severity": "major",
+    "path": "src/bioetl/domain/contracts/gold/composite_bioassay.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8863"
+  }
+}

@@ -16,7 +16,7 @@
       "max_internal_fan_in": 6,
       "helper_function_ratio": 0.365,
       "files": 192,
-      "total_loc": 23105,
+      "total_loc": 23103,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 10
     },
@@ -43,7 +43,7 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.42,
       "files": 139,
-      "total_loc": 16090,
+      "total_loc": 16087,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 2
     },

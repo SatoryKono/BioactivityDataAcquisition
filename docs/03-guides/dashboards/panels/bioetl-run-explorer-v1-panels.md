@@ -44,9 +44,13 @@ collapsed progressive-disclosure row. `run_id` is never a Prometheus label.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`
 - **Layout:** Compact index; Inspect Run Identity / Processed Records stay on
   the first screen (`y<=12`). Selected-run forensics stay collapsed.
-- **Empty states:** Valid empty when no matching reports exist. Backend
-  unavailable when Ops HTTP cannot load the index — verify `/health/live`
-  and report-root bind (`python scripts/ops/runtime/docker/verify_report_bind.py`).
+- **Empty states:** Valid empty (`noValue` starts with `VALID EMPTY`) when
+  Ops HTTP `index_state=valid_empty` — no matching reports for this pipeline.
+  A visible `TREE_MISSING` / `LAYOUT_UNHEALTHY` / `IDENTITY_UNHEALTHY` row is
+  bind or origin failure, not a selector problem; run
+  `python scripts/ops/runtime/docker/verify_report_bind.py` from the checkout
+  you are viewing. Backend unavailable when Ops HTTP cannot load the index —
+  verify `/health/live`.
 
 ### 6. Selected Run Details
 - **Type:** Row (**collapsed by default**, `id=3099`)

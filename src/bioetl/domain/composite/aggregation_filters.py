@@ -19,15 +19,26 @@ def _require_filter_field(field: str) -> None:
 def _validate_null_filter(text: str, upper: str, token: str) -> bool:
     if token not in upper:
         return False
-    field = text[: upper.find(token)].strip()
+    token_index = upper.find(token)
+    field = text[:token_index].strip()
     _require_filter_field(field)
+    if text[token_index + len(token) :].strip():
+        raise ValueError(
+            "aggregation filter_condition null check must not contain trailing text"
+        )
     return True
 
 
 def _is_quoted_literal(value: str) -> bool:
-    return (value.startswith("'") and value.endswith("'")) or (
-        value.startswith('"') and value.endswith('"')
-    )
+    if len(value) < 2 or value[0] not in {"'", '"'} or value[-1] != value[0]:
+        return False
+    quote = value[0]
+    escaped = False
+    for character in value[1:-1]:
+        if character == quote and not escaped:
+            return False
+        escaped = character == "\\" and not escaped
+    return not escaped
 
 
 def _rhs_contains_nested_operators(rhs: str) -> bool:

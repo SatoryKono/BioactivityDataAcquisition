@@ -20,12 +20,12 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "2cc4a61298b83451d886d43c0c431fd59adf7a3f83491e443d743608147bf02a",
-    "bioetl-dq-v2": "c1a92d3f9b1a603e0cc1aa57be7398d087e630040f8966c5051655e32122a5cc",
+    "bioetl-control-plane-v1": "4d6b694bafb2ee068da9c8cdeed7551cf6e98c8beb2ada8ddc82295765d40b4c",
+    "bioetl-dq-v2": "d5d6a530b5d5c9ba6e1dc5e1d9fc103736a64e78568dc7142c73ba485f901c87",
     "bioetl-incident-v1": "cac1c6ca162a21e31bc726c035ee50f65472a9d3cfdd345439eae29ef23cc70b",
-    "bioetl-overview-v2": "589ac06f7fda5619af01bc03c181924c96703f8127896228ea285e58614670a0",
-    "bioetl-provider-health-v2": "ec31718b1ceb971c80032a1bd62f67f7ce587477b3e5482791707024d891fd52",
-    "bioetl-run-explorer-v1": "a1be0ee7a9e80543766d4197f174bea9b6d2d4425a2847bf6a720c71f1cab4e9",
+    "bioetl-overview-v2": "acb057f935abe5212fba35730fd65e958a12eeeab25027e6aa6c38739bf87c16",
+    "bioetl-provider-health-v2": "e29d06af955f638a70ee098b311ee26624e62153a1547c48ed961942b6c96feb",
+    "bioetl-run-explorer-v1": "d7c77805a4018be4769d9f818d10826eeaa67a98e02e19c0b0cba8175690ac49",
     "bioetl-runtime": "da53accc1b25b37bd15fb5d79649b5ad304014e321ac0bd364ac37bc0a84b16c"
   },
   "panels": [

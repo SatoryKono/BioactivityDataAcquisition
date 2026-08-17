@@ -134,12 +134,12 @@ def test_field_explanation_uses_priority_and_applied_enrichments() -> None:
     )
 
     assert explanation.field_name == "title"
-    assert explanation.source_providers == ["chembl", "pubmed"]
-    assert explanation.priority_order == ["pubmed", "chembl"]
+    assert explanation.source_providers == ("chembl", "pubmed")
+    assert explanation.priority_order == ("pubmed", "chembl")
     # Priority order is highest-first, so "pubmed" should be the final value source
     assert explanation.final_value_source == "pubmed"
     assert explanation.conflict_resolution == "priority_based"
-    assert explanation.enrichment_applied == ["mesh"]
+    assert explanation.enrichment_applied == ("mesh",)
 
 
 def test_field_explanation_handles_missing_priority_and_enrichment() -> None:
@@ -150,7 +150,7 @@ def test_field_explanation_handles_missing_priority_and_enrichment() -> None:
         {"title": {"priority": "pubmed"}},
     )
 
-    assert explanation.priority_order == []
+    assert explanation.priority_order == ()
     assert explanation.final_value_source is None
     assert explanation.conflict_resolution is None
     assert explanation.enrichment_applied is None

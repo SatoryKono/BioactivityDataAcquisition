@@ -150,6 +150,7 @@ def test_panel_3010_terminal_contract_documents_playwright_states() -> None:
     check = preflight.classify_panel_3010_terminal_contract()
     assert check.status == "ok"
     assert "valid-empty" in check.detail
+    assert "TREE_MISSING" in check.detail
     assert "explicit-error" in check.detail
     assert "--fallback playwright" in check.detail
 

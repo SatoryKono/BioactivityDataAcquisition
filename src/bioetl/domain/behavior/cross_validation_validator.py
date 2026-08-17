@@ -178,6 +178,8 @@ def _build_disposed_issue(
     suffix: str,
     extra_details: JsonDict,
 ) -> ValidationIssue:
+    if issue.details and "disposition" in issue.details:
+        return issue
     issue_result: ValidationIssue = _create_issue(
         code=issue.code,
         severity=severity,

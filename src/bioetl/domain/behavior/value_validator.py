@@ -62,6 +62,8 @@ class ValueValidator:
         # when only a single molar range is configured.
         min_m = self.config.concentration_range.min_molar
         max_m = self.config.concentration_range.max_molar
+        self._apply_molar_window("fM", min_m, max_m, 1e15)
+        self._apply_molar_window("pM", min_m, max_m, 1e12)
         self._apply_molar_window("nM", min_m, max_m, 1e9)
         um_key = self._micromolar_key()
         if um_key is not None:

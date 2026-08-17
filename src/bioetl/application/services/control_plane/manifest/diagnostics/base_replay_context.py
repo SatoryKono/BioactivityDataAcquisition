@@ -38,7 +38,6 @@ _compute_input_snapshot_identity_fingerprint = (
     _snapshot_support.compute_input_snapshot_identity_fingerprint
 )
 
-
 @dataclass(frozen=True, slots=True)
 class _BaseSummaryReplayContext:
     """Replay- and resume-related inputs reused by base summary assembly."""

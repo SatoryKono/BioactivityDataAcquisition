@@ -55,6 +55,7 @@ class Batch(_BatchMutationMixin, _BatchLifecycleMixin):
         self._start_index = start_index
         self._created_at = created_at
         self._sealed_at: datetime | None = None
+        self._sealed_valid_count: int | None = None
         self._events: list[DomainEvent] = []
         self._metadata: MetaDict = deepcopy(metadata) if metadata is not None else {}
 

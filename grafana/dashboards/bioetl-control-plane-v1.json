@@ -118,7 +118,7 @@
       "description": "Distinguishes CURRENT Prometheus state, SELECTED RUN persisted HTTP evidence, TIME RANGE history, and UNKNOWN missing/stale evidence. Pipeline and Run Type affect CURRENT and TIME RANGE evidence; run_id never filters Prometheus. UNKNOWN means missing or stale evidence, never healthy.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Can this run be replayed safely?</div><div><b>Scope:</b> <b>CURRENT</b> = replay status/reason/action · <b>SELECTED RUN</b> = identity evidence</div><div><b>UNKNOWN</b> = incomplete evidence — not OK</div><div style=\"margin-top:6px;font-size:16px;line-height:1.4\"><b>Fail-closed empty identity:</b> default <code>pipeline=unknown</code> / <code>run_id=-</code> yields <em>not available for current scope</em> by design. Select a real pipeline (e.g. <code>chembl_assay</code>, <code>chembl_activity</code>), compatible <code>run_type</code>, then a concrete <code>run_id</code> to load manifest/checkpoint evidence from control-plane.</div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Can this run be replayed safely?</div><div><b>Scope:</b> <b>CURRENT</b> = replay status/reason/action · <b>SELECTED RUN</b> = identity evidence</div><div><b>UNKNOWN</b> = incomplete evidence — not OK</div><div style=\"margin-top:6px;font-size:16px;line-height:1.4\"><b>Fail-closed empty identity:</b> default <code style=\"font-size:16px\">pipeline=unknown</code> / <code style=\"font-size:16px\">run_id=-</code> yields <em>not available for current scope</em> by design. Select a real pipeline (e.g. <code style=\"font-size:16px\">chembl_assay</code>, <code style=\"font-size:16px\">chembl_activity</code>), compatible <code style=\"font-size:16px\">run_type</code>, then a concrete <code style=\"font-size:16px\">run_id</code> to load manifest/checkpoint evidence from control-plane.</div></div></div>"
       }
     },
     {
@@ -691,8 +691,8 @@
           },
           "id": 894,
           "options": {
-            "content": "Coverage contract\n- Replay duplicate/overwrite risk is covered by bounded `risk_type` telemetry.\n- Manifest-to-ledger referential integrity is covered by complementary `consistent` / `inconsistent` ratio series.\n- A zero blocker verdict is trustworthy only while the telemetry-coverage card is complete.",
-            "mode": "markdown"
+            "content": "<div style=\"font-size:16px;line-height:1.4\"><strong style=\"font-size:16px\">Coverage contract</strong><ul style=\"margin:6px 0 0 22px;padding:0\"><li style=\"font-size:16px\">Replay duplicate/overwrite risk is covered by bounded <code style=\"font-size:16px\">risk_type</code> telemetry.</li><li style=\"font-size:16px\">Manifest-to-ledger referential integrity is covered by complementary <code style=\"font-size:16px\">consistent</code> / <code style=\"font-size:16px\">inconsistent</code> ratio series.</li><li style=\"font-size:16px\">A zero blocker verdict is trustworthy only while the telemetry-coverage card is complete.</li></ul></div>",
+            "mode": "html"
           },
           "title": "Review Coverage Limits",
           "type": "text",
@@ -3894,7 +3894,7 @@
               "showLineNumbers": false,
               "showMiniMap": false
             },
-            "content": "<div style=\"font-size:16px;line-height:1.45;color:#c9d1d9\"><b>Identity table guardrail.</b><br/>If no rows are visible, check <code>/health/live</code>, selector scope, and a concrete <code>pipeline/run_id</code> before treating the empty state as expected.</div>",
+            "content": "<div style=\"font-size:16px;line-height:1.45;color:#c9d1d9\"><b>Identity table guardrail.</b><br/>If no rows are visible, check <code style=\"font-size:16px\">/health/live</code>, selector scope, and a concrete <code style=\"font-size:16px\">pipeline/run_id</code> before treating the empty state as expected.</div>",
             "mode": "html"
           },
           "title": "Explain Missing Identity Data",

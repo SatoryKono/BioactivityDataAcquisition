@@ -76,6 +76,8 @@ _RUNTIME_SOURCE_ID_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 _COMMIT_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 _MIN_PANEL_BODY_FONT_PX = 16.0
 _MIN_PANEL_TITLE_FONT_PX = 14.0 * 4.0 / 3.0
+_MIN_GRAFANA_BODY_FONT_PX = 12.0
+_MIN_GRAFANA_PANEL_TITLE_FONT_PX = 14.0
 
 
 @dataclass(frozen=True)
@@ -113,7 +115,9 @@ def _resolve_grafana_username() -> str:
     return DEFAULT_GRAFANA_USERNAME
 
 
-def _resolve_expected_runtime_source_identity() -> RuntimeSourceIdentityResolutionResult:
+def _resolve_expected_runtime_source_identity() -> (
+    RuntimeSourceIdentityResolutionResult
+):
     """Resolve the expected identity with the canonical source precedence."""
     root = Path(__file__).resolve().parents[4]
     contract_path = root / "configs/quality/docker_runtime_contracts.yaml"
@@ -551,13 +555,28 @@ def _validate_dashboard_typography(
         return f"render manifest dashboard {uid} typography validation failed"
     body_minimum = typography.get("bodyMinimumPx")
     title_minimum = typography.get("panelTitleMinimumPx")
-    if not isinstance(body_minimum, (int, float)) or body_minimum < _MIN_PANEL_BODY_FONT_PX:
+    grafana_body_minimum = typography.get("grafanaBodyMinimumPx")
+    grafana_title_minimum = typography.get("grafanaPanelTitleMinimumPx")
+    if (
+        not isinstance(body_minimum, (int, float))
+        or body_minimum < _MIN_PANEL_BODY_FONT_PX
+    ):
         return f"render manifest dashboard {uid} body typography floor drift"
     if (
         not isinstance(title_minimum, (int, float))
         or title_minimum + 0.01 < _MIN_PANEL_TITLE_FONT_PX
     ):
         return f"render manifest dashboard {uid} title typography floor drift"
+    if (
+        not isinstance(grafana_body_minimum, (int, float))
+        or grafana_body_minimum < _MIN_GRAFANA_BODY_FONT_PX
+    ):
+        return f"render manifest dashboard {uid} Grafana body typography floor drift"
+    if (
+        not isinstance(grafana_title_minimum, (int, float))
+        or grafana_title_minimum < _MIN_GRAFANA_PANEL_TITLE_FONT_PX
+    ):
+        return f"render manifest dashboard {uid} Grafana title typography floor drift"
     violations = typography.get("violations")
     if not isinstance(violations, list) or violations:
         return f"render manifest dashboard {uid} has typography violations"
@@ -789,6 +808,14 @@ def _validate_manifest_provenance(
             return f"render manifest dashboard {uid} kiosk state drift"
         if browser_state.get("cssZoom") in {None, ""}:
             return f"render manifest dashboard {uid} lacks actual CSS zoom"
+        if requested_zoom > 100 and browser_state.get("zoomEmulation") != (
+            "layout-viewport-and-device-scale-factor"
+        ):
+            return f"render manifest dashboard {uid} lacks reflow zoom evidence"
+        if requested_zoom > 100 and not isinstance(
+            browser_state.get("layoutViewport"), dict
+        ):
+            return f"render manifest dashboard {uid} lacks zoom layout viewport"
     return None
 
 
@@ -1047,11 +1074,13 @@ def classify_panel_3010_terminal_contract() -> PreflightCheck:
         status="ok",
         detail=(
             "3010 positive render must classify healthy; successful empty must "
-            "classify valid-empty (noValue starts with VALID EMPTY); missing "
-            "datasource or bootstrap deferred/failed must classify "
-            "explicit-error. explicit-error is not success for positive 3010 "
-            "renders. Use --fallback playwright (Grafana Render API leaves "
-            "terminal state not-checked)."
+            "classify valid-empty (noValue starts with VALID EMPTY); a visible "
+            "TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is a "
+            "healthy fail-closed bind/origin state (HTTP 200), not "
+            "explicit-error. Missing datasource or bootstrap deferred/failed "
+            "must classify explicit-error. explicit-error is not success for "
+            "positive 3010 renders. Use --fallback playwright (Grafana Render "
+            "API leaves terminal state not-checked)."
         ),
     )
 
