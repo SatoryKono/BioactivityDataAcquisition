@@ -29,10 +29,7 @@ from bioetl.domain.control_plane.reproducibility_profiles import (
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 
 
-def _build_diagnostics_summary(
-    *args: object,
-    **kwargs: object,
-) -> dict[str, object]:
+def build_diagnostics_summary(*args: object, **kwargs: object) -> dict[str, object]:
     payload = import_module(
         "bioetl.application.services.control_plane.manifest.diagnostics"
     ).build_diagnostics_summary(*args, **kwargs)
@@ -43,7 +40,8 @@ def _build_diagnostics_summary(
     return {str(key): value for key, value in payload.items()}
 
 
-build_diagnostics_summary = _build_diagnostics_summary
+_build_diagnostics_summary = build_diagnostics_summary
+
 
 __all__ = [
     "HistoricalReplayBulkCertificationRecord",
@@ -67,7 +65,7 @@ class HistoricalReplayCorpusService:
     def build_certifiability_inventory(self) -> HistoricalReplayCertifiabilityInventory:
         """Inventory retained manifests against the certified replay tranche."""
         records = tuple(
-            self._build_record(manifest) for manifest in self._iter_manifests()
+            self._record(manifest) for manifest in self.manifest_port.list_all()
         )
         return HistoricalReplayCertifiabilityInventory(records=records)
 
@@ -82,7 +80,7 @@ class HistoricalReplayCorpusService:
             record.manifest_id: record for record in inventory_before.records
         }
         manifest_by_id = {
-            manifest.manifest_id: manifest for manifest in self._iter_manifests()
+            manifest.manifest_id: manifest for manifest in self.manifest_port.list_all()
         }
         # Validate all specs before sorting so missing keys raise explicit
         # ValueError instead of KeyError during sort key evaluation.
@@ -100,9 +98,7 @@ class HistoricalReplayCorpusService:
         ordered_specs = tuple(
             sorted(
                 specs,
-                key=lambda spec: self._bulk_spec_order_key(
-                    manifest_by_id[spec.manifest_id]
-                ),
+                key=lambda spec: bulk_spec_order_key(manifest_by_id[spec.manifest_id]),
             )
         )
         records: list[HistoricalReplayBulkCertificationRecord] = []
@@ -173,9 +169,7 @@ class HistoricalReplayCorpusService:
             certifications=spec.certifications,
         )
 
-    def _build_record(
-        self, manifest: RunManifest
-    ) -> HistoricalReplayCertifiabilityRecord:
+    def _record(self, manifest: RunManifest) -> HistoricalReplayCertifiabilityRecord:
         execution_context = resolve_execution_context(manifest)
         diagnostics = build_diagnostics_summary(
             manifest,
@@ -237,9 +231,3 @@ class HistoricalReplayCorpusService:
                 inventory_record.broader_historical_exact_replay_state
             ),
         )
-
-    def _iter_manifests(self) -> tuple[RunManifest, ...]:
-        return tuple(self.manifest_port.list_all())
-
-    def _bulk_spec_order_key(self, manifest: RunManifest) -> tuple[int, object, str]:
-        return bulk_spec_order_key(manifest)

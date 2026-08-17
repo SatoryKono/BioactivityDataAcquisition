@@ -49,6 +49,7 @@ from bioetl.application.services.workflow.workflow_runner_models import (
     WorkflowRunExecutionResult,
     WorkflowStepExecutionResult,
 )
+from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.workflow import (
     TransformStepConfig,
     WorkflowConfig,
@@ -64,6 +65,11 @@ from bioetl.interfaces.cli.commands.domains.diagnostics import contract_checks
 from bioetl.interfaces.cli.commands.domains.health import (
     observability_backend_process as backend_process,
 )
+from bioetl.interfaces.cli.commands.domains.health import (
+    observability_backend_runtime as backend_runtime,
+)
+from bioetl.interfaces.cli.commands.domains.run import command_policy
+from bioetl.interfaces.cli.commands.domains.run_all.public_runtime import run_batch_coro
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
 
@@ -833,10 +839,10 @@ def test_backend_process_helpers_cover_listener_parsing_and_detached_start(
     original_find_pids = backend_process._find_listening_backend_pids_by_port
     fake_result = SimpleNamespace(
         stdout="\n".join(
-                [
-                    'LISTEN 0 128 127.0.0.1:9090 0.0.0.0:* users:(("python",pid=123,fd=4))',
-                    'LISTEN 0 128 127.0.0.1:9090 0.0.0.0:* users:(("python",pid=bad,fd=4))',
-                ]
+            [
+                'LISTEN 0 128 127.0.0.1:9090 0.0.0.0:* users:(("python",pid=123,fd=4))',
+                'LISTEN 0 128 127.0.0.1:9090 0.0.0.0:* users:(("python",pid=bad,fd=4))',
+            ]
         )
     )
     monkeypatch.setattr(
@@ -1438,3 +1444,85 @@ def test_run_manifest_commands_cover_failure_paths(
     assert any(
         title == "Historical replay universe report failed" for title, _ in errors
     )
+
+
+def test_backend_parsers_reject_malformed_inputs() -> None:
+    assert backend_process._parse_windows_netstat_listener_pids("short", 8000) == ()
+    with pytest.raises(TypeError, match="numeric CLI value"):
+        backend_runtime._parse_observability_backend_port(True)
+
+
+def test_prepare_run_request_marks_non_terminating_exit_as_unreachable() -> None:
+    service = SimpleNamespace(
+        prepare_execution_request=lambda _request: SimpleNamespace(
+            request=None,
+            error_message=None,
+        )
+    )
+    command_input = SimpleNamespace(
+        pipeline="chembl_activity",
+        run_type="incremental",
+        resume=False,
+        start_offset=None,
+        limit=None,
+        input_csv=None,
+        filter_column=None,
+        filter_field=None,
+        dry_run=False,
+        vacuum_after_run=None,
+        vacuum_retention_days=None,
+        debug=False,
+        enable_tracing=None,
+        use_cached_bronze=False,
+        cached_bronze_date=None,
+        cached_bronze_path=None,
+        replay_of_run_id=None,
+        replay_of_manifest_id=None,
+        resume_run_id=None,
+        resume_manifest_id=None,
+        exact_replay=False,
+        required_persistence_profile=None,
+        health_server=False,
+        health_port=8000,
+    )
+
+    with pytest.raises(RuntimeError, match="exit_func is expected to terminate"):
+        command_policy.prepare_run_request(
+            service=service,  # type: ignore[arg-type]
+            command_input=command_input,  # type: ignore[arg-type]
+            exit_func=lambda _code: None,  # type: ignore[arg-type]
+        )
+
+
+@pytest.mark.parametrize("error", [BioETLError("domain"), TypeError("typed")])
+def test_destructive_step_returns_false_if_failure_handler_returns(
+    monkeypatch: pytest.MonkeyPatch,
+    error: BaseException,
+) -> None:
+    monkeypatch.setattr(
+        command_policy,
+        "handle_destructive_run_confirmation",
+        lambda *_args: (_ for _ in ()).throw(error),
+    )
+    monkeypatch.setattr(
+        command_policy, "handle_cli_failure", lambda *_args, **_kw: None
+    )
+
+    assert (
+        command_policy.handle_destructive_step(
+            pipeline="chembl_activity",
+            run_type="rebuild",
+            dry_run=False,
+            yes=False,
+        )
+        is False
+    )
+
+
+def test_batch_coroutine_uses_canonical_asyncio_entrypoint() -> None:
+    result = object()
+
+    async def complete() -> object:
+        return result
+
+    assert run_batch_coro(complete()) is result  # type: ignore[arg-type]

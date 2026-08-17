@@ -213,20 +213,16 @@ def _build_replay_state_projection(
             input_snapshots=input_snapshots,
             policy_assessment=policy_assessment,
         ),
-        "historical_live_run_upgrade_state": (
-            _resolve_historical_live_run_upgrade_state(
-                manifest=manifest,
-                input_snapshots=input_snapshots,
-                policy_assessment=policy_assessment,
-                replay_family_context=replay_family_context,
-            )
+        "historical_live_run_upgrade_state": _resolve_historical_live_run_upgrade_state(
+            manifest=manifest,
+            input_snapshots=input_snapshots,
+            policy_assessment=policy_assessment,
+            replay_family_context=replay_family_context,
         ),
-        "broader_historical_exact_replay_state": (
-            _resolve_broader_historical_exact_replay_state(
-                manifest=manifest,
-                input_snapshots=input_snapshots,
-                policy_assessment=policy_assessment,
-            )
+        "broader_historical_exact_replay_state": _resolve_broader_historical_exact_replay_state(
+            manifest=manifest,
+            input_snapshots=input_snapshots,
+            policy_assessment=policy_assessment,
         ),
         "source_posture": _resolve_source_posture(policy_assessment),
     }
