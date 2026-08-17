@@ -112,9 +112,7 @@ async def test_run_health_server_start_failure_closes_without_stopping(
     server.start = AsyncMock(side_effect=OSError("bind failed"))
     server.stop = AsyncMock()
     close_resources = AsyncMock()
-    monkeypatch.setattr(
-        lifecycle._deps, "get_health_server_dependencies", lambda: deps
-    )
+    monkeypatch.setattr(lifecycle._deps, "get_health_server_dependencies", lambda: deps)
     monkeypatch.setattr(
         lifecycle._deps,
         "_get_optional_health_server_quarantine_service",

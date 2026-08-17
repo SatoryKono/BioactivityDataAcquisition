@@ -45,7 +45,9 @@ def test_vcr_secret_checker_does_not_treat_substring_as_redacted() -> None:
     assert _looks_redacted("unredacted_secret") is False
 
 
-def test_complete_rotation_rejects_short_next_salt(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_complete_rotation_rejects_short_next_salt(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setenv(ENV_ROTATION_ACTIVE, "true")
     monkeypatch.setenv(ENV_SALT_NEXT, "too-short")
     result = complete_rotation()

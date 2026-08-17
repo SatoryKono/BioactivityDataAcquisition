@@ -77,13 +77,17 @@ def test_pubchem_inchi_activity_and_extract_field() -> None:
 
 def test_dq_invariants_and_frozen_schema() -> None:
     with pytest.raises(ValueError, match="UTC offset"):
-        _require_aware_timestamp(datetime(2026, 1, 1, tzinfo=timezone(timedelta(hours=2))))
+        _require_aware_timestamp(
+            datetime(2026, 1, 1, tzinfo=timezone(timedelta(hours=2)))
+        )
     with pytest.raises(ValueError, match="error_rate"):
         DQResult(status=DQEvaluationStatus.PASSED, error_rate=1.5)
     with pytest.raises(ValueError, match="error_records"):
         BatchDQMetrics(total_records=1, error_records=5)
     assert calculate_null_rate([], 0) == 0.0
-    snap = SchemaSnapshotResult(fields_detected=1, schema={"a": "int"}, status=DQCheckStatus.PASS)
+    snap = SchemaSnapshotResult(
+        fields_detected=1, schema={"a": "int"}, status=DQCheckStatus.PASS
+    )
     with pytest.raises(TypeError):
         snap.schema["a"] = "str"  # type: ignore[index]
     cfg = ColumnOrderConfig()
@@ -101,4 +105,6 @@ def test_schema_date_timestamp_dups_json_accession() -> None:
     assert bool(result.iloc[1]) is True
     extra = pd.Series(["P12345EXTRA"])
     assert bool(UniprotCoreSchema._check_accession(extra).iloc[0]) is False
-    assert str_matches_pattern(pd.Series(["CHEMBL1X"]), pattern=r"CHEMBL\\d+").tolist() == [False]
+    assert str_matches_pattern(
+        pd.Series(["CHEMBL1X"]), pattern=r"CHEMBL\\d+"
+    ).tolist() == [False]

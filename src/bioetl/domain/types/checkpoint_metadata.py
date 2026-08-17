@@ -38,6 +38,7 @@ from bioetl.domain.types.checkpoint_compatibility_result import (
 _OPTIONAL_STR = str | None
 _OPTIONAL_BOOL = bool | None
 
+
 @dataclass(frozen=True, slots=True)
 class CheckpointMetadata:
     """Extended checkpoint metadata with compatibility and replay anchors."""

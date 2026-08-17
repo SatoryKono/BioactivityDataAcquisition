@@ -119,6 +119,7 @@ def bronze_cleanup_command(retention_days: int, dry_run: bool) -> None:
         retention_days: Retention days.
         dry_run: Dry run mode flag.
     """
+
     async def _run() -> None:
         service = get_bronze_cleanup_service()
         if dry_run:

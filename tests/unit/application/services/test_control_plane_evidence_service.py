@@ -521,10 +521,12 @@ def test_failure_reasons_make_unknown_state_visible_without_zero_counts(
 
 
 def test_trust_status_is_incomplete_when_processing_succeeds_without_evidence() -> None:
-    manifest = _manifest(launch_context={
-        "required_persistence_profile": "replay_ready",
-        "processing_status": "success",
-    })
+    manifest = _manifest(
+        launch_context={
+            "required_persistence_profile": "replay_ready",
+            "processing_status": "success",
+        }
+    )
     payload = ControlPlaneEvidenceService().manifest_validation(scope=_scope(manifest))
 
     assert payload["processing_status"] == "success"

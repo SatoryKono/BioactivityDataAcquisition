@@ -85,21 +85,43 @@ def _manifest_candidate_paths(
         ),
         (
             ControlPlaneArtifactSurface.RUN_MANIFEST,
-            base_path / "run_manifest" / f"{manifest.manifest_id}.contract-evidence.json",
+            base_path
+            / "run_manifest"
+            / f"{manifest.manifest_id}.contract-evidence.json",
         ),
         (
             ControlPlaneArtifactSurface.RUN_LEDGER,
             base_path / "run_ledger" / f"{manifest.manifest_id}.jsonl",
         ),
     ]
+    _append_effective_config_candidate(candidates, base_path, manifest)
+    _append_lineage_candidates(candidates, base_path, manifest)
+    _append_checkpoint_candidates(candidates, base_path, manifest)
+    _append_cached_bronze_candidates(candidates, base_path)
+    return candidates
+
+
+def _append_effective_config_candidate(
+    candidates: list[tuple[ControlPlaneArtifactSurface, Path]],
+    base_path: Path,
+    manifest: RunManifest,
+) -> None:
     config_id = manifest.code_provenance.effective_config_artifact_id
-    if config_id:
-        candidates.append(
-            (
-                ControlPlaneArtifactSurface.EFFECTIVE_CONFIG,
-                base_path / "effective_config" / f"{config_id}.json",
-            )
+    if not config_id:
+        return
+    candidates.append(
+        (
+            ControlPlaneArtifactSurface.EFFECTIVE_CONFIG,
+            base_path / "effective_config" / f"{config_id}.json",
         )
+    )
+
+
+def _append_lineage_candidates(
+    candidates: list[tuple[ControlPlaneArtifactSurface, Path]],
+    base_path: Path,
+    manifest: RunManifest,
+) -> None:
     lineage_index = (
         base_path
         / "lineage"
@@ -108,24 +130,38 @@ def _manifest_candidate_paths(
     )
     fragment_ids = set(load_fragment_ids(lineage_index, key=manifest.manifest_id))
     fragments_root = base_path / "lineage" / "fragments"
-    if fragments_root.exists():
-        for path in fragments_root.glob("*.json"):
-            if path.stem in fragment_ids or _json_mentions_manifest(path, manifest):
-                candidates.append((ControlPlaneArtifactSurface.LINEAGE, path))
+    if not fragments_root.exists():
+        return
+    for path in fragments_root.glob("*.json"):
+        if path.stem in fragment_ids or _json_mentions_manifest(path, manifest):
+            candidates.append((ControlPlaneArtifactSurface.LINEAGE, path))
+
+
+def _append_checkpoint_candidates(
+    candidates: list[tuple[ControlPlaneArtifactSurface, Path]],
+    base_path: Path,
+    manifest: RunManifest,
+) -> None:
     checkpoint_root = base_path.parent / "checkpoints"
-    if checkpoint_root.exists():
-        for path in checkpoint_root.rglob("*"):
-            if path.is_file() and (
-                str(manifest.run_id) in path.name
-                or manifest.manifest_id in path.name
-            ):
-                candidates.append((ControlPlaneArtifactSurface.CHECKPOINT, path))
+    if not checkpoint_root.exists():
+        return
+    for path in checkpoint_root.rglob("*"):
+        if path.is_file() and (
+            str(manifest.run_id) in path.name or manifest.manifest_id in path.name
+        ):
+            candidates.append((ControlPlaneArtifactSurface.CHECKPOINT, path))
+
+
+def _append_cached_bronze_candidates(
+    candidates: list[tuple[ControlPlaneArtifactSurface, Path]],
+    base_path: Path,
+) -> None:
     bronze_root = base_path.parent / "bronze"
-    if bronze_root.exists():
-        for path in bronze_root.rglob("*"):
-            if path.is_file():
-                candidates.append((ControlPlaneArtifactSurface.CACHED_BRONZE, path))
-    return candidates
+    if not bronze_root.exists():
+        return
+    for path in bronze_root.rglob("*"):
+        if path.is_file():
+            candidates.append((ControlPlaneArtifactSurface.CACHED_BRONZE, path))
 
 
 def _json_mentions_manifest(path: Path, manifest: RunManifest) -> bool:
