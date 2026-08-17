@@ -169,6 +169,7 @@ uv run python -m scripts.ops setup-plugins
 
 Notes:
 
+- The command above is the **minimal local-dev** extra-set (`dev,tests,tracing`). It is not the same as `make install` (`dev,tests,tests_full,export`) or the Testing section (`dev,tests,tests_full,tracing`). Add `tests_full` before architecture / benchmark / observability suites; `export` is only required for export tooling; `docs` is only required for MkDocs/site builds.
 - Documentation site commands require the separate `docs` extra: `uv sync --extra dev --extra tests --extra tracing --extra docs` or `pip install -e ".[dev,tests,tracing,docs]"`.
 - `uv run python -m scripts.ops setup-plugins` configures local pytest and pre-commit tooling.
 - Hook-only reinstall remains available through `bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only`.
