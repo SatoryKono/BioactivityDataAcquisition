@@ -126,3 +126,31 @@ def test_row_cap_contracts_are_unique_and_owned() -> None:
         assert str(item["owner"]).startswith("@")
         assert item["bind"] in {"topk", "limit", "filter"}
         assert 1 <= int(item["max_rows"]) <= 5
+
+
+def test_first_window_scope_banners_name_current_range_and_selected_run() -> None:
+    """#8923: first-window scope copy must not conflate CURRENT / RANGE / SELECTED RUN."""
+    required = {
+        "bioetl-overview-v2.json": ("CURRENT", "SELECTED RUN", "TIME RANGE"),
+        "bioetl-runtime.json": ("CURRENT", "SELECTED RUN"),
+        "bioetl-provider-health-v2.json": ("GLOBAL", "SELECTED PROVIDER"),
+        "bioetl-dq-v2.json": ("CURRENT", "SELECTED RUN", "TIME RANGE"),
+        "bioetl-incident-v1.json": ("CURRENT", "SELECTED RUN"),
+        "bioetl-run-explorer-v1.json": ("BROWSE", "SELECTED RUN"),
+        "bioetl-control-plane-v1.json": ("CURRENT", "SELECTED RUN"),
+    }
+    by_name = {path.name: load_dashboard(path) for path in get_dashboard_files()}
+    missing: list[str] = []
+    for dashboard_name, tokens in required.items():
+        dashboard = by_name[dashboard_name]
+        first_window = select_first_window_panels(_root_panels(dashboard))
+        blob = "\n".join(
+            f"{panel.get('title', '')}\n{panel.get('description', '')}\n"
+            f"{((panel.get('options') or {}).get('content') or '')}"
+            for panel in first_window
+            if panel.get("type") == "text"
+        )
+        for token in tokens:
+            if token not in blob:
+                missing.append(f"{dashboard_name} missing {token}")
+    assert not missing, "first-window scope banners:\n" + "\n".join(missing)

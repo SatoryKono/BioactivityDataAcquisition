@@ -48,9 +48,14 @@ def _redact_transport_error_message(message: str) -> str:
     import re
 
     redacted = re.sub(
-        r"(?i)(api[_-]?key|token|secret|password|authorization|bearer)\s*[:=]\s*\S+",
-        r"\1=<redacted>",
+        r"(?i)\bBearer\s+\S+",
+        "Bearer <redacted>",
         message,
+    )
+    redacted = re.sub(
+        r"(?i)(api[_-]?key|token|secret|password|authorization)\s*[:=]\s*\S+",
+        r"\1=<redacted>",
+        redacted,
     )
     return redacted[:500]
 

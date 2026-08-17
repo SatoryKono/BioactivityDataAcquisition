@@ -310,9 +310,13 @@ async def compute_dq_metrics_from_arrow_data(
 
     def _compute() -> BatchDQMetrics:
         records_dict = (
-            [dict(record) for record in arrow_data.to_pylist()] if arrow_data else []
+            [dict(record) for record in arrow_data.to_pylist()]
+            if arrow_data is not None
+            else []
         )
-        existing_schema_fields = set(arrow_data.column_names) if arrow_data else set()
+        existing_schema_fields = (
+            set(arrow_data.column_names) if arrow_data is not None else set()
+        )
 
         dq_input = DQMetricsInput(
             records=records_dict,

@@ -110,10 +110,10 @@ multiple runs; use RunLedger for exact reconciliation.
 - **Purpose:** Show historical failure evidence.
 - **Data sources:** `bioetl_historical_failures`
 
-### 18. Review Recent Terminal Runs
+### 18. Review Recent Non-success Terminal Runs
 - **Type:** Table
-- **Purpose:** Show recent terminal run evidence.
-- **Data sources:** `bioetl_recent_terminal_runs`
+- **Purpose:** Show recent non-success terminal-run evidence in the selected range.
+- **Data sources:** `bioetl_pipeline_runs_total` with `status!="success"`
 
 ### 19. Track Silver Rejects
 - **Type:** Stat

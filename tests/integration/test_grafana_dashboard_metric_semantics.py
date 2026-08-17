@@ -260,14 +260,14 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
         "Track Data Quality Status": (9019, "bioetl_l1_dq_status"),
         "Track Gold Lifecycle": (9020, "bioetl_l1_gold_lifecycle_status"),
         "Review Failed Runs": (9010, "bioetl_pipeline_runs_total"),
-        "Review Recent Terminal Runs": (9011, "bioetl_pipeline_runs_total"),
+        "Review Recent Non-success Terminal Runs": (9011, "bioetl_pipeline_runs_total"),
     }
     disclosure_by_panel = {
         "Track Runtime Blockers": "Domain Status Tracks",
         "Track Data Quality Status": "Domain Status Tracks",
         "Track Gold Lifecycle": "Domain Status Tracks",
         "Review Failed Runs": "Inspect Range Evidence",
-        "Review Recent Terminal Runs": "Inspect Range Evidence",
+        "Review Recent Non-success Terminal Runs": "Inspect Range Evidence",
     }
 
     for dashboard_path in (Path("grafana/dashboards/bioetl-overview-v2.json"),):
@@ -1672,7 +1672,7 @@ def test_selected_range_kpis_follow_declared_counter_window_intent() -> None:
                 "required": ("increase(",),
                 "forbidden": ("max_over_time(", "last_over_time("),
             },
-            "Review Recent Terminal Runs": {
+            "Review Recent Non-success Terminal Runs": {
                 "intent": "event_delta",
                 "required": ("increase(",),
                 "forbidden": ("max_over_time(", "last_over_time("),

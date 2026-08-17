@@ -1841,7 +1841,7 @@
         {
           "id": 9011,
           "type": "table",
-          "title": "Review Recent Terminal Runs",
+          "title": "Review Recent Non-success Terminal Runs",
           "gridPos": {
             "x": 8,
             "y": 49,

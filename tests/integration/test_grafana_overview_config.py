@@ -477,11 +477,12 @@ def test_range_evidence_and_trend_rows_are_retained() -> None:
                 "not proof",
             ),
         },
-        "Review Recent Terminal Runs": {
+        "Review Recent Non-success Terminal Runs": {
             "id": 9011,
             "links": {"Open Control Plane", "Open Runtime"},
             "tokens": (
                 "selected range",
+                "non-success",
                 "not proof",
             ),
         },
@@ -505,7 +506,10 @@ def test_range_evidence_and_trend_rows_are_retained() -> None:
         assert "current" in description
 
     assert "[$__range]" in _panel_expr(panels["Review Failed Runs"])
-    assert "[$__range]" in _panel_expr(panels["Review Recent Terminal Runs"])
+    assert "[$__range]" in _panel_expr(panels["Review Recent Non-success Terminal Runs"])
+    terminal_expr = _panel_expr(panels["Review Recent Non-success Terminal Runs"])
+    assert 'status!="success"' in terminal_expr
+    assert "status=" not in terminal_expr.replace('status!="success"', "")
     assert "[$__range]" in _panel_expr(panels["Track Silver Rejects"])
 
 
