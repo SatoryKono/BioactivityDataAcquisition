@@ -241,7 +241,7 @@
       "id": 9991,
       "type": "text",
       "title": "Start Pipeline Triage",
-      "description": "States the current verdict and neutral outcome explicitly, then routes non-OK states through runtime blockers, DQ evidence, and Run Explorer.",
+      "description": "States the current verdict and neutral outcome explicitly, then routes non-OK states through runtime blockers, DQ evidence, and Run Explorer. SCRAPING is telemetry confidence, not proof of delivery health. Verify coverage before trusting an empty blocker table.",
       "gridPos": {
         "h": 2,
         "w": 24,
@@ -250,7 +250,7 @@
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:16px;white-space:normal\"><strong>First action:</strong> OK + SCRAPING + no blocker → continue monitoring. Otherwise open the highest-severity blocker; verify coverage before trusting an empty blocker table.</div>"
+        "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:16px;white-space:normal\"><strong>First action:</strong> If Pipeline Health is OK and no blocker is listed, continue monitoring. Otherwise open the highest-severity blocker.</div>"
       },
       "links": [
         {

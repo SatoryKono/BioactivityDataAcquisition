@@ -243,10 +243,10 @@
         "y": 8
       },
       "options": {
-        "content": "<div style=\"font-size:16px;line-height:1.4\"><strong style=\"font-size:16px\">Data trust — next actions (&lt;=4)</strong><ol style=\"margin:6px 0 0 22px;padding:0\"><li style=\"font-size:16px\">Read <strong style=\"font-size:16px\">Status</strong> + <strong style=\"font-size:16px\">Now · DQ Threshold/Reasons</strong> (not range zeros).</li><li style=\"font-size:16px\">If blocked/quarantine/rejects &gt; 0, use accounting with denominators (expand Run/Range lanes).</li><li style=\"font-size:16px\">Selected run → <strong style=\"font-size:16px\">Run Explorer</strong> hub; resume → Trust <strong style=\"font-size:16px\">Review First Recovery Action</strong>.</li><li style=\"font-size:16px\">Range cards are SLA/freshness context only — not peer severity.</li></ol></div>",
+        "content": "<div style=\"font-size:16px;line-height:1.35;padding:2px 8px;white-space:normal\"><strong>First action:</strong> Act on Current DQ Status and Threshold/Reasons. Open Run Explorer only for a selected run.</div>",
         "mode": "html"
       },
-      "description": "Start with Current DQ Status, Threshold State, and Current Reasons. For CRIT, inspect validation, anomaly, quarantine, and reject blockers before replay. For WARN, inspect threshold and freshness evidence. Use selected-run accounting and selected-range evidence as supporting lanes, not competing verdicts.",
+      "description": "Start with Current DQ Status, Threshold State, and Current Reasons. For CRIT, inspect validation, anomaly, quarantine, and reject blockers before replay. For WARN, inspect threshold and freshness evidence. If blocked/quarantine/rejects > 0, use accounting with denominators in the Run/Range lanes. Selected-run forensics stay in Run Explorer; resume stays on Trust Review First Recovery Action. Range cards are SLA/freshness context only, not peer severity. Use selected-run accounting and selected-range evidence as supporting lanes, not competing verdicts.",
       "links": [
         {
           "title": "Review current status",
