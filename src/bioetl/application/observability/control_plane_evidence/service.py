@@ -36,7 +36,11 @@ from bioetl.application.observability.control_plane_evidence.service_support imp
     sanitized_manifest_payload_scope,
     service_payload,
 )
-from bioetl.domain.control_plane import ControlPlaneArtifactLifecyclePolicy
+from bioetl.domain.control_plane import (
+    ControlPlaneArtifactLifecyclePlan,
+    ControlPlaneArtifactLifecyclePolicy,
+    RunManifest,
+)
 from bioetl.domain.ports import (
     LineageStorePort,
     RawRunManifestInspectionPort,
@@ -204,8 +208,8 @@ class ControlPlaneEvidenceService:
     def _bounded_retention_plan(
         self,
         policy: ControlPlaneArtifactLifecyclePolicy,
-        manifest: object,
-    ) -> object:
+        manifest: RunManifest,
+    ) -> ControlPlaneArtifactLifecyclePlan:
         planner = self.lifecycle_planner
         assert planner is not None
         plan_for_manifest = getattr(planner, "plan_for_manifest", None)
