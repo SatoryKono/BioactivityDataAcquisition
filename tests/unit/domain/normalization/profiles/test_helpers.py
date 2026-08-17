@@ -30,6 +30,8 @@
 
 from __future__ import annotations
 
+import math
+
 import pytest
 
 from bioetl.domain.normalization.profiles._normalization_helpers import (
@@ -92,6 +94,12 @@ def test_normalize_profile_date_canonicalizes_partial_dates() -> None:
 def test_normalize_profile_int_preserves_invalid_text() -> None:
     assert normalize_profile_int(" 42 ") == 42
     assert normalize_profile_int("abc") == "abc"
+
+
+def test_normalize_profile_int_rejects_non_finite_floats() -> None:
+    assert normalize_profile_int(math.nan) is None
+    assert normalize_profile_int(math.inf) is None
+    assert normalize_profile_int(5.0) == 5
 
 
 def test_normalize_profile_float_rounds_and_preserves_unhandled_object() -> None:
