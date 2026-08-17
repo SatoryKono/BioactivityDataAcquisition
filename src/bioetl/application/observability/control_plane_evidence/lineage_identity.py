@@ -22,7 +22,10 @@ def identity_gaps(
     """Return stable identity mismatches across selected fragments."""
     expected_run = str(manifest.run_id)
     expected_manifest = manifest.manifest_id
-    gaps = {f"node_definition:{node_id}" for node_id in conflicting_node_ids(fragments)}
+    gaps = {
+        f"node_definition_conflict:{node_id}"
+        for node_id in conflicting_node_ids(fragments)
+    }
     for fragment in fragments:
         gaps.update(_fragment_anchor_gaps(fragment, expected_run, expected_manifest))
         for edge in fragment.edges:

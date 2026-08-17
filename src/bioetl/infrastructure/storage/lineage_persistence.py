@@ -53,6 +53,22 @@ def _emit_lineage_fragment_metric(
     )
 
 
+def _lineage_fragment_preflight_error(fragment: LineageGraphFragment) -> str | None:
+    """Return a stable publish-time reason when a fragment is not closed."""
+    node_ids = {node.node_id for node in fragment.nodes}
+    dangling = sorted(
+        {
+            node_id
+            for edge in fragment.edges
+            for node_id in (edge.source.node_id, edge.target.node_id)
+            if node_id not in node_ids
+        }
+    )
+    if dangling:
+        return "edge_endpoint_missing:" + ",".join(dangling[:8])
+    return None
+
+
 def lineage_fragment_publication_required(coordinator: object | None) -> bool:
     """Return whether the coordinator run context requires lineage persistence."""
     run_context = getattr(coordinator, "run_context", None)
@@ -227,6 +243,21 @@ async def persist_lineage_fragment_if_present(
             raise RuntimeError(
                 "Strict metadata publication requires a lineage store: "
                 f"pipeline={pipeline_name or 'unknown'}, layer={layer or 'unknown'}"
+            )
+        return
+    preflight_error = _lineage_fragment_preflight_error(lineage_fragment)
+    if preflight_error is not None:
+        _emit_lineage_fragment_metric(
+            metrics,
+            pipeline_name=pipeline_name,
+            layer=layer,
+            status="failed",
+        )
+        if required:
+            raise RuntimeError(
+                "Strict metadata publication rejected an incomplete lineage "
+                f"fragment: pipeline={pipeline_name or 'unknown'}, "
+                f"layer={layer or 'unknown'}, reason={preflight_error}"
             )
         return
     try:

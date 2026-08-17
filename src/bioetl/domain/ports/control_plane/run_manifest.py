@@ -21,6 +21,12 @@ class RawManifestInspection:
 
     parse_ok: bool
     schema_errors: tuple[str, ...] = ()
+    contract_comparison_status: str | None = None
+    contract_comparison_reason: str | None = None
+    resume_contract: str | None = None
+    resume_contract_reason: str | None = None
+    lock_owner_id: str | None = None
+    lock_owner_reason: str | None = None
 
     @property
     def schema_ok(self) -> bool:
