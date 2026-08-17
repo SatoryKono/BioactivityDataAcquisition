@@ -20,6 +20,19 @@ __all__ = [
 ]
 
 
+def _coerce_finite_molecular_weight(value: float | int | str) -> float:
+    """Return a finite float while rejecting booleans and malformed values."""
+    if isinstance(value, bool):
+        raise ValueError(f"Invalid molecular weight: {value!r}")
+    try:
+        result = float(value)
+    except (ValueError, TypeError) as exc:
+        raise ValueError(f"Invalid molecular weight: {value!r}") from exc
+    if not math.isfinite(result):
+        raise ValueError(f"Invalid molecular weight: {value} (NaN or Inf)")
+    return result
+
+
 class MolecularWeight(ValueObject[float]):
     """Molecular weight value object with validation.
 
@@ -91,15 +104,7 @@ class MolecularWeight(ValueObject[float]):
         Raises:
             ValueError: If MW is invalid or outside range.
         """
-        # Convert to float
-        try:
-            float_value = float(value)
-        except (ValueError, TypeError) as e:
-            raise ValueError(f"Invalid molecular weight: {value!r}") from e
-
-        # Check for NaN/Inf
-        if math.isnan(float_value) or math.isinf(float_value):
-            raise ValueError(f"Invalid molecular weight: {value} (NaN or Inf)")
+        float_value = _coerce_finite_molecular_weight(value)
 
         # Round first so range checks use the stored canonical value.
         precision = self._config.molecular_weight_precision

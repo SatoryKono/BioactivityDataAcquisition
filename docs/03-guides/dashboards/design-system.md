@@ -162,7 +162,7 @@ timeseries without checking whether the panel compares multiple series.
 `DASH-COPY-003` is exclusive for non-row, non-text, non-shell content panels.
 Text/row/shell titles MAY keep `Navigate` / `Understand` / `Start` / `Assess` /
 `Explain` / `Continue`. Former pending data-panel titles were renamed to
-`Inspect Recent Runs (last 20)` and `Inspect Identity Values`.
+`Inspect Recent Runs (last 4)` and `Inspect Identity Values`.
 
 ### 3.2 Description
 

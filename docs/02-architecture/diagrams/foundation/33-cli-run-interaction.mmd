@@ -1,10 +1,11 @@
 %% Title: CLI Run Command → Current Execution Flow
 %% Covers: RULES.md §1.1 (Interfaces → Composition → Application), RF-011
 %% Rank: 8 (Score 8.50) — Current run-command routing via accessor + narrow APIs
-%% Updated: 2026-03-19
+%% Updated: 2026-08-17
+%% Re-verified 2026-08-17 against live src/bioetl symbols
 
-%% @version 1.1.0
-%% @date    2026-03-19
+%% @version 1.1.1
+%% @date    2026-08-17
 %% @type    sequenceDiagram
 %% @level   Mixed (System / Component / Module)
 %% @nodes   10
@@ -14,10 +15,10 @@ sequenceDiagram
     autonumber
     participant User as User
     participant CLI as run.py<br/>CLI command
-    participant Access as run_service_access
+    participant Access as service_access
     participant Policy as run_command_flow
     participant Orch as CliRunOrchestrationService
-    participant Runtime as run_runtime_helpers
+    participant Runtime as runtime_helpers
     participant Health as health_server_context
     participant CtrlAPI as control_plane_api
     participant PRS as PipelineRunnerService

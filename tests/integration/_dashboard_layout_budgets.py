@@ -16,6 +16,7 @@ SSOT: ``docs/03-guides/dashboards/contracts/layout-budgets.yaml``.
 
 from __future__ import annotations
 
+import re
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -23,6 +24,8 @@ from typing import Any
 import yaml
 
 LAYOUT_BUDGETS_PATH = Path("docs/03-guides/dashboards/contracts/layout-budgets.yaml")
+_TOPK_RE = re.compile(r"topk\(\s*(\d+)\s*,", re.IGNORECASE)
+_LIMIT_RE = re.compile(r"[?&]limit=(\d+)")
 PERFORMANCE_BUDGETS_PATH = Path(
     "docs/03-guides/dashboards/contracts/performance-budgets.yaml"
 )
@@ -109,6 +112,10 @@ DATA_PANEL_TYPES = _string_set(_PAYLOAD, "data_panel_types")
 
 STRADDLE_ALLOWLIST = _allowlist(_PAYLOAD, "straddle")
 MIN_HEIGHT_ALLOWLIST = _allowlist(_PAYLOAD, "min_height")
+FIRST_WINDOW_OVERFLOW_ALLOWLIST = _allowlist(_PAYLOAD, "first_window_overflow")
+HORIZONTAL_SCROLL_ALLOWLIST = _allowlist(_PAYLOAD, "horizontal_scroll")
+PANEL_CONTAINMENT_TOLERANCE_PX = _require_int(_PAYLOAD, "panel_containment_tolerance_px")
+FIRST_WINDOW_CONTAINMENT_TYPES = _string_set(_PAYLOAD, "first_window_containment_types")
 
 # DASH-DENSITY-002: scalar information density (values/area).
 SCALAR_DENSITY_TYPES = _string_set(_PAYLOAD, "scalar_density_types")
@@ -129,6 +136,134 @@ def min_height_for(panel_type: str, *, nested: bool) -> int | None:
     if not isinstance(value, int) or isinstance(value, bool):
         raise ValueError(f"{LAYOUT_BUDGETS_PATH}:min_height.{panel_type} must be int")
     return value
+
+
+def first_window_summary_tables() -> tuple[dict[str, Any], ...]:
+    entries = _PAYLOAD.get("first_window_summary_tables")
+    if not isinstance(entries, list):
+        raise ValueError(
+            f"{LAYOUT_BUDGETS_PATH}:first_window_summary_tables must be a list"
+        )
+    out: list[dict[str, Any]] = []
+    required = ("dashboard", "id", "max_rows", "owner", "bind")
+    for entry in entries:
+        if not isinstance(entry, dict):
+            raise ValueError(
+                f"{LAYOUT_BUDGETS_PATH}:first_window_summary_tables entries must be maps"
+            )
+        missing = [key for key in required if entry.get(key) in (None, "")]
+        if missing:
+            raise ValueError(
+                f"{LAYOUT_BUDGETS_PATH}:first_window_summary_tables missing {missing}"
+            )
+        dashboard = entry.get("dashboard")
+        panel_id = entry.get("id")
+        max_rows = entry.get("max_rows")
+        bind = entry.get("bind")
+        owner = entry.get("owner")
+        if not isinstance(dashboard, str) or not isinstance(panel_id, int):
+            raise ValueError(
+                f"{LAYOUT_BUDGETS_PATH}:first_window_summary_tables needs dashboard+int id"
+            )
+        if not isinstance(max_rows, int) or isinstance(max_rows, bool) or max_rows < 1:
+            raise ValueError(
+                f"{LAYOUT_BUDGETS_PATH}:first_window_summary_tables {dashboard}:{panel_id} "
+                "max_rows must be a positive int"
+            )
+        if not isinstance(bind, str) or not isinstance(owner, str):
+            raise ValueError(
+                f"{LAYOUT_BUDGETS_PATH}:first_window_summary_tables {dashboard}:{panel_id} "
+                "needs bind and owner"
+            )
+        out.append(
+            {
+                "dashboard": dashboard,
+                "id": panel_id,
+                "max_rows": max_rows,
+                "owner": owner,
+                "bind": bind,
+            }
+        )
+    return tuple(out)
+
+
+def is_first_window_panel(panel: dict[str, Any], *, first_window_y: int | None = None) -> bool:
+    """Root-style first-window test: non-row and ``gridPos.y < FIRST_WINDOW_Y``."""
+    if panel.get("type") == "row":
+        return False
+    fold = FIRST_WINDOW_Y if first_window_y is None else first_window_y
+    grid = panel.get("gridPos")
+    if not isinstance(grid, dict):
+        return False
+    y = grid.get("y")
+    return isinstance(y, int) and y < fold
+
+
+def select_first_window_panels(
+    panels: list[Any], *, first_window_y: int | None = None
+) -> list[dict[str, Any]]:
+    """Select root non-row panels that intersect the first window."""
+    selected: list[dict[str, Any]] = []
+    for panel in panels or []:
+        if isinstance(panel, dict) and is_first_window_panel(
+            panel, first_window_y=first_window_y
+        ):
+            selected.append(panel)
+    return selected
+
+
+def panel_declared_row_cap(panel: dict[str, Any]) -> int | None:
+    """Return the tightest declared first-screen row cap, if any."""
+    caps: list[int] = []
+    for target in panel.get("targets") or []:
+        if not isinstance(target, dict):
+            continue
+        expr = target.get("expr")
+        if isinstance(expr, str):
+            caps.extend(int(match.group(1)) for match in _TOPK_RE.finditer(expr))
+        url = target.get("url")
+        if isinstance(url, str):
+            caps.extend(int(match.group(1)) for match in _LIMIT_RE.finditer(url))
+    for transform in panel.get("transformations") or []:
+        if not isinstance(transform, dict):
+            continue
+        transform_id = transform.get("id")
+        options = transform.get("options")
+        if not isinstance(options, dict):
+            continue
+        if transform_id == "limit":
+            for key in ("limitField", "limit"):
+                value = options.get(key)
+                if isinstance(value, int) and not isinstance(value, bool) and value > 0:
+                    caps.append(value)
+        if transform_id == "filterByValue" and options.get("type") == "include":
+            filters = options.get("filters")
+            if isinstance(filters, list) and filters:
+                regex_values = []
+                equal_count = 0
+                for item in filters:
+                    if not isinstance(item, dict):
+                        continue
+                    config = item.get("config")
+                    if not isinstance(config, dict):
+                        continue
+                    config_options = config.get("options")
+                    if not isinstance(config_options, dict):
+                        continue
+                    value = config_options.get("value")
+                    if config.get("id") == "regex" and isinstance(value, str):
+                        regex_values.append(value)
+                    elif config.get("id") == "equal":
+                        equal_count += 1
+                if equal_count:
+                    caps.append(equal_count)
+                for pattern in regex_values:
+                    alternatives = [
+                        part for part in pattern.strip("^$").split("|") if part
+                    ]
+                    if alternatives:
+                        caps.append(len(alternatives))
+    return min(caps) if caps else None
 
 
 def answer_panels() -> dict[str, list[dict[str, Any]]]:

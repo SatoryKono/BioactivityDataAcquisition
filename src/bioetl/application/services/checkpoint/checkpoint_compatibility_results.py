@@ -29,7 +29,7 @@ def build_strict_checkpoint_compatibility_result(
         identity_continuity_proven=(
             identity_continuity_proven and required_anchor_compatible
         ),
-        messages=list(messages),
+        messages=tuple(messages),
     )
 
 
@@ -54,7 +54,7 @@ def build_lenient_checkpoint_compatibility_result(
         compatible=compatible,
         dq_compatible=dq_compatible,
         pipeline_compatible=pipeline_compatible,
-        messages=list(messages),
+        messages=tuple(messages),
         execution_identity_compatible=execution_identity_compatible,
         identity_continuity_proven=identity_continuity_proven,
         resume_verdict=resume_verdict,

@@ -91,7 +91,7 @@ class TestNormalizePublicationType:
     def test_unknown_mixed_case_returns_none(self) -> None:
         assert normalize_publication_type("SomeNewType") is None
 
-    def test_empty_string_returns_none(self) -> None:
+    def test_publication_type__empty_string_returns_none(self) -> None:
         assert normalize_publication_type("") is None
 
     def test_pipe_separated_normalization(self) -> None:

@@ -4,13 +4,11 @@ from __future__ import annotations
 
 from typing import Protocol, cast
 
-from bioetl.application.services.control_plane.replay import (
-    historical_closure_models as _closure_models,
+from bioetl.application.services.control_plane.replay.historical_closure_models import (
+    HistoricalReplayClaimScopeMode as HistoricalReplayClaimScopeMode,
 )
-
-HistoricalReplayClaimScopeMode = _closure_models.HistoricalReplayClaimScopeMode
-HistoricalReplayResidualDispositionRecord = (
-    _closure_models.HistoricalReplayResidualDispositionRecord
+from bioetl.application.services.control_plane.replay.historical_closure_models import (
+    HistoricalReplayResidualDispositionRecord as HistoricalReplayResidualDispositionRecord,
 )
 
 

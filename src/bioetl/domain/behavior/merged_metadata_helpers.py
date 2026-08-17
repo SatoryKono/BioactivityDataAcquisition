@@ -18,6 +18,7 @@ def resolve_priority_order(
     field_name: str,
     field_priorities: dict[str, JsonDict] | None,
 ) -> tuple[str, ...] | None:
+    """Resolve configured provider priority for a merged metadata field."""
     if not field_priorities or field_name not in field_priorities:
         return None
     priority = field_priorities[field_name].get("priority")
@@ -45,6 +46,7 @@ def resolve_final_value_source(
 def extract_applied_enrichments(
     composite_metadata: CompositeOutputExt,
 ) -> tuple[str, ...] | None:
+    """Return the enrichers whose composite status is ``applied``."""
     if not composite_metadata.enrichment_status:
         return None
     applied = [
@@ -56,6 +58,7 @@ def extract_applied_enrichments(
 
 
 def public_field_names(record_data: JsonDict) -> list[str]:
+    """Return record field names that are not internal metadata keys."""
     return [name for name in record_data if not name.startswith("_")]
 
 
@@ -70,7 +73,7 @@ def resolve_record_id(record: JsonDict) -> str:
 def deterministic_record_id(record: JsonDict) -> str:
     """Produce a deterministic id for supported non-JSON-native values."""
     payload = json.dumps(
-        _normalize_mapping_keys(record),
+        _normalize_record_id_value(record),
         sort_keys=True,
         separators=(",", ":"),
         ensure_ascii=False,
@@ -80,40 +83,37 @@ def deterministic_record_id(record: JsonDict) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
-def _normalize_mapping_keys(value: object) -> object:
-    """Coerce mapping keys to strings so sort_keys stays type-stable.
-
-    JSON already coerces scalar keys to strings on serialization, but
-    ``sort_keys=True`` compares the raw keys first and raises on mixed-type
-    keys. Normalizing keys up front keeps the emitted payload identical for
-    string-keyed mappings while making mixed-type keys deterministic.
-    """
+def _normalize_record_id_value(value: object) -> object:
+    """Normalize nested mappings without order-sensitive mixed-type keys."""
     if isinstance(value, dict):
-        return {
-            _stringify_key(key): _normalize_mapping_keys(item)
-            for key, item in value.items()
-        }
+        return _normalize_record_id_mapping(value)
     if isinstance(value, (list, tuple)):
-        return [_normalize_mapping_keys(item) for item in value]
+        return [_normalize_record_id_value(item) for item in value]
     return value
 
 
-def _stringify_key(key: object) -> str:
-    """Return the canonical string form JSON would emit for a mapping key."""
+def _normalize_record_id_mapping(value: dict[object, object]) -> dict[str, object]:
+    normalized: dict[str, object] = {}
+    for key, item in value.items():
+        normalized_key = _normalize_record_id_key(key)
+        if normalized_key in normalized:
+            raise TypeError("Ambiguous mapping keys for deterministic record id")
+        normalized[normalized_key] = _normalize_record_id_value(item)
+    return normalized
+
+
+def _normalize_record_id_key(key: object) -> str:
     if isinstance(key, str):
         return key
-    if isinstance(key, bool):
-        return "true" if key else "false"
-    if key is None:
-        return "null"
-    if isinstance(key, (int, float)):
-        return json.dumps(key, allow_nan=False)
+    if key is None or isinstance(key, (bool, int, float)):
+        return json.dumps(key, ensure_ascii=False, allow_nan=False)
     raise TypeError(
-        f"Unsupported key for deterministic record id: {type(key).__name__}"
+        f"Unsupported mapping key for deterministic record id: {type(key).__name__}"
     )
 
 
 def json_fallback(value: object) -> object:
+    """Convert supported non-JSON-native values or reject them explicitly."""
     if isinstance(value, (datetime, date)):
         return value.isoformat()
     if isinstance(value, Decimal):
@@ -134,7 +134,7 @@ def _bytes_or_reject(value: object) -> str:
 
 def _to_json_compatible(value: object) -> object:
     payload = json.dumps(
-        value,
+        _normalize_record_id_value(value),
         sort_keys=True,
         separators=(",", ":"),
         ensure_ascii=False,

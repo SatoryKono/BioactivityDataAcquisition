@@ -35,6 +35,8 @@ class ActivityType(StrEnum):
         Returns:
             Corresponding ActivityType enum member.
         """
+        if s is None:
+            raise ValueError("Unknown activity type: None")
         normalized = s.strip().upper()
         type_map = {
             "IC50": cls.IC50,

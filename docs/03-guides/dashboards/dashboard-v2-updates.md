@@ -7,16 +7,43 @@ ______________________________________________________________________
 `docs/reports/dashboard-ux-checks/YYYY-MM-DD.md`.
 
 Latest dashboard UX artifact for current shipped JSON changes:
-`docs/reports/dashboard-ux-checks/2026-08-11.md`
-(prior: `docs/reports/dashboard-ux-checks/2026-08-05.md`;
+`docs/reports/dashboard-ux-checks/2026-08-17.md`
+(prior: `docs/reports/dashboard-ux-checks/2026-08-11.md`;
 visual-audit closeout: sequential expanded-row bands and a compact Incident
 alert-state history layout, without query or verdict changes)
+(prior: `docs/reports/dashboard-ux-checks/2026-08-05.md`)
 (prior: `docs/reports/dashboard-ux-checks/2026-07-30.md`;
 threshold-only repair: shipped dashboards now use the canonical gray base
 threshold color without changing queries or operator workflows)
 (prior: `docs/reports/dashboard-ux-checks/2026-07-28-drmr.md`;
 also: `docs/reports/dashboard-ux-checks/2026-07-28.md`; canonical baseline:
 `docs/reports/dashboard-ux-checks/2026-05-19.md`)
+
+## First-window containment gate and dense P1 tables (2026-08-17)
+
+- Render evidence now records per-panel first-window containment
+  (`clientHeight`/`scrollHeight`/`clientWidth`/`scrollWidth`) and fails closed
+  on internal overflow for text, stat, and summary-table panels (`#8896`).
+- Provider Health first-screen tables are capped at four worst/deviating rows;
+  `9104` ends at row 18 and the fold-straddle allowlist is retired (`#8900`).
+- Incident `Inspect Ranked Suspects` keeps domain/signal provenance and an
+  outer five-row cap (`#8902`). A single union query exceeds the first-screen
+  PromQL length budget, so the bound is `topk(5)` per domain plus a Grafana
+  `limit=5`.
+- Run Explorer first screen shows the latest four runs and 4-row
+  identity/accounting summaries; the last-20 browser and full tables stay in
+  Selected Run Details (`#8903`).
+
+## P2 first-window copy compaction (2026-08-17)
+
+- Overview, Trust, Pipeline Diagnostics, and Data Quality first-window text
+  panels keep the operator question or primary action and move selection
+  procedures, pipeline examples, and coverage caveats into descriptions.
+- Overview `Review Domain Status` (`9002`) is now a `topk(4)` deviation-first
+  summary; the complete domain matrix is `Review All Domain Status` (`9031`)
+  under collapsed Domain Status Tracks.
+- Trust `Review Recovery Action` no longer relies on `overflow:hidden`.
+- Pipeline Diagnostics no longer treats SCRAPING as proof of delivery health.
 
 ## Run Explorer Completed timestamp format (2026-08-05)
 

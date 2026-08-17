@@ -674,7 +674,7 @@ def test_run_explorer_identity_is_on_the_first_screen() -> None:
     assert browse.get("gridPos", {}).get("h", 99) <= 5
     assert identity.get("gridPos", {}).get("y", 999) <= 13
     assert records.get("gridPos", {}).get("y", 999) <= 13
-    assert "last 20" in str(browse.get("title", "")).lower()
+    assert "last 4" in str(browse.get("title", "")).lower()
 
 
 def test_overview_alerts_row_is_collapsed() -> None:

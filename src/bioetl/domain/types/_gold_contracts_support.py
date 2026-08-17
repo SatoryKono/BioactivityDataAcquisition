@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from types import MappingProxyType
 from typing import Literal, Protocol, cast, runtime_checkable
 
 GOLD_CONTRACT_VERSION_UNKNOWN = "0.0.0"
@@ -23,10 +24,7 @@ def invoke_to_schema(schema: object) -> object | None:
     """Resolve a schema factory without weakening the input type to Any."""
     if not isinstance(schema, _SchemaConvertible):
         return None
-    try:
-        return schema.to_schema()
-    except (AttributeError, RuntimeError, TypeError, ValueError):
-        return None
+    return schema.to_schema()
 
 
 def normalize_column_name(value: object, *, field_name: str) -> str:
@@ -74,8 +72,8 @@ def normalize_text_or_empty(value: object | None) -> str:
 
 
 def coerce_mapping(value: Mapping[str, object] | None) -> Mapping[str, object]:
-    """Freeze nullable mapping-like payloads into a plain dict-backed mapping."""
-    return dict(value) if value is not None else {}
+    """Freeze nullable mapping-like payloads into a read-only mapping."""
+    return MappingProxyType(dict(value) if value is not None else {})
 
 
 def normalize_contract_version(value: object | None) -> str:

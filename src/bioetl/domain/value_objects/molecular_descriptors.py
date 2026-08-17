@@ -46,11 +46,20 @@ def _coerce_int(value: object) -> int:
     """Coerce *value* to ``int``, raising ``ValueError`` on failure."""
     if isinstance(value, bool):
         raise ValueError(f"Expected int, got {type(value).__name__}")
-    if isinstance(value, (int, float)):
-        f = float(value)
-        if not math.isfinite(f):
-            raise ValueError(f"Cannot convert {value} to int")
-        return int(f)
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return _coerce_integral_float(value)
+    return _parse_int(value)
+
+
+def _coerce_integral_float(value: float) -> int:
+    if not math.isfinite(value) or not value.is_integer():
+        raise ValueError(f"Cannot convert {value} to int")
+    return int(value)
+
+
+def _parse_int(value: object) -> int:
     try:
         return int(str(value).strip())
     except (ValueError, TypeError) as exc:
