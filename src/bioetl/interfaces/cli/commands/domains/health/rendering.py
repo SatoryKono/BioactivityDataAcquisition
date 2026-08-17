@@ -31,7 +31,7 @@ def build_health_server_info_lines(host: str, port: int) -> list[str]:
 
 def all_health_results_healthy(results: HealthResults) -> bool:
     """Return True when every provider result is healthy."""
-    return all(
+    return bool(results) and all(
         result.get("status", "unknown") == "healthy" for result in results.values()
     )
 

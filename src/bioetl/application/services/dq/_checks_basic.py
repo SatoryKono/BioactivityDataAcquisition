@@ -14,7 +14,7 @@ __all__ = [
 ]
 
 
-from datetime import datetime
+from datetime import UTC, datetime
 
 import polars as pl
 
@@ -168,7 +168,9 @@ def check_data_freshness(
             status=DQCheckStatus.PASS,
         )
 
-    lag_seconds = (current_time - max_ts).total_seconds()
+    normalized_current_time = _as_utc_datetime(current_time)
+    normalized_max_ts = _as_utc_datetime(max_ts)
+    lag_seconds = (normalized_current_time - normalized_max_ts).total_seconds()
     lag_hours = lag_seconds / 3600
 
     if lag_hours > FRESHNESS_CRITICAL_HOURS:
@@ -179,7 +181,7 @@ def check_data_freshness(
         status = DQCheckStatus.PASS
 
     return DataFreshnessResult(
-        max_updated_at=max_ts,
+        max_updated_at=normalized_max_ts,
         freshness_lag_seconds=round(lag_seconds, 2),
         freshness_lag_hours=round(lag_hours, 2),
         status=status,
@@ -198,3 +200,10 @@ def _extract_freshness_timestamp(df: pl.DataFrame) -> datetime | None:
         if isinstance(col_max, datetime):
             return col_max
     return None
+
+
+def _as_utc_datetime(value: datetime) -> datetime:
+    """Return a timezone-aware UTC datetime for safe comparisons."""
+    if value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value.astimezone(UTC)

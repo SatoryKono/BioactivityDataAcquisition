@@ -756,9 +756,12 @@ def test_lineage_text_renderers_cover_structured_payloads_and_command_errors(
         ),
     )
 
-    lineage_cmd.show_fragment_command.callback("fragment-1", False, "json")
-    lineage_cmd.trace_command.callback("silver:missing", "json")
-    lineage_cmd.explain_command.callback("run-1", None, "json")
+    with pytest.raises(SystemExit):
+        lineage_cmd.show_fragment_command.callback("fragment-1", False, "json")
+    with pytest.raises(SystemExit):
+        lineage_cmd.trace_command.callback("silver:missing", "json")
+    with pytest.raises(SystemExit):
+        lineage_cmd.explain_command.callback("run-1", None, "json")
     with pytest.raises(SystemExit):
         lineage_cmd.explain_command.callback("run-1", "manifest-1", "json")
 
@@ -830,10 +833,10 @@ def test_backend_process_helpers_cover_listener_parsing_and_detached_start(
     original_find_pids = backend_process._find_listening_backend_pids_by_port
     fake_result = SimpleNamespace(
         stdout="\n".join(
-            [
-                'LISTEN 0 128 127.0.0.1:9090 users:(("python",pid=123,fd=4))',
-                'LISTEN 0 128 127.0.0.1:9090 users:(("python",pid=bad,fd=4))',
-            ]
+                [
+                    'LISTEN 0 128 127.0.0.1:9090 0.0.0.0:* users:(("python",pid=123,fd=4))',
+                    'LISTEN 0 128 127.0.0.1:9090 0.0.0.0:* users:(("python",pid=bad,fd=4))',
+                ]
         )
     )
     monkeypatch.setattr(

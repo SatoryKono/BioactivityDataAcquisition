@@ -15,6 +15,7 @@ from bioetl.interfaces.cli.commands.domains.shared.click_options import (
     typed_click_option,
     typed_group_command,
 )
+from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
 if TYPE_CHECKING:
@@ -87,7 +88,7 @@ def show_command(number: int, raw: bool) -> None:
         doc = service.get_adr(number)
     except FileNotFoundError as e:
         echo_error("ADR not found", str(e))
-        return
+        raise SystemExit(int(ExitCode.EX_NOINPUT)) from e
     if raw:
         echo_info(doc.content)
         return

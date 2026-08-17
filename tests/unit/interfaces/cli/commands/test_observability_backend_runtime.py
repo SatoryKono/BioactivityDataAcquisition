@@ -170,6 +170,38 @@ def test_describe_required_probe_failure_includes_http_status_and_body() -> None
     assert "Control-plane selector catalog unavailable" in detail
 
 
+def test_describe_required_probe_failure_checks_every_required_path() -> None:
+    calls: list[str] = []
+
+    class _Response:
+        def __init__(self, status: int) -> None:
+            self.status = status
+
+        def __enter__(self) -> _Response:
+            return self
+
+        def __exit__(self, exc_type: object, exc: object, tb: object) -> bool:
+            return False
+
+    def fake_urlopen(url: str, timeout: float) -> _Response:
+        calls.append(url)
+        return _Response(503 if url.endswith("/second") else 200)
+
+    detail = runtime_subject._describe_required_probe_failure(
+        "http://127.0.0.1:8081/health",
+        required_probe_paths=("/first", "second", "/third"),
+        urlopen_fn=fake_urlopen,
+    )
+
+    assert detail == (
+        "Capability probe http://127.0.0.1:8081/second returned HTTP 503."
+    )
+    assert calls == [
+        "http://127.0.0.1:8081/first",
+        "http://127.0.0.1:8081/second",
+    ]
+
+
 def test_open_url_uses_standard_library_opener(monkeypatch: pytest.MonkeyPatch) -> None:
     opener = MagicMock()
     build_opener = MagicMock(return_value=opener)
@@ -387,6 +419,26 @@ def test_ensure_backend_failure_message_includes_exit_code_and_log_tail(
         assert "RuntimeError: boom" in (result.message or "")
     finally:
         log_path.unlink(missing_ok=True)
+
+
+def test_backend_startup_log_tail_is_bounded_and_redacted(tmp_path: Path) -> None:
+    log_path = tmp_path / "backend.log"
+    log_path.write_text(
+        ("old log line\n" * 20_000)
+        + "API_KEY=super-secret-value\n"
+        + "DATABASE_URL=postgresql://user:password@localhost/db?token=secret\n"
+        + "Authorization: Bearer abc.def.ghi\n",
+        encoding="utf-8",
+    )
+
+    excerpt = failure_details_subject._read_backend_startup_log_excerpt(log_path)
+
+    assert excerpt is not None
+    assert len(excerpt) <= 1203
+    assert "super-secret-value" not in excerpt
+    assert "user:password" not in excerpt
+    assert "abc.def.ghi" not in excerpt
+    assert "[REDACTED]" in excerpt
 
 
 def test_wait_for_observability_backend_required_paths_ready_retries_until_success() -> (
@@ -657,6 +709,49 @@ def test_find_listening_backend_pids_by_port_returns_empty_when_command_missing(
     )
 
     assert process_subject._find_listening_backend_pids_by_port(8081) == ()
+
+
+def test_posix_listener_parser_ignores_peer_port_collision() -> None:
+    output = "\n".join(
+        [
+            'LISTEN 0 128 127.0.0.1:8000 127.0.0.1:9000 users:(("python",pid=42,fd=3))',
+            'LISTEN 0 128 127.0.0.1:9000 0.0.0.0:* users:(("python",pid=84,fd=4))',
+        ]
+    )
+
+    assert process_subject._parse_posix_ss_listener_pids(output, 9000) == (84,)
+
+
+def test_listener_and_taskkill_timeouts_are_nonfatal(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def _timeout(command: list[str], **_kwargs: object) -> object:
+        raise process_subject.subprocess.TimeoutExpired(command, timeout=5.0)
+
+    monkeypatch.setattr(process_subject.subprocess, "run", _timeout)
+    monkeypatch.setattr(
+        process_subject,
+        "_resolve_system_executable",
+        lambda command: command,
+    )
+
+    assert process_subject._run_listener_probe(["ss", "-ltnp"]) == ""
+    assert process_subject._run_taskkill(42).returncode == 1
+
+
+@pytest.mark.parametrize("raw_port", ["not-a-port", 8080.5, float("inf")])
+def test_backend_cli_options_reject_invalid_ports(raw_port: object) -> None:
+    with pytest.raises(TypeError, match="observability_backend_port"):
+        runtime_subject.resolve_observability_backend_cli_options(
+            {"observability_backend_port": raw_port}
+        )
+
+
+@pytest.mark.parametrize("raw_port", [8080, 8080.0, "8080"])
+def test_backend_cli_options_accept_integral_ports(raw_port: object) -> None:
+    assert runtime_subject.resolve_observability_backend_cli_options(
+        {"observability_backend_port": raw_port}
+    ) == (False, 8080)
 
 
 def test_build_detached_backend_env_prefixes_src_pythonpath() -> None:

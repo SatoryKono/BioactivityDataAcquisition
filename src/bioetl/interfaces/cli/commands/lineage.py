@@ -16,6 +16,7 @@ from bioetl.interfaces.cli.commands.domains.shared.click_options import (
 from bioetl.interfaces.cli.commands.domains.shared.inspection_output import (
     emit_inspection_payload,
 )
+from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
 
 if TYPE_CHECKING:
@@ -241,7 +242,7 @@ def show_fragment_command(
         result = service.show_fragment(fragment_id, semantic=semantic)
     except ValueError as exc:
         echo_error("Lineage fragment not found", str(exc))
-        return
+        raise SystemExit(ExitCode.FAIL) from exc
     emit_inspection_payload(
         result.to_dict(),
         output_format,
@@ -269,7 +270,7 @@ def trace_command(dataset_ref: str, output_format: str) -> None:
         result = service.trace(dataset_ref)
     except ValueError as exc:
         echo_error("Lineage trace not found", str(exc))
-        return
+        raise SystemExit(ExitCode.FAIL) from exc
     emit_inspection_payload(
         result.to_dict(),
         output_format,
@@ -301,14 +302,14 @@ def explain_command(
             "Lineage explain failed",
             "Provide exactly one of --run-id or --manifest-id",
         )
-        raise SystemExit(1)
+        raise SystemExit(ExitCode.FAIL)
 
     service = get_lineage_service()
     try:
         result = service.explain_run(identifier)
     except ValueError as exc:
         echo_error("Lineage run explanation not found", str(exc))
-        return
+        raise SystemExit(ExitCode.FAIL) from exc
     emit_inspection_payload(
         result.to_dict(),
         output_format,

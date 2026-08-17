@@ -85,6 +85,7 @@ def _cli_metrics_publish_kwargs(
         "pipeline_name": "workflow_chembl_activity",
         "run_type": None,
         "grouping_key_extra": None,
+        "metric_names": None,
     }
 
 

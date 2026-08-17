@@ -124,6 +124,13 @@ def test_map_batch_run_result_to_exit_code_shutdown() -> None:
 
 
 @pytest.mark.unit
+def test_map_empty_batch_run_result_to_ok() -> None:
+    batch = _BatchResult(failed=0, total=0, results=[])
+
+    assert map_batch_run_result_to_exit_code(batch) == ExitCode.OK
+
+
+@pytest.mark.unit
 def test_map_success_flag_to_exit_code_matrix() -> None:
     assert map_success_flag_to_exit_code(True) == ExitCode.OK
     assert map_success_flag_to_exit_code(False) == ExitCode.PIPELINE_ERROR

@@ -5,7 +5,6 @@ Implements checkpoint listing and management commands.
 
 from __future__ import annotations
 
-import asyncio
 import json
 from collections.abc import Callable
 from typing import TYPE_CHECKING, cast
@@ -14,6 +13,10 @@ from bioetl.interfaces.cli.commands.domains.shared.click_options import (
     typed_click_group,
     typed_click_option,
     typed_group_command,
+)
+from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
+    build_target_cli_boundary_policy,
+    run_async_with_cli_failure_policy,
 )
 from bioetl.interfaces.cli.commands.domains.shared.inspection_commands import (
     add_audit_run_options,
@@ -296,14 +299,22 @@ def checkpoint_list(pipeline: str) -> None:
     """
     echo_info(f"Listing checkpoints for {pipeline}...")
 
-    checkpoint_runtime_service = get_checkpoint_runtime_service(pipeline)
-
     async def _list() -> None:
+        checkpoint_runtime_service = get_checkpoint_runtime_service(pipeline)
         checkpoints = await checkpoint_runtime_service.list_all()
         for cp in checkpoints:
             echo_checkpoint(cp)
 
-    asyncio.run(_list())
+    run_async_with_cli_failure_policy(
+        _list(),
+        policy=build_target_cli_boundary_policy(
+            reason_prefix="CLI_CHECKPOINT_LIST",
+            target=pipeline,
+            domain_error_title="Checkpoint listing failed with domain error",
+            unexpected_error_title="Unexpected error during checkpoint listing",
+            interrupted_message="Checkpoint listing interrupted by user (Ctrl+C)",
+        ),
+    )
 
 
 @typed_group_command(checkpoint, "audit-run")
