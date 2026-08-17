@@ -7,6 +7,9 @@ from typing import Protocol
 import httpx
 
 from bioetl.domain.resilience import RetryConfig
+from bioetl.infrastructure.adapters.decorators._retry_support import (
+    _redact_transport_error_message,
+)
 from bioetl.infrastructure.adapters.http._client_retry_models import (
     _RequestAttemptOutcome,
 )
@@ -152,7 +155,13 @@ async def handle_request_exception(
 
     if can_retry(attempt, retries_used):
         wait_seconds = await handle_retry_delay(attempt, url)
-        log_retry(url, method, attempt, wait_seconds, reason=str(exc))
+        log_retry(
+            url,
+            method,
+            attempt,
+            wait_seconds,
+            reason=_redact_transport_error_message(str(exc)),
+        )
         return _RequestAttemptOutcome(
             True,
             status_code_from_error(exc),

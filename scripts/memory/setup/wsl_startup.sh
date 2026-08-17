@@ -51,16 +51,17 @@ upsert_env_local() {
   local value="$3"
 
   if [[ -f "$file_path" ]] && grep -q "^${key}=" "$file_path"; then
-    python3 - "$file_path" "$key" "$value" <<'PY'
+    BIOETL_ENV_UPSERT_VALUE="$value" python3 - "$file_path" "$key" <<'PY'
 from __future__ import annotations
 
+import os
 import re
 import sys
 from pathlib import Path
 
 path = Path(sys.argv[1])
 key = sys.argv[2]
-value = sys.argv[3]
+value = os.environ["BIOETL_ENV_UPSERT_VALUE"]
 pattern = re.compile(rf"^{re.escape(key)}=.*$", re.MULTILINE)
 text = path.read_text(encoding="utf-8")
 updated = pattern.sub(f"{key}={value}", text)

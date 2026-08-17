@@ -73,14 +73,22 @@ class UniProtProteinTransformer(  # pyright: ignore[reportIncompatibleMethodOver
         index: int,
     ) -> PreSilverRecord | None:
         """Build an intermediate UniProt payload for application finalization."""
-        accession = str(self._get_required_field(record, "primaryAccession"))
-        entry_name = self._get_entry_name(record)
-        business_data = self._build_business_data(record, accession, entry_name)
-        return self._stage_identity_business_data(
-            source_id=accession,
-            identity_field="accession",
-            business_data=business_data,
-        )
+        try:
+            accession = str(self._get_required_field(record, "primaryAccession"))
+            entry_name = self._get_entry_name(record)
+            business_data = self._build_business_data(record, accession, entry_name)
+            return self._stage_identity_business_data(
+                source_id=accession,
+                identity_field="accession",
+                business_data=business_data,
+            )
+        except (FilteredOutError, ValueError) as e:
+            context.logger.warning(
+                "Skipping UniProt record: validation failed",
+                error=str(e),
+                index=index,
+            )
+            return None
 
     def _get_entry_name(self, record: BronzeRecord) -> str:
         """Extract entry name (uniProtkbId) as required field."""

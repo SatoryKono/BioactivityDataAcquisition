@@ -36,6 +36,9 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+from bioetl.application.pipelines.crossref.author_extractors import (
+    _build_author_detail,
+)
 from bioetl.application.pipelines.crossref.extractors import (
     extract_affiliations,
     extract_author_details,
@@ -544,6 +547,12 @@ class TestExtractPublishedDate:
 
 class TestExtractAuthorDetails:
     """Tests for extract_author_details function."""
+
+    def test_build_author_detail_null_fields_do_not_raise(self) -> None:
+        result = _build_author_detail(
+            {"given": None, "family": None, "name": None}
+        )
+        assert result is None
 
     def test_extract_full_author_details(self) -> None:
         """Should extract complete author details with all fields."""

@@ -6,6 +6,9 @@ import time
 
 from bioetl.domain.ports import LoggerPort, MetricsPort
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.decorators._retry_support import (
+    _redact_transport_error_message,
+)
 from bioetl.infrastructure.adapters.health_check_contract import HealthCheckContext
 
 
@@ -97,7 +100,7 @@ def handle_health_check_failure(
         provider=ctx.provider,
         endpoint=ctx.endpoint,
         error_type=type(error).__name__,
-        error_message=str(error),
+        error_message=_redact_transport_error_message(str(error)),
         latency_seconds=elapsed,
     )
 
