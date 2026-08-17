@@ -74,7 +74,7 @@ class DQRuleOutcome:
     severity: str
     disposition: DQDisposition
     disposition_reason: str | None = None
-    affected_fields: list[str] | None = None
+    affected_fields: tuple[str, ...] = ()
     config_path: str | None = None
     policy_ref: DQPolicyRef | None = None
 
@@ -84,10 +84,12 @@ class DQRuleOutcome:
             raise ValueError("rule_id cannot be empty")
         if not self.severity:
             raise ValueError("severity cannot be empty")
-
-        # Ensure affected_fields is initialized
-        if self.affected_fields is None:
-            object.__setattr__(self, "affected_fields", [])
+        raw_fields = self.affected_fields
+        object.__setattr__(
+            self,
+            "affected_fields",
+            () if raw_fields is None else tuple(raw_fields),
+        )
 
 
 @dataclass(frozen=True)

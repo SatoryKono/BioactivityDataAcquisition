@@ -104,3 +104,11 @@ Independent ground-truth of S01-domain-types criticals against current main:
 - remaining 34 S01-domain-types findings and ~720 other ok-leaf raw items stay on #8890
 - product streams already opened: #8891 / #8888 / #8889 (PR #8892)
 
+## S01-domain-types remainder (2026-08-17)
+
+Independent ground-truth of the remaining 34 S01-domain-types findings:
+
+- confirm 13 -> stream #8895 (004/010/011/012/013/014/015/016/017/019/023/026/028)
+- reject 21 (style / DRY / API expansion / Protocol / shipped heuristic)
+- leaf S01-domain-types is now fully disposed (36/36 including 018/022 on #8893)
+

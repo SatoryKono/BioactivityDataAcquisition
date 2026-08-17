@@ -52,8 +52,9 @@ def _is_numeric_version_parts(parts: list[str]) -> bool:
 
 
 def _has_contract_ref_namespace(contract_ref: str) -> bool:
-    """Return True when contract reference includes a namespace separator."""
-    return bool(contract_ref) and "." in contract_ref
+    """Return True when contract reference has non-empty namespace segments."""
+    parts = contract_ref.split(".")
+    return len(parts) >= 2 and all(part != "" for part in parts)
 
 
 def _is_semver(version: str) -> bool:
@@ -147,6 +148,8 @@ class ContractIdentity:
     @classmethod
     def from_legacy(cls, contract_ref: str, version: str) -> ContractIdentity:
         """Create contract identity from legacy contract + version inputs."""
+        if not contract_ref.strip():
+            raise ValueError("contract_ref cannot be empty")
         normalized_version = _normalize_semver(version)
         schema_hash = hashlib.sha256(
             f"{contract_ref}-{normalized_version}".encode()
