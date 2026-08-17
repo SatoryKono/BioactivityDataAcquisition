@@ -81,8 +81,8 @@ Lanes: `docs/00-project/ai/agents/guides/TEST_LANE_MENTAL_MODEL.md` +
 | `WORK_BRANCH` | `fix/test-cycle` (never `main`) |
 | `SCOPE` | path/nodeids, or **`all`** (весь `tests/`) |
 | `LANE` | `unit-fast` \| `architecture-fast` \| `scripts` \| `repo_backed` \| `custom` \| **`full`** |
-| `MODE` | `run` \| `run+fix` \| `run+issues` \| `full` |
-| `CYCLE_COUNT` | `1` |
+| `MODE` | `full` \| `run+fix` \| `run+issues` \| `full` |
+| `CYCLE_COUNT` | `5` |
 | `MAX_FIXES_PER_CYCLE` | `5` |
 | `PYTEST_EXTRA` | e.g. `-q --maxfail=1` (optional) |
 | `REQUIRE_GH_TRACKING` | `false` |

@@ -63,6 +63,42 @@ def reset_rehydrate_seed_state() -> None:
     _SEEDED_STAGE_KEYS.clear()
 
 
+def _first_text(*values: object) -> str:
+    """Return the first non-empty stripped string from *values*."""
+    for value in values:
+        if value is None:
+            continue
+        text = str(value).strip()
+        if text:
+            return text
+    return ""
+
+
+def _anchor_from_report_entry(entry: object) -> PipelineRunAnchor | None:
+    """Build one terminal anchor from a report index entry, or None."""
+    payload = _load_report_payload(entry.json_path)
+    if payload is None:
+        return None
+    identity = payload.get("identity")
+    if not isinstance(identity, dict):
+        return None
+    pipeline = _first_text(identity.get("pipeline_name"), getattr(entry, "owner", None))
+    run_type = _first_text(identity.get("run_type"))
+    status = _first_text(identity.get("status"), getattr(entry, "status", None))
+    run_id = _first_text(identity.get("run_id"), getattr(entry, "run_id", None))
+    if not pipeline or not run_type or status not in _TERMINAL_STATUSES:
+        return None
+    provider_raw = identity.get("provider")
+    provider = provider_raw.strip() if isinstance(provider_raw, str) else None
+    return PipelineRunAnchor(
+        pipeline=pipeline,
+        run_type=run_type,
+        status=status,
+        provider=provider or None,
+        run_id=run_id,
+    )
+
+
 def collect_latest_terminal_anchors(
     *,
     root: Path | None = None,
@@ -72,30 +108,13 @@ def collect_latest_terminal_anchors(
     entries = list_pipeline_reports(pipeline_name=None, limit=limit, root=root)
     selected: dict[tuple[str, str, str], PipelineRunAnchor] = {}
     for entry in entries:
-        payload = _load_report_payload(entry.json_path)
-        if payload is None:
+        anchor = _anchor_from_report_entry(entry)
+        if anchor is None:
             continue
-        identity = payload.get("identity")
-        if not isinstance(identity, dict):
-            continue
-        pipeline = str(identity.get("pipeline_name") or entry.owner or "").strip()
-        run_type = str(identity.get("run_type") or "").strip()
-        status = str(identity.get("status") or entry.status or "").strip()
-        run_id = str(identity.get("run_id") or entry.run_id or "").strip()
-        if not pipeline or not run_type or status not in _TERMINAL_STATUSES:
-            continue
-        key = (pipeline, run_type, status)
+        key = (anchor.pipeline, anchor.run_type, anchor.status)
         if key in selected:
             continue
-        provider_raw = identity.get("provider")
-        provider = str(provider_raw).strip() if isinstance(provider_raw, str) else None
-        selected[key] = PipelineRunAnchor(
-            pipeline=pipeline,
-            run_type=run_type,
-            status=status,
-            provider=provider or None,
-            run_id=run_id,
-        )
+        selected[key] = anchor
     return tuple(selected.values())
 
 

@@ -53,25 +53,17 @@ class HealthServerRoutingMixin:
     if TYPE_CHECKING:
         # Supplied by sibling mixins in the concrete HealthServer MRO.
         async def _send_json_response(
-            self,
-            writer: asyncio.StreamWriter,
-            response: HealthResponse,
+            self, writer: asyncio.StreamWriter, response: HealthResponse
         ) -> None: ...
-
         async def _send_response(
-            self,
-            writer: asyncio.StreamWriter,
-            status_code: int,
-            message: str,
+            self, writer: asyncio.StreamWriter, status_code: int, message: str
         ) -> None: ...
-
         async def _send_payload_response(
             self,
             writer: asyncio.StreamWriter,
             status_code: int,
             payload: dict[str, object],
         ) -> None: ...
-
         async def _send_text_response(
             self,
             writer: asyncio.StreamWriter,
@@ -80,9 +72,7 @@ class HealthServerRoutingMixin:
             *,
             content_type: str = "text/plain; charset=utf-8",
         ) -> None: ...
-
         def _get_overall_status(self) -> HealthStatus: ...
-
         def _get_provider_statuses(self) -> dict[str, JsonDict]: ...
 
     @property

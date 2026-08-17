@@ -5,6 +5,8 @@ Program: OBS-LIFE-001 / OBS-PROV-001 / OBS-DQ-001.
 GitHub epic: [#8927](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8927)
 (children #8930, #8928, #8929, #8931, #8932).
 Companion: [`baseline.md`](baseline.md).
+Trust / exact-run follow-on (D0 `bioetl-control-plane-v1`, not this fill
+pass): [`plan_grafana_trust_rf_audit.md`](plan_grafana_trust_rf_audit.md).
 Normative: `docs/00-project/RULES.md` §3.2, ADR-010, ADR-017,
 `docs/01-requirements/DASHBOARD_REQUIREMENTS.md`,
 `docs/03-guides/dashboards/contracts/synthetic-zero-policy.yaml`.
