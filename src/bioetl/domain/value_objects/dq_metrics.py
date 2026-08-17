@@ -138,6 +138,8 @@ class BatchDQMetrics:
             "column_stats",
             MappingProxyType(dict(self.column_stats)),
         )
+        if self.error_records > self.total_records:
+            raise ValueError("error_records cannot exceed total_records")
 
     @property
     def error_rate(self) -> float:

@@ -112,3 +112,9 @@ Independent ground-truth of the remaining 34 S01-domain-types findings:
 - reject 21 (style / DRY / API expansion / Protocol / shipped heuristic)
 - leaf S01-domain-types is now fully disposed (36/36 including 018/022 on #8893)
 
+## S01-domain-value_objects + S01-domain-schemas (2026-08-17)
+
+- value_objects 41: confirm 18 -> #8905; reject 23
+- schemas 42: confirm 6 -> #8905; reject 36
+- rejected after reproduction: vo-008 (UTC offset is contract expansion), sch-016 (UTC-required ingestion_ts breaks shipped fixtures)
+

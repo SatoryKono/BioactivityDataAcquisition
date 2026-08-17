@@ -244,3 +244,86 @@ ead_order/write_versions=() fail __post_init__ (ctive_version must be present i
 | CR-20260816-A-S01-domain-types-035 | reject | trivial | Terminal phases do not overlap explicit table keys; no overwrite. | execution_phase_transitions.py |
 | CR-20260816-A-S01-domain-types-036 | reject | trivial | Literal annotation only. | gold_contracts_rejects.py |
 
+| CR-20260816-A-S01-domain-value_objects-001 | reject | - | inventory-hash-only |  |
+| CR-20260816-A-S01-domain-value_objects-002 | reject | - | test-only facade coverage |  |
+| CR-20260816-A-S01-domain-value_objects-003 | confirm | - | Concentration unit not validated as enum | #8905 |
+| CR-20260816-A-S01-domain-value_objects-004 | confirm | - | from_string accepts trailing garbage | #8905 |
+| CR-20260816-A-S01-domain-value_objects-005 | confirm | - | MolecularWeight(True) coerced via float | #8905 |
+| CR-20260816-A-S01-domain-value_objects-006 | confirm | - | year 2000 century is 21 | #8905 |
+| CR-20260816-A-S01-domain-value_objects-007 | confirm | - | 2024-99-99 parsed as 2024 | #8905 |
+| CR-20260816-A-S01-domain-value_objects-008 | reject | - | UTC-offset requirement is contract expansion; naive already rejected |  |
+| CR-20260816-A-S01-domain-value_objects-009 | reject | - | test-only SilverWriteResult |  |
+| CR-20260816-A-S01-domain-value_objects-010 | reject | - | test-only PublicationFieldGroup |  |
+| CR-20260816-A-S01-domain-value_objects-011 | confirm | - | PChemblValue accepts NaN | #8905 |
+| CR-20260816-A-S01-domain-value_objects-012 | reject | - | path already validated; list freeze is style |  |
+| CR-20260816-A-S01-domain-value_objects-013 | reject | - | test-only TaxonomyId |  |
+| CR-20260816-A-S01-domain-value_objects-014 | reject | - | test-only DOI/PMID |  |
+| CR-20260816-A-S01-domain-value_objects-015 | reject | - | inventory-hash-only |  |
+| CR-20260816-A-S01-domain-value_objects-016 | reject | - | test-only ORCID |  |
+| CR-20260816-A-S01-domain-value_objects-017 | reject | - | test-only DQ report result VOs |  |
+| CR-20260816-A-S01-domain-value_objects-018 | confirm | - | _coerce_int truncates 1.9 | #8905 |
+| CR-20260816-A-S01-domain-value_objects-019 | confirm | - | format_utc accepts naive datetime | #8905 |
+| CR-20260816-A-S01-domain-value_objects-020 | confirm | - | PubChemCid.from_raw(True) -> 1 | #8905 |
+| CR-20260816-A-S01-domain-value_objects-021 | confirm | - | InChI=1/ accepted | #8905 |
+| CR-20260816-A-S01-domain-value_objects-022 | confirm | - | DQ timestamp allows non-UTC offset | #8905 |
+| CR-20260816-A-S01-domain-value_objects-023 | confirm | - | SchemaSnapshotResult.schema mutable | #8905 |
+| CR-20260816-A-S01-domain-value_objects-024 | confirm | - | DQResult.error_rate accepts NaN/1.5 | #8905 |
+| CR-20260816-A-S01-domain-value_objects-025 | reject | - | redundant lower() style |  |
+| CR-20260816-A-S01-domain-value_objects-026 | reject | - | compression_ratio inf is API change |  |
+| CR-20260816-A-S01-domain-value_objects-027 | reject | - | exception-message style |  |
+| CR-20260816-A-S01-domain-value_objects-028 | confirm | - | ColumnOrderConfig.field_groups mutable | #8905 |
+| CR-20260816-A-S01-domain-value_objects-029 | confirm | - | error_records can exceed total_records | #8905 |
+| CR-20260816-A-S01-domain-value_objects-030 | reject | - | set hashing is DRY/robustness without current producer |  |
+| CR-20260816-A-S01-domain-value_objects-031 | confirm | - | extract_field drops dotted tails | #8905 |
+| CR-20260816-A-S01-domain-value_objects-032 | reject | - | enum vs str style |  |
+| CR-20260816-A-S01-domain-value_objects-033 | confirm | - | calculate_null_rate(total=0) ZeroDivisionError | #8905 |
+| CR-20260816-A-S01-domain-value_objects-034 | reject | - | docstring Raises |  |
+| CR-20260816-A-S01-domain-value_objects-035 | reject | - | docstring Raises |  |
+| CR-20260816-A-S01-domain-value_objects-036 | reject | - | AssayId slots refactor |  |
+| CR-20260816-A-S01-domain-value_objects-037 | reject | - | type annotation only; already MappingProxyType |  |
+| CR-20260816-A-S01-domain-value_objects-038 | reject | - | comment wording |  |
+| CR-20260816-A-S01-domain-value_objects-039 | confirm | - | ActivityType.from_string(None) AttributeError | #8905 |
+| CR-20260816-A-S01-domain-value_objects-040 | reject | - | eq/hash subclass asymmetry without demonstrated producer |  |
+| CR-20260816-A-S01-domain-value_objects-041 | reject | - | docstring KI membership |  |
+| CR-20260816-A-S01-domain-schemas-001 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-002 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-003 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-004 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-005 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-006 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-007 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-008 | confirm | - | ISO date regex accepts Feb 30 | #8905 |
+| CR-20260816-A-S01-domain-schemas-009 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-010 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-011 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-012 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-013 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-014 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-015 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-016 | reject | - | requiring UTC on ingestion_ts breaks shipped fixtures; regex already optional-TZ |  |
+| CR-20260816-A-S01-domain-schemas-017 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-018 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-019 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-020 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-021 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-022 | confirm | - | duplicate column names silently dropped | #8905 |
+| CR-20260816-A-S01-domain-schemas-023 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-024 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-025 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-026 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-027 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-028 | confirm | - | pd.isna on list/ndarray raises | #8905 |
+| CR-20260816-A-S01-domain-schemas-029 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-030 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-031 | confirm | - | accession alternation is not full-match grouped | #8905 |
+| CR-20260816-A-S01-domain-schemas-032 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-033 | confirm | - | str_matches_pattern is prefix match | #8905 |
+| CR-20260816-A-S01-domain-schemas-034 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-035 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-036 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-037 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-038 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-039 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-040 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |
+| CR-20260816-A-S01-domain-schemas-041 | confirm | - | heavy_atom_count rejects 0 | #8905 |
+| CR-20260816-A-S01-domain-schemas-042 | reject | - | style/DRY/test-only/docstring/unique-constraint or catalog expansion/shipped API |  |

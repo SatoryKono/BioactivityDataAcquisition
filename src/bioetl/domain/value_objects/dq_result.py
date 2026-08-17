@@ -11,6 +11,7 @@ Note:
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from enum import StrEnum
 
@@ -80,6 +81,10 @@ class DQResult:
             object.__setattr__(self, "anomalies", tuple(self.anomalies))
         if isinstance(self.rule_outcomes, list):
             object.__setattr__(self, "rule_outcomes", tuple(self.rule_outcomes))
+        if not math.isfinite(self.error_rate) or not 0.0 <= self.error_rate <= 1.0:
+            raise ValueError(
+                f"error_rate must be finite in [0.0, 1.0], got {self.error_rate}"
+            )
 
     @property
     def is_passed(self) -> bool:

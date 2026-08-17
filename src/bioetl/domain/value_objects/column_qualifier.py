@@ -162,7 +162,7 @@ class ColumnQualifier:
             >>> ColumnQualifier.extract_field("title")
             'title'
         """
-        parts = column.split(".")
+        parts = column.split(".", 2)
         if len(parts) == 3:
             return parts[2]
         return column
