@@ -155,7 +155,10 @@ class EnricherDeduplicatorService:
             all_null_col = f"{col}__all_null"
 
             conflict_exprs.append(
-                ((pl.col(n_unique_col) > 1) | (pl.col(has_null_col) & ~pl.col(all_null_col)))
+                (
+                    (pl.col(n_unique_col) > 1)
+                    | (pl.col(has_null_col) & ~pl.col(all_null_col))
+                )
                 .any()
                 .alias(col)
             )
