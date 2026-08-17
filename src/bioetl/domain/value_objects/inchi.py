@@ -36,11 +36,8 @@ class InChI(ValueObject[str]):
             raise ValueError(f"InChI must start with '{self._PREFIX}': {original!r}")
         # Require version + at least one layer after prefix (reject bare InChI=).
         suffix = normalized[len(self._PREFIX) :]
-        if not suffix:
-            raise ValueError(
-                f"InChI must include version and layer after '{self._PREFIX}': {original!r}"
-            )
-        if "/" not in suffix:
+        version, separator, layer = suffix.partition("/")
+        if not version or not separator or not layer:
             raise ValueError(
                 f"InChI must include version and layer after '{self._PREFIX}': {original!r}"
             )

@@ -95,7 +95,15 @@ class Concentration:
     def __post_init__(self) -> None:
         """Validate concentration invariants."""
         self._require_numeric_value()
+        self._require_concentration_unit()
         self._require_finite_non_negative()
+
+    def _require_concentration_unit(self) -> None:
+        if isinstance(self.unit, ConcentrationUnit):
+            return
+        raise TypeError(
+            f"Concentration unit must be ConcentrationUnit, got {type(self.unit).__name__}"
+        )
 
     def to_unit(self, target_unit: ConcentrationUnit) -> Concentration:
         """Convert to a different unit.
@@ -134,7 +142,7 @@ class Concentration:
         Returns:
             Concentration instance with parsed numeric value and unit.
         """
-        match = re.match(
+        match = re.fullmatch(
             r"([+-]?[\d.]+(?:e[+-]?\d+)?)\s*([a-zμ]+)", s.strip(), re.IGNORECASE
         )
         if not match:

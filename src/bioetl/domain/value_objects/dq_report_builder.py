@@ -13,8 +13,10 @@ from bioetl.domain.value_objects.dq_report_results import DataFreshnessResult
 
 def _require_aware_timestamp(value: datetime, *, field_name: str = "timestamp") -> None:
     """Reject naive datetimes so DQ report provenance is timezone-explicit."""
-    if value.tzinfo is None or value.tzinfo.utcoffset(value) is None:
+    if value.tzinfo is None or value.utcoffset() is None:
         raise ValueError(f"{field_name} must be timezone-aware UTC, got naive datetime")
+    if value.utcoffset().total_seconds() != 0:
+        raise ValueError(f"{field_name} must use a zero UTC offset")
 
 
 @dataclass(frozen=True, slots=True)
