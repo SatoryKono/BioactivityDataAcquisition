@@ -7,7 +7,8 @@ ______________________________________________________________________
 `docs/reports/dashboard-ux-checks/YYYY-MM-DD.md`.
 
 Latest dashboard UX artifact for current shipped JSON changes:
-`docs/reports/dashboard-ux-checks/2026-08-11.md`
+`docs/reports/dashboard-ux-checks/2026-08-17.md`
+(prior: `docs/reports/dashboard-ux-checks/2026-08-11.md`
 (prior: `docs/reports/dashboard-ux-checks/2026-08-05.md`;
 visual-audit closeout: sequential expanded-row bands and a compact Incident
 alert-state history layout, without query or verdict changes)
@@ -17,6 +18,17 @@ threshold color without changing queries or operator workflows)
 (prior: `docs/reports/dashboard-ux-checks/2026-07-28-drmr.md`;
 also: `docs/reports/dashboard-ux-checks/2026-07-28.md`; canonical baseline:
 `docs/reports/dashboard-ux-checks/2026-05-19.md`)
+
+## P2 first-window copy compaction (2026-08-17)
+
+- Overview, Trust, Pipeline Diagnostics, and Data Quality first-window text
+  panels keep the operator question or primary action and move selection
+  procedures, pipeline examples, and coverage caveats into descriptions.
+- Overview `Review Domain Status` (`9002`) is now a `topk(4)` deviation-first
+  summary; the complete domain matrix is `Review All Domain Status` (`9031`)
+  under collapsed Domain Status Tracks.
+- Trust `Review Recovery Action` no longer relies on `overflow:hidden`.
+- Pipeline Diagnostics no longer treats SCRAPING as proof of delivery health.
 
 ## Run Explorer Completed timestamp format (2026-08-05)
 
