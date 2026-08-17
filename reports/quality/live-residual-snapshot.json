@@ -3,7 +3,7 @@
   "linked_issue": "#6891",
   "follow_up_issue": "#7464",
   "parent_epic": "#6890",
-  "snapshot_date": "2026-08-16",
+  "snapshot_date": "2026-08-17",
   "generated_by": "scripts.engineering.qa.report_live_residual_snapshot",
   "policy": {
     "direction": "shrink_only",
@@ -43,7 +43,7 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.42,
       "files": 139,
-      "total_loc": 16079,
+      "total_loc": 16076,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 2
     },
