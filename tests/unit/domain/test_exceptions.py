@@ -448,6 +448,19 @@ class TestErrorContext:
         assert ctx["port"] == 8080
         assert ctx["retry_count"] == 3
 
+    @pytest.mark.parametrize("key", ["context", "args", "error_type"])
+    def test_reserved_context_key_is_rejected_on_init(self, key: str) -> None:
+        with pytest.raises(ValueError, match="reserved or read-only"):
+            BioETLError("boom", **{key: {"nested": 1}})
+
+    def test_reserved_context_key_is_rejected_on_with_context(self) -> None:
+        err = BioETLError("boom", record_id="r1")
+        with pytest.raises(ValueError, match="reserved or read-only"):
+            err.with_context(context={"nested": 1})
+        with pytest.raises(ValueError, match="reserved or read-only"):
+            err.with_context(reason_code="R1")
+        assert err.context == {"record_id": "r1"}
+
     def test_context_inheritance(self) -> None:
         """Subclass context should include parent class attributes."""
         # ServiceUnavailableError inherits from ExternalServiceError
