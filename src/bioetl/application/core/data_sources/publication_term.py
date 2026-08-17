@@ -55,7 +55,6 @@ class PublicationTermDataSource(
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        _ = query
         # Offset is applied on the emitted term stream (post-expansion). Upstream
         # publication pagination is approximated via the term limit multiplier.
         skip = max(0, offset or 0)
@@ -65,6 +64,7 @@ class PublicationTermDataSource(
             None if limit is None else (limit + skip),
             filter_ids,
             filter_field,
+            query=query,
         ):
             if seen < skip:
                 seen += 1

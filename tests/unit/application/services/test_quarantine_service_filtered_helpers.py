@@ -281,16 +281,13 @@ def test_filtered_stats_denominator_uses_run_scope_ledger_and_show_fallback() ->
         run_type=None,
         run_manifest_service=service,
     ) == ["explicit"]
-    assert (
-        helpers._resolve_filtered_stats_run_ids(
-            run_id=None,
-            scoped_run_ids=["already-scoped"],
-            pipeline=None,
-            run_type=None,
-            run_manifest_service=service,
-        )
-        == []
-    )
+    assert helpers._resolve_filtered_stats_run_ids(
+        run_id=None,
+        scoped_run_ids=["already-scoped"],
+        pipeline=None,
+        run_type=None,
+        run_manifest_service=service,
+    ) == ["already-scoped"]
     assert (
         helpers._sum_bronze_records_for_runs(
             run_ids=[_RUN_ID, "invalid", "missing", "raise"],

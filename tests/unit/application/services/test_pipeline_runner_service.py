@@ -553,6 +553,27 @@ class TestPipelineRunnerServiceRun:
         assert "other_pipeline" in exc_info.value.available
 
     @pytest.mark.asyncio
+    async def test_runner_construction_failure_records_completed_failed(
+        self,
+        service,
+        mock_runner_factory,
+        mock_audit_port,
+    ) -> None:
+        mock_runner_factory.create.side_effect = RuntimeError("factory boom")
+
+        with pytest.raises(RuntimeError, match="factory boom"):
+            await service.run("test_pipeline")
+
+        completed_calls = [
+            call
+            for call in mock_audit_port.log_event.call_args_list
+            if call.args and call.args[0] == "PipelineRunCompleted"
+        ]
+        assert completed_calls
+        assert completed_calls[-1].args[1]["status"] == "failed"
+        assert completed_calls[-1].args[1]["error_type"] == "RuntimeError"
+
+    @pytest.mark.asyncio
     async def test_pipeline_shutdown(
         self, service, mock_runner, mock_metrics_extractor, mock_metrics_port
     ):

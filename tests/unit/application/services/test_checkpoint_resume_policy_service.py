@@ -75,8 +75,8 @@ class TestCheckpointCompatibilityService:
         assert result.compatible is True
         assert result.dq_compatible is True
         assert result.pipeline_compatible is True
-        assert len(result.messages) == 1  # "Checkpoint is compatible for resume"
-        assert "Checkpoint is compatible for resume" in result.messages[0]
+        assert "DQ contracts are compatible" in result.messages
+        assert "Pipeline versions are compatible" in result.messages
 
         # Verify logging
         self.logger.info.assert_called_once()
@@ -156,8 +156,8 @@ class TestCheckpointCompatibilityService:
         assert result.dq_compatible is True
         assert result.pipeline_compatible is True
         # When DQ info is missing, it should still be compatible
-        assert len(result.messages) == 1  # "Checkpoint is compatible for resume"
-        assert "Checkpoint is compatible for resume" in result.messages[0]
+        assert any("not enforced" in msg for msg in result.messages)
+        assert "Pipeline versions are compatible" in result.messages
 
     def test_validate_partial_dq_info(self) -> None:
         """Test validation when only one side has DQ contract info."""
@@ -206,8 +206,8 @@ class TestCheckpointCompatibilityService:
         assert result.dq_compatible is True
         assert result.pipeline_compatible is True
         # Rule bundle changes don't block resume, so should be compatible
-        assert len(result.messages) == 1  # "Checkpoint is compatible for resume"
-        assert "Checkpoint is compatible for resume" in result.messages[0]
+        assert any("DQ rule bundle version changed" in msg for msg in result.messages)
+        assert "DQ contracts are compatible" in result.messages
 
     def test_validate_execution_identity_hash_mismatch(self) -> None:
         """Execution identity mismatch should block resume in strict mode."""
@@ -461,6 +461,99 @@ class TestCheckpointCompatibilityService:
         assert result.execution_identity_compatible is False
         assert any(
             "Input snapshot fingerprint mismatch" in msg for msg in result.messages
+        )
+
+    def test_validate_snapshot_mismatch_blocks_resume_without_exact_replay(
+        self,
+    ) -> None:
+        current = CheckpointMetadata(
+            records_processed=1000,
+            dq_contract_compatibility_hash="same_hash",
+            pipeline_version="1.0.0",
+            execution_fingerprint="fingerprint-current",
+            manifest_id="manifest-current",
+            effective_config_hash="a" * 64,
+            effective_config_artifact_id="effective-config-current",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            git_commit="a" * 40,
+            dependency_lock_hash="sha256:deps-001",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="2.0.0",
+            normalization_profile_hash="n" * 64,
+            exact_replay=False,
+            input_snapshot_fingerprint="snapshot-fp-a",
+        )
+        checkpoint = CheckpointMetadata(
+            records_processed=500,
+            dq_contract_compatibility_hash="same_hash",
+            pipeline_version="1.0.0",
+            execution_fingerprint="fingerprint-current",
+            manifest_id="manifest-current",
+            effective_config_hash="a" * 64,
+            effective_config_artifact_id="effective-config-current",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            git_commit="a" * 40,
+            dependency_lock_hash="sha256:deps-001",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="2.0.0",
+            normalization_profile_hash="n" * 64,
+            exact_replay=False,
+            input_snapshot_fingerprint="snapshot-fp-b",
+        )
+
+        result = self.service.validate_checkpoint_compatibility(current, checkpoint)
+
+        assert result.compatible is False
+        assert any(
+            "Input snapshot fingerprint mismatch" in msg for msg in result.messages
+        )
+
+    def test_exact_replay_ids_do_not_satisfy_required_fingerprint(self) -> None:
+        current = CheckpointMetadata(
+            records_processed=1000,
+            dq_contract_compatibility_hash="same_hash",
+            pipeline_version="1.0.0",
+            execution_fingerprint="fingerprint-current",
+            manifest_id="manifest-current",
+            effective_config_hash="a" * 64,
+            effective_config_artifact_id="effective-config-current",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            git_commit="a" * 40,
+            dependency_lock_hash="sha256:deps-001",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="2.0.0",
+            normalization_profile_hash="n" * 64,
+            exact_replay=True,
+            input_snapshot_fingerprint="snapshot-fp-a",
+        )
+        checkpoint = CheckpointMetadata(
+            records_processed=500,
+            dq_contract_compatibility_hash="same_hash",
+            pipeline_version="1.0.0",
+            execution_fingerprint="fingerprint-current",
+            manifest_id="manifest-current",
+            effective_config_hash="a" * 64,
+            effective_config_artifact_id="effective-config-current",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            git_commit="a" * 40,
+            dependency_lock_hash="sha256:deps-001",
+            normalization_profile_ref="chembl.activity",
+            normalization_profile_version="2.0.0",
+            normalization_profile_hash="n" * 64,
+            exact_replay=True,
+            input_snapshot_ids=("snapshot-a",),
+        )
+
+        result = self.service.validate_checkpoint_compatibility(current, checkpoint)
+
+        assert result.compatible is False
+        assert any(
+            "requires checkpoint input snapshot fingerprint" in msg
+            for msg in result.messages
         )
 
     def test_validate_strict_resume_rejects_missing_dq_hash_anchor(self) -> None:

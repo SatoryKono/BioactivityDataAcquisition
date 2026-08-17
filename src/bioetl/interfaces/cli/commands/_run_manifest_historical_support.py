@@ -169,6 +169,12 @@ def _load_universe_external_records(
     return tuple(records)
 
 
+def _require_json_bool(value: object, *, field_name: str) -> bool:
+    if not isinstance(value, bool):
+        raise ValueError(f"{field_name} must be a JSON boolean")
+    return value
+
+
 def _coerce_universe_external_record(
     payload: object,
     *,
@@ -209,6 +215,9 @@ def _coerce_universe_external_record(
             str(value).strip() for value in blocking_reasons if str(value).strip()
         ),
         evidence_residency=str(payload.get("evidence_residency") or "archived").strip(),
-        durable_evidence_coverage=bool(payload.get("durable_evidence_coverage", False)),
+        durable_evidence_coverage=_require_json_bool(
+            payload.get("durable_evidence_coverage", False),
+            field_name="durable_evidence_coverage",
+        ),
         source_pack_ref=pack_ref,
     )

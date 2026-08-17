@@ -146,16 +146,25 @@ def build_traceql_query(
 ) -> str | None:
     if not run_id:
         return None
-    filters = [f'span."bioetl.run_id" = "{run_id}"']
+    filters = [f'span."bioetl.run_id" = "{_escape_traceql(run_id)}"']
     if pipeline_name:
-        filters.append(f'span."bioetl.pipeline" = "{pipeline_name}"')
+        filters.append(
+            f'span."bioetl.pipeline" = "{_escape_traceql(pipeline_name)}"'
+        )
     if run_type:
-        filters.append(f'span."bioetl.run_type" = "{run_type}"')
+        filters.append(f'span."bioetl.run_type" = "{_escape_traceql(run_type)}"')
     if provider:
-        filters.append(f'span."bioetl.provider" = "{provider}"')
+        filters.append(f'span."bioetl.provider" = "{_escape_traceql(provider)}"')
     if composite_run_id:
-        filters.append(f'span."bioetl.composite_run_id" = "{composite_run_id}"')
+        filters.append(
+            f'span."bioetl.composite_run_id" = "{_escape_traceql(composite_run_id)}"'
+        )
     return "{ " + " && ".join(filters) + " }"
+
+
+def _escape_traceql(value: str) -> str:
+    """Escape backslashes and quotes for quoted TraceQL string filters."""
+    return value.replace("\\", "\\\\").replace('"', '\\"')
 
 
 def resolve_primary_composite_run_id(diagnostics: dict[str, object]) -> str | None:

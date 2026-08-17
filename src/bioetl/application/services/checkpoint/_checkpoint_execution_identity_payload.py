@@ -21,7 +21,6 @@ CANONICAL_ONLY_IDENTITY_FIELDS: Final[frozenset[str]] = frozenset(
         "normalization_profile_hash",
         "exact_replay",
         "input_snapshot_fingerprint",
-        "silver_filter_compatibility_mode",
     }
 )
 
@@ -56,22 +55,29 @@ def build_checkpoint_execution_identity_payload(
         normalization_profile_version,
         normalization_profile_hash,
     ) = normalization_profile
-    if all(
-        value is None
-        for value in (
-            pipeline_name,
-            run_type,
-            pipeline_version,
-            git_commit,
-            dependency_lock_hash,
-            dq_contract_compatibility_hash,
-            normalization_profile_ref,
-            normalization_profile_version,
-            normalization_profile_hash,
-            exact_replay,
-            input_snapshot_fingerprint,
-            silver_filter_compatibility_mode,
+    mode_is_identity = (
+        silver_filter_compatibility_mode is not None
+        and silver_filter_compatibility_mode
+        != CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE
+    )
+    if (
+        all(
+            value is None
+            for value in (
+                pipeline_name,
+                run_type,
+                pipeline_version,
+                git_commit,
+                dependency_lock_hash,
+                dq_contract_compatibility_hash,
+                normalization_profile_ref,
+                normalization_profile_version,
+                normalization_profile_hash,
+                exact_replay,
+                input_snapshot_fingerprint,
+            )
         )
+        and not mode_is_identity
     ):
         return {}
     return {
@@ -101,4 +107,9 @@ def build_checkpoint_execution_identity_payload(
 
 def has_canonical_checkpoint_execution_identity_fields(payload: JsonDict) -> bool:
     """Return whether payload contains any canonical-only checkpoint identity field."""
-    return any(field in payload for field in CANONICAL_ONLY_IDENTITY_FIELDS)
+    if any(field in payload for field in CANONICAL_ONLY_IDENTITY_FIELDS):
+        return True
+    mode = payload.get("silver_filter_compatibility_mode")
+    return (
+        mode is not None and mode != CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE
+    )

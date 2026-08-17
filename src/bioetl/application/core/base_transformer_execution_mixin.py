@@ -122,18 +122,18 @@ class _BaseTransformerExecutionMixin(_BaseTransformerRecordHelpersMixin):
         """
         start_time = time.perf_counter()
         error_type: str | None = None
-        span = start_transform_span(self, context, index)
+        span = self._start_transform_span(context, index)
 
         try:
             result = await self._transform_impl(context, record, index)
             # Structural policy applies Silver filter once for non-quarantined
             # records; do not call _apply_silver_filter again after this.
-            return apply_structural_policy(self, context, result, index)
+            return self._apply_structural_policy(context, result, index)
         except TransformationError as error:
-            error_type = handle_transformation_error(self, error, context, span)
+            error_type = self._handle_transformation_error(error, context, span)
             return None
         except ValueError as error:
-            error_type = handle_validation_error(self, error, context, span)
+            error_type = self._handle_validation_error(error, context, span)
             raise
         finally:
-            record_metrics_and_close_span(self, start_time, error_type, span)
+            self._record_metrics_and_close_span(start_time, error_type, span)

@@ -195,6 +195,39 @@ class TestLockRuntimeService:
 
         mock_shutdown_signal.request.assert_called_once()
 
+    async def test_start_heartbeat_rejects_second_start(
+        self,
+        lock_manager: LockRuntimeService,
+        mock_lock_port: AsyncMock,
+    ) -> None:
+        """A second start_heartbeat must not replace the running heartbeat."""
+        mock_lock_port.heartbeat.return_value = True
+        await lock_manager.start_heartbeat()
+        first = lock_manager._heartbeat
+
+        with pytest.raises(RuntimeError, match="heartbeat already running"):
+            await lock_manager.start_heartbeat()
+
+        assert lock_manager._heartbeat is first
+        await lock_manager.release()
+        assert lock_manager._heartbeat is None
+
+    async def test_enter_releases_lock_when_heartbeat_start_fails(
+        self,
+        lock_manager: LockRuntimeService,
+        mock_lock_port: AsyncMock,
+    ) -> None:
+        """Failed initial heartbeat startup must release the acquired lock."""
+        mock_lock_port.acquire.return_value = _TEST_TOKEN
+        mock_lock_port.heartbeat.return_value = False
+
+        with pytest.raises(PipelineShutdownError):
+            async with lock_manager:
+                pass
+
+        mock_lock_port.release.assert_called_once()
+        assert lock_manager._heartbeat is None
+
     async def test_context_manager_failure(
         self, lock_manager: LockRuntimeService, mock_lock_port: AsyncMock
     ) -> None:

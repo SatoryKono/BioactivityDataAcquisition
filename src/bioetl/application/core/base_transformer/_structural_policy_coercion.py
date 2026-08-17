@@ -123,9 +123,15 @@ def _coerce_boolean(
         if not allow_string_coercion:
             return None
         normalized = value.strip().lower()
-        true_vocabulary = frozenset(true_values) if true_values else _BOOL_TRUE_VALUES
+        true_vocabulary = (
+            frozenset(item.strip().lower() for item in true_values)
+            if true_values
+            else _BOOL_TRUE_VALUES
+        )
         false_vocabulary = (
-            frozenset(false_values) if false_values else _BOOL_FALSE_VALUES
+            frozenset(item.strip().lower() for item in false_values)
+            if false_values
+            else _BOOL_FALSE_VALUES
         )
         if normalized in true_vocabulary:
             return True

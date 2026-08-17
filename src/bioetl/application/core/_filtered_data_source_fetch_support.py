@@ -53,7 +53,10 @@ async def fetch_multi_column(
     """Fetch records using multi-column server-side filtering plus local validation."""
     state._ensure_filterable_adapter("Multi-column filtering")
     adapter = cast("FilterableDataSourcePort", state._data_source)
-    assert state._multi_filter_ids is not None
+    if state._multi_filter_ids is None:
+        raise ValueError(
+            "multi_filter_ids must be loaded before multi-column fetch."
+        )
     fetched_count = 0
     async for record in adapter.fetch_multi_filtered(
         entity_type=entity_type,
@@ -83,7 +86,10 @@ async def fetch_single_column(
             "filter_field must be specified in InputFilterConfig "
             "when filtering is enabled."
         )
-    assert state._filter_ids is not None
+    if state._filter_ids is None:
+        raise ValueError(
+            "filter_ids must be loaded before single-column fetch."
+        )
     if state._fallback_mapping:
         async for record in adapter.fetch_filtered_with_fallback(
             entity_type=entity_type,
@@ -134,7 +140,12 @@ def fetch_records(
     JsonDict  # Any: filter record values vary (str|int|float|list)
 ]:  # Any: filter record values vary (str|int|float|list)
     """Select the fetch strategy based on loaded filter state."""
-    _ = filter_ids, filter_field
+    if filter_ids is not None or filter_field is not None:
+        raise ValueError(
+            "filter_ids and filter_field must not be passed to "
+            "FilteredDataSource.fetch; filtering is driven by preloaded "
+            "InputFilterConfig state."
+        )
     if state._filter_config.enabled and state._multi_filter_ids:
         return fetch_multi_column(state, entity_type, limit)
     if state._filter_config.enabled and state._filter_ids:

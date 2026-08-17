@@ -45,7 +45,7 @@ def safe_float(
     try:
         converted = _coerce_to_float(value)
         return converted if math.isfinite(converted) else default
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, OverflowError):
         return default
 
 

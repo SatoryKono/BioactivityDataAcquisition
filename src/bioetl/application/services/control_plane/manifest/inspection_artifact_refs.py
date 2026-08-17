@@ -116,7 +116,7 @@ def build_artifact_ref_semantic_diff(
     semantic_equivalent = not semantic_difference_fields
     occurrence_only = semantic_equivalent and bool(occurrence_difference_fields)
     return {
-        "artifact_refs_available": True,
+        "artifact_refs_available": bool(left_artifact_refs or right_artifact_refs),
         "left_artifact_ref_count": len(left_sorted),
         "right_artifact_ref_count": len(right_sorted),
         "artifact_ref_semantic_equivalent": semantic_equivalent,

@@ -66,6 +66,16 @@ def test_publication_term_entity_id_uppercases_unknown_term_types() -> None:
     assert left != other
 
 
+def test_publication_term_entity_id_rejects_empty_normalized_components() -> None:
+    """Empty normalized publication-term identity components fail closed."""
+    with pytest.raises(ValueError, match="non-empty"):
+        compute_publication_term_entity_id("", "TARGET", "Alpha")
+    with pytest.raises(ValueError, match="non-empty"):
+        compute_publication_term_entity_id("CHEMBL1", "   ", "Alpha")
+    with pytest.raises(ValueError, match="non-empty"):
+        compute_publication_term_entity_id("CHEMBL1", "TARGET", "   ")
+
+
 def test_publication_term_entity_id_golden_digest_v2() -> None:
     """Pin the v2 composite digest so identity changes require a scheme bump."""
     digest = compute_publication_term_entity_id("CHEMBL1", "TARGET", "Alpha Kinase")

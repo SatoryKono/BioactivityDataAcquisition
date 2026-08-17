@@ -237,6 +237,22 @@ class TestPublicationTermDataSourceFetch:
         assert len(terms) == 3
 
     @pytest.mark.asyncio
+    async def test_fetch_publication_term_forwards_query(
+        self, mock_data_source_single_document
+    ):
+        """Non-empty query is forwarded to the wrapped publication fetch."""
+        wrapper = PublicationTermDataSource(
+            data_source=mock_data_source_single_document
+        )
+
+        _ = [
+            term
+            async for term in wrapper.fetch("publication_term", query="kinase")
+        ]
+
+        assert mock_data_source_single_document.fetch_calls[-1]["query"] == "kinase"
+
+    @pytest.mark.asyncio
     async def test_fetch_other_entity_delegates(self, mock_data_source):
         """Test fetch for other entity types delegates to wrapped adapter."""
         wrapper = PublicationTermDataSource(data_source=mock_data_source)

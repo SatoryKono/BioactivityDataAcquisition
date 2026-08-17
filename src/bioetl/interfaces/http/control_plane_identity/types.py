@@ -38,6 +38,22 @@ _ANCHOR_SPEC_POSITIONAL_FIELDS: tuple[str, ...] = (
     "drilldown",
     "missing_severity",
 )
+_ANCHOR_SPEC_LEGACY_ALIASES = frozenset(
+    {
+        "anchor_name",
+        "display_name",
+        "source_location",
+        "data_type",
+        "description",
+        "display_mode",
+        "is_identifier",
+        "usage_locations",
+        "implementation_status",
+    }
+)
+_ANCHOR_SPEC_RECOGNIZED_FIELDS = (
+    frozenset(_ANCHOR_SPEC_POSITIONAL_FIELDS) | _ANCHOR_SPEC_LEGACY_ALIASES
+)
 
 
 @dataclass(frozen=True, slots=True, init=False)
@@ -79,6 +95,12 @@ class AnchorSpec:
                         f"AnchorSpec() got multiple values for argument '{key}'"
                     )
                 fields[key] = value
+        unknown = set(fields) - _ANCHOR_SPEC_RECOGNIZED_FIELDS
+        if unknown:
+            raise TypeError(
+                "AnchorSpec() got unexpected keyword argument(s): "
+                + ", ".join(sorted(str(key) for key in unknown))
+            )
         values = _resolve_anchor_spec_values(priority=priority, **fields)
         _apply_anchor_spec_values(self, values)
 

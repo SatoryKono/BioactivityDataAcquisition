@@ -254,6 +254,24 @@ class TestIDMappingDataSourceFetch:
         assert len(records) == 2
 
     @pytest.mark.asyncio
+    async def test_fetch_applies_offset_before_limit(
+        self, data_source: IDMappingDataSource, mock_client: MagicMock
+    ) -> None:
+        """Offset is applied before limit so later pages do not repeat earlier IDs."""
+        await asyncio.sleep(0)
+        records = [
+            record
+            async for record in data_source.fetch("idmapping", limit=1, offset=1)
+        ]
+        assert len(records) == 1
+        assert records[0]["target_id"] == "CHEMBL205"
+        mock_client.map_ids.assert_awaited_once_with(
+            from_db="ChEMBL",
+            to_db="UniProtKB",
+            ids=["CHEMBL205"],
+        )
+
+    @pytest.mark.asyncio
     async def test_fetch_logs_warning_for_unexpected_entity_type(
         self,
         data_source: IDMappingDataSource,

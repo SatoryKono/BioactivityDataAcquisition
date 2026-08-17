@@ -177,6 +177,40 @@ async def test_stop_is_idempotent_and_bounds_listener_shutdown_timeout(
 
 
 @pytest.mark.asyncio
+async def test_start_closes_listener_when_initial_metrics_refresh_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    listener = MagicMock()
+    listener.is_serving.return_value = True
+    listener.wait_closed = AsyncMock()
+    monkeypatch.setattr(
+        health_server_module.asyncio,
+        "start_server",
+        AsyncMock(return_value=listener),
+    )
+    monkeypatch.setattr(
+        health_server_module,
+        "refresh_control_plane_metrics",
+        AsyncMock(side_effect=RuntimeError("refresh failed")),
+    )
+    server = HealthServer(
+        host="127.0.0.1",
+        port=8127,
+        control_plane=HealthServerControlPlaneDeps(
+            control_plane_integrity_refresher=MagicMock(),
+        ),
+    )
+
+    with pytest.raises(RuntimeError, match="refresh failed"):
+        await server.start()
+
+    listener.close.assert_called_once_with()
+    listener.wait_closed.assert_awaited_once_with()
+    assert server._server is None
+    assert server.is_running is False
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize("with_logger", [False, True])
 async def test_bind_failure_is_reported_and_propagated(
     monkeypatch: pytest.MonkeyPatch,

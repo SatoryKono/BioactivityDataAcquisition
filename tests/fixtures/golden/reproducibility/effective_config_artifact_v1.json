@@ -1,5 +1,5 @@
 {
-  "artifact_id": "effective-config-27f58c3bd406afd3",
+  "artifact_id": "effective-config-0f28fac4a3ba8efe",
   "occurrence_envelope": {
     "created_at": "2025-01-01T12:00:00+00:00",
     "effective_execution_timestamp": "2025-01-01T12:00:00+00:00",
@@ -7,13 +7,13 @@
   },
   "schema_version": "2.0",
   "semantic_artifact": {
-    "artifact_id": "effective-config-27f58c3bd406afd3",
+    "artifact_id": "effective-config-0f28fac4a3ba8efe",
     "contract_refs": [],
     "dq_contract_compatibility_hash": "no_dq_policies",
     "dq_policy_refs": [],
     "dq_policy_snapshots": [],
     "dq_rule_bundle_versions": {},
-    "effective_config_hash": "6eabe5858d643f3326daea4a57e1737bf157b82ba0b8dff9efe0ee08ca54ae15",
+    "effective_config_hash": "db0fc92c253d9f95599cae55eaa13696790b6b0763684be85a474c73f83f36e9",
     "effective_execution_config": {
       "config_data": {
         "exact_replay": true,
@@ -24,7 +24,6 @@
           "dependency_lock_present": true,
           "schema_version": "execution-environment-v1",
           "settings_env": "prod",
-          "settings_snapshot_hash": "sha256:settings-golden",
           "test_mode": false
         },
         "limit": 25,
@@ -37,12 +36,12 @@
           "limit": 25
         }
       },
-      "effective_hash": "6eabe5858d643f3326daea4a57e1737bf157b82ba0b8dff9efe0ee08ca54ae15",
+      "effective_hash": "db0fc92c253d9f95599cae55eaa13696790b6b0763684be85a474c73f83f36e9",
       "identity_version": "effective-config-v1"
     },
     "execution_environment": {
       "ambient_environment_policy": "materialized_via_execution_environment",
-      "environment_hash": "e8887fb2ed52c00aaab8cd39c7866b56aa5f30dd900bff6f777678571fc3c092",
+      "environment_hash": "aaeee3fd75469ee8e758cfdb174038e9234e3a4558400c4afb515f41a41f36d8",
       "materialized_env_keys": [
         "execution_environment"
       ],
@@ -54,7 +53,6 @@
           "dependency_lock_present": true,
           "schema_version": "execution-environment-v1",
           "settings_env": "prod",
-          "settings_snapshot_hash": "sha256:settings-golden",
           "test_mode": false
         }
       },

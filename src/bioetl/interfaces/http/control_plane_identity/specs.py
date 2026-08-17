@@ -14,12 +14,24 @@ from bioetl.interfaces.http.control_plane_identity.spec_constants import (
 )
 from bioetl.interfaces.http.control_plane_identity.types import AnchorSpec
 
+def _anchor_specs_by_unique_name(
+    specs: tuple[AnchorSpec, ...],
+) -> dict[str, AnchorSpec]:
+    """Fail closed when two specs share a name instead of silently overwriting."""
+    by_name: dict[str, AnchorSpec] = {}
+    for spec in specs:
+        if spec.name in by_name:
+            raise ValueError(f"duplicate AnchorSpec name: {spec.name}")
+        by_name[spec.name] = spec
+    return by_name
+
+
 ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
     *P0_ANCHOR_SPECS,
     *P1_ANCHOR_SPECS,
     *P2_ANCHOR_SPECS,
 )
-SPEC_BY_NAME = {spec.name: spec for spec in ANCHOR_SPECS}
+SPEC_BY_NAME = _anchor_specs_by_unique_name(ANCHOR_SPECS)
 OVERVIEW_NAMES = frozenset(
     {
         "run_id",

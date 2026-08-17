@@ -35,6 +35,18 @@ class WorkflowStepTransitionPolicy:
     stores_output: bool
     failed_step_id: str | None = None
 
+    def __post_init__(self) -> None:
+        allowed = {
+            _DISPOSITION_RUN,
+            _DISPOSITION_SKIP_FAILED,
+            _DISPOSITION_SKIP_COMPLETED,
+        }
+        if self.disposition not in allowed:
+            raise ValueError(
+                f"Unknown workflow step disposition: {self.disposition!r}"
+            )
+        self.ensure_runnable()
+
     @property
     def should_run(self) -> bool:
         """Return whether the current step should execute."""

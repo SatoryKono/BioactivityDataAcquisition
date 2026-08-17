@@ -229,12 +229,13 @@ def run_all_command_flow(
         listing_emitter(source=cli_input.source, pipelines=pipelines)
         exit_func(ExitCode.OK)
 
-    destructive_confirmation(
+    if not destructive_confirmation(
         cli_input.run_type,
         pipelines,
         cli_input.dry_run,
         cli_input.yes,
-    )
+    ):
+        return
     preview_emitter(
         source=cli_input.source,
         pipelines=pipelines,

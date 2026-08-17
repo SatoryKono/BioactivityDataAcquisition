@@ -55,7 +55,7 @@ from bioetl.domain.control_plane.run_ledger import (
 from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
-from bioetl.interfaces.http import _health_server_routing_support
+from bioetl.interfaces.http import _health_server_checkpoint_freshness
 from bioetl.interfaces.http.health_server import HealthServer
 from tests.helpers.clock import fixed_test_clock
 from tests.helpers.control_plane import InMemoryRunLedgerStore, InMemoryRunManifestStore
@@ -326,7 +326,7 @@ class TestHealthServerControlPlaneCheckpointFreshness:
         )
 
         with patch.object(
-            _health_server_routing_support,
+            _health_server_checkpoint_freshness,
             "current_utc_time",
             test_clock.now,
         ):

@@ -218,6 +218,17 @@ def test_build_traceql_query_uses_only_available_filters() -> None:
         )
         == '{ span."bioetl.run_id" = "run-only" }'
     )
+    assert (
+        build_traceql_query(
+            run_id='run"\\id',
+            pipeline_name='pipe"line',
+            provider=None,
+            run_type=None,
+            composite_run_id=None,
+        )
+        == r'{ span."bioetl.run_id" = "run\"\\id" && '
+        r'span."bioetl.pipeline" = "pipe\"line" }'
+    )
 
 
 def test_build_trace_urls_returns_empty_when_traceql_cannot_be_built() -> None:

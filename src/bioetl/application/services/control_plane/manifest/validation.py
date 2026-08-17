@@ -147,8 +147,18 @@ def _is_explicit_degraded_profile_opt_down(request: RunManifestCreateSpec) -> bo
         return False
     if not bool(request.launch_context.get("required_persistence_profile_opt_down")):
         return False
+    if _is_production_launch_context(request):
+        return False
     configured_profile = normalize_required_persistence_profile(
         request.launch_context.get("configured_required_persistence_profile")
         or request.launch_context.get("required_persistence_profile")
     )
     return configured_profile == "degraded_observable"
+
+
+def _is_production_launch_context(request: RunManifestCreateSpec) -> bool:
+    """Return whether launch context signals a production-grade request."""
+    launch = request.launch_context if isinstance(request.launch_context, dict) else {}
+    env = str(launch.get("env") or launch.get("environment") or "").strip().lower()
+    execution_context = str(launch.get("execution_context") or "").strip().lower()
+    return env in {"prod", "production"} or execution_context == "production"

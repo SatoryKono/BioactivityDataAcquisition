@@ -5,7 +5,18 @@ from __future__ import annotations
 import math
 import re
 
-_ALL_SCOPE_TOKENS = frozenset({"All", "$__all", "__all", "*", ".*"})
+_ALL_SCOPE_EXACT_TOKENS = frozenset({"$__all", "__all", ".*"})
+
+
+def _is_all_scope(value: str | None) -> bool:
+    """Return True for Grafana All-scope tokens, including lowercase ``all``."""
+    if value is None:
+        return False
+    normalized = value.strip()
+    if not normalized:
+        return False
+    lowered = normalized.casefold()
+    return lowered in {"all", "*"} or normalized in _ALL_SCOPE_EXACT_TOKENS
 
 
 def _selector_regex(raw: str | None) -> str:
@@ -21,7 +32,7 @@ def _selector_tokens(raw: str | None) -> tuple[str, ...]:
     if raw is None:
         return ()
     normalized = raw.strip()
-    if not normalized or normalized in _ALL_SCOPE_TOKENS:
+    if not normalized or _is_all_scope(normalized):
         return ()
     if normalized.startswith("{") and normalized.endswith("}"):
         normalized = normalized[1:-1]
@@ -29,7 +40,7 @@ def _selector_tokens(raw: str | None) -> tuple[str, ...]:
     tokens: list[str] = []
     for part in normalized.split(","):
         token = part.strip()
-        if not token or token in _ALL_SCOPE_TOKENS:
+        if not token or _is_all_scope(token):
             return ()
         if token not in tokens:
             tokens.append(token)

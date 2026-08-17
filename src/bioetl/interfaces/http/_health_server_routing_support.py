@@ -8,7 +8,6 @@ from typing import Protocol
 from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
 )
-from bioetl.application.runtime_clock import current_utc_time
 from bioetl.domain.control_plane import WorkflowManifest
 from bioetl.domain.ports import (
     CheckpointPort,
@@ -16,22 +15,14 @@ from bioetl.domain.ports import (
     RunManifestPort,
     WorkflowManifestPort,
 )
-from bioetl.interfaces.http._health_server_checkpoint_freshness_payloads import (
-    build_checkpoint_freshness_ok_payload,
-    build_checkpoint_freshness_unknown_payload,
-    extract_checkpoint_saved_at_epoch_seconds,
-    optional_text,
-)
-from bioetl.interfaces.http._health_server_checkpoint_lookup import (
-    load_checkpoint_freshness_evidence,
+from bioetl.interfaces.http._health_server_checkpoint_freshness import (
+    handle_control_plane_checkpoint_freshness,
 )
 from bioetl.interfaces.http._health_server_control_plane_evidence_routing import (
     dispatch_control_plane_evidence_request,
 )
 from bioetl.interfaces.http._health_server_control_plane_scope import (
-    _IdentityScope,
     read_selected_run_id,
-    resolve_control_plane_identity_scope,
 )
 from bioetl.interfaces.http._health_server_identity_routing_support import (
     handle_control_plane_identity_evidence,
@@ -50,6 +41,7 @@ from bioetl.interfaces.http.control_plane_selector_context import (
 )
 
 _NOT_FOUND_MESSAGE = "Not Found"
+_CONTROL_PLANE_CLIENT_ERRORS = (ValueError, RuntimeError, OSError, ConnectionError)
 
 
 class _HealthResponseSupport(Protocol):
@@ -136,8 +128,8 @@ async def dispatch_control_plane_request(
             query=query,
         ):
             return
-    except ValueError as exc:
-        await host._send_response(writer, 400, str(exc))
+    except _CONTROL_PLANE_CLIENT_ERRORS as exc:
+        await _send_control_plane_dispatch_error(host, writer, exc)
         return
 
     if host._run_manifest_port is None:
@@ -152,8 +144,8 @@ async def dispatch_control_plane_request(
         if await _dispatch_ops_endpoints(host, writer, path, query):
             return
         await host._send_response(writer, 404, _NOT_FOUND_MESSAGE)
-    except ValueError as exc:
-        await host._send_response(writer, 400, str(exc))
+    except _CONTROL_PLANE_CLIENT_ERRORS as exc:
+        await _send_control_plane_dispatch_error(host, writer, exc)
 
 
 async def handle_control_plane_ready(
@@ -271,117 +263,22 @@ async def _list_workflow_manifests(
     return await asyncio.to_thread(workflow_manifest_port.list_all)
 
 
-def _resolved_scope_pipeline(scope: _IdentityScope) -> str:
-    resolved_manifest = scope.resolved_manifest
-    if resolved_manifest is not None:
-        return str(resolved_manifest.pipeline_name)
-    return str(scope.requested_pipeline)
-
-
-async def handle_control_plane_checkpoint_freshness(
-    host: _HealthRoutingHost,
-    writer: asyncio.StreamWriter,
-    query: dict[str, str],
-) -> None:
-    """Handle HTTP-backed checkpoint freshness evidence for Control Plane."""
-    assert host._run_manifest_port is not None
-    if host._checkpoint_port is None:
-        await host._send_payload_response(
-            writer,
-            200,
-            build_checkpoint_freshness_unknown_payload(
-                pipeline=host._read_required_param(query, "pipeline"),
-                resolved_via="checkpoint_port_unavailable",
-                detail="Checkpoint persistence port is unavailable in this backend.",
-                evidence_source="checkpoint_port_missing",
-            ),
-        )
-        return
-
-    scope = await asyncio.to_thread(resolve_control_plane_identity_scope, host, query)
-    target_pipeline = _resolved_scope_pipeline(scope)
-
-    (
-        checkpoint_tuple,
-        evidence_source,
-        manifest_id,
-        aggregate_scope_unknown,
-    ) = await load_checkpoint_freshness_evidence(
-        host,
-        scope=scope,
-        target_pipeline=target_pipeline,
-    )
-    if aggregate_scope_unknown:
-        await host._send_payload_response(
-            writer,
-            200,
-            build_checkpoint_freshness_unknown_payload(
-                pipeline=target_pipeline,
-                resolved_via=scope.resolved_via,
-                detail=(
-                    "Checkpoint freshness requires one exact pipeline scope or run_id; "
-                    "aggregate scope cannot infer one persisted checkpoint."
-                ),
-                evidence_source="aggregate_scope_requires_exact_pipeline",
-            ),
-        )
-        return
-
-    if checkpoint_tuple is None:
-        await host._send_payload_response(
-            writer,
-            200,
-            build_checkpoint_freshness_unknown_payload(
-                pipeline=target_pipeline,
-                resolved_via=scope.resolved_via,
-                detail="No persisted checkpoint evidence was found for the current scope.",
-                evidence_source=evidence_source,
-                manifest_id=manifest_id,
-            ),
-        )
-        return
-
-    checkpoint_run_id, metadata = checkpoint_tuple
-    saved_at_epoch_seconds = extract_checkpoint_saved_at_epoch_seconds(metadata)
-    if saved_at_epoch_seconds is None:
-        await host._send_payload_response(
-            writer,
-            200,
-            build_checkpoint_freshness_unknown_payload(
-                pipeline=target_pipeline,
-                resolved_via=scope.resolved_via,
-                detail=(
-                    "Persisted checkpoint metadata is missing "
-                    "checkpoint_saved_at_epoch_seconds."
-                ),
-                evidence_source=evidence_source,
-                manifest_id=manifest_id or optional_text(metadata.get("manifest_id")),
-                checkpoint_run_id=str(checkpoint_run_id),
-            ),
-        )
-        return
-
-    await host._send_payload_response(
-        writer,
-        200,
-        build_checkpoint_freshness_ok_payload(
-            pipeline=target_pipeline,
-            resolved_via=scope.resolved_via,
-            manifest_id=manifest_id,
-            checkpoint_run_id=checkpoint_run_id,
-            evidence_source=evidence_source,
-            saved_at_epoch_seconds=saved_at_epoch_seconds,
-            current_epoch_seconds=current_utc_time().timestamp(),
-            metadata=metadata,
-        ),
-    )
-
-
 __all__ = [
     "dispatch_control_plane_request",
     "dispatch_observability_request",
     "dispatch_quarantine_request",
 ]
+
+
+async def _send_control_plane_dispatch_error(
+    host: _HealthRoutingHost,
+    writer: asyncio.StreamWriter,
+    exc: BaseException,
+) -> None:
+    if isinstance(exc, ValueError):
+        await host._send_response(writer, 400, str(exc))
+        return
+    await host._send_response(writer, 503, str(exc))
 
 
 async def _dispatch_ops_endpoints(

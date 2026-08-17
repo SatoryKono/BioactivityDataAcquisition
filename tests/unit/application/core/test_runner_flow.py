@@ -51,7 +51,8 @@ class _Host:
         self._config = SimpleNamespace(pipeline_name="chembl_activity")
         self._runtime = SimpleNamespace(run_type=SimpleNamespace(value="incremental"))
         self._context = SimpleNamespace(
-            started_at=datetime(2026, 4, 29, 12, 0, tzinfo=UTC)
+            started_at=datetime(2026, 4, 29, 12, 0, tzinfo=UTC),
+            run_id="run-test",
         )
         self._executor = SimpleNamespace()
         self._checkpoint_manager = SimpleNamespace()
@@ -225,6 +226,33 @@ def test_record_run_failed_omits_empty_execution_diagnostics() -> None:
         metrics_snapshot={"records_gold": 3},
         details=None,
     )
+
+
+def test_record_run_finished_records_ledger_before_projection_failure() -> None:
+    host = _Host(diagnostics=None)
+    host._services.metrics.increment_counter.side_effect = RuntimeError("metrics down")
+
+    runner_flow.record_run_finished(host)
+
+    host._run_ledger_service.record_run_finished.assert_called_once()
+    host._logger.warning.assert_called_once()
+    assert host._logger.warning.call_args.args[0] == "finished_flow_projections_failed"
+
+
+def test_record_run_failed_guards_flow_invariants() -> None:
+    host = _Host(diagnostics=None)
+    host._services.metrics.increment_counter.side_effect = RuntimeError("metrics down")
+    exc = RuntimeError("boom")
+
+    runner_flow.record_run_failed(host, exc)
+
+    host._run_ledger_service.record_run_exception.assert_called_once_with(
+        error=exc,
+        metrics_snapshot={"records_gold": 3},
+        details=None,
+    )
+    host._logger.warning.assert_called_once()
+    assert host._logger.warning.call_args.args[0] == "failed_flow_invariants_failed"
 
 
 def test_record_run_finished_emits_passed_record_flow_invariants(

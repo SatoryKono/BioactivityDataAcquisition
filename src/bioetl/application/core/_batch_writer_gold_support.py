@@ -50,16 +50,17 @@ def prepare_gold_records(
     if not schema_columns:
         return records, writer._collect_record_columns(records)
 
+    ordered_columns = sorted(schema_columns)
     dq_defaults = {"_dq_warn": False, "_dq_error": False}
     projected = [
         {
             key: record.get(key, dq_defaults.get(key))
-            for key in schema_columns
+            for key in ordered_columns
             if key in record or key in dq_defaults
         }
         for record in records
     ]
-    return projected, list(schema_columns)
+    return projected, ordered_columns
 
 
 def validate_gold_records(

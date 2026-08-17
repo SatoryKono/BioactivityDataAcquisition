@@ -89,7 +89,7 @@ def start_current_span(
         yield span
 
 
-def close_span(span: _ClosableSpan | None, error: Exception | None = None) -> None:
+def close_span(span: _ClosableSpan | None, error: BaseException | None = None) -> None:
     """Close a tracing span and optionally record an exception."""
     if not span:
         return

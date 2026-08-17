@@ -27,6 +27,7 @@ from bioetl.interfaces.http._health_server_routing_support import (
     dispatch_observability_request,
     dispatch_quarantine_request,
 )
+from bioetl.interfaces.http._processed_records_value_support import _is_all_scope
 from bioetl.interfaces.http.types import HealthResponse
 
 _NOT_FOUND_MESSAGE = "Not Found"
@@ -164,20 +165,8 @@ class HealthServerRoutingMixin:
 
     @staticmethod
     def _is_all_scope_token(value: str | None) -> bool:
-        """Return True when a selector token represents Grafana's All scope.
-
-        Grafana may send ``All``, ``$__all``, brace/csv expansions, or a bare
-        lowercase ``all`` depending on variable config and client version.
-        Treat all of these as unbounded filters so run_id lists stay populated.
-        """
-        if value is None:
-            return False
-        normalized = value.strip()
-        if not normalized:
-            return False
-        # Case-insensitive match for All/all; keep exact forms for $__all tokens.
-        lowered = normalized.casefold()
-        return lowered in {"all", "*"} or normalized in {"$__all", "__all", ".*"}
+        """Return True when a selector token represents Grafana's All scope."""
+        return _is_all_scope(value)
 
     def _read_optional_scope_param(
         self,
@@ -270,48 +259,11 @@ class HealthServerRoutingMixin:
 
     async def _handle_readiness(self) -> HealthResponse:
         """Handle /health/ready endpoint."""
-        await asyncio.sleep(0)
-        from bioetl.application.observability.current_metrics_reconciliation import (
-            current_metrics_reconciliation_check,
-        )
-        from bioetl.interfaces.http.report_root_config import (
-            enforce_report_root_marker,
-            report_root_readiness_check,
+        from bioetl.interfaces.http._health_server_readiness import (
+            build_readiness_response,
         )
 
-        report_root_check = report_root_readiness_check()
-
-        checks: JsonDict = {
-            "report_root": report_root_check,
-            "current_metrics": current_metrics_reconciliation_check(
-                exposition=self._metrics_exposition.build_exposition()
-            ),
-        }
-        status = "healthy"
-        if (
-            enforce_report_root_marker()
-            and report_root_check.get("status") != "healthy"
-        ):
-            status = "unhealthy"
-        if not self._health_monitor:
-            checks["message"] = "No health monitor configured"
-            return HealthResponse(
-                status=status,
-                timestamp=self._response_timestamp(),
-                checks=checks,
-            )
-        provider_statuses = self._get_provider_statuses()
-        checks["providers"] = provider_statuses
-        has_unhealthy = any(
-            status.get("status") == "unhealthy" for status in provider_statuses.values()
-        )
-        if has_unhealthy:
-            status = "unhealthy"
-        return HealthResponse(
-            status=status,
-            timestamp=self._response_timestamp(),
-            checks=checks,
-        )
+        return await build_readiness_response(self)
 
     async def _handle_providers(self) -> HealthResponse:
         """Handle /health/providers endpoint."""

@@ -13,7 +13,7 @@ from bioetl.application.core.base_transformer._structural_policy_types import (
 from bioetl.domain.types import JsonDict, SilverRecord
 
 _SENSITIVE_FIELD_NAME_TOKENS = frozenset(
-    {"api_key", "authorization", "password", "secret", "token"}
+    {"api_key", "apikey", "authorization", "password", "secret", "token"}
 )
 
 

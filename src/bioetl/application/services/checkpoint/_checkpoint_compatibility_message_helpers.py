@@ -167,8 +167,6 @@ def exact_replay_mismatch_messages(
         ]
     if checkpoint_metadata.input_snapshot_fingerprint:
         return []
-    if checkpoint_metadata.input_snapshot_ids:
-        return []
     return [
         "Exact replay requires checkpoint input snapshot fingerprint, but none was persisted"
     ]

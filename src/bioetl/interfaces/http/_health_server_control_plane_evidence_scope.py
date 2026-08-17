@@ -52,6 +52,7 @@ async def resolve_evidence_scope(
     reason: str,
 ) -> tuple[_IdentityScope | None, dict[str, object] | None]:
     """Resolve one selector scope, mapping source failures to stable evidence."""
+    requested_pipeline = _safe_required_param(host, query, "pipeline")
     try:
         scope = await asyncio.to_thread(
             resolve_control_plane_identity_scope,
@@ -63,6 +64,7 @@ async def resolve_evidence_scope(
             host,
             query,
             resolved_via="control_plane_source_read_failed",
+            requested_pipeline=requested_pipeline,
         )
         return None, source_error_payload(
             endpoint=endpoint,
@@ -109,14 +111,32 @@ def evidence_service_unavailable_payload(
     )
 
 
+def _safe_required_param(
+    host: EvidenceScopeHost,
+    query: dict[str, str],
+    name: str,
+) -> str:
+    """Read a required query param without raising outside a caller handler."""
+    try:
+        return host._read_required_param(query, name)
+    except SOURCE_READ_ERRORS:
+        return ""
+
+
 def _unresolved_evidence_scope(
     host: EvidenceScopeHost,
     query: dict[str, str],
     *,
     resolved_via: str,
+    requested_pipeline: str | None = None,
 ) -> EvidenceScopeContext:
+    pipeline = (
+        requested_pipeline
+        if requested_pipeline is not None
+        else _safe_required_param(host, query, "pipeline")
+    )
     return EvidenceScopeContext(
-        requested_pipeline=host._read_required_param(query, "pipeline"),
+        requested_pipeline=pipeline,
         selected_run_id=read_selected_run_id(host, query),
         selected_run_types=host._read_scope_csv_param(query, "run_type"),
         resolved_via=resolved_via,

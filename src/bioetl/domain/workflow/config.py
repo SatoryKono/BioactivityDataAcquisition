@@ -64,6 +64,20 @@ class WorkflowRunOptionsConfig:
     debug_export_dir: str | None = None
     workflow_id: str | None = None
 
+    def __post_init__(self) -> None:
+        if self.multi_filter_ids is not None:
+            object.__setattr__(
+                self,
+                "multi_filter_ids",
+                {key: tuple(value) for key, value in self.multi_filter_ids.items()},
+            )
+        if self.fallback_mapping is not None:
+            object.__setattr__(
+                self,
+                "fallback_mapping",
+                dict(self.fallback_mapping),
+            )
+
     def merged_with(
         self, override: WorkflowRunOptionsConfig
     ) -> WorkflowRunOptionsConfig:
@@ -192,6 +206,10 @@ class TransformStepConfig:
     transform_name: str
     depends_on: tuple[str, ...] = ()
     config: JsonDict | None = None
+
+    def __post_init__(self) -> None:
+        if self.config is not None:
+            object.__setattr__(self, "config", dict(self.config))
 
 
 type WorkflowStep = WorkflowStepConfig | TransformStepConfig

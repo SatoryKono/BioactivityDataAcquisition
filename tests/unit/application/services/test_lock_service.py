@@ -196,8 +196,7 @@ class TestLockServiceForceReleaseAll:
             owner_id, ["pipeline1", "pipeline2"]
         )
 
-        assert "pipeline1" in result
-        assert "pipeline2:exclusive" in result
+        assert result == ["pipeline1", "pipeline2"]
 
 
 @pytest.mark.unit

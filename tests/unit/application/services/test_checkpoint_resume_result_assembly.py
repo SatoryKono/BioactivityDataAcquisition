@@ -59,6 +59,45 @@ def test_strict_checkpoint_result_gates_identity_on_required_anchors() -> None:
 
 
 @pytest.mark.unit
+def test_strict_checkpoint_result_rejects_invalid_required_anchor() -> None:
+    """Required-anchor failure must block a compatible caller verdict."""
+    result = build_strict_checkpoint_compatibility_result(
+        compatible=True,
+        dq_compatible=True,
+        pipeline_compatible=True,
+        execution_identity_compatible=True,
+        identity_continuity_proven=True,
+        required_anchor_compatible=False,
+        messages=("checkpoint_missing_required_execution_anchor: manifest_id",),
+    )
+
+    assert result.compatible is False
+    assert result.execution_identity_compatible is False
+    assert result.identity_continuity_proven is False
+    assert result.resume_verdict == "non_replayable"
+    assert result.messages == (
+        "checkpoint_missing_required_execution_anchor: manifest_id",
+    )
+
+
+@pytest.mark.unit
+def test_strict_checkpoint_result_keeps_compatible_messages() -> None:
+    result = build_strict_checkpoint_compatibility_result(
+        compatible=True,
+        dq_compatible=True,
+        pipeline_compatible=True,
+        execution_identity_compatible=True,
+        identity_continuity_proven=True,
+        required_anchor_compatible=True,
+        messages=("DQ contracts are compatible",),
+    )
+
+    assert result.compatible is True
+    assert result.resume_verdict == "resume_only"
+    assert result.messages == ("DQ contracts are compatible",)
+
+
+@pytest.mark.unit
 def test_lenient_checkpoint_result_reports_degraded_resume_verdict() -> None:
     """Lenient result assembly must expose degraded resume reasons."""
     result = build_lenient_checkpoint_compatibility_result(
@@ -75,3 +114,20 @@ def test_lenient_checkpoint_result_reports_degraded_resume_verdict() -> None:
     assert result.resume_verdict == "resume_only_degraded"
     assert result.degraded_resume_reasons == ("config drift accepted",)
     assert result.messages == ("compatible", "config drift accepted")
+
+
+@pytest.mark.unit
+def test_lenient_checkpoint_result_is_non_replayable_when_incompatible() -> None:
+    result = build_lenient_checkpoint_compatibility_result(
+        compatible=False,
+        dq_compatible=True,
+        pipeline_compatible=True,
+        execution_identity_compatible=False,
+        identity_continuity_proven=False,
+        messages=("identity mismatch", "config drift accepted"),
+        degraded_messages=("config drift accepted",),
+    )
+
+    assert result.compatible is False
+    assert result.resume_verdict == "non_replayable"
+    assert result.degraded_resume_reasons == ("config drift accepted",)

@@ -82,7 +82,9 @@ class TestSilverThresholdChecker:
         assert result.current_error_rate == pytest.approx(0.0)
         assert result.threshold_status == DQCheckStatus.PASS
 
-    def test_check_key_nullability_skips_nullable_and_missing_columns(self) -> None:
+    def test_check_key_nullability_skips_nullable_and_records_missing_columns(
+        self,
+    ) -> None:
         checker = SilverThresholdChecker()
         df = pl.DataFrame({"entity_id": ["e1", None], "value": [1, 2]})
 
@@ -98,7 +100,12 @@ class TestSilverThresholdChecker:
         assert result["status"] == DQCheckStatus.FAIL.value
         assert result["rules_checked"] == 3
         assert result["violations"] == [
-            {"field": "entity_id", "key_type": "merge", "null_count": 1}
+            {"field": "entity_id", "key_type": "merge", "null_count": 1},
+            {
+                "field": "partition_date",
+                "key_type": "partition",
+                "missing_column": True,
+            },
         ]
 
     def test_check_key_nullability_returns_pass_without_violations(self) -> None:

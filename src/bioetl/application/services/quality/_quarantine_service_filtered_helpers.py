@@ -79,7 +79,11 @@ def _resolve_filtered_stats_run_ids(
     if run_id is not None:
         return [run_id]
     if isinstance(scoped_run_ids, list) and scoped_run_ids:
-        return []
+        return [
+            candidate
+            for candidate in scoped_run_ids
+            if isinstance(candidate, str) and candidate.strip()
+        ]
 
     resolved_scope_run_id = _resolve_latest_scope_run_id(
         pipeline=pipeline,

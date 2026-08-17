@@ -282,7 +282,7 @@ class TestPrepareExecutionRequest:
             == "--start-offset and --resume cannot be used together"
         )
 
-    def test_build_options_normalizes_false_vacuum_after_run_to_none(self) -> None:
+    def test_build_options_preserves_explicit_false_vacuum_after_run(self) -> None:
         service = CliRunOrchestrationService()
 
         options = service.build_options(
@@ -304,7 +304,7 @@ class TestPrepareExecutionRequest:
             )
         )
 
-        assert options.vacuum_after_run is None
+        assert options.vacuum_after_run is False
 
     def test_build_options_propagates_exact_replay(self) -> None:
         service = CliRunOrchestrationService()

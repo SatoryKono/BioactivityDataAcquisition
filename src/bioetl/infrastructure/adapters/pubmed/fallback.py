@@ -77,11 +77,6 @@ class PubMedTitleFallbackHandler(BaseTitleFallbackHandler):
                 if pub_title and titles_match(clean_title, pub_title):
                     return publication
 
-            # If we got results but no title match, return first result
-            # (title may be in different format in PubMed)
-            if results:
-                return results[0]
-
         except PUBMED_FALLBACK_ERRORS as e:
             self._logger.debug(
                 "pubmed_title_search_failed",

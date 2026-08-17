@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+
 from bioetl.application.core.preflight.medallion_validator_idempotency import (
     validate_idempotency_contracts,
 )
@@ -71,6 +73,11 @@ def validate_layer_formats(
     return errors
 
 
+def canonicalize_layer_path(path: str) -> str:
+    """Normalize a medallion layer path so trailing-slash variants compare equal."""
+    return os.path.normpath(path.strip())
+
+
 def validate_path_uniqueness(
     *,
     bronze_path: str,
@@ -79,10 +86,13 @@ def validate_path_uniqueness(
 ) -> list[ConfigValidationError]:
     """Validate that bronze/silver/gold use distinct paths."""
     errors: list[ConfigValidationError] = []
-    paths = {bronze_path, silver_path, gold_path}
+    canon_bronze = canonicalize_layer_path(bronze_path)
+    canon_silver = canonicalize_layer_path(silver_path)
+    canon_gold = canonicalize_layer_path(gold_path)
+    paths = {canon_bronze, canon_silver, canon_gold}
     if len(paths) >= 3:
         return errors
-    if bronze_path == silver_path:
+    if canon_bronze == canon_silver:
         errors.append(
             ConfigValidationError(
                 field=_LAYER_PATHS_FIELD,
@@ -91,7 +101,7 @@ def validate_path_uniqueness(
                 rule=_DISTINCT_LAYER_PATHS_RULE,
             )
         )
-    if silver_path == gold_path:
+    if canon_silver == canon_gold:
         errors.append(
             ConfigValidationError(
                 field=_LAYER_PATHS_FIELD,
@@ -100,7 +110,7 @@ def validate_path_uniqueness(
                 rule=_DISTINCT_LAYER_PATHS_RULE,
             )
         )
-    if bronze_path == gold_path:
+    if canon_bronze == canon_gold:
         errors.append(
             ConfigValidationError(
                 field=_LAYER_PATHS_FIELD,
@@ -186,6 +196,7 @@ def validate_key_nullability_policies(
 
 
 __all__ = [
+    "canonicalize_layer_path",
     "validate_idempotency_contracts",
     "validate_key_nullability_policies",
     "validate_layer_formats",

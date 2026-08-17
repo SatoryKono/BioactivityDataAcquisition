@@ -166,7 +166,7 @@ def generate_entity_id(
     Returns:
         Stable entity identifier in format 'provider:key'.
     """
-    if id_field and id_field in record:
+    if id_field and id_field in record and record[id_field] is not None:
         stable_id = str(record[id_field])
         return EntityID(f"{provider}:{stable_id}")
     content_hash = generate_content_hash(record, provider)

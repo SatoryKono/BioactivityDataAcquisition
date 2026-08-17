@@ -139,9 +139,7 @@ class CliRunOrchestrationService:
             input_csv=request.input_csv,
             filter_column=request.filter_column,
             filter_field=request.filter_field,
-            vacuum_after_run=(
-                request.vacuum_after_run if request.vacuum_after_run else None
-            ),
+            vacuum_after_run=request.vacuum_after_run,
             vacuum_retention_days=request.vacuum_retention_days,
             log_level="DEBUG" if request.debug else "INFO",
             use_cached_bronze=request.use_cached_bronze,
