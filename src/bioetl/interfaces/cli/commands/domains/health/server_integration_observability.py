@@ -123,10 +123,12 @@ def _rehydrate_current_metrics(*, logger: LoggerPort | None = None) -> None:
     from bioetl.application.observability.current_metrics_rehydrate import (
         rehydrate_current_pipeline_run_metrics,
     )
-    from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
+    from bioetl.composition.health_api import get_health_server_dependencies
 
     try:
-        result = rehydrate_current_pipeline_run_metrics(PrometheusMetrics())
+        result = rehydrate_current_pipeline_run_metrics(
+            get_health_server_dependencies().metrics
+        )
     except (
         ImportError,
         OSError,
