@@ -57,6 +57,8 @@ class TestExtractionParams:
         # Mutating the result must not affect the original
         result["new_key"] = "new_value"
         assert "new_key" not in ep.params
+        original["standard_units"] = "uM"
+        assert ep.params["standard_units"] == "nM"
 
     def test_to_query_string_sorted_deterministic(self) -> None:
         """GIVEN params with multiple keys WHEN to_query_string THEN keys are sorted."""

@@ -100,6 +100,18 @@ def test_transform_and_schema_refs_build_stable_node_ids() -> None:
     assert schema_node.attributes["validation_mode"] == "strict"
 
 
+def test_transform_node_id_encodes_delimiter_collision() -> None:
+    colliding = TransformRef(
+        name="normalize:values",
+        version="1.2.3",
+        step_index=1,
+        pipeline_name="chembl_activity",
+    )
+    assert colliding.node_id == (
+        "transform:chembl_activity:normalize%3Avalues:1.2.3:1"
+    )
+
+
 def test_lineage_edge_and_fragment_roundtrip() -> None:
     dataset = DatasetRef(
         layer="gold",

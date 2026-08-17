@@ -208,6 +208,15 @@ class TestSemanticScholarPublicationEntity:
         with pytest.raises(ValueError, match="Paper ID is required"):
             SemanticScholarPublicationEntity(**BASE_KWARGS, paper_id="")
 
+    def test_paper_id_is_persisted_stripped_and_lowercased(self) -> None:
+        from bioetl.domain.entities.semanticscholar import (
+            SemanticScholarPublicationEntity,
+        )
+
+        raw = "  " + ("A" * 40) + "  "
+        entity = SemanticScholarPublicationEntity(**BASE_KWARGS, paper_id=raw)
+        assert entity.paper_id == "a" * 40
+
 
 @pytest.mark.unit
 class TestPubMedPublicationEntity:

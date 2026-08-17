@@ -175,7 +175,13 @@ class TransformRef:
         pipeline = self.pipeline_name or "unknown_pipeline"
         version = self.version or "unknown_version"
         step_index = self.step_index if self.step_index is not None else "na"
-        return f"transform:{pipeline}:{self.name}:{version}:{step_index}"
+        return (
+            "transform:"
+            f"{_node_id_segment(pipeline)}:"
+            f"{_node_id_segment(self.name)}:"
+            f"{_node_id_segment(version)}:"
+            f"{_node_id_segment(str(step_index))}"
+        )
 
     def to_node_ref(self) -> LineageNodeRef:
         """Convert transform reference into generic lineage node."""
@@ -227,7 +233,10 @@ class SchemaRef:
     def node_id(self) -> str:
         """Return canonical schema node identifier."""
         version = self.version or "unknown_version"
-        return f"schema:{self.contract_path}:{version}"
+        return (
+            f"schema:{_node_id_segment(self.contract_path)}:"
+            f"{_node_id_segment(version)}"
+        )
 
     def to_node_ref(self) -> LineageNodeRef:
         """Convert schema reference into generic lineage node."""

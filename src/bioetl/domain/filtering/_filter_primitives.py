@@ -109,8 +109,10 @@ def check_single_list_contains(
     contains_filter: GoldListContainsFilter,
 ) -> bool:
     """Check a single list-contains filter against a record value."""
-    value = record.get(contains_filter.column)
-    if not value:
+    if contains_filter.column not in record:
+        return True
+    value = record[contains_filter.column]
+    if value is None:
         return True
     return matches_contains_mode(
         to_string_set(value),

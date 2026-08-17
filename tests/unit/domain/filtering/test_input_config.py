@@ -207,6 +207,14 @@ class TestInputFilterConfigDirectIdsMode:
                 direct_filter_ids=("CHEMBL25",),
             )
 
+    def test_empty_direct_filter_ids_raises(self) -> None:
+        with pytest.raises(ValueError, match="direct_filter_ids must be non-empty"):
+            InputFilterConfig(
+                enabled=True,
+                filter_field="molecule_chembl_id",
+                direct_filter_ids=(),
+            )
+
     def test_direct_multi_filter_ids_mode(self) -> None:
         """Test direct multi-field filter IDs mode."""
         config = InputFilterConfig(

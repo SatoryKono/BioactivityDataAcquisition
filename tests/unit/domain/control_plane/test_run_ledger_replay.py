@@ -470,3 +470,24 @@ class TestRunLedgerReplayProjection:
         assert projection.unsupported_replay_entries == (
             ("entry-postrun", "stage_completed", "postrun"),
         )
+
+    def test_marks_incomplete_input_snapshot_without_immutable_uri(self) -> None:
+        projection = project_run_ledger_replay(
+            [
+                _entry(
+                    entry_id="entry-snapshot-gap",
+                    event_type=INPUT_SNAPSHOT_PUBLISHED_EVENT,
+                    occurred_at=datetime(2024, 6, 1, 9, 0, tzinfo=UTC),
+                    details={
+                        "snapshot_id": "snapshot-gap",
+                        "content_hash": "sha256:gap",
+                    },
+                )
+            ]
+        )
+
+        assert projection.projector_coverage_complete is False
+        assert projection.input_snapshots == ()
+        assert projection.unsupported_replay_entries == (
+            ("entry-snapshot-gap", INPUT_SNAPSHOT_PUBLISHED_EVENT, None),
+        )
