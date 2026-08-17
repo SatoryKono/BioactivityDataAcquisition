@@ -174,6 +174,23 @@ def _validate_comparison_sources(
     source_name: object,
     valid_sources: set[str],
 ) -> list[ValidationIssue]:
+    if (
+        isinstance(source_name, str)
+        and comparison_sources
+        and set(comparison_sources) == {source_name}
+    ):
+        return [
+            _create_issue(
+                IssueCode.CMP_PF_CV_007,
+                ValidationSeverity.BLOCKER,
+                f"Cross-validation source '{source_name}' cannot compare only to itself",
+                {
+                    "comparison_source": source_name,
+                    "source_name": source_name,
+                    "available_sources": sorted(valid_sources),
+                },
+            )
+        ]
     issues: list[ValidationIssue] = []
     for comparison_source in comparison_sources:
         if comparison_source == source_name:
@@ -297,7 +314,9 @@ def _collect_covered_sources(pairs: list[dict[str, object]]) -> set[str]:
         if not isinstance(pair, dict):
             continue
         for source_name, comparison_sources in pair.items():
-            if isinstance(source_name, str):
+            normalized = _comparison_source_list(comparison_sources)
+            valid_comparisons = {item for item in normalized if item != source_name}
+            if isinstance(source_name, str) and valid_comparisons:
                 covered_sources.add(source_name)
-            covered_sources.update(_comparison_source_list(comparison_sources))
+            covered_sources.update(valid_comparisons)
     return covered_sources

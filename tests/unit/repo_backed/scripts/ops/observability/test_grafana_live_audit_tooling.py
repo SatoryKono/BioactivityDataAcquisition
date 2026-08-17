@@ -1207,7 +1207,6 @@ def test_live_audit_strips_userinfo_before_authenticated_proxy_request(
 
     assert payload == {"status": "ok"}
     assert captured["url"] == (
-        "http://localhost:3000/api/datasources/proxy/uid/"
-        "bioetl-ops-http/health/live"
+        "http://localhost:3000/api/datasources/proxy/uid/bioetl-ops-http/health/live"
     )
     assert captured["auth_header"].startswith("Basic ")

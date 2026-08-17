@@ -29,6 +29,7 @@ from scripts.engineering.qa.run_observability_closure_campaign import (
     _workflow_failure_command,
 )
 
+
 def _planned_payload(
     *,
     parity_ok: bool,
@@ -450,6 +451,3 @@ def main(argv: list[str] | None = None) -> int:
         )
     )
     return 0 if core_complete else 1
-
-
-

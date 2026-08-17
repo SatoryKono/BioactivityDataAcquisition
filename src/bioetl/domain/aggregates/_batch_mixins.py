@@ -253,6 +253,7 @@ class _BatchLifecycleMixin(_BatchReadModelMixin):
             quarantined_count,
             sealed_at,
         )
+        self._sealed_valid_count = valid_count
 
     def mark_writing(self) -> None:
         """Mark batch as being written (SEALED -> WRITING)."""
@@ -265,12 +266,17 @@ class _BatchLifecycleMixin(_BatchReadModelMixin):
             layer: Medallion layer that successfully received the batch.
             committed_at: Explicit timestamp when the batch write completed.
         """
+        sealed_valid_count = (
+            self._sealed_valid_count
+            if self._sealed_valid_count is not None
+            else self.valid_count
+        )
         self._status = lifecycle.mark_committed(
             self._status,
             self._events,
             self._run_id,
             self._batch_id,
-            self.valid_count,
+            sealed_valid_count,
             layer,
             committed_at,
         )

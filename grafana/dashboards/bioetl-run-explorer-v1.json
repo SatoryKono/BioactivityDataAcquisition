@@ -105,7 +105,7 @@
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which exact run should be inspected?</div><div><b>Scope:</b> <b>BROWSE</b> = recent runs · <b>SELECTED RUN</b> = identity/accounting/actions</div><div><b>FULL PATHS</b> = report artifacts, not triage bodies</div><div style=\"margin-top:6px;font-size:16px;line-height:1.4\"><b>Fail-closed empty state:</b> default <code>pipeline=unknown</code> and <code>run_id=-</code> intentionally show no runs (not a missing data store). Select a real pipeline from the dropdown (e.g. <code>chembl_assay</code>, <code>chembl_activity</code>), keep <code>run_type</code> compatible (often <code>backfill</code>), then pick a concrete <code>run_id</code> (not <code>-</code>). Expand <b>Selected Run Details</b> for funnel/reasons/artifacts.</div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which exact run should be inspected?</div><div><b>Scope:</b> <b>BROWSE</b> = recent runs · <b>SELECTED RUN</b> = identity/accounting/actions</div><div><b>FULL PATHS</b> = report artifacts, not triage bodies</div><div style=\"margin-top:6px;font-size:16px;line-height:1.4\"><b>Fail-closed empty state:</b> default <code style=\"font-size:16px\">pipeline=unknown</code> and <code style=\"font-size:16px\">run_id=-</code> intentionally show no runs (not a missing data store). Select a real pipeline from the dropdown (e.g. <code style=\"font-size:16px\">chembl_assay</code>, <code style=\"font-size:16px\">chembl_activity</code>), keep <code style=\"font-size:16px\">run_type</code> compatible (often <code style=\"font-size:16px\">backfill</code>), then pick a concrete <code style=\"font-size:16px\">run_id</code> (not <code style=\"font-size:16px\">-</code>). Expand <b>Selected Run Details</b> for funnel/reasons/artifacts.</div></div></div>"
       },
       "description": "Run Explorer has two modes. Browse mode lists recent run-report artifacts for the selected pipeline. Selected-run mode uses BioETL Ops HTTP to show identity, accounting, reasons, reconciliation, and artifacts for one exact run. Run ID is never a Prometheus label. Full filesystem paths belong to report-artifact Open/Copy actions, not scan-oriented cells."
     },
@@ -113,7 +113,7 @@
       "id": 3010,
       "type": "table",
       "title": "Inspect Recent Runs (last 20)",
-      "description": "Browse mode: Recent pipeline-run reports found on disk for the selected pipeline. $pipeline is a pipeline name (chembl_assay, chembl_target, chembl_publication), not a workflow (chembl_baseline). Workflow artifacts live under reports/run-reports/workflow/<name>/ and GET /ops/observability/workflow-run-reports. Choose a row to set the run ID and open exact-run evidence. An empty table is valid when no matching reports exist. If reports are expected, treat backend unavailable as a distinct failure state and verify BioETL Ops HTTP at /health/live. Empty table: no matching reports under reports/run-reports/pipeline/<name>/. Has reports: chembl_assay, chembl_target, chembl_publication. chembl_activity may appear in run_id (control-plane) but has no report artifacts yet. If the host has reports and this is empty: bind mismatch — python -m scripts.ops.runtime.docker.verify_report_bind Index is bounded to the last 20 pipeline-run-report artifacts (limit=20). Older runs are omitted by design; they are not a missing backend.",
+      "description": "Browse mode: Recent pipeline-run reports found on disk for the selected pipeline. $pipeline is a pipeline name (chembl_assay, chembl_target, chembl_publication), not a workflow (chembl_baseline). Workflow artifacts live under reports/run-reports/workflow/<name>/ and GET /ops/observability/workflow-run-reports. Choose a row to set the run ID and open exact-run evidence. An empty table is valid when no matching reports exist for this pipeline (index_state=valid_empty). A TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is bind or origin failure, not a selector problem — run python scripts/ops/runtime/docker/verify_report_bind.py from the checkout you are viewing. If reports are expected and the table is empty without that row, treat backend unavailable as a distinct failure and verify BioETL Ops HTTP at /health/live. Has reports: chembl_assay, chembl_target, chembl_publication. chembl_activity may appear in run_id (control-plane) but has no report artifacts yet. Index is bounded to the last 20 pipeline-run-report artifacts (limit=20). Older runs are omitted by design; they are not a missing backend.",
       "gridPos": {
         "h": 5,
         "w": 24,
@@ -153,6 +153,46 @@
                 "value": "dateTimeAsIso"
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "status"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "TREE_MISSING": {
+                        "text": "TREE_MISSING",
+                        "color": "red"
+                      },
+                      "LAYOUT_UNHEALTHY": {
+                        "text": "LAYOUT_UNHEALTHY",
+                        "color": "orange"
+                      },
+                      "IDENTITY_UNHEALTHY": {
+                        "text": "IDENTITY_UNHEALTHY",
+                        "color": "orange"
+                      },
+                      "success": {
+                        "text": "success",
+                        "color": "green"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
@@ -188,13 +228,15 @@
               "markdown_path": true,
               "path": true,
               "report_path": true,
-              "artifact_path": true
+              "artifact_path": true,
+              "row_kind": true
             },
             "renameByName": {
               "completed_at": "Completed",
               "run_id": "Run",
               "pipeline": "Pipeline",
               "status": "Status",
+              "message": "Message",
               "kind": "Artifact",
               "name": "Artifact"
             }
@@ -957,7 +999,7 @@
           },
           "options": {
             "mode": "html",
-            "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:16px;white-space:normal\"><strong>Layer accounting:</strong> exact layer counts come from <code>pipeline_run_report_v1.layers</code>; use <em>Inspect Processed Records</em> for the compact stage/outcome view. Selection required without a run ID. Review reconciliation before escalating an accounting mismatch.</div>"
+            "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:16px;white-space:normal\"><strong>Layer accounting:</strong> exact layer counts come from <code style=\"font-size:16px\">pipeline_run_report_v1.layers</code>; use <em>Inspect Processed Records</em> for the compact stage/outcome view. Selection required without a run ID. Review reconciliation before escalating an accounting mismatch.</div>"
           }
         },
         {
@@ -1054,7 +1096,7 @@
           },
           "options": {
             "mode": "html",
-            "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:16px;white-space:normal\"><strong>Timings &amp; failure:</strong> optional blocks on <code>pipeline_run_report_v1</code>. Empty means not recorded — not zero duration and not proof of success. Open the JSON or Markdown report for exact details.</div>"
+            "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:16px;white-space:normal\"><strong>Timings &amp; failure:</strong> optional blocks on <code style=\"font-size:16px\">pipeline_run_report_v1</code>. Empty means not recorded — not zero duration and not proof of success. Open the JSON or Markdown report for exact details.</div>"
           }
         },
         {
@@ -1093,7 +1135,7 @@
           "id": 3020,
           "type": "table",
           "title": "Inspect Recent Workflow Runs (last 20)",
-          "description": "Browse mode for workflow-run reports. $workflow is a workflow name (e.g. chembl_baseline), not a pipeline. This panel calls GET /ops/observability/workflow-run-reports?workflow=${workflow}&limit=20. Panel 3010 remains pipeline-only. An empty table is valid when no matching workflow reports exist. Backend unavailable is a distinct failure — verify BioETL Ops HTTP at /health/live.",
+          "description": "Browse mode for workflow-run reports. $workflow is a workflow name (e.g. chembl_baseline), not a pipeline. This panel calls GET /ops/observability/workflow-run-reports?workflow=${workflow}&limit=20. Panel 3010 remains pipeline-only. An empty table is valid when no matching workflow reports exist (index_state=valid_empty). A TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is bind or origin failure, not a selector problem — run python scripts/ops/runtime/docker/verify_report_bind.py from the checkout you are viewing. Backend unavailable is a distinct failure — verify BioETL Ops HTTP at /health/live.",
           "gridPos": {
             "h": 5,
             "w": 24,
@@ -1109,7 +1151,48 @@
               },
               "noValue": "VALID EMPTY — no workflow-run-report artifacts for workflow '$workflow' under reports/run-reports/workflow/<name>/ (index is last 20)."
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "TREE_MISSING": {
+                            "text": "TREE_MISSING",
+                            "color": "red"
+                          },
+                          "LAYOUT_UNHEALTHY": {
+                            "text": "LAYOUT_UNHEALTHY",
+                            "color": "orange"
+                          },
+                          "IDENTITY_UNHEALTHY": {
+                            "text": "IDENTITY_UNHEALTHY",
+                            "color": "orange"
+                          },
+                          "success": {
+                            "text": "success",
+                            "color": "green"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           },
           "options": {
             "showHeader": true,
@@ -1143,13 +1226,15 @@
                   "markdown_path": true,
                   "path": true,
                   "report_path": true,
-                  "artifact_path": true
+                  "artifact_path": true,
+                  "row_kind": true
                 },
                 "renameByName": {
                   "completed_at": "Completed",
                   "run_id": "Run",
                   "workflow": "Workflow",
-                  "status": "Status"
+                  "status": "Status",
+                  "message": "Message"
                 }
               }
             }

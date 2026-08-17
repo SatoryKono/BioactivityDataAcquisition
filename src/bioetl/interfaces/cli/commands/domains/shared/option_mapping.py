@@ -32,7 +32,9 @@ def option_optional_str(values: Mapping[str, object], key: str) -> str | None:
     if value is None:
         return None
     if not isinstance(value, str):
-        raise TypeError(f"option {key!r} must be str | None, got {type(value).__name__}")
+        raise TypeError(
+            f"option {key!r} must be str | None, got {type(value).__name__}"
+        )
     return value
 
 
@@ -71,7 +73,9 @@ def option_optional_bool_get(values: Mapping[str, object], key: str) -> bool | N
     if value is None:
         return None
     if not isinstance(value, bool):
-        raise TypeError(f"option {key!r} must be bool | None, got {type(value).__name__}")
+        raise TypeError(
+            f"option {key!r} must be bool | None, got {type(value).__name__}"
+        )
     return value
 
 
@@ -101,7 +105,9 @@ def option_optional_int(values: Mapping[str, object], key: str) -> int | None:
     if value is None:
         return None
     if isinstance(value, bool) or not isinstance(value, int):
-        raise TypeError(f"option {key!r} must be int | None, got {type(value).__name__}")
+        raise TypeError(
+            f"option {key!r} must be int | None, got {type(value).__name__}"
+        )
     return value
 
 

@@ -42,9 +42,7 @@ def normalize_text(text: str) -> str:
     """
     if not text:
         return ""
-    cleaned_chars = [
-        " " if _is_unicode_punctuation(char) else char for char in text
-    ]
+    cleaned_chars = [" " if _is_unicode_punctuation(char) else char for char in text]
     cleaned = "".join(cleaned_chars)
     return " ".join(cleaned.lower().strip().split())
 

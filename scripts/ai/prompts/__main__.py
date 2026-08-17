@@ -185,9 +185,7 @@ def cmd_check(args: argparse.Namespace) -> int:
         "errors": len(reg.errors),
         "warnings": len(reg.warnings),
     }
-    _write_stdout(
-        format_report(reg, title="Prompt Library check (registry + hygiene)")
-    )
+    _write_stdout(format_report(reg, title="Prompt Library check (registry + hygiene)"))
     artifact = args.artifact or "reports/quality/prompts/check.json"
     if args.write_artifact or args.artifact:
         write_quality_artifact(reg, REPO_ROOT / artifact)

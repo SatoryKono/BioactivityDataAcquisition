@@ -206,6 +206,12 @@ Verify host vs container report trees:
 python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay
 ```
 
+`/health/ready` green is not enough for **Inspect Recent Runs**. After switching
+worktrees, run the verifier from the checkout you are viewing. Do not start
+`--stack main` from `/tmp/bioetl-issues*` unless you pass
+`--allow-transient-origin`; leftover issue worktrees steal the global `bioetl`
+container. `runtime_manager status --stack main` now re-runs the same bind gate.
+
 `runtime_manager.py` binds the explicitly selected `data/` and `reports/`
 directories and injects a managed `BIOETL_RUNTIME_SOURCE_ID`. Absolute Windows,
 WSL (`/mnt/<drive>/...`), and Docker Desktop host path spellings normalize to

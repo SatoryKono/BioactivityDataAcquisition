@@ -368,9 +368,7 @@ _iter_text_files_with_git_ls_files_impl = (
 
 def _sync_metric_scan_compatibility_seams() -> None:
     """Propagate historical module overrides into the scanner seam."""
-    _metric_scan._iter_text_files_with_git_ls_files = (
-        _iter_text_files_with_git_ls_files
-    )
+    _metric_scan._iter_text_files_with_git_ls_files = _iter_text_files_with_git_ls_files
     _metric_scan._run_text_discovery_command = _run_text_discovery_command
     _metric_scan._module_string_bindings = _module_string_bindings
     _metric_scan._DEFAULT_DECLARED_METRIC_DEFINITIONS = (
@@ -438,7 +436,9 @@ REGISTERED_PROMETHEUS_METRIC_LABELS: dict[str, frozenset[str]] = {
 }
 _metric_scan.REGISTERED_PROMETHEUS_METRIC_LABELS = REGISTERED_PROMETHEUS_METRIC_LABELS
 
-from scripts.engineering.qa import observability_metric_inventory_runtime as _metric_runtime
+from scripts.engineering.qa import (
+    observability_metric_inventory_runtime as _metric_runtime,
+)
 from scripts.engineering.qa.observability_metric_inventory_runtime import (
     RuntimeCardinalityReviewSummary,
 )
@@ -535,6 +535,7 @@ def _build_runtime_cardinality_review_summary(
         prometheus_base_url=prometheus_base_url,
         allow_local_cardinality_fallback=allow_local_cardinality_fallback,
     )
+
 
 def _scan_docs_and_rules_mentions(
     repo_root: Path, *, declared_set: set[str]
@@ -924,7 +925,6 @@ def collect_metric_inventory(repo_root: Path) -> MetricInventoryReport:
     """Collect the inventory after syncing compatibility overrides."""
     _sync_metric_scan_compatibility_seams()
     return _collect_metric_inventory_impl(repo_root)
-
 
 
 from scripts.engineering.qa import observability_metric_inventory_cli as _metric_cli

@@ -219,10 +219,10 @@ def test_panel_datasources_use_allowed_identities() -> None:
                 elif isinstance(datasource, dict):
                     ds_type = str(datasource.get("type") or "")
                     ds_uid = str(datasource.get("uid") or "")
-                    assert (
-                        ds_type in ALLOWED_DATASOURCE_TYPES
-                        or ds_uid in {"prometheus", "grafana"}
-                    ), f"{ident} uses an unknown datasource identity"
+                    assert ds_type in ALLOWED_DATASOURCE_TYPES or ds_uid in {
+                        "prometheus",
+                        "grafana",
+                    }, f"{ident} uses an unknown datasource identity"
                 else:
                     pytest.fail(f"{ident} has a malformed datasource reference")
 
@@ -401,8 +401,8 @@ def test_current_status_cards_have_guidance_and_state_mappings() -> None:
             assert description, (
                 f"{ident} verdict card must document operator interpretation"
             )
-            mappings = (panel.get("fieldConfig") or {}).get("defaults", {}).get(
-                "mappings"
+            mappings = (
+                (panel.get("fieldConfig") or {}).get("defaults", {}).get("mappings")
             )
             assert isinstance(mappings, list) and mappings, (
                 f"{ident} verdict card must define explicit value mappings "
