@@ -145,6 +145,16 @@ first_window_summary_tables:
     max_rows: 4
     owner: "@bioetl-observability"
     bind: filter
+  - dashboard: bioetl-control-plane-v1.json
+    id: 9418
+    max_rows: 4
+    owner: "@bioetl-observability"
+    bind: limit
+  - dashboard: bioetl-control-plane-v1.json
+    id: 9416
+    max_rows: 4
+    owner: "@bioetl-observability"
+    bind: limit
 
 # DASH-DENSITY-002 scalar information density (values / w*h). Only scalar panels
 # count; timeseries/table/text/row are excluded (runtime-dependent value counts).

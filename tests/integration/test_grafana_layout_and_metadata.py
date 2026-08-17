@@ -258,6 +258,7 @@ def test_control_plane_row_sequence_matches_operator_flow() -> None:
         )
     ]
     expected_prefix = [
+        (9419, "Review Lineage Validation"),
         (902, "Inspect Replay & Checkpoint Evidence"),
         (901, "Inspect Manifest & Ledger Evidence"),
         (903, "Inspect Global Store Reliability"),

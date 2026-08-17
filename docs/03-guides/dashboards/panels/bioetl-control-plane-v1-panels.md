@@ -31,7 +31,8 @@ absence.
 | --- | --- | --- | --- | --- | --- | --- |
 | 9400 | Inspect Scope & Evidence | text | Static | Replay-safety question: SELECTED RUN is this run's processing outcome and Trust status; CURRENT is pipeline replay readiness now, not this run. INCOMPLETE/UNKNOWN is incomplete evidence, not OK. | shared shell | No thresholds; interpretive guidance only. |
 | 9401 | Monitor Replay Readiness | stat | Prometheus | CURRENT Prometheus replay/resume verdict from `bioetl_control_plane_current_status_trusted` (not selected-run HTTP trust). | shared shell | `0=OK`, `1=WARN`, `2=CRIT`, `3=INCOMPLETE`, `null=UNKNOWN`. `INCOMPLETE` blocks Prom-current replay approval. |
-| 9418 | Review Selected-Run Trust | table | BioETL Ops HTTP | Exact-run `processing_status`, `trust_status`, `scope_kind`, and `evidence_freshness` from manifest-validation. | shared shell | `INCOMPLETE`/`ERROR`/`UNAVAILABLE` are not OK. |
+| 9418 | Review Selected-Run Trust | table | BioETL Ops HTTP | First-screen exact-run `processing_status`, `trust_status`, `scope_kind`, and `evidence_freshness` from manifest-validation. | shared shell | `INCOMPLETE`/`ERROR`/`UNAVAILABLE` are not OK. |
+| 9416 | Review Retention Compliance | table | BioETL Ops HTTP | First-screen run-scoped evidence-floor, retention-policy, required-evidence, and archive-support checks. | shared shell | Unsupported archive behavior is explicit rather than inferred as compliant. |
 | 9402 | Review Run Summary | table | BioETL Ops HTTP | Identity anchors for the selected workflow/pipeline/run scope. | shared shell | No numeric threshold; forensic handoff table. |
 | 9403 | Review Processed Records | table | BioETL Ops HTTP | Current processed-record evidence for the selected run scope. | shared shell | No numeric threshold; read-path evidence table. |
 | 9410 | Explain Missing Identity Data | text | Static | Neutral visible fallback when the Control Plane identity table returns no visible rows. | shared shell | No thresholds; prevents blank first-screen identity space. |
@@ -40,7 +41,7 @@ absence.
 | 892 | Monitor Checkpoint Age | stat | BioETL Ops HTTP | Current checkpoint freshness lag from HTTP-backed control-plane evidence. | shared shell | Numeric lag; no PromQL threshold in doc. |
 | 893 | Monitor Manifest/Ledger | stat | Prometheus | Current manifest/ledger failure state from `bioetl_manifest_ledger_failures_15m`. | shared shell | Severity/value mapping. |
 | 907 | Monitor Telemetry | stat | Prometheus | Missing-control-plane-telemetry signal from `bioetl_control_plane_telemetry_missing_5m`. | shared shell | Value mapping distinguishes no-data vs telemetry-missing. |
-| 906 | Review Recovery Action | text | Static | Next-step rail: do not replay this run if Trust status is INCOMPLETE or UNKNOWN; look at Review Selected-Run Trust below, then expand Inspect Audit & Lineage Evidence. | shared shell | Links: 130 blockers, 9418 this-run Trust, 9415 lineage, 9416 retention. |
+| 906 | Review Recovery Action | text | Static | Next-step rail: do not replay this run if Trust status is INCOMPLETE or UNKNOWN; first-screen tables are Review Selected-Run Trust and Review Retention Compliance; then expand the row Review Lineage Validation. | shared shell | Links: 130 blockers, 9418 this-run Trust, 9415 lineage, 9416 retention. |
 
 ### Inspect Replay & Checkpoint Evidence
 
@@ -87,11 +88,18 @@ absence.
 | 6 | Compare Global Reads by Store | timeseries | Prometheus | Read outcomes by `store`, `operation`, and `status`. | shared shell | Series legend is the key mapping. |
 | 111 | Track Global Read Latency | timeseries | Prometheus | Histogram quantiles for successful control-plane read latency. | shared shell | Quantile series `p50/p95/p99` are the key mapping. |
 
+### Review Lineage Validation
+
+| ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
+| --- | --- | --- | --- | --- | --- | --- |
+| 9419 | Review Lineage Validation | row | Static | First collapsed row after the first screen; named after the table it contains. | shared shell | Expand to open table 9415. This row is not Inspect Audit & Lineage Evidence. |
+| 9415 | Review Lineage Validation | table | BioETL Ops HTTP | Run-scoped closure, identity-consistency, cycle-detection, and persistence-profile checks. | shared shell | Stable reason codes localize broken references, conflicts, and cycles. |
+
 ### Inspect Audit & Lineage Evidence
 
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
-| 904 | Inspect Audit & Lineage Evidence | row | Static | Collapsed-by-default audit/lineage evidence section. | shared shell | Groups lineage and audit panels; no direct metric. |
+| 904 | Inspect Audit & Lineage Evidence | row | Static | Collapsed-by-default audit/lineage PromQL evidence section. Does not contain Review Lineage Validation or Review Retention Compliance. | shared shell | Groups remaining lineage and audit PromQL panels; no direct metric. |
 | 122 | Track Missing Lineage References | stat | Prometheus | Missing lineage reference count over the selected range. | shared shell | Count panel. |
 | 137 | Track Lineage Persistence Failures | stat | Prometheus | Failed lineage fragment persistence events. | shared shell | Count panel. |
 | 138 | Review Missing Lineage by Layer | table | Prometheus | Missing lineage references grouped by `layer` and `ref_type`. | shared shell | Forensic table; grouped breakdown is the key mapping. |
@@ -100,8 +108,6 @@ absence.
 | 109 | Track Global Audit Write Latency | timeseries | Prometheus | Histogram quantiles for audit write latency. | shared shell | Quantile series `p50/p95/p99` are the key mapping. |
 | 110 | Track Global Audit Query Latency | timeseries | Prometheus | Histogram quantiles for audit query latency. | shared shell | Quantile series `p50/p95/p99` are the key mapping. |
 | 112 | Compare Lineage Persistence Outcomes | timeseries | Prometheus | Lineage fragment emission outcomes by `layer` and `status`. | shared shell | Series legend maps lineage outcome families. |
-| 9415 | Review Lineage Validation | table | BioETL Ops HTTP | Run-scoped closure, identity-consistency, cycle-detection, and persistence-profile checks. | shared shell | Stable reason codes localize broken references, conflicts, and cycles. |
-| 9416 | Review Retention Compliance | table | BioETL Ops HTTP | Run-scoped evidence-floor, retention-policy, required-evidence, and archive-support checks. | shared shell | Unsupported archive behavior is explicit rather than inferred as compliant. |
 
 ### Inspect Run Identity Evidence
 
