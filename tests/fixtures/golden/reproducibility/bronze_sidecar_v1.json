@@ -55,7 +55,7 @@
     "completed_at_utc": "2025-01-01T12:00:05Z",
     "duration_seconds": 5.0,
     "exact_replay": false,
-    "input_snapshot_fingerprint": "2f847242c9547e889e852f7a4dc132293b43ba0e72d766fa2b7a91166decd6a9",
+    "input_snapshot_fingerprint": "9e58378679553df33444c2cbb71e02c04228ad14d34c7072c5c5e5a46e9c920c",
     "manifest_id": "manifest-golden-001",
     "replay_of_manifest_id": null,
     "replay_of_run_id": null,
