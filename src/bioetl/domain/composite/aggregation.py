@@ -8,7 +8,6 @@ See ADR-026 for architectural decisions.
 
 from __future__ import annotations
 
-from collections import Counter
 from dataclasses import dataclass
 from enum import StrEnum
 
@@ -156,6 +155,8 @@ class AggregationFieldSpec:
         """Validate field specification."""
         require_non_empty(self.source_field, "aggregation source_field")
         if self.output_field is not None:
+            if not isinstance(self.output_field, str):
+                raise ValueError("aggregation output_field must be a string")
             normalized_output_field = self.output_field.strip()
             require_non_empty(normalized_output_field, "aggregation output_field")
             object.__setattr__(self, "output_field", normalized_output_field)
@@ -221,17 +222,17 @@ class AggregationConfig:
         if not self.fields:
             raise ValueError("aggregation.fields cannot be empty")
         _require_field_specs(self.fields)
-        duplicates = _duplicate_output_fields(self.fields)
-        if duplicates:
-            raise ValueError(
-                "aggregation.fields contain duplicate output fields: "
-                + ", ".join(duplicates)
-            )
+        _require_unique_output_fields(self.fields)
 
 
-def _duplicate_output_fields(fields: tuple[AggregationFieldSpec, ...]) -> list[str]:
-    counts = Counter(field.effective_output_field for field in fields)
-    return sorted(field for field, count in counts.items() if count > 1)
+def _require_unique_output_fields(fields: tuple[AggregationFieldSpec, ...]) -> None:
+    output_fields = [field.effective_output_field for field in fields]
+    duplicate_output_fields = {
+        field for field in output_fields if output_fields.count(field) > 1
+    }
+    if duplicate_output_fields:
+        duplicates = ", ".join(sorted(duplicate_output_fields))
+        raise ValueError(f"aggregation.fields duplicate output field: {duplicates}")
 
 
 __all__ = [

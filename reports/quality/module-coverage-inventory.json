@@ -48390,7 +48390,13 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-14",
+<<<<<<< HEAD
+  "source_tree_sha256": "45735647cb2421db03fd99e9f577486081c341e5e8758a39dc98c700d6bd5723",
+||||||| 8038301294
   "source_tree_sha256": "799f420d617c911305d7c0f5e4992e51c46dd2af99f42f6b25096b7d82afdd1d",
+=======
+  "source_tree_sha256": "6e869062025167c0b92b59ee76d9c945f295694ffcdeb9a9c18c3ecddc9eed5c",
+>>>>>>> fix/consolidate-6h-r3
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

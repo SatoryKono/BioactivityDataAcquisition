@@ -43,9 +43,9 @@
     },
     "6165": {
       "debt_type": "dead_code_zero_import_review",
-      "repo_wide_owner_test_anchored_candidate_count": 5,
+      "repo_wide_owner_test_anchored_candidate_count": 4,
       "repo_wide_untriaged_zero_import_candidate_count": 0,
-      "repo_wide_zero_import_candidate_count": 5
+      "repo_wide_zero_import_candidate_count": 4
     },
     "6166": {
       "config_inconsistent_parameter_count": 0,
@@ -71,7 +71,7 @@
         "scripts/engineering/repo/apply_branch_cleanup_phases_0_2.sh"
       ],
       "untriaged_zero_reference_supporting_script_count": 0,
-    "zero_reference_supporting_script_count": 4
+      "zero_reference_supporting_script_count": 0
     }
   },
   "schema_version": "1.0",

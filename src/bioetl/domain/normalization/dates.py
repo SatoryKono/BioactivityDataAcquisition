@@ -32,16 +32,27 @@ def _extract_date_parts(
     return parts if parts else None
 
 
-def _format_parts_to_date(parts: Sequence[int]) -> str:
+def _format_parts_to_date(parts: Sequence[int]) -> str | None:
     """Format date parts to YYYY-MM-DD with end-of-period normalization."""
-    year = parts[0]
-    if len(parts) >= 3:
-        return _DATE_FULL_FMT.format(year, parts[1], parts[2])
-    if len(parts) == 2:
-        return _DATE_FULL_FMT.format(
-            year, parts[1], _get_last_day_of_month(year, parts[1])
-        )
-    return _DATE_FULL_FMT.format(year, 12, 31)
+    if not _date_parts_are_integers(parts):
+        return None
+    try:
+        year = parts[0]
+        if len(parts) >= 3:
+            normalized = date(year, parts[1], parts[2])
+        elif len(parts) == 2:
+            month = parts[1]
+            normalized = date(year, month, _get_last_day_of_month(year, month))
+        else:
+            normalized = date(year, 12, 31)
+    except (IndexError, TypeError, ValueError):
+        return None
+    return normalized.isoformat()
+
+
+def _date_parts_are_integers(parts: Sequence[int]) -> bool:
+    """Return whether every consumed date component is a strict integer."""
+    return all(type(part) is int for part in parts[:3])
 
 
 def format_date_parts(date_parts: Sequence[Sequence[int]] | None) -> str | None:
@@ -70,7 +81,7 @@ def _normalize_partial_month(date_str: str) -> str | None:
 
 def _normalize_partial_year(date_str: str) -> str | None:
     """Normalize YYYY to YYYY-12-31."""
-    return f"{date_str}-12-31" if date_str.isdigit() else None
+    return f"{date_str}-12-31" if date_str.isascii() and date_str.isdecimal() else None
 
 
 def _parse_year_month(date_str: str) -> tuple[int, int] | None:

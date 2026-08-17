@@ -13,8 +13,7 @@ from bioetl.application.services.control_plane.workflow.manifest_service import 
     WorkflowManifestService,
 )
 
-# TD2-02: do not re-export WorkflowLedgerService / WorkflowManifestCreateSpec here.
-# Import from ledger_service / manifest_models (or control_plane lazy facade).
+# TD2-02: do not re-export ledger service/manifest spec; use modules or lazy facade.
 
 __all__ = [
     "WorkflowExecutionService",

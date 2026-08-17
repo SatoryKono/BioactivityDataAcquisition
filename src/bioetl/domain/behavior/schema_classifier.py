@@ -24,13 +24,6 @@ from bioetl.domain.types.schema_policy import (
 )
 
 
-def _as_properties(value: object) -> JsonDict | None:
-    """Copy a properties mapping, or flag malformed schema structure."""
-    if not isinstance(value, Mapping):
-        return None
-    return {str(key): item for key, item in value.items()}
-
-
 class SchemaClassifier:
     """Policy-aware schema change classifier."""
 
@@ -56,9 +49,13 @@ class SchemaClassifier:
 
     def _calculate_diff(self, old_schema: JsonDict, new_schema: JsonDict) -> SchemaDiff:
         """Calculate detailed diff between two schemas."""
-        old_properties = _as_properties(old_schema.get("properties", {}))
-        new_properties = _as_properties(new_schema.get("properties", {}))
-        if old_properties is None or new_properties is None:
+        old_properties, old_properties_valid = _as_properties(
+            old_schema.get("properties", {})
+        )
+        new_properties, new_properties_valid = _as_properties(
+            new_schema.get("properties", {})
+        )
+        if not old_properties_valid or not new_properties_valid:
             return SchemaDiff(
                 breaking_changes=[],
                 non_breaking_changes=[],
@@ -119,8 +116,13 @@ class SchemaClassifier:
             )
 
         if diff.unknown_changes:
-            return SchemaChangeClassification.manual_review(
-                explanation="Unknown changes require manual review"
+            return SchemaChangeClassification(
+                classification=ChangeClassification.MANUAL_REVIEW,
+                explanation="Unknown changes require manual review",
+                requires_manual_review=True,
+                breaking_changes=diff.breaking_changes,
+                non_breaking_changes=diff.non_breaking_changes,
+                unknown_changes=diff.unknown_changes,
             )
 
         return SchemaChangeClassification(
@@ -132,9 +134,8 @@ class SchemaClassifier:
             unknown_changes=diff.unknown_changes,
         )
 
-    @staticmethod
     def _generate_explanation(
-        diff: SchemaDiff, classification: SchemaChangeClassification
+        self, diff: SchemaDiff, classification: SchemaChangeClassification
     ) -> SchemaChangeExplanation:
         """Generate human-readable explanation of changes."""
         base_explanation = classification.explanation
@@ -181,3 +182,10 @@ def create_schema_classifier(
 ) -> SchemaClassifier:
     """Factory function for SchemaClassifier."""
     return SchemaClassifier(policy)
+
+
+def _as_properties(value: object) -> tuple[JsonDict, bool]:
+    """Normalize properties while retaining evidence of malformed shapes."""
+    if not isinstance(value, Mapping):
+        return {}, False
+    return dict(value), True

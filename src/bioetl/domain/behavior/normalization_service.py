@@ -147,17 +147,18 @@ class _NormalizationActivityMixin:
 
     def classify_potency(self, pchembl_value: float) -> str:
         """Classify potency level based on pChEMBL value."""
-        potency_threshold = self.config.potency_threshold
-        high_potency_threshold = self.config.high_potency_threshold
-        inactive_threshold = potency_threshold - 1.0
-        potent_threshold = (potency_threshold + high_potency_threshold) / 2.0
+        potency = self.config.potency_threshold
+        high_potency = self.config.high_potency_threshold
+        threshold_span = high_potency - potency
+        inactive_threshold = potency - threshold_span / 2
+        potent_threshold = potency + threshold_span / 2
         if pchembl_value < inactive_threshold:
             return "inactive"
-        if pchembl_value < potency_threshold:
+        if pchembl_value < potency:
             return "weak"
         if pchembl_value < potent_threshold:
             return "moderate"
-        if pchembl_value < high_potency_threshold:
+        if pchembl_value < high_potency:
             return "potent"
         return "highly_potent"
 

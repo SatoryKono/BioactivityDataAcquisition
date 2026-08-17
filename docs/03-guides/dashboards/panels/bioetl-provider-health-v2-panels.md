@@ -12,11 +12,6 @@ as a synthetic green zero.
 
 ## Key Panels
 
-### 1. Navigate Dashboards
-- **Type:** Text
-- **Purpose:** Explain dashboard navigation and escalation flow.
-- **Data sources:** Dashboard variables and operator copy.
-
 ### 2. Understand Evidence Scope
 - **Type:** Text
 - **Purpose:** Distinguish provider-global fleet evidence from the selected

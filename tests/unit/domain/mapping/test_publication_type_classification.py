@@ -362,6 +362,22 @@ class TestPublicationTypePayload:
             "publication_class": None,
         }
 
+    def test_unknown_chembl_value_is_preserved_while_derived_fields_fail_closed(
+        self,
+    ) -> None:
+        payload = build_publication_type_classification_payload(
+            "chembl",
+            raw_type="Grant",
+            raw_field_name="publication_type",
+        )
+
+        assert payload == {
+            "publication_type": "Grant",
+            "publication_type_unified": None,
+            "publication_subclass": None,
+            "publication_class": None,
+        }
+
     def test_unknown_raw_provider_type_list_is_preserved_without_deriving_taxonomy(
         self,
     ) -> None:

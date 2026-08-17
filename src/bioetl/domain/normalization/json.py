@@ -33,7 +33,18 @@ _NON_ASCII_RE = re.compile(r"[^\x00-\x7F]")
 
 def _escape_non_ascii(text: str) -> str:
     """Escape non-ASCII characters using JSON unicode escape format."""
-    return _NON_ASCII_RE.sub(lambda m: f"\\u{ord(m.group(0)):04x}", text)
+    return _NON_ASCII_RE.sub(_escape_unicode_match, text)
+
+
+def _escape_unicode_match(match: re.Match[str]) -> str:
+    """Return a valid JSON escape, including surrogate pairs outside the BMP."""
+    code_point = ord(match.group(0))
+    if code_point <= 0xFFFF:
+        return f"\\u{code_point:04x}"
+    supplementary = code_point - 0x10000
+    high_surrogate = 0xD800 + (supplementary >> 10)
+    low_surrogate = 0xDC00 + (supplementary & 0x3FF)
+    return f"\\u{high_surrogate:04x}\\u{low_surrogate:04x}"
 
 
 def _has_non_ascii(text: str) -> bool:
@@ -79,13 +90,23 @@ def _serialize_with_stdlib(
     )
 
 
-def _assert_no_non_finite_floats(value: object) -> None:
-    """Reject NaN/Infinity to keep canonical JSON stable across runtimes."""
+def _validate_canonical_json_value(value: object) -> None:
+    """Reject values whose canonical output would depend on the JSON backend."""
     if isinstance(value, float):
         _assert_finite_float(value)
         return
-    for nested_value in _iter_nested_json_values(value):
-        _assert_no_non_finite_floats(nested_value)
+    if _is_json_scalar(value):
+        return
+    if isinstance(value, dict):
+        _validate_json_mapping(value)
+        return
+    if _is_nested_json_sequence(value):
+        _validate_json_sequence(cast(Sequence[object], value))
+        return
+    raise TypeError(
+        f"Canonical JSON serialization requires JSON-compatible values; "
+        f"got {type(value).__name__}"
+    )
 
 
 def _assert_finite_float(value: float) -> None:
@@ -95,13 +116,23 @@ def _assert_finite_float(value: float) -> None:
     raise ValueError("Canonical JSON serialization does not allow NaN or Infinity")
 
 
-def _iter_nested_json_values(value: object) -> Sequence[object]:
-    """Return nested JSON-like values that need recursive inspection."""
-    if isinstance(value, dict):
-        return list(value.values())
-    if _is_nested_json_sequence(value):
-        return cast(Sequence[object], value)
-    return ()
+def _is_json_scalar(value: object) -> bool:
+    """Return whether *value* is a backend-independent JSON scalar."""
+    return value is None or isinstance(value, (str, int, bool))
+
+
+def _validate_json_mapping(value: dict[object, object]) -> None:
+    """Validate mapping keys and values for canonical JSON serialization."""
+    for key, nested_value in value.items():
+        if not isinstance(key, str):
+            raise TypeError("Canonical JSON serialization requires string keys")
+        _validate_canonical_json_value(nested_value)
+
+
+def _validate_json_sequence(value: Sequence[object]) -> None:
+    """Validate every item in a JSON-like sequence."""
+    for nested_value in value:
+        _validate_canonical_json_value(nested_value)
 
 
 def _is_nested_json_sequence(value: object) -> bool:
@@ -113,7 +144,7 @@ def _is_nested_json_sequence(value: object) -> bool:
 
 def serialize_json_canonical(data: JsonDict | Sequence[object]) -> str:
     """Serialize data to deterministic canonical JSON string."""
-    _assert_no_non_finite_floats(data)
+    _validate_canonical_json_value(data)
     if _orjson_available:
         return _serialize_with_orjson(data, sort_keys=True, ensure_ascii=True)
     return _serialize_with_stdlib(data, sort_keys=True, ensure_ascii=True)
