@@ -26,7 +26,11 @@ class FrozenList(Sequence[object]):
     _items: tuple[object, ...]
 
     def __init__(self, iterable: Iterable[object] = ()) -> None:
-        object.__setattr__(self, "_items", tuple(iterable))
+        object.__setattr__(
+            self,
+            "_items",
+            tuple(deep_freeze_json(item) for item in iterable),
+        )
 
     @overload
     def __getitem__(self, index: int) -> object: ...
@@ -86,15 +90,8 @@ class FrozenDict(Mapping[str, object]):
         mapping: Mapping[str, object] | Iterable[tuple[str, object]] | None = None,
         **kwargs: object,
     ) -> None:
-        data: dict[str, object] = {}
-        if mapping is not None:
-            if isinstance(mapping, Mapping):
-                data.update(mapping)
-            else:
-                data.update(dict(mapping))
-        if kwargs:
-            data.update(kwargs)
-        object.__setattr__(self, "_data", dict(data))
+        data = _mapping_init_data(mapping, kwargs)
+        object.__setattr__(self, "_data", _freeze_mapping_items(data))
 
     @override
     def __getitem__(self, key: str) -> object:
@@ -128,6 +125,27 @@ class FrozenDict(Mapping[str, object]):
     def __deepcopy__(self, memo: dict[int, object]) -> FrozenDict:
         del memo
         return self
+
+
+def _mapping_init_data(
+    mapping: Mapping[str, object] | Iterable[tuple[str, object]] | None,
+    kwargs: Mapping[str, object],
+) -> dict[str, object]:
+    data: dict[str, object] = {}
+    if mapping is not None:
+        data.update(mapping if isinstance(mapping, Mapping) else dict(mapping))
+    if kwargs:
+        data.update(kwargs)
+    return data
+
+
+def _freeze_mapping_items(data: Mapping[object, object]) -> dict[str, object]:
+    frozen: dict[str, object] = {}
+    for key, item in data.items():
+        if not isinstance(key, str):
+            raise TypeError("JSON object keys must be strings")
+        frozen[key] = deep_freeze_json(item)
+    return frozen
 
 
 def _freeze_list(value: list[object]) -> FrozenList:

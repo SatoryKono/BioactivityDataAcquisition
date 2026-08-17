@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 from functools import lru_cache
+from types import MappingProxyType
 from typing import Any
 
 REASON_CATALOG_VERSION = "reason_catalog_v1"
@@ -96,8 +97,11 @@ class ReasonCatalog:
     """Immutable reason catalog projection."""
 
     version: str
-    entries: dict[str, ReasonCatalogEntry]
+    entries: Mapping[str, ReasonCatalogEntry]
     unknown_code: str = UNKNOWN_REASON
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "entries", MappingProxyType(dict(self.entries)))
 
     def resolve(self, code: str | None) -> ReasonCatalogEntry:
         """Return catalog entry or UNKNOWN_REASON."""
@@ -128,8 +132,7 @@ def normalize_reason_code(
     stripped = "" if code is None else str(code).strip()
     if not stripped:
         return active.unknown_code
-    valid_codes = active.entries.keys() | _BUILTIN_REASONS.keys()
-    return stripped if stripped in valid_codes else active.unknown_code
+    return stripped if stripped in active.entries else active.unknown_code
 
 
 def _active_catalog(catalog: ReasonCatalog | None) -> ReasonCatalog:
