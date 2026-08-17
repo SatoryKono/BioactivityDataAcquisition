@@ -1,6 +1,6 @@
-{"type":"review_context","reviewType":"all","currentBranch":"audit-leaf","baseBranch":"main","workingDirectory":"/tmp/bioetl-cr-S07-infra-storage-d3laavol"}
+{"type":"review_context","reviewType":"all","currentBranch":"audit-leaf","baseBranch":"main","workingDirectory":"/tmp/bioetl-cr-S07-infra-storage-olnvy1p6"}
 {"type":"status","phase":"connecting","status":"connecting_to_review_service"}
 {"type":"status","phase":"setup","status":"setting_up"}
-{"type":"error","errorType":"rate_limit","message":"Rate limit exceeded","recoverable":true,"details":{},"metadata":{"isProUser":true,"waitTime":"22 minutes","policyGuidance":"**Limit details:** You’ve used all 5 included reviews currently available under your plan.\n\nEnable **[usage-based reviews](https://app.coderabbit.ai/settings/billing?tab=usage&orgId=84ef2b43-0fca-452c-8ec8-22f6d0dc500d)** in Billing to review now. Otherwise, wait until the next included review is available.\nYou're only billed for reviews past your plan's rate limits ($0.25/file).","orgAttributed":true,"cliReviewPolicyMode":"normal"}}
+{"type":"error","errorType":"rate_limit","message":"Rate limit exceeded","recoverable":true,"details":{},"metadata":{"isProUser":true,"waitTime":"5 seconds","policyGuidance":"**Limit details:** You’ve used all 5 included reviews currently available under your plan.\n\nEnable **[usage-based reviews](https://app.coderabbit.ai/settings/billing?tab=usage&orgId=84ef2b43-0fca-452c-8ec8-22f6d0dc500d)** in Billing to review now. Otherwise, wait until the next included review is available.\nYou're only billed for reviews past your plan's rate limits ($0.25/file).","orgAttributed":true,"cliReviewPolicyMode":"normal"}}
 
 Error: Rate limit exceeded
