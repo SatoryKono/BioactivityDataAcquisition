@@ -265,7 +265,7 @@ def _apply_projector_result(
     projector: _ProjectionFn,
 ) -> RunLedgerReplayProjection:
     projected = projector(replayed, entry)
-    if projected is replayed and entry.event_type == STAGE_COMPLETED_EVENT:
+    if projected is replayed:
         return _mark_projection_unsupported(replayed, entry)
     return projected
 
