@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-17T05:32:31.395957+00:00",
+  "generated_at": "2026-08-17T18:32:12.661141+00:00",
   "summary": {
     "total_scripts": 601,
     "status_counts": {
@@ -15,7 +15,7 @@
       "other": 77,
       "scripts": 499,
       "skills": 12,
-      "tests": 390
+      "tests": 393
     }
   },
   "scripts": [
@@ -228,7 +228,7 @@
       "references": [
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 286,
+          "line": 359,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.bat\").exists()"
         }
@@ -249,7 +249,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 285,
+          "line": 358,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.ps1\").exists()"
         }
@@ -288,19 +288,19 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 281,
+          "line": 354,
           "source_group": "tests",
           "text": "assert \"../ai/codex/diagnose_wsl.sh\" in ops_router"
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 284,
+          "line": 357,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.sh\").exists()"
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 299,
+          "line": 372,
           "source_group": "tests",
           "text": "assert 'bash \"${SCRIPT_DIR}/diagnose_wsl.sh\"' in launcher"
         }
@@ -380,7 +380,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 298,
+          "line": 371,
           "source_group": "tests",
           "text": "assert 'python3 \"${SCRIPT_DIR}/efficiency_baseline.py\"' in launcher"
         },
@@ -401,7 +401,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 165,
+          "line": 168,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/headless.ps1` — PowerShell transport for headless mode;"
         }
@@ -416,7 +416,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 176,
+          "line": 179,
           "source_group": "scripts",
           "text": "bash scripts/ai/codex/headless.sh exec \"run a bounded task\""
         },
@@ -440,7 +440,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 307,
+          "line": 380,
           "source_group": "tests",
           "text": "headless = (root / \"scripts/ai/codex/headless.sh\").read_text(encoding=\"utf-8\")"
         }
@@ -498,7 +498,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 319,
+          "line": 392,
           "source_group": "tests",
           "text": "helper = (root / \"scripts/ai/codex/helper/check-env.sh\").read_text(encoding=\"utf-8\")"
         }
@@ -513,7 +513,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 13,
       "references": [
         {
           "path": "scripts/ai/codex/helper/README.md",
@@ -541,13 +541,13 @@
         },
         {
           "path": "scripts/ai/codex/helper/run-codex-impl.sh",
-          "line": 23,
+          "line": 42,
           "source_group": "scripts",
           "text": "# shellcheck source=codex-auth-lib.sh"
         },
         {
           "path": "scripts/ai/codex/helper/run-codex-impl.sh",
-          "line": 24,
+          "line": 43,
           "source_group": "scripts",
           "text": "source \"${SCRIPT_DIR}/codex-auth-lib.sh\""
         },
@@ -574,7 +574,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 166,
+          "line": 169,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/helper/diagnose-hang.ps1` — setup-hang diagnostics;"
         },
@@ -652,7 +652,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 10,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -697,10 +697,10 @@
           "text": "ENSURE_MCP_SCRIPT=\"${SCRIPT_DIR}/ensure-mcp.sh\""
         },
         {
-          "path": "scripts/ai/codex/helper/setup-env.sh",
-          "line": 11,
+          "path": "scripts/ai/codex/helper/run-codex-impl.sh",
+          "line": 24,
           "source_group": "scripts",
-          "text": "ENSURE_MCP_SCRIPT=\"${SCRIPT_DIR}/ensure-mcp.sh\""
+          "text": "# ensure-mcp.sh owns the bounded materialization and shared-plane startup"
         }
       ],
       "owner": "@bioetl-platform",
@@ -713,7 +713,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 16,
       "references": [
         {
           "path": "docs/03-guides/development/codex-paths.md",
@@ -852,7 +852,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 256,
+          "line": 259,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/helper/setup-wsl-complete.sh` for Bash setup;"
         },
@@ -882,7 +882,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 130,
+          "line": 137,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ai\" / \"codex\" / \"helper\" / \"setup-wsl-complete.sh\""
         },
@@ -1133,7 +1133,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 120,
+          "line": 123,
           "source_group": "scripts",
           "text": "Remediation is a separate explicit command in `local_state_audit.py`; it"
         },
@@ -1145,7 +1145,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 314,
+          "line": 387,
           "source_group": "tests",
           "text": "assert 'local_state_audit.py\" audit' in launcher"
         },
@@ -1193,7 +1193,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 203,
+          "line": 206,
           "source_group": "scripts",
           "text": "python3 scripts/ai/codex/mcp_profile_contract.py --check"
         },
@@ -1275,7 +1275,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 131,
+          "line": 134,
           "source_group": "scripts",
           "text": "python3 scripts/ai/codex/profile_benchmark.py \\"
         },
@@ -1302,19 +1302,19 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 152,
+          "line": 155,
           "source_group": "scripts",
           "text": "python3 scripts/ai/codex/profile_config.py audit"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 153,
+          "line": 156,
           "source_group": "scripts",
           "text": "python3 scripts/ai/codex/profile_config.py apply --confirm \\"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 155,
+          "line": 158,
           "source_group": "scripts",
           "text": "python3 scripts/ai/codex/profile_config.py restore --confirm \\"
         },
@@ -1455,7 +1455,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 255,
+          "line": 258,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/setup-codex-wsl.bat` for Windows setup;"
         },
@@ -1506,7 +1506,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 167,
+          "line": 170,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/setup-windows-dns.ps1` — explicit Windows DNS repair;"
         }
@@ -1521,7 +1521,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 168,
+          "line": 171,
           "source_group": "scripts",
           "text": "- `scripts/ai/codex/setup-wsl-dns.sh` — explicit WSL DNS repair;"
         }
@@ -1733,7 +1733,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 241,
+          "line": 244,
           "source_group": "scripts",
           "text": "bash scripts/ai/codex/setup_skills.sh --check"
         },
@@ -4618,7 +4618,7 @@
         },
         {
           "path": "scripts/ai/codex/helper/run-codex-impl.sh",
-          "line": 30,
+          "line": 49,
           "source_group": "scripts",
           "text": "REPO_ENV_LOADER=\"${REPO_ROOT}/scripts/ai/mcp/support/load_repo_env.sh\""
         },
@@ -12043,7 +12043,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 343,
+      "reference_count": 342,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -15813,19 +15813,19 @@
         },
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
-          "line": 252,
+          "line": 264,
           "source_group": "docs",
           "text": "./.venv/bin/python scripts/engineering/qa/run_historical_replay_closure_campaign.py --auto-certify-sources --auto-certify-composites --claim-scope-mode retained_certifiable_historical_runs --write-dis"
         },
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
-          "line": 253,
+          "line": 265,
           "source_group": "docs",
           "text": "./.venv/bin/python scripts/engineering/qa/run_historical_replay_closure_campaign.py --auto-certify-sources --auto-certify-composites --claim-scope-mode retained_certifiable_historical_runs --write-rep"
         },
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
-          "line": 291,
+          "line": 303,
           "source_group": "docs",
           "text": "- `run_historical_replay_closure_campaign.py` is the deterministic batch path"
         },
@@ -15864,19 +15864,19 @@
         },
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
-          "line": 254,
+          "line": 266,
           "source_group": "docs",
           "text": "./.venv/bin/python scripts/engineering/qa/run_historical_replay_universe_campaign.py --external-pack path/to/archive-pack.json --write-report"
         },
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
-          "line": 255,
+          "line": 267,
           "source_group": "docs",
           "text": "./.venv/bin/python scripts/engineering/qa/run_historical_replay_universe_campaign.py --external-pack path/to/archive-pack.json --write-report --require-universal-claim --require-durable-evidence-cover"
         },
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
-          "line": 296,
+          "line": 308,
           "source_group": "docs",
           "text": "- `run_historical_replay_universe_campaign.py` is the full-universe path: it"
         },
@@ -16345,13 +16345,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/qa/vcr/__main__.py",
           "line": 25,
           "source_group": "scripts",
           "text": "\"check-secrets\": \"check_vcr_secrets.py\","
+        },
+        {
+          "path": "tests/unit/infrastructure/test_cr_8917_secret_redaction.py",
+          "line": 14,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.vcr.check_vcr_secrets import _looks_redacted"
         }
       ]
     },
@@ -17242,7 +17248,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/foundation/33-cli-run-interaction.mmd",
-          "line": 16,
+          "line": 17,
           "source_group": "docs",
           "text": "participant CLI as run.py<br/>CLI command"
         }
@@ -17456,7 +17462,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 12,
       "references": [
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
@@ -18189,7 +18195,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 169,
+          "line": 172,
           "source_group": "scripts",
           "text": "- `scripts/ops/install-codex-cmd.bat` — optional Windows CMD installation."
         }
@@ -18564,7 +18570,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 97,
+          "line": 104,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"start-codex.bat\""
         }
@@ -18579,7 +18585,7 @@
       "references": [
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 100,
+          "line": 107,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"verify-setup.bat\""
         }
@@ -18594,7 +18600,7 @@
       "references": [
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 103,
+          "line": 110,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"verify-setup.ps1\""
         }
@@ -18643,7 +18649,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -18662,6 +18668,12 @@
           "line": 48,
           "source_group": "scripts",
           "text": "\"salt-rotate\": \"maintenance/security/salt_rotate.py\","
+        },
+        {
+          "path": "tests/unit/infrastructure/test_cr_8917_secret_redaction.py",
+          "line": 15,
+          "source_group": "tests",
+          "text": "from scripts.ops.maintenance.security.salt_rotate import ("
         }
       ]
     },
@@ -19275,11 +19287,11 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 12,
       "references": [
         {
           "path": "docs/01-requirements/DASHBOARD_REQUIREMENTS.md",
-          "line": 256,
+          "line": 259,
           "source_group": "docs",
           "text": "| Computed title/body font floors | `scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs` plus `check_grafana_dashboard_audit_preflight.py` and their unit tests |"
         },
@@ -19585,7 +19597,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 179,
+          "line": 180,
           "source_group": "docs",
           "text": "`scripts/ops/observability/grafana/render_nav_bus.py`). The current dashboard"
         },
@@ -19624,7 +19636,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 14,
       "references": [
         {
           "path": "docs/03-guides/dashboards/archive/audit-protocols/dux5-screenshot-regression-protocol.md",
@@ -19873,7 +19885,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 169,
+          "line": 170,
           "source_group": "docs",
           "text": "- On Linux, `setup_grafana_screenshot_runtime.sh` is the canonical bootstrap"
         },
@@ -20743,7 +20755,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/panels/bioetl-run-explorer-v1-panels.md",
-          "line": 46,
+          "line": 49,
           "source_group": "docs",
           "text": "`python scripts/ops/runtime/docker/verify_report_bind.py` from the checkout"
         },
@@ -20773,7 +20785,7 @@
         },
         {
           "path": "grafana/README.md",
-          "line": 2615,
+          "line": 2616,
           "source_group": "other",
           "text": "`python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay`."
         }
