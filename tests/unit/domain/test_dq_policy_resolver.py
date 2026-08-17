@@ -295,7 +295,7 @@ class TestRuleOutcomeCreation:
         assert outcome.violation_kind == DQViolationKind.SCHEMA_VIOLATION
         assert outcome.severity == "high"
         assert outcome.disposition == DQDisposition.QUARANTINE  # Escalated from WARN
-        assert outcome.affected_fields == ["id", "name"]
+        assert outcome.affected_fields == ("id", "name")
         assert outcome.config_path == "configs/quality/chembl.yaml"
 
     def test_create_rule_outcome_with_override(self):
@@ -327,7 +327,7 @@ class TestRuleOutcomeCreation:
             severity="medium",
         )
 
-        assert outcome.affected_fields == []  # Default empty list
+        assert outcome.affected_fields == ()  # Default empty tuple
         assert outcome.config_path is None  # Default None
         assert outcome.disposition == DQDisposition.WARN  # Default disposition
 

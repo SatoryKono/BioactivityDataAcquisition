@@ -25,6 +25,30 @@ _OPTIONAL_STR = str | None
 _OPTIONAL_BOOL = bool | None
 
 
+def _optional_stripped_text(value: object) -> str | None:
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
+
+
+def _coerce_records_processed(value: object) -> int:
+    if value is None:
+        return 0
+    if isinstance(value, int) and not isinstance(value, bool):
+        return value
+    return _parse_records_processed_text(value)
+
+
+def _parse_records_processed_text(value: object) -> int:
+    if not isinstance(value, str):
+        raise ValueError("records_processed must be an integer")
+    text = value.strip()
+    if not text or not text.lstrip("-").isdigit():
+        raise ValueError("records_processed must be an integer")
+    return int(text)
+
+
 def _extract_with_fallback(
     data: JsonDict,
     key: str,
@@ -33,7 +57,7 @@ def _extract_with_fallback(
     """Extract optional string with fallback to run_context anchor."""
     value = data.get(key)
     if value is not None:
-        return cast(_OPTIONAL_STR, value)
+        return _optional_stripped_text(value)
     if fallback_key:
         return extract_run_context_anchor(data, fallback_key)
     return None
@@ -87,7 +111,9 @@ class CheckpointMetadata:
     def from_legacy_metadata(legacy_metadata: JsonDict) -> CheckpointMetadata:
         """Create CheckpointMetadata from legacy metadata format."""
         return CheckpointMetadata(
-            records_processed=legacy_metadata.get("records_processed", 0),
+            records_processed=_coerce_records_processed(
+                legacy_metadata.get("records_processed", 0)
+            ),
             dq_contract_compatibility_hash=legacy_metadata.get(
                 "dq_contract_compatibility_hash"
             ),
@@ -194,12 +220,14 @@ class CheckpointMetadata:
     def from_dict(data: JsonDict) -> CheckpointMetadata:
         """Create CheckpointMetadata from dictionary."""
         return CheckpointMetadata(
-            records_processed=data.get("records_processed", 0),
+            records_processed=_coerce_records_processed(
+                data.get("records_processed", 0)
+            ),
             dq_contract_compatibility_hash=data.get("dq_contract_compatibility_hash"),
             dq_policy_hash=data.get("dq_policy_hash"),
             dq_rule_bundle_version=data.get("dq_rule_bundle_version"),
-            pipeline_name=cast(_OPTIONAL_STR, data.get("pipeline_name")),
-            run_type=cast(_OPTIONAL_STR, data.get("run_type")),
+            pipeline_name=_optional_stripped_text(data.get("pipeline_name")),
+            run_type=_optional_stripped_text(data.get("run_type")),
             pipeline_version=data.get("pipeline_version"),
             git_commit=cast(_OPTIONAL_STR, data.get("git_commit")),
             dependency_lock_hash=_extract_anchor(data, "dependency_lock_hash"),
@@ -248,7 +276,9 @@ class CheckpointMetadata:
             self.input_snapshot_fingerprint
             if self.input_snapshot_fingerprint is not None
             else compute_input_snapshot_identity_fingerprint(
-                list(self.input_snapshot_refs or self.input_snapshot_ids)
+                _snapshot_fingerprint_inputs(
+                    self.input_snapshot_refs, self.input_snapshot_ids
+                )
             )
         )
         normalized_payload = normalize_execution_identity_payload(
@@ -301,3 +331,12 @@ __all__ = [
     "CheckpointCompatibilityResult",
     "CheckpointMetadata",
 ]
+
+
+def _snapshot_fingerprint_inputs(
+    refs: tuple[JsonDict, ...],
+    ids: tuple[str, ...],
+) -> list[object]:
+    if refs:
+        return list(refs)
+    return [{"snapshot_id": snapshot_id} for snapshot_id in ids]

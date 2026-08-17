@@ -24,4 +24,4 @@ Exact-cover of still-blocked CodeRabbit leaves remains #8859.
 | domain-20260816-freeze-catalogs | #8888 | 3 | P1 | residual-root-011/012 + run_reports-002 |
 | domain-20260816-run-report-accounting | #8889 | 4 | P1 | run_reports-005/011/013/014 |
 | later-leaf-ok-triage | #8890 | ~756 raw | P2 | independent triage; types criticals promoted to #8893 |
-
+| domain-20260816-types-remaining | #8895 | 13 | P1 | remaining types confirms after #8893 |

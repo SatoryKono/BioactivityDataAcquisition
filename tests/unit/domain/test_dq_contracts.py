@@ -131,7 +131,7 @@ class TestDQRuleOutcome:
         assert outcome.severity == "high"
         assert outcome.disposition == DQDisposition.FAIL
         assert outcome.disposition_reason == "Field 'id' cannot be null"
-        assert outcome.affected_fields == ["id"]
+        assert outcome.affected_fields == ("id",)
         assert outcome.config_path == "configs/quality/chembl.yaml"
 
     def test_d_q_rule_outcome__outcome_validation__bfc5d651(self):
@@ -156,11 +156,11 @@ class TestDQRuleOutcome:
             outcome.rule_id = "new_value"  # type: ignore
 
     def test_affected_fields_default(self):
-        """Test that affected_fields defaults to empty list."""
+        """Test that affected_fields defaults to an empty tuple."""
         outcome = DQRuleOutcome(
             "test", DQViolationKind.SCHEMA_VIOLATION, "high", DQDisposition.FAIL
         )
-        assert outcome.affected_fields == []
+        assert outcome.affected_fields == ()
 
 
 class TestDQRuleProvenance:
@@ -280,4 +280,4 @@ class TestSerialization:
         assert outcome_dict["violation_kind"] == "schema_violation"
         assert outcome_dict["severity"] == "high"
         assert outcome_dict["disposition"] == "fail"
-        assert outcome_dict["affected_fields"] == ["field1"]
+        assert list(outcome_dict["affected_fields"]) == ["field1"]
