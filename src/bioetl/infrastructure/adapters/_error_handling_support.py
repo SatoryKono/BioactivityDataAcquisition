@@ -7,6 +7,9 @@ from typing import TYPE_CHECKING
 
 from bioetl.domain.types import ErrorType, JsonDict
 from bioetl.infrastructure.adapters.adapter_error_classifier import ErrorCategory
+from bioetl.infrastructure.adapters.decorators._retry_support import (
+    _redact_transport_error_message,
+)
 
 if TYPE_CHECKING:
     from httpx import Response
@@ -89,7 +92,7 @@ def emit_error_telemetry(
         retry_count=error_context.retry_count,
         circuit_breaker_state=error_context.circuit_breaker_state,
         retry_after=error_context.retry_after,
-        error=str(error),
+        error=_redact_transport_error_message(str(error)),
         error_class=type(error).__name__,
         **error_context.extra,
     )

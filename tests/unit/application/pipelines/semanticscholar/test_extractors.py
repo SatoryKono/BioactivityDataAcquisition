@@ -335,6 +335,10 @@ class TestExtractJournalInfo:
         assert result["page_first"] == "123"
         assert result["page_last"] == "130"
 
+    def test_numeric_pages_do_not_raise(self) -> None:
+        result = extract_journal_info({"name": "Nature", "pages": 123}, venue=None)
+        assert result["page_range"] == "123"
+
     def test_fallback_to_venue(self) -> None:
         """Test fallback to venue when journal name is missing."""
         journal = {"volume": "10"}

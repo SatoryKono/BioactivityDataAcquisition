@@ -324,13 +324,56 @@ async def test_gold_reference_table_missing_fails_fast() -> None:
 
     with pytest.raises(
         ValueError,
-        match=r"Gold foreign-key reconciliation reference table not found: chembl\.target",
+        match=r"foreign-key reconciliation reference table not found: chembl\.target \(gold\)",
     ) as exc_info:
         await adapter.reconcile_foreign_keys(
             ForeignKeyReconciliationRequest(
                 source_layer="gold",
                 reference_layer="gold",
                 mutation_layer="gold",
+                source_table="chembl.assay",
+                reference_table="chembl.target",
+                source_key="target_id",
+                reference_key="target_id",
+                primary_keys=("assay_id",),
+            )
+        )
+
+    assert isinstance(exc_info.value.__cause__, FileNotFoundError)
+
+
+@dataclass
+class _MissingSilverWriter:
+    async def read_silver(
+        self,
+        table_name: str,
+        columns: list[str] | None = None,
+    ) -> list[dict[str, object]]:
+        if table_name == "chembl.assay":
+            row = {"assay_id": "CHEMBL_A1", "target_id": "CHEMBL_T1", "_is_current": True}
+            if columns is None:
+                return [row]
+            return [{column: row[column] for column in columns if column in row}]
+        raise FileNotFoundError(table_name)
+
+
+@pytest.mark.asyncio
+async def test_silver_reference_table_missing_fails_closed() -> None:
+    adapter = SilverForeignKeyReconciliationAdapter(
+        silver_writer=_MissingSilverWriter(),  # type: ignore[arg-type]
+        gold_writer=None,
+        logger=_Logger(),  # type: ignore[arg-type]
+    )
+
+    with pytest.raises(
+        ValueError,
+        match=r"foreign-key reconciliation reference table not found: chembl\.target \(silver\)",
+    ) as exc_info:
+        await adapter.reconcile_foreign_keys(
+            ForeignKeyReconciliationRequest(
+                source_layer="silver",
+                reference_layer="silver",
+                mutation_layer="silver",
                 source_table="chembl.assay",
                 reference_table="chembl.target",
                 source_key="target_id",

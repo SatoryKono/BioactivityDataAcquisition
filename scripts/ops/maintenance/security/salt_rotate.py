@@ -245,6 +245,15 @@ def complete_rotation() -> RotationResult:
         )
 
     next_salt = os.environ.get(ENV_SALT_NEXT, "")
+    if len(next_salt) < MIN_SALT_LENGTH:
+        return RotationResult(
+            success=False,
+            action="complete",
+            error=(
+                f"{ENV_SALT_NEXT} is too short "
+                f"({len(next_salt)} < {MIN_SALT_LENGTH})"
+            ),
+        )
 
     return RotationResult(
         success=True,

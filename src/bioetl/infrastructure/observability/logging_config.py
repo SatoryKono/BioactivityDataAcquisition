@@ -47,7 +47,8 @@ _SECRET_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     ),
     (
         re.compile(
-            r"(?i)(auth|authorization)['\"]?\s*[:=]\s*['\"]?[\w-]+", re.IGNORECASE
+            r"(?i)(auth|authorization)['\"]?\s*[:=]\s*['\"]?(?:Bearer\s+)?\S+",
+            re.IGNORECASE,
         ),
         "[REDACTED_AUTH]",
     ),
@@ -68,7 +69,7 @@ _SECRET_PATTERNS: list[tuple[re.Pattern[str], str]] = [
         "[REDACTED_SECRET]",
     ),
     # Bearer tokens in headers
-    (re.compile(r"Bearer\s+[\w.-]+", re.IGNORECASE), "Bearer [REDACTED]"),
+    (re.compile(r"Bearer\s+\S+", re.IGNORECASE), "Bearer [REDACTED]"),
     # Stripe/OpenAI-style prefixed tokens that can appear outside key=value text.
     (
         # Omit a-z under IGNORECASE to avoid S5869 duplicate-range findings.

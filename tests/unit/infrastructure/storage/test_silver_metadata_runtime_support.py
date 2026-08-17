@@ -203,6 +203,19 @@ class TestSilverMetadataRuntimeSupport:
         assert dq_input.quarantined_count == 2
         assert dq_input.validation_errors == ["warn"]
 
+    async def test_compute_dq_metrics_from_empty_arrow_table_keeps_schema(
+        self,
+    ) -> None:
+        ops = _MetadataRuntimeOps()
+        ops._dq_calculator.calculate.return_value = BatchDQMetrics()
+        empty_table = pa.table({"entity_id": pa.array([], type=pa.string())})
+
+        await compute_dq_metrics_from_arrow_data(ops, empty_table)
+
+        dq_input = ops._dq_calculator.calculate.call_args.args[0]
+        assert dq_input.records == []
+        assert dq_input.existing_schema_fields == {"entity_id"}
+
     def test_should_skip_silver_metadata_write_covers_all_guard_paths(self) -> None:
         ops = _MetadataRuntimeOps()
         assert should_skip_silver_metadata_write(ops, records=[]) is True

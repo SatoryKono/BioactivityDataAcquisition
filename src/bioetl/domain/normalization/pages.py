@@ -62,15 +62,17 @@ def _normalize_and_split_pages(page: str) -> tuple[str, str | None]:
     return first, last or None
 
 
-def _prepare_page_input(page: str | None) -> str | None:
+def _prepare_page_input(page: str | int | float | None) -> str | None:
     """Strip and return page string, or None if empty."""
-    if not page:
+    if page is None:
         return None
+    if not isinstance(page, str):
+        page = str(page)
     stripped = page.strip()
     return stripped if stripped else None
 
 
-def parse_page_range(page: str | None) -> tuple[str | None, str | None]:
+def parse_page_range(page: str | int | float | None) -> tuple[str | None, str | None]:
     """Parse page range string to (first, last) tuple."""
     stripped = _prepare_page_input(page)
     if stripped is None:

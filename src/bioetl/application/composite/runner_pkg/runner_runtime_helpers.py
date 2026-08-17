@@ -222,8 +222,10 @@ async def run_with_managed_lock[TRunResult](
         await lock_context.heartbeat.start()
         return await run_while_locked()
     finally:
-        await lock_context.heartbeat.stop()
-        await lock_port.release(key=lock_key, owner_id=owner_id)
+        try:
+            await lock_context.heartbeat.stop()
+        finally:
+            await lock_port.release(key=lock_key, owner_id=owner_id)
 
 
 async def prepare_run_state(

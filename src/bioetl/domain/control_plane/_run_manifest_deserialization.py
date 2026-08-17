@@ -86,7 +86,7 @@ def _load_source_refs[SourceRefT, SnapshotRefT](
     loaded: list[SourceRefT] = []
     for index, item in enumerate(raw_sources):
         if not isinstance(item, dict):
-            continue
+            raise ValueError(f"source_refs[{index}] must be an object")
         context = f"source_refs[{index}]"
         loaded.append(
             source_ref_type(
@@ -110,11 +110,14 @@ def _load_input_snapshots[SnapshotRefT](
 ) -> tuple[SnapshotRefT, ...]:
     if not isinstance(raw_snapshots, list):
         return ()
-    return tuple(
-        _load_input_snapshot_ref(item, snapshot_ref_type=snapshot_ref_type)
-        for item in raw_snapshots
-        if isinstance(item, dict)
-    )
+    loaded: list[SnapshotRefT] = []
+    for index, item in enumerate(raw_snapshots):
+        if not isinstance(item, dict):
+            raise ValueError(f"input_snapshots[{index}] must be an object")
+        loaded.append(
+            _load_input_snapshot_ref(item, snapshot_ref_type=snapshot_ref_type)
+        )
+    return tuple(loaded)
 
 
 def _load_input_snapshot_ref[SnapshotRefT](
@@ -164,7 +167,7 @@ def _load_artifacts[ArtifactRefT](
     loaded: list[ArtifactRefT] = []
     for index, item in enumerate(raw_artifacts):
         if not isinstance(item, dict):
-            continue
+            raise ValueError(f"artifacts[{index}] must be an object")
         context = f"artifacts[{index}]"
         loaded.append(
             artifact_type(

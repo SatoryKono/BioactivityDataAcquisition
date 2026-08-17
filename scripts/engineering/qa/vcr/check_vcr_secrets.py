@@ -31,7 +31,10 @@ def _looks_redacted(value: str) -> bool:
     lowered = value.strip().strip("'\"").lower()
     if not lowered:
         return True
-    return any(marker in lowered for marker in REDACTED_MARKERS)
+    exact_markers = {marker.lower() for marker in REDACTED_MARKERS}
+    if lowered in exact_markers:
+        return True
+    return lowered in {"[redacted]", "bearer [redacted]", "bearer <redacted>"}
 
 
 def _scan_uri(path: Path, line_idx: int, uri_value: str) -> list[str]:
