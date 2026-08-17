@@ -41,12 +41,12 @@ class PubMedPublicationGoldSchema(PublicationGoldCommonSchema):
 
     @pa.check("pub_month", name="pub_month_integer")
     def pub_month_integer(cls, series: Series[float]) -> Series[bool]:
-        """Require nullable publication months to be whole numbers."""
+        """Require nullable publication months to remain integer-valued."""
         return cast(Series[bool], series.isna() | series.mod(1).eq(0))
 
     @pa.check("pub_day", name="pub_day_integer")
     def pub_day_integer(cls, series: Series[float]) -> Series[bool]:
-        """Require nullable publication days to be whole numbers."""
+        """Require nullable publication days to remain integer-valued."""
         return cast(Series[bool], series.isna() | series.mod(1).eq(0))
 
     date_completed: Series[str] = pa.Field(nullable=True)

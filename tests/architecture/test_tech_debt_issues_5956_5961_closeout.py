@@ -187,7 +187,7 @@ def test_scripts_and_root_hygiene_burndown_for_5959_and_5960() -> None:
         for row in scripts
         if row.get("status") == "supporting" and row.get("reference_count") == 0
     ]
-    # Updated from 8 to 5 to match actual current count
+    # The zero-reference supporting-script ratchet may only decrease.
     assert (
         len(zero_ref_rows)
         <= closeout["ratchets"]["zero_reference_supporting_scripts"]["current"]

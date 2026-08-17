@@ -30,8 +30,11 @@
 
 from __future__ import annotations
 
+import math
+
 import pytest
 
+import bioetl.domain.normalization.json as json_normalization
 from bioetl.domain.normalization.json import (
     canonicalize_json_string,
     deserialize_json_value,
@@ -222,6 +225,38 @@ class TestEdgeCases:
         result = serialize_json_canonical(data)
         assert '"text"' in result
         assert '"emoji"' in result
+
+    def test_non_bmp_unicode_is_a_valid_surrogate_pair_for_every_backend(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Supplementary characters have identical valid JSON on both backends."""
+        data = {"emoji": "👋"}
+        monkeypatch.setattr(json_normalization, "_orjson_available", False)
+        stdlib_result = serialize_json_canonical(data)
+
+        assert stdlib_result == '{"emoji":"\\ud83d\\udc4b"}'
+        if json_normalization.orjson is not None:
+            monkeypatch.setattr(json_normalization, "_orjson_available", True)
+            assert serialize_json_canonical(data) == stdlib_result
+
+    @pytest.mark.parametrize("value", [math.nan, math.inf, -math.inf])
+    def test_non_finite_values_are_rejected(self, value: float) -> None:
+        """Canonical serialization rejects every non-finite float."""
+        with pytest.raises(ValueError, match="does not allow NaN or Infinity"):
+            serialize_json_canonical({"value": value})
+
+    def test_non_string_mapping_keys_are_rejected(self) -> None:
+        """Backend selection cannot change handling of non-string keys."""
+        with pytest.raises(TypeError, match="requires string keys"):
+            serialize_json_canonical({1: "value"})  # type: ignore[dict-item]
+
+    def test_numpy_arrays_are_rejected_before_backend_selection(self) -> None:
+        """NumPy-specific orjson support must not alter canonical output policy."""
+        numpy = pytest.importorskip("numpy")
+        values = numpy.array([1.0, math.nan])
+
+        with pytest.raises(TypeError, match="requires JSON-compatible values"):
+            serialize_json_canonical(values)  # type: ignore[arg-type]
 
     def test_numeric_edge_cases(self) -> None:
         """Test numeric edge cases."""

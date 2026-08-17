@@ -140,35 +140,38 @@ class TestFilterLoadResult:
         assert len(result.ids) == 0
         assert result.has_duplicates is False
 
-    def test_multi_column_valid_combinations(self) -> None:
+    def test_valid_multi_column_result(self) -> None:
+        """Ordered fields and row-wise combinations form a valid result."""
         result = FilterLoadResult(
-            column_ids={
-                "molecule_chembl_id": ("CHEMBL1", "CHEMBL2"),
-                "target_chembl_id": ("CHEMBL240",),
-            },
-            filter_fields=("molecule_chembl_id", "target_chembl_id"),
-            valid_combinations=frozenset({("CHEMBL1", "CHEMBL240")}),
+            column_ids={"target_id": ("T1", "T2"), "assay_id": ("A1",)},
+            filter_fields=("target_id", "assay_id"),
+            valid_combinations=frozenset({("T1", "A1"), ("T2", "A1")}),
         )
+
         assert result.is_multi_column is True
 
-    def test_multi_column_rejects_unknown_combination_value(self) -> None:
-        with pytest.raises(ValueError, match="not in column_ids"):
+    def test_multi_column_fields_must_match_mapping_order(self) -> None:
+        """Combination positions are bound to the declared mapping order."""
+        with pytest.raises(ValueError, match="must match column_ids keys in order"):
             FilterLoadResult(
-                column_ids={
-                    "molecule_chembl_id": ("CHEMBL1",),
-                    "target_chembl_id": ("CHEMBL240",),
-                },
-                filter_fields=("molecule_chembl_id", "target_chembl_id"),
-                valid_combinations=frozenset({("CHEMBL9", "CHEMBL240")}),
+                column_ids={"target_id": ("T1",), "assay_id": ("A1",)},
+                filter_fields=("assay_id", "target_id"),
             )
 
-    def test_multi_column_rejects_arity_mismatch(self) -> None:
-        with pytest.raises(ValueError, match="must have length 2"):
+    def test_multi_column_combination_must_match_field_arity(self) -> None:
+        """Every exact combination supplies one value per filter field."""
+        with pytest.raises(ValueError, match="must match filter_fields arity"):
             FilterLoadResult(
-                column_ids={
-                    "molecule_chembl_id": ("CHEMBL1",),
-                    "target_chembl_id": ("CHEMBL240",),
-                },
-                filter_fields=("molecule_chembl_id", "target_chembl_id"),
-                valid_combinations=frozenset({("CHEMBL1",)}),
+                column_ids={"target_id": ("T1",), "assay_id": ("A1",)},
+                filter_fields=("target_id", "assay_id"),
+                valid_combinations=frozenset({("T1",)}),
+            )
+
+    def test_multi_column_combination_values_must_be_declared(self) -> None:
+        """Each row-wise value belongs to its corresponding column domain."""
+        with pytest.raises(ValueError, match="must belong to column_ids"):
+            FilterLoadResult(
+                column_ids={"target_id": ("T1",), "assay_id": ("A1",)},
+                filter_fields=("target_id", "assay_id"),
+                valid_combinations=frozenset({("T1", "A2")}),
             )

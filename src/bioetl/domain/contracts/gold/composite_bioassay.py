@@ -192,7 +192,7 @@ class CompositeTargetGoldSchema(CompositeLookupLineageSchema):
 
     @pa.check("top_level_count", name="top_level_count_integer")
     def top_level_count_integer(cls, series: Series[float]) -> Series[bool]:
-        """Require nullable aggregate counts to be whole numbers."""
+        """Require nullable aggregate counts to remain integer-valued."""
         return cast(Series[bool], series.isna() | series.mod(1).eq(0))
 
     canonical_top_levels: Series[str] = pa.Field(

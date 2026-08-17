@@ -46,19 +46,14 @@ class FilterLoadResult:
 
     def __post_init__(self) -> None:
         """Validate result consistency."""
-        if self.column_ids and not self.ids:
-            self._validate_multi_column()
+        if self.column_ids:
+            _validate_multi_column_result(
+                column_ids=self.column_ids,
+                valid_combinations=self.valid_combinations,
+                filter_fields=self.filter_fields,
+            )
             return
-        # Single-column validation
-        if self.unique_count != len(self.ids):
-            raise ValueError(
-                f"unique_count ({self.unique_count}) must match len(ids) ({len(self.ids)})"
-            )
-        if self.duplicate_count != self.total_count - self.unique_count:
-            raise ValueError(
-                f"duplicate_count ({self.duplicate_count}) must equal "
-                f"total_count - unique_count ({self.total_count - self.unique_count})"
-            )
+        _validate_single_column_result(self)
 
     def _validate_multi_column(self) -> None:
         """Fail closed when multi-column combinations do not match declared fields."""
@@ -93,3 +88,45 @@ class FilterLoadResult:
     def is_multi_column(self) -> bool:
         """Check if this is a multi-column filter result."""
         return bool(self.column_ids) and len(self.column_ids) > 1
+
+
+def _validate_single_column_result(result: FilterLoadResult) -> None:
+    """Validate counts for a single-column filter result."""
+    if result.unique_count != len(result.ids):
+        raise ValueError(
+            f"unique_count ({result.unique_count}) must match "
+            f"len(ids) ({len(result.ids)})"
+        )
+    if result.duplicate_count != result.total_count - result.unique_count:
+        raise ValueError(
+            f"duplicate_count ({result.duplicate_count}) must equal "
+            f"total_count - unique_count ({result.total_count - result.unique_count})"
+        )
+
+
+def _validate_multi_column_result(
+    *,
+    column_ids: Mapping[str, tuple[str, ...]],
+    valid_combinations: frozenset[tuple[str, ...]],
+    filter_fields: tuple[str, ...],
+) -> None:
+    """Validate ordered fields and exact combinations for column-mode results."""
+    if tuple(column_ids) != filter_fields:
+        raise ValueError("filter_fields must match column_ids keys in order")
+    allowed_values = tuple(column_ids[field] for field in filter_fields)
+    for combination in valid_combinations:
+        _validate_multi_column_combination(combination, allowed_values)
+
+
+def _validate_multi_column_combination(
+    combination: tuple[str, ...],
+    allowed_values: tuple[tuple[str, ...], ...],
+) -> None:
+    """Validate one row-wise multi-column value combination."""
+    if len(combination) != len(allowed_values):
+        raise ValueError("valid_combinations entries must match filter_fields arity")
+    if any(
+        value not in allowed
+        for value, allowed in zip(combination, allowed_values, strict=True)
+    ):
+        raise ValueError("valid_combinations values must belong to column_ids")
