@@ -131,6 +131,17 @@ class InputFilterContext:
 
     def __post_init__(self) -> None:
         """Validate filter configuration."""
+        if self.multi_filter_ids is not None:
+            object.__setattr__(
+                self,
+                "multi_filter_ids",
+                {
+                    key: tuple(values)
+                    for key, values in self.multi_filter_ids.items()
+                },
+            )
+        if self.fallback_mapping is not None:
+            object.__setattr__(self, "fallback_mapping", dict(self.fallback_mapping))
         if not self.enabled:
             return
         if self.multi_filter_ids is not None:

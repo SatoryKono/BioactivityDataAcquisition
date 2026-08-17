@@ -32,16 +32,22 @@ def _extract_date_parts(
     return parts if parts else None
 
 
-def _format_parts_to_date(parts: Sequence[int]) -> str:
+def _format_parts_to_date(parts: Sequence[int]) -> str | None:
     """Format date parts to YYYY-MM-DD with end-of-period normalization."""
     year = parts[0]
-    if len(parts) >= 3:
-        return _DATE_FULL_FMT.format(year, parts[1], parts[2])
-    if len(parts) == 2:
-        return _DATE_FULL_FMT.format(
-            year, parts[1], _get_last_day_of_month(year, parts[1])
-        )
-    return _DATE_FULL_FMT.format(year, 12, 31)
+    try:
+        if len(parts) >= 3:
+            date(year, parts[1], parts[2])
+            return _DATE_FULL_FMT.format(year, parts[1], parts[2])
+        if len(parts) == 2:
+            date(year, parts[1], 1)
+            return _DATE_FULL_FMT.format(
+                year, parts[1], _get_last_day_of_month(year, parts[1])
+            )
+        date(year, 12, 31)
+        return _DATE_FULL_FMT.format(year, 12, 31)
+    except ValueError:
+        return None
 
 
 def format_date_parts(date_parts: Sequence[Sequence[int]] | None) -> str | None:

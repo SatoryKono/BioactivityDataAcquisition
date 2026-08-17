@@ -487,6 +487,10 @@ class TestRunContextValidationAndProperties:
             {"molecule_chembl_id": ("CHEMBL1",), "document_chembl_id": ("DOC1",)}
         )
         assert ctx.filter_field == "molecule_chembl_id"
+        owned = {"molecule_chembl_id": ("CHEMBL1",)}
+        frozen = InputFilterContext.from_multi_ids(owned)
+        owned["molecule_chembl_id"] = ("CHEMBL9",)
+        assert frozen.multi_filter_ids == {"molecule_chembl_id": ("CHEMBL1",)}
 
         with pytest.raises(ValueError, match="multi_filter_ids must be non-empty"):
             InputFilterContext.from_multi_ids({})
