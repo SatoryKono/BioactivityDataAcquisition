@@ -197,14 +197,14 @@ class FilterConfigBuilder:
         Returns:
             Configured InputFilterConfig, or None if filtering is disabled.
         """
-        if direct_multi_filter_ids is not None:
+        if direct_multi_filter_ids:
             return FilterConfigBuilder.from_direct_multi_ids(
                 multi_filter_ids=direct_multi_filter_ids,
                 valid_combinations=direct_valid_combinations,
                 batch_size=yaml_filter.batch_size,
             )
 
-        if direct_filter_ids is not None:
+        if direct_filter_ids:
             return FilterConfigBuilder.from_direct_ids(
                 filter_ids=direct_filter_ids,
                 filter_field=cli_field or yaml_filter.filter_field or "doi",

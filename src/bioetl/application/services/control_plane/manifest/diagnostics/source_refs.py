@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from contextlib import suppress
 from datetime import datetime
 
 from bioetl.domain.control_plane import (
@@ -63,13 +64,18 @@ def _group_input_snapshots_by_source(
     for item in input_snapshots:
         if not isinstance(item, dict):
             continue
-        provider = str(item.get("provider") or manifest.provider).strip()
-        entity = str(item.get("entity") or manifest.entity).strip()
-        pipeline_name = str(item.get("pipeline_name") or manifest.pipeline_name).strip()
+        provider = str(item.get("provider") or manifest.provider)
+        entity = str(item.get("entity") or manifest.entity)
+        pipeline_name = str(item.get("pipeline_name") or manifest.pipeline_name)
         query_value = item.get("query")
-        query = str(query_value).strip() if query_value is not None else None
+        query = str(query_value) if query_value is not None else None
         snapshots_by_source.setdefault(
-            (provider, entity, pipeline_name, query),
+            _source_key(
+                provider=provider,
+                entity=entity,
+                pipeline_name=pipeline_name,
+                query=query,
+            ),
             [],
         ).append(_build_snapshot_ref(item))
     return snapshots_by_source
@@ -115,14 +121,19 @@ def _pop_matching_source_snapshots(
     query: str | None,
 ) -> list[RunInputSnapshotRef]:
     """Resolve ledger-derived snapshots back onto a manifest-declared source."""
-    exact_key = (provider, entity, pipeline_name, query)
+    exact_key = _source_key(
+        provider=provider,
+        entity=entity,
+        pipeline_name=pipeline_name,
+        query=query,
+    )
     if query is not None:
         return snapshots_by_source.pop(exact_key, [])
 
     matched_keys = [
         key
         for key in snapshots_by_source
-        if key[:3] == (provider, entity, pipeline_name)
+        if key[:3] == exact_key[:3]
     ]
     snapshots: list[RunInputSnapshotRef] = []
     for key in matched_keys:
@@ -145,16 +156,29 @@ def _build_additional_source_refs(
             input_snapshots=tuple(snapshots),
         )
         for (provider, entity, pipeline_name, query), snapshots in sorted(
-            snapshots_by_source.items()
+            snapshots_by_source.items(),
+            key=lambda item: (*item[0][:3], item[0][3] is not None, item[0][3] or ""),
         )
     ]
 
 
+def _source_key(
+    *,
+    provider: str,
+    entity: str,
+    pipeline_name: str,
+    query: str | None,
+) -> tuple[str, str, str, str | None]:
+    """Return one normalized source-identity key for grouping and lookup."""
+    return (
+        provider.strip(),
+        entity.strip(),
+        pipeline_name.strip(),
+        query.strip() if query is not None else None,
+    )
+
+
 def _build_snapshot_ref(snapshot: dict[str, object]) -> RunInputSnapshotRef:
-    captured_at_value = snapshot.get("captured_at")
-    captured_at = None
-    if isinstance(captured_at_value, str) and captured_at_value.strip():
-        captured_at = datetime.fromisoformat(captured_at_value)
     return RunInputSnapshotRef(
         snapshot_id=str(snapshot.get("snapshot_id") or ""),
         content_hash=str(snapshot.get("content_hash") or ""),
@@ -166,8 +190,17 @@ def _build_snapshot_ref(snapshot: dict[str, object]) -> RunInputSnapshotRef:
         object_version_id=_optional_text(snapshot.get("object_version_id")),
         etag=_optional_text(snapshot.get("etag")),
         last_modified=_optional_text(snapshot.get("last_modified")),
-        captured_at=captured_at,
+        captured_at=_parse_optional_datetime(snapshot.get("captured_at")),
     )
+
+
+def _parse_optional_datetime(value: object) -> datetime | None:
+    """Parse an optional ISO datetime without failing diagnostics assembly."""
+    if not isinstance(value, str) or not value.strip():
+        return None
+    with suppress(ValueError):
+        return datetime.fromisoformat(value.strip())
+    return None
 
 
 def _optional_text(value: object) -> str | None:

@@ -140,9 +140,10 @@ def test_all_potency_labels_are_reachable_for_presets(
     potency = config.potency_threshold
     high = config.high_potency_threshold
     midpoint = (potency + high) / 2.0
+    inactive_threshold = potency - (high - potency) / 2.0
 
     labels = {
-        normalizer.classify_potency(potency - 1.5),
+        normalizer.classify_potency(inactive_threshold - 0.5),
         normalizer.classify_potency(potency - 0.5),
         normalizer.classify_potency((potency + midpoint) / 2.0),
         normalizer.classify_potency((midpoint + high) / 2.0),
@@ -339,7 +340,7 @@ def test_aggregation_output_field_is_non_empty_and_normalized() -> None:
 
 
 def test_aggregation_rejects_duplicate_effective_output_fields() -> None:
-    with pytest.raises(ValueError, match="duplicate output fields"):
+    with pytest.raises(ValueError, match="duplicate output field"):
         AggregationConfig(
             group_by="id",
             fields=(

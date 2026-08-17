@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -39,7 +40,10 @@ def load_latest_pointer(
     base = _root(root) / kind / _safe_segment(owner) / "_latest.json"
     if not base.is_file():
         return None
-    payload = json.loads(base.read_text(encoding="utf-8"))
+    try:
+        payload = json.loads(base.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return None
     return payload if isinstance(payload, dict) else None
 
 
@@ -100,7 +104,10 @@ def _load_json_dict(
 ) -> dict[str, Any] | None:  # Any: decoded JSON object
     if not path.is_file():
         return None
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return None
     return payload if isinstance(payload, dict) else None
 
 
@@ -126,15 +133,12 @@ def _list_reports(
     *,
     kind: str,
     owner: str | None,
-    limit: int,
+    limit: int | None,
     root: Path | None,
 ) -> list[ReportIndexEntry]:
     """List newest reports by mtime first; hydrate meta only for top ``limit``."""
     base = _root(root) / kind
     if not base.is_dir():
-        return []
-    capped = max(0, limit)
-    if capped == 0:
         return []
     candidates = _collect_report_candidates(base=base, kind=kind, owner=owner)
     candidates.sort(key=lambda item: item[0], reverse=True)
@@ -146,8 +150,21 @@ def _list_reports(
             run_dir=run_dir,
             json_path=json_path,
         )
-        for mtime, owner_name, run_dir, json_path in candidates[:capped]
+        for mtime, owner_name, run_dir, json_path in _limit_report_candidates(
+            candidates,
+            limit,
+        )
     ]
+
+
+def _limit_report_candidates(
+    candidates: list[tuple[float, str, Path, Path]],
+    limit: int | None,
+) -> list[tuple[float, str, Path, Path]]:
+    """Return an optional ranked prefix without imposing a retention cap."""
+    if limit is None:
+        return candidates
+    return candidates[: max(0, limit)]
 
 
 def _collect_report_candidates(
@@ -320,9 +337,7 @@ def _reports_for_prune(
     owner: str | None,
     root: Path | None,
 ) -> list[ReportIndexEntry]:
-    if kind == "pipeline":
-        return list_pipeline_reports(pipeline_name=owner, limit=10_000, root=root)
-    return list_workflow_reports(workflow_name=owner, limit=10_000, root=root)
+    return _list_reports(kind=kind, owner=owner, limit=None, root=root)
 
 
 def _prune_candidates(
@@ -331,6 +346,7 @@ def _prune_candidates(
     max_age_days: int | None,
     now: datetime | None,
 ) -> list[ReportIndexEntry]:
+    """Select victims from entries sorted by modification time descending."""
     victims: list[ReportIndexEntry] = []
     if max_age_days is not None and now is not None:
         cutoff = now.astimezone(UTC).timestamp() - (max_age_days * 86400)
@@ -397,9 +413,7 @@ def _as_mapping(
 
 
 def _rm_tree(path: Path) -> None:
-    if path.is_file():
+    if path.is_symlink() or path.is_file():
         path.unlink(missing_ok=True)
         return
-    for child in path.iterdir():
-        _rm_tree(child)
-    path.rmdir()
+    shutil.rmtree(path)

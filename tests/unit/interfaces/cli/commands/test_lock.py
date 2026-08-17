@@ -158,7 +158,7 @@ class TestLockReleaseCommand:
                 ],
             )
 
-        assert result.exit_code == 0
+        assert result.exit_code == 1
         # Should print a warning about lock not released
         assert "not released" in result.output or "not held" in result.output
 
@@ -176,8 +176,8 @@ class TestLockReleaseCommand:
             ],
         )
 
-        assert result.exit_code == 0  # returns 0 but prints error
-        assert "Invalid run-id" in result.output or "UUID" in result.output
+        assert result.exit_code == 2
+        assert "Invalid value for --run-id" in result.output
 
     def test_release_missing_pipeline_exits_nonzero(
         self, cli_runner: CliRunner
@@ -267,8 +267,8 @@ class TestLockCheckCommand:
             ],
         )
 
-        assert result.exit_code == 0
-        assert "Invalid run-id" in result.output or "UUID" in result.output
+        assert result.exit_code == 2
+        assert "Invalid value for --run-id" in result.output
 
     def test_check_missing_run_id_exits_nonzero(self, cli_runner: CliRunner) -> None:
         """Test that missing --run-id option causes non-zero exit."""

@@ -114,17 +114,18 @@ def _make_request(**kwargs: object) -> RunExecutionRequest:
 class TestHandleCliFailure:
     """Tests for handle_cli_failure."""
 
-    def test_cleanup_preview_reason_prints_error_and_returns(
+    def test_cleanup_preview_reason_prints_error_and_exits(
         self, capsys: pytest.CaptureFixture[str]
     ) -> None:
-        """CLI_CLEANUP_PREVIEW* reason prints error to stderr and returns (no sys.exit)."""
+        """CLI_CLEANUP_PREVIEW* failures stay visible and exit non-zero."""
         exc = RuntimeError("disk full")
-        # Must NOT raise SystemExit
-        handle_cli_failure(
-            exc,
-            pipeline="chembl_activity",
-            reason_code="CLI_CLEANUP_PREVIEW_ERROR",
-        )
+        with pytest.raises(SystemExit) as exc_info:
+            handle_cli_failure(
+                exc,
+                pipeline="chembl_activity",
+                reason_code="CLI_CLEANUP_PREVIEW_ERROR",
+            )
+        assert exc_info.value.code == ExitCode.FAIL
         err = capsys.readouterr().err
         assert "Error previewing cleanup" in err
         assert "disk full" in err
@@ -136,11 +137,13 @@ class TestHandleCliFailure:
     ) -> None:
         """Cleanup-preview error message includes exception class name."""
         exc = ValueError("bad config")
-        handle_cli_failure(
-            exc,
-            pipeline="pubmed",
-            reason_code="CLI_CLEANUP_PREVIEW_SOMETHING",
-        )
+        with pytest.raises(SystemExit) as exc_info:
+            handle_cli_failure(
+                exc,
+                pipeline="pubmed",
+                reason_code="CLI_CLEANUP_PREVIEW_SOMETHING",
+            )
+        assert exc_info.value.code == ExitCode.FAIL
         err = capsys.readouterr().err
         assert "ValueError" in err
 
@@ -312,39 +315,41 @@ class TestHandleDestructiveStep:
                 yes=False,
             )
 
-    def test_bioetl_error_calls_handle_failure_and_returns_false(
+    def test_bioetl_error_calls_handle_failure_and_exits(
         self, capsys: pytest.CaptureFixture[str]
     ) -> None:
-        """BioETLError is caught, handle_cli_failure called, returns False (lines 142-148)."""
+        """BioETLError in cleanup preview remains a failed execution."""
         with patch(
             "bioetl.interfaces.cli.commands.domains.run.command_policy.handle_destructive_run_confirmation",
             side_effect=NetworkError("network down"),
         ):
-            result = handle_destructive_step(
-                pipeline="chembl_activity",
-                run_type="rebuild",
-                dry_run=False,
-                yes=True,
-            )
-        assert result is False
+            with pytest.raises(SystemExit) as exc_info:
+                handle_destructive_step(
+                    pipeline="chembl_activity",
+                    run_type="rebuild",
+                    dry_run=False,
+                    yes=True,
+                )
+        assert exc_info.value.code == ExitCode.FAIL
         err = capsys.readouterr().err
         assert "Error previewing cleanup" in err
 
-    def test_cli_entrypoint_typed_error_returns_false(
+    def test_cli_entrypoint_typed_error_exits(
         self, capsys: pytest.CaptureFixture[str]
     ) -> None:
-        """OSError (member of CLI_ENTRYPOINT_TYPED_ERRORS) is caught, returns False (lines 149-155)."""
+        """OSError in cleanup preview remains a failed execution."""
         with patch(
             "bioetl.interfaces.cli.commands.domains.run.command_policy.handle_destructive_run_confirmation",
             side_effect=OSError("permission denied"),
         ):
-            result = handle_destructive_step(
-                pipeline="chembl_activity",
-                run_type="backfill",
-                dry_run=False,
-                yes=True,
-            )
-        assert result is False
+            with pytest.raises(SystemExit) as exc_info:
+                handle_destructive_step(
+                    pipeline="chembl_activity",
+                    run_type="backfill",
+                    dry_run=False,
+                    yes=True,
+                )
+        assert exc_info.value.code == ExitCode.FAIL
         err = capsys.readouterr().err
         assert "Error previewing cleanup" in err
 

@@ -32,6 +32,7 @@ DEFAULT_REPORT_ROOT = Path("reports") / "run-reports"
 # Stale Docker Desktop bind caches that point at an empty tree fail this check.
 REPORT_ROOT_MARKER_NAME = ".bioetl-report-root"
 REPORT_ROOT_MARKER_VALUE = "bioetl-report-root-v1"
+_REPORT_ROOT_MARKER_READ_LIMIT = 4096
 
 # Machine-local source attestation written by the supported Docker runtime
 # manager. Unlike the tracked layout marker above, this value is bound to the
@@ -100,10 +101,10 @@ def write_report_root_source_identity(
             suffix=".tmp",
             delete=False,
         ) as handle:
+            temporary_path = Path(handle.name)
             handle.write(serialized)
             handle.flush()
             os.fsync(handle.fileno())
-            temporary_path = Path(handle.name)
         temporary_path.replace(target)
     finally:
         if temporary_path is not None and temporary_path.exists():
@@ -262,14 +263,17 @@ def inspect_report_root_marker(
         )
         return payload
     try:
-        token = marker.read_text(encoding="utf-8").strip()
-    except OSError as exc:
+        with marker.open(encoding="utf-8") as stream:
+            marker_prefix = stream.read(_REPORT_ROOT_MARKER_READ_LIMIT + 1)
+        oversized = len(marker_prefix) > _REPORT_ROOT_MARKER_READ_LIMIT
+        token = marker_prefix[:_REPORT_ROOT_MARKER_READ_LIMIT].strip()
+    except (OSError, UnicodeDecodeError) as exc:
         payload["status"] = "unhealthy"
         payload["marker"] = "unreadable"
         payload["layout_marker_state"] = "invalid"
         payload["message"] = f"Report-root marker unreadable: {exc}"
         return payload
-    if token != REPORT_ROOT_MARKER_VALUE:
+    if oversized or token != REPORT_ROOT_MARKER_VALUE:
         payload["status"] = "unhealthy"
         payload["marker"] = "mismatch"
         payload["layout_marker_state"] = "invalid"

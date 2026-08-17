@@ -17,6 +17,7 @@ from bioetl.interfaces.cli.commands.domains.shared.option_mapping import (
     option_optional_str,
     option_str,
 )
+from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
 
 __all__ = [
@@ -176,7 +177,7 @@ def run_async_inspection_command(
             result = await action()
         except ValueError as exc:
             echo_error(error_title, str(exc))
-            return
+            raise SystemExit(ExitCode.FAIL) from exc
         emit_inspection_payload(
             result.to_dict(),
             output_format,

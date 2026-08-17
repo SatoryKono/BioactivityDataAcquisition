@@ -188,7 +188,7 @@ def handle_cli_failure(
                 f"error_type={type(exc).__name__})"
             ),
         )
-        return
+        raise SystemExit(ExitCode.FAIL) from exc
 
     handle_cli_execution_failure(
         exc,

@@ -33,7 +33,9 @@ from __future__ import annotations
 import inspect
 import json
 from datetime import UTC, datetime
+from types import SimpleNamespace
 from typing import Any
+from unittest.mock import MagicMock
 
 import pytest
 from click.testing import CliRunner
@@ -229,3 +231,29 @@ class TestLineageCommands:
 
         assert result.exit_code != 0
         assert "Provide exactly one of --run-id or --manifest-id" in result.stderr
+
+    @pytest.mark.parametrize(
+        "arguments",
+        [
+            ["lineage", "show-fragment", "missing"],
+            ["lineage", "trace", "--dataset-ref", "missing"],
+            ["lineage", "explain", "--run-id", "missing"],
+        ],
+    )
+    def test_lineage_lookup_value_errors_exit_nonzero(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+        arguments: list[str],
+    ) -> None:
+        service = SimpleNamespace(
+            show_fragment=MagicMock(side_effect=ValueError("missing lineage")),
+            trace=MagicMock(side_effect=ValueError("missing lineage")),
+            explain_run=MagicMock(side_effect=ValueError("missing lineage")),
+        )
+        _patch_lineage_service(monkeypatch, service)
+
+        result = cli_runner.invoke(cli, arguments)
+
+        assert result.exit_code == 1
+        assert "missing lineage" in result.output

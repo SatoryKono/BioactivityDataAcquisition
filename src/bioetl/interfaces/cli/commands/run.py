@@ -150,9 +150,8 @@ def validate_options(start_offset: int | None, run_type: str, resume: bool) -> N
     )
     if validation.is_valid:
         return
-    if validation.error_message is not None:
-        echo_error(validation.error_message)
-        sys.exit(ExitCode.CONFIG_ERROR)
+    echo_error(validation.error_message or "Invalid run options")
+    sys.exit(ExitCode.CONFIG_ERROR)
 
 
 def build_run_options(options_input: CliRunOptionsInput) -> RunOptions:
