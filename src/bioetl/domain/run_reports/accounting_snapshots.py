@@ -27,8 +27,8 @@ class StageAccountingSnapshotsMixin:
     _stages: dict[str, _StageBucket] = cast(Any, None)  # Any: host attr default (PD3)
     _touched_instrumented: bool = cast(Any, None)  # Any: host attr default (PD3)
 
-    def _sum_outcome(self, stage: str, outcome: str) -> int:
-        """Return a stage/outcome total supplied by the accumulator."""
+    def _sum_outcome(self, stage: str, outcome: str) -> int | None:
+        """Return a measured stage/outcome total, or None when unmapped."""
         raise NotImplementedError
 
     def snapshot_layers_from_metrics(self, metrics: dict[str, int]) -> LayerCounts:
@@ -51,15 +51,19 @@ class StageAccountingSnapshotsMixin:
         return LayerCounts(
             bronze_records=int(metrics.get("records_bronze", 0)),
             silver_valid=int(metrics.get("records_silver", 0)),
-            silver_filtered_out=mapped_filtered or silver_filtered,
-            silver_quarantined=mapped_quarantined or silver_quarantined,
-            silver_skipped=mapped_skipped,
-            silver_deduplicated=mapped_dedup,
+            silver_filtered_out=_prefer_mapped_count(mapped_filtered, silver_filtered),
+            silver_quarantined=_prefer_mapped_count(
+                mapped_quarantined, silver_quarantined
+            ),
+            silver_skipped=_prefer_mapped_count(mapped_skipped, 0),
+            silver_deduplicated=_prefer_mapped_count(mapped_dedup, 0),
             gold_written=int(metrics.get("records_gold", 0)),
-            gold_excluded_by_contract=mapped_gold_excluded or gold_excluded,
-            gold_quarantined=mapped_gold_quarantined,
-            gold_skipped=mapped_gold_skipped,
-            gold_deduplicated=mapped_gold_dedup,
+            gold_excluded_by_contract=_prefer_mapped_count(
+                mapped_gold_excluded, gold_excluded
+            ),
+            gold_quarantined=_prefer_mapped_count(mapped_gold_quarantined, 0),
+            gold_skipped=_prefer_mapped_count(mapped_gold_skipped, 0),
+            gold_deduplicated=_prefer_mapped_count(mapped_gold_dedup, 0),
         )
 
     def snapshot_funnel(self, layers: LayerCounts) -> tuple[StageFunnelRow, ...]:
@@ -278,3 +282,8 @@ def _is_unknown_balance(records_in: int, tracking: TrackingCoverage) -> bool:
 
 def _is_degraded_balance(unaccounted: int, tracking: TrackingCoverage) -> bool:
     return unaccounted > 0 and tracking is TrackingCoverage.PARTIAL
+
+
+def _prefer_mapped_count(mapped: int | None, coarse: int) -> int:
+    """Keep a measured zero; fall back to coarse only when unmapped."""
+    return coarse if mapped is None else mapped

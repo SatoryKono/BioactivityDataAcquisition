@@ -92,11 +92,25 @@ def _serialize_with_stdlib(
 
 def _validate_canonical_json_value(value: object) -> None:
     """Reject values whose canonical output would depend on the JSON backend."""
+    _reject_numpy_like_array(value)
     if isinstance(value, float):
         _assert_finite_float(value)
         return
     if _is_json_scalar(value):
         return
+    _validate_canonical_json_container(value)
+
+
+def _reject_numpy_like_array(value: object) -> None:
+    if not _is_numpy_like_array(value):
+        return
+    raise TypeError(
+        "Canonical JSON serialization requires JSON-compatible values; "
+        f"got {type(value).__name__}"
+    )
+
+
+def _validate_canonical_json_container(value: object) -> None:
     if isinstance(value, dict):
         _validate_json_mapping(value)
         return
@@ -137,8 +151,19 @@ def _validate_json_sequence(value: Sequence[object]) -> None:
 
 def _is_nested_json_sequence(value: object) -> bool:
     """Return whether the value is a JSON-like sequence."""
-    return isinstance(value, Sequence) and not isinstance(
-        value, (str, bytes, bytearray)
+    return (
+        isinstance(value, Sequence)
+        and not isinstance(value, (str, bytes, bytearray))
+        and not _is_numpy_like_array(value)
+    )
+
+
+def _is_numpy_like_array(value: object) -> bool:
+    """Return whether value looks like a NumPy / pandas array, not JSON."""
+    return (
+        hasattr(value, "dtype")
+        and hasattr(value, "shape")
+        and not isinstance(value, (str, bytes, bytearray, memoryview))
     )
 
 

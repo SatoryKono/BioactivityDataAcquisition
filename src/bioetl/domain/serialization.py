@@ -25,8 +25,9 @@ from bioetl.domain.types import JsonDict
 
 from __future__ import annotations
 
+import math
 import re
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from functools import lru_cache
 from typing import TYPE_CHECKING
 
@@ -85,6 +86,7 @@ def serialize_to_json(
         '{"key":"value"}'
 
     """
+    _reject_non_finite_json_floats(data)
     if _orjson_available:
         return _serialize_with_orjson(
             data, sort_keys=sort_keys, ensure_ascii=ensure_ascii
@@ -172,12 +174,45 @@ def canonicalize_json_string(value: str | None) -> str | None:
 
 
 def _escape_non_ascii(text: str) -> str:
-    """Escape non-ASCII characters using JSON unicode escape format (\\uNNNN).
+    """Escape non-ASCII characters using JSON unicode escape format.
 
-    Performance note: Using a compiled regex `re.sub` is significantly faster
-    (~18x) than iterating over the string and checking each character manually.
+    Supplementary-plane characters become UTF-16 surrogate pairs.
     """
-    return _NON_ASCII_RE.sub(lambda m: f"\\u{ord(m.group(0)):04x}", text)
+    return _NON_ASCII_RE.sub(_escape_unicode_match, text)
+
+
+def _escape_unicode_match(match: re.Match[str]) -> str:
+    """Return a valid JSON escape, including surrogate pairs outside the BMP."""
+    code_point = ord(match.group(0))
+    if code_point <= 0xFFFF:
+        return f"\\u{code_point:04x}"
+    supplementary = code_point - 0x10000
+    high_surrogate = 0xD800 + (supplementary >> 10)
+    low_surrogate = 0xDC00 + (supplementary & 0x3FF)
+    return f"\\u{high_surrogate:04x}\\u{low_surrogate:04x}"
+
+
+def _reject_non_finite_json_floats(value: object) -> None:
+    """Reject NaN/Inf so orjson and stdlib cannot diverge on non-finite floats."""
+    if isinstance(value, float) and not math.isfinite(value):
+        raise ValueError("JSON serialization does not allow NaN or Infinity")
+    _reject_nested_non_finite_json_floats(value)
+
+
+def _reject_nested_non_finite_json_floats(value: object) -> None:
+    if isinstance(value, Mapping):
+        for nested in value.values():
+            _reject_non_finite_json_floats(nested)
+        return
+    if _is_json_like_sequence(value):
+        for nested in value:
+            _reject_non_finite_json_floats(nested)
+
+
+def _is_json_like_sequence(value: object) -> bool:
+    return isinstance(value, Sequence) and not isinstance(
+        value, (str, bytes, bytearray)
+    )
 
 
 def _has_non_ascii(text: str) -> bool:
@@ -226,6 +261,7 @@ def _serialize_with_stdlib(
         sort_keys=sort_keys,
         separators=(",", ":"),
         ensure_ascii=ensure_ascii,
+        allow_nan=False,
     )
 
 
