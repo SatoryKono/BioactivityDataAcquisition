@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 from bioetl.domain.value_objects.activity_concentration import (
@@ -18,6 +19,8 @@ class PChemblValue:
 
     def __post_init__(self) -> None:
         """Validate pChEMBL value invariants."""
+        if not math.isfinite(self.value):
+            raise ValueError(f"pChEMBL value must be finite: {self.value}")
         if self.value < 0:
             raise ValueError(f"pChEMBL value cannot be negative: {self.value}")
         if self.value > 14:

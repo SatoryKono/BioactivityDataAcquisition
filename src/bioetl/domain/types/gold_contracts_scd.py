@@ -85,7 +85,7 @@ class ScdConfig:
     ) -> ScdConfig:
         """Build typed config from YAML/test mapping input."""
         scd_type_raw = raw.get("type", 2)
-        if not isinstance(scd_type_raw, int):
+        if isinstance(scd_type_raw, bool) or not isinstance(scd_type_raw, int):
             raise ValueError("type must be an integer when provided")
 
         return cls(

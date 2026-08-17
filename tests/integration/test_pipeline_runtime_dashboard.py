@@ -548,9 +548,12 @@ def test_runtime_first_action_cta_contract() -> None:
         f"got {first_action_panel.get('title')!r}"
     )
     content = str(first_action_panel.get("options", {}).get("content", ""))
+    description = str(first_action_panel.get("description", ""))
     assert "continue monitoring" in content
     assert "highest-severity blocker" in content
-    assert "verify coverage" in content
+    assert "SCRAPING" not in content
+    assert "verify coverage" in description.lower()
+    assert "scraping is telemetry confidence" in description.lower()
     # First Action panel uses panel-level links, not options.dataLinks
     links = first_action_panel.get("links", [])
     assert isinstance(links, list), "First Action panel must have links list"

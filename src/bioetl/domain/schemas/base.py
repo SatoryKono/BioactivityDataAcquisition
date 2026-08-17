@@ -17,9 +17,7 @@ __all__ = [
 
 # Regex pattern for ISO 8601 timestamp validation (YYYY-MM-DDTHH:MM:SS with optional subseconds and timezone)
 # Matches: 2024-01-15T10:30:00, 2024-01-15T10:30:00.123456, 2024-01-15T10:30:00+00:00
-ISO8601_TIMESTAMP_REGEX = (
-    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?([+-]\d{2}:\d{2}|Z)?$"
-)
+ISO8601_TIMESTAMP_REGEX = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?([+-]\d{2}:\d{2}|Z)?$"
 
 
 class ETLRecordSchema(pa.DataFrameModel):
@@ -59,6 +57,7 @@ class ETLRecordSchema(pa.DataFrameModel):
         str_matches=ISO8601_TIMESTAMP_REGEX,
         description="Timestamp when the record was ingested (UTC, ISO 8601 format).",
     )
+
     index: Series[int] = pa.Field(
         alias="_index",
         nullable=False,
@@ -85,3 +84,4 @@ class ETLRecordSchema(pa.DataFrameModel):
         strict = True  # Disallow columns not specified in the schema
         ordered = True  # Enforce column order
         coerce = True  # Coerce data types to match schema
+

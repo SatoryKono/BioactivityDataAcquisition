@@ -51,7 +51,7 @@ dashboards:
       - Prometheus
       - BioETL Ops HTTP
       - Grafana
-    panel_count: 26
+    panel_count: 27
     key_panels:
       - id: 214
         title: Monitor Fleet Health
@@ -115,7 +115,7 @@ dashboards:
       - Prometheus
       - BioETL Ops HTTP
       - Grafana
-    panel_count: 31
+    panel_count: 35
     key_panels:
       - id: 9101
         title: Monitor Fleet Severity
@@ -212,7 +212,7 @@ dashboards:
     data_sources:
       - Prometheus
       - BioETL Ops HTTP
-    panel_count: 15
+    panel_count: 18
     key_panels:
       - id: 9402
         title: Inspect Run Identity
@@ -223,9 +223,9 @@ dashboards:
         type: table
         description: Bronze/Silver/Gold accounting hub via Ops HTTP
       - id: 3010
-        title: Inspect Recent Runs (last 20)
+        title: Inspect Recent Runs (last 4)
         type: table
-        description: pipeline-run-reports index; VALID EMPTY vs TREE_MISSING bind gap
+        description: pipeline-run-reports first-screen index; VALID EMPTY vs TREE_MISSING bind gap
       - id: 3020
         title: Inspect Recent Workflow Runs (last 20)
         type: table

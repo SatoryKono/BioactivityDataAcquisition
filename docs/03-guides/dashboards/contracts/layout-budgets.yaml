@@ -83,6 +83,69 @@ data_panel_types:
   - heatmap
   - state-timeline
 
+# DASH-FIT-004: browser-rounding tolerance only. Not a layout exemption.
+panel_containment_tolerance_px: 2
+
+# First-window types that fail closed on internal scroll overflow.
+first_window_containment_types:
+  - text
+  - stat
+  - table
+
+# DASH-FIT-005: every first-window table must declare a bounded first-screen
+# row cap. bind is how the JSON enforces it (topk / limit / filter).
+first_window_summary_tables:
+  - dashboard: bioetl-overview-v2.json
+    id: 215
+    max_rows: 4
+    owner: "@bioetl-observability"
+    bind: topk
+  - dashboard: bioetl-overview-v2.json
+    id: 9002
+    max_rows: 4
+    owner: "@bioetl-observability"
+    bind: topk
+  - dashboard: bioetl-runtime.json
+    id: 9101
+    max_rows: 3
+    owner: "@bioetl-observability"
+    bind: topk
+  - dashboard: bioetl-provider-health-v2.json
+    id: 9101
+    max_rows: 4
+    owner: "@bioetl-observability"
+    bind: topk
+  - dashboard: bioetl-provider-health-v2.json
+    id: 9102
+    max_rows: 4
+    owner: "@bioetl-observability"
+    bind: topk
+  - dashboard: bioetl-provider-health-v2.json
+    id: 9103
+    max_rows: 4
+    owner: "@bioetl-observability"
+    bind: topk
+  - dashboard: bioetl-incident-v1.json
+    id: 2010
+    max_rows: 5
+    owner: "@bioetl-observability"
+    bind: topk
+  - dashboard: bioetl-run-explorer-v1.json
+    id: 3010
+    max_rows: 4
+    owner: "@bioetl-observability"
+    bind: limit
+  - dashboard: bioetl-run-explorer-v1.json
+    id: 9402
+    max_rows: 4
+    owner: "@bioetl-observability"
+    bind: filter
+  - dashboard: bioetl-run-explorer-v1.json
+    id: 9403
+    max_rows: 4
+    owner: "@bioetl-observability"
+    bind: filter
+
 # DASH-DENSITY-002 scalar information density (values / w*h). Only scalar panels
 # count; timeseries/table/text/row are excluded (runtime-dependent value counts).
 # MUST equal report_dashboard_scalar_density.SCALAR_TYPES (locked by a test).
@@ -134,15 +197,13 @@ trust_gate_panels:
     id: 9401
 
 allowlists:
-  straddle:
-    - dashboard: bioetl-provider-health-v2.json
-      id: 9104
-      owner: "@bioetl-observability"
-      rationale: >-
-        Monitor Telemetry Presence (y=15, h=4, bottom=19) is the first-screen
-        trust marker for the provider severity band. Shrinking to h=3 breaks
-        REQ-DASH-002 typography; moving the band requires a first-screen relayout.
-      retire_when: provider first-screen band is re-laid out entirely below the fold
+  # Retired with #8900: panel 9104 now ends at row 18 (y=15, h=3).
+  straddle: []
+  # DASH-FIT-004: first-window internal overflow must not be excepted to
+  # preserve a failing layout. Keep empty.
+  first_window_overflow: []
+  # Horizontal scrolling is allowed only for named below-fold explorers.
+  horizontal_scroll: []
   min_height:
     - dashboard: bioetl-dq-v2.json
       id: 153

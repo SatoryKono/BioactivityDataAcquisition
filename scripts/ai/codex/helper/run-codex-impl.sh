@@ -11,6 +11,25 @@ REPO_ROOT="${REPO_ROOT:-$(timeout 5 git rev-parse --show-toplevel 2>/dev/null ||
 ENSURE_SCRIPT="${SCRIPT_DIR}/ensure-codex-cli.sh"
 ENSURE_MCP_SCRIPT="${SCRIPT_DIR}/ensure-mcp.sh"
 
+ensure_mcp_ready() {
+    local codex_bin="$1"
+
+    if [[ "${CODEX_SKIP_MCP_SETUP:-0}" == "1" ]]; then
+        return 0
+    fi
+    if [[ ! -x "${ENSURE_MCP_SCRIPT}" ]]; then
+        echo "[ERROR] MCP setup helper not found: ${ENSURE_MCP_SCRIPT}" >&2
+        return 1
+    fi
+    # ensure-mcp.sh owns the bounded materialization and shared-plane startup
+    # phases. Do not wrap it in a shorter launcher-level timeout.
+    if ! "${ENSURE_MCP_SCRIPT}" --ensure --codex-bin "${codex_bin}" >/dev/null 2>&1; then
+        echo "[WARN] MCP setup failed, continuing anyway" >&2
+    else
+        echo "[INFO] MCP configuration ready" >&2
+    fi
+}
+
 # Load optional local API-key env (not required when ChatGPT device auth is present).
 ENV_FILE="${ROOT_DIR}/.env.codex"
 if [[ -f "${ENV_FILE}" ]]; then
@@ -56,6 +75,7 @@ if [[ -n "${BIOETL_CODEX_DIRECT_BIN:-}" ]]; then
     fi
     direct_codex_bin="${BIOETL_CODEX_DIRECT_BIN}"
     unset BIOETL_CODEX_DIRECT_BIN
+    ensure_mcp_ready "${direct_codex_bin}" || exit 1
     exec "${direct_codex_bin}" "$@"
 fi
 
@@ -115,18 +135,7 @@ fi
 
 # Verify Codex's persisted native config before launching and repair it only
 # when missing or stale. Codex reads ~/.codex/config.toml, not .mcp.json directly.
-if [[ "${CODEX_SKIP_MCP_SETUP:-0}" != "1" ]]; then
-    if [[ ! -x "${ENSURE_MCP_SCRIPT}" ]]; then
-        echo "[ERROR] MCP setup helper not found: ${ENSURE_MCP_SCRIPT}" >&2
-        exit 1
-    fi
-    # Bound both the persisted-config verification and any required repair.
-    if ! timeout 60 "${ENSURE_MCP_SCRIPT}" --ensure --codex-bin "${CODEX_BIN}" >/dev/null 2>&1; then
-        echo "[WARN] MCP setup timed out or failed, continuing anyway" >&2
-    else
-        echo "[INFO] MCP configuration ready"
-    fi
-fi
+ensure_mcp_ready "${CODEX_BIN}" || exit 1
 
 # Launch Codex
 exec "${CODEX_BIN}" -C "${REPO_ROOT}" "$@"

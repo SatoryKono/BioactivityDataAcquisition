@@ -631,10 +631,25 @@
       "id": "S04b-app-residual",
       "wave": "A",
       "files": 171,
-      "status": "timeout",
-      "reason": "timeout after 600s",
+      "status": "ok",
+      "reason": "",
+      "exit_code": 0,
       "log": "reports/quality/coderabbit/20260816/review_A_S04b-app-residual.log",
-      "elapsed_s": 606.0
+      "bytes": 144572,
+      "elapsed_s": 562.4,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ]
     },
     "S09-composition": {
       "id": "S09-composition",
@@ -643,7 +658,7 @@
       "status": "timeout",
       "reason": "timeout after 600s",
       "log": "reports/quality/coderabbit/20260816/review_A_S09-composition.log",
-      "elapsed_s": 606.5
+      "elapsed_s": 606.9
     },
     "S10-interfaces-cli": {
       "id": "S10-interfaces-cli",
@@ -769,9 +784,8 @@
       "id": "S16-configs-quality",
       "wave": "B",
       "files": 100,
-      "status": "connection_error",
-      "reason": "CodeRabbit connection/WebSocket failure",
-      "exit_code": 1,
+      "status": "timeout",
+      "reason": "timeout after 600s",
       "log": "reports/quality/coderabbit/20260816/review_B_S16-configs-quality.log",
       "bytes": 453,
       "elapsed_s": 70.5,

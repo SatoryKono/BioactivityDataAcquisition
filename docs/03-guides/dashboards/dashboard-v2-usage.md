@@ -687,7 +687,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
   shipped `grafana/dashboards/*.json` through reviewable PR changes.
 - `overview` first-screen selected-scope cards normalize a manually selected `workflow_<pipeline>` value back to the entity pipeline before reading `bioetl_l0_*` / `bioetl_l1_*` summary recording rules. For example, `workflow_chembl_assay` resolves to the same current-state summary rows as `chembl_assay`.
 - `dq.id=2 (DQ Score Snapshot)`: no-data остается `UNKNOWN`, не `0`; hard-fail signals блокируют promotion, warning-only означает drift. Next action: hard-fail -> reject/quarantine diagnostics; warning-only -> trend + top reasons.
-- `overview.id=9002 (Inputs)`: использует `max by (input) (bioetl_l0_input_status_selected{pipeline=~"$pipeline",run_type=~"$run_type"})`. Это compact projected selected-scope surface: first-screen таблица держит одну worst-status строку на operator input, чтобы не требовать scroll на default `Workflow=All/Pipeline=All/Run Type=All`.
+- `overview.id=9002 (Review Domain Status)`: использует `topk(4, max by (input) (bioetl_l0_input_status_selected{pipeline=~"$pipeline",run_type=~"$run_type"}))`. First-screen таблица показывает четыре worst/UNKNOWN domain status; полный six-domain matrix остаётся в `overview.id=9031` под `Domain Status Tracks`.
 - `dq.id=154 (Blocked Share Trend)`: numerator = `filtered_out + quarantined`,
   denominator = Bronze input in the same window. Sustained growth = filter /
   quarantine pressure, spike = incident. Next action: `Top Silver Reject

@@ -232,7 +232,7 @@
       "id": 2010,
       "type": "table",
       "title": "Inspect Ranked Suspects",
-      "description": "Selected pipeline may differ from row pipeline (blast radius). Single ranked suspect matrix across Runtime/Provider/DQ. Domain label identifies source; row links preserve scope. VALID_EMPTY when no active suspects. Primary evidence before domain forensics",
+      "description": "Selected pipeline may differ from row pipeline (blast radius). Cross-domain first-screen ranking capped at five active suspects. Domain and signal labels identify source; row links preserve scope. VALID_EMPTY when no active suspects — empty domains are not a healthy-fleet verdict. Complete per-domain evidence stays in Domain Suspect Details.",
       "gridPos": {
         "h": 7,
         "w": 24,
@@ -246,21 +246,21 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "topk(15, label_replace(label_replace(max by (pipeline, run_type, reason) (bioetl_runtime_current_blocker_reason) > 0, \"domain\", \"runtime\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
+          "expr": "topk(5, label_replace(label_replace(max by (pipeline, run_type, reason) (bioetl_runtime_current_blocker_reason) > 0, \"domain\", \"runtime\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
           "legendFormat": "runtime",
           "instant": true,
           "format": "table"
         },
         {
           "refId": "B",
-          "expr": "topk(15, label_replace(label_replace(max by (provider, cause) (bioetl_provider_current_cause) > 0, \"domain\", \"provider\", \"\", \"\"), \"signal\", \"$1\", \"cause\", \"(.*)\"))",
+          "expr": "topk(5, label_replace(label_replace(max by (provider, cause) (bioetl_provider_current_cause) > 0, \"domain\", \"provider\", \"\", \"\"), \"signal\", \"$1\", \"cause\", \"(.*)\"))",
           "legendFormat": "provider",
           "instant": true,
           "format": "table"
         },
         {
           "refId": "C",
-          "expr": "topk(15, label_replace(label_replace(max by (pipeline, reason) (bioetl_dq_current_reason) > 0, \"domain\", \"dq\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
+          "expr": "topk(5, label_replace(label_replace(max by (pipeline, reason) (bioetl_dq_current_reason) > 0, \"domain\", \"dq\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
           "legendFormat": "dq",
           "instant": true,
           "format": "table"
@@ -270,6 +270,12 @@
         {
           "id": "merge",
           "options": {}
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 5
+          }
         },
         {
           "id": "organize",

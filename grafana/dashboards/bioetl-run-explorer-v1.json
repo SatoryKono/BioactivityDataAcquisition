@@ -105,15 +105,15 @@
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which exact run should be inspected?</div><div><b>Scope:</b> <b>BROWSE</b> = recent runs · <b>SELECTED RUN</b> = identity/accounting/actions</div><div><b>FULL PATHS</b> = report artifacts, not triage bodies</div><div style=\"margin-top:6px;font-size:16px;line-height:1.4\"><b>Fail-closed empty state:</b> default <code style=\"font-size:16px\">pipeline=unknown</code> and <code style=\"font-size:16px\">run_id=-</code> intentionally show no runs (not a missing data store). Select a real pipeline from the dropdown (e.g. <code style=\"font-size:16px\">chembl_assay</code>, <code style=\"font-size:16px\">chembl_activity</code>), keep <code style=\"font-size:16px\">run_type</code> compatible (often <code style=\"font-size:16px\">backfill</code>), then pick a concrete <code style=\"font-size:16px\">run_id</code> (not <code style=\"font-size:16px\">-</code>). Expand <b>Selected Run Details</b> for funnel/reasons/artifacts.</div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which exact run should be inspected?</div><div><b>Scope:</b> <b>BROWSE</b> = recent runs · <b>SELECTED RUN</b> = identity/accounting · <b>FULL PATHS</b> = report artifacts, not triage bodies</div><div><b>Fail-closed:</b> <code style=\"font-size:16px\">pipeline=unknown</code> and <code style=\"font-size:16px\">run_id=-</code> show no runs — not a missing store and not a healthy run.</div></div></div>"
       },
-      "description": "Run Explorer has two modes. Browse mode lists recent run-report artifacts for the selected pipeline. Selected-run mode uses BioETL Ops HTTP to show identity, accounting, reasons, reconciliation, and artifacts for one exact run. Run ID is never a Prometheus label. Full filesystem paths belong to report-artifact Open/Copy actions, not scan-oriented cells."
+      "description": "Run Explorer has two modes. Browse mode lists recent run-report artifacts for the selected pipeline. Selected-run mode uses BioETL Ops HTTP to show identity, accounting, reasons, reconciliation, and artifacts for one exact run. Fail-closed empty state: default pipeline=unknown and run_id=- intentionally show no runs (not a missing data store and not a healthy run). Select a real pipeline from the dropdown (e.g. chembl_assay, chembl_activity), keep run_type compatible (often backfill), then pick a concrete run_id (not -). Expand Selected Run Details for the last-20 browser and full identity/accounting. Run ID is never a Prometheus label. Full filesystem paths belong to report-artifact Open/Copy actions, not scan-oriented cells."
     },
     {
       "id": 3010,
       "type": "table",
-      "title": "Inspect Recent Runs (last 20)",
-      "description": "Browse mode: Recent pipeline-run reports found on disk for the selected pipeline. $pipeline is a pipeline name (chembl_assay, chembl_target, chembl_publication), not a workflow (chembl_baseline). Workflow artifacts live under reports/run-reports/workflow/<name>/ and GET /ops/observability/workflow-run-reports. Choose a row to set the run ID and open exact-run evidence. An empty table is valid when no matching reports exist for this pipeline (index_state=valid_empty). A TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is bind or origin failure, not a selector problem — run python scripts/ops/runtime/docker/verify_report_bind.py from the checkout you are viewing. If reports are expected and the table is empty without that row, treat backend unavailable as a distinct failure and verify BioETL Ops HTTP at /health/live. Has reports: chembl_assay, chembl_target, chembl_publication. chembl_activity may appear in run_id (control-plane) but has no report artifacts yet. Index is bounded to the last 20 pipeline-run-report artifacts (limit=20). Older runs are omitted by design; they are not a missing backend.",
+      "title": "Inspect Recent Runs (last 4)",
+      "description": "Browse mode: latest four pipeline-run reports found on disk for the selected pipeline. $pipeline is a pipeline name (chembl_assay, chembl_target, chembl_publication), not a workflow (chembl_baseline). Workflow artifacts live under reports/run-reports/workflow/<name>/ and GET /ops/observability/workflow-run-reports. Choose a row to set the run ID and open exact-run evidence. An empty table is valid when no matching reports exist for this pipeline (index_state=valid_empty). A TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is bind or origin failure, not a selector problem — run python scripts/ops/runtime/docker/verify_report_bind.py from the checkout you are viewing. If reports are expected and the table is empty without that row, treat backend unavailable as a distinct failure and verify BioETL Ops HTTP at /health/live. Has reports: chembl_assay, chembl_target, chembl_publication. chembl_activity may appear in run_id (control-plane) but has no report artifacts yet. First screen is bounded to the last 4 artifacts (limit=4). The complete last-20 browser is in Selected Run Details. Older runs are omitted by design; they are not a missing backend.",
       "gridPos": {
         "h": 5,
         "w": 24,
@@ -127,7 +127,7 @@
             "align": "left",
             "inspect": true
           },
-          "noValue": "VALID EMPTY — no pipeline-run-report artifacts for pipeline '$pipeline' under reports/run-reports/pipeline/<name>/ (index is last 20)."
+          "noValue": "VALID EMPTY — no pipeline-run-report artifacts for pipeline '$pipeline' under reports/run-reports/pipeline/<name>/ (first screen is last 4)."
         },
         "overrides": [
           {
@@ -211,7 +211,7 @@
           "root_selector": "items",
           "source": "url",
           "type": "json",
-          "url": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=20",
+          "url": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=4",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -255,7 +255,7 @@
         "y": 13
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "Selected run: Exact identity for the selected run, including run, manifest, provider entity, contract, execution, replay, and checkpoint evidence. Selection required when no run ID is set. Valid empty means no matching identity was found for that run. Backend failure renders as QUERY ERROR; verify /health/live. Use existing Open/Copy actions for full values.",
+      "description": "Selected run: compact 4-row identity summary (run, manifest, provider.entity, identity health). Selection required when no run ID is set. Valid empty means no matching identity was found for that run. Backend failure renders as QUERY ERROR; verify /health/live. Full identity rows remain in Selected Run Details. Use existing Open/Copy actions for full values.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -397,6 +397,30 @@
               "Value #C": "Series C"
             }
           }
+        },
+        {
+          "id": "filterByValue",
+          "options": {
+            "filters": [
+              {
+                "fieldName": "parameter",
+                "config": {
+                  "id": "regex",
+                  "options": {
+                    "value": "^(Run ID \\[Pipeline\\]|Manifest ID \\[Control Plane\\]|Provider\\.Entity \\[Version\\]|Identity Health \\[Gaps\\])$"
+                  }
+                }
+              }
+            ],
+            "match": "any",
+            "type": "include"
+          }
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 4
+          }
         }
       ]
     },
@@ -411,7 +435,7 @@
         "y": 13
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "Selected run: Bronze, Silver, and Gold stage/outcome accounting for the selected run. Zero-valued outcomes are evidence and must not be presented as success by themselves. Selection required when no run ID is set. Valid empty means no matching accounting rows exist; unexpected empty or errors require an Ops HTTP /health/live check.",
+      "description": "Selected run: compact four-row stage summary (bronze total, silver valid, gold written, gold quarantined). Zero-valued outcomes are evidence and must not be presented as success by themselves. Selection required when no run ID is set. Valid empty means no matching accounting rows exist; unexpected empty or errors require an Ops HTTP /health/live check. Full accounting remains in Selected Run Details.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -734,6 +758,30 @@
               "Value #C": "Series C"
             }
           }
+        },
+        {
+          "id": "filterByValue",
+          "options": {
+            "filters": [
+              {
+                "fieldName": "parameter",
+                "config": {
+                  "id": "regex",
+                  "options": {
+                    "value": "^(01 bronze_records|02 silver_valid_records|07 gold_written_records|09 gold_quarantined_records)$"
+                  }
+                }
+              }
+            ],
+            "match": "any",
+            "type": "include"
+          }
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 4
+          }
         }
       ]
     },
@@ -750,6 +798,141 @@
       },
       "panels": [
         {
+          "id": 3021,
+          "type": "table",
+          "title": "Inspect Recent Runs (last 20)",
+          "description": "Complete last-20 pipeline-run-report browser. First-screen Inspect Recent Runs stays at limit=4. An empty table is valid when no matching reports exist (index_state=valid_empty). TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY is bind or origin failure. Backend failure renders as QUERY ERROR and is distinct from valid empty.",
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 19
+          },
+          "datasource": "BioETL Ops HTTP",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "inspect": true
+              },
+              "noValue": "VALID EMPTY — no pipeline-run-report artifacts for pipeline '$pipeline' under reports/run-reports/pipeline/<name>/ (index is last 20)."
+            }
+          },
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false
+            },
+            "cellHeight": "sm"
+          },
+          "targets": [
+            {
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "items",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=20",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              },
+              "expr": ""
+            }
+          ]
+        },
+        {
+          "id": 3022,
+          "type": "table",
+          "title": "Inspect Full Run Identity",
+          "description": "Complete identity rows for the selected run. First-screen Inspect Run Identity is the four-row summary. Selection required when no run ID is set. VALID EMPTY means the selected run has no identity; backend failure renders as QUERY ERROR.",
+          "gridPos": {
+            "h": 8,
+            "w": 10,
+            "x": 0,
+            "y": 27
+          },
+          "datasource": "BioETL Ops HTTP",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "inspect": true
+              },
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity."
+            }
+          },
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false
+            },
+            "cellHeight": "sm"
+          },
+          "targets": [
+            {
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "rows",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              },
+              "expr": ""
+            }
+          ]
+        },
+        {
+          "id": 3023,
+          "type": "table",
+          "title": "Inspect Full Processed Records",
+          "description": "Complete Bronze/Silver/Gold accounting. First-screen Inspect Processed Records is the four-row summary. Zero-valued outcomes remain evidence.",
+          "gridPos": {
+            "h": 8,
+            "w": 14,
+            "x": 10,
+            "y": 27
+          },
+          "datasource": "BioETL Ops HTTP",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "inspect": true
+              },
+              "noValue": "VALID EMPTY — selected run has no accounting rows. Select a Run ID first; backend failure renders as QUERY ERROR."
+            }
+          },
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false
+            },
+            "cellHeight": "sm"
+          },
+          "targets": [
+            {
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "rows",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              },
+              "expr": ""
+            }
+          ]
+        },
+        {
           "id": 3011,
           "type": "table",
           "title": "Inspect Stage Funnel",
@@ -758,7 +941,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 19
+            "y": 35
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -817,7 +1000,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 25
+            "y": 41
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -876,7 +1059,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 30
+            "y": 46
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -995,7 +1178,7 @@
             "h": 3,
             "w": 24,
             "x": 0,
-            "y": 38
+            "y": 54
           },
           "options": {
             "mode": "html",
@@ -1011,7 +1194,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 41
+            "y": 57
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -1092,7 +1275,7 @@
             "h": 4,
             "w": 24,
             "x": 0,
-            "y": 46
+            "y": 62
           },
           "options": {
             "mode": "html",
@@ -1107,7 +1290,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 50
+            "y": 66
           },
           "options": {
             "mode": "html",

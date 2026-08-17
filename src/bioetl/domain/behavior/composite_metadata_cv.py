@@ -12,19 +12,29 @@ class MergedRecordExplanationLike(Protocol):
     """Structural view required by explainability summary helpers."""
 
     @property
-    def source_providers(self) -> tuple[str, ...]: ...
+    def source_providers(self) -> tuple[str, ...]:
+        """Return providers contributing to the merged record."""
+        ...
 
     @property
-    def field_explanations(self) -> tuple[object, ...]: ...
+    def field_explanations(self) -> tuple[object, ...]:
+        """Return field-level merge explanations."""
+        ...
 
     @property
-    def merge_strategy(self) -> str: ...
+    def merge_strategy(self) -> str:
+        """Return the merge strategy identifier."""
+        ...
 
     @property
-    def conflict_count(self) -> int: ...
+    def conflict_count(self) -> int:
+        """Return the number of detected merge conflicts."""
+        ...
 
     @property
-    def enrichment_count(self) -> int: ...
+    def enrichment_count(self) -> int:
+        """Return the number of applied enrichments."""
+        ...
 
 
 class CompositeCvDQSummary(TypedDict):

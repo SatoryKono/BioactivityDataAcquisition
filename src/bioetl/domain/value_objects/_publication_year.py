@@ -8,6 +8,7 @@ PubMed, Semantic Scholar).
 
 from __future__ import annotations
 
+from datetime import date
 from typing import TYPE_CHECKING
 
 from bioetl.domain.value_objects.base import ValueObject
@@ -121,12 +122,9 @@ class PublicationYear(ValueObject[int]):
             ValueError: If parsing fails.
         """
         stripped = value.strip()
-        # Support date string format: "2024-01-15" → 2024
-        if len(stripped) >= 4 and stripped[4:5] in ("-", "/", ""):
-            try:
-                return int(stripped[:4])
-            except ValueError:
-                pass  # Why: year prefix not parseable as int; fall through to full-string parse
+        parsed_date_year = _year_from_complete_date(stripped)
+        if parsed_date_year is not None:
+            return parsed_date_year
         try:
             return int(stripped)
         except ValueError:
@@ -179,7 +177,7 @@ class PublicationYear(ValueObject[int]):
         Returns:
             Century as integer (e.g., 20 for year 1953).
         """
-        return (self._value // 100) + 1
+        return ((self._value - 1) // 100) + 1
 
     @classmethod
     def from_raw(
@@ -224,3 +222,13 @@ class PublicationYear(ValueObject[int]):
     def __hash__(self) -> int:
         """Hash based on class and value only (ignoring config)."""
         return hash((self.__class__.__name__, self._value))
+
+
+def _year_from_complete_date(value: str) -> int | None:
+    if len(value) != 10 or value[4] not in "-/" or value[7] not in "-/":
+        return None
+    try:
+        parsed = date(int(value[0:4]), int(value[5:7]), int(value[8:10]))
+    except ValueError:
+        return None
+    return parsed.year

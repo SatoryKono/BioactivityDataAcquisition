@@ -583,6 +583,58 @@ def _validate_dashboard_typography(
     return None
 
 
+def _validate_dashboard_panel_containment(
+    uid: str,
+    dashboard: dict[str, object],
+) -> str | None:
+    """Fail closed on first-window internal overflow when evidence is present."""
+    containment = dashboard.get("panelContainment")
+    if containment is None:
+        return None
+    if not isinstance(containment, dict):
+        return f"render manifest dashboard {uid} has invalid panel containment evidence"
+    if containment.get("status") != "ok":
+        overflow = [
+            f"panel {item.get('id')}"
+            for item in containment.get("panels") or []
+            if isinstance(item, dict) and item.get("status") != "ok"
+        ]
+        detail = ", ".join(overflow) if overflow else "status!=ok"
+        return f"render manifest dashboard {uid} first-window panel overflow: {detail}"
+    panels = containment.get("panels")
+    if not isinstance(panels, list) or not panels:
+        return f"render manifest dashboard {uid} lacks first-window containment panels"
+    required = (
+        "uid",
+        "id",
+        "title",
+        "type",
+        "gridPos",
+        "clientHeight",
+        "scrollHeight",
+        "clientWidth",
+        "scrollWidth",
+        "verticalOverflow",
+        "horizontalOverflow",
+        "status",
+    )
+    for item in panels:
+        if not isinstance(item, dict):
+            return f"render manifest dashboard {uid} has a non-object containment panel"
+        missing = [field for field in required if field not in item]
+        if missing:
+            return (
+                f"render manifest dashboard {uid} containment panel "
+                f"{item.get('id')} missing {missing}"
+            )
+        if item.get("verticalOverflow") or item.get("horizontalOverflow"):
+            return (
+                f"render manifest dashboard {uid} first-window overflow on "
+                f"panel {item.get('id')}"
+            )
+    return None
+
+
 def _validate_panel_id_coverage(
     uid: str,
     *,
@@ -840,6 +892,10 @@ def _validate_one_dashboard_render(
     typography_error = _validate_dashboard_typography(uid, dashboard)
     if typography_error:
         return typography_error
+
+    containment_error = _validate_dashboard_panel_containment(uid, dashboard)
+    if containment_error:
+        return containment_error
 
     dashboard_terminal, panel_states, panel_error = _extract_panel_states(
         uid, dashboard

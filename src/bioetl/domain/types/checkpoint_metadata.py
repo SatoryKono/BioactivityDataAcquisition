@@ -12,10 +12,24 @@ from bioetl.domain.normalization import (
 )
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types._checkpoint_metadata_support import (
+    coerce_json_dict_sequence as _coerce_json_dict_sequence,
+)
+from bioetl.domain.types._checkpoint_metadata_support import (
+    coerce_records_processed as _coerce_records_processed,
+)
+from bioetl.domain.types._checkpoint_metadata_support import (
     coerce_snapshot_ids,
     coerce_snapshot_refs,
-    extract_run_context_anchor,
     is_empty_checkpoint_metadata_value,
+)
+from bioetl.domain.types._checkpoint_metadata_support import (
+    extract_checkpoint_anchor as _extract_anchor,
+)
+from bioetl.domain.types._checkpoint_metadata_support import (
+    optional_stripped_text as _optional_stripped_text,
+)
+from bioetl.domain.types._checkpoint_metadata_support import (
+    snapshot_fingerprint_inputs as _snapshot_fingerprint_inputs,
 )
 from bioetl.domain.types.checkpoint_compatibility_result import (
     CheckpointCompatibilityResult,
@@ -23,33 +37,6 @@ from bioetl.domain.types.checkpoint_compatibility_result import (
 
 _OPTIONAL_STR = str | None
 _OPTIONAL_BOOL = bool | None
-
-
-def _extract_with_fallback(
-    data: JsonDict,
-    key: str,
-    fallback_key: str | None = None,
-) -> _OPTIONAL_STR:
-    """Extract optional string with fallback to run_context anchor."""
-    value = data.get(key)
-    if value is not None:
-        return cast(_OPTIONAL_STR, value)
-    if fallback_key:
-        return extract_run_context_anchor(data, fallback_key)
-    return None
-
-
-def _extract_anchor(data: JsonDict, key: str) -> _OPTIONAL_STR:
-    """Extract optional string with like-named run-context fallback."""
-    return _extract_with_fallback(data, key, key)
-
-
-def _coerce_json_dict_sequence(value: object) -> tuple[JsonDict, ...]:
-    """Coerce persisted JSON objects into an immutable tuple."""
-    if not isinstance(value, list | tuple):
-        return ()
-    return tuple(item for item in value if isinstance(item, dict))
-
 
 @dataclass(frozen=True, slots=True)
 class CheckpointMetadata:
@@ -87,7 +74,9 @@ class CheckpointMetadata:
     def from_legacy_metadata(legacy_metadata: JsonDict) -> CheckpointMetadata:
         """Create CheckpointMetadata from legacy metadata format."""
         return CheckpointMetadata(
-            records_processed=legacy_metadata.get("records_processed", 0),
+            records_processed=_coerce_records_processed(
+                legacy_metadata.get("records_processed", 0)
+            ),
             dq_contract_compatibility_hash=legacy_metadata.get(
                 "dq_contract_compatibility_hash"
             ),
@@ -194,12 +183,14 @@ class CheckpointMetadata:
     def from_dict(data: JsonDict) -> CheckpointMetadata:
         """Create CheckpointMetadata from dictionary."""
         return CheckpointMetadata(
-            records_processed=data.get("records_processed", 0),
+            records_processed=_coerce_records_processed(
+                data.get("records_processed", 0)
+            ),
             dq_contract_compatibility_hash=data.get("dq_contract_compatibility_hash"),
             dq_policy_hash=data.get("dq_policy_hash"),
             dq_rule_bundle_version=data.get("dq_rule_bundle_version"),
-            pipeline_name=cast(_OPTIONAL_STR, data.get("pipeline_name")),
-            run_type=cast(_OPTIONAL_STR, data.get("run_type")),
+            pipeline_name=_optional_stripped_text(data.get("pipeline_name")),
+            run_type=_optional_stripped_text(data.get("run_type")),
             pipeline_version=data.get("pipeline_version"),
             git_commit=cast(_OPTIONAL_STR, data.get("git_commit")),
             dependency_lock_hash=_extract_anchor(data, "dependency_lock_hash"),
@@ -248,7 +239,9 @@ class CheckpointMetadata:
             self.input_snapshot_fingerprint
             if self.input_snapshot_fingerprint is not None
             else compute_input_snapshot_identity_fingerprint(
-                list(self.input_snapshot_refs or self.input_snapshot_ids)
+                _snapshot_fingerprint_inputs(
+                    self.input_snapshot_refs, self.input_snapshot_ids
+                )
             )
         )
         normalized_payload = normalize_execution_identity_payload(

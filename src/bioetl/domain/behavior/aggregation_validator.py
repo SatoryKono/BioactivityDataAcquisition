@@ -18,6 +18,11 @@ from bioetl.domain.behavior.aggregation_validation_helpers import (
 from bioetl.domain.behavior.aggregation_validation_helpers import (
     field_name_from_descriptor as _field_name_from_descriptor,
 )
+from bioetl.domain.behavior.validation_helpers import (
+    aggregation_fallback_fields,
+    aggregation_field_names_from_list,
+    aggregation_source_fields,
+)
 from bioetl.domain.behavior.validation_result_envelopes import (
     build_validation_result,
 )
@@ -28,6 +33,15 @@ from bioetl.domain.types.validation_severity import (
     ValidationLayer,
     ValidationSeverity,
 )
+
+__all__ = [
+    "AggregationConfig",
+    "AggregationProvenance",
+    "AggregationValidator",
+    "_column_names",
+    "_explicit_field_names",
+    "_field_name_from_descriptor",
+]
 
 _SUPPORTED_AGGREGATIONS = frozenset(
     {"sum", "avg", "min", "max", "count", "first", "last", "concat", "list"}
@@ -60,7 +74,6 @@ class AggregationValidator:
     _get_source_fields = staticmethod(aggregation_source_fields)
     _field_names_from_list = staticmethod(aggregation_field_names_from_list)
     _collect_fallback_fields = staticmethod(aggregation_fallback_fields)
-    _build_group_key = staticmethod(aggregation_group_key)
 
     def validate_aggregation_config(
         self,

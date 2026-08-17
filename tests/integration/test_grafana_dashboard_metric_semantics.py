@@ -1325,7 +1325,9 @@ def test_provider_critical_table_keeps_severity_only_scope() -> None:
     assert panel is not None, "Panel 'Inspect Non-OK Providers' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert expressions == ["max by (provider) (bioetl_provider_current_status) >= 1"]
+    assert expressions == [
+        "topk(4, max by (provider) (bioetl_provider_current_status) >= 1)"
+    ]
 
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     # Null/missing stays gray (not healthy green); explicit 0 remains OK/green.
@@ -1886,9 +1888,11 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     assert processed.get("options", {}).get("cellHeight") == "sm"
 
     transformations = processed.get("transformations", [])
-    assert [transformation.get("id") for transformation in transformations] == [
-        "organize",
-    ]
+    transform_ids = [transformation.get("id") for transformation in transformations]
+    if dashboard_name == "bioetl-run-explorer-v1.json":
+        assert transform_ids == ["organize", "filterByValue", "limit"]
+    else:
+        assert transform_ids == ["organize"]
     organize_options = transformations[0].get("options", {})
     rename_by_name = organize_options.get("renameByName", {})
     assert rename_by_name.get("parameter") == "parameter"

@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "4d6b694bafb2ee068da9c8cdeed7551cf6e98c8beb2ada8ddc82295765d40b4c",
-    "bioetl-dq-v2": "d5d6a530b5d5c9ba6e1dc5e1d9fc103736a64e78568dc7142c73ba485f901c87",
-    "bioetl-incident-v1": "cac1c6ca162a21e31bc726c035ee50f65472a9d3cfdd345439eae29ef23cc70b",
-    "bioetl-overview-v2": "acb057f935abe5212fba35730fd65e958a12eeeab25027e6aa6c38739bf87c16",
-    "bioetl-provider-health-v2": "e29d06af955f638a70ee098b311ee26624e62153a1547c48ed961942b6c96feb",
-    "bioetl-run-explorer-v1": "d7c77805a4018be4769d9f818d10826eeaa67a98e02e19c0b0cba8175690ac49",
-    "bioetl-runtime": "da53accc1b25b37bd15fb5d79649b5ad304014e321ac0bd364ac37bc0a84b16c"
+    "bioetl-control-plane-v1": "542da637ba292534d9c0825af2f731f4020449592996bb16d67d36b5525ac198",
+    "bioetl-dq-v2": "09d5a84b01e05a3dbd2cfd4a7aa7083caf9d140a6be4f35f507054a1c687d39b",
+    "bioetl-incident-v1": "33579f60669d0931a8e4aa5276ec75f21970d20a9e8fb8e447c889e9c0abd80d",
+    "bioetl-overview-v2": "ccae22eb74ed628e3d0ccd1be551faca8e36864b90ebd347ceb3f4eeeeeffcb4",
+    "bioetl-provider-health-v2": "72c5894ffc1836210c989942ab178cecf5baf4de81bc14d1c43fbf58020dd324",
+    "bioetl-run-explorer-v1": "6e749744a91e7bce1a0025e7ff58ea0591b96b1f534563287ffd467f16f71ea4",
+    "bioetl-runtime": "5cdd1b6d387be72c79f26479cee018f7fa03d43670743d7768c8ac321fe47011"
   },
   "panels": [
     {
@@ -1792,9 +1792,9 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "topk(15, label_replace(label_replace(max by (pipeline, run_type, reason) (bioetl_runtime_current_blocker_reason) > 0, \"domain\", \"runtime\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
-          "topk(15, label_replace(label_replace(max by (provider, cause) (bioetl_provider_current_cause) > 0, \"domain\", \"provider\", \"\", \"\"), \"signal\", \"$1\", \"cause\", \"(.*)\"))",
-          "topk(15, label_replace(label_replace(max by (pipeline, reason) (bioetl_dq_current_reason) > 0, \"domain\", \"dq\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))"
+          "topk(5, label_replace(label_replace(max by (pipeline, run_type, reason) (bioetl_runtime_current_blocker_reason) > 0, \"domain\", \"runtime\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
+          "topk(5, label_replace(label_replace(max by (provider, cause) (bioetl_provider_current_cause) > 0, \"domain\", \"provider\", \"\", \"\"), \"signal\", \"$1\", \"cause\", \"(.*)\"))",
+          "topk(5, label_replace(label_replace(max by (pipeline, reason) (bioetl_dq_current_reason) > 0, \"domain\", \"dq\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))"
         ],
         "target_count": 3
       }
@@ -1997,7 +1997,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})"
+          "topk(4, max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}))"
         ],
         "target_count": 1
       }
@@ -2017,6 +2017,25 @@
         "datasource_uid": "prometheus",
         "expressions": [
           "count by (alertname, severity) (ALERTS{alertstate=\"firing\"})"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-overview-v2",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-overview-v2",
+      "panel_id": 9031,
+      "panel_title": "Review All Domain Status",
+      "route": "operations-home",
+      "source": {
+        "datasource_type": "prometheus",
+        "datasource_uid": "prometheus",
+        "expressions": [
+          "max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})"
         ],
         "target_count": 1
       }
@@ -2389,7 +2408,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (provider) (bioetl_provider_current_status)"
+          "topk(4, max by (provider) (bioetl_provider_current_status))"
         ],
         "target_count": 1
       }
@@ -2408,7 +2427,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max by (provider) (bioetl_provider_current_status) >= 1"
+          "topk(4, max by (provider) (bioetl_provider_current_status) >= 1)"
         ],
         "target_count": 1
       }
@@ -2427,7 +2446,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "topk(5, max by (provider, cause) (bioetl_provider_current_cause) > 0)"
+          "topk(4, max by (provider, cause) (bioetl_provider_current_cause) > 0)"
         ],
         "target_count": 1
       }
@@ -2447,6 +2466,63 @@
         "datasource_uid": "prometheus",
         "expressions": [
           "max(bioetl_provider_current_status{provider=~\"$provider\"}) * 0"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-provider-health-v2",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-provider-health-v2",
+      "panel_id": 9111,
+      "panel_title": "Inspect Full Fleet Severity",
+      "route": "dependency-health",
+      "source": {
+        "datasource_type": "prometheus",
+        "datasource_uid": "prometheus",
+        "expressions": [
+          "max by (provider) (bioetl_provider_current_status)"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-provider-health-v2",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-provider-health-v2",
+      "panel_id": 9112,
+      "panel_title": "Inspect Full Non-OK Providers",
+      "route": "dependency-health",
+      "source": {
+        "datasource_type": "prometheus",
+        "datasource_uid": "prometheus",
+        "expressions": [
+          "max by (provider) (bioetl_provider_current_status) >= 1"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-provider-health-v2",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-provider-health-v2",
+      "panel_id": 9113,
+      "panel_title": "Inspect Full Provider Causes",
+      "route": "dependency-health",
+      "source": {
+        "datasource_type": "prometheus",
+        "datasource_uid": "prometheus",
+        "expressions": [
+          "max by (provider, cause) (bioetl_provider_current_cause) > 0"
         ],
         "target_count": 1
       }
@@ -2874,13 +2950,13 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-run-explorer-v1",
       "panel_id": 3010,
-      "panel_title": "Inspect Recent Runs (last 20)",
+      "panel_title": "Inspect Recent Runs (last 4)",
       "route": "run-explorer",
       "source": {
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
-          "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=20"
+          "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=4"
         ],
         "target_count": 1
       }
@@ -2913,6 +2989,63 @@
       "json_fallback": "/d/bioetl-run-explorer-v1",
       "panel_id": 9403,
       "panel_title": "Inspect Processed Records",
+      "route": "run-explorer",
+      "source": {
+        "datasource_type": null,
+        "datasource_uid": null,
+        "expressions": [
+          "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-run-explorer-v1",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-run-explorer-v1",
+      "panel_id": 3021,
+      "panel_title": "Inspect Recent Runs (last 20)",
+      "route": "run-explorer",
+      "source": {
+        "datasource_type": null,
+        "datasource_uid": null,
+        "expressions": [
+          "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=20"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-run-explorer-v1",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-run-explorer-v1",
+      "panel_id": 3022,
+      "panel_title": "Inspect Full Run Identity",
+      "route": "run-explorer",
+      "source": {
+        "datasource_type": null,
+        "datasource_uid": null,
+        "expressions": [
+          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-run-explorer-v1",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-run-explorer-v1",
+      "panel_id": 3023,
+      "panel_title": "Inspect Full Processed Records",
       "route": "run-explorer",
       "source": {
         "datasource_type": null,
@@ -3762,7 +3895,7 @@
     "dashboard_uid_count": 7,
     "hidden_datasources": [],
     "missing_dashboard_uids": [],
-    "panel_disposition_count": 198,
+    "panel_disposition_count": 205,
     "parity_status": "pass",
     "route_count": 6,
     "run_id_prometheus_violations": [],

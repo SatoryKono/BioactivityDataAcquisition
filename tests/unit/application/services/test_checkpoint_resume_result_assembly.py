@@ -55,7 +55,7 @@ def test_strict_checkpoint_result_gates_identity_on_required_anchors() -> None:
     assert result.pipeline_compatible is True
     assert result.execution_identity_compatible is False
     assert result.identity_continuity_proven is False
-    assert result.messages == ["missing execution fingerprint"]
+    assert result.messages == ("missing execution fingerprint",)
 
 
 @pytest.mark.unit
@@ -74,4 +74,4 @@ def test_lenient_checkpoint_result_reports_degraded_resume_verdict() -> None:
     assert result.compatible is True
     assert result.resume_verdict == "resume_only_degraded"
     assert result.degraded_resume_reasons == ("config drift accepted",)
-    assert result.messages == ["compatible", "config drift accepted"]
+    assert result.messages == ("compatible", "config drift accepted")
