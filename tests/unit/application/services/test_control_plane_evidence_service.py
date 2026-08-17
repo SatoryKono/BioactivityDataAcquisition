@@ -290,7 +290,7 @@ def test_lineage_validation_detects_conflicting_node_definitions() -> None:
 
     assert payload["status"] == "ERROR"
     assert "lineage_identity_mismatch" in _reasons(payload)
-    assert "node_definition:shared:node" in str(payload)
+    assert "node_definition_conflict:shared:node" in str(payload)
 
 
 @pytest.mark.parametrize(
