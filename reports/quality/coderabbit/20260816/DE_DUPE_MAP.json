@@ -2776,7 +2776,7 @@
     "path": "src/bioetl/domain/schemas/_schema_validation_patterns.py",
     "claim": "In @src/bioetl/domain/schemas/_schema_validation_patterns.py at line 17, Update the schema validation using ISO_DATE_PATTERN so it parses the matched value as a calendar date, rejecting impossible days and months such as February 30 or month 13 while preserving the existing YYYY-MM-DD format contract.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "111fe7893ba0bda2": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-schemas-009",
@@ -2874,7 +2874,7 @@
     "path": "src/bioetl/domain/schemas/column_order.py",
     "claim": "In @src/bioetl/domain/schemas/column_order.py at line 116, Add validation around columns_set in the column-order logic to detect duplicate names before frozenset(columns) removes them, and raise an appropriate error instead of returning a shortened list. Preserve the existing ordering behavior for inputs with unique column names.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "10dd84ccf1b405f9": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-schemas-023",
@@ -2916,7 +2916,7 @@
     "path": "src/bioetl/domain/schemas/validators.py",
     "claim": "In @src/bioetl/domain/schemas/validators.py around lines 59 - 60, Update all three validator check closures in validators.py to use a scalar-safe null check instead of directly evaluating pd.isna(val), so list and ndarray values do not produce ambiguous truth-value ValueErrors; preserve the existing true result for scalar missing values and allow non-scalar inputs to continue to schema validation.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "b2a966c2281dd3d1": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-schemas-029",
@@ -2937,7 +2937,7 @@
     "path": "src/bioetl/domain/schemas/uniprot/_core.py",
     "claim": "In @src/bioetl/domain/schemas/uniprot/_core.py around lines 45 - 51, Update _check_accession so the entire alternation is grouped and validation uses full-string matching semantics, ensuring both UniProt accession branches reject trailing or otherwise extra characters.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "9e92f84e6e442b39": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-schemas-032",
@@ -2951,7 +2951,7 @@
     "path": "src/bioetl/domain/schemas/validators.py",
     "claim": "In @src/bioetl/domain/schemas/validators.py around lines 255 - 272, Update str_matches_pattern to use full-string regex matching instead of prefix matching, while preserving the existing missing-value behavior and pattern parameter API.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "46529a7e351f015d": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-schemas-034",
@@ -3007,7 +3007,7 @@
     "path": "src/bioetl/domain/schemas/pubchem/_physchem.py",
     "claim": "In @src/bioetl/domain/schemas/pubchem/_physchem.py around lines 87 - 90, Update _check_heavy_atom_count to accept zero by changing its lower-bound validation from 1 to 0, while retaining the existing upper bound, null handling, and boolean Series return behavior consistent with CANONICAL_HEAVY_ATOM_COUNT_RANGE.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "b6fe36b63f1c7838": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-schemas-042",
@@ -3084,7 +3084,7 @@
     "path": "src/bioetl/domain/types/checkpoint_compatibility_result.py",
     "claim": "In @src/bioetl/domain/types/checkpoint_compatibility_result.py around lines 35 - 44, Update the incompatible_result factory so identity_continuity_proven defaults to False, matching the other compatibility flags and ensuring omitted values do not assert proven identity continuity. Preserve explicit caller-provided values and the existing incompatible-result behavior.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8895
   },
   "6dfdafb3f90ccf95": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-types-005",
@@ -3126,70 +3126,70 @@
     "path": "src/bioetl/domain/types/checkpoint_metadata.py",
     "claim": "In @src/bioetl/domain/types/checkpoint_metadata.py around lines 247 - 253, Update the snapshot fingerprint calculation in the checkpoint metadata method around input_snapshot_fingerprint so compute_input_snapshot_identity_fingerprint always receives its declared input shape. Normalize input_snapshot_refs and input_snapshot_ids into the same canonical snapshot representation before fingerprinting, preserving identical fingerprints for logically equivalent checkpoints regardless of which field is populated; confirm the function’s signature and reuse the existing normalization helper or canonical fields rather than passing a union of mappings and strings.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8895
   },
   "1b7ce322821687fc": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-types-011",
     "path": "src/bioetl/domain/types/_checkpoint_metadata_support.py",
     "claim": "In @src/bioetl/domain/types/_checkpoint_metadata_support.py around lines 32 - 44, Update coerce_snapshot_ids to accept only non-empty string items, skipping None and other non-string values before trimming, deduplicating, and appending snapshot IDs. Preserve the stable tuple output and existing order for valid strings.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8895
   },
   "01cd775e6860eb60": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-types-012",
     "path": "src/bioetl/domain/types/_gold_contracts_support.py",
     "claim": "In @src/bioetl/domain/types/_gold_contracts_support.py around lines 22 - 29, Update invoke_to_schema so failures raised by a valid _SchemaConvertible.to_schema implementation are not silently converted to None: narrow the exception handling to only the expected capability-probing cases, or translate unexpected failures into the domain error used by this layer. Preserve None for genuinely unsupported schema inputs and document any intentionally retained broad catch with its known producer.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8895
   },
   "aa00d731fb71e15f": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-types-013",
     "path": "src/bioetl/domain/types/contract_identity.py",
     "claim": "In @src/bioetl/domain/types/contract_identity.py around lines 37 - 39, Update _has_contract_ref_namespace to require exactly one valid non-empty namespace and name segment around the separator, rejecting \".\", \"..\", and references with empty segments such as \"...v1.0.0\"; ensure from_legacy cannot produce or accept a namespaced reference from an empty contract_ref.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8895
   },
   "05a865b6278d2e23": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-types-014",
     "path": "src/bioetl/domain/types/_gold_contracts_support.py",
     "claim": "In @src/bioetl/domain/types/_gold_contracts_support.py around lines 76 - 78, Update coerce_mapping to return an actually read-only mapping, using MappingProxyType around a copied dictionary for both non-null and empty inputs. Preserve the function’s nullable-input behavior and ensure callers cannot mutate the stored mapping through an existing reference.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8895
   },
   "569818ba86f099fd": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-types-015",
     "path": "src/bioetl/domain/types/checkpoint_metadata.py",
     "claim": "In @src/bioetl/domain/types/checkpoint_metadata.py around lines 24 - 44, Replace the unchecked cast in _extract_with_fallback with the same runtime normalization used by extract_run_context_anchor: convert non-null primary values to stripped strings and return None for empty results. Apply this pattern to the repeated unchecked cast sites identified in the checkpoint metadata extraction helpers, preserving the declared optional-string behavior without relying on cast.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8895
   },
   "f5bf8da3fe61b280": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-types-016",
     "path": "src/bioetl/domain/types/checkpoint_compatibility_result.py",
     "claim": "In @src/bioetl/domain/types/checkpoint_compatibility_result.py around lines 12 - 19, Change the messages field in CheckpointCompatibilityResult from list[str] to tuple[str, ...] to preserve frozen value-object immutability and hashing. Update all factories and callers constructing or indexing this result to provide tuples while preserving message ordering and content.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8895
   },
   "990db27039e7f7eb": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-types-017",
     "path": "src/bioetl/domain/types/dq_contracts.py",
     "claim": "In @src/bioetl/domain/types/dq_contracts.py around lines 77 - 90, Make affected_fields an immutable, non-optional collection in the dataclass definition, replacing the mutable list type and removing the __post_init__ normalization via object.__setattr__. Update the DQ outcome construction and consumers to use the new type without None checks, while preserving frozen-dataclass equality and hashability.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8895
   },
   "128fa37f1a94c31c": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-types-018",
     "path": "src/bioetl/domain/types/contract_identity.py",
     "claim": "In @src/bioetl/domain/types/contract_identity.py around lines 32 - 34, Update _normalize_semver to normalize any version that is not exactly X.Y.Z into a valid three-component SemVer-like string, including padding single-component versions and handling versions with extra components without appending an additional suffix. Add unit coverage for \"1\", \"1.2\", \"1.2.3\", and \"1.2.3.4\", and ensure from_legacy produces identities that validate successfully with the normalized contract_version and matching schema_hash.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8893
   },
   "8b90962083e45f8d": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-types-019",
     "path": "src/bioetl/domain/types/debug_export.py",
     "claim": "In @src/bioetl/domain/types/debug_export.py around lines 11 - 27, Update DebugExportPack to preserve deterministic value-object behavior: make tables and reason_dictionary deeply immutable, and explicitly disable generated hashing with unsafe_hash=False unless a valid immutable hash is required. Retain the existing field values and dataclass interface while preventing post-construction mutation and hash failures.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8895
   },
   "bc86f35d754982e3": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-types-020",
@@ -3210,14 +3210,14 @@
     "path": "src/bioetl/domain/types/contract_rollout.py",
     "claim": "In @src/bioetl/domain/types/contract_rollout.py around lines 96 - 114, Update ContractRolloutPolicy defaults and validation so constructing it with only contract_ref and active_version is valid: for mode=\"single\", derive read_order and write_versions as (active_version,) when omitted, while preserving explicit tuple handling and existing invariant checks. Add a unit test covering construction with the default tuples.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8893
   },
   "d1b77f5aefb9b938": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-types-023",
     "path": "src/bioetl/domain/types/checkpoint_metadata.py",
     "claim": "In @src/bioetl/domain/types/checkpoint_metadata.py at line 90, Update both checkpoint metadata constructors that read legacy_metadata records_processed to coerce and validate the value as an integer, including persisted string values and nulls, before assigning the int-typed field. Reuse the existing cast or coercion helper pattern used by the surrounding fields rather than passing legacy_metadata.get(\"records_processed\", 0) through unchanged.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8895
   },
   "18bfd761f8193388": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-types-024",
@@ -3238,7 +3238,7 @@
     "path": "src/bioetl/domain/types/gold_contracts_rules.py",
     "claim": "In @src/bioetl/domain/types/gold_contracts_rules.py around lines 59 - 61, Update the value object’s __post_init__ validation to reject inverted ranges when minimum and maximum are comparable numeric values, specifically when minimum exceeds maximum. Preserve existing text normalization, allow non-comparable or non-numeric bounds unchanged, and raise the established validation error type consistently.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8895
   },
   "3a6358d5a67e9651": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-types-027",
@@ -3252,7 +3252,7 @@
     "path": "src/bioetl/domain/types/gold_contracts_scd.py",
     "claim": "In @src/bioetl/domain/types/gold_contracts_scd.py around lines 87 - 89, Update the scd_type_raw validation in the SCD configuration parsing flow to reject booleans explicitly while continuing to accept integer values; ensure type: true/false raises the existing ValueError instead of being treated as an SCD type.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8895
   },
   "e8f474fa2642ce52": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-types-029",
@@ -3378,35 +3378,35 @@
     "path": "src/bioetl/domain/value_objects/activity_concentration.py",
     "claim": "In @src/bioetl/domain/value_objects/activity_concentration.py around lines 95 - 112, Update Concentration.__post_init__ to validate that unit is a valid ConcentrationUnit before using it in conversion or other operations, so invalid values such as a string are rejected during construction rather than causing AttributeError later. Reuse the existing validation approach and preserve the current numeric and finite non-negative checks.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "63b1120219a153e5": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-value_objects-004",
     "path": "src/bioetl/domain/value_objects/activity_concentration.py",
     "claim": "In @src/bioetl/domain/value_objects/activity_concentration.py around lines 137 - 145, Update the concentration parser around the existing re.match call to require the entire stripped input to match, rejecting any trailing data while preserving current value and unit conversion for valid strings. Use a full-string matching approach or explicit end-of-input anchoring before constructing the value object.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "9e41602e750867bc": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-value_objects-005",
     "path": "src/bioetl/domain/value_objects/_molecular_weight.py",
     "claim": "In @src/bioetl/domain/value_objects/_molecular_weight.py around lines 94 - 106, Update the value validation in the molecular-weight constructor before the float conversion to reject boolean inputs explicitly, so MolecularWeight(True) and MolecularWeight(False) raise ValueError instead of being coerced numerically; preserve existing handling for other numeric and convertible values.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "098c33564b0cb022": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-value_objects-006",
     "path": "src/bioetl/domain/value_objects/_publication_year.py",
     "claim": "In @src/bioetl/domain/value_objects/_publication_year.py around lines 176 - 182, Update the century property to calculate the century using the year minus one before integer division, so boundary years such as 2000 map to the 20th century while preserving the existing integer result contract.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "a3f5dbfa5f911eaa": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-value_objects-007",
     "path": "src/bioetl/domain/value_objects/_publication_year.py",
     "claim": "In @src/bioetl/domain/value_objects/_publication_year.py around lines 123 - 133, Update the publication-year parsing logic around the prefix check to accept a date only when the complete value matches the documented YYYY-MM-DD form, validating its date structure before returning the year; otherwise fall through to integer parsing and raise the existing invalid-year error for malformed strings such as “2024-” or “2024-invalid”.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "0b599e4ec9532915": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-value_objects-008",
@@ -3434,7 +3434,7 @@
     "path": "src/bioetl/domain/value_objects/pchembl_value.py",
     "claim": "In @src/bioetl/domain/value_objects/pchembl_value.py around lines 19 - 67, Update PChemblValue.__post_init__ and from_molar to reject non-finite values before applying range or positivity checks, while preserving the existing handling of zero and negative inputs. Add unit tests covering nominal conversions plus NaN, positive infinity, negative infinity, zero, and negative concentrations.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "491e284a7e5846ab": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-value_objects-012",
@@ -3483,49 +3483,49 @@
     "path": "src/bioetl/domain/value_objects/molecular_descriptors.py",
     "claim": "In @src/bioetl/domain/value_objects/molecular_descriptors.py around lines 45 - 57, Update _coerce_int to require float inputs to satisfy is_integer() before converting, while preserving existing handling for booleans, integers, finite values, and string representations. Fractional floats must raise ValueError instead of being truncated. Add unit tests covering accepted integral values and rejected fractional floats through the relevant integer descriptor, such as HydrogenBondCount.from_raw.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "7d1174c7c8706d7e": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-value_objects-019",
     "path": "src/bioetl/domain/value_objects/export_identity.py",
     "claim": "In @src/bioetl/domain/value_objects/export_identity.py around lines 64 - 68, Update format_utc to reject naive datetime inputs before calling astimezone, preserving deterministic UTC formatting for timezone-aware values. Add tests covering aware UTC input, aware non-UTC conversion, and rejection of naive input.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "fa599fd60240c1a8": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-value_objects-020",
     "path": "src/bioetl/domain/value_objects/identifiers.py",
     "claim": "In @src/bioetl/domain/value_objects/identifiers.py around lines 251 - 259, Update PubChemCid.from_raw to pass raw directly to the PubChemCid constructor instead of converting it with int(), preserving _coerce_to_int validation and rejecting boolean inputs. Add tests covering a valid string CID and rejected True input.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "0cc03d43585abede": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-value_objects-021",
     "path": "src/bioetl/domain/value_objects/inchi.py",
     "claim": "In @src/bioetl/domain/value_objects/inchi.py around lines 34 - 46, Update _require_inchi_layers to split the suffix at the first “/” and reject either an empty version or an empty layer, including the “InChI=1/” case; preserve the existing prefix validation and deterministic ValueError behavior, and add unit tests covering a nominal layered InChI and empty-version/empty-layer inputs.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "9031f7cb201af09c": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-value_objects-022",
     "path": "src/bioetl/domain/value_objects/dq_report_builder.py",
     "claim": "In @src/bioetl/domain/value_objects/dq_report_builder.py around lines 14 - 17, Update _require_aware_timestamp to require a zero UTC offset in addition to timezone awareness, rejecting timestamps with non-UTC offsets while preserving the existing naive-datetime rejection. Add nominal construction tests using UTC timestamps and rejection tests covering both naive and non-UTC timestamps for the DQ report value objects.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "2f08fe1360ea8fc7": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-value_objects-023",
     "path": "src/bioetl/domain/value_objects/dq_report_results_core.py",
     "claim": "In @src/bioetl/domain/value_objects/dq_report_results_core.py around lines 35 - 55, Update SchemaSnapshotResult.__post_init__ to copy schema into a read-only mapping, preserving its contents while preventing post-construction mutation; retain the existing tuple normalization. Add a unit test that constructs a SchemaSnapshotResult and verifies assignment through schema raises the appropriate mutation error.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "b83590d95b0c1300": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-value_objects-024",
     "path": "src/bioetl/domain/value_objects/dq_result.py",
     "claim": "In @src/bioetl/domain/value_objects/dq_result.py around lines 77 - 82, Update DQResult.__post_init__ to validate error_rate as finite and within the inclusive 0.0–1.0 range, rejecting negative, oversized, and NaN values while preserving the existing tuple conversion. Add unit tests covering a valid rate and each invalid case.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "a7b0394cd52a501c": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-value_objects-025",
@@ -3553,14 +3553,14 @@
     "path": "src/bioetl/domain/value_objects/column_order.py",
     "claim": "In @src/bioetl/domain/value_objects/column_order.py around lines 134 - 153, Update ColumnOrderConfig to normalize field_groups to a read-only MappingProxyType in __post_init__, using object.__setattr__ so callers may continue passing plain dictionaries. Ensure the default mapping is wrapped without exposing mutable shared state, preserving deterministic ordering and making the frozen value object hashable; retain the existing provider_priority behavior and DEFAULT_COLUMN_ORDER API.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "469ab376c047f0a8": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-value_objects-029",
     "path": "src/bioetl/domain/value_objects/dq_metrics.py",
     "claim": "In @src/bioetl/domain/value_objects/dq_metrics.py around lines 129 - 151, Validate the DQ metrics invariant during construction so error_records cannot exceed total_records, preserving error_rate within 0.0–1.0 and preventing negative valid_records in to_dq_summary. Update the from_records empty-batch handling to remain valid when errors are reported, and add a unit test covering error_count greater than the record count.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "5cfd8e08a5f0b651": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-value_objects-030",
@@ -3574,7 +3574,7 @@
     "path": "src/bioetl/domain/value_objects/column_qualifier.py",
     "claim": "In @src/bioetl/domain/value_objects/column_qualifier.py around lines 133 - 168, Update ColumnQualifier.extract_field to split the column with a maximum of two separators, matching is_qualified and parse, so qualified names whose field contains dots return the full remaining field portion.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "9aad0e43d35f8b3b": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-value_objects-032",
@@ -3588,7 +3588,7 @@
     "path": "src/bioetl/domain/value_objects/dq_metrics_calculations.py",
     "claim": "In @src/bioetl/domain/value_objects/dq_metrics_calculations.py around lines 100 - 114, Update calculate_null_rate to handle total == 0 before dividing, returning the established zero-rate value while preserving the existing rounded calculation for positive totals.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "4a3b18501d713e30": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-value_objects-034",
@@ -3630,7 +3630,7 @@
     "path": "src/bioetl/domain/value_objects/activity_type.py",
     "claim": "In @src/bioetl/domain/value_objects/activity_type.py around lines 28 - 60, Update ActivityType.from_string to accept optional input and handle None explicitly with the same intentional validation error used for unknown activity types, rather than calling strip on it. Add a Raises section to its docstring documenting the ValueError for unsupported or missing labels, while preserving existing normalization and mappings for valid strings.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8905
   },
   "e531adaa391dfe1a": {
     "canonical_finding_id": "CR-20260816-A-S01-domain-value_objects-040",
