@@ -84,6 +84,14 @@ class TestGoldListLengthFilter:
         with pytest.raises(ValueError, match="min_length or max_length"):
             GoldListLengthFilter(column="tags")
 
+    def test_negative_and_inverted_bounds_raise(self) -> None:
+        with pytest.raises(ValueError, match="min_length cannot be negative"):
+            GoldListLengthFilter(column="tags", min_length=-1)
+        with pytest.raises(ValueError, match="max_length cannot be negative"):
+            GoldListLengthFilter(column="tags", max_length=-1)
+        with pytest.raises(ValueError, match="cannot exceed max_length"):
+            GoldListLengthFilter(column="tags", min_length=5, max_length=1)
+
     def test_list_length_filter__immutability__2de067c8(self) -> None:
         """Test that filter is immutable (frozen)."""
         filter_obj = GoldListLengthFilter(column="tags", min_length=1)

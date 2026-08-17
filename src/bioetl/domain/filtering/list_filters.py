@@ -35,6 +35,23 @@ class GoldListLengthFilter:
             raise ValueError(
                 f"At least one of min_length or max_length must be provided for column '{self.column}'"
             )
+        if self.min_length is not None and self.min_length < 0:
+            raise ValueError(
+                f"min_length cannot be negative for column '{self.column}'"
+            )
+        if self.max_length is not None and self.max_length < 0:
+            raise ValueError(
+                f"max_length cannot be negative for column '{self.column}'"
+            )
+        if (
+            self.min_length is not None
+            and self.max_length is not None
+            and self.min_length > self.max_length
+        ):
+            raise ValueError(
+                f"min_length ({self.min_length}) cannot exceed max_length "
+                f"({self.max_length}) for column '{self.column}'"
+            )
 
 
 @dataclass(frozen=True, slots=True)
