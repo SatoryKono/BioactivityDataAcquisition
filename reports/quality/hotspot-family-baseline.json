@@ -87,9 +87,9 @@
       ],
       "duplication_clusters": 0,
       "files": 139,
-      "total_loc": 16068,
+      "total_loc": 16101,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.42,
+      "helper_function_ratio": 0.422,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.application.services.control_plane.workflow.manifest_models",
       "bounded_growth_budgets": {
