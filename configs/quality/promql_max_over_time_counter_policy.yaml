@@ -1,6 +1,6 @@
 schema_version: 1
-reviewed_expression_count: 40
-reviewed_on: "2026-07-16"
+reviewed_expression_count: 41
+reviewed_on: "2026-08-17"
 
 # These are the only Counter families allowed inside max_over_time().
 # Any new expression changes reviewed_expression_count and forces a new review.
@@ -8,7 +8,8 @@ allowed_counter_metrics:
   bioetl_records_processed_total:
     intents: [pushed_snapshot_evidence, snapshot_denominator, event_presence]
   bioetl_stage_records_total:
-    intents: [pushed_snapshot_evidence, current_state_projection, event_presence]
+    intents:
+      [pushed_snapshot_evidence, current_state_projection, event_presence]
   bioetl_dq_records_quarantined_total:
     intents: [pushed_snapshot_evidence, snapshot_denominator, event_presence]
   bioetl_silver_filter_rejections_total:
@@ -16,4 +17,3 @@ allowed_counter_metrics:
 
 event_delta_function: increase
 exact_multi_run_total_source: RunLedger
-
