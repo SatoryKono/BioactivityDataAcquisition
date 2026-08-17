@@ -1,0 +1,1 @@
+{"status":"success","data":{"resultType":"vector","result":[{"metric":{"__name__":"bioetl_runtime_trust_gap_status_10m"},"value":[1786991092.860,"0"]}]}}
