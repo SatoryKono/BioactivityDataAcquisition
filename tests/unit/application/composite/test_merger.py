@@ -1243,6 +1243,32 @@ class TestDeduplicateEnricher:
         assert row_a["title"][0] == "T1|T2"
         assert row_a["count"][0] == "10|20"
 
+    def test_classify_columns_empty_non_keys(self, deduplicator):
+        """No non-key columns is a valid empty classification, not a query error."""
+        import polars as pl
+
+        df = pl.DataFrame({"doi": ["a", "a"]})
+        with_c, without_c = deduplicator._classify_columns(df, ["doi"], [])
+        assert with_c == []
+        assert without_c == []
+
+    def test_classify_columns_vectorized_conflict_and_clean(self, deduplicator):
+        """Conflict vs clean columns stay equivalent after the vectorized select."""
+        import polars as pl
+
+        df = pl.DataFrame(
+            {
+                "doi": ["a", "a", "b"],
+                "title": ["T1", "T2", "T3"],
+                "same": [1, 1, 2],
+            }
+        )
+        with_c, without_c = deduplicator._classify_columns(
+            df, ["doi"], ["title", "same"]
+        )
+        assert with_c == ["title"]
+        assert without_c == ["same"]
+
     def test_all_null_remains_null(self, deduplicator):
         """Test all null values remain null (no conflict when all identical)."""
         import polars as pl
