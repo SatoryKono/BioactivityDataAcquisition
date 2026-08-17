@@ -285,7 +285,7 @@
     {
       "id": 906,
       "type": "text",
-      "title": "Review Recovery Action",
+      "title": "",
       "gridPos": {
         "h": 2,
         "w": 24,
@@ -293,7 +293,8 @@
         "y": 12
       },
       "options": {
-        "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:16px;white-space:normal\"><strong>First recovery action:</strong> run outcome → Trust readiness (HTTP trust_status) → lineage validation → retention compliance → replay. Do not treat terminal success as replay-ready. If INCOMPLETE/UNKNOWN, inspect the HTTP reason before Prom scrape or replay.</div>",
+        "bioetlDisplayTitle": "Review Recovery Action",
+        "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:16px;white-space:normal;overflow-wrap:anywhere\"><strong>First recovery action:</strong> run outcome → HTTP trust_status → lineage → retention → replay. Do not replay on INCOMPLETE/UNKNOWN.</div>",
         "mode": "html",
         "dataLinks": [
           {
@@ -305,7 +306,7 @@
         ]
       },
       "transparent": false,
-      "description": "Shows the safest next step for the current trust verdict. Follow this action before attempting replay or resume. After the primary readiness check, open blocker details and confirm identity in Run Explorer."
+      "description": "Shows the safest next step for the current trust verdict. Native Grafana title chrome is omitted so the 16px rail fits gridPos.h=2 without internal scroll (DASH-FIT-004). Follow run outcome → HTTP trust_status → lineage → retention → replay before resume. Terminal success is not replay-ready. If INCOMPLETE/UNKNOWN, inspect the HTTP reason before Prom scrape or replay. After the primary readiness check, open blocker details (panel 130) and confirm identity in Run Explorer."
     },
     {
       "datasource": {

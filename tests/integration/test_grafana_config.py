@@ -35,6 +35,7 @@ from tests.integration._grafana_test_support import (
     get_metric_label_sets,
     get_panel_expressions,
     load_dashboard,
+    panel_display_title,
 )
 
 
@@ -1160,7 +1161,9 @@ def test_control_plane_l1_triage_row_has_3_to_5_kpis_and_one_next_step() -> None
     }
     next_step_title = "Review Recovery Action"
     first_screen_titles = {
-        panel.get("title") for panel in panels[:13] if panel.get("type") != "row"
+        panel_display_title(panel)
+        for panel in panels[:13]
+        if panel.get("type") != "row"
     }
 
     assert kpi_titles.issubset(first_screen_titles)
@@ -1173,7 +1176,7 @@ def test_control_plane_l1_has_single_next_step_panel_with_expected_target() -> N
     panels = [
         panel
         for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") == "Review Recovery Action"
+        if panel_display_title(panel) == "Review Recovery Action"
     ]
     assert len(panels) == 1
 

@@ -58,6 +58,7 @@ __all__ = [
     "load_dashboard",
     "materialize_expanded",
     "panel_base_title",
+    "panel_display_title",
     "require_dashboard_navigation_links",
     "strip_scope_title_prefix",
 ]
@@ -68,16 +69,33 @@ def strip_scope_title_prefix(title: str) -> str:
     return SCOPE_TITLE_PREFIX_RE.sub("", title)
 
 
+def panel_display_title(panel: dict[str, Any]) -> str:
+    """Return operator-facing title, preferring ``bioetlDisplayTitle``."""
+    options = panel.get("options")
+    if isinstance(options, dict):
+        custom_title = options.get("bioetlDisplayTitle")
+        if isinstance(custom_title, str) and custom_title.strip():
+            return custom_title.strip()
+    title = panel.get("title")
+    if isinstance(title, str) and title.strip():
+        return title.strip()
+    return ""
+
+
 def panel_base_title(panel: dict[str, Any]) -> str:
     """Return panel title without optional scope prefix."""
-    return strip_scope_title_prefix(str(panel.get("title") or ""))
+    return strip_scope_title_prefix(panel_display_title(panel))
 
 
 def index_panels_by_base_title(
     panels: list[dict[str, Any]],
 ) -> dict[str, dict[str, Any]]:
     """Map base titles to panels (last wins on duplicates)."""
-    return {panel_base_title(panel): panel for panel in panels if panel.get("title")}
+    return {
+        panel_base_title(panel): panel
+        for panel in panels
+        if panel_display_title(panel)
+    }
 
 
 def _add_metric_name_suffixes(

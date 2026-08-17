@@ -23,7 +23,11 @@ from pathlib import Path
 
 import pytest
 
-from tests.integration._grafana_test_support import get_dashboard_panels, load_dashboard
+from tests.integration._grafana_test_support import (
+    get_dashboard_panels,
+    load_dashboard,
+    panel_display_title,
+)
 
 pytestmark = pytest.mark.integration
 
@@ -220,7 +224,7 @@ def test_trust_primary_recovery_ssot_title_and_link() -> None:
     panels = [
         panel
         for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") == "Review Recovery Action"
+        if panel_display_title(panel) == "Review Recovery Action"
     ]
     assert len(panels) == 1
     assert not any(
@@ -232,6 +236,12 @@ def test_trust_primary_recovery_ssot_title_and_link() -> None:
     url = str(links[0].get("url") or "")
     assert "bioetl-control-plane-v1" in url
     assert "viewPanel=130" in url
+    assert panels[0].get("title") in {"", None}
+    content = str((panels[0].get("options") or {}).get("content") or "")
+    assert "overflow:hidden" not in content
+    assert "overflow-wrap:anywhere" in content
+    assert "Do not replay on INCOMPLETE/UNKNOWN" in content
+    assert panels[0].get("gridPos", {}).get("h") == 2
 
 
 def test_operator_status_stats_map_null_unknown() -> None:
