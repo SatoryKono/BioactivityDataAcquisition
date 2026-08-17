@@ -32,6 +32,9 @@ from __future__ import annotations
 
 import pytest
 
+from bioetl.domain.mapping.pubmed_publication import (
+    build_pubmed_publication_type_fields,
+)
 from bioetl.domain.mapping.publication_type_mapping import (
     PUBLICATION_TYPE_MAPPING,
     normalize_publication_type,
@@ -82,14 +85,14 @@ class TestNormalizePublicationType:
     def test_publication_type__none_returns_none__27d0ae42(self) -> None:
         assert normalize_publication_type(None) is None
 
-    def test_unknown_value_returns_lowercase(self) -> None:
-        assert normalize_publication_type("UNKNOWN_TYPE") == "unknown_type"
+    def test_unknown_value_returns_none(self) -> None:
+        assert normalize_publication_type("UNKNOWN_TYPE") is None
 
-    def test_unknown_mixed_case_returns_lowercase(self) -> None:
-        assert normalize_publication_type("SomeNewType") == "somenewtype"
+    def test_unknown_mixed_case_returns_none(self) -> None:
+        assert normalize_publication_type("SomeNewType") is None
 
-    def test_empty_string_returns_empty(self) -> None:
-        assert normalize_publication_type("") == ""
+    def test_empty_string_returns_none(self) -> None:
+        assert normalize_publication_type("") is None
 
     def test_pipe_separated_normalization(self) -> None:
         result = normalize_publication_type("Journal Article|Review")
@@ -97,7 +100,7 @@ class TestNormalizePublicationType:
 
     def test_pipe_separated_with_unknown(self) -> None:
         result = normalize_publication_type("Journal Article|UnknownType")
-        assert result == "journal-article|unknowntype"
+        assert result is None
 
     def test_pipe_separated_with_whitespace(self) -> None:
         result = normalize_publication_type("Journal Article | Review")
@@ -108,6 +111,22 @@ class TestNormalizePublicationType:
         assert normalize_publication_type("journal-article") == "journal-article"
         assert normalize_publication_type("book") == "book"
         assert normalize_publication_type("dataset") == "dataset"
+
+
+def test_pubmed_raw_type_cannot_be_overwritten_by_classification() -> None:
+    """Provider evidence remains authoritative over a colliding derived key."""
+    result = build_pubmed_publication_type_fields(
+        ["Journal Article", "Review"],
+        classification={
+            "publication_type": "overwritten",
+            "publication_type_unified": "Review",
+        },
+    )
+
+    assert result == {
+        "publication_type": "Journal Article|Review",
+        "publication_type_unified": "Review",
+    }
 
 
 # ---------------------------------------------------------------------------

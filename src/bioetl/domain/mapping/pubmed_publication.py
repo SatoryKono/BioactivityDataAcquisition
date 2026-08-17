@@ -28,11 +28,8 @@ def build_pubmed_publication_type_fields(
         plus any additional fields from classification if provided.
     """
     raw_type = "|".join(pub_types) if pub_types else None
-    result: dict[str, str | None] = {
-        "publication_type": raw_type,
-    }
-    if classification:
-        result.update(classification)
+    result: dict[str, str | None] = dict(classification or {})
+    result["publication_type"] = raw_type
     return result
 
 
