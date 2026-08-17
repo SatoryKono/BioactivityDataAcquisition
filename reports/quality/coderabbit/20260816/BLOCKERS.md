@@ -42,3 +42,35 @@ Each entry requires GitHub reconciliation before closeout.
 - Detail: CodeRabbit rate limit (waitTime=1800s)
 - GitHub issue: pending reconciliation
 
+## S01-domain-workflow — rate_limit
+
+- UTC: `2026-08-17T02:37:35.229875+00:00`
+- Wave: `A`
+- Files: `6`
+- Detail: CodeRabbit rate limit (waitTime=1920s)
+- GitHub issue: pending reconciliation
+
+## S04b-app-residual — timeout
+
+- UTC: `2026-08-17T04:19:01.408554+00:00`
+- Wave: `A`
+- Files: `171`
+- Detail: timeout after 600s
+- GitHub issue: pending reconciliation
+
+## S09-composition — rate_limit
+
+- UTC: `2026-08-17T04:20:14.032057+00:00`
+- Wave: `A`
+- Files: `283`
+- Detail: CodeRabbit rate limit (waitTime=1140s)
+- GitHub issue: pending reconciliation
+
+## S05-app-pipelines — rate_limit
+
+- UTC: `2026-08-17T05:07:31.965485+00:00`
+- Wave: `B`
+- Files: `99`
+- Detail: CodeRabbit rate limit (waitTime=120s)
+- GitHub issue: pending reconciliation
+
