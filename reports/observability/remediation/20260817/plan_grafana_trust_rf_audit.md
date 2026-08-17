@@ -14,6 +14,8 @@ changes, or debt-budget / threshold increases.
 Companion execution plan for the six operator boards:
 [`plan.md`](plan.md) / epic [#8927](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8927).
 PR in flight: [#8933](https://github.com/SatoryKono/BioactivityDataAcquisition/pull/8933).
+This Trust lane: epic [#8935](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8935)
+(`#8939 → {#8940, #8938, #8941} → #8936 → #8937`).
 
 ## 1. Verdict
 
