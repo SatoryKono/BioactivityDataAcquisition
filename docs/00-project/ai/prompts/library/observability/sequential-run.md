@@ -63,7 +63,7 @@ max_body_lines: 280
 | `WORK_BRANCH` | `fix/observability-seq-<shortsha>` (never main) |
 | `SCOPE` | `grafana/dashboards` |
 | `LANGUAGE` | `ru` |
-| `MONITORING` | `false` |
+| `MONITORING` | `true` |
 | `ALLOW_ISSUE_WRITE` | `true` |
 | `ALLOW_PUSH` | `true` |
 | `ALLOW_MERGE` | `false` |
