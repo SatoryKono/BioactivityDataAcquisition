@@ -18,6 +18,7 @@ def test_shipped_dashboard_panel_matrix_matches_baseline(tmp_path: Path) -> None
     with output.open(encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle))
     assert len(rows) == subject.EXPECTED_PANEL_COUNT
+    assert subject.EXPECTED_PANEL_COUNT == subject.expected_panel_count_from_inventory()
     assert {row["dashboard_uid"] for row in rows} == {
         "bioetl-control-plane-v1",
         "bioetl-dq-v2",

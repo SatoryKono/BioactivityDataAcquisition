@@ -140,7 +140,8 @@ def test_pfill_12_browse_explains_artifact_backing_and_backend_failure() -> None
     target = (browse.get("targets") or [])[0]
 
     assert no_value.startswith("VALID EMPTY — no pipeline-run-report artifacts")
-    assert "pipeline '$pipeline'" in no_value
+    assert "selected pipeline" in no_value
+    assert "$pipeline" not in no_value
     assert "reports/run-reports/pipeline/<name>/" in no_value
     # Operator help distinguishes valid empty vs backend unavailable (#7248)
     # and bind/origin TREE_MISSING from a selector miss.
@@ -182,7 +183,8 @@ def test_pfill_12_workflow_browser_is_not_panel_3010() -> None:
     target = (workflow.get("targets") or [])[0]
     assert workflow.get("title") == "Inspect Recent Workflow Runs (last 20)"
     assert no_value.startswith("VALID EMPTY — no workflow-run-report artifacts")
-    assert "workflow '$workflow'" in no_value
+    assert "selected workflow" in no_value
+    assert "$workflow" not in no_value
     assert target.get("url") == (
         "/ops/observability/workflow-run-reports?workflow=${workflow}&limit=20"
     )
