@@ -9,7 +9,18 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
+from bioetl.domain.behavior import composite_metadata_cv
+from bioetl.domain.behavior.composite_metadata_helpers import (
+    resolve_final_value_source as _resolve_final_value_source,
+)
+from bioetl.domain.behavior.composite_metadata_helpers import (
+    resolve_priority_order as _resolve_priority_order,
+)
 from bioetl.domain.types import JsonDict
+
+_build_explainability_summary = composite_metadata_cv.build_explainability_summary
+_empty_explainability_summary = composite_metadata_cv.empty_explainability_summary
+_safe_ratio = composite_metadata_cv.safe_ratio
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import CompositeOutputExt
@@ -166,39 +177,6 @@ class MergedMetadataExplainer:
         ]
 
 
-def _resolve_priority_order(
-    field_name: str,
-    field_priorities: dict[str, JsonDict] | None,
-) -> tuple[str, ...] | None:
-    if not field_priorities or field_name not in field_priorities:
-        return None
-    priority = field_priorities[field_name].get("priority")
-    if not isinstance(priority, list):
-        return ()
-    return tuple(str(item) for item in priority)
-
-
-def _resolve_final_value_source(
-    *,
-    source_providers: tuple[str, ...],
-    priority_order: tuple[str, ...] | None,
-) -> str | None:
-    """Select final value source honoring priority_order when available.
-
-    Priority order is highest-first (first item = highest priority).
-    Returns the highest-priority provider that exists in source_providers.
-    """
-    if not source_providers:
-        return None
-    if priority_order:
-        provider_set = set(source_providers)
-        # Return the first (highest priority) provider from priority_order that exists in source_providers
-        for provider in priority_order:
-            if provider in provider_set:
-                return provider
-    return source_providers[0]
-
-
 def _extract_applied_enrichments(
     composite_metadata: CompositeOutputExt,
 ) -> tuple[str, ...] | None:
@@ -316,101 +294,6 @@ def _bytes_or_reject(value: object) -> str:
     raise TypeError(
         f"Unsupported value for deterministic record identity: {type(value).__name__}"
     )
-
-
-def _empty_explainability_summary() -> JsonDict:
-    return {
-        "record_count": 0,
-        "field_count": 0,
-        "avg_fields_per_record": 0.0,
-        "source_provider_distribution": {},
-        "merge_strategy_distribution": {},
-        "conflict_summary": {
-            "total_conflicts": 0,
-            "conflict_rate": 0.0,
-            "records_with_conflicts": 0,
-        },
-        "enrichment_summary": {
-            "total_enrichments": 0,
-            "enrichment_rate": 0.0,
-            "records_with_enrichments": 0,
-        },
-    }
-
-
-def _build_distributions(
-    explanations: list[MergedRecordExplanation],
-) -> tuple[JsonDict, JsonDict]:
-    source_distribution: dict[str, int] = {}
-    strategy_distribution: dict[str, int] = {}
-    for explanation in explanations:
-        for provider in explanation.source_providers:
-            source_distribution[provider] = source_distribution.get(provider, 0) + 1
-        strategy = explanation.merge_strategy
-        strategy_distribution[strategy] = strategy_distribution.get(strategy, 0) + 1
-    return source_distribution, strategy_distribution
-
-
-def _build_explainability_summary(
-    explanations: list[MergedRecordExplanation],
-) -> JsonDict:
-    totals = _summary_totals(explanations)
-    source_distribution, strategy_distribution = _build_distributions(explanations)
-    return {
-        "record_count": totals["total_records"],
-        "field_count": totals["total_fields"],
-        "avg_fields_per_record": _safe_ratio(
-            totals["total_fields"],
-            totals["total_records"],
-        ),
-        "source_provider_distribution": source_distribution,
-        "merge_strategy_distribution": strategy_distribution,
-        "conflict_summary": _conflict_summary(explanations, totals),
-        "enrichment_summary": _enrichment_summary(explanations, totals),
-    }
-
-
-def _summary_totals(explanations: list[MergedRecordExplanation]) -> dict[str, int]:
-    return {
-        "total_records": len(explanations),
-        "total_fields": sum(len(exp.field_explanations) for exp in explanations),
-        "total_conflicts": sum(exp.conflict_count for exp in explanations),
-        "total_enrichments": sum(exp.enrichment_count for exp in explanations),
-    }
-
-
-def _conflict_summary(
-    explanations: list[MergedRecordExplanation],
-    totals: dict[str, int],
-) -> JsonDict:
-    return {
-        "total_conflicts": totals["total_conflicts"],
-        "conflict_rate": _safe_ratio(totals["total_conflicts"], totals["total_fields"]),
-        "records_with_conflicts": sum(
-            1 for exp in explanations if exp.conflict_count > 0
-        ),
-    }
-
-
-def _enrichment_summary(
-    explanations: list[MergedRecordExplanation],
-    totals: dict[str, int],
-) -> JsonDict:
-    records_with_enrichments = sum(
-        1 for exp in explanations if exp.enrichment_count > 0
-    )
-    return {
-        "total_enrichments": totals["total_enrichments"],
-        "enrichment_rate": _safe_ratio(
-            records_with_enrichments,
-            totals["total_records"],
-        ),
-        "records_with_enrichments": records_with_enrichments,
-    }
-
-
-def _safe_ratio(numerator: int, denominator: int) -> float:
-    return numerator / denominator if denominator > 0 else 0.0
 
 
 def create_merged_metadata_explainability_service() -> MergedMetadataExplainer:

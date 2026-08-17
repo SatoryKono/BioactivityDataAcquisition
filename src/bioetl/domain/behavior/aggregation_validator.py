@@ -3,9 +3,14 @@
 from __future__ import annotations
 
 import dataclasses
-import json
 from dataclasses import dataclass
 
+from bioetl.domain.behavior.validation_helpers import (
+    aggregation_fallback_fields,
+    aggregation_field_names_from_list,
+    aggregation_group_key,
+    aggregation_source_fields,
+)
 from bioetl.domain.behavior.validation_result_envelopes import (
     build_validation_result,
 )
@@ -44,6 +49,11 @@ class AggregationProvenance:
 
 class AggregationValidator:
     """Validate aggregation config and runtime uniqueness constraints."""
+
+    _get_source_fields = staticmethod(aggregation_source_fields)
+    _field_names_from_list = staticmethod(aggregation_field_names_from_list)
+    _collect_fallback_fields = staticmethod(aggregation_fallback_fields)
+    _build_group_key = staticmethod(aggregation_group_key)
 
     def validate_aggregation_config(
         self,
@@ -172,28 +182,6 @@ class AggregationValidator:
             for field in shadowing_fields
         ]
 
-    def _get_source_fields(self, source_schema: JsonDict) -> set[str]:
-        properties = source_schema.get("properties")
-        if isinstance(properties, dict):
-            return set(properties.keys())
-        fields_node = source_schema.get("fields")
-        if isinstance(fields_node, list):
-            return self._field_names_from_list(fields_node)
-        return self._collect_fallback_fields(source_schema)
-
-    @staticmethod
-    def _field_names_from_list(fields_node: list[object]) -> set[str]:
-        """Extract field names from string entries or dict descriptors."""
-        names = (_field_name_from_descriptor(entry) for entry in fields_node)
-        return {name for name in names if name is not None}
-
-    @staticmethod
-    def _collect_fallback_fields(source_schema: JsonDict) -> set[str]:
-        """Collect field names from explicit schema shapes only."""
-        fields = _column_names(source_schema.get("columns"))
-        fields.update(_explicit_field_names(source_schema.get("field_names")))
-        return fields
-
     def validate_post_aggregation_uniqueness(
         self,
         aggregation_results: list[JsonDict],
@@ -237,40 +225,6 @@ class AggregationValidator:
             else:
                 seen_groups.add(group_key)
         return duplicates
-
-    @staticmethod
-    def _build_group_key(
-        record: JsonDict, group_by_fields: list[str]
-    ) -> tuple[tuple[str, str, str], ...]:
-        """Build a type-preserving group key.
-
-        Each component is ``(presence, type_name, canonical)`` so that
-        integer ``1`` and string ``\"1\"`` do not collide, and a missing field
-        is distinct from the literal string ``\"MISSING\"``.
-        """
-        components: list[tuple[str, str, str]] = []
-        for field in group_by_fields:
-            if field not in record:
-                components.append(("absent", "", ""))
-                continue
-            value = record[field]
-            type_name = type(value).__name__
-            if value is None:
-                components.append(("present", "NoneType", "null"))
-            else:
-                components.append(
-                    (
-                        "present",
-                        type_name,
-                        json.dumps(
-                            value,
-                            sort_keys=True,
-                            separators=(",", ":"),
-                            ensure_ascii=False,
-                        ),
-                    )
-                )
-        return tuple(components)
 
     def _build_uniqueness_issues(
         self,
@@ -328,37 +282,3 @@ class AggregationValidator:
                 )
             )
         return provenance
-
-
-def _field_name_from_descriptor(entry: object) -> str | None:
-    """Return a field name from a string or mapping descriptor."""
-    if isinstance(entry, str):
-        return entry
-    if not isinstance(entry, dict):
-        return None
-    name = entry.get("name")
-    return name if isinstance(name, str) and name else None
-
-
-def _column_name(entry: object) -> str | None:
-    """Return names only from supported string or mapping descriptors."""
-    if isinstance(entry, str):
-        return entry
-    if isinstance(entry, dict):
-        return _field_name_from_descriptor(entry)
-    return None
-
-
-def _column_names(columns: object) -> set[str]:
-    """Return names from the fallback ``columns`` schema shape."""
-    if not isinstance(columns, list):
-        return set()
-    names = (_column_name(entry) for entry in columns)
-    return {name for name in names if name is not None}
-
-
-def _explicit_field_names(names: object) -> set[str]:
-    """Return valid strings from the fallback ``field_names`` shape."""
-    if not isinstance(names, list):
-        return set()
-    return {item for item in names if isinstance(item, str)}

@@ -20,6 +20,7 @@ from ._renderers import (
 from ._styles import _REPORT_STYLES
 
 __all__ = [
+    "DQSerializerHtmlCompatibilityMixin",
     "format_detail_value",
     "generate_html_report",
     "render_check_details_html",
@@ -27,6 +28,29 @@ __all__ = [
     "render_thresholds_html",
     "status_color_class",
 ]
+
+
+class DQSerializerHtmlCompatibilityMixin:
+    """Compatibility methods for callers that exercise HTML rendering helpers."""
+
+    def _generate_html(self, data: JsonDict, report: object) -> str:
+        del report
+        return generate_html_report(data)
+
+    def _status_color(self, status: str) -> str:
+        return status_color_class(status)
+
+    def _render_checks_html(self, checks: JsonDict) -> str:
+        return render_checks_html(checks)
+
+    def _render_check_details(self, data: JsonDict) -> str:
+        return render_check_details_html(data)
+
+    def _format_detail_value(self, value: object) -> str:
+        return format_detail_value(value)
+
+    def _render_thresholds_html(self, thresholds: JsonDict) -> str:
+        return render_thresholds_html(thresholds)
 
 
 def generate_html_report(data: JsonDict) -> str:

@@ -2,18 +2,19 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from bioetl.domain.behavior.aggregation_validator import AggregationValidator
 from bioetl.domain.behavior.composite_validation_helpers import (
-    _append_config_issue_if_invalid,
     _convert_to_aggregation_config,
     _convert_to_cross_validation_config,
     _create_issue,
     _extract_priority,
     _is_valid_field_priorities,
     _is_valid_lineage_config,
+    append_invalid_config_section,
+    as_output_schema,
+    as_source_names,
 )
 from bioetl.domain.behavior.cross_validation_validator import CrossValidationValidator
 from bioetl.domain.behavior.preflight_governance import (
@@ -50,6 +51,11 @@ class CompositeValidationConfig:
 
 class CompositeValidator:
     """Validator for structural and deep-preflight composite checks."""
+
+    _as_output_schema = staticmethod(as_output_schema)
+    _as_source_names = staticmethod(as_source_names)
+    _extract_priority = staticmethod(_extract_priority)
+    _is_valid_lineage_config = staticmethod(_is_valid_lineage_config)
 
     def __init__(
         self,
@@ -95,10 +101,9 @@ class CompositeValidator:
             execution_context=config.execution_context,
             config=governance_config,
         )
-        from dataclasses import replace
-
-        # NOSONAR - mypy infers correct type; Sonar S5886 false positive on dataclass.replace()
-        return replace(validation_report, execution_decision=governance_decision)
+        return replace(
+            validation_report, execution_decision=governance_decision
+        )  # NOSONAR
 
     def _run_structural_validation(
         self,
@@ -107,7 +112,7 @@ class CompositeValidator:
         issues: list[ValidationIssue] = []
         if not isinstance(config.composite_config, dict):
             issues.append(
-                self._create_issue(
+                _create_issue(
                     IssueCode.CMP_STR_SCHEMA_001,
                     ValidationSeverity.BLOCKER,
                     "Composite config must be a dictionary",
@@ -124,7 +129,7 @@ class CompositeValidator:
             if required_field in config.composite_config:
                 continue
             issues.append(
-                self._create_issue(
+                _create_issue(
                     IssueCode.CMP_STR_CONFIG_002,
                     ValidationSeverity.BLOCKER,
                     f"Missing required field: {required_field}",
@@ -155,7 +160,7 @@ class CompositeValidator:
     ) -> list[ValidationIssue]:
         if not isinstance(composite_config, dict):
             return [
-                self._create_issue(
+                _create_issue(
                     IssueCode.CMP_STR_SCHEMA_001,
                     ValidationSeverity.BLOCKER,
                     "Composite config must be a dictionary",
@@ -165,21 +170,21 @@ class CompositeValidator:
         issues: list[ValidationIssue] = []
         issues.extend(self._aggregation_preflight_issues(composite_config))
         issues.extend(self._cross_validation_preflight_issues(composite_config))
-        self._append_config_issue_if_invalid(
+        append_invalid_config_section(
             issues=issues,
             composite_config=composite_config,
             config_key="field_priorities",
-            validator=self._is_valid_field_priorities,
+            validator=_is_valid_field_priorities,
             code=IssueCode.CMP_PF_FIELD_001,
             severity=ValidationSeverity.WARNING,
             message="Conflicting or invalid field priorities detected",
             details_key="priorities",
         )
-        self._append_config_issue_if_invalid(
+        append_invalid_config_section(
             issues=issues,
             composite_config=composite_config,
             config_key="lineage",
-            validator=self._is_valid_lineage_config,
+            validator=_is_valid_lineage_config,
             code=IssueCode.CMP_PF_LIN_001,
             severity=ValidationSeverity.BLOCKER,
             message="Insufficient lineage tracking configuration",
@@ -214,72 +219,6 @@ class CompositeValidator:
                 self._validate_cross_validation_config(cross_validation, source_names)
             )
         return issues
-
-    def _as_output_schema(
-        self, raw: object
-    ) -> tuple[JsonDict | None, list[ValidationIssue]]:
-        """Accept only a mapping schema; do not forward strings/lists to .get."""
-        if isinstance(raw, dict):
-            return raw, []
-        return None, [
-            self._create_issue(
-                IssueCode.CMP_STR_SCHEMA_001,
-                ValidationSeverity.BLOCKER,
-                "output_schema must be a mapping",
-                {"actual_type": type(raw).__name__},
-            )
-        ]
-
-    def _as_source_names(
-        self, raw: object
-    ) -> tuple[list[str] | None, list[ValidationIssue]]:
-        """Accept only a list of source name strings."""
-        if isinstance(raw, list) and all(isinstance(item, str) for item in raw):
-            return list(raw), []
-        return None, [
-            self._create_issue(
-                IssueCode.CMP_STR_FORMAT_003,
-                ValidationSeverity.BLOCKER,
-                "sources must be a list of strings",
-                {"actual_type": type(raw).__name__},
-            )
-        ]
-
-    def _append_config_issue_if_invalid(
-        self,
-        *,
-        issues: list[ValidationIssue],
-        composite_config: JsonDict,
-        config_key: str,
-        validator: Callable[[JsonDict], bool],
-        code: IssueCode,
-        severity: ValidationSeverity,
-        message: str,
-        details_key: str,
-    ) -> None:
-        section_value = composite_config.get(config_key)
-        if section_value is None:
-            return
-        if isinstance(section_value, dict) and validator(section_value):
-            return
-        _append_config_issue_if_invalid(
-            issues=issues,
-            is_valid=False,
-            code=code,
-            severity=severity,
-            message=message,
-            details={details_key: section_value},
-        )
-
-    def _create_issue(
-        self,
-        code: IssueCode,
-        severity: ValidationSeverity,
-        message: str,
-        details: JsonDict | None = None,
-        location: str | None = None,
-    ) -> ValidationIssue:
-        return _create_issue(code, severity, message, details, location)
 
     def _validate_aggregation_config(
         self,
@@ -364,14 +303,3 @@ class CompositeValidator:
                 {"rules": rules if isinstance(rules, dict) else {}},
             )
         ]
-
-    def _is_valid_field_priorities(self, priorities: JsonDict) -> bool:
-        return _is_valid_field_priorities(priorities)
-
-    @staticmethod
-    def _extract_priority(priority_config: object) -> object | None:
-        return _extract_priority(priority_config)
-
-    @staticmethod
-    def _is_valid_lineage_config(config: JsonDict) -> bool:
-        return _is_valid_lineage_config(config)
