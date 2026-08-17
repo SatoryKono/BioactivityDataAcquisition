@@ -8,9 +8,6 @@ from pathlib import Path
 from bioetl.application.observability.current_metrics_rehydrate import (
     collect_latest_terminal_anchors,
 )
-from bioetl.infrastructure.observability.health_metrics_exposition import (
-    build_health_server_metrics_exposition,
-)
 
 
 @dataclass(frozen=True, slots=True)
@@ -33,11 +30,7 @@ def reconcile_current_metrics_with_run_reports(
     """Return an explicit gap reason when durable success lacks scrape samples."""
     anchors = collect_latest_terminal_anchors(root=root)
     successes = tuple(anchor for anchor in anchors if anchor.status == "success")
-    body = (
-        exposition
-        if exposition is not None
-        else build_health_server_metrics_exposition()
-    )
+    body = exposition if exposition is not None else ""
     scrape_has_samples = _exposition_has_pipeline_runs_sample(body)
     missing = tuple(
         sorted(
@@ -88,9 +81,13 @@ def reconcile_current_metrics_with_run_reports(
 def current_metrics_reconciliation_check(
     *,
     root: Path | None = None,
+    exposition: str | None = None,
 ) -> dict[str, object]:
     """JSON payload for ``/health/ready`` (diagnostic; does not fail ready)."""
-    result = reconcile_current_metrics_with_run_reports(root=root)
+    result = reconcile_current_metrics_with_run_reports(
+        root=root,
+        exposition=exposition,
+    )
     return {
         "status": result.status,
         "state": result.state,

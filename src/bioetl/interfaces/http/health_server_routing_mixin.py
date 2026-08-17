@@ -275,15 +275,19 @@ class HealthServerRoutingMixin:
             enforce_report_root_marker,
             report_root_readiness_check,
         )
-
-        report_root_check = report_root_readiness_check()
         from bioetl.application.observability.current_metrics_reconciliation import (
             current_metrics_reconciliation_check,
         )
+        from bioetl.infrastructure.observability.health_metrics_exposition import (
+            build_health_server_metrics_exposition,
+        )
+        report_root_check = report_root_readiness_check()
 
         checks: JsonDict = {
             "report_root": report_root_check,
-            "current_metrics": current_metrics_reconciliation_check(),
+            "current_metrics": current_metrics_reconciliation_check(
+                exposition=build_health_server_metrics_exposition()
+            ),
         }
         status = "healthy"
         if (
@@ -327,7 +331,6 @@ class HealthServerRoutingMixin:
         )
 
     def _handle_metrics(self) -> str:
-        """Return the low-cardinality Prometheus process exposition."""
         return self._metrics_exposition.build_exposition()
 
 

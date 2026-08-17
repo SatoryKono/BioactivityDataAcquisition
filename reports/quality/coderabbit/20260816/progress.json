@@ -996,11 +996,11 @@
       "wave": "E",
       "files": 60,
       "status": "rate_limit",
-      "reason": "CodeRabbit rate limit (waitTime=1680s)",
+      "reason": "CodeRabbit rate limit (waitTime=26s)",
       "exit_code": 1,
       "log": "reports/quality/coderabbit/20260816/review_E_S17-docs-decisions.log",
-      "bytes": 940,
-      "elapsed_s": 40.8,
+      "bytes": 836,
+      "elapsed_s": 31.2,
       "command": [
         "/home/fedor/.local/bin/coderabbit",
         "review",
@@ -1153,5 +1153,5 @@
       ]
     }
   },
-  "updated_utc": "2026-08-17T17:05:26.236702+00:00"
+  "updated_utc": "2026-08-17T17:33:57.461855+00:00"
 }
