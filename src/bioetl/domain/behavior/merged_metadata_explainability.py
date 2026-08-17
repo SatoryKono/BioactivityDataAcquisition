@@ -287,6 +287,15 @@ def _typed_mapping_items(
 
 
 def _json_fallback(value: object) -> object:
+    converted = _temporal_or_decimal(value)
+    if converted is not None:
+        return converted
+    if isinstance(value, (set, frozenset)):
+        return _canonical_set_members(value)
+    return _bytes_or_reject(value)
+
+
+def _temporal_or_decimal(value: object) -> object | None:
     if isinstance(value, (datetime, date)):
         return value.isoformat()
     if isinstance(value, Decimal):

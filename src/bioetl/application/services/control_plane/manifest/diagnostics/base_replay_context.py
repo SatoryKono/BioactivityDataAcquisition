@@ -21,7 +21,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.resume_contr
     _build_resume_contract,
 )
 from bioetl.application.services.control_plane.manifest.replay_family_contract_payload import (
-    build_replay_family_contract_payload as build_replay_family_contract_payload,
+    build_replay_family_contract_payload,
 )
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
@@ -37,7 +37,6 @@ _compute_input_snapshot_identity_fingerprint = (
     _snapshot_support.compute_input_snapshot_identity_fingerprint
 )
 _build_replay_family_contract_payload = build_replay_family_contract_payload
-
 
 @dataclass(frozen=True, slots=True)
 class _BaseSummaryReplayContext:

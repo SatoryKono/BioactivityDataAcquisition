@@ -130,6 +130,9 @@ class EnricherDeduplicatorService:
         """
         import polars as pl
 
+        if not non_key_columns:
+            return [], []
+
         # Build all conflict-detection aggregations in one pass
         agg_exprs: list[pl.Expr] = []
         for col in non_key_columns:
@@ -140,6 +143,8 @@ class EnricherDeduplicatorService:
             agg_exprs.append(pl.col(col).is_null().all().alias(f"{col}__all_null"))
 
         aggregated = df.group_by(key_columns).agg(agg_exprs)
+        if aggregated.is_empty():
+            return [], list(non_key_columns)
 
         # Classify each column based on the single aggregation result
         columns_with_conflicts: list[str] = []
@@ -148,28 +153,23 @@ class EnricherDeduplicatorService:
         if not non_key_columns:
             return columns_with_conflicts, columns_without_conflicts
 
-        conflict_exprs = []
-        for col in non_key_columns:
-            n_unique_col = f"{col}__n_unique"
-            has_null_col = f"{col}__has_null"
-            all_null_col = f"{col}__all_null"
-
-            conflict_exprs.append(
-                (
-                    (pl.col(n_unique_col) > 1)
-                    | (pl.col(has_null_col) & ~pl.col(all_null_col))
-                )
-                .any()
-                .alias(col)
+        # One select/.any() pass instead of N filter().height FFI crossings.
+        conflict_exprs = [
+            (
+                (pl.col(f"{col}__n_unique") > 1)
+                | (pl.col(f"{col}__has_null") & ~pl.col(f"{col}__all_null"))
             )
-
+            .any()
+            .alias(col)
+            for col in non_key_columns
+        ]
         conflict_results = aggregated.select(conflict_exprs).row(0, named=True)
-        for col in non_key_columns:
-            if conflict_results[col]:
-                columns_with_conflicts.append(col)
-            else:
-                columns_without_conflicts.append(col)
-
+        columns_with_conflicts = [
+            col for col in non_key_columns if conflict_results[col]
+        ]
+        columns_without_conflicts = [
+            col for col in non_key_columns if not conflict_results[col]
+        ]
         return columns_with_conflicts, columns_without_conflicts
 
     def _build_aggregation_exprs(
