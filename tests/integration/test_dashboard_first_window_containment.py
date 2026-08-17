@@ -72,9 +72,7 @@ def test_horizontal_scroll_allowlist_is_below_fold_only() -> None:
     for (dashboard_name, panel_id), meta in HORIZONTAL_SCROLL_ALLOWLIST.items():
         dashboard = by_name[dashboard_name]
         panel = next(
-            item
-            for item in _root_panels(dashboard)
-            if item.get("id") == panel_id
+            item for item in _root_panels(dashboard) if item.get("id") == panel_id
         )
         y = int((panel.get("gridPos") or {}).get("y") or 0)
         assert y >= FIRST_WINDOW_Y, (
@@ -109,8 +107,7 @@ def test_every_first_window_table_owns_a_row_cap() -> None:
     extra = sorted(
         f"{item['dashboard']}:{item['id']}"
         for item in contracts
-        if item["dashboard"]
-        not in {path.name for path in get_dashboard_files()}
+        if item["dashboard"] not in {path.name for path in get_dashboard_files()}
     )
     assert not missing, f"first-window tables missing row-cap ownership: {missing}"
     assert not unbound, f"first-window tables exceed or lack a declared cap: {unbound}"

@@ -147,10 +147,7 @@ class InputFilterContext:
             object.__setattr__(
                 self,
                 "multi_filter_ids",
-                {
-                    key: tuple(values)
-                    for key, values in self.multi_filter_ids.items()
-                },
+                {key: tuple(values) for key, values in self.multi_filter_ids.items()},
             )
         if self.fallback_mapping is not None:
             object.__setattr__(self, "fallback_mapping", dict(self.fallback_mapping))

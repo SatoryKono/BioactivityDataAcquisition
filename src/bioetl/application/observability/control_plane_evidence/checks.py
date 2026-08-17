@@ -49,7 +49,9 @@ def aggregate_trust_status(checks: Iterable[EvidenceCheckResult]) -> TrustStatus
     saw_check = False
     for check in checks:
         saw_check = True
-        mapped: TrustStatus = "INCOMPLETE" if check.status == "UNKNOWN" else check.status
+        mapped: TrustStatus = (
+            "INCOMPLETE" if check.status == "UNKNOWN" else check.status
+        )
         if _TRUST_RANK[mapped] > _TRUST_RANK[trust]:
             trust = mapped
     return "INCOMPLETE" if not saw_check else trust

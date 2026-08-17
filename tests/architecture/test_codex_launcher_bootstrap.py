@@ -261,7 +261,7 @@ def test_direct_codex_command_ensures_mcp_before_exec(tmp_path: Path) -> None:
         "#!/usr/bin/env bash\n"
         "set -euo pipefail\n"
         ': >"${BIOETL_TEST_MCP_MARKER:?}"\n'
-        "printf 'arg=%s\\n' \"$@\" >\"${BIOETL_TEST_MCP_CAPTURE:?}\"\n",
+        'printf \'arg=%s\\n\' "$@" >"${BIOETL_TEST_MCP_CAPTURE:?}"\n',
         encoding="utf-8",
     )
     ensure_mcp.chmod(0o700)

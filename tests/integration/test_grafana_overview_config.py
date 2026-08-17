@@ -227,7 +227,9 @@ def test_review_domain_status_is_deviation_first_and_capped() -> None:
     assert "topk(" not in full_expr
     assert "max by (input)" in full_expr
     assert "bioetl_l0_input_status_selected" in full_expr
-    content = str(panels["Inspect Scope & Evidence"].get("options", {}).get("content", ""))
+    content = str(
+        panels["Inspect Scope & Evidence"].get("options", {}).get("content", "")
+    )
     assert "set a concrete" not in content
     assert "What is broken or degraded right now?" in content
 
@@ -506,7 +508,9 @@ def test_range_evidence_and_trend_rows_are_retained() -> None:
         assert "current" in description
 
     assert "[$__range]" in _panel_expr(panels["Review Failed Runs"])
-    assert "[$__range]" in _panel_expr(panels["Review Recent Non-success Terminal Runs"])
+    assert "[$__range]" in _panel_expr(
+        panels["Review Recent Non-success Terminal Runs"]
+    )
     terminal_expr = _panel_expr(panels["Review Recent Non-success Terminal Runs"])
     assert 'status!="success"' in terminal_expr
     assert "status=" not in terminal_expr.replace('status!="success"', "")
