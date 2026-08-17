@@ -313,7 +313,9 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
             )
             # Overview answer cards sit at y<=10. Trust keeps Prom KPI cards on
             # the first window (y<18) below the named Review* tables at y=8.
-            max_answer_y = 15 if dashboard_name == "bioetl-control-plane-v1.json" else 10
+            max_answer_y = (
+                15 if dashboard_name == "bioetl-control-plane-v1.json" else 10
+            )
             assert panel.get("gridPos", {}).get("y", 999) <= max_answer_y, (
                 f"{dashboard_name}:{panel_title} must stay in the answer/evidence band"
             )

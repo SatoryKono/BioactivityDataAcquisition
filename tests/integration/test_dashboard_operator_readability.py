@@ -81,7 +81,9 @@ FIELD_IDENTIFIERS = (
     "risk_type",
     "run_id",
 )
-TIMESTAMP_FIELD_RE = re.compile(r"(?:^|_)((?:completed|created|updated|saved|observed)_at|evidence_observed_at)$")
+TIMESTAMP_FIELD_RE = re.compile(
+    r"(?:^|_)((?:completed|created|updated|saved|observed)_at|evidence_observed_at)$"
+)
 FORBIDDEN_DATETIME_UNITS = frozenset(
     {
         "dateTimeAsIso",
@@ -110,7 +112,10 @@ def _html_content(panel: dict[str, Any]) -> str:
 def _is_nav_panel(panel: dict[str, Any]) -> bool:
     content = _html_content(panel)
     title = panel_display_title(panel)
-    return any(marker in content for marker in _NAV_MARKERS) or title == "Navigate Dashboards"
+    return (
+        any(marker in content for marker in _NAV_MARKERS)
+        or title == "Navigate Dashboards"
+    )
 
 
 def _inside_tag(html: str, start: int, tag: str) -> bool:
@@ -210,7 +215,9 @@ def test_enforced_dashboards_apply_inline_copy_roles() -> None:
     violations: list[str] = []
     by_name = {path.name: path for path in get_dashboard_files()}
     missing = sorted(COPY_ROLE_ENFORCED_DASHBOARDS - set(by_name))
-    assert not missing, f"enforced dashboards missing from grafana/dashboards: {missing}"
+    assert not missing, (
+        f"enforced dashboards missing from grafana/dashboards: {missing}"
+    )
 
     for name in sorted(COPY_ROLE_ENFORCED_DASHBOARDS):
         dashboard = load_dashboard(by_name[name])
@@ -269,16 +276,16 @@ def test_enforced_dashboards_apply_inline_copy_roles() -> None:
             for field in FIELD_IDENTIFIERS:
                 for match in re.finditer(rf"\b{re.escape(field)}\b", stripped):
                     if not _inside_tag(stripped, match.start(), "code"):
-                        violations.append(
-                            f"{loc} field {field!r} must be <code> 16px"
-                        )
+                        violations.append(f"{loc} field {field!r} must be <code> 16px")
 
     assert not violations, "inline copy-role violations:\n" + "\n".join(violations)
 
 
 def test_status_scope_tokens_keep_canonical_caps_in_authored_html() -> None:
     """Bold/strong status-scope labels must use the canonical CAPS token."""
-    label_re = re.compile(r"<(?P<tag>b|strong)\b[^>]*>(?P<body>.*?)</(?P=tag)>", re.I | re.S)
+    label_re = re.compile(
+        r"<(?P<tag>b|strong)\b[^>]*>(?P<body>.*?)</(?P=tag)>", re.I | re.S
+    )
     canon = {token.casefold(): token for token in STATUS_SCOPE_TOKENS}
     violations: list[str] = []
     for path in get_dashboard_files():
@@ -347,10 +354,7 @@ def test_http_iso_timestamp_fields_convert_to_time() -> None:
 
 def test_grafana_compose_date_formats_use_yyyy_mm_dd_hh_mm() -> None:
     payload = yaml.safe_load(MONITORING_COMPOSE.read_text(encoding="utf-8"))
-    environment = [
-        str(item)
-        for item in payload["services"]["grafana"]["environment"]
-    ]
+    environment = [str(item) for item in payload["services"]["grafana"]["environment"]]
     required = {
         "GF_DATE_FORMATS_FULL_DATE=YYYY-MM-DD HH:mm",
         "GF_DATE_FORMATS_INTERVAL_MINUTE=YYYY-MM-DD HH:mm",
@@ -360,9 +364,9 @@ def test_grafana_compose_date_formats_use_yyyy_mm_dd_hh_mm() -> None:
     }
     missing = sorted(required.difference(environment))
     assert not missing, f"compose date formats missing: {missing}"
-    assert not any("HH:MM" in item for item in environment if item.startswith("GF_DATE_FORMATS_")), (
-        "Grafana date tokens must use mm for minutes; MM is months"
-    )
+    assert not any(
+        "HH:MM" in item for item in environment if item.startswith("GF_DATE_FORMATS_")
+    ), "Grafana date tokens must use mm for minutes; MM is months"
 
 
 def test_first_window_panels_do_not_declare_internal_scroll() -> None:
@@ -388,8 +392,10 @@ def test_first_window_panels_do_not_declare_internal_scroll() -> None:
                 kind = match.group(1).lower()
                 window = html[max(0, match.start() - 120) : match.end() + 80]
                 compact = re.sub(r"\s+", "", window)
-                spacer = kind == "hidden" and "height:0" in compact and (
-                    "aria-hidden" in window or "flex:11 100%" in compact
+                spacer = (
+                    kind == "hidden"
+                    and "height:0" in compact
+                    and ("aria-hidden" in window or "flex:11 100%" in compact)
                 )
                 if spacer:
                     continue
