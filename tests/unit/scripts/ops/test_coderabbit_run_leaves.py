@@ -65,7 +65,9 @@ def test_classify_output_requires_review_completed() -> None:
 def test_classify_output_ignores_rate_limit_text_inside_completed_review() -> None:
     output = "\n".join(
         (
-            json.dumps({"type": "finding", "fileName": "network_rate_limit_helpers.py"}),
+            json.dumps(
+                {"type": "finding", "fileName": "network_rate_limit_helpers.py"}
+            ),
             json.dumps(
                 {
                     "type": "finding",

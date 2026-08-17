@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from bioetl.application.services.control_plane.manifest.diagnostics import (
+    summary_support as _summary_support,
+)
 from bioetl.application.services.control_plane.manifest.diagnostics.base_effective_config_diagnostics import (
     _build_effective_config_diagnostics,
 )
@@ -23,12 +26,6 @@ from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_p
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection import (
     resolve_resume_identity_maps as _resolve_resume_identity_maps,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
-    build_exact_replay_anchors as _build_exact_replay_anchors,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
-    build_produced_artifact_trace as _build_produced_artifact_trace,
 )
 from bioetl.domain.control_plane import RunManifest
 
@@ -59,13 +56,13 @@ def _attach_base_summary_artifact_defaults(
     summary["artifact_refs"] = []
     summary["lineage_fragment_ids"] = []
     summary["published_artifact_count"] = 0
-    summary["exact_replay_anchors"] = _build_exact_replay_anchors(
+    summary["exact_replay_anchors"] = _summary_support.build_exact_replay_anchors(
         manifest=manifest,
         summary=summary,
         artifact_refs=[],
         lineage_fragment_ids=frozenset(),
     )
-    produced_artifact_trace = _build_produced_artifact_trace(
+    produced_artifact_trace = _summary_support._build_produced_artifact_trace(
         manifest=manifest,
         ledger_entries_present=False,
         artifact_refs=[],
