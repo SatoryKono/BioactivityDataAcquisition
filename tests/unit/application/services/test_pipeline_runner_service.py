@@ -409,14 +409,14 @@ class TestPipelineRunnerServiceRun:
         mock_runner_factory.create.assert_called_once()
         mock_runner.run.assert_called_once()
         mock_metrics_extractor.extract_metrics.assert_called_once_with(mock_runner)
-        mock_metrics_port.increment_counter.assert_called_once_with(
-            "bioetl_pipeline_runs_total",
-            1,
-            {
-                "pipeline": "test_pipeline",
-                "run_type": "incremental",
-                "status": "success",
-            },
+        run_total_calls = [
+            call
+            for call in mock_metrics_port.increment_counter.call_args_list
+            if call.args and call.args[0] == "bioetl_pipeline_runs_total"
+        ]
+        assert run_total_calls == [], (
+            "PipelineRunnerService must not increment bioetl_pipeline_runs_total; "
+            "PipelineObserver owns the terminal counter (OBS-LIFE-001)"
         )
         assert mock_audit_port.log_event.call_count == 2
         mock_audit_port.log_event.assert_any_call(
@@ -565,14 +565,14 @@ class TestPipelineRunnerServiceRun:
         assert result.is_success is False
         # Metrics should still be extracted
         mock_metrics_extractor.extract_metrics.assert_called_once()
-        mock_metrics_port.increment_counter.assert_called_once_with(
-            "bioetl_pipeline_runs_total",
-            1,
-            {
-                "pipeline": "test_pipeline",
-                "run_type": "incremental",
-                "status": "shutdown",
-            },
+        run_total_calls = [
+            call
+            for call in mock_metrics_port.increment_counter.call_args_list
+            if call.args and call.args[0] == "bioetl_pipeline_runs_total"
+        ]
+        assert run_total_calls == [], (
+            "PipelineRunnerService must not increment bioetl_pipeline_runs_total; "
+            "PipelineObserver owns the terminal counter (OBS-LIFE-001)"
         )
 
     @pytest.mark.asyncio
@@ -593,14 +593,14 @@ class TestPipelineRunnerServiceRun:
         assert result.error_message == "Invalid configuration"
         assert result.error_type == "ValueError"
         mock_metrics_extractor.extract_metrics.assert_called_once()
-        mock_metrics_port.increment_counter.assert_called_once_with(
-            "bioetl_pipeline_runs_total",
-            1,
-            {
-                "pipeline": "test_pipeline",
-                "run_type": "incremental",
-                "status": "failed",
-            },
+        run_total_calls = [
+            call
+            for call in mock_metrics_port.increment_counter.call_args_list
+            if call.args and call.args[0] == "bioetl_pipeline_runs_total"
+        ]
+        assert run_total_calls == [], (
+            "PipelineRunnerService must not increment bioetl_pipeline_runs_total; "
+            "PipelineObserver owns the terminal counter (OBS-LIFE-001)"
         )
         mock_audit_port.log_event.assert_any_call(
             "PipelineRunCompleted",
