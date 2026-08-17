@@ -30,6 +30,8 @@
 
 from __future__ import annotations
 
+import math
+
 import pytest
 
 from bioetl.domain.entities.bioactivity._converters import (
@@ -50,10 +52,13 @@ pytestmark = pytest.mark.unit
         (True, None),
         (False, None),
         (12, 12),
+        (5.0, 5),
         (" 42 ", 42),
         ("nope", None),
         ("3", 3),
-        (3.5, None),  # str(3.5) is not a pure int token
+        (3.5, None),
+        (math.nan, None),
+        (math.inf, None),
     ],
 )
 def test_safe_int_edges(value: object, expected: int | None) -> None:
@@ -68,6 +73,11 @@ def test_safe_int_edges(value: object, expected: int | None) -> None:
         (" 1.5 ", 1.5),
         ("bad", None),
         (2, 2.0),
+        (math.nan, None),
+        (math.inf, None),
+        (-math.inf, None),
+        ("nan", None),
+        ("inf", None),
     ],
 )
 def test_safe_float_edges(value: object, expected: float | None) -> None:
@@ -77,6 +87,8 @@ def test_safe_float_edges(value: object, expected: float | None) -> None:
 def test_safe_str_and_require_field() -> None:
     assert _safe_str(None) is None
     assert _safe_str(7) == "7"
+    assert _safe_str(math.nan) is None
+    assert _safe_str(math.inf) is None
     assert _require_field({"a": 1}, "a") == 1
     with pytest.raises(ValueError, match="raw_data must contain"):
         _require_field({}, "missing")
