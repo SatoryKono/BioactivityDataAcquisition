@@ -311,8 +311,9 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
             assert panel is not None, (
                 f"{dashboard_name} must expose first-screen panel {panel_title!r}"
             )
-            # Trust evidence cards may start at y=6; Overview First Action at y=6.
-            max_answer_y = 10
+            # Overview answer cards sit at y<=10. Trust keeps Prom KPI cards on
+            # the first window (y<18) below the named Review* tables at y=8.
+            max_answer_y = 15 if dashboard_name == "bioetl-control-plane-v1.json" else 10
             assert panel.get("gridPos", {}).get("y", 999) <= max_answer_y, (
                 f"{dashboard_name}:{panel_title} must stay in the answer/evidence band"
             )
