@@ -156,6 +156,11 @@ class TestApplyFieldMapping:
         result = apply_field_mapping(record, "unknown")  # type: ignore[arg-type]
         assert result == record
 
+    def test_duplicate_unified_key_is_rejected(self) -> None:
+        record = {"doc_type": "article", "publication_type": "review"}
+        with pytest.raises(ValueError, match="duplicate unified key"):
+            apply_field_mapping(record, "chembl")
+
     def test_crossref_full_mapping(self) -> None:
         record = {
             "source_type": "journal-article",

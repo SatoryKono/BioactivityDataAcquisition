@@ -127,3 +127,7 @@ class TestGoldRangeFilter:
         )
         assert filter_obj.min_value == 0
         assert filter_obj.max_value == 100
+
+    def test_inverted_bounds_raise(self) -> None:
+        with pytest.raises(ValueError, match="cannot exceed max_value"):
+            GoldRangeFilter(column="value", min_value=10.0, max_value=1.0)

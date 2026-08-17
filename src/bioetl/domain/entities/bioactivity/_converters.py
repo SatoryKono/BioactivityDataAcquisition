@@ -18,30 +18,24 @@ def _finite_number(val: object) -> float | None:
     return number
 
 
-def _safe_int(val: object) -> int | None:
-    if val is None:
-        return None
-    if isinstance(val, bool):
-        return None
-    number = _finite_number(val)
-    if number is not None:
-        if number.is_integer():
-            return int(number)
-        return None
+def _reject_none_or_bool(val: object) -> bool:
+    return val is None or isinstance(val, bool)
+
+
+def _as_integer(number: float) -> int | None:
+    if number.is_integer():
+        return int(number)
+    return None
+
+
+def _parse_int_text(val: object) -> int | None:
     try:
         return int(str(val).strip())
     except (ValueError, TypeError):
         return None
 
 
-def _safe_float(val: object) -> float | None:
-    if val is None:
-        return None
-    if isinstance(val, bool):
-        return None
-    number = _finite_number(val)
-    if number is not None:
-        return number
+def _parse_finite_float_text(val: object) -> float | None:
     try:
         parsed = float(str(val).strip())
     except (ValueError, TypeError):
@@ -49,6 +43,24 @@ def _safe_float(val: object) -> float | None:
     if not math.isfinite(parsed):
         return None
     return parsed
+
+
+def _safe_int(val: object) -> int | None:
+    number = _finite_number(val)
+    if number is not None:
+        return _as_integer(number)
+    if _reject_none_or_bool(val):
+        return None
+    return _parse_int_text(val)
+
+
+def _safe_float(val: object) -> float | None:
+    number = _finite_number(val)
+    if number is not None:
+        return number
+    if _reject_none_or_bool(val):
+        return None
+    return _parse_finite_float_text(val)
 
 
 def _safe_str_from_float(val: float) -> str | None:
