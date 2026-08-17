@@ -114,3 +114,26 @@ Each entry requires GitHub reconciliation before closeout.
 - Detail: timeout after 600s
 - GitHub issue: pending reconciliation
 
+## S08-infra-observability — rate_limit
+
+- UTC: `2026-08-17T10:14:37.683619+00:00`
+- Wave: `C`
+- Files: `57`
+- Detail: CodeRabbit rate limit (waitTime=600s)
+- GitHub issue: pending reconciliation
+
+## S17-docs-00-project-01 — timeout
+
+- UTC: `2026-08-17T11:23:46.506747+00:00`
+- Wave: `E`
+- Files: `300`
+- Detail: timeout after 600s
+- GitHub issue: pending reconciliation
+
+## S17-docs-decisions — rate_limit
+
+- UTC: `2026-08-17T11:33:41.054869+00:00`
+- Wave: `E`
+- Files: `60`
+- Detail: CodeRabbit rate limit (waitTime=1260s)
+- GitHub issue: pending reconciliation
