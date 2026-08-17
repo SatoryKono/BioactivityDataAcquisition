@@ -108,10 +108,12 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
         return all(ch in allowed for ch in paper_id)
 
     def _require_paper_id(self) -> str:
-        paper_id = self.paper_id.strip()
-        if paper_id:
-            return paper_id
-        raise ValueError("Semantic Scholar Paper ID is required")
+        paper_id = self.paper_id.strip().lower()
+        if not paper_id:
+            raise ValueError("Semantic Scholar Paper ID is required")
+        if paper_id != self.paper_id:
+            object.__setattr__(self, "paper_id", paper_id)
+        return paper_id
 
     def _validate_invariants(self) -> None:
         """Validate Semantic Scholar-specific publication invariants."""
