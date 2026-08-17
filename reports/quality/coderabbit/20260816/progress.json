@@ -932,12 +932,25 @@
       "wave": "E",
       "files": 60,
       "status": "rate_limit",
-      "reason": "CodeRabbit rate limit (waitTime=1260s)",
+      "reason": "CodeRabbit rate limit (waitTime=8s)",
       "exit_code": 1,
       "log": "reports/quality/coderabbit/20260816/review_E_S17-docs-decisions.log",
-      "bytes": 940,
-      "elapsed_s": 15.3
+      "bytes": 939,
+      "elapsed_s": 17.0,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ]
     }
   },
-  "updated_utc": "2026-08-17T11:33:41.042457+00:00"
+  "updated_utc": "2026-08-17T11:54:57.975804+00:00"
 }
