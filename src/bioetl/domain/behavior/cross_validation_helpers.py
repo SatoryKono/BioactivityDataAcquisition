@@ -4,6 +4,12 @@ from __future__ import annotations
 
 from typing import cast
 
+from bioetl.domain.behavior.cross_validation_coverage import (
+    collect_covered_sources as _collect_covered_sources,
+)
+from bioetl.domain.behavior.cross_validation_coverage import (
+    validate_coverage as _validate_coverage,
+)
 from bioetl.domain.behavior.cross_validation_source_helpers import (
     comparison_source_list as _comparison_source_list,
 )
@@ -14,6 +20,12 @@ from bioetl.domain.types.validation_severity import (
     ValidationLayer,
     ValidationSeverity,
 )
+
+__all__ = [
+    "_collect_covered_sources",
+    "_comparison_source_list",
+    "_validate_coverage",
+]
 
 _SUPPORTED_RULE_TYPES = frozenset({"strict", "lenient", "warn", "custom"})
 
@@ -217,14 +229,6 @@ def _unknown_comparison_source_issue(
     )
 
 
-def _compares_only_to_self(source_name: object, comparison_sources: list[str]) -> bool:
-    if not isinstance(source_name, str):
-        return False
-    if not comparison_sources:
-        return False
-    return set(comparison_sources) == {source_name}
-
-
 def _validate_rules(rules: dict[str, str]) -> list[ValidationIssue]:
     if not rules:
         return [
@@ -293,60 +297,3 @@ def _is_valid_threshold(value: object | None) -> bool:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return False
     return 0 <= value <= 1
-
-
-def _validate_coverage(
-    pairs: list[dict[str, object]],
-    source_names: list[str],
-) -> list[ValidationIssue]:
-    if not source_names:
-        return []
-
-    covered_sources = _collect_covered_sources(pairs)
-    uncovered_sources = set(source_names) - covered_sources
-    if not uncovered_sources:
-        return []
-
-    return [
-        _create_issue(
-            IssueCode.CMP_PF_CV_013,
-            ValidationSeverity.WARNING,
-            f"Cross-validation does not cover all sources: {sorted(uncovered_sources)}",
-            {
-                "uncovered_sources": sorted(uncovered_sources),
-                "covered_sources": sorted(covered_sources),
-                "all_sources": sorted(source_names),
-            },
-        )
-    ]
-
-
-def _collect_covered_sources(pairs: list[dict[str, object]]) -> set[str]:
-    covered_sources: set[str] = set()
-    for pair in pairs:
-        covered_sources.update(_covered_sources_for_pair(pair))
-    return covered_sources
-
-
-def _covered_sources_for_pair(pair: object) -> set[str]:
-    if not isinstance(pair, dict):
-        return set()
-    covered_sources: set[str] = set()
-    for source_name, comparison_sources in pair.items():
-        covered_sources.update(
-            _covered_sources_for_mapping(source_name, comparison_sources)
-        )
-    return covered_sources
-
-
-def _covered_sources_for_mapping(
-    source_name: object, comparison_sources: object
-) -> set[str]:
-    normalized_sources = _comparison_source_list(comparison_sources)
-    non_self_sources = {
-        source for source in normalized_sources if source != source_name
-    }
-    source = (
-        {source_name} if isinstance(source_name, str) and non_self_sources else set()
-    )
-    return source | non_self_sources

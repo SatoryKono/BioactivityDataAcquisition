@@ -234,8 +234,7 @@ class SchemaRef:
         """Return canonical schema node identifier."""
         version = self.version or "unknown_version"
         return (
-            f"schema:{_node_id_segment(self.contract_path)}:"
-            f"{_node_id_segment(version)}"
+            f"schema:{_node_id_segment(self.contract_path)}:{_node_id_segment(version)}"
         )
 
     def to_node_ref(self) -> LineageNodeRef:

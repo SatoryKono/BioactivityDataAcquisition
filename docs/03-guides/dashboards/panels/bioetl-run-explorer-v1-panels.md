@@ -11,11 +11,6 @@ collapsed progressive-disclosure row. `run_id` is never a Prometheus label.
 
 ## Key Panels
 
-### 1. Navigate Dashboards
-- **Type:** Text
-- **Purpose:** Portfolio bus handoffs with preserved time range and vars.
-- **Data sources:** Static HTML + panel links.
-
 ### 2. Understand Run Scope
 - **Type:** Text
 - **Purpose:** Explain browse and selected-run modes, the HTTP-only run_id contract, and where full artifact paths lead.
@@ -51,6 +46,19 @@ collapsed progressive-disclosure row. `run_id` is never a Prometheus label.
   `python scripts/ops/runtime/docker/verify_report_bind.py` from the checkout
   you are viewing. Backend unavailable when Ops HTTP cannot load the index —
   verify `/health/live`.
+
+### 14. Browse Workflow Runs
+- **Type:** Row (**collapsed by default**, `id=3098`)
+- **Purpose:** Optional below-fold browser for workflow-run reports; it does not
+  replace the pipeline-run index or add a competing first-screen path.
+- **Data sources:** Nested Ops HTTP table below.
+
+### 15. Inspect Recent Workflow Runs (last 20)
+- **Type:** Table
+- **Purpose:** Last 20 workflow-run reports for the selected workflow, with the
+  same valid-empty and bind/origin failure distinctions as the pipeline index.
+- **Data sources:** BioETL Ops HTTP
+  `/ops/observability/workflow-run-reports?workflow=${workflow}&limit=20`.
 
 ### 6. Selected Run Details
 - **Type:** Row (**collapsed by default**, `id=3099`)
