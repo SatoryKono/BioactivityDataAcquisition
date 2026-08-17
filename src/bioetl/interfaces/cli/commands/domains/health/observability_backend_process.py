@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 _PROCESS_PROBE_TIMEOUT_SECONDS = 5.0
-_BIOETL_PACKAGE_ROOT = Path(cast(str, bioetl.__file__)).resolve().parent
+_BIOETL_PACKAGE_ROOT = Path(bioetl.__file__).resolve().parent
 _BIOETL_SRC_ROOT = _BIOETL_PACKAGE_ROOT.parent
 _BIOETL_REPOSITORY_ROOT = _BIOETL_SRC_ROOT.parent
 
