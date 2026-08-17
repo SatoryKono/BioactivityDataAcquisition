@@ -21,13 +21,13 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1518 OK| application
+    application -->|1517 OK| application
     application -->|974 OK| domain
     composition -->|161 OK| application
     composition -->|670 OK| composition
     composition -->|281 OK| domain
     composition -->|233 OK| infrastructure
-    domain -->|1201 OK| domain
+    domain -->|1202 OK| domain
     infrastructure -->|755 OK| domain
     infrastructure -->|1180 OK| infrastructure
     interfaces -->|49 OK| application
@@ -40,13 +40,13 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1518 | allowed |
+| `application`    | `application`    |    1517 | allowed |
 | `application`    | `domain`         |     974 | allowed |
 | `composition`    | `application`    |     161 | allowed |
 | `composition`    | `composition`    |     670 | allowed |
 | `composition`    | `domain`         |     281 | allowed |
 | `composition`    | `infrastructure` |     233 | allowed |
-| `domain`         | `domain`         |    1201 | allowed |
+| `domain`         | `domain`         |    1202 | allowed |
 | `infrastructure` | `domain`         |     755 | allowed |
 | `infrastructure` | `infrastructure` |    1180 | allowed |
 | `interfaces`     | `application`    |      49 | allowed |

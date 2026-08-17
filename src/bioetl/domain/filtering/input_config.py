@@ -86,6 +86,8 @@ class InputFilterConfig:
         """Validate direct filter IDs mode configuration."""
         if not self.filter_field:
             raise ValueError("filter_field is required when using direct_filter_ids")
+        if not self.direct_filter_ids:
+            raise ValueError("direct_filter_ids must be non-empty when set")
 
     def _validate_csv_mode(self) -> None:
         """Validate CSV-based filter configuration."""

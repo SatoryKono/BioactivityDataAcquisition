@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from bioetl.domain.entities._validators import require_positive_id
 from bioetl.domain.entities.base import BaseEntity
 from bioetl.domain.entities.publication_base import PublicationEntityBase
 from bioetl.domain.immutability import freeze_fields
@@ -129,8 +130,7 @@ class TargetComponent(BaseEntity):
         freeze_fields(self, ("protein_classification_ids",))
 
     def _validate_invariants(self) -> None:
-        if not self.component_id:
-            raise ValueError("Component ID is required")
+        require_positive_id(self.component_id, "component_id")
 
 
 @dataclass(frozen=True, kw_only=True)
