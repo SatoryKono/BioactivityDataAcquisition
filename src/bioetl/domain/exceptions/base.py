@@ -137,14 +137,15 @@ class BioETLError(Exception):
             self._assign_context_attr(key, value)
         return self
 
+    def _is_reserved_context_key(self, key: str) -> bool:
+        if not key or key.startswith("_") or key in self._RESERVED_CONTEXT_KEYS:
+            return True
+        existing = getattr(type(self), key, None)
+        return isinstance(existing, property) or callable(existing)
+
     def _assign_context_attr(self, key: str, value: object) -> None:
         """Attach one diagnostic field, rejecting reserved or read-only names."""
-        if not key or key.startswith("_") or key in self._RESERVED_CONTEXT_KEYS:
-            raise ValueError(
-                f"reserved or read-only context key cannot be assigned: {key!r}"
-            )
-        existing = getattr(type(self), key, None)
-        if isinstance(existing, property) or callable(existing):
+        if self._is_reserved_context_key(key):
             raise ValueError(
                 f"reserved or read-only context key cannot be assigned: {key!r}"
             )

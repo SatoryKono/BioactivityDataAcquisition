@@ -6,13 +6,13 @@
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 321,
     "violations": 0,
-    "source_fingerprint": "71986c833bd30851d1cf141356545b20b17c14ff853d934924eac4c604aae2bd"
+    "source_fingerprint": "51a5e496521e42d27d3943c6dde5093bac4ce3122383f2ffe13ac9c738e697af"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1518,
+      "imports": 1517,
       "allowed": true
     },
     {
@@ -48,7 +48,7 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1201,
+      "imports": 1202,
       "allowed": true
     },
     {
