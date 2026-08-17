@@ -631,10 +631,25 @@
       "id": "S04b-app-residual",
       "wave": "A",
       "files": 171,
-      "status": "timeout",
-      "reason": "timeout after 600s",
+      "status": "ok",
+      "reason": "",
+      "exit_code": 0,
       "log": "reports/quality/coderabbit/20260816/review_A_S04b-app-residual.log",
-      "elapsed_s": 606.0
+      "bytes": 144572,
+      "elapsed_s": 562.4,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ]
     },
     "S09-composition": {
       "id": "S09-composition",
@@ -790,5 +805,5 @@
       ]
     }
   },
-  "updated_utc": "2026-08-17T06:22:04.489333+00:00"
+  "updated_utc": "2026-08-17T09:34:40.324700+00:00"
 }
