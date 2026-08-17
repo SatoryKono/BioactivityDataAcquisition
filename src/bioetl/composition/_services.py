@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from importlib import import_module
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.composition._service_invocation import invoke_bootstrap as _invoke_bootstrap
 

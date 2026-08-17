@@ -4354,7 +4354,7 @@
     "severity": "critical",
     "confidence": "high",
     "triage_reason": "Confirmed: source-reference sorting compares tuple keys containing query=None and query=str; the mixed input raises TypeError.",
-    "evidence": "src/bioetl/application/core/control_plane/source_refs.py; current-tree mixed-query reproduction; #8890",
+    "evidence": "src/bioetl/application/services/control_plane/manifest/diagnostics/source_refs.py; current-tree mixed-query reproduction; #8890",
     "finding_id": "CR-20260816-A-S03-app-control-plane-117"
   },
   "3ce209af5ac41a8d": {
@@ -5122,7 +5122,7 @@
     "severity": "critical",
     "confidence": "high",
     "triage_reason": "Confirmed: terminal timestamp selection compares offset-naive and offset-aware datetimes and raises TypeError.",
-    "evidence": "src/bioetl/application/services/run_history.py; current-tree two-terminal-event reproduction; #8890",
+    "evidence": "src/bioetl/application/services/quality/_quarantine_service_filtered_helpers.py; current-tree two-terminal-event reproduction; #8890",
     "finding_id": "CR-20260816-A-S04-app-services-other-083"
   },
   "401a0c4b3593bc71": {
@@ -5826,7 +5826,7 @@
     "severity": "critical",
     "confidence": "high",
     "triage_reason": "Confirmed: _rm_tree follows a directory symlink, deletes content outside the requested tree, then raises NotADirectoryError.",
-    "evidence": "src/bioetl/application/services/system_cleanup.py; isolated symlink-target reproduction; #8890",
+    "evidence": "src/bioetl/application/services/run_reports/query.py; isolated symlink-target reproduction; #8890",
     "finding_id": "CR-20260816-A-S04-app-services-other-171"
   },
   "1341e011df6639d4": {
@@ -5930,7 +5930,7 @@
     "severity": "critical",
     "confidence": "high",
     "triage_reason": "Confirmed: normalize_runtime_path recursively prepends a relative root and reaches RecursionError.",
-    "evidence": "src/bioetl/application/services/runtime_paths.py; current-tree relative-root reproduction; #8890",
+    "evidence": "src/bioetl/application/services/run_reports/source_identity.py; current-tree relative-root reproduction; #8890",
     "finding_id": "CR-20260816-A-S04-app-services-other-184"
   },
   "53aee99b5a9280ba": {
@@ -6586,7 +6586,7 @@
     "severity": "critical",
     "confidence": "high",
     "triage_reason": "Confirmed: the ss parser scans the entire line, so a peer port match is misidentified as the queried local listener.",
-    "evidence": "src/bioetl/interfaces/cli/system_processes.py; synthetic local=8000 peer=9000 reproduction returned PID 42 for port 9000; #8890",
+    "evidence": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_process.py; synthetic local=8000 peer=9000 reproduction returned PID 42 for port 9000; #8890",
     "finding_id": "CR-20260816-A-S10-interfaces-cli-082"
   },
   "890ccf5c6e22bbe5": {
