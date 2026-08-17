@@ -256,7 +256,20 @@
           "unit": "none",
           "noValue": "No selected-run trust payload. Select an exact run; UNAVAILABLE/INCOMPLETE is not OK."
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "evidence_observed_at"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "time:YYYY-MM-DD HH:mm"
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "footer": {
@@ -282,6 +295,17 @@
         }
       ],
       "transformations": [
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "targetField": "evidence_observed_at",
+                "destinationType": "time"
+              }
+            ]
+          }
+        },
         {
           "id": "limit",
           "options": {
