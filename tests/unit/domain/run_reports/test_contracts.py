@@ -58,6 +58,13 @@ def test_pipeline_run_report_golden_matches_v1_schema() -> None:
     )
 
 
+def test_chembl_assay_backfill_run_report_golden_matches_v1_schema() -> None:
+    validate_fixture(
+        schema_name="pipeline_run_report.v1.json",
+        fixture_name="chembl_assay_backfill_run_report_golden.json",
+    )
+
+
 def test_workflow_run_report_golden_matches_v1_schema() -> None:
     validate_fixture(
         schema_name="workflow_run_report.v1.json",

@@ -383,6 +383,7 @@ separate from actual `record:` outputs and direct runtime collector families.
 | `bioetl_processed_records_silver_quarantined_current` | Recording rule | rule-defined | Current Silver quarantined-record projection |
 | `bioetl_processed_records_silver_skipped_current` | Recording rule | rule-defined | Current Silver skipped-record projection |
 | `bioetl_processed_records_silver_valid_current` | Recording rule | rule-defined | Current Silver valid-record projection |
+| `bioetl_dq_current_reason` | Recording rule | pipeline, reason, severity | Bounded current DQ reasons; `gold_contract_exclusions` is warn-only and must not escalate runtime CRIT |
 | `bioetl_dq_current_status` | Recording rule | rule-defined | Current DQ status signal used by L0/L1 dashboards |
 | `bioetl_l0_input_status` | Recording rule | rule-defined | L0 input status projection |
 | `bioetl_l0_status` | Recording rule | rule-defined | L0 overall status projection |

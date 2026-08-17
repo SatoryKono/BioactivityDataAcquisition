@@ -1457,6 +1457,14 @@ def test_dq_current_status_splits_hard_failures_from_degraded_warnings() -> None
     assert "bioetl_dq_current_activity_15m * 0" in status_expr
     assert len(dq_disabled_reason_rules) == 1
     assert len(quarantined_reason_rules) == 1
+    contract_exclude_reason_rules = [
+        rule
+        for rule in _recording_rules_named(payload, "bioetl_dq_current_reason")
+        if rule.get("labels", {}).get("reason") == "gold_contract_exclusions"
+    ]
+    assert len(contract_exclude_reason_rules) == 1
+    assert contract_exclude_reason_rules[0].get("labels", {}).get("severity") == "warn"
+    assert "excluded_by_contract" in contract_exclude_reason_rules[0].get("expr", "")
     assert (
         dq_disabled_reason_rules[0].get("expr", "")
         == "bioetl_dq_monitor_disabled_current"
