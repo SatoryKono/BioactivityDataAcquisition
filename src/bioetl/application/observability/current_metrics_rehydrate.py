@@ -158,31 +158,6 @@ def rehydrate_current_pipeline_run_metrics(
         )
 
 
-def rehydrate_current_metrics_safely(*, root: Path | None = None) -> RehydrateResult:
-    """Best-effort rehydrate using the process Prometheus registry."""
-    try:
-        from bioetl.infrastructure.observability.prometheus_metrics import (
-            PrometheusMetrics,
-        )
-
-        return rehydrate_current_pipeline_run_metrics(PrometheusMetrics(), root=root)
-    except (
-        ImportError,
-        OSError,
-        RuntimeError,
-        TypeError,
-        ValueError,
-        AttributeError,
-    ) as exc:
-        return RehydrateResult(
-            anchors=0,
-            pipeline_runs_seeded=0,
-            provider_universe_seeded=0,
-            stage_series_seeded=0,
-            error=str(exc),
-        )
-
-
 def _seed_pipeline_runs_total(metrics: MetricsPort, anchor: PipelineRunAnchor) -> int:
     key = (anchor.pipeline, anchor.run_type, anchor.status)
     if key in _SEEDED_RUN_KEYS:
