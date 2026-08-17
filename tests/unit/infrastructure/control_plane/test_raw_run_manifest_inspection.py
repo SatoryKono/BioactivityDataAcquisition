@@ -284,3 +284,29 @@ def test_missing_manifest_returns_bounded_diagnostic(tmp_path: Path) -> None:
 
     assert inspection.parse_ok is False
     assert inspection.schema_errors == ("manifest_not_found",)
+
+
+def test_inspect_raw_manifest_reads_contract_evidence_sidecar(tmp_path: Path) -> None:
+    from bioetl.infrastructure.control_plane._raw_run_manifest_inspection import (
+        persist_contract_evidence,
+    )
+
+    store = _saved_store(tmp_path)
+    persist_contract_evidence(
+        store.base_path,
+        "manifest-raw",
+        {
+            "contract_comparison_status": "compatible",
+            "contract_comparison_reason": "manifest_contract_comparison_compatible",
+            "resume_contract": "n/a",
+            "resume_contract_reason": "fresh_run_not_resume",
+            "lock_owner_id": "n/a",
+            "lock_owner_reason": "no_distributed_lock",
+        },
+    )
+
+    inspection = store.inspect_raw_manifest("manifest-raw")
+
+    assert inspection.contract_comparison_status == "compatible"
+    assert inspection.resume_contract == "n/a"
+    assert inspection.lock_owner_reason == "no_distributed_lock"

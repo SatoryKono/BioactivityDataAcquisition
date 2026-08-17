@@ -615,3 +615,52 @@ def test_lifecycle_dry_run_emits_summary_metrics_without_deletions(
         deleted_count=0,
         missing_count=0,
     )
+
+
+def test_plan_for_manifest_does_not_include_unrelated_catalog_files(
+    tmp_path: Path,
+) -> None:
+    from uuid import UUID
+
+    from bioetl.domain.control_plane import RunCodeProvenance, RunManifest
+    from bioetl.domain.types import RunID, RunType
+
+    control_root = tmp_path / "control"
+    now = datetime(2026, 4, 22, tzinfo=UTC)
+    _write_json(
+        control_root / "run_manifest" / "manifest-selected.json",
+        {"manifest_id": "manifest-selected", "created_at": now.isoformat()},
+    )
+    _write_json(
+        control_root / "run_manifest" / "manifest-other.json",
+        {"manifest_id": "manifest-other", "created_at": now.isoformat()},
+    )
+    _write_text(control_root / "run_ledger" / "manifest-selected.jsonl", "{}\n")
+    _write_text(control_root / "run_ledger" / "manifest-other.jsonl", "{}\n")
+    store = FileControlPlaneArtifactLifecycleStore(base_path=control_root)
+    manifest = RunManifest(
+        manifest_id="manifest-selected",
+        execution_fingerprint="fp",
+        schema_version="1.0",
+        created_at=now,
+        run_id=RunID(UUID("00000000-0000-0000-0000-000000000001")),
+        run_type=RunType.INCREMENTAL,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        code_provenance=RunCodeProvenance(),
+    )
+
+    plan = store.plan_for_manifest(
+        ControlPlaneArtifactLifecyclePolicy(retention_days=30, now=now),
+        manifest=manifest,
+        dry_run=True,
+    )
+
+    artifact_ids = {artifact.artifact_id for artifact in plan.artifacts}
+    paths = {Path(artifact.path).name for artifact in plan.artifacts}
+    assert "manifest-selected.json" in paths
+    assert "manifest-selected.jsonl" in paths
+    assert "manifest-other.json" not in paths
+    assert "manifest-other.jsonl" not in paths
+    assert "manifest-selected" in artifact_ids
