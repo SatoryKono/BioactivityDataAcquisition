@@ -334,3 +334,11 @@ class TestCachedBronzeDataSourceFetch:
         total = await source.get_total_records()
 
         assert total == 3
+
+
+def test_cached_bronze_health_check_does_not_emit_chembl_counters() -> None:
+    source = object.__new__(CachedBronzeDataSource)
+    assert "handle_health_check_result" not in source.health_check.__code__.co_names
+    assert "bioetl_health_check_success_total" not in (
+        source.health_check.__code__.co_consts or ()
+    )

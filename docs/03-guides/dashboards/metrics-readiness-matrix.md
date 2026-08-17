@@ -13,9 +13,14 @@ ______________________________________________________________________
 **Rule:** do not invent series. Names below already exist in
 `grafana/prometheus-rules/bioetl_observability.yml` or HTTP control-plane APIs.
 
+`Ready? yes` means the **recording/HTTP contract exists**. Live scrape samples
+for `bioetl_pipeline_runs_total` require health-server rehydrate from durable
+run reports (OBS-FILL-01 / #8930). HELP/TYPE without samples is a trust gap,
+not a ready first-screen.
+
 | Panel / need | Metric / source | Ready? | Blocker |
 | --- | --- | --- | --- |
-| Overview Status | `bioetl_l0_status` | yes | — |
+| Overview Status | `bioetl_l0_status` | yes | live empty until trust-anchor samples exist |
 | Overview First Action route | `bioetl_l0_next_action_route` | yes | — |
 | Overview Inputs matrix | `bioetl_l0_input_status_selected` | yes | — |
 | Runtime Status | `bioetl_runtime_current_status_trusted` | yes | — |
