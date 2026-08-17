@@ -245,7 +245,8 @@ def test_trust_primary_recovery_ssot_title_and_link() -> None:
     assert "INCOMPLETE" in content
     assert "UNKNOWN" in content
     assert "<em>Review Selected-Run Trust</em>" in content
-    assert "<em>Inspect Audit" in content
+    assert "<em>Review Retention Compliance</em>" in content
+    assert "<em>Review Lineage Validation</em>" in content
     assert "<b>INCOMPLETE" not in content
     assert "<strong>Do not replay" not in content
     assert panels[0].get("gridPos", {}).get("h") == 2
