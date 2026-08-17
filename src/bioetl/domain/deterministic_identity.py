@@ -43,10 +43,15 @@ def _canonical_enum(value: object) -> object:
 
 def _canonical_mapping(value: object) -> dict[str, object]:
     mapping = cast(Mapping[object, object], value)
-    return {
-        str(key): _canonical_identity_value(nested)
-        for key, nested in sorted(mapping.items(), key=lambda item: str(item[0]))
-    }
+    canonical: dict[str, object] = {}
+    for key, nested in mapping.items():
+        if not isinstance(key, str):
+            raise TypeError(
+                "deterministic identity mappings require string keys; "
+                f"got {type(key).__name__}"
+            )
+        canonical[key] = _canonical_identity_value(nested)
+    return {key: canonical[key] for key in sorted(canonical)}
 
 
 def _is_non_string_sequence(value: object) -> bool:

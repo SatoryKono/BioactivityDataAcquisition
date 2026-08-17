@@ -66,9 +66,11 @@ def _extract_counts(payload: object) -> dict[str, int | None]:
         source.get("records_fetched"),
         source.get("records_bronze"),
     )
-    extracted = next((value for value in extracted_candidates if value is not None), 0)
+    extracted = next(
+        (value for value in extracted_candidates if value is not None), None
+    )
     return {
-        "records_extracted": _as_int(extracted),
+        "records_extracted": None if extracted is None else _as_int(extracted),
         "records_bronze": _optional_int(source, "records_bronze"),
         "records_silver": _optional_int(source, "records_silver"),
         "records_gold": _optional_int(source, "records_gold"),
@@ -90,7 +92,7 @@ def _first_attribute(source: object, *names: str) -> object:
 
 def _mapping_counts(raw: Mapping[str, object]) -> dict[str, int | None]:
     explicit = _extract_counts(raw)
-    if explicit["records_extracted"] != 0 or raw.get("payload") is None:
+    if explicit["records_extracted"] is not None or raw.get("payload") is None:
         return explicit
     return _extract_counts(raw.get("payload"))
 
