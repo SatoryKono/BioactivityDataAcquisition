@@ -26,3 +26,11 @@ Each entry requires GitHub reconciliation before closeout.
 - Detail: CodeRabbit rate limit
 - GitHub issue: pending reconciliation
 
+## S01-domain-normalization — rate_limit
+
+- UTC: `2026-08-17T00:02:40.650154+00:00`
+- Wave: `A`
+- Files: `88`
+- Detail: CodeRabbit rate limit (waitTime=2220s)
+- GitHub issue: pending reconciliation
+

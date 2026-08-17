@@ -48391,6 +48391,9 @@
   "schema_version": 1,
   "snapshot_date": "2026-08-14",
 <<<<<<< HEAD
+  "source_tree_sha256": "4d35ab13d2d6f4d1fe763a8d1672778505af7b34627b30ea23a259aef3c739f7",
+||||||| 6ecbb1ab23
+<<<<<<< HEAD
 <<<<<<< HEAD
   "source_tree_sha256": "709086a6b816e342753ee3a65bdb9815a10a4172d07bf238909ee71adfd94e32",
 ||||||| 235094265b
@@ -48409,6 +48412,9 @@
 =======
   "source_tree_sha256": "979e6d3f9ba130c802e43229503d11a517bebe0bf9fceca7f8636a021f71da4a",
 >>>>>>> codex/full-suite-green-20260816
+=======
+  "source_tree_sha256": "8c37282cd2f4b5b432119b7ef3f1fd38df085065bc1f7315edb29b7d4d461748",
+>>>>>>> fix/vectorize-dedup-classify-8869
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

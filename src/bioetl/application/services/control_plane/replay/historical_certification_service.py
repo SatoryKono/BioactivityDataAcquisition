@@ -23,11 +23,21 @@ from bioetl.application.services.control_plane.replay.historical_corpus_models i
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 from bioetl.domain.types import RunID
 
-HistoricalReplayBulkCertificationRecord = _corpus_models.HistoricalReplayBulkCertificationRecord
-HistoricalReplayBulkCertificationResult = _corpus_models.HistoricalReplayBulkCertificationResult
-HistoricalReplayBulkCertificationSpec = _corpus_models.HistoricalReplayBulkCertificationSpec
-HistoricalReplayCertifiabilityInventory = _corpus_models.HistoricalReplayCertifiabilityInventory
-HistoricalReplayCertifiabilityRecord = _corpus_models.HistoricalReplayCertifiabilityRecord
+HistoricalReplayBulkCertificationRecord = (
+    _corpus_models.HistoricalReplayBulkCertificationRecord
+)
+HistoricalReplayBulkCertificationResult = (
+    _corpus_models.HistoricalReplayBulkCertificationResult
+)
+HistoricalReplayBulkCertificationSpec = (
+    _corpus_models.HistoricalReplayBulkCertificationSpec
+)
+HistoricalReplayCertifiabilityInventory = (
+    _corpus_models.HistoricalReplayCertifiabilityInventory
+)
+HistoricalReplayCertifiabilityRecord = (
+    _corpus_models.HistoricalReplayCertifiabilityRecord
+)
 
 __all__ = [
     "HistoricalReplayCertificationResult",

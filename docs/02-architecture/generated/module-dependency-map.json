@@ -1,24 +1,24 @@
 {
   "summary": {
     "scanned_modules": 2417,
-    "total_internal_imports": 7522,
+    "total_internal_imports": 7524,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 321,
     "violations": 0,
-    "source_fingerprint": "67ba587803c8b38abb355bc5f6efd69372efb20d2b53a5aaf6f716afbb831f46"
+    "source_fingerprint": "7ae9bc52f13c17231b3337fbc076b57479a2dce3170084de46ec3e7054e4af90"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1519,
+      "imports": 1518,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 973,
+      "imports": 974,
       "allowed": true
     },
     {
@@ -54,13 +54,13 @@
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 754,
+      "imports": 755,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 1179,
+      "imports": 1180,
       "allowed": true
     },
     {
@@ -78,13 +78,13 @@
     {
       "source": "interfaces",
       "target": "domain",
-      "imports": 64,
+      "imports": 65,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 383,
+      "imports": 382,
       "allowed": true
     }
   ],
@@ -112,7 +112,7 @@
     {
       "source": "application.services",
       "target": "domain.types",
-      "imports": 79
+      "imports": 80
     },
     {
       "source": "infrastructure.storage",
@@ -160,13 +160,13 @@
       "imports": 35
     },
     {
-      "source": "application.composite",
-      "target": "domain.exceptions",
-      "imports": 33
-    },
-    {
       "source": "infrastructure.storage",
       "target": "domain.models",
+      "imports": 34
+    },
+    {
+      "source": "application.composite",
+      "target": "domain.exceptions",
       "imports": 33
     },
     {
