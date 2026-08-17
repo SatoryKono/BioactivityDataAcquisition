@@ -297,6 +297,25 @@ def test_grafana_live_audit_report_routes_under_reports() -> None:
     assert "reports/observability/grafana/live-panel-audit.json" in routed_outputs
 
 
+def test_grafana_panel_fill_report_routes_under_reports() -> None:
+    """Panel-fill error reports must write under reports/observability."""
+    script = (
+        ROOT
+        / "scripts"
+        / "ops"
+        / "observability"
+        / "grafana"
+        / "check_dashboard_panel_fill.py"
+    ).read_text(encoding="utf-8")
+    routing = _load_routing()
+    routed_outputs = {
+        output for route in routing["routes"] for output in route.get("outputs", [])
+    }
+
+    assert 'Path("reports/observability/grafana/panel-fill-errors.json")' in script
+    assert "reports/observability/grafana/panel-fill-errors.json" in routed_outputs
+
+
 def test_runtime_log_default_routes_under_reports_logs() -> None:
     """Default local log files must avoid root logs/."""
     script = (
