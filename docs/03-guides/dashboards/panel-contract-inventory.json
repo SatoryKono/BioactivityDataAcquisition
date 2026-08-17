@@ -12,9 +12,9 @@
   "schema_version": 1,
   "source": "grafana/dashboards/*.json",
   "target_counts": {
-    "http": 29,
+    "http": 32,
     "loki": 0,
-    "promql": 166,
+    "promql": 170,
     "tempo": 0,
     "unknown": 0
   },
@@ -2664,11 +2664,11 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "topk(15, label_replace(label_replace(max by (pipeline, run_type, reason) (bioetl_runtime_current_blocker_reason) > 0, \"domain\", \"runtime\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
+      "formula": "topk(5, label_replace(label_replace(max by (pipeline, run_type, reason) (bioetl_runtime_current_blocker_reason) > 0, \"domain\", \"runtime\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
       "kind": "promql",
       "panel_id": 2010,
       "panel_title": "Inspect Ranked Suspects",
-      "query": "topk(15, label_replace(label_replace(max by (pipeline, run_type, reason) (bioetl_runtime_current_blocker_reason) > 0, \"domain\", \"runtime\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
+      "query": "topk(5, label_replace(label_replace(max by (pipeline, run_type, reason) (bioetl_runtime_current_blocker_reason) > 0, \"domain\", \"runtime\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
       "query_tokens": [
         "bioetl_runtime_current_blocker_reason"
       ],
@@ -2699,11 +2699,11 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "topk(15, label_replace(label_replace(max by (provider, cause) (bioetl_provider_current_cause) > 0, \"domain\", \"provider\", \"\", \"\"), \"signal\", \"$1\", \"cause\", \"(.*)\"))",
+      "formula": "topk(5, label_replace(label_replace(max by (provider, cause) (bioetl_provider_current_cause) > 0, \"domain\", \"provider\", \"\", \"\"), \"signal\", \"$1\", \"cause\", \"(.*)\"))",
       "kind": "promql",
       "panel_id": 2010,
       "panel_title": "Inspect Ranked Suspects",
-      "query": "topk(15, label_replace(label_replace(max by (provider, cause) (bioetl_provider_current_cause) > 0, \"domain\", \"provider\", \"\", \"\"), \"signal\", \"$1\", \"cause\", \"(.*)\"))",
+      "query": "topk(5, label_replace(label_replace(max by (provider, cause) (bioetl_provider_current_cause) > 0, \"domain\", \"provider\", \"\", \"\"), \"signal\", \"$1\", \"cause\", \"(.*)\"))",
       "query_tokens": [
         "bioetl_provider_current_cause"
       ],
@@ -2734,11 +2734,11 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "topk(15, label_replace(label_replace(max by (pipeline, reason) (bioetl_dq_current_reason) > 0, \"domain\", \"dq\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
+      "formula": "topk(5, label_replace(label_replace(max by (pipeline, reason) (bioetl_dq_current_reason) > 0, \"domain\", \"dq\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
       "kind": "promql",
       "panel_id": 2010,
       "panel_title": "Inspect Ranked Suspects",
-      "query": "topk(15, label_replace(label_replace(max by (pipeline, reason) (bioetl_dq_current_reason) > 0, \"domain\", \"dq\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
+      "query": "topk(5, label_replace(label_replace(max by (pipeline, reason) (bioetl_dq_current_reason) > 0, \"domain\", \"dq\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
       "query_tokens": [
         "bioetl_dq_current_reason"
       ],
@@ -2871,11 +2871,11 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
+      "formula": "topk(4, max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}))",
       "kind": "promql",
       "panel_id": 9002,
       "panel_title": "Review Domain Status",
-      "query": "max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
+      "query": "topk(4, max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}))",
       "query_tokens": [
         "bioetl_l0_input_status_selected"
       ],
@@ -3278,6 +3278,45 @@
         {
           "color": "red",
           "value": 2
+        }
+      ],
+      "unit": "none"
+    },
+    {
+      "dashboard_uid": "bioetl-overview-v2",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "formula": "max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
+      "kind": "promql",
+      "panel_id": 9031,
+      "panel_title": "Review All Domain Status",
+      "query": "max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
+      "query_tokens": [
+        "bioetl_l0_input_status_selected"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "gray",
+          "value": null
+        },
+        {
+          "color": "green",
+          "value": 0
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        },
+        {
+          "color": "gray",
+          "value": 3
         }
       ],
       "unit": "none"
@@ -3912,11 +3951,11 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "max by (provider) (bioetl_provider_current_status)",
+      "formula": "topk(4, max by (provider) (bioetl_provider_current_status))",
       "kind": "promql",
       "panel_id": 9101,
       "panel_title": "Monitor Fleet Severity",
-      "query": "max by (provider) (bioetl_provider_current_status)",
+      "query": "topk(4, max by (provider) (bioetl_provider_current_status))",
       "query_tokens": [
         "bioetl_provider_current_status"
       ],
@@ -3947,11 +3986,11 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "max by (provider) (bioetl_provider_current_status) >= 1",
+      "formula": "topk(4, max by (provider) (bioetl_provider_current_status) >= 1)",
       "kind": "promql",
       "panel_id": 9102,
       "panel_title": "Inspect Non-OK Providers",
-      "query": "max by (provider) (bioetl_provider_current_status) >= 1",
+      "query": "topk(4, max by (provider) (bioetl_provider_current_status) >= 1)",
       "query_tokens": [
         "bioetl_provider_current_status"
       ],
@@ -3982,11 +4021,11 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "topk(5, max by (provider, cause) (bioetl_provider_current_cause) > 0)",
+      "formula": "topk(4, max by (provider, cause) (bioetl_provider_current_cause) > 0)",
       "kind": "promql",
       "panel_id": 9103,
       "panel_title": "Inspect Top Provider Causes",
-      "query": "topk(5, max by (provider, cause) (bioetl_provider_current_cause) > 0)",
+      "query": "topk(4, max by (provider, cause) (bioetl_provider_current_cause) > 0)",
       "query_tokens": [
         "bioetl_provider_current_cause"
       ],
@@ -4042,6 +4081,60 @@
         }
       ],
       "unit": "none"
+    },
+    {
+      "dashboard_uid": "bioetl-provider-health-v2",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "formula": "max by (provider) (bioetl_provider_current_status)",
+      "kind": "promql",
+      "panel_id": 9111,
+      "panel_title": "Inspect Full Fleet Severity",
+      "query": "max by (provider) (bioetl_provider_current_status)",
+      "query_tokens": [
+        "bioetl_provider_current_status"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": ""
+    },
+    {
+      "dashboard_uid": "bioetl-provider-health-v2",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "formula": "max by (provider) (bioetl_provider_current_status) >= 1",
+      "kind": "promql",
+      "panel_id": 9112,
+      "panel_title": "Inspect Full Non-OK Providers",
+      "query": "max by (provider) (bioetl_provider_current_status) >= 1",
+      "query_tokens": [
+        "bioetl_provider_current_status"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": ""
+    },
+    {
+      "dashboard_uid": "bioetl-provider-health-v2",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "formula": "max by (provider, cause) (bioetl_provider_current_cause) > 0",
+      "kind": "promql",
+      "panel_id": 9113,
+      "panel_title": "Inspect Full Provider Causes",
+      "query": "max by (provider, cause) (bioetl_provider_current_cause) > 0",
+      "query_tokens": [
+        "bioetl_provider_current_cause"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": ""
     },
     {
       "dashboard_uid": "bioetl-provider-health-v2",
@@ -4124,8 +4217,8 @@
       "formula": "",
       "kind": "http",
       "panel_id": 3010,
-      "panel_title": "Inspect Recent Runs (last 20)",
-      "query": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=20",
+      "panel_title": "Inspect Recent Runs (last 4)",
+      "query": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=4",
       "query_tokens": [
         "/ops/observability/pipeline-run-reports",
         "pipeline",
@@ -4230,6 +4323,68 @@
         "/ops/observability/workflow-run-reports",
         "workflow",
         "limit"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": ""
+    },
+    {
+      "dashboard_uid": "bioetl-run-explorer-v1",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "formula": "",
+      "kind": "http",
+      "panel_id": 3021,
+      "panel_title": "Inspect Recent Runs (last 20)",
+      "query": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=20",
+      "query_tokens": [
+        "/ops/observability/pipeline-run-reports",
+        "pipeline",
+        "limit"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": ""
+    },
+    {
+      "dashboard_uid": "bioetl-run-explorer-v1",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "formula": "",
+      "kind": "http",
+      "panel_id": 3022,
+      "panel_title": "Inspect Full Run Identity",
+      "query": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+      "query_tokens": [
+        "/ops/control-plane/identity-table",
+        "pipeline",
+        "run_type",
+        "run_id"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": ""
+    },
+    {
+      "dashboard_uid": "bioetl-run-explorer-v1",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "formula": "",
+      "kind": "http",
+      "panel_id": 3023,
+      "panel_title": "Inspect Full Processed Records",
+      "query": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+      "query_tokens": [
+        "/ops/observability/processed-records",
+        "pipeline",
+        "run_type",
+        "run_id"
       ],
       "ref_id": "A",
       "runbook_urls": [],
