@@ -7,7 +7,7 @@ import json
 from dataclasses import dataclass
 from datetime import date, datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.domain.types import JsonDict
 
@@ -292,8 +292,7 @@ def _json_fallback(value: object) -> object:
     if isinstance(value, Decimal):
         return str(value)
     if isinstance(value, (set, frozenset)):
-        canonical_items = sorted(_canonical_json_text(item) for item in value)
-        return [json.loads(item) for item in canonical_items]
+        return _canonical_set_members(value)
     return _bytes_or_reject(value)
 
 
