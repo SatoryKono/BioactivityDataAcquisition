@@ -7,7 +7,7 @@ application mixin layer under the file-size policy while preserving behavior.
 from __future__ import annotations
 
 from collections.abc import Callable
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any, cast
 from uuid import UUID
 
@@ -112,12 +112,21 @@ def _latest_terminal_timestamp(
     latest_entry = max(
         entries,
         key=lambda entry: (
-            getattr(entry, "occurred_at", datetime.min),
+            _as_utc_datetime(getattr(entry, "occurred_at", None)),
             getattr(entry, "entry_id", ""),
         ),
     )
     occurred_at = getattr(latest_entry, "occurred_at", None)
-    return occurred_at if isinstance(occurred_at, datetime) else None
+    return _as_utc_datetime(occurred_at) if isinstance(occurred_at, datetime) else None
+
+
+def _as_utc_datetime(value: object) -> datetime:
+    """Normalize comparable timestamps and provide an aware minimum sentinel."""
+    if not isinstance(value, datetime):
+        return datetime.min.replace(tzinfo=UTC)
+    if value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value.astimezone(UTC)
 
 
 def _manifest_matches_scope(
@@ -160,7 +169,7 @@ def _pick_latest_scope_manifest(
                 run_id=getattr(manifest, "run_id", None),
                 ledger_port=ledger_port,
             )
-            or getattr(manifest, "created_at", datetime.min),
+            or _as_utc_datetime(getattr(manifest, "created_at", None)),
             str(getattr(manifest, "run_id", "")),
         ),
     )

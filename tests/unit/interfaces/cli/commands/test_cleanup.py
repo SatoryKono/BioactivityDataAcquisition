@@ -168,6 +168,20 @@ class TestBronzeCleanupCommand:
 
         assert result.exit_code != 0
 
+    def test_service_resolution_failure_exits_nonzero(
+        self,
+        cli_runner: CliRunner,
+    ) -> None:
+        """Composition failures are handled inside the shared async boundary."""
+        with patch(
+            "bioetl.interfaces.cli.commands.cleanup.get_bronze_cleanup_service",
+            side_effect=RuntimeError("composition failed"),
+        ):
+            result = cli_runner.invoke(cli, ["maintenance", "bronze-cleanup"])
+
+        assert result.exit_code == 1
+        assert "composition failed" in result.output
+
 
 @pytest.mark.unit
 class TestCleanupPreviewCommand:

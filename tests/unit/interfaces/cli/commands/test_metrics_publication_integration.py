@@ -30,6 +30,7 @@
 
 from __future__ import annotations
 
+import builtins
 from unittest.mock import patch
 
 import pytest
@@ -89,3 +90,24 @@ def test_publish_metrics_safely_propagates_failed_publication_result() -> None:
         )
 
     assert result is False
+
+
+def test_publish_metrics_safely_swallows_deferred_import_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original_import = builtins.__import__
+
+    def _fail_observability_import(
+        name: str,
+        globals: object = None,
+        locals: object = None,
+        fromlist: object = (),
+        level: int = 0,
+    ) -> object:
+        if name == "bioetl.composition.observability_api":
+            raise ImportError("observability import failed")
+        return original_import(name, globals, locals, fromlist, level)
+
+    monkeypatch.setattr(builtins, "__import__", _fail_observability_import)
+
+    assert publish_metrics_safely() is False

@@ -115,15 +115,34 @@ def resolve_observability_backend_cli_options(
 ) -> tuple[bool, int]:
     """Read backend auto-start options from raw Click kwargs mapping."""
     raw_port = options.get("observability_backend_port", default_port)
-    if isinstance(raw_port, bool) or not isinstance(
-        raw_port,
-        (str, bytes, bytearray, int, float),
-    ):
-        raise TypeError("observability_backend_port must be a numeric CLI value")
+    port = _parse_observability_backend_port(raw_port)
     return (
         bool(options.get("ensure_observability_backend", False)),
-        int(raw_port),
+        port,
     )
+
+
+def _parse_observability_backend_port(raw_port: object) -> int:
+    """Parse one integral backend-port value without lossy truncation."""
+    if isinstance(raw_port, bool):
+        raise TypeError("observability_backend_port must be a numeric CLI value")
+    if not isinstance(raw_port, (str, bytes, bytearray, int, float)):
+        raise TypeError("observability_backend_port must be a numeric CLI value")
+    try:
+        port = int(raw_port)
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise TypeError(
+            "observability_backend_port must be a numeric CLI value"
+        ) from exc
+    if isinstance(raw_port, float):
+        _require_integral_backend_port(raw_port)
+    return port
+
+
+def _require_integral_backend_port(raw_port: float) -> None:
+    """Reject floats that would be truncated by ``int`` conversion."""
+    if not raw_port.is_integer():
+        raise TypeError("observability_backend_port must be an integral CLI value")
 
 
 @dataclass(frozen=True, slots=True)

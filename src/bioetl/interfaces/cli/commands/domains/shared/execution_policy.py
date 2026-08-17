@@ -191,7 +191,7 @@ def map_batch_run_result_to_exit_code(batch_result: BatchRunResultProtocol) -> E
         return ExitCode.SIGINT
     if batch_result.total > 0:
         return ExitCode.OK
-    return ExitCode.SIGINT
+    return ExitCode.OK
 
 
 def map_success_flag_to_exit_code(

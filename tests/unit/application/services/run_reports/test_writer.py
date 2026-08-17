@@ -137,6 +137,31 @@ def test_write_workflow_run_report(tmp_path: Path) -> None:
     assert "Steps" in written.markdown_path.read_text(encoding="utf-8")
 
 
+def test_latest_pointer_uses_sanitized_identity_owner_with_custom_directory(
+    tmp_path: Path,
+) -> None:
+    report = build_workflow_run_report(
+        identity={
+            "workflow_name": "unsafe/owner",
+            "workflow_run_id": "wf1",
+            "status": "success",
+        },
+        plan_steps=[],
+        execution_steps=[],
+    )
+    custom_directory = tmp_path / "custom" / "artifacts"
+
+    written = write_workflow_run_report(
+        report,
+        root=tmp_path,
+        directory=custom_directory,
+    )
+
+    assert written.json_path.parent == custom_directory
+    assert written.latest_path == tmp_path / "workflow" / "unsafe_owner" / "_latest.json"
+    assert written.latest_path.is_file()
+
+
 def test_write_json_cleans_temporary_file_when_replace_fails(
     tmp_path: Path,
     monkeypatch,
