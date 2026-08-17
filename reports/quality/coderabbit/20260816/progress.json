@@ -784,26 +784,20 @@
       "id": "S16-configs-quality",
       "wave": "B",
       "files": 100,
-      "status": "connection_error",
-      "reason": "CodeRabbit connection/WebSocket failure",
-      "exit_code": 1,
+      "status": "timeout",
+      "reason": "timeout after 600s",
       "log": "reports/quality/coderabbit/20260816/review_B_S16-configs-quality.log",
-      "bytes": 453,
-      "elapsed_s": 70.5,
-      "command": [
-        "/home/fedor/.local/bin/coderabbit",
-        "review",
-        "--base",
-        "main",
-        "--dir",
-        ".",
-        "--agent",
-        "-c",
-        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
-        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
-        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
-      ]
+      "elapsed_s": 606.0
+    },
+    "S16b-configs-other": {
+      "id": "S16b-configs-other",
+      "wave": "B",
+      "files": 156,
+      "status": "timeout",
+      "reason": "timeout after 600s",
+      "log": "reports/quality/coderabbit/20260816/review_B_S16b-configs-other.log",
+      "elapsed_s": 607.2
     }
   },
-  "updated_utc": "2026-08-17T09:45:02.207089+00:00"
+  "updated_utc": "2026-08-17T10:05:45.371880+00:00"
 }

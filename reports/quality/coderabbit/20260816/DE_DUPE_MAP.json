@@ -5513,7 +5513,7 @@
     "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/source_refs.py",
     "claim": "In @src/bioetl/application/services/control_plane/manifest/diagnostics/source_refs.py around lines 63 - 75, Add a shared key-normalization helper for provider, entity, pipeline_name, and query, then use it in both _group_input_snapshots_by_source and _pop_matching_source_snapshots when constructing grouping and exact lookup keys. Preserve None handling for query so normalized keys match regardless of surrounding whitespace and prevent duplicate source references.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8907
   },
   "0f3947df82fa996e": {
     "canonical_finding_id": "CR-20260816-A-S03-app-control-plane-104",
@@ -5597,7 +5597,7 @@
     "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/source_refs.py",
     "claim": "In @src/bioetl/application/services/control_plane/manifest/diagnostics/source_refs.py around lines 153 - 170, Update _build_snapshot_ref so malformed or unsupported captured_at text does not raise during diagnostics construction; catch datetime.fromisoformat parsing failures and leave captured_at as None, while preserving valid timestamp parsing and the existing _optional_text handling.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8907
   },
   "dac92f83d098d31d": {
     "canonical_finding_id": "CR-20260816-A-S03-app-control-plane-116",
@@ -5611,7 +5611,7 @@
     "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/source_refs.py",
     "claim": "In @src/bioetl/application/services/control_plane/manifest/diagnostics/source_refs.py around lines 139 - 150, Update the sorting in the source-reference construction around _pop_matching_source_snapshots to use a total-order key for query, ordering None and string values deterministically instead of comparing them directly. Preserve ordering by provider, entity, and pipeline_name, and keep the existing RunSourceRef construction unchanged.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8907
   },
   "3ce209af5ac41a8d": {
     "canonical_finding_id": "CR-20260816-A-S03-app-control-plane-118",
@@ -6045,7 +6045,7 @@
     "path": "src/bioetl/application/services/dq/_checks_basic.py",
     "claim": "In @src/bioetl/application/services/dq/_checks_basic.py around lines 161 - 172, Update the freshness calculation around _extract_freshness_timestamp so current_time and max_ts use a consistent UTC-aware representation before the subtraction, preserving the existing PASS result when max_ts is None and the lag calculation otherwise.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8908
   },
   "c89db1b8e27917b4": {
     "canonical_finding_id": "CR-20260816-A-S04-app-services-other-050",
@@ -6283,7 +6283,7 @@
     "path": "src/bioetl/application/services/quality/_quarantine_service_filtered_helpers.py",
     "claim": "In @src/bioetl/application/services/quality/_quarantine_service_filtered_helpers.py around lines 92 - 120, Update _latest_terminal_timestamp and the related comparison around its latest-terminal fallback to avoid mixing naive and timezone-aware datetimes: normalize ledger and manifest timestamp candidates to a consistent timezone-aware representation and use a matching aware minimum sentinel instead of datetime.min. Preserve the existing terminal-event selection and return behavior while ensuring comparisons work for UTC-aware timestamps.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8908
   },
   "401a0c4b3593bc71": {
     "canonical_finding_id": "CR-20260816-A-S04-app-services-other-084",
@@ -6871,7 +6871,7 @@
     "path": "src/bioetl/application/services/run_reports/writer.py",
     "claim": "In @src/bioetl/application/services/run_reports/writer.py around lines 196 - 236, Update write_pipeline_run_report and the corresponding writer so _write_latest_pointer targets the resolved, sanitized owner directory derived from the report identity rather than out_dir.parent; when directory is explicitly supplied, skip writing the pointer if that is the established intended behavior. Preserve the existing artifact paths and pointer payload.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8909
   },
   "b1d82e04ffeb5030": {
     "canonical_finding_id": "CR-20260816-A-S04-app-services-other-168",
@@ -6885,7 +6885,7 @@
     "path": "src/bioetl/application/services/run_reports/query.py",
     "claim": "In @src/bioetl/application/services/run_reports/query.py around lines 33 - 43, Update load_latest_pointer and _load_json_dict to catch JSON decoding errors, alongside existing file-read errors where applicable, and return None for malformed or partially written JSON. Preserve the current dictionary validation and successful-load behavior.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8909
   },
   "9dac415cf3daf654": {
     "canonical_finding_id": "CR-20260816-A-S04-app-services-other-170",
@@ -6899,7 +6899,7 @@
     "path": "src/bioetl/application/services/run_reports/query.py",
     "claim": "In @src/bioetl/application/services/run_reports/query.py around lines 399 - 405, Update _rm_tree to use shutil.rmtree for directory removal, ensuring symlinked directories are not traversed or deleted outside the report tree; preserve unlink behavior for files and symlinks.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8909
   },
   "1341e011df6639d4": {
     "canonical_finding_id": "CR-20260816-A-S04-app-services-other-172",
@@ -6927,7 +6927,7 @@
     "path": "src/bioetl/application/services/run_reports/paths.py",
     "claim": "In @src/bioetl/application/services/run_reports/paths.py around lines 93 - 111, Update the temporary-file handling around NamedTemporaryFile so temporary_path is assigned immediately after the file is created, before handle.write, handle.flush, or os.fsync can raise. Keep the existing finally cleanup using temporary_path, and preserve the replace behavior after the with block.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8909
   },
   "82441da9ff5b898b": {
     "canonical_finding_id": "CR-20260816-A-S04-app-services-other-176",
@@ -6962,7 +6962,7 @@
     "path": "src/bioetl/application/services/run_reports/paths.py",
     "claim": "In @src/bioetl/application/services/run_reports/paths.py around lines 254 - 286, Update inspect_report_root_marker to read only a bounded prefix of the marker file rather than loading it entirely, while preserving the existing token comparison and reporting behavior. Also catch UnicodeDecodeError alongside OSError so invalid binary marker content returns the existing unhealthy/invalid payload instead of raising.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8909
   },
   "e52e0a22a2120541": {
     "canonical_finding_id": "CR-20260816-A-S04-app-services-other-181",
@@ -6976,7 +6976,7 @@
     "path": "src/bioetl/application/services/run_reports/query.py",
     "claim": "In @src/bioetl/application/services/run_reports/query.py around lines 318 - 340, Make _reports_for_prune retrieve the complete report set instead of applying the 10,000-entry limit, using an unbounded internal listing path or an equivalent cap-detection failure. In _prune_candidates, document that entries must be sorted by modification time descending so entries[max_count:] selects the oldest reports.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8909
   },
   "b2b9185b670efeef": {
     "canonical_finding_id": "CR-20260816-A-S04-app-services-other-183",
@@ -6990,7 +6990,7 @@
     "path": "src/bioetl/application/services/run_reports/source_identity.py",
     "claim": "In @src/bioetl/application/services/run_reports/source_identity.py around lines 169 - 177, Update normalize_runtime_path to resolve a relative root once before joining it with a relative value, then normalize the joined path without recursively calling normalize_runtime_path. Preserve the existing absolute-path handling and /mnt case-folding behavior, including the compute_runtime_source_id call using runtime_root.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8909
   },
   "26dae8468b51fe0a": {
     "canonical_finding_id": "CR-20260816-A-S04b-app-residual-001",
@@ -7907,7 +7907,7 @@
     "path": "src/bioetl/interfaces/cli/commands/config.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/config.py around lines 107 - 116, Update the exception handling in the config show command to raise or return the appropriate non-zero exit statuses after echoing errors: use CONFIG_ERROR for ValueError and EX_NOINPUT for FileNotFoundError, matching show_dq_config_command in config_dq.py.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8910
   },
   "0f8f79785c2d1336": {
     "canonical_finding_id": "CR-20260816-A-S10-interfaces-cli-009",
@@ -7921,7 +7921,7 @@
     "path": "src/bioetl/interfaces/cli/commands/checkpoint.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/checkpoint.py around lines 289 - 306, Update checkpoint_list to execute its service resolution and asynchronous list operation through the existing run_async_with_cli_failure_policy used by archive.py and cleanup.py. Ensure failures are converted into an actionable CLI message and the corresponding defined ExitCode, while preserving successful checkpoint listing.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8910
   },
   "3e57092f7a012bdf": {
     "canonical_finding_id": "CR-20260816-A-S10-interfaces-cli-011",
@@ -7956,14 +7956,14 @@
     "path": "src/bioetl/interfaces/cli/commands/cleanup.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/cleanup.py around lines 122 - 139, Move the get_bronze_cleanup_service() call into the _run coroutine so service-resolution failures are handled by run_async_with_cli_failure_policy. Keep the cleanup, dry-run messaging, and result reporting behavior unchanged, and align bronze_cleanup_command with cleanup_preview_command.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8910
   },
   "b5229b1f243f576b": {
     "canonical_finding_id": "CR-20260816-A-S10-interfaces-cli-016",
     "path": "src/bioetl/interfaces/cli/commands/adr.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/adr.py around lines 85 - 93, Update show_command’s FileNotFoundError handler to raise SystemExit(int(ExitCode.EX_NOINPUT)) after reporting the missing ADR, instead of returning normally; preserve the existing actionable error message and successful raw/content output paths.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8910
   },
   "8574da1d6c24def7": {
     "canonical_finding_id": "CR-20260816-A-S10-interfaces-cli-017",
@@ -7984,7 +7984,7 @@
     "path": "src/bioetl/interfaces/cli/commands/config.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/config.py around lines 140 - 153, Update the ValueError and FileNotFoundError handlers in the config validation command to report the error through the established non-zero CLI failure path, matching config_dq.py::_fail_dq behavior. Preserve the existing actionable messages and successful return path for valid configurations, without exposing secrets or changing the command’s input/API contract.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8910
   },
   "28990decb4d3e1c8": {
     "canonical_finding_id": "CR-20260816-A-S10-interfaces-cli-020",
@@ -8068,7 +8068,7 @@
     "path": "src/bioetl/interfaces/cli/commands/domains/shared/execution_policy.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/domains/shared/execution_policy.py around lines 185 - 194, The execution-policy decision flow should not map an empty batch to ExitCode.SIGINT. Update the final batch_result.total == 0 branch to return the intended non-interrupt outcome—ExitCode.OK for a benign empty batch or an explicit failure code if empty execution is considered an error—while preserving the existing failed and SHUTDOWN handling.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8910
   },
   "cc350b484467623d": {
     "canonical_finding_id": "CR-20260816-A-S10-interfaces-cli-032",
@@ -8089,7 +8089,7 @@
     "path": "src/bioetl/interfaces/cli/commands/domains/shared/inspection_commands.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/domains/shared/inspection_commands.py around lines 165 - 186, Update run_async_inspection_command and its _emit error path so a caught ValueError remains a failed CLI execution with a non-zero exit status after echo_error, using the project’s existing shared execution policy or ExitCode.FAIL mechanism while preserving successful payload emission.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8910
   },
   "b3a91080114ed4ef": {
     "canonical_finding_id": "CR-20260816-A-S10-interfaces-cli-035",
@@ -8110,7 +8110,7 @@
     "path": "src/bioetl/interfaces/cli/commands/domains/diagnostics/operations.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/domains/diagnostics/operations.py around lines 162 - 171, Update the ValueError failure paths in emit_manifest_payload and emit_forensic_run_diff to raise SystemExit(ExitCode.FAIL) after reporting the actionable error, matching run_health_diagnostics and ensuring CLI failures return a nonzero status without exposing secrets; only retain the current return behavior if it is explicitly documented with an explanatory comment.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8910
   },
   "8e1fa6a9f941bef0": {
     "canonical_finding_id": "CR-20260816-A-S10-interfaces-cli-038",
@@ -8194,7 +8194,7 @@
     "path": "src/bioetl/interfaces/cli/commands/domains/run/command_policy.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/domains/run/command_policy.py around lines 182 - 191, Update handle_cli_failure so CLI_CLEANUP_PREVIEW failures propagate to handle_cli_execution_failure or otherwise terminate with a non-zero status instead of returning normally. Preserve the existing successful dry-run preview behavior, and ensure run_command_flow distinguishes a failed preview from a normal False result.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8910
   },
   "5cd9ae6d54f44869": {
     "canonical_finding_id": "CR-20260816-A-S10-interfaces-cli-050",
@@ -8229,7 +8229,7 @@
     "path": "src/bioetl/interfaces/cli/commands/domains/diagnostics/operations.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/domains/diagnostics/operations.py around lines 73 - 78, Update the diagnostics command flow around echo_health_results and all_health_results_healthy so JSON output is still evaluated for provider health before returning. Preserve JSON rendering and the existing ExitCode.FAIL behavior for unhealthy results, and add coverage for healthy and unhealthy results in both JSON and non-JSON modes.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8910
   },
   "310ffd612d383d11": {
     "canonical_finding_id": "CR-20260816-A-S10-interfaces-cli-055",
@@ -8250,7 +8250,7 @@
     "path": "src/bioetl/interfaces/cli/commands/lineage.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/lineage.py around lines 240 - 244, Update show_fragment_command, trace_command, and explain_command so their ValueError handlers raise SystemExit(ExitCode.FAIL) after reporting the error instead of returning success; import and reuse ExitCode from bioetl.interfaces.cli.exit_codes, and replace the literal SystemExit(1) in the affected command flow with SystemExit(ExitCode.FAIL).",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8910
   },
   "e22626e139ed5336": {
     "canonical_finding_id": "CR-20260816-A-S10-interfaces-cli-058",
@@ -8264,7 +8264,7 @@
     "path": "src/bioetl/interfaces/cli/commands/lock.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/lock.py around lines 67 - 71, Update the UUID validation in both affected command handlers to raise click.BadParameter for invalid run_id values instead of calling echo_error and returning, so Click reports the parameter and exits with a usage-error status. Add the click import and remove echo_error only if no longer used in these handlers.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8910
   },
   "89a64a9b2076a2ea": {
     "canonical_finding_id": "CR-20260816-A-S10-interfaces-cli-060",
@@ -8278,7 +8278,7 @@
     "path": "src/bioetl/interfaces/cli/commands/run.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/run.py around lines 144 - 156, Update validate_options so every invalid validation result emits an error and exits with ExitCode.CONFIG_ERROR, including when validation.error_message is None; use a clear fallback message for the missing-message case while preserving the existing behavior for valid results and provided error messages.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8910
   },
   "7de6b93c8b1a2bee": {
     "canonical_finding_id": "CR-20260816-A-S10-interfaces-cli-062",
@@ -8292,7 +8292,7 @@
     "path": "src/bioetl/interfaces/cli/commands/lock.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/lock.py around lines 82 - 85, Update release_command so the unsuccessful released == False path returns a non-zero ExitCode after echo_warning, importing and using ExitCode from bioetl.interfaces.cli.exit_codes; preserve the success message and zero-exit behavior when the lock is released.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8910
   },
   "36f9a7975d02a1d0": {
     "canonical_finding_id": "CR-20260816-A-S10-interfaces-cli-064",
@@ -8327,14 +8327,14 @@
     "path": "src/bioetl/interfaces/cli/commands/domains/health/server_integration_lifecycle.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/domains/health/server_integration_lifecycle.py around lines 51 - 52, Update run_long_lived_health_server_command so the temporary sys.pycache_prefix assignment is restored in a finally block after the command completes, preserving the original value including None. Keep the assignment scoped to this command and avoid leaving interpreter-wide state changed for in-process callers.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8911
   },
   "4de1d8ec1a643d82": {
     "canonical_finding_id": "CR-20260816-A-S10-interfaces-cli-069",
     "path": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_process.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/domains/health/observability_backend_process.py at line 225, Replace the positional __file__.parents[6] and parents[7] calculations in the subprocess path setup with paths anchored to the installed bioetl package, using bioetl.__file__ and the appropriate parent levels for src and the repository root. Derive the anchor once and reuse it for both locations, preserving the existing subprocess behavior.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8911
   },
   "e46d1febf4252a8f": {
     "canonical_finding_id": "CR-20260816-A-S10-interfaces-cli-070",
@@ -8362,7 +8362,7 @@
     "path": "src/bioetl/interfaces/cli/commands/domains/health/rendering.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/domains/health/rendering.py around lines 32 - 36, Update all_health_results_healthy so it returns False when results is empty, while preserving the existing all-provider status check for non-empty mappings.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8911
   },
   "8cdecfd6a034a900": {
     "canonical_finding_id": "CR-20260816-A-S10-interfaces-cli-074",
@@ -8383,49 +8383,49 @@
     "path": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_failure_details.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/domains/health/observability_backend_failure_details.py around lines 48 - 64, Update _read_backend_startup_log_excerpt to read only a bounded tail of the log file via seek/read rather than loading the entire file, while preserving its existing line and character limits. Sanitize the extracted tail before _build_startup_failure_detail exposes it in CLI output, redacting credentials, tokens, connection strings, and environment-value secrets without changing the function’s None behavior or CLI failure contract.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8911
   },
   "3931b1ab26e366e7": {
     "canonical_finding_id": "CR-20260816-A-S10-interfaces-cli-077",
     "path": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_runtime.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/domains/health/observability_backend_runtime.py around lines 111 - 126, Update resolve_observability_backend_cli_options to ensure invalid observability_backend_port values consistently raise TypeError: handle conversion failures from int(raw_port) and reject non-integral numeric values rather than silently truncating floats. Preserve valid integer and numeric-string conversions and the existing ensure_observability_backend result.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8911
   },
   "4b77ac17bebef4a7": {
     "canonical_finding_id": "CR-20260816-A-S10-interfaces-cli-078",
     "path": "src/bioetl/interfaces/cli/commands/domains/health/server_integration_lifecycle.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/domains/health/server_integration_lifecycle.py around lines 71 - 83, Update the lifecycle function around server.start so server.stop is called only after a successful start, while ensuring close_health_server_resources always runs when startup fails or the running loop exits. Mirror the start-failure handling pattern already used by health_server_context, preserving the original startup exception and cleanup behavior.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8911
   },
   "ddbb9b65cb847db5": {
     "canonical_finding_id": "CR-20260816-A-S10-interfaces-cli-079",
     "path": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_failure_details.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/domains/health/observability_backend_failure_details.py around lines 115 - 133, Update _describe_required_probe_failure to iterate through every path in required_probe_paths, normalizing and probing each URL with the existing timeout and urlopen_fn; return the first failure encountered, and return None only when all required probes succeed.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8911
   },
   "4944fbc83b9e3fee": {
     "canonical_finding_id": "CR-20260816-A-S10-interfaces-cli-080",
     "path": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_process.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/domains/health/observability_backend_process.py around lines 68 - 75, Update _run_listener_probe and _run_taskkill to pass a bounded timeout to subprocess.run, and handle subprocess.TimeoutExpired by returning the existing “no listeners found”/non-fatal result so CLI startup cannot hang.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8911
   },
   "20f9215a224f8b3a": {
     "canonical_finding_id": "CR-20260816-A-S10-interfaces-cli-081",
     "path": "src/bioetl/interfaces/cli/commands/domains/health/metrics_publication_integration.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/domains/health/metrics_publication_integration.py around lines 19 - 52, Move the deferred import of push_metrics_to_gateway inside the try block in publish_metrics_safely so ImportError and module-initialization failures return False under the existing safety contract. Collapse the metric_names branches into one call by building kwargs conditionally, while preserving all existing arguments and boolean result handling.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8911
   },
   "79b37ed88b295c6b": {
     "canonical_finding_id": "CR-20260816-A-S10-interfaces-cli-082",
     "path": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_process.py",
     "claim": "In @src/bioetl/interfaces/cli/commands/domains/health/observability_backend_process.py around lines 55 - 65, Update _parse_posix_ss_listener_pids to parse ss -ltnp fields and inspect only the local-address field, matching it with endswith(f\":{port}\") rather than searching the entire line for the port suffix. Preserve LISTEN filtering, PID extraction, deduplication, and sorted tuple output so drop_listening_backend_on_port receives only processes bound to the requested local port.",
     "duplicates": [],
-    "gh_issue": null
+    "gh_issue": 8911
   },
   "890ccf5c6e22bbe5": {
     "canonical_finding_id": "CR-20260816-A-S11-interfaces-http-001",

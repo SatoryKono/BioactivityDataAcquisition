@@ -9,6 +9,15 @@ from bioetl.domain.behavior.aggregation_validation_helpers import (
     build_group_key,
     collect_duplicate_groups,
 )
+from bioetl.domain.behavior.aggregation_validation_helpers import (
+    column_names as _column_names,
+)
+from bioetl.domain.behavior.aggregation_validation_helpers import (
+    explicit_field_names as _explicit_field_names,
+)
+from bioetl.domain.behavior.aggregation_validation_helpers import (
+    field_name_from_descriptor as _field_name_from_descriptor,
+)
 from bioetl.domain.behavior.validation_helpers import (
     aggregation_fallback_fields,
     aggregation_field_names_from_list,
@@ -25,6 +34,15 @@ from bioetl.domain.types.validation_severity import (
     ValidationLayer,
     ValidationSeverity,
 )
+
+__all__ = [
+    "AggregationConfig",
+    "AggregationProvenance",
+    "AggregationValidator",
+    "_column_names",
+    "_explicit_field_names",
+    "_field_name_from_descriptor",
+]
 
 _SUPPORTED_AGGREGATIONS = frozenset(
     {"sum", "avg", "min", "max", "count", "first", "last", "concat", "list"}

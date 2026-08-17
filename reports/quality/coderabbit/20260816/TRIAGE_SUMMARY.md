@@ -36,17 +36,18 @@ The campaign directory also contains pending records from leaves outside
 | --- | --- | --- |
 | `S01-domain-types-018` | confirm | malformed semantic-version cardinalities violate `ContractIdentity.validate()`; linked to #8893 |
 | `S01-domain-types-022` | confirm | single-mode rollout defaults violate the active-version invariant; linked to #8893 |
-| `S03-app-control-plane-117` | confirm | mixed `query=None` / `query=str` source-reference keys raise `TypeError` during sorting |
-| `S04-app-services-other-083` | confirm | mixed offset-naive / offset-aware terminal timestamps raise `TypeError` in `max()` |
-| `S04-app-services-other-171` | confirm | `_rm_tree` follows a directory symlink and deletes content outside the requested tree |
-| `S04-app-services-other-184` | confirm | a relative runtime root recursively prepends itself until `RecursionError` |
+| `S03-app-control-plane-117` | confirm | mixed `query=None` / `query=str` source-reference keys raise `TypeError` during sorting; linked to [#8907](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8907) |
+| `S04-app-services-other-083` | confirm | mixed offset-naive / offset-aware terminal timestamps raise `TypeError` in `max()`; linked to [#8908](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8908) |
+| `S04-app-services-other-171` | confirm | `_rm_tree` follows a directory symlink and deletes content outside the requested tree; linked to [#8909](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8909) |
+| `S04-app-services-other-184` | confirm | a relative runtime root recursively prepends itself until `RecursionError`; linked to [#8909](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8909) |
 | `S10-interfaces-cli-014` | reject | `checkpoint_inspect` already accepts and forwards `manifest_id`; the alleged alternate command is absent at BASE and HEAD |
-| `S10-interfaces-cli-019` | confirm | invalid config paths print errors but retain exit status 0 |
-| `S10-interfaces-cli-082` | confirm | the POSIX `ss` parser matches a peer port anywhere on the line as if it were the local listener |
+| `S10-interfaces-cli-019` | confirm | invalid config paths print errors but retain exit status 0; linked to [#8910](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910) |
+| `S10-interfaces-cli-082` | confirm | the POSIX `ss` parser matches a peer port anywhere on the line as if it were the local listener; linked to [#8911](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8911) |
 
-The six newly reviewed critical confirms have current-tree evidence recorded in
-`TRIAGE_OVERRIDES.json`; the two earlier type criticals remain linked to #8893.
-No product implementation was performed in this triage task.
+The six newly reviewed critical confirms have current-tree evidence and grouped
+stream links recorded in `TRIAGE_OVERRIDES.json`; the two earlier type
+criticals remain linked to #8893. No product implementation was performed in
+this triage task.
 
 ## Confirm sets
 
@@ -89,6 +90,25 @@ The five leaves completed before #8890 remain linked to #8863 and retain their
 
 Earlier #8890 streams remain grouped as follows: type criticals on #8893,
 remaining type confirms on #8895, and value-object/schema confirms on #8905.
+
+## Follow-up streams opened at closeout
+
+The six later application/CLI criticals were promoted together with 30 related
+confirms, avoiding one-issue-per-finding fan-out:
+
+- [#8907](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8907) — control-plane source-reference normalization (3 confirms)
+- [#8908](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8908) — application UTC timestamp normalization (2 confirms)
+- [#8909](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8909) — run-report filesystem and path safety (7 confirms)
+- [#8910](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910) — CLI fail-closed exit semantics (14 confirms)
+- [#8911](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8911) — health backend process-probe correctness (10 confirms)
+
+## #8890 closure criteria
+
+- All 756 listed ok-leaf findings have independent dispositions.
+- All nine requested criticals are evidenced: eight confirms are linked to
+  grouped streams and `S10-014` is rejected.
+- No atomic-per-finding issues were opened.
+- No product PR or product implementation was created from #8890.
 
 ## Canonical ledgers
 

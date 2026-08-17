@@ -4243,7 +4243,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/application/services/control_plane/manifest/diagnostics/source_refs.py; reports/quality/coderabbit/20260816/review_A_S03-app-control-plane.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S03-app-control-plane-103"
+    "finding_id": "CR-20260816-A-S03-app-control-plane-103",
+    "gh_issue": 8907,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8907"
   },
   "0f3947df82fa996e": {
     "status": "reject",
@@ -4339,7 +4341,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/application/services/control_plane/manifest/diagnostics/source_refs.py; reports/quality/coderabbit/20260816/review_A_S03-app-control-plane.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S03-app-control-plane-115"
+    "finding_id": "CR-20260816-A-S03-app-control-plane-115",
+    "gh_issue": 8907,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8907"
   },
   "dac92f83d098d31d": {
     "status": "reject",
@@ -4355,7 +4359,9 @@
     "confidence": "high",
     "triage_reason": "Confirmed: source-reference sorting compares tuple keys containing query=None and query=str; the mixed input raises TypeError.",
     "evidence": "src/bioetl/application/services/control_plane/manifest/diagnostics/source_refs.py; current-tree mixed-query reproduction; #8890",
-    "finding_id": "CR-20260816-A-S03-app-control-plane-117"
+    "finding_id": "CR-20260816-A-S03-app-control-plane-117",
+    "gh_issue": 8907,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8907"
   },
   "3ce209af5ac41a8d": {
     "status": "reject",
@@ -4851,7 +4857,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/application/services/dq/_checks_basic.py; reports/quality/coderabbit/20260816/review_A_S04-app-services-other.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S04-app-services-other-049"
+    "finding_id": "CR-20260816-A-S04-app-services-other-049",
+    "gh_issue": 8908,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8908"
   },
   "c89db1b8e27917b4": {
     "status": "confirm",
@@ -5123,7 +5131,9 @@
     "confidence": "high",
     "triage_reason": "Confirmed: terminal timestamp selection compares offset-naive and offset-aware datetimes and raises TypeError.",
     "evidence": "src/bioetl/application/services/quality/_quarantine_service_filtered_helpers.py; current-tree two-terminal-event reproduction; #8890",
-    "finding_id": "CR-20260816-A-S04-app-services-other-083"
+    "finding_id": "CR-20260816-A-S04-app-services-other-083",
+    "gh_issue": 8908,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8908"
   },
   "401a0c4b3593bc71": {
     "status": "reject",
@@ -5795,7 +5805,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/application/services/run_reports/writer.py; reports/quality/coderabbit/20260816/review_A_S04-app-services-other.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S04-app-services-other-167"
+    "finding_id": "CR-20260816-A-S04-app-services-other-167",
+    "gh_issue": 8909,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8909"
   },
   "b1d82e04ffeb5030": {
     "status": "confirm",
@@ -5811,7 +5823,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/application/services/run_reports/query.py; reports/quality/coderabbit/20260816/review_A_S04-app-services-other.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S04-app-services-other-169"
+    "finding_id": "CR-20260816-A-S04-app-services-other-169",
+    "gh_issue": 8909,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8909"
   },
   "9dac415cf3daf654": {
     "status": "confirm",
@@ -5827,7 +5841,9 @@
     "confidence": "high",
     "triage_reason": "Confirmed: _rm_tree follows a directory symlink, deletes content outside the requested tree, then raises NotADirectoryError.",
     "evidence": "src/bioetl/application/services/run_reports/query.py; isolated symlink-target reproduction; #8890",
-    "finding_id": "CR-20260816-A-S04-app-services-other-171"
+    "finding_id": "CR-20260816-A-S04-app-services-other-171",
+    "gh_issue": 8909,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8909"
   },
   "1341e011df6639d4": {
     "status": "reject",
@@ -5859,7 +5875,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/application/services/run_reports/paths.py; reports/quality/coderabbit/20260816/review_A_S04-app-services-other.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S04-app-services-other-175"
+    "finding_id": "CR-20260816-A-S04-app-services-other-175",
+    "gh_issue": 8909,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8909"
   },
   "82441da9ff5b898b": {
     "status": "reject",
@@ -5899,7 +5917,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/application/services/run_reports/paths.py; reports/quality/coderabbit/20260816/review_A_S04-app-services-other.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S04-app-services-other-180"
+    "finding_id": "CR-20260816-A-S04-app-services-other-180",
+    "gh_issue": 8909,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8909"
   },
   "e52e0a22a2120541": {
     "status": "reject",
@@ -5915,7 +5935,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/application/services/run_reports/query.py; reports/quality/coderabbit/20260816/review_A_S04-app-services-other.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S04-app-services-other-182"
+    "finding_id": "CR-20260816-A-S04-app-services-other-182",
+    "gh_issue": 8909,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8909"
   },
   "b2b9185b670efeef": {
     "status": "reject",
@@ -5931,7 +5953,9 @@
     "confidence": "high",
     "triage_reason": "Confirmed: normalize_runtime_path recursively prepends a relative root and reaches RecursionError.",
     "evidence": "src/bioetl/application/services/run_reports/source_identity.py; current-tree relative-root reproduction; #8890",
-    "finding_id": "CR-20260816-A-S04-app-services-other-184"
+    "finding_id": "CR-20260816-A-S04-app-services-other-184",
+    "gh_issue": 8909,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8909"
   },
   "53aee99b5a9280ba": {
     "status": "confirm",
@@ -5995,7 +6019,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/interfaces/cli/commands/config.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-008"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-008",
+    "gh_issue": 8910,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910"
   },
   "0f8f79785c2d1336": {
     "status": "reject",
@@ -6011,7 +6037,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/interfaces/cli/commands/checkpoint.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-010"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-010",
+    "gh_issue": 8910,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910"
   },
   "3e57092f7a012bdf": {
     "status": "confirm",
@@ -6051,7 +6079,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/interfaces/cli/commands/cleanup.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-015"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-015",
+    "gh_issue": 8910,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910"
   },
   "b5229b1f243f576b": {
     "status": "confirm",
@@ -6059,7 +6089,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/interfaces/cli/commands/adr.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-016"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-016",
+    "gh_issue": 8910,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910"
   },
   "8574da1d6c24def7": {
     "status": "reject",
@@ -6083,7 +6115,9 @@
     "confidence": "high",
     "triage_reason": "Confirmed: config validation error handlers print an error but do not produce a non-zero CLI exit status.",
     "evidence": "src/bioetl/interfaces/cli/commands/config.py; current CLI tests assert exit_code == 0 for invalid input; #8890",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-019"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-019",
+    "gh_issue": 8910,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910"
   },
   "28990decb4d3e1c8": {
     "status": "confirm",
@@ -6179,7 +6213,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/interfaces/cli/commands/domains/shared/execution_policy.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-031"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-031",
+    "gh_issue": 8910,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910"
   },
   "cc350b484467623d": {
     "status": "confirm",
@@ -6203,7 +6239,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/interfaces/cli/commands/domains/shared/inspection_commands.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-034"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-034",
+    "gh_issue": 8910,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910"
   },
   "b3a91080114ed4ef": {
     "status": "reject",
@@ -6227,7 +6265,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/interfaces/cli/commands/domains/diagnostics/operations.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-037"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-037",
+    "gh_issue": 8910,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910"
   },
   "8e1fa6a9f941bef0": {
     "status": "confirm",
@@ -6323,7 +6363,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/interfaces/cli/commands/domains/run/command_policy.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-049"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-049",
+    "gh_issue": 8910,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910"
   },
   "5cd9ae6d54f44869": {
     "status": "reject",
@@ -6363,7 +6405,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/interfaces/cli/commands/domains/diagnostics/operations.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-054"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-054",
+    "gh_issue": 8910,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910"
   },
   "310ffd612d383d11": {
     "status": "reject",
@@ -6387,7 +6431,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/interfaces/cli/commands/lineage.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-057"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-057",
+    "gh_issue": 8910,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910"
   },
   "e22626e139ed5336": {
     "status": "reject",
@@ -6403,7 +6449,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/interfaces/cli/commands/lock.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-059"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-059",
+    "gh_issue": 8910,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910"
   },
   "89a64a9b2076a2ea": {
     "status": "confirm",
@@ -6419,7 +6467,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/interfaces/cli/commands/run.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-061"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-061",
+    "gh_issue": 8910,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910"
   },
   "7de6b93c8b1a2bee": {
     "status": "confirm",
@@ -6435,7 +6485,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/interfaces/cli/commands/lock.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-063"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-063",
+    "gh_issue": 8910,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8910"
   },
   "36f9a7975d02a1d0": {
     "status": "reject",
@@ -6475,7 +6527,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/interfaces/cli/commands/domains/health/server_integration_lifecycle.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-068"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-068",
+    "gh_issue": 8911,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8911"
   },
   "4de1d8ec1a643d82": {
     "status": "confirm",
@@ -6483,7 +6537,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_process.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-069"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-069",
+    "gh_issue": 8911,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8911"
   },
   "e46d1febf4252a8f": {
     "status": "reject",
@@ -6515,7 +6571,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/interfaces/cli/commands/domains/health/rendering.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-073"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-073",
+    "gh_issue": 8911,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8911"
   },
   "8cdecfd6a034a900": {
     "status": "reject",
@@ -6539,7 +6597,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_failure_details.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-076"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-076",
+    "gh_issue": 8911,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8911"
   },
   "3931b1ab26e366e7": {
     "status": "confirm",
@@ -6547,7 +6607,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_runtime.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-077"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-077",
+    "gh_issue": 8911,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8911"
   },
   "4b77ac17bebef4a7": {
     "status": "confirm",
@@ -6555,7 +6617,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/interfaces/cli/commands/domains/health/server_integration_lifecycle.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-078"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-078",
+    "gh_issue": 8911,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8911"
   },
   "ddbb9b65cb847db5": {
     "status": "confirm",
@@ -6563,7 +6627,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_failure_details.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-079"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-079",
+    "gh_issue": 8911,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8911"
   },
   "4944fbc83b9e3fee": {
     "status": "confirm",
@@ -6571,7 +6637,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_process.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-080"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-080",
+    "gh_issue": 8911,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8911"
   },
   "20f9215a224f8b3a": {
     "status": "confirm",
@@ -6579,7 +6647,9 @@
     "confidence": "medium",
     "triage_reason": "Confirmed by independent current-code reconciliation; the reported behavior violates the cited runtime invariant.",
     "evidence": "src/bioetl/interfaces/cli/commands/domains/health/metrics_publication_integration.py; reports/quality/coderabbit/20260816/review_A_S10-interfaces-cli.log; #8890 ground-truth review",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-081"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-081",
+    "gh_issue": 8911,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8911"
   },
   "79b37ed88b295c6b": {
     "status": "confirm",
@@ -6587,7 +6657,9 @@
     "confidence": "high",
     "triage_reason": "Confirmed: the ss parser scans the entire line, so a peer port match is misidentified as the queried local listener.",
     "evidence": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_process.py; synthetic local=8000 peer=9000 reproduction returned PID 42 for port 9000; #8890",
-    "finding_id": "CR-20260816-A-S10-interfaces-cli-082"
+    "finding_id": "CR-20260816-A-S10-interfaces-cli-082",
+    "gh_issue": 8911,
+    "gh_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8911"
   },
   "890ccf5c6e22bbe5": {
     "status": "reject",
