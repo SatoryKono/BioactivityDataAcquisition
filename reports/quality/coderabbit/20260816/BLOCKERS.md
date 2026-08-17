@@ -82,3 +82,11 @@ Each entry requires GitHub reconciliation before closeout.
 - Detail: CodeRabbit rate limit (waitTime=1320s)
 - GitHub issue: pending reconciliation
 
+## S16-configs-quality — connection_error
+
+- UTC: `2026-08-17T06:20:33.974706+00:00`
+- Wave: `B`
+- Files: `100`
+- Detail: CodeRabbit connection/WebSocket failure
+- GitHub issue: pending reconciliation
+
