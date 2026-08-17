@@ -367,7 +367,7 @@ class TestProvenanceInformation:
         outcome = outcomes[0]
         assert outcome.rule_id == "schema.required_field"
         assert outcome.violation_kind == DQViolationKind.SCHEMA_VIOLATION
-        assert outcome.affected_fields == ["required_field"]
+        assert outcome.affected_fields == ("required_field",)
         assert outcome.config_path == "contracts/provenance_test/dq_rules.yaml"
         assert outcome.policy_ref is not None
         assert outcome.policy_ref.contract_ref == "provenance_test"

@@ -851,6 +851,7 @@ class TestCheckpointManagerCompatibilityPolicy:
                 dq_compatible=False,
                 pipeline_compatible=True,
                 execution_identity_compatible=True,
+                identity_continuity_proven=True,
                 messages=["dq mismatch"],
             )
         )

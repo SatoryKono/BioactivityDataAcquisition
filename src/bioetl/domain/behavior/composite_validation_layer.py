@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import replace
 
 from bioetl.domain.behavior.aggregation_validator import AggregationValidator
 from bioetl.domain.behavior.composite_validation_config import CompositeValidationConfig
@@ -15,8 +16,6 @@ from bioetl.domain.behavior.composite_validation_helpers import (
     _is_valid_field_priorities,
     _is_valid_lineage_config,
     append_invalid_config_section,
-    as_output_schema,
-    as_source_names,
 )
 from bioetl.domain.behavior.composite_validation_shapes import (
     as_output_schema,

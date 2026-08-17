@@ -70,7 +70,7 @@ def resolve_record_id(record: JsonDict) -> str:
 def deterministic_record_id(record: JsonDict) -> str:
     """Produce a deterministic id for supported non-JSON-native values."""
     payload = json.dumps(
-        record,
+        _normalize_mapping_keys(record),
         sort_keys=True,
         separators=(",", ":"),
         ensure_ascii=False,
@@ -78,6 +78,39 @@ def deterministic_record_id(record: JsonDict) -> str:
         default=json_fallback,
     )
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _normalize_mapping_keys(value: object) -> object:
+    """Coerce mapping keys to strings so sort_keys stays type-stable.
+
+    JSON already coerces scalar keys to strings on serialization, but
+    ``sort_keys=True`` compares the raw keys first and raises on mixed-type
+    keys. Normalizing keys up front keeps the emitted payload identical for
+    string-keyed mappings while making mixed-type keys deterministic.
+    """
+    if isinstance(value, dict):
+        return {
+            _stringify_key(key): _normalize_mapping_keys(item)
+            for key, item in value.items()
+        }
+    if isinstance(value, (list, tuple)):
+        return [_normalize_mapping_keys(item) for item in value]
+    return value
+
+
+def _stringify_key(key: object) -> str:
+    """Return the canonical string form JSON would emit for a mapping key."""
+    if isinstance(key, str):
+        return key
+    if isinstance(key, bool):
+        return "true" if key else "false"
+    if key is None:
+        return "null"
+    if isinstance(key, (int, float)):
+        return json.dumps(key, allow_nan=False)
+    raise TypeError(
+        f"Unsupported key for deterministic record id: {type(key).__name__}"
+    )
 
 
 def json_fallback(value: object) -> object:
