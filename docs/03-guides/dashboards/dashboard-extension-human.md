@@ -124,7 +124,7 @@ uv run python -m pytest -q tests/integration/test_grafana_config.py
 - [ ] В L0 dashboards используется только `OK/WARN/CRIT/UNKNOWN`; alias-термины (`DEGRADED/BROKEN/HEALTHY`) допустимы только в диагностических deep-dive поверхностях и с явным alias mapping в description.
 - [ ] Для Prometheus current-status/current-cause panels не используется invalid `or vector(0)`; missing telemetry остаётся `UNKNOWN`.
 - [ ] Для HTTP-backed forensic panels copy различает empty result, invalid filter chain и backend failure.
-- [ ] Для схожих KPI в разных dashboards совпадают `unit` и `decimals` (например, event counts = `short/0`, timestamps = `dateTimeAsIso/0`).
+- [ ] Для схожих KPI в разных dashboards совпадают `unit` и `decimals` (например, event counts = `short/0`, timestamps = `time:YYYY-MM-DD HH:mm/0`).
 - [ ] Заголовки новых/переименованных панелей соответствуют action-first шаблону (`Monitor/Inspect/Track/...: ...`).
 - [ ] Заголовки и описания новых панелей соответствуют шаблонам из design system.
 - [ ] Пройдена автоматическая проверка:

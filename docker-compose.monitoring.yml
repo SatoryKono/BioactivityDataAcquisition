@@ -108,6 +108,17 @@ services:
       - GF_LOG_LEVEL=info
       - GF_SERVER_ROOT_URL=http://localhost:3000
       - GF_SERVER_SERVE_FROM_SUB_PATH=false
+      # Operator-facing clock on all shipped dashboards: YYYY-MM-DD HH:mm
+      # (Grafana uses mm for minutes). Applies to time picker, axis ticks,
+      # and default Time fields. Panel units use the same custom format.
+      - GF_DATE_FORMATS_FULL_DATE=YYYY-MM-DD HH:mm
+      - GF_DATE_FORMATS_INTERVAL_SECOND=HH:mm:ss
+      - GF_DATE_FORMATS_INTERVAL_MINUTE=YYYY-MM-DD HH:mm
+      - GF_DATE_FORMATS_INTERVAL_HOUR=YYYY-MM-DD HH:mm
+      - GF_DATE_FORMATS_INTERVAL_DAY=YYYY-MM-DD
+      - GF_DATE_FORMATS_INTERVAL_MONTH=YYYY-MM
+      - GF_DATE_FORMATS_INTERVAL_YEAR=YYYY
+      - GF_DATE_FORMATS_USE_BROWSER_LOCALE=false
       # Required for BioETL Ops HTTP panels (Run Explorer, identity tables, etc.).
       # Keep the frontend compatible with pinned Grafana 12.0.0. Infinity 3.11.3
       # imports react/jsx-runtime, which this Grafana build does not expose and

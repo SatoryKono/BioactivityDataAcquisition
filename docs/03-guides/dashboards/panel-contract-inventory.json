@@ -2069,7 +2069,7 @@
           "value": null
         }
       ],
-      "unit": "dateTimeAsIso"
+      "unit": "time:YYYY-MM-DD HH:mm"
     },
     {
       "dashboard_uid": "bioetl-dq-v2",

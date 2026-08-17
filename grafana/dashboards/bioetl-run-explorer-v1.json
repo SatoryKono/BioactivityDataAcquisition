@@ -144,13 +144,13 @@
           },
           {
             "matcher": {
-              "id": "byName",
-              "options": "completed_at"
+              "id": "byRegexp",
+              "options": "^(completed_at|Completed)$"
             },
             "properties": [
               {
                 "id": "unit",
-                "value": "dateTimeAsIso"
+                "value": "time:YYYY-MM-DD HH:mm"
               }
             ]
           },
@@ -839,6 +839,18 @@
             "overrides": [
               {
                 "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(completed_at|Completed)$"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "time:YYYY-MM-DD HH:mm"
+                  }
+                ]
+              },
+              {
+                "matcher": {
                   "id": "byName",
                   "options": "run_id"
                 },
@@ -1375,6 +1387,18 @@
               "noValue": "VALID EMPTY — no workflow-run-report artifacts for the selected workflow under reports/run-reports/workflow/<name>/ (index is last 20)."
             },
             "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(completed_at|Completed)$"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "time:YYYY-MM-DD HH:mm"
+                  }
+                ]
+              },
               {
                 "matcher": {
                   "id": "byName",
