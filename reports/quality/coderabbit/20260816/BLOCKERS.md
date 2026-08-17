@@ -98,3 +98,19 @@ Each entry requires GitHub reconciliation before closeout.
 - Detail: timeout after 600s
 - GitHub issue: pending reconciliation
 
+## S16-configs-quality — timeout
+
+- UTC: `2026-08-17T09:55:23.217302+00:00`
+- Wave: `B`
+- Files: `100`
+- Detail: timeout after 600s
+- GitHub issue: pending reconciliation
+
+## S16b-configs-other — timeout
+
+- UTC: `2026-08-17T10:05:45.378540+00:00`
+- Wave: `B`
+- Files: `156`
+- Detail: timeout after 600s
+- GitHub issue: pending reconciliation
+
