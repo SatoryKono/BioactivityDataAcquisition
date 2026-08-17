@@ -28,7 +28,6 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     ReproducibilityPolicyAssessment,
 )
 
-_build_replay_family_contract_payload = build_replay_family_contract_payload
 _collect_input_snapshot_content_hashes = (
     _snapshot_support.collect_input_snapshot_content_hashes
 )
