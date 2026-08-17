@@ -16,12 +16,12 @@ Usage::
     canonical = normalize_publication_type("PUBLICATION")  # "journal-article"
     canonical = normalize_publication_type("Journal Article")  # "journal-article"
     canonical = normalize_publication_type(None)  # None
-    canonical = normalize_publication_type("unknown-value")  # "unknown-value"
+    canonical = normalize_publication_type("unknown-value")  # None
 """
 
 from __future__ import annotations
 
-from typing import Final
+from typing import Final, cast
 
 __all__ = [
     "PUBLICATION_TYPE_MAPPING",
@@ -79,15 +79,31 @@ PUBLICATION_TYPE_MAPPING: Final[dict[str, str]] = {
 }
 
 
-def _normalize_single(raw: str) -> str:
+def _normalize_single(raw: str) -> str | None:
     """Normalize a single publication type token to canonical form."""
-    return PUBLICATION_TYPE_MAPPING.get(raw, raw.lower())
+    return PUBLICATION_TYPE_MAPPING.get(raw)
 
 
-def _normalize_pipe_separated(raw_value: str) -> str:
+def _normalize_pipe_separated(raw_value: str) -> str | None:
     """Normalize a pipe-separated publication type string."""
-    parts = [_normalize_single(p.strip()) for p in raw_value.split("|") if p.strip()]
-    return "|".join(parts) if parts else raw_value.lower()
+    parts = _non_empty_publication_type_parts(raw_value)
+    if not parts:
+        return None
+    normalized = _normalize_known_publication_type_parts(parts)
+    return None if normalized is None else "|".join(normalized)
+
+
+def _non_empty_publication_type_parts(raw_value: str) -> tuple[str, ...]:
+    return tuple(part.strip() for part in raw_value.split("|") if part.strip())
+
+
+def _normalize_known_publication_type_parts(
+    parts: tuple[str, ...],
+) -> tuple[str, ...] | None:
+    normalized = tuple(_normalize_single(part) for part in parts)
+    if any(value is None for value in normalized):
+        return None
+    return cast("tuple[str, ...]", normalized)
 
 
 def normalize_publication_type(raw_value: str | None) -> str | None:
@@ -100,8 +116,7 @@ def normalize_publication_type(raw_value: str | None) -> str | None:
         raw_value: Raw publication type from provider API, or None.
 
     Returns:
-        Canonical kebab-case value, or None if input is None.
-        Unknown values fall back to ``raw_value.lower()``.
+        Canonical kebab-case value, or None for absent or unknown input.
 
     """
     if raw_value is None:
