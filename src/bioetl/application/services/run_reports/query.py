@@ -220,7 +220,7 @@ def _owner_directories(base: Path, owner: str | None) -> list[Path]:
     return [path for path in base.iterdir() if path.is_dir()]
 
 
-def diff_pipeline_reports(left: MappingLike, right: MappingLike) -> dict[str, Any]:
+def diff_pipeline_reports(left: MappingLike, right: MappingLike) -> ReportPayload:
     """Compute funnel and reason deltas between two pipeline report payloads."""
     left_payload = _as_mapping(left)
     right_payload = _as_mapping(right)
@@ -232,7 +232,7 @@ def diff_pipeline_reports(left: MappingLike, right: MappingLike) -> dict[str, An
     }
 
 
-def _funnel_rows(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
+def _funnel_rows(payload: ReportPayload) -> dict[str, ReportPayload]:
     return {
         str(row.get("stage_id")): row
         for row in payload.get("funnel") or []
@@ -269,7 +269,7 @@ def _stage_delta(
     }
 
 
-def _reason_counts(payload: dict[str, Any]) -> dict[str, int]:
+def _reason_counts(payload: ReportPayload) -> dict[str, int]:
     return {
         str(item.get("reason_code")): _int(item.get("count"))
         for item in payload.get("reasons_top_n") or []
@@ -393,9 +393,10 @@ def _int(value: object) -> int:
 
 
 MappingLike = dict[str, Any] | Any  # Any: decoded external JSON payload
+ReportPayload = dict[str, Any]  # Any: decoded report JSON payload
 
 
-def _as_mapping(value: MappingLike) -> dict[str, Any]:
+def _as_mapping(value: MappingLike) -> ReportPayload:
     if isinstance(value, dict):
         return value
     raise TypeError("report payload must be a mapping")
