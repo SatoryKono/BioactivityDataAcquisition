@@ -19,21 +19,19 @@ This wave is the remaining Lane A from the seven-dashboard QA plan
 
 ## Issue matrix
 
-Created live in the same session as this pack. Fill numbers after create.
-
 | Code | Pri | Issue | Title |
 | --- | --- | --- | --- |
-| GRAF-TRUST-00 | meta/P0 | TBD | Separate processing success from Trust / replay readiness |
-| GRAF-TRUST-01 | P0 | TBD | Trust status model and HTTP contract |
-| GRAF-TRUST-02 | P0 | TBD | Repair write-side lineage closure and identity |
-| GRAF-TRUST-03 | P1 | TBD | Persist manifest contract / replay-anchor evidence |
-| GRAF-TRUST-04 | P0 | TBD | Make retention evidence run-scoped |
-| GRAF-TRUST-05 | P1 | TBD | Forensic HTTP budget and failure rendering |
-| GRAF-TRUST-06 | P1 | TBD | Trust D0 UX, inventory, and docs closeout |
+| GRAF-TRUST-00 | meta/P0 | [#8935](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8935) | Separate processing success from Trust / replay readiness |
+| GRAF-TRUST-01 | P0 | [#8939](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8939) | Trust status model and HTTP contract |
+| GRAF-TRUST-02 | P0 | [#8940](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8940) | Repair write-side lineage closure and identity |
+| GRAF-TRUST-03 | P1 | [#8938](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8938) | Persist manifest contract / replay-anchor evidence |
+| GRAF-TRUST-04 | P0 | [#8941](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8941) | Make retention evidence run-scoped |
+| GRAF-TRUST-05 | P1 | [#8936](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8936) | Forensic HTTP budget and failure rendering |
+| GRAF-TRUST-06 | P1 | [#8937](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8937) | Trust D0 UX, inventory, and docs closeout |
 
 ## Dependency order
 
-1. GRAF-TRUST-01
-2. GRAF-TRUST-02, GRAF-TRUST-03, GRAF-TRUST-04 in parallel after 01
-3. GRAF-TRUST-05 after 04
-4. GRAF-TRUST-06 last (after 01–05; D1–D6 stay on #8932)
+1. [#8939](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8939)
+2. [#8940](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8940), [#8938](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8938), [#8941](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8941) after 01
+3. [#8936](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8936) after 04
+4. [#8937](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8937) last (D1–D6 stay on #8932)
