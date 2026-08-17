@@ -18,3 +18,10 @@ Do not reopen #8643 / #8644 / #8645 / #8652 unless a confirm is a proven
 regression. Do not implement the 82 rejected findings from these leaves.
 
 Exact-cover of still-blocked CodeRabbit leaves remains #8859.
+
+| domain-20260816-types-criticals | #8893 | 2 | P1 | types-018 semver pad/trim; types-022 single-mode defaults |
+| domain-20260816-identity-json | #8891 | 8 | P1 | residual-root-006/028/029 + normalization-012/013/039/070/071 |
+| domain-20260816-freeze-catalogs | #8888 | 3 | P1 | residual-root-011/012 + run_reports-002 |
+| domain-20260816-run-report-accounting | #8889 | 4 | P1 | run_reports-005/011/013/014 |
+| later-leaf-ok-triage | #8890 | ~756 raw | P2 | independent triage; types criticals promoted to #8893 |
+
