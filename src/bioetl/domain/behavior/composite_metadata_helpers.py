@@ -27,6 +27,8 @@ __all__ = [
     "parse_composite_list",
     "parse_composite_status",
     "parse_lineage_created_at",
+    "resolve_final_value_source",
+    "resolve_priority_order",
     "summarize_composite_cv_dq",
 ]
 
@@ -116,6 +118,35 @@ def _normalize_composite_lineage_payload(
 def _normalize_optional_str(value: object) -> str | None:
     """Convert non-null payload into string value."""
     return str(value) if value is not None else None
+
+
+def resolve_priority_order(
+    field_name: str,
+    field_priorities: dict[str, dict[str, object]] | None,
+) -> tuple[str, ...] | None:
+    """Resolve the configured provider priority for one output field."""
+    if not field_priorities or field_name not in field_priorities:
+        return None
+    priority = field_priorities[field_name].get("priority")
+    if not isinstance(priority, list):
+        return ()
+    return tuple(str(item) for item in priority)
+
+
+def resolve_final_value_source(
+    *,
+    source_providers: tuple[str, ...],
+    priority_order: tuple[str, ...] | None,
+) -> str | None:
+    """Select the highest-priority available provider."""
+    if not source_providers:
+        return None
+    if priority_order:
+        provider_set = set(source_providers)
+        for provider in priority_order:
+            if provider in provider_set:
+                return provider
+    return source_providers[0]
 
 
 def _build_schema_validation_metadata(

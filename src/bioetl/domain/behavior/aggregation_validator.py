@@ -57,6 +57,11 @@ class AggregationProvenance:
 class AggregationValidator:
     """Validate aggregation config and runtime uniqueness constraints."""
 
+    _get_source_fields = staticmethod(aggregation_source_fields)
+    _field_names_from_list = staticmethod(aggregation_field_names_from_list)
+    _collect_fallback_fields = staticmethod(aggregation_fallback_fields)
+    _build_group_key = staticmethod(aggregation_group_key)
+
     def validate_aggregation_config(
         self,
         config: AggregationConfig,
@@ -183,28 +188,6 @@ class AggregationValidator:
             )
             for field in shadowing_fields
         ]
-
-    def _get_source_fields(self, source_schema: JsonDict) -> set[str]:
-        properties = source_schema.get("properties")
-        if isinstance(properties, dict):
-            return set(properties.keys())
-        fields_node = source_schema.get("fields")
-        if isinstance(fields_node, list):
-            return self._field_names_from_list(fields_node)
-        return self._collect_fallback_fields(source_schema)
-
-    @staticmethod
-    def _field_names_from_list(fields_node: list[object]) -> set[str]:
-        """Extract field names from string entries or dict descriptors."""
-        names = (_field_name_from_descriptor(entry) for entry in fields_node)
-        return {name for name in names if name is not None}
-
-    @staticmethod
-    def _collect_fallback_fields(source_schema: JsonDict) -> set[str]:
-        """Collect field names from explicit schema shapes only."""
-        fields = _column_names(source_schema.get("columns"))
-        fields.update(_explicit_field_names(source_schema.get("field_names")))
-        return fields
 
     def validate_post_aggregation_uniqueness(
         self,

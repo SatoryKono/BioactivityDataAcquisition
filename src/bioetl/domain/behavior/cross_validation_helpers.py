@@ -13,11 +13,21 @@ from bioetl.domain.behavior.cross_validation_coverage import (
 from bioetl.domain.behavior.cross_validation_source_helpers import (
     comparison_source_list as _comparison_source_list,
 )
-from bioetl.domain.types import JsonDict
+from bioetl.domain.behavior.cross_validation_source_helpers import (
+    create_cross_validation_issue,
+)
+from bioetl.domain.behavior.cross_validation_source_helpers import (
+    normalize_comparison_sources as _normalize_comparison_sources,
+)
+from bioetl.domain.behavior.cross_validation_source_helpers import (
+    validate_comparison_sources as _validate_comparison_sources,
+)
+from bioetl.domain.behavior.cross_validation_source_helpers import (
+    validate_source_name as _validate_source_name,
+)
 from bioetl.domain.types.validation_result import ValidationIssue
 from bioetl.domain.types.validation_severity import (
     IssueCode,
-    ValidationLayer,
     ValidationSeverity,
 )
 
@@ -28,23 +38,7 @@ __all__ = [
 ]
 
 _SUPPORTED_RULE_TYPES = frozenset({"strict", "lenient", "warn", "custom"})
-
-
-def _create_issue(
-    code: IssueCode,
-    severity: ValidationSeverity,
-    message: str,
-    details: JsonDict | None = None,
-    location: str | None = None,
-) -> ValidationIssue:
-    return ValidationIssue(
-        code=code,
-        severity=severity,
-        layer=ValidationLayer.DEEP_PREFLIGHT,
-        message=message,
-        details=details or {},
-        location=location,
-    )
+_create_issue = create_cross_validation_issue
 
 
 def _validate_pairs(

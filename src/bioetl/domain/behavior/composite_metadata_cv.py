@@ -3,7 +3,28 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import TypedDict
+from typing import Protocol, TypedDict
+
+from bioetl.domain.types import JsonDict
+
+
+class MergedRecordExplanationLike(Protocol):
+    """Structural view required by explainability summary helpers."""
+
+    @property
+    def source_providers(self) -> tuple[str, ...]: ...
+
+    @property
+    def field_explanations(self) -> tuple[object, ...]: ...
+
+    @property
+    def merge_strategy(self) -> str: ...
+
+    @property
+    def conflict_count(self) -> int: ...
+
+    @property
+    def enrichment_count(self) -> int: ...
 
 
 class CompositeCvDQSummary(TypedDict):
@@ -15,6 +36,93 @@ class CompositeCvDQSummary(TypedDict):
     quarantine_records: int
     validation_passed: bool
     rule_provenance: list[dict[str, str | None]]
+
+
+def empty_explainability_summary() -> JsonDict:
+    """Return the stable summary shape for an empty explanation set."""
+    return {
+        "record_count": 0,
+        "field_count": 0,
+        "avg_fields_per_record": 0.0,
+        "source_provider_distribution": {},
+        "merge_strategy_distribution": {},
+        "conflict_summary": {
+            "total_conflicts": 0,
+            "conflict_rate": 0.0,
+            "records_with_conflicts": 0,
+        },
+        "enrichment_summary": {
+            "total_enrichments": 0,
+            "enrichment_rate": 0.0,
+            "records_with_enrichments": 0,
+        },
+    }
+
+
+def safe_ratio(numerator: int, denominator: int) -> float:
+    """Divide counts while preserving zero for empty populations."""
+    return numerator / denominator if denominator > 0 else 0.0
+
+
+def _explainability_distributions(
+    explanations: Sequence[MergedRecordExplanationLike],
+) -> tuple[JsonDict, JsonDict]:
+    source_distribution: dict[str, int] = {}
+    strategy_distribution: dict[str, int] = {}
+    for explanation in explanations:
+        for provider in explanation.source_providers:
+            source_distribution[provider] = source_distribution.get(provider, 0) + 1
+        strategy = explanation.merge_strategy
+        strategy_distribution[strategy] = strategy_distribution.get(strategy, 0) + 1
+    return source_distribution, strategy_distribution
+
+
+def _explainability_totals(
+    explanations: Sequence[MergedRecordExplanationLike],
+) -> dict[str, int]:
+    return {
+        "total_records": len(explanations),
+        "total_fields": sum(len(exp.field_explanations) for exp in explanations),
+        "total_conflicts": sum(exp.conflict_count for exp in explanations),
+        "total_enrichments": sum(exp.enrichment_count for exp in explanations),
+    }
+
+
+def build_explainability_summary(
+    explanations: Sequence[MergedRecordExplanationLike],
+) -> JsonDict:
+    """Summarize explainability coverage, conflicts, and enrichments."""
+    totals = _explainability_totals(explanations)
+    source_distribution, strategy_distribution = _explainability_distributions(
+        explanations
+    )
+    records_with_conflicts = sum(1 for exp in explanations if exp.conflict_count > 0)
+    records_with_enrichments = sum(
+        1 for exp in explanations if exp.enrichment_count > 0
+    )
+    return {
+        "record_count": totals["total_records"],
+        "field_count": totals["total_fields"],
+        "avg_fields_per_record": safe_ratio(
+            totals["total_fields"], totals["total_records"]
+        ),
+        "source_provider_distribution": source_distribution,
+        "merge_strategy_distribution": strategy_distribution,
+        "conflict_summary": {
+            "total_conflicts": totals["total_conflicts"],
+            "conflict_rate": safe_ratio(
+                totals["total_conflicts"], totals["total_fields"]
+            ),
+            "records_with_conflicts": records_with_conflicts,
+        },
+        "enrichment_summary": {
+            "total_enrichments": totals["total_enrichments"],
+            "enrichment_rate": safe_ratio(
+                records_with_enrichments, totals["total_records"]
+            ),
+            "records_with_enrichments": records_with_enrichments,
+        },
+    }
 
 
 def _is_truthy_marker(value: object) -> bool:
