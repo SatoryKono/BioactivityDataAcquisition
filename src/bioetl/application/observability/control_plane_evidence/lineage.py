@@ -79,7 +79,8 @@ def _missing_fragment_checks(
             "closure",
             "ERROR" if lineage_required else "UNKNOWN",
             "lineage_fragments_missing",
-            "No persisted lineage fragments resolved for the selected run.",
+            "Write-side lineage fragments are missing for the selected run "
+            "(not a stale index-only miss).",
         ),
         EvidenceCheckResult(
             "identity_consistency",

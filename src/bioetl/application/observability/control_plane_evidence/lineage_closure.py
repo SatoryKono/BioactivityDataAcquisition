@@ -12,9 +12,12 @@ def closure_gaps(
 ) -> list[str]:
     """Return unresolved edge-node and ledger-fragment references."""
     return [
-        *(f"node:{node_id}" for node_id in _missing_edge_nodes(fragments)),
         *(
-            f"fragment:{fragment_id}"
+            f"edge_endpoint_missing:{node_id}"
+            for node_id in _missing_edge_nodes(fragments)
+        ),
+        *(
+            f"ledger_fragment_missing:{fragment_id}"
             for fragment_id in _missing_ledger_fragments(fragments, ledger_entries)
         ),
     ]

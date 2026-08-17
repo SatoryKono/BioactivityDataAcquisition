@@ -115,10 +115,10 @@
         "x": 0,
         "y": 4
       },
-      "description": "Distinguishes CURRENT Prometheus state, SELECTED RUN persisted HTTP evidence, TIME RANGE history, and UNKNOWN missing/stale evidence. Pipeline and Run Type affect CURRENT and TIME RANGE evidence; run_id never filters Prometheus. UNKNOWN means missing or stale evidence, never healthy. Fail-closed empty identity: default pipeline=unknown / run_id=- yields not available for current scope by design. Select a real pipeline (for example chembl_assay or chembl_activity), a compatible run_type, then a concrete run_id to load manifest/checkpoint evidence from control-plane.",
+      "description": "Distinguishes data-processing outcome (processing_status) from exact-run Trust (trust_status) and CURRENT Prometheus replay readiness. Terminal success is not lineage/retention/replay proof. Pipeline and Run Type affect CURRENT Prometheus; run_id never filters Prometheus. UNKNOWN/INCOMPLETE means missing or contradictory evidence, never healthy.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Can this run be replayed safely?</div><div><b>Scope:</b> <b>CURRENT</b> = replay status/reason/action · <b>SELECTED RUN</b> = identity evidence</div><div><b>UNKNOWN</b> = incomplete evidence — not OK</div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Can this run be replayed safely?</div><div><b>SELECTED RUN</b> HTTP: processing_status vs trust_status · <b>CURRENT</b> Prom: replay readiness</div><div><b>INCOMPLETE/UNKNOWN</b> = missing evidence — not OK. Success ≠ closed lineage or retention.</div></div></div>"
       }
     },
     {
@@ -135,7 +135,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Shows the overall replay/resume verdict. Status mapping: 0=OK, 1=WARN, 2=CRIT, 3=INCOMPLETE, null=UNKNOWN. Replay/resume is allowed only when the verdict and required evidence cards are complete and OK. UNKNOWN means required evidence is incomplete or missing.",
+      "description": "CURRENT Prometheus replay/resume readiness for pipeline×run_type (not the selected-run HTTP trust_status). Status mapping: 0=OK, 1=WARN, 2=CRIT, 3=INCOMPLETE, null=UNKNOWN. Exact-run Trust comes from Ops HTTP processing_status/trust_status. UNKNOWN/INCOMPLETE is not healthy.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -233,6 +233,56 @@
       ]
     },
     {
+      "id": 9418,
+      "type": "table",
+      "title": "Review Selected-Run Trust",
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "datasource": "BioETL Ops HTTP",
+      "description": "SELECTED RUN HTTP trust summary. processing_status is the data-processing outcome; trust_status is fail-closed exact-run evidence (INCOMPLETE/ERROR are not OK). Scope is exact_run when run_id resolves. No-data or backend unavailable is not a health verdict.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": true
+          },
+          "unit": "none",
+          "noValue": "No selected-run trust payload. Select an exact run; UNAVAILABLE/INCOMPLETE is not OK."
+        },
+        "overrides": []
+      },
+      "options": {
+        "footer": {
+          "show": false
+        },
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "targets": [
+        {
+          "expr": "",
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "trust",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/control-plane/manifest-validation?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          }
+        }
+      ]
+    },
+    {
       "id": 906,
       "type": "text",
       "title": "Review Recovery Action",
@@ -243,7 +293,7 @@
         "y": 12
       },
       "options": {
-        "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:16px;white-space:normal\"><strong>First recovery action:</strong> Check readiness and replay/checkpoint evidence. If UNKNOWN or INCOMPLETE, verify the Prometheus scrape before replay.</div>",
+        "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:16px;white-space:normal\"><strong>First recovery action:</strong> run outcome → Trust readiness (HTTP trust_status) → lineage validation → retention compliance → replay. Do not treat terminal success as replay-ready. If INCOMPLETE/UNKNOWN, inspect the HTTP reason before Prom scrape or replay.</div>",
         "mode": "html",
         "dataLinks": [
           {
@@ -850,7 +900,6 @@
             "w": 6,
             "x": 6,
             "y": 20
-
           },
           "id": 3,
           "options": {
@@ -942,7 +991,6 @@
             "w": 6,
             "x": 12,
             "y": 20
-
           },
           "id": 104,
           "options": {
@@ -1034,7 +1082,6 @@
             "w": 6,
             "x": 18,
             "y": 20
-
           },
           "id": 120,
           "options": {
@@ -1126,7 +1173,6 @@
             "w": 6,
             "x": 0,
             "y": 23
-
           },
           "id": 101,
           "options": {
@@ -1218,7 +1264,6 @@
             "w": 6,
             "x": 6,
             "y": 23
-
           },
           "id": 102,
           "options": {
@@ -1310,7 +1355,6 @@
             "w": 6,
             "x": 12,
             "y": 23
-
           },
           "id": 103,
           "options": {
@@ -1402,7 +1446,6 @@
             "w": 6,
             "x": 18,
             "y": 23
-
           },
           "id": 121,
           "options": {
@@ -1465,7 +1508,6 @@
             "w": 12,
             "x": 12,
             "y": 26
-
           },
           "id": 5,
           "options": {
@@ -1533,7 +1575,6 @@
             "w": 12,
             "x": 0,
             "y": 32
-
           },
           "id": 134,
           "options": {
@@ -1604,7 +1645,6 @@
             "w": 12,
             "x": 12,
             "y": 32
-
           },
           "id": 135,
           "options": {
@@ -1676,7 +1716,6 @@
             "w": 24,
             "x": 0,
             "y": 38
-
           },
           "id": 105,
           "options": {
@@ -1759,7 +1798,6 @@
             "w": 24,
             "x": 0,
             "y": 45
-
           },
           "id": 106,
           "options": {
@@ -1831,7 +1869,6 @@
             "w": 24,
             "x": 0,
             "y": 52
-
           },
           "id": 9413,
           "options": {
@@ -2005,7 +2042,6 @@
             "y": 82,
             "w": 6,
             "h": 3
-
           },
           "id": 2,
           "options": {
@@ -2097,7 +2133,6 @@
             "y": 82,
             "w": 6,
             "h": 3
-
           },
           "id": 1,
           "options": {
@@ -2158,7 +2193,6 @@
           "gridPos": {
             "x": 0,
             "y": 85,
-
             "w": 24,
             "h": 7
           },
@@ -2212,7 +2246,6 @@
           "gridPos": {
             "x": 0,
             "y": 92,
-
             "w": 24,
             "h": 7
           },
@@ -2297,7 +2330,6 @@
             "y": 82,
             "w": 6,
             "h": 3
-
           },
           "id": 132,
           "options": {
@@ -2389,7 +2421,6 @@
             "y": 82,
             "w": 6,
             "h": 3
-
           },
           "id": 133,
           "options": {
@@ -2457,7 +2488,6 @@
           "gridPos": {
             "x": 0,
             "y": 111,
-
             "w": 24,
             "h": 6
           },
@@ -2560,7 +2590,6 @@
             "y": 121,
             "w": 6,
             "h": 3
-
           },
           "id": 4,
           "options": {
@@ -2652,7 +2681,6 @@
             "y": 121,
             "w": 6,
             "h": 3
-
           },
           "id": 136,
           "options": {
@@ -2713,7 +2741,6 @@
           "gridPos": {
             "x": 0,
             "y": 124,
-
             "w": 24,
             "h": 6
           },
@@ -2785,7 +2812,6 @@
           "gridPos": {
             "x": 0,
             "y": 130,
-
             "w": 24,
             "h": 7
           },
@@ -2897,7 +2923,6 @@
             "y": 141,
             "w": 6,
             "h": 3
-
           },
           "id": 122,
           "options": {
@@ -2989,7 +3014,6 @@
             "y": 141,
             "w": 6,
             "h": 3
-
           },
           "id": 137,
           "options": {
@@ -3097,7 +3121,6 @@
           "gridPos": {
             "x": 0,
             "y": 144,
-
             "w": 24,
             "h": 6
           },
@@ -3158,7 +3181,6 @@
           "gridPos": {
             "x": 0,
             "y": 150,
-
             "w": 24,
             "h": 7
           },
@@ -3212,7 +3234,6 @@
           "gridPos": {
             "x": 0,
             "y": 157,
-
             "w": 24,
             "h": 7
           },
@@ -3284,7 +3305,6 @@
           "gridPos": {
             "x": 0,
             "y": 164,
-
             "w": 24,
             "h": 7
           },
@@ -3366,7 +3386,6 @@
           "gridPos": {
             "x": 0,
             "y": 171,
-
             "w": 24,
             "h": 7
           },
@@ -3430,7 +3449,6 @@
           "gridPos": {
             "x": 12,
             "y": 178,
-
             "w": 12,
             "h": 6
           },
@@ -3491,7 +3509,6 @@
           "gridPos": {
             "x": 0,
             "y": 184,
-
             "w": 24,
             "h": 6
           },
@@ -3555,7 +3572,6 @@
           "gridPos": {
             "x": 0,
             "y": 190,
-
             "w": 24,
             "h": 6
           },

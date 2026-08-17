@@ -121,6 +121,81 @@ async def test_persist_lineage_fragment_if_present_calls_store() -> None:
 
 @pytest.mark.unit
 @pytest.mark.asyncio
+async def test_persist_lineage_fragment_fail_closed_on_dangling_edges_when_required() -> (
+    None
+):
+    from bioetl.domain.lineage import (
+        LineageEdge,
+        LineageEdgeType,
+        LineageGraphFragment,
+        LineageNodeRef,
+        LineageNodeType,
+    )
+
+    fragment = LineageGraphFragment(
+        fragment_id="bronze:broken",
+        nodes=(LineageNodeRef(LineageNodeType.RUN, "run:1"),),
+        edges=(
+            LineageEdge(
+                LineageEdgeType.PRODUCED_BY,
+                LineageNodeRef(LineageNodeType.DATASET, "dataset:missing"),
+                LineageNodeRef(LineageNodeType.RUN, "run:1"),
+            ),
+        ),
+    )
+    store = MagicMock()
+    metrics = MagicMock()
+
+    with pytest.raises(RuntimeError, match="edge_endpoint_missing"):
+        await persist_lineage_fragment_if_present(
+            lineage_store=store,
+            lineage_fragment=fragment,
+            metrics=metrics,
+            pipeline_name="chembl_activity",
+            layer="bronze",
+            required=True,
+        )
+
+    store.save.assert_not_called()
+    metrics.increment_counter.assert_called_once()
+    assert metrics.increment_counter.call_args.args[2]["status"] == "failed"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_persist_lineage_fragment_skips_dangling_when_not_required() -> None:
+    from bioetl.domain.lineage import (
+        LineageEdge,
+        LineageEdgeType,
+        LineageGraphFragment,
+        LineageNodeRef,
+        LineageNodeType,
+    )
+
+    fragment = LineageGraphFragment(
+        fragment_id="bronze:broken",
+        nodes=(LineageNodeRef(LineageNodeType.RUN, "run:1"),),
+        edges=(
+            LineageEdge(
+                LineageEdgeType.PRODUCED_BY,
+                LineageNodeRef(LineageNodeType.DATASET, "dataset:missing"),
+                LineageNodeRef(LineageNodeType.RUN, "run:1"),
+            ),
+        ),
+    )
+    store = MagicMock()
+
+    await persist_lineage_fragment_if_present(
+        lineage_store=store,
+        lineage_fragment=fragment,
+        required=False,
+    )
+
+    store.save.assert_not_called()
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
 async def test_persist_lineage_fragment_if_present_emits_metric() -> None:
     fragment = make_produced_artifact_fragment(
         fragment_id="silver:fragment-1",
