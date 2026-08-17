@@ -31,7 +31,24 @@ class LifecycleStatus(Enum):
 
 def _normalize_semver(version: str) -> str:
     """Normalize legacy version strings into SemVer-like X.Y.Z."""
-    return version if version.count(".") == _SEMVER_PARTS_COUNT - 1 else f"{version}.0"
+    parts = _numeric_semver_parts(version)
+    if parts is None:
+        return version
+    padded = parts[:_SEMVER_PARTS_COUNT]
+    while len(padded) < _SEMVER_PARTS_COUNT:
+        padded.append("0")
+    return ".".join(padded)
+
+
+def _numeric_semver_parts(version: str) -> list[str] | None:
+    parts = [part for part in version.split(".") if part != ""]
+    if _is_numeric_version_parts(parts):
+        return [str(int(part)) for part in parts]
+    return None
+
+
+def _is_numeric_version_parts(parts: list[str]) -> bool:
+    return bool(parts) and all(part.isdigit() for part in parts)
 
 
 def _has_contract_ref_namespace(contract_ref: str) -> bool:

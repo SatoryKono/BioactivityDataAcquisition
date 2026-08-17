@@ -204,3 +204,8 @@ Code/config/contracts and executable gates outrank CodeRabbit output.
 | `CR-20260816-A-S01-domain-exceptions-023` | pending | trivial | pending ground-truth reconciliation |  |
 | `CR-20260816-A-S01-domain-exceptions-024` | pending | trivial | pending ground-truth reconciliation |  |
 | `CR-20260816-A-S01-domain-exceptions-025` | pending | major | pending ground-truth reconciliation |  |
+
+| CR-20260816-A-S01-domain-types-018 | confirm | critical | _normalize_semver pads with a single .0, so "1" becomes "1.0" and "1.2.3.4" becomes "1.2.3.4.0"; rom_legacy(..., "1") fails validate(). | src/bioetl/domain/types/contract_identity.py; #8893 |
+| CR-20260816-A-S01-domain-types-022 | confirm | critical | ContractRolloutPolicy single-mode defaults 
+ead_order/write_versions=() fail __post_init__ (ctive_version must be present in read_order). | src/bioetl/domain/types/contract_rollout.py; #8893 |
+
