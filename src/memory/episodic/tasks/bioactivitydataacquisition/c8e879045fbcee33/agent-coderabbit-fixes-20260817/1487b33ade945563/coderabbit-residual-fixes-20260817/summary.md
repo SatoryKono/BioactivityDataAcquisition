@@ -2,7 +2,7 @@
 record_id: coderabbit-residual-fixes-20260817
 record_type: working
 repo_id: bioactivitydataacquisition
-git_commit: 80383012948d978e4abaa1a6f1079bfeeedbbd4e
+git_commit: 397ed7dc3e88df1161713dfb5a08dad351f6e327
 branch: agent/coderabbit-fixes-20260817
 worktree_id: c8e879045fbcee33
 task_id: coderabbit-residual-fixes-20260817
@@ -10,10 +10,10 @@ actor:
   runtime: codex
   agent: py-test-bot
   model: null
-created_at: '2026-08-17T02:15:32.455765+00:00'
+created_at: '2026-08-17T05:43:07.634897+00:00'
 source_refs:
-- reports/quality/coderabbit/20260816/review_A_S01-domain-normalization.log
 - reports/quality/coderabbit/20260816/review_A_S01-domain-filtering.log
+- reports/quality/coderabbit/20260816/review_A_S01-domain-normalization.log
 - reports/quality/coderabbit/20260816/review_A_S01-domain-lineage.log
 - reports/quality/coderabbit/20260816/review_A_S01-domain-mapping.log
 source_hashes: {}
@@ -22,16 +22,17 @@ security_class: internal
 status: active
 supersedes: []
 schema_version: 1
-content_digest: 7bd36b3ff7a08bdb152fbaf114fa9fd51619c5f72e34cb84be4631d9f82181a8
+content_digest: c53d53509c828d2acfe79e1b9db04e597bb5be15d5dde2b558db5786d52cd46e
 id: coderabbit-residual-fixes-20260817
 title: Continue fixing CodeRabbit findings
 ttl_days: 14
 confidence: episodic
-summary: 'Fixed seven confirmed CodeRabbit residuals: strict date-part and ASCII-year
-  normalization, canonical JSON backend parity, multi-column FilterLoadResult invariants,
-  JSON-safe lineage exports, publication-type fail-closed normalization, ChEMBL unknown
-  classification, and PubMed raw-field precedence. Focused/domain tests, Ruff, mypy,
-  architecture, docs, debt, governance, and quality gates passed.'
+summary: 'Landed seven confirmed CodeRabbit domain fixes in c9b3f4c1fa, then repaired
+  current-main merge fallout: removed duplicate multi-column validation, reduced InputFilterContext
+  complexity from CC 7 to the limit, removed committed conflict markers from module
+  coverage inventory, and synchronized scripts inventory and quality/debt artifacts.
+  Targeted/domain, architecture, governance, Ruff, mypy, and debt gates passed; final
+  CodeRabbit review raised zero issues.'
 ---
 
 # Episodic summary
@@ -42,7 +43,7 @@ summary: 'Fixed seven confirmed CodeRabbit residuals: strict date-part and ASCII
 
 ## Outcome
 
-- Fixed seven confirmed CodeRabbit residuals: strict date-part and ASCII-year normalization, canonical JSON backend parity, multi-column FilterLoadResult invariants, JSON-safe lineage exports, publication-type fail-closed normalization, ChEMBL unknown classification, and PubMed raw-field precedence. Focused/domain tests, Ruff, mypy, architecture, docs, debt, governance, and quality gates passed.
+- Landed seven confirmed CodeRabbit domain fixes in c9b3f4c1fa, then repaired current-main merge fallout: removed duplicate multi-column validation, reduced InputFilterContext complexity from CC 7 to the limit, removed committed conflict markers from module coverage inventory, and synchronized scripts inventory and quality/debt artifacts. Targeted/domain, architecture, governance, Ruff, mypy, and debt gates passed; final CodeRabbit review raised zero issues.
 
 ## Lessons learned
 
