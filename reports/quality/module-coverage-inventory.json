@@ -48550,13 +48550,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-17",
-<<<<<<< HEAD
   "source_tree_sha256": "06ec7f40d986bef5f9132c8f068d086e5b544205f90cad6da44f4f86ee2f82c8",
-||||||| 4d2c59a178
-  "source_tree_sha256": "f1619300786e425d708d75b3710353e660d1a3cb129236a01668658da89162be",
-=======
-  "source_tree_sha256": "d51c12e13325426d6c8a73355d8564603e3bbf88fb8f3a45b606ad100e6f1131",
->>>>>>> fix/obs-fill-8927-current-prometheus-truth
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
