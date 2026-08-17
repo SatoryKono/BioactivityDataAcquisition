@@ -141,10 +141,9 @@ def test_all_potency_labels_are_reachable_for_presets(
     high = config.high_potency_threshold
     inactive = potency - (high - potency) / 2.0
     midpoint = (potency + high) / 2.0
-    inactive_threshold = potency - (high - potency) / 2.0
 
     labels = {
-        normalizer.classify_potency(inactive_threshold - 0.5),
+        normalizer.classify_potency(inactive - 0.5),
         normalizer.classify_potency(potency - 0.5),
         normalizer.classify_potency((potency + midpoint) / 2.0),
         normalizer.classify_potency((midpoint + high) / 2.0),
