@@ -287,7 +287,14 @@ class HealthServerRoutingMixin:
         )
 
         report_root_check = report_root_readiness_check()
-        checks: JsonDict = {"report_root": report_root_check}
+        from bioetl.application.observability.current_metrics_reconciliation import (
+            current_metrics_reconciliation_check,
+        )
+
+        checks: JsonDict = {
+            "report_root": report_root_check,
+            "current_metrics": current_metrics_reconciliation_check(),
+        }
         status = "healthy"
         if (
             enforce_report_root_marker()
