@@ -214,22 +214,51 @@ def materialize_leaf(base_sha: str, paths: list[str], target: Path) -> None:
     run_checked(["git", "branch", "-M", "audit-leaf"], target, git_env)
 
 
+def _structured_error_type(output: str) -> str | None:
+    """Return the last JSON errorType, ignoring finding/file payload text."""
+    error_type: str | None = None
+    for line in (output or "").splitlines():
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(event, dict) or event.get("type") != "error":
+            continue
+        raw = str(event.get("errorType") or "").strip()
+        if raw:
+            error_type = raw
+    return error_type
+
+
 def classify_output(return_code: int, output: str) -> tuple[str, str]:
-    lowered = output.lower()
-    if "rate_limit" in lowered or "rate limit" in lowered or "rate-limit" in lowered:
+    error_type = (_structured_error_type(output) or "").casefold()
+    completed = has_review_completion(output)
+    # A completed review wins over payload text such as network_rate_limit_helpers.py
+    # or exception messages that contain "Rate limit exceeded".
+    if error_type == "rate_limit" and not completed:
         wait = extract_rate_limit_wait_seconds(output)
         if wait is None:
             return "rate_limit", "CodeRabbit rate limit"
         return "rate_limit", f"CodeRabbit rate limit (waitTime={int(wait)}s)"
+    lowered = output.lower()
     if "all files are ignored" in lowered or "all_files_ignored" in lowered:
         return "all_files_ignored", "CodeRabbit reported all files ignored"
-    if "not_authenticated" in lowered or "not authenticated" in lowered:
+    if (
+        error_type in {"not_authenticated", "unauthenticated"}
+        or "not_authenticated" in lowered
+        or "not authenticated" in lowered
+    ) and not completed:
         return "auth_error", "CodeRabbit authentication failed"
-    if "websocket" in lowered or "socket hang up" in lowered or "econnreset" in lowered:
+    if (
+        error_type in {"websocket", "connection"}
+        or "websocket" in lowered
+        or "socket hang up" in lowered
+        or "econnreset" in lowered
+    ) and not completed:
         return "connection_error", "CodeRabbit connection/WebSocket failure"
-    if return_code != 0:
+    if return_code != 0 and not completed:
         return "error", f"CodeRabbit exit code {return_code}"
-    if not has_review_completion(output):
+    if not completed:
         return "missing_output", "CodeRabbit exited 0 without review_completed"
     return "ok", ""
 

@@ -20,7 +20,7 @@ Parent issue: [#8859](https://github.com/SatoryKono/BioactivityDataAcquisition/i
 
 | Tool/context | Result |
 |---|---|
-| CodeRabbit CLI | `0.7.2` (`/home/fedor/.local/bin/coderabbit`) |
+| CodeRabbit CLI | `0.7.2` at campaign start; resume 2026-08-17 uses `0.7.3` (`/home/fedor/.local/bin/coderabbit`) |
 | CodeRabbit auth | authenticated as `SatoryKono`, provider `GitHub`, region `US`, Plan `Pro`, seat assigned |
 | Python (WSL runner) | `3.14.4` |
 | Python (Windows tests) | `.venv-win` |
