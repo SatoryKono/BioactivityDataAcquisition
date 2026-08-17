@@ -164,6 +164,8 @@ def _normalize_profile_float_value(value: object) -> object:
 
 def _coerce_profile_int(value: object) -> int | str | float | object | None:
     if isinstance(value, float):
+        if not math.isfinite(value):
+            return None
         return int(value) if value.is_integer() else value
     if not isinstance(value, str):
         return _UNHANDLED
