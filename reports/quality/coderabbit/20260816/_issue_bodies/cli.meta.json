@@ -1,0 +1,39 @@
+{
+  "title": "[CR-FULL][20260816][P2] CLI leftover fail-closed residuals",
+  "pri": "P2",
+  "count": 15,
+  "ids": [
+    "CR-20260816-A-S10-interfaces-cli-001",
+    "CR-20260816-A-S10-interfaces-cli-004",
+    "CR-20260816-A-S10-interfaces-cli-011",
+    "CR-20260816-A-S10-interfaces-cli-013",
+    "CR-20260816-A-S10-interfaces-cli-018",
+    "CR-20260816-A-S10-interfaces-cli-020",
+    "CR-20260816-A-S10-interfaces-cli-022",
+    "CR-20260816-A-S10-interfaces-cli-023",
+    "CR-20260816-A-S10-interfaces-cli-024",
+    "CR-20260816-A-S10-interfaces-cli-032",
+    "CR-20260816-A-S10-interfaces-cli-038",
+    "CR-20260816-A-S10-interfaces-cli-045",
+    "CR-20260816-A-S10-interfaces-cli-046",
+    "CR-20260816-A-S10-interfaces-cli-060",
+    "CR-20260816-A-S10-interfaces-cli-062"
+  ],
+  "fps": [
+    "53aee99b5a9280ba",
+    "26f07453b075aeb3",
+    "3e57092f7a012bdf",
+    "44ece6cc2ac87ca4",
+    "5b79876390120d92",
+    "28990decb4d3e1c8",
+    "ea9dd3f4f027a7a5",
+    "7696322dff26fbea",
+    "133e31c94472a064",
+    "cc350b484467623d",
+    "8e1fa6a9f941bef0",
+    "c2d4c3bbb9eaabd1",
+    "908305edfd840e7e",
+    "89a64a9b2076a2ea",
+    "7de6b93c8b1a2bee"
+  ]
+}

@@ -255,7 +255,7 @@
       "links": [
         {
           "title": "Review current status",
-          "url": "/d/bioetl-runtime/bioetl-runtime?viewPanel=9100&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}&var-workflow=$workflow",
+          "url": "/d/bioetl-runtime/bioetl-runtime?viewPanel=9401&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}&var-workflow=$workflow",
           "targetBlank": false,
           "includeVars": false
         },
@@ -1231,7 +1231,6 @@
             "y": 43,
             "w": 8,
             "h": 4
-
           },
           "id": 220,
           "options": {
@@ -1841,7 +1840,6 @@
             "y": 65,
             "w": 6,
             "h": 4
-
           },
           "id": 230,
           "options": {
@@ -1929,7 +1927,6 @@
             "y": 65,
             "w": 6,
             "h": 4
-
           },
           "id": 236,
           "options": {
@@ -2033,7 +2030,6 @@
             "y": 65,
             "w": 6,
             "h": 4
-
           },
           "id": 21,
           "options": {
@@ -2073,7 +2069,6 @@
           "gridPos": {
             "x": 0,
             "y": 69,
-
             "w": 24,
             "h": 2
           },
@@ -2134,7 +2129,6 @@
             "y": 71,
             "w": 6,
             "h": 4
-
           },
           "id": 4,
           "options": {
@@ -2222,7 +2216,6 @@
             "y": 71,
             "w": 6,
             "h": 4
-
           },
           "id": 5,
           "options": {
@@ -2304,7 +2297,6 @@
             "y": 71,
             "w": 6,
             "h": 4
-
           },
           "id": 6,
           "options": {
@@ -2393,7 +2385,6 @@
             "y": 71,
             "w": 6,
             "h": 4
-
           },
           "id": 259,
           "options": {
@@ -2483,7 +2474,6 @@
             "y": 75,
             "w": 6,
             "h": 4
-
           },
           "id": 7,
           "options": {
@@ -2528,7 +2518,6 @@
           "gridPos": {
             "x": 0,
             "y": 79,
-
             "w": 24,
             "h": 2
           },
@@ -2584,7 +2573,6 @@
           "gridPos": {
             "x": 0,
             "y": 81,
-
             "w": 12,
             "h": 6
           },
@@ -2664,7 +2652,6 @@
           "gridPos": {
             "x": 12,
             "y": 81,
-
             "w": 12,
             "h": 6
           },
@@ -2764,7 +2751,6 @@
             "y": 116,
             "w": 6,
             "h": 4
-
           },
           "id": 237,
           "options": {
@@ -2849,7 +2835,6 @@
             "y": 116,
             "w": 6,
             "h": 4
-
           },
           "id": 16,
           "options": {
@@ -2931,7 +2916,6 @@
             "y": 116,
             "w": 6,
             "h": 4
-
           },
           "id": 205,
           "options": {
@@ -3483,7 +3467,6 @@
             "y": 135,
             "w": 6,
             "h": 4
-
           },
           "id": 9996,
           "options": {
@@ -3569,7 +3552,6 @@
             "y": 135,
             "w": 6,
             "h": 4
-
           },
           "id": 9997,
           "options": {

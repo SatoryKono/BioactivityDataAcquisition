@@ -1205,7 +1205,127 @@
         "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
         "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
       ]
+    },
+    "S13-tests-unit-domain-02": {
+      "id": "S13-tests-unit-domain-02",
+      "wave": "F",
+      "files": 43,
+      "status": "ok",
+      "reason": "",
+      "exit_code": 0,
+      "log": "reports/quality/coderabbit/20260816/review_F_S13-tests-unit-domain-02.log",
+      "bytes": 17435,
+      "elapsed_s": 167.6,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ]
+    },
+    "S14-tests-unit-application-01": {
+      "id": "S14-tests-unit-application-01",
+      "wave": "F",
+      "files": 300,
+      "status": "error",
+      "reason": "CodeRabbit exit code 1",
+      "exit_code": 1,
+      "log": "reports/quality/coderabbit/20260816/review_F_S14-tests-unit-application-01.log",
+      "bytes": 1283,
+      "elapsed_s": 19.3,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ]
+    },
+    "S14-tests-unit-application-02": {
+      "id": "S14-tests-unit-application-02",
+      "wave": "F",
+      "files": 96,
+      "status": "ok",
+      "reason": "",
+      "exit_code": 0,
+      "log": "reports/quality/coderabbit/20260816/review_F_S14-tests-unit-application-02.log",
+      "bytes": 85873,
+      "elapsed_s": 456.3,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ]
+    },
+    "S14b-tests-unit-infrastructure-01": {
+      "id": "S14b-tests-unit-infrastructure-01",
+      "wave": "F",
+      "files": 300,
+      "status": "error",
+      "reason": "CodeRabbit exit code 1",
+      "exit_code": 1,
+      "log": "reports/quality/coderabbit/20260816/review_F_S14b-tests-unit-infrastructure-01.log",
+      "bytes": 1286,
+      "elapsed_s": 15.8,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ]
+    },
+    "S14b-tests-unit-infrastructure-02": {
+      "id": "S14b-tests-unit-infrastructure-02",
+      "wave": "F",
+      "files": 83,
+      "status": "rate_limit",
+      "reason": "CodeRabbit rate limit (waitTime=20s)",
+      "exit_code": 1,
+      "log": "reports/quality/coderabbit/20260816/review_F_S14b-tests-unit-infrastructure-02.log",
+      "bytes": 954,
+      "elapsed_s": 17.4,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ]
     }
   },
-  "updated_utc": "2026-08-17T18:59:01.900326+00:00"
+  "updated_utc": "2026-08-17T19:23:52.104809+00:00"
 }

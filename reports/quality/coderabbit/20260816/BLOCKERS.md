@@ -230,3 +230,27 @@ billing was not enabled.
 - Detail: CodeRabbit exit code 1
 - GitHub issue: pending reconciliation
 
+## S14-tests-unit-application-01 — error
+
+- UTC: `2026-08-17T19:02:34.864139+00:00`
+- Wave: `F`
+- Files: `300`
+- Detail: CodeRabbit exit code 1
+- GitHub issue: pending reconciliation
+
+## S14b-tests-unit-infrastructure-01 — error
+
+- UTC: `2026-08-17T19:12:33.819531+00:00`
+- Wave: `F`
+- Files: `300`
+- Detail: CodeRabbit exit code 1
+- GitHub issue: pending reconciliation
+
+## S14b-tests-unit-infrastructure-02 — rate_limit
+
+- UTC: `2026-08-17T19:14:34.713951+00:00`
+- Wave: `F`
+- Files: `83`
+- Detail: CodeRabbit rate limit (waitTime=540s)
+- GitHub issue: pending reconciliation
+

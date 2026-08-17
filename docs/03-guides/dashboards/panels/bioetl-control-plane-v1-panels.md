@@ -29,7 +29,7 @@ absence.
 
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
-| 9400 | Inspect Scope & Evidence | text | Static | Replay-safety question plus processing_status vs trust_status vs CURRENT Prom readiness. | shared shell | No thresholds; interpretive guidance only. |
+| 9400 | Inspect Scope & Evidence | text | Static | Replay-safety question: SELECTED RUN is this run's processing outcome and Trust status; CURRENT is pipeline replay readiness now, not this run. INCOMPLETE/UNKNOWN is incomplete evidence, not OK. | shared shell | No thresholds; interpretive guidance only. |
 | 9401 | Monitor Replay Readiness | stat | Prometheus | CURRENT Prometheus replay/resume verdict from `bioetl_control_plane_current_status_trusted` (not selected-run HTTP trust). | shared shell | `0=OK`, `1=WARN`, `2=CRIT`, `3=INCOMPLETE`, `null=UNKNOWN`. `INCOMPLETE` blocks Prom-current replay approval. |
 | 9418 | Review Selected-Run Trust | table | BioETL Ops HTTP | Exact-run `processing_status`, `trust_status`, `scope_kind`, and `evidence_freshness` from manifest-validation. | shared shell | `INCOMPLETE`/`ERROR`/`UNAVAILABLE` are not OK. |
 | 9402 | Review Run Summary | table | BioETL Ops HTTP | Identity anchors for the selected workflow/pipeline/run scope. | shared shell | No numeric threshold; forensic handoff table. |
@@ -40,7 +40,7 @@ absence.
 | 892 | Monitor Checkpoint Age | stat | BioETL Ops HTTP | Current checkpoint freshness lag from HTTP-backed control-plane evidence. | shared shell | Numeric lag; no PromQL threshold in doc. |
 | 893 | Monitor Manifest/Ledger | stat | Prometheus | Current manifest/ledger failure state from `bioetl_manifest_ledger_failures_15m`. | shared shell | Severity/value mapping. |
 | 907 | Monitor Telemetry | stat | Prometheus | Missing-control-plane-telemetry signal from `bioetl_control_plane_telemetry_missing_5m`. | shared shell | Value mapping distinguishes no-data vs telemetry-missing. |
-| 906 | Review Recovery Action | text | Static | One-line next-step rail (`bioetlDisplayTitle`, no native title chrome) so `h=2` does not scroll. | shared shell | Drilldown router into the replay-safety row below. |
+| 906 | Review Recovery Action | text | Static | Next-step rail: do not replay this run if Trust status is INCOMPLETE or UNKNOWN; look at Review Selected-Run Trust below, then expand Inspect Audit & Lineage Evidence. | shared shell | Links: 130 blockers, 9418 this-run Trust, 9415 lineage, 9416 retention. |
 
 ### Inspect Replay & Checkpoint Evidence
 

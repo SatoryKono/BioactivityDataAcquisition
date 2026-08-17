@@ -1,0 +1,21 @@
+{
+  "title": "[CR-FULL][20260816][P2] Adapter fallback and PubChem query residuals",
+  "pri": "P2",
+  "count": 6,
+  "ids": [
+    "CR-20260816-C-S06-infra-adapters-049",
+    "CR-20260816-C-S06-infra-adapters-057",
+    "CR-20260816-C-S06-infra-adapters-103",
+    "CR-20260816-C-S06-infra-adapters-110",
+    "CR-20260816-C-S06-infra-adapters-111",
+    "CR-20260816-C-S08-infra-observability-005"
+  ],
+  "fps": [
+    "c581270e6b60aef7",
+    "6f86813f6930177d",
+    "8b466c85fa555e95",
+    "d1ecd42bae9adf53",
+    "3237cf9f74650bbb",
+    "66c53d2610c60545"
+  ]
+}

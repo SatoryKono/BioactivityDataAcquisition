@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-17T18:32:12.661141+00:00",
+  "generated_at": "2026-08-17T19:20:49.278412+00:00",
   "summary": {
     "total_scripts": 601,
     "status_counts": {
@@ -12,7 +12,7 @@
       "build": 17,
       "ci": 81,
       "docs": 256,
-      "other": 77,
+      "other": 78,
       "scripts": 499,
       "skills": 12,
       "tests": 393
@@ -12043,13 +12043,25 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 342,
+      "reference_count": 344,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
           "line": 54,
           "source_group": "other",
           "text": "`python -m scripts.engineering.qa report-duplication-baseline` after each"
+        },
+        {
+          "path": ".github/ISSUES/_dash_cycle_bodies/DASH-CYCLE-003.md",
+          "line": 30,
+          "source_group": "other",
+          "text": "- [ ] `python -m scripts.engineering.qa report-dashboard-panel-audit-matrix --check` exits 0 against 235 live rows"
+        },
+        {
+          "path": ".github/ISSUES/_dash_cycle_bodies/DASH-CYCLE-003.md",
+          "line": 31,
+          "source_group": "other",
+          "text": "- [ ] `python -m scripts.engineering.qa report-dashboard-inventory --check --json` still green"
         },
         {
           "path": ".github/ISSUES/_grafana_provenance_readability_bodies/GRA-PROV-00.md",
@@ -12080,18 +12092,6 @@
           "line": 113,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa report-pipeline-config-contract-ownership-map --check"
-        },
-        {
-          "path": ".github/workflows/contract-governance-fast-check.yml",
-          "line": 129,
-          "source_group": "ci",
-          "text": "uv run --frozen --no-build python -m scripts.engineering.qa report-contract-coverage-matrix --check"
-        },
-        {
-          "path": ".github/workflows/docs.yml",
-          "line": 170,
-          "source_group": "ci",
-          "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-xwalk-missing-backlog \\"
         }
       ]
     },
@@ -14713,8 +14713,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
+        {
+          "path": ".github/ISSUES/_dash_cycle_bodies/DASH-CYCLE-003.md",
+          "line": 15,
+          "source_group": "other",
+          "text": "| `EXPECTED_PANEL_COUNT` in `scripts/engineering/qa/report_dashboard_panel_audit_matrix.py` | **226** |"
+        },
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 37,
@@ -19473,7 +19479,7 @@
         },
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 241,
+          "line": 244,
           "source_group": "tests",
           "text": "recover_ps1 = Path(\"scripts/ops/observability/grafana/recover_renderer.ps1\")"
         }
@@ -19541,7 +19547,7 @@
       "references": [
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 242,
+          "line": 245,
           "source_group": "tests",
           "text": "recover_sh = Path(\"scripts/ops/observability/grafana/recover_renderer.sh\")"
         }

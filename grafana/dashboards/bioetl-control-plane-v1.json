@@ -115,10 +115,10 @@
         "x": 0,
         "y": 4
       },
-      "description": "Distinguishes data-processing outcome (processing_status) from exact-run Trust (trust_status) and CURRENT Prometheus replay readiness. Terminal success is not lineage/retention/replay proof. Pipeline and Run Type affect CURRENT Prometheus; run_id never filters Prometheus. UNKNOWN/INCOMPLETE means missing or contradictory evidence, never healthy.",
+      "description": "processing_status is whether the pipeline finished. trust_status is whether this run's evidence is complete enough to replay. Monitor Replay Readiness (9401) is CURRENT Prometheus for pipeline x run_type; run_id never filters Prometheus. Review Selected-Run Trust (9418) is the exact-run verdict. UNKNOWN/INCOMPLETE is missing or contradictory evidence, never healthy.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Can this run be replayed safely?</div><div><b>SELECTED RUN</b> HTTP: processing_status vs trust_status · <b>CURRENT</b> Prom: replay readiness</div><div><b>INCOMPLETE/UNKNOWN</b> = missing evidence — not OK. Success ≠ closed lineage or retention.</div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Can this run be replayed safely?</div><div>SELECTED RUN = this run's processing outcome and Trust status. CURRENT = pipeline replay readiness now, not this run.</div><div>INCOMPLETE or UNKNOWN = incomplete evidence — not OK. A successful run is not proof of lineage or retention.</div></div></div>"
       }
     },
     {
@@ -294,7 +294,7 @@
       },
       "options": {
         "bioetlDisplayTitle": "Review Recovery Action",
-        "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:16px;white-space:normal;overflow-wrap:anywhere\"><strong>First recovery action:</strong> run outcome → HTTP trust_status → lineage → retention → replay. Do not replay on INCOMPLETE/UNKNOWN.</div>",
+        "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:16px;white-space:normal;overflow-wrap:anywhere\">Do not replay this run if its Trust status is INCOMPLETE or UNKNOWN. Look at <em>Review Selected-Run Trust</em> below, then expand <em>Inspect Audit &amp; Lineage Evidence</em>.</div>",
         "mode": "html",
         "dataLinks": [
           {
@@ -302,11 +302,29 @@
             "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?viewPanel=130&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow",
             "targetBlank": false,
             "includeVars": false
+          },
+          {
+            "title": "Open Selected-Run Trust",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?viewPanel=9418&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow",
+            "targetBlank": false,
+            "includeVars": false
+          },
+          {
+            "title": "Open Lineage Validation",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?viewPanel=9415&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow",
+            "targetBlank": false,
+            "includeVars": false
+          },
+          {
+            "title": "Open Retention Compliance",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?viewPanel=9416&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow",
+            "targetBlank": false,
+            "includeVars": false
           }
         ]
       },
       "transparent": false,
-      "description": "Shows the safest next step for the current trust verdict. Native Grafana title chrome is omitted so the 16px rail fits gridPos.h=2 without internal scroll (DASH-FIT-004). Follow run outcome → HTTP trust_status → lineage → retention → replay before resume. Terminal success is not replay-ready. If INCOMPLETE/UNKNOWN, inspect the HTTP reason before Prom scrape or replay. After the primary readiness check, open blocker details (panel 130) and confirm identity in Run Explorer."
+      "description": "Next-step rail (native title omitted so h=2 does not scroll). Do not replay this run if its Trust status is INCOMPLETE or UNKNOWN. The table immediately below is Review Selected-Run Trust (9418): that is the exact-run Trust verdict. Lineage and retention are not on the first screen: expand the row Inspect Audit & Lineage Evidence, then open Review Lineage Validation (9415) and Review Retention Compliance (9416). Monitor Replay Readiness (9401) is current Prometheus for the pipeline, not this run."
     },
     {
       "datasource": {
@@ -742,7 +760,7 @@
           },
           "id": 894,
           "options": {
-            "content": "<div style=\"font-size:16px;line-height:1.4\"><strong style=\"font-size:16px\">Coverage contract</strong><ul style=\"margin:6px 0 0 22px;padding:0\"><li style=\"font-size:16px\">Replay duplicate/overwrite risk is covered by bounded <code style=\"font-size:16px\">risk_type</code> telemetry.</li><li style=\"font-size:16px\">Manifest-to-ledger referential integrity is covered by complementary <code style=\"font-size:16px\">consistent</code> / <code style=\"font-size:16px\">inconsistent</code> ratio series.</li><li style=\"font-size:16px\">A zero blocker verdict is trustworthy only while the telemetry-coverage card is complete.</li></ul></div>",
+            "content": "<div style=\"font-size:16px;line-height:1.4\">Coverage contract<ul style=\"margin:6px 0 0 22px;padding:0\"><li style=\"font-size:16px\">Replay duplicate/overwrite risk is covered by bounded <code style=\"font-size:16px\">risk_type</code> telemetry.</li><li style=\"font-size:16px\">Manifest-to-ledger referential integrity is covered by complementary <code style=\"font-size:16px\">consistent</code> / <code style=\"font-size:16px\">inconsistent</code> ratio series.</li><li style=\"font-size:16px\">A zero blocker verdict is trustworthy only while the telemetry-coverage card is complete.</li></ul></div>",
             "mode": "html"
           },
           "title": "Review Coverage Limits",
@@ -3911,7 +3929,7 @@
               "showLineNumbers": false,
               "showMiniMap": false
             },
-            "content": "<div style=\"font-size:16px;line-height:1.45;color:#c9d1d9\"><b>Identity table guardrail.</b><br/>If no rows are visible, check <code style=\"font-size:16px\">/health/live</code>, selector scope, and a concrete <code style=\"font-size:16px\">pipeline/run_id</code> before treating the empty state as expected.</div>",
+            "content": "<div style=\"font-size:16px;line-height:1.45;color:#c9d1d9\">Identity table guardrail.<br/>If no rows are visible, check <code style=\"font-size:16px\">/health/live</code>, selector scope, and a concrete <code style=\"font-size:16px\">pipeline</code>/<code style=\"font-size:16px\">run_id</code> before treating the empty state as expected.</div>",
             "mode": "html"
           },
           "title": "Explain Missing Identity Data",
@@ -3940,7 +3958,7 @@
               "showLineNumbers": false,
               "showMiniMap": false
             },
-            "content": "<div style=\"font-size:16px;line-height:1.45;color:#c9d1d9\"><b>Accounting table guardrail.</b><br/>Visible rows are backend accounting evidence; if this table becomes empty, verify backend health and scope before reading it as zero records.</div>",
+            "content": "<div style=\"font-size:16px;line-height:1.45;color:#c9d1d9\">Accounting table guardrail.<br/>Visible rows are backend accounting evidence; if this table becomes empty, verify backend health and scope before reading it as zero records.</div>",
             "mode": "html"
           },
           "title": "Explain Missing Record Counts",
@@ -4311,7 +4329,7 @@
           },
           "id": 139,
           "options": {
-            "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:16px;white-space:normal\"><strong>Remaining replay-safety signal:</strong> occurrence-only vs semantic drift classification still requires exact-run evidence.<br>Duplicate/overwrite write risk is now bounded Prometheus telemetry. Keep high-cardinality IDs in identity evidence, manifests, ledger/checkpoint diagnostics, and artifact lineage.</div>",
+            "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:16px;white-space:normal\">Remaining replay-safety signal: occurrence-only vs semantic drift classification still requires exact-run evidence.<br>Duplicate/overwrite write risk is now bounded Prometheus telemetry. Keep high-cardinality IDs in identity evidence, manifests, ledger/checkpoint diagnostics, and artifact lineage.</div>",
             "mode": "html"
           },
           "title": "Review Uncovered Replay Signals",

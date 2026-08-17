@@ -1,0 +1,23 @@
+{
+  "title": "[CR-FULL][20260816][P2] Domain hashing/workflow leftovers",
+  "pri": "P2",
+  "count": 7,
+  "ids": [
+    "CR-20260816-A-S01-domain-transformations-004",
+    "CR-20260816-A-S01-domain-transformations-005",
+    "CR-20260816-A-S01-domain-transformations-006",
+    "CR-20260816-A-S01-domain-validation-003",
+    "CR-20260816-A-S01-domain-validation-007",
+    "CR-20260816-A-S01-domain-workflow-002",
+    "CR-20260816-A-S01-domain-workflow-005"
+  ],
+  "fps": [
+    "4974fee7386cf05b",
+    "e6725c93d3936674",
+    "608a2d53d58e2a67",
+    "68d7f4a48743b761",
+    "e901c22472dad956",
+    "9c512147a811d392",
+    "aa00bc284c2e609d"
+  ]
+}

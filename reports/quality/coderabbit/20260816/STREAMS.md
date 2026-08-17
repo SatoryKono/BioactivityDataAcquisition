@@ -21,10 +21,17 @@ streams are closed on `main` as of 2026-08-17.
 | `infra-20260816-fail-closed` | #8916 | 16 | P1 | join `.0`, Silver FK, Arrow, time-travel, empty keys | closed |
 | `security-20260816-redaction` | #8917 | 6 | P1 | Bearer/VCR/salt/argv | closed |
 | `app-20260816-fail-closed` | #8918 | 20 | P1 | manifest, replay sort, FK blanks, lock, pmc_id | closed |
+| `config-s16b-fail-closed` | #8942 | 10 | P2 | bounded FK reconcile, `[^\\s]` regex, stray publication_year filters | open |
+| `app-core-8890-split` | #8952 | 44 | P1 | S02 lock/heartbeat, batch write, filter fetch | open |
+| `control-plane-8890-split` | #8953 | 44 | P1 | S03 replay/manifest/profile | open |
+| `app-services-8890-split` | #8954 | 56 | P1 | S04 checkpoint/DQ/ops | open |
+| `adapters-8890-split` | #8955 | 6 | P2 | OpenAlex/PubMed fallback, PubChem query | open |
+| `http-8890-split` | #8956 | 30 | P2 | health routing / report-root | open |
+| `cli-8890-split` | #8957 | 15 | P2 | leftover CLI fail-closed | open |
+| `domain-8890-split` | #8958 | 7 | P2 | hashing / workflow freeze | open |
 
-Unlinked leftover confirms from #8890 bulk triage are bound to closed #8890
-(no new per-finding GitHub issues). Do not reopen #8643 / #8644 / #8645 / #8652
-without a fresh reproduction.
+#8890 leftover confirms were split into #8952–#8958 (not one issue per finding).
+Do not reopen #8643 / #8644 / #8645 / #8652 without a fresh reproduction.
 
 Exact-cover retries of CodeRabbit service-blocked leaves remain documented in
 `BLOCKERS.md` / `FINAL.md`.

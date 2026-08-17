@@ -201,7 +201,7 @@
         "dataLinks": [
           {
             "title": "Inspect DQ Current Status",
-            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?viewPanel=9100&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}&var-workflow=$workflow",
+            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?viewPanel=9401&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}&var-workflow=$workflow",
             "targetBlank": false,
             "includeVars": false
           },
@@ -250,7 +250,7 @@
       "links": [
         {
           "title": "Review current status",
-          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?viewPanel=9100&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}&var-workflow=$workflow",
+          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?viewPanel=9401&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}&var-workflow=$workflow",
           "targetBlank": false,
           "includeVars": false
         },
