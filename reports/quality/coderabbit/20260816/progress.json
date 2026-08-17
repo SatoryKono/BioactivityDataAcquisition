@@ -1067,10 +1067,25 @@
       "id": "S19-github-workflows",
       "wave": "E",
       "files": 41,
-      "status": "timeout",
-      "reason": "timeout after 600s",
+      "status": "ok",
+      "reason": "",
+      "exit_code": 0,
       "log": "reports/quality/coderabbit/20260816/review_E_S19-github-workflows.log",
-      "elapsed_s": 606.0
+      "bytes": 62906,
+      "elapsed_s": 580.1,
+      "command": [
+        "/home/fedor/.local/bin/coderabbit",
+        "review",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+        "-c",
+        "/mnt/e/github/BioactivityDataAcquisition/AGENTS.md",
+        "/mnt/e/github/BioactivityDataAcquisition/.coderabbit.yaml",
+        "/mnt/e/github/BioactivityDataAcquisition/reports/quality/coderabbit/20260816/02-review-prompt.md"
+      ]
     },
     "S19b-github-actions": {
       "id": "S19b-github-actions",
@@ -1168,5 +1183,5 @@
       ]
     }
   },
-  "updated_utc": "2026-08-17T18:34:40.023310+00:00"
+  "updated_utc": "2026-08-17T18:44:35.172480+00:00"
 }

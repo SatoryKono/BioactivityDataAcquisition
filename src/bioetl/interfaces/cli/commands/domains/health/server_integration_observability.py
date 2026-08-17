@@ -121,10 +121,28 @@ def _start_health_observability(logger: LoggerPort | None = None) -> None:
 def _rehydrate_current_metrics(*, logger: LoggerPort | None = None) -> None:
     """Seed scraped contract samples from durable run reports."""
     from bioetl.application.observability.current_metrics_rehydrate import (
-        rehydrate_current_metrics_safely,
+        rehydrate_current_pipeline_run_metrics,
     )
+    from bioetl.composition.health_api import get_health_server_dependencies
 
-    result = rehydrate_current_metrics_safely()
+    try:
+        result = rehydrate_current_pipeline_run_metrics(
+            get_health_server_dependencies().metrics
+        )
+    except (
+        ImportError,
+        OSError,
+        RuntimeError,
+        TypeError,
+        ValueError,
+        AttributeError,
+    ) as exc:
+        if logger is not None:
+            logger.warning(
+                "health_server_current_metrics_rehydrate_failed",
+                error=str(exc),
+            )
+        return
     if logger is None:
         return
     if result.error:

@@ -41,3 +41,12 @@ count are both 41 on this tree and `origin/main`.
 2. [#8945](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8945) — parallel; no Grafana required
 3. [#8947](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8947) — independent ops; do not rewrite D0–D5 JSON while open
 4. [#8948](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8948) — last, after 001 re-render and 003 `--check`
+
+## Current-tree facts (do not re-count from memory)
+
+| Surface | Count |
+| --- | ---: |
+| JSON leaf+row | 235 |
+| YAML `panel_count` sum | 235 |
+| `EXPECTED_PANEL_COUNT` | 226 |
+| `reviewed_expression_count` | 41 = live 41 |

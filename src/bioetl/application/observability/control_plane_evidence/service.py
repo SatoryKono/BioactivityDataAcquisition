@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+from typing import cast
 
 from bioetl.application.observability.control_plane_evidence.checkpoint_validation import (
     build_checkpoint_checks,
@@ -183,11 +184,7 @@ class ControlPlaneEvidenceService:
                 ),
                 ledger_entries=ledger_entries(self.ledger_port, scope.manifest),
             )
-        policy = ControlPlaneArtifactLifecyclePolicy(
-            retention_days=self.retention_days,
-            now=now,
-        )
-        plan = self._bounded_retention_plan(policy, scope.manifest)
+        plan = self._bounded_retention_plan(scope.manifest, now)
         checks, relevant_artifacts = build_retention_checks(
             manifest=scope.manifest,
             plan=plan,
@@ -207,15 +204,31 @@ class ControlPlaneEvidenceService:
 
     def _bounded_retention_plan(
         self,
-        policy: ControlPlaneArtifactLifecyclePolicy,
         manifest: RunManifest,
+        now: datetime,
     ) -> ControlPlaneArtifactLifecyclePlan:
         planner = self.lifecycle_planner
         assert planner is not None
         plan_for_manifest = getattr(planner, "plan_for_manifest", None)
         if callable(plan_for_manifest):
-            return plan_for_manifest(policy, manifest=manifest, dry_run=True)
-        return planner.plan(policy, dry_run=True)
+            return cast(
+                ControlPlaneArtifactLifecyclePlan,
+                plan_for_manifest(
+                    ControlPlaneArtifactLifecyclePolicy(
+                        retention_days=self.retention_days,
+                        now=now,
+                    ),
+                    manifest=manifest,
+                    dry_run=True,
+                ),
+            )
+        return planner.plan(
+            ControlPlaneArtifactLifecyclePolicy(
+                retention_days=self.retention_days,
+                now=now,
+            ),
+            dry_run=True,
+        )
 
     def failure_reasons(self, *, scope: EvidenceScopeContext) -> dict[str, object]:
         """Return only fixed-category failure counts; omit raw errors/messages."""
