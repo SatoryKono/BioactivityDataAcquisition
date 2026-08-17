@@ -91,6 +91,8 @@ class MolecularWeight(ValueObject[float]):
         Raises:
             ValueError: If MW is invalid or outside range.
         """
+        if isinstance(value, bool):
+            raise ValueError(f"Invalid molecular weight: {value!r}")
         # Convert to float
         try:
             float_value = float(value)

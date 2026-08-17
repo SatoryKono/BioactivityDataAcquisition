@@ -253,7 +253,6 @@ class PubChemCid(ValueObject[int]):
         if isinstance(raw, str) and not raw.strip():
             return None
         try:
-            # int() is idempotent on ints, converts str to int
-            return cls(int(raw))
-        except ValueError:
+            return cls(raw)
+        except (TypeError, ValueError):
             return None

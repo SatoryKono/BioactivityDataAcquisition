@@ -110,6 +110,8 @@ def calculate_null_rate(
     Returns:
         Null rate rounded to 4 decimal places (0.0 to 1.0).
     """
+    if total == 0:
+        return 0.0
     null_count = sum(1 for v in values if v is None)
     return round(null_count / total, 4)
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from types import MappingProxyType
 
 from bioetl.domain.types import DriftLevel, JsonDict
 from bioetl.domain.value_objects.dq_report_enums import DQCheckStatus
@@ -53,6 +54,7 @@ class SchemaSnapshotResult:
                 "missing_fields_since_last_run",
                 tuple(self.missing_fields_since_last_run),
             )
+        object.__setattr__(self, "schema", MappingProxyType(dict(self.schema)))
 
 
 @dataclass(frozen=True, slots=True)
