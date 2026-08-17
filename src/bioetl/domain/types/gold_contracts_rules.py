@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import cast
+from typing import TypeGuard, cast
 
 from ._gold_contracts_support import (
     GOLD_CONTRACT_VERSION_UNKNOWN,
@@ -194,7 +194,7 @@ class GoldBusinessRuleSpec:
         )
 
 
-def _is_numeric_bound(value: object) -> bool:
+def _is_numeric_bound(value: object) -> TypeGuard[int | float]:
     return isinstance(value, (int, float)) and not isinstance(value, bool)
 
 

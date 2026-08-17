@@ -44,10 +44,14 @@ class DebugExportAdapter:
         *,
         pack: DebugExportPack,
     ) -> DebugExportResult:
+        """Persist a deterministic debug-export pack and return its manifest."""
         root_path = self._resolve_root(pack)
         root_path.mkdir(parents=True, exist_ok=True)
         lineage_rows = tuple(self._load_lineage_rows(pack))
-        tables = dict(pack.tables)
+        tables = {
+            table_name: tuple(dict(row) for row in rows)
+            for table_name, rows in pack.tables.items()
+        }
         if lineage_rows:
             tables["lineage"] = lineage_rows
 

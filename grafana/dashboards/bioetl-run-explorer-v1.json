@@ -801,7 +801,7 @@
           "id": 3021,
           "type": "table",
           "title": "Inspect Recent Runs (last 20)",
-          "description": "Complete last-20 pipeline-run-report browser. First-screen Inspect Recent Runs stays at limit=4. An empty table is valid when no matching reports exist (index_state=valid_empty). TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY is bind or origin failure.",
+          "description": "Complete last-20 pipeline-run-report browser. First-screen Inspect Recent Runs stays at limit=4. An empty table is valid when no matching reports exist (index_state=valid_empty). TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY is bind or origin failure. Backend failure renders as QUERY ERROR and is distinct from valid empty.",
           "gridPos": {
             "h": 8,
             "w": 24,
@@ -846,7 +846,7 @@
           "id": 3022,
           "type": "table",
           "title": "Inspect Full Run Identity",
-          "description": "Complete identity rows for the selected run. First-screen Inspect Run Identity is the four-row summary. Selection required when no run ID is set.",
+          "description": "Complete identity rows for the selected run. First-screen Inspect Run Identity is the four-row summary. Selection required when no run ID is set. VALID EMPTY means the selected run has no identity; backend failure renders as QUERY ERROR.",
           "gridPos": {
             "h": 8,
             "w": 10,
