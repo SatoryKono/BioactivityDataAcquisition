@@ -27,8 +27,10 @@ from bioetl.composition.pipeline_runner_request import (
     _require_runtime,
     _require_settings,
 )
+from bioetl.composition.runtime_builders import _snapshot_mapping_support
 from bioetl.composition.runtime_builders._snapshot_mapping_support import (
     normalize_snapshot,
+    to_serializable_mapping,
 )
 from bioetl.domain.filtering import InputFilterConfig
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -109,3 +111,34 @@ def test_http_config_uses_bounded_fallback_without_registry_config(
 
     assert (resolved.rate, resolved.capacity) == (5.0, 10)
     assert http_client.HttpClientFactory._api_key_setting_name("OTHER_KEY") is None
+
+
+def test_pipeline_registration_delegate_preserves_explicit_scope(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    ensure = MagicMock()
+    monkeypatch.setattr(_services, "_ensure_registrations", ensure)
+
+    _services._ensure_pipeline_registrations()
+
+    ensure.assert_called_once_with(registry=None, scope="pipelines")
+
+
+def test_snapshot_mapping_fails_closed_if_normalization_changes_shape(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class DumpHost:
+        def model_dump(
+            self, *, mode: str = "python", exclude_none: bool = False
+        ) -> dict[str, object]:
+            del mode, exclude_none
+            return {"value": 1}
+
+    monkeypatch.setattr(
+        _snapshot_mapping_support,
+        "normalize_snapshot",
+        lambda _value: [],
+    )
+
+    with pytest.raises(TypeError, match="must return a mapping"):
+        to_serializable_mapping(DumpHost())

@@ -11,6 +11,10 @@ from bioetl.infrastructure.config.source_normalizers.source import (
     _normalize_rate_limit,
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.infrastructure.storage.metadata import metadata_helpers
+from bioetl.infrastructure.storage.silver.writer_metadata_facade import (
+    SilverWriterMetadataFacade,
+)
 from bioetl.infrastructure.storage.support.checkpoint_writer import (
     CheckpointPathError,
     CheckpointSizeError,
@@ -52,3 +56,22 @@ def test_checkpoint_writer_residual_safety_branches(tmp_path: Path) -> None:
 
     with pytest.raises(CheckpointPathError):
         writer.list_glob("../*.json")
+
+
+def test_schema_metadata_introspection_contains_known_failures(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        metadata_helpers.inspect,
+        "getmodule",
+        lambda _schema: (_ for _ in ()).throw(OSError("unavailable")),
+    )
+
+    assert metadata_helpers._extract_contract_path(object()) is None
+    assert metadata_helpers._extract_schema_columns(object()) == ()
+
+
+def test_silver_metadata_float_coercion_is_bounded() -> None:
+    assert SilverWriterMetadataFacade._as_optional_float(None) is None
+    assert SilverWriterMetadataFacade._as_optional_float(True) == 1.0
+    assert SilverWriterMetadataFacade._as_optional_float(object()) is None

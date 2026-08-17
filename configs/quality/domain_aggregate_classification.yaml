@@ -250,6 +250,11 @@ non_aggregate_root_modules:
       <<: *support_module,
     }
   - {
+      module: bioetl.domain.serialization_arrow,
+      path: src/bioetl/domain/serialization_arrow.py,
+      <<: *support_module,
+    }
+  - {
       module: bioetl.domain.types_config_validation,
       path: src/bioetl/domain/types_config_validation.py,
       <<: *support_module,
