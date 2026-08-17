@@ -723,3 +723,4 @@ status tokens in `<b>` / `<strong>`.
 
 Pilot surface: `bioetl-control-plane-v1` authored text panels. Other shipped
 dashboards keep their current markup until the same pass lands there.
+Enforcement: `tests/integration/test_dashboard_operator_readability.py`.

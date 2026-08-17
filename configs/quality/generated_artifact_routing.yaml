@@ -706,6 +706,14 @@ routes:
       - reports/observability/grafana/live-panel-audit.json
     notes: Live datasource/frame audit output stays under reports/observability/grafana.
 
+  - id: grafana-panel-fill-error-report
+    generator: scripts/ops/observability/grafana/check_dashboard_panel_fill.py
+    output_kind: working_report
+    commit_policy: working_output
+    outputs:
+      - reports/observability/grafana/panel-fill-errors.json
+    notes: Per-panel Grafana /api/ds/query fill-error report stays under reports/.
+
   - id: grafana-dashboard-release-gate-report
     generator: scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py
     output_kind: working_report

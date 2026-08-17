@@ -51,6 +51,15 @@ also: `docs/reports/dashboard-ux-checks/2026-07-28.md`; canonical baseline:
   body (`design-system.md` §9.1).
 - Pipeline Diagnostics no longer treats SCRAPING as proof of delivery health.
 
+## Operator readability gate (2026-08-17)
+
+- Required check on every `grafana/dashboards/**` change:
+  `pytest tests/integration/test_dashboard_operator_readability.py`.
+- Covers inline copy roles (design-system §9.1), operator clock
+  `YYYY-MM-DD HH:MM` (`time:YYYY-MM-DD HH:mm`), and first-window no-scroll
+  declarations. Wired in CI Tests and the `check-dashboard-operator-readability`
+  pre-push hook.
+
 ## Dashboard clock format (2026-08-17)
 
 - Operator-facing date/time on shipped dashboards is `YYYY-MM-DD HH:mm`

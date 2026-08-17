@@ -25,7 +25,12 @@ description: "Edit, render, validate, or debug BioETL Grafana dashboards and the
 4. Do not start `docker-compose.monitoring.yml` unless the user explicitly
    requested dashboard/render work.
 5. Validate JSON, queries, and relevant dashboard tests; update operator docs
-   when shipped behaviour changes.
+   when shipped behaviour changes. Any change under `grafana/dashboards/`
+   MUST run
+   `pytest tests/integration/test_dashboard_operator_readability.py`
+   (copy roles, `YYYY-MM-DD HH:MM` clock, first-window no-scroll). This is
+   also the CI Tests → Dashboard semantic release policy gate and the
+   `check-dashboard-operator-readability` pre-push hook.
 
 ## Debug empty Run Explorer index
 

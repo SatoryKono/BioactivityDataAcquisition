@@ -89,6 +89,10 @@ Verify changes against the current normative stack:
 
 - locate related config validators, contract tests, and docs references
 - run the narrowest relevant config/contract validation commands
+- when any file under `grafana/dashboards/**` changes, MUST run
+  `pytest tests/integration/test_dashboard_operator_readability.py`
+  (inline copy roles, operator clock `YYYY-MM-DD HH:MM`, first-window
+  no-scroll). Do not treat dashboard JSON edits as done without this gate.
 
 ### MCP runtime settings and local-only surfaces
 
