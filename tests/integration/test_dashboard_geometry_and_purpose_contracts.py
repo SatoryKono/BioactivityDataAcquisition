@@ -10,7 +10,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Geometry & purpose regression locks for shipped Grafana dashboards.
 
-Enforced: DASH-LAYOUT-003/004, DASH-FIT-001/002/003, DASH-COPY-003/004/005/006/007,
+Enforced: DASH-LAYOUT-003/004, DASH-FIT-001/002/003/004/005, DASH-COPY-003/004/005/006/007,
 DASH-PERF-003.
 """
 
@@ -326,8 +326,7 @@ def test_first_window_verdict_cards_state_interpretation() -> None:
 def test_always_visible_nonrow_stack_fits_viewport() -> None:
     """DASH-FIT-001: max(y+h) of root non-row panels <= VIEWPORT_ROWS.
 
-    Collapsed row headers may sit on/after the fold. The Provider 9104
-    straddle remains a governed exception (same allowlist as DASH-FIT-002).
+    Collapsed row headers may sit on/after the fold.
     """
     assert VIEWPORT_ROWS is not None
     violations: list[str] = []
@@ -403,10 +402,10 @@ def test_allowlists_carry_governance_metadata() -> None:
         ("straddle", STRADDLE_ALLOWLIST),
         ("min_height", MIN_HEIGHT_ALLOWLIST),
     ):
-        assert allowlist, f"{name} allowlist must not be empty while exceptions exist"
         for key, meta in allowlist.items():
             for field in ("owner", "rationale", "retire_when"):
                 assert meta.get(field, "").strip(), f"{name} {key} missing {field}"
+    assert MIN_HEIGHT_ALLOWLIST, "min_height still has a governed exception"
 
 
 # --- DASH-DENSITY-002: scalar information density (values/area) -------------

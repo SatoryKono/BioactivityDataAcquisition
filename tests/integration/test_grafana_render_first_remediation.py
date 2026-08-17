@@ -536,11 +536,12 @@ def test_audit_followup_action_first_layout_contracts() -> None:
     provider_rows = [
         panel for panel in provider.get("panels", []) if panel.get("type") == "row"
     ]
-    assert [panel.get("id") for panel in provider_rows] == [91, 9404, 9405]
+    assert [panel.get("id") for panel in provider_rows] == [9105, 91, 9404, 9405]
     assert [panel.get("gridPos", {}).get("y") for panel in provider_rows] == [
+        18,
+        19,
         20,
         21,
-        22,
     ]
     assert all(panel.get("collapsed") is True for panel in provider_rows)
     for panel_id in (9101, 9102, 9103):
@@ -649,6 +650,15 @@ def test_incident_ranked_suspects_hides_merged_activation_fields() -> None:
     exclude = organize.get("options", {}).get("excludeByName", {})
 
     assert len(suspects.get("targets", [])) == 3
+    assert all(
+        "topk(5," in str(target.get("expr") or "")
+        for target in suspects.get("targets", [])
+    )
+    assert any(
+        transform.get("id") == "limit"
+        and (transform.get("options") or {}).get("limitField") == 5
+        for transform in suspects.get("transformations", [])
+    )
     for field in (
         "Time",
         "Time 1",

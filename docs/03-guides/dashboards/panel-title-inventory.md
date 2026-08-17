@@ -134,6 +134,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-overview-v2.json | 9600 | Inspect Alerts |
 | bioetl-overview-v2.json | 9601 | Review Active Alerts |
 | bioetl-overview-v2.json | 9030 | Domain Status Tracks |
+| bioetl-overview-v2.json | 9031 | Review All Domain Status |
 | bioetl-overview-v2.json | 9018 | Track Runtime Blockers |
 | bioetl-overview-v2.json | 9019 | Track Data Quality Status |
 | bioetl-overview-v2.json | 9020 | Track Gold Lifecycle |
@@ -160,6 +161,10 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-provider-health-v2.json | 9102 | Inspect Non-OK Providers |
 | bioetl-provider-health-v2.json | 9103 | Inspect Top Provider Causes |
 | bioetl-provider-health-v2.json | 9104 | Monitor Telemetry Presence |
+| bioetl-provider-health-v2.json | 9105 | Inspect Full Fleet Evidence |
+| bioetl-provider-health-v2.json | 9111 | Inspect Full Fleet Severity |
+| bioetl-provider-health-v2.json | 9112 | Inspect Full Non-OK Providers |
+| bioetl-provider-health-v2.json | 9113 | Inspect Full Provider Causes |
 | bioetl-provider-health-v2.json | 91 | Selected Provider Details |
 | bioetl-provider-health-v2.json | 106 | Track Health Failures & Degradation |
 | bioetl-provider-health-v2.json | 107 | Track Failure Share |
@@ -185,10 +190,13 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-provider-health-v2.json | 9403 | Inspect Processed Records |
 | bioetl-run-explorer-v1.json | 1000 | Navigate Dashboards |
 | bioetl-run-explorer-v1.json | 1 | Understand Run Scope |
-| bioetl-run-explorer-v1.json | 3010 | Inspect Recent Runs (last 20) |
+| bioetl-run-explorer-v1.json | 3010 | Inspect Recent Runs (last 4) |
 | bioetl-run-explorer-v1.json | 9402 | Inspect Run Identity |
 | bioetl-run-explorer-v1.json | 9403 | Inspect Processed Records |
 | bioetl-run-explorer-v1.json | 3099 | Selected Run Details |
+| bioetl-run-explorer-v1.json | 3021 | Inspect Recent Runs (last 20) |
+| bioetl-run-explorer-v1.json | 3022 | Inspect Full Run Identity |
+| bioetl-run-explorer-v1.json | 3023 | Inspect Full Processed Records |
 | bioetl-run-explorer-v1.json | 3011 | Inspect Stage Funnel |
 | bioetl-run-explorer-v1.json | 3012 | Inspect Top Run Reasons |
 | bioetl-run-explorer-v1.json | 3015 | Inspect Reconciliation |

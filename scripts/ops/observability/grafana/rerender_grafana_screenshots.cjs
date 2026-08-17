@@ -10,6 +10,20 @@ const MIN_AUTHORED_BODY_FONT_PX = 16;
 const MIN_AUTHORED_TITLE_FONT_PX = (14 * 4) / 3;
 const MIN_GRAFANA_BODY_FONT_PX = 12;
 const MIN_GRAFANA_TITLE_FONT_PX = 14;
+const FIRST_WINDOW_Y = 18;
+const CONTAINMENT_TOLERANCE_PX = 2;
+const FIRST_WINDOW_CONTAINMENT_TYPES = Object.freeze(["text", "stat", "table"]);
+const PANEL_CONTENT_SCROLLER_SELECTORS = Object.freeze([
+  '[data-testid="data-testid scrollbar viewport"]',
+  '[data-testid="scrollbar viewport"]',
+  ".scrollbar-view",
+  '[class*="table-scroller"]',
+  '[class*="tableScroller"]',
+  '[data-testid="data-testid panel content"]',
+  '[data-testid="panel content"]',
+  '[data-testid$="panel content"]',
+  ".panel-content",
+]);
 
 function zoomScale(zoomPercent) {
   return zoomPercent / 100;
@@ -425,6 +439,211 @@ function pngEvidence(buffer) {
   };
 }
 
+function isFirstWindowPanel(panel, firstWindowY = FIRST_WINDOW_Y) {
+  if (!panel || typeof panel !== "object" || panel.type === "row") {
+    return false;
+  }
+  const y = panel.gridPos && panel.gridPos.y;
+  return Number.isInteger(y) && y < firstWindowY;
+}
+
+function selectFirstWindowPanels(panels, firstWindowY = FIRST_WINDOW_Y) {
+  return (Array.isArray(panels) ? panels : []).filter((panel) =>
+    isFirstWindowPanel(panel, firstWindowY),
+  );
+}
+
+function summarizeFirstWindowPanel(panel) {
+  const grid = panel.gridPos && typeof panel.gridPos === "object" ? panel.gridPos : {};
+  const pluginOptions =
+    panel.options && typeof panel.options === "object" ? panel.options : {};
+  const displayTitle =
+    typeof pluginOptions.bioetlDisplayTitle === "string"
+      ? pluginOptions.bioetlDisplayTitle.trim()
+      : "";
+  return {
+    id: panel.id,
+    title:
+      displayTitle ||
+      (typeof panel.title === "string" ? panel.title.trim() : ""),
+    type: typeof panel.type === "string" ? panel.type : "unknown",
+    gridPos: {
+      x: Number.isInteger(grid.x) ? grid.x : 0,
+      y: Number.isInteger(grid.y) ? grid.y : 0,
+      w: Number.isInteger(grid.w) ? grid.w : 0,
+      h: Number.isInteger(grid.h) ? grid.h : 0,
+    },
+  };
+}
+
+function evaluatePanelContainment(measurement, policy = {}) {
+  const tolerance = Number.isFinite(policy.tolerancePx)
+    ? policy.tolerancePx
+    : CONTAINMENT_TOLERANCE_PX;
+  const firstWindowY = Number.isInteger(policy.firstWindowY)
+    ? policy.firstWindowY
+    : FIRST_WINDOW_Y;
+  const containedTypes = new Set(
+    Array.isArray(policy.containedTypes)
+      ? policy.containedTypes
+      : FIRST_WINDOW_CONTAINMENT_TYPES,
+  );
+  const horizontalAllow = new Set(
+    Array.isArray(policy.horizontalScrollAllowlist)
+      ? policy.horizontalScrollAllowlist
+      : [],
+  );
+  const firstWindowOverflowAllow = new Set(
+    Array.isArray(policy.firstWindowOverflowAllowlist)
+      ? policy.firstWindowOverflowAllowlist
+      : [],
+  );
+
+  if (!measurement || typeof measurement !== "object") {
+    return {
+      status: "error",
+      reasons: ["missing-measurement"],
+      verticalOverflow: true,
+      horizontalOverflow: true,
+    };
+  }
+
+  if (measurement.missing) {
+    return {
+      ...measurement,
+      verticalOverflow: true,
+      horizontalOverflow: true,
+      status: "error",
+      reasons: ["missing-panel"],
+    };
+  }
+
+  const y = measurement.gridPos && measurement.gridPos.y;
+  const firstWindow = Number.isInteger(y) && y < firstWindowY;
+  const clientHeight = Number(measurement.clientHeight);
+  const scrollHeight = Number(measurement.scrollHeight);
+  const clientWidth = Number(measurement.clientWidth);
+  const scrollWidth = Number(measurement.scrollWidth);
+  const verticalOverflow =
+    Number.isFinite(scrollHeight) &&
+    Number.isFinite(clientHeight) &&
+    scrollHeight > clientHeight + tolerance;
+  const horizontalOverflow =
+    Number.isFinite(scrollWidth) &&
+    Number.isFinite(clientWidth) &&
+    scrollWidth > clientWidth + tolerance;
+  const allowKey = `${measurement.uid || ""}:${measurement.id}`;
+  const reasons = [];
+
+  if (firstWindow && containedTypes.has(measurement.type)) {
+    if (firstWindowOverflowAllow.has(allowKey) || firstWindowOverflowAllow.has(String(measurement.id))) {
+      reasons.push("forbidden-first-window-overflow-exception");
+    }
+    if (verticalOverflow) {
+      reasons.push("vertical-overflow");
+    }
+    if (horizontalOverflow) {
+      reasons.push("horizontal-overflow");
+    }
+  } else if (horizontalOverflow) {
+    if (
+      !horizontalAllow.has(allowKey) &&
+      !horizontalAllow.has(String(measurement.id))
+    ) {
+      reasons.push("horizontal-overflow");
+    }
+  }
+
+  return {
+    ...measurement,
+    verticalOverflow,
+    horizontalOverflow,
+    status: reasons.length > 0 ? "error" : "ok",
+    reasons,
+  };
+}
+
+function evaluateContainmentResults(measurements, policy = {}) {
+  const panels = (Array.isArray(measurements) ? measurements : []).map((item) =>
+    evaluatePanelContainment(item, policy),
+  );
+  const overflowCount = panels.filter((item) => item.status !== "ok").length;
+  return {
+    status: overflowCount === 0 ? "ok" : "error",
+    firstWindowY: Number.isInteger(policy.firstWindowY)
+      ? policy.firstWindowY
+      : FIRST_WINDOW_Y,
+    tolerancePx: Number.isFinite(policy.tolerancePx)
+      ? policy.tolerancePx
+      : CONTAINMENT_TOLERANCE_PX,
+    panels,
+    overflowCount,
+  };
+}
+
+function validateContainmentManifest(payload) {
+  if (!payload || typeof payload !== "object") {
+    return { status: "error", reasons: ["missing-payload"] };
+  }
+  const reasons = [];
+  if (!["ok", "error"].includes(payload.status)) {
+    reasons.push("invalid-status");
+  }
+  if (!Number.isInteger(payload.firstWindowY) || payload.firstWindowY !== FIRST_WINDOW_Y) {
+    reasons.push("invalid-first-window-y");
+  }
+  if (
+    !Number.isFinite(payload.tolerancePx) ||
+    payload.tolerancePx > CONTAINMENT_TOLERANCE_PX
+  ) {
+    reasons.push("invalid-tolerance");
+  }
+  if (!Array.isArray(payload.panels)) {
+    reasons.push("missing-panels");
+    return { status: "error", reasons };
+  }
+  const required = [
+    "uid",
+    "id",
+    "title",
+    "type",
+    "gridPos",
+    "clientHeight",
+    "scrollHeight",
+    "clientWidth",
+    "scrollWidth",
+    "verticalOverflow",
+    "horizontalOverflow",
+    "status",
+  ];
+  for (const [index, panel] of payload.panels.entries()) {
+    if (!panel || typeof panel !== "object") {
+      reasons.push(`panel-${index}-invalid`);
+      continue;
+    }
+    for (const field of required) {
+      if (!(field in panel)) {
+        reasons.push(`panel-${index}-missing-${field}`);
+      }
+    }
+    if (panel.gridPos && typeof panel.gridPos === "object") {
+      for (const axis of ["x", "y", "w", "h"]) {
+        if (!Number.isInteger(panel.gridPos[axis])) {
+          reasons.push(`panel-${index}-grid-${axis}`);
+        }
+      }
+    }
+  }
+  if (
+    Number.isInteger(payload.overflowCount) &&
+    payload.overflowCount !==
+      payload.panels.filter((panel) => panel && panel.status !== "ok").length
+  ) {
+    reasons.push("overflow-count-mismatch");
+  }
+  return { status: reasons.length > 0 ? "error" : "ok", reasons };
+}
+
 function requiredNonRowPanels(panels, includeCollapsedRows) {
   const required = [];
   for (const panel of panels) {
@@ -452,6 +671,7 @@ function requiredNonRowPanels(panels, includeCollapsedRows) {
         displayTitle ||
         (typeof panel.title === "string" ? panel.title.trim() : ""),
       type: typeof panel.type === "string" ? panel.type : "unknown",
+      gridPos: summarizeFirstWindowPanel(panel).gridPos,
     });
   }
   return required;
@@ -550,6 +770,7 @@ function dashboardEntryFromPayload(payload) {
     url: `/d/${uid}/${slug}`,
     file: `${uid}.png`,
     requiredPanels,
+    firstWindowPanels: selectFirstWindowPanels(panels).map(summarizeFirstWindowPanel),
     requiredTerminalPanelIds:
       uid === "bioetl-silver-reject-explorer" ? [13] : [],
     collapsedRowTitles,
@@ -1316,6 +1537,98 @@ async function collectLayoutGeometry(page, dashboard) {
   }, { requiredPanels: dashboard.requiredPanels, physicalViewport: CONFIG.viewport });
 }
 
+async function collectPanelContainment(page, dashboard) {
+  const raw = await page.evaluate(
+    ({ panels, uid, scrollerSelectors }) => {
+      const panelElement = (panel) =>
+        document.querySelector(`[data-panelid="${panel.id}"]`) ||
+        document.querySelector(`[data-viz-panel-key="panel-${panel.id}"]`) ||
+        document.querySelector(`[data-griditem-key="grid-item-${panel.id}"]`);
+      const visible = (element) => {
+        if (!(element instanceof Element)) return false;
+        const rect = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        return (
+          rect.width > 0 &&
+          rect.height > 0 &&
+          style.display !== "none" &&
+          style.visibility !== "hidden"
+        );
+      };
+      const resolveScroller = (container) => {
+        const content =
+          container.querySelector('[data-testid="data-testid panel content"]') ||
+          container.querySelector('[data-testid="panel content"]') ||
+          container.querySelector('[data-testid$="panel content"]') ||
+          container.querySelector(".panel-content") ||
+          container;
+        const candidates = [];
+        for (const selector of scrollerSelectors) {
+          for (const element of content.querySelectorAll(selector)) {
+            if (visible(element)) {
+              candidates.push({ element, selector });
+            }
+          }
+        }
+        if (visible(content)) {
+          candidates.push({ element: content, selector: "panel-content" });
+        }
+        let best = { element: content, selector: "panel-content", delta: -1 };
+        for (const candidate of candidates) {
+          const delta = Math.max(
+            candidate.element.scrollHeight - candidate.element.clientHeight,
+            candidate.element.scrollWidth - candidate.element.clientWidth,
+          );
+          if (delta > best.delta) {
+            best = { ...candidate, delta };
+          }
+        }
+        return best;
+      };
+
+      return panels.map((panel) => {
+        const container = panelElement(panel);
+        if (!container || !visible(container)) {
+          return {
+            uid,
+            id: panel.id,
+            title: panel.title,
+            type: panel.type,
+            gridPos: panel.gridPos,
+            missing: true,
+          };
+        }
+        const scroller = resolveScroller(container);
+        return {
+          uid,
+          id: panel.id,
+          title: panel.title,
+          type: panel.type,
+          gridPos: panel.gridPos,
+          missing: false,
+          scroller: scroller.selector,
+          clientHeight: scroller.element.clientHeight,
+          scrollHeight: scroller.element.scrollHeight,
+          clientWidth: scroller.element.clientWidth,
+          scrollWidth: scroller.element.scrollWidth,
+        };
+      });
+    },
+    {
+      panels: dashboard.firstWindowPanels || [],
+      uid: dashboard.uid,
+      scrollerSelectors: PANEL_CONTENT_SCROLLER_SELECTORS,
+    },
+  );
+  return evaluateContainmentResults(raw, {
+    firstWindowY: FIRST_WINDOW_Y,
+    tolerancePx: CONTAINMENT_TOLERANCE_PX,
+    containedTypes: FIRST_WINDOW_CONTAINMENT_TYPES,
+    firstWindowOverflowAllowlist: [],
+    horizontalScrollAllowlist: [],
+  });
+}
+
 async function collectNavigationValidation(page) {
   return page.evaluate(() => {
     const panel =
@@ -1679,6 +1992,24 @@ async function renderDashboard(page, dashboard, index, total) {
       `Layout validation failed for ${dashboard.uid}: documentWidth=${dashboard.layoutGeometry.documentWidth} layoutViewportWidth=${dashboard.layoutGeometry.layoutViewport.width}`,
     );
   }
+  dashboard.panelContainment = await collectPanelContainment(page, dashboard);
+  const containmentSchema = validateContainmentManifest(dashboard.panelContainment);
+  if (containmentSchema.status !== "ok") {
+    throw new Error(
+      `Panel containment schema failed for ${dashboard.uid}: ${containmentSchema.reasons.join(", ")}`,
+    );
+  }
+  if (dashboard.panelContainment.status !== "ok") {
+    const overflow = dashboard.panelContainment.panels
+      .filter((panel) => panel.status !== "ok")
+      .map(
+        (panel) =>
+          `panel ${panel.id} (${panel.title || panel.type}): ${(panel.reasons || []).join(",")}`,
+      );
+    throw new Error(
+      `Panel containment failed for ${dashboard.uid}: ${overflow.join("; ")}`,
+    );
+  }
   dashboard.typographyValidation = await collectTypographyValidation(page, dashboard);
   if (dashboard.typographyValidation.status !== "ok") {
     throw new Error(
@@ -1885,7 +2216,16 @@ if (require.main === module) {
 
 module.exports = {
   classifyPanelTerminalEvidence,
+  evaluateContainmentResults,
+  evaluatePanelContainment,
+  isFirstWindowPanel,
   layoutViewportForZoom,
   physicalViewportFromLayout,
   pngEvidence,
+  selectFirstWindowPanels,
+  summarizeFirstWindowPanel,
+  validateContainmentManifest,
+  CONTAINMENT_TOLERANCE_PX,
+  FIRST_WINDOW_CONTAINMENT_TYPES,
+  FIRST_WINDOW_Y,
 };

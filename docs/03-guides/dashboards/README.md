@@ -75,7 +75,8 @@ guides. Do not treat `v3.0/` as a shipping contract.
   selector/navigation contract и UX evidence links для последних JSON-изменений.
 - `contracts/dashboard-inventory.yaml` — machine-readable mapping shipped dashboards к panels, data sources и contract metadata для drift detection и audibility.
 - `contracts/layout-budgets.yaml` — named fold constants (`FIRST_WINDOW_Y` vs
-  `FIRST_LOAD_Y_MAX`), min-heights, answer-panel map, and governed allowlists.
+  `FIRST_LOAD_Y_MAX`), min-heights, first-window row caps, containment
+  tolerance, answer-panel map, and governed allowlists.
 
 Правило routing:
 
