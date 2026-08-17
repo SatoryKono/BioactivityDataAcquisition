@@ -1380,7 +1380,6 @@
     ],
     "bioetl_dq_current_reason": [
       "docs/03-guides/dashboards/design-system.md",
-      "docs/03-guides/dashboards/metrics-readiness-matrix.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md",
       "docs/03-guides/dashboards/panels/bioetl-incident-v1-panels.md",
@@ -1392,7 +1391,6 @@
     "bioetl_dq_current_status": [
       "docs/03-guides/dashboards/README.md",
       "docs/03-guides/dashboards/design-system.md",
-      "docs/03-guides/dashboards/metrics-readiness-matrix.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md",
       "docs/03-guides/dashboards/verdict-ontology.md",
@@ -1604,7 +1602,6 @@
     ],
     "bioetl_l0_input_status_selected": [
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
-      "docs/03-guides/dashboards/metrics-readiness-matrix.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "docs/04-reference/observability/alerting-guide.md",
@@ -1619,7 +1616,6 @@
       "docs/03-guides/dashboards/contracts/navigation-links.yaml",
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "docs/03-guides/dashboards/design-system.md",
-      "docs/03-guides/dashboards/metrics-readiness-matrix.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "grafana/README.md",
@@ -1627,7 +1623,6 @@
     ],
     "bioetl_l0_status": [
       "docs/03-guides/dashboards/design-system.md",
-      "docs/03-guides/dashboards/metrics-readiness-matrix.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-incident-v1-panels.md",
       "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
@@ -1806,6 +1801,7 @@
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/alerting-guide.md",
       "docs/04-reference/observability/metrics-catalog.md",
+      "docs/05-operations/runbooks/observability-checklist.md",
       "docs/05-operations/sli-slo-baseline.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-overview-v2.json",
@@ -1889,7 +1885,6 @@
     "bioetl_provider_current_cause": [
       "docs/03-guides/dashboards/dashboard-v2-updates.md",
       "docs/03-guides/dashboards/design-system.md",
-      "docs/03-guides/dashboards/metrics-readiness-matrix.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-incident-v1-panels.md",
       "docs/03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md",
@@ -1901,7 +1896,6 @@
       "docs/03-guides/dashboards/README.md",
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "docs/03-guides/dashboards/design-system.md",
-      "docs/03-guides/dashboards/metrics-readiness-matrix.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md",
       "docs/03-guides/dashboards/variables-guide.md",
@@ -2143,7 +2137,6 @@
     ],
     "bioetl_runtime_current_blocker_reason": [
       "docs/03-guides/dashboards/design-system.md",
-      "docs/03-guides/dashboards/metrics-readiness-matrix.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-incident-v1-panels.md",
       "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
@@ -2163,7 +2156,6 @@
     "bioetl_runtime_current_status_trusted": [
       "docs/03-guides/dashboards/README.md",
       "docs/03-guides/dashboards/design-system.md",
-      "docs/03-guides/dashboards/metrics-readiness-matrix.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
       "docs/03-guides/dashboards/verdict-ontology.md",
@@ -3645,6 +3637,18 @@
       "approved_max_series=500",
       "runtime_emitter_count=3",
       "label_keys=provider"
+    ],
+    "bioetl_pipeline_runs_total": [
+      "observed_series_count=0",
+      "approved_max_series=0",
+      "runtime_emitter_count=3",
+      "label_keys=pipeline,run_type,status"
+    ],
+    "bioetl_records_processed_total": [
+      "observed_series_count=0",
+      "approved_max_series=0",
+      "runtime_emitter_count=3",
+      "label_keys=pipeline,run_type,stage"
     ]
   },
   "runtime_cardinality_observed_series": {
@@ -4141,9 +4145,14 @@
   "runtime_cardinality_review_candidates": [
     "bioetl_checkpoint_load_events_total",
     "bioetl_checkpoint_saved_at_seconds",
-    "bioetl_health_check_latency_seconds"
+    "bioetl_health_check_latency_seconds",
+    "bioetl_pipeline_runs_total",
+    "bioetl_records_processed_total"
   ],
-  "runtime_cardinality_review_required": [],
+  "runtime_cardinality_review_required": [
+    "bioetl_pipeline_runs_total",
+    "bioetl_records_processed_total"
+  ],
   "runtime_cardinality_reviewed": [
     "bioetl_checkpoint_load_events_total",
     "bioetl_checkpoint_saved_at_seconds",
@@ -4404,6 +4413,7 @@
       "src/bioetl/application/observability/observer_health_mixin.py"
     ],
     "bioetl_health_check_success_total": [
+      "src/bioetl/application/observability/current_metrics_rehydrate.py",
       "src/bioetl/infrastructure/adapters/_health_check_observability.py"
     ],
     "bioetl_http_request_duration_seconds": [
@@ -4476,6 +4486,7 @@
     ],
     "bioetl_pipeline_runs_total": [
       "src/bioetl/application/composite/_lifecycle_observer_event_metrics.py",
+      "src/bioetl/application/observability/current_metrics_rehydrate.py",
       "src/bioetl/application/observability/observer_context_mixin.py"
     ],
     "bioetl_pipeline_stage_expected": [
@@ -4517,7 +4528,8 @@
     ],
     "bioetl_records_processed_total": [
       "src/bioetl/application/core/_quarantine_metrics_support.py",
-      "src/bioetl/application/core/batch_metrics.py"
+      "src/bioetl/application/core/batch_metrics.py",
+      "src/bioetl/application/observability/current_metrics_rehydrate.py"
     ],
     "bioetl_replay_drift_events_total": [
       "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py"
@@ -4580,6 +4592,7 @@
       "src/bioetl/application/observability/pipeline_metrics.py"
     ],
     "bioetl_stage_records_total": [
+      "src/bioetl/application/observability/current_metrics_rehydrate.py",
       "src/bioetl/application/observability/pipeline_metrics.py"
     ],
     "bioetl_storage_optimization_total": [
