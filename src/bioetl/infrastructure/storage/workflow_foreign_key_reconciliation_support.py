@@ -13,6 +13,46 @@ from bioetl.domain.ports import (
 
 NULL_TOKEN = object()
 
+_RUN_IDENTITY_COLUMNS = (
+    "_run_id",
+    "run_id",
+    "composite_run_id",
+    "_composite_run_id",
+    "workflow_run_id",
+)
+
+
+def filter_source_rows_to_current_run(
+    rows: list[dict[str, object]],
+    *,
+    source_scope: str,
+    source_run_ids: tuple[str, ...],
+) -> tuple[list[dict[str, object]], str]:
+    """Restrict source rows to the current run when CLI --limit scoped delete_orphans.
+
+    Returns (rows, disposition) where disposition is:
+    - ``all_current``: no extra filter
+    - ``current_run``: filtered to matching run ids
+    - ``blocked``: current_run requested but rows cannot be scoped safely
+    """
+    if source_scope != "current_run":
+        return rows, "all_current"
+    if not rows:
+        return rows, "current_run"
+    if not source_run_ids:
+        return [], "blocked"
+    allowed = {item.strip() for item in source_run_ids if item.strip()}
+    column = None
+    for candidate in _RUN_IDENTITY_COLUMNS:
+        if any(candidate in row for row in rows):
+            column = candidate
+            break
+    if column is None:
+        return [], "blocked"
+    scoped = [row for row in rows if str(row.get(column) or "").strip() in allowed]
+    return scoped, "current_run"
+
+
 
 class ReconciliationLoggingHost(Protocol):
     """Adapter logging surface required by completion helpers."""

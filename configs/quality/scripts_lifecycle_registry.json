@@ -1399,6 +1399,12 @@
       "owner": "@bioetl-observability",
       "review_by": "2026-09-30"
     },
+    "scripts/ops/observability/relayout_trust_review_panels.py": {
+      "decision": "legacy_manual_utility",
+      "next_step": "Retain as the bounded Trust Review* hoist helper used during first-window layout work; remove it after the Trust first-screen layout is frozen or fold it into a governed dashboard command.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-09-30"
+    },
     "scripts/ops/observability/trust_validation_fixture_materialization.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the fixture-materialization implementation imported by the bounded Trust validation generator; keep it supporting and route operator execution through generate_trust_validation_fixtures.py.",

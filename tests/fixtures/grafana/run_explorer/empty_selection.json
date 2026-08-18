@@ -1,0 +1,22 @@
+{
+  "contract": "run_explorer_request_snapshot_v1",
+  "endpoint": "identity_table",
+  "expected_empty_copy_tokens": [
+    "SELECT RUN",
+    "VALID EMPTY"
+  ],
+  "method": "GET",
+  "panel_id": 9402,
+  "response_state": "select_run",
+  "root_selector": "rows",
+  "scenario": "empty_selection",
+  "selectors": {
+    "pipeline": "chembl_assay",
+    "run_id": "-",
+    "run_type": "backfill",
+    "workflow": "chembl_baseline"
+  },
+  "title": "Inspect Run Identity",
+  "url": "/ops/control-plane/identity-table?pipeline=chembl_assay&run_type=backfill&run_id=-",
+  "url_template": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+}

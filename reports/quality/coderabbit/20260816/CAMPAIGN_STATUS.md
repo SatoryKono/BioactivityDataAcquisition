@@ -8,7 +8,7 @@
 | Closeout checkout | `origin/main@3809e140aa514d89d4e26eb69b637a83938b04b6` |
 | Matrix leaves | 88 |
 | Exact cover assignment | `coverage_ok=True` |
-| Review terminal status | **partial** (55 ok / 3 too_many_files / 2 rate_limit / 1 connection_error / 27 never started) |
+| Review terminal status | **partial** (57 ok / 3 too_many_files / 3 rate_limit / 25 never started) |
 | Status UTC | `2026-08-18` |
 | Campaign status | `retry_in_progress_service_residual` |
 | CodeRabbit CLI | `0.7.3` |
@@ -18,17 +18,17 @@
 
 | Status | Count |
 | --- | ---: |
-| ok | 55 |
+| ok | 57 |
 | too_many_files | 3 |
-| rate_limit | 2 |
-| connection_error | 1 |
-| never started | 27 |
+| rate_limit | 3 |
+| never started | 25 |
 | Total matrix leaves | 88 |
 
-Retry 2026-08-18 landed `S-R-scripts-docs` as terminal `ok`. Live blocker is
-CodeRabbit Pro included-review quota (`S15c-tests-residual-03` `waitTime=1620s`).
-300-file leaves still need the runner `--committed` + omit-`-c` path; they were
-not re-attempted after the quota stop.
+Retry 2026-08-18 landed `S-R-scripts-docs`, `S-R-scripts-residual`, and
+`S-R-scripts-schema` as terminal `ok`. Live blocker is CodeRabbit Pro
+included-review quota (`S-R-reports-quality-03` `waitTime=1500s`). 300-file
+leaves still need a retry with omit-`-c`; they were not re-attempted after
+the quota stop.
 
 Never-started leaves are listed in `progress.json` (absent keys) and `01-scope-matrix.md`.
 
