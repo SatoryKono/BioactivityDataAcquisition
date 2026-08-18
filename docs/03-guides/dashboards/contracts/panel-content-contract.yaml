@@ -1082,15 +1082,15 @@ dashboards:
         required_copy:
         - evidence_scope
         - no_data
-        required_columns:
-        - parameter
-        - value
         fixture_cases:
         - populated
         - valid_empty
         - backend_error
         render_profiles:
         - full_dark
+        required_columns:
+        - parameter
+        - value
       '9403':
         title: Review Processed Records
         role: accounting_table
@@ -1104,12 +1104,6 @@ dashboards:
         required_copy:
         - evidence_scope
         - no_data
-        required_columns:
-        - parameter
-        - value
-        - percentage
-        hidden_columns:
-        - row_status
         fixture_cases:
         - populated
         - valid_empty
@@ -1117,6 +1111,12 @@ dashboards:
         - backend_error
         render_profiles:
         - full_dark
+        required_columns:
+        - parameter
+        - value
+        - percentage
+        hidden_columns:
+        - row_status
       '9404':
         title: Review Identity Anchors
         role: evidence_table
@@ -2017,7 +2017,7 @@ dashboards:
         role: causes_table
         tier: 2
         scope: current
-        evidence_source: ops_http
+        evidence_source: prometheus
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -2294,7 +2294,7 @@ dashboards:
         role: forensic_table
         tier: 1
         scope: time_range
-        evidence_source: ops_http
+        evidence_source: prometheus
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -2440,7 +2440,7 @@ dashboards:
         - first_window_dark
         - first_window_light
       '1000':
-        title: Navigate Dashboards
+        title: ''
         role: navigation
         tier: 2
         scope: global
@@ -3334,7 +3334,7 @@ dashboards:
         role: severity_table
         tier: 1
         scope: current
-        evidence_source: ops_http
+        evidence_source: prometheus
         state_model:
         - OK
         - WARN
@@ -3378,7 +3378,7 @@ dashboards:
         role: causes_table
         tier: 1
         scope: current
-        evidence_source: ops_http
+        evidence_source: prometheus
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -3867,9 +3867,6 @@ dashboards:
         required_copy:
         - evidence_scope
         - no_data
-        required_columns:
-        - parameter
-        - value
         fixture_cases:
         - populated
         - valid_empty
@@ -3877,6 +3874,9 @@ dashboards:
         render_profiles:
         - first_window_dark
         - first_window_light
+        required_columns:
+        - parameter
+        - value
       '9403':
         title: Inspect Processed Records
         role: accounting_table
@@ -3890,12 +3890,6 @@ dashboards:
         required_copy:
         - evidence_scope
         - no_data
-        required_columns:
-        - parameter
-        - value
-        - percentage
-        hidden_columns:
-        - row_status
         fixture_cases:
         - populated
         - valid_empty
@@ -3904,6 +3898,12 @@ dashboards:
         render_profiles:
         - first_window_dark
         - first_window_light
+        required_columns:
+        - parameter
+        - value
+        - percentage
+        hidden_columns:
+        - row_status
   bioetl-runtime:
     panels:
       '4':

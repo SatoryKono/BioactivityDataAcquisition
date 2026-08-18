@@ -124,14 +124,23 @@ def _contract_panel_records(
     return records, errors
 
 
-def _dashboard_panel_records() -> dict[tuple[str, str], dict[str, object]]:
+def _dashboard_panel_records() -> tuple[
+    dict[tuple[str, str], dict[str, object]], list[str]
+]:
     records: dict[tuple[str, str], dict[str, object]] = {}
+    errors: list[str] = []
     for dashboard_path in sorted(DASHBOARD_DIR.glob("*.json")):
-        payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
+        try:
+            payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            errors.append(f"{dashboard_path}: invalid JSON: {exc}")
+            continue
         if not isinstance(payload, dict):
+            errors.append(f"{dashboard_path}: expected JSON object")
             continue
         uid = payload.get("uid")
         if not isinstance(uid, str):
+            errors.append(f"{dashboard_path}: missing dashboard uid")
             continue
         for panel in _iter_panels(payload):
             panel_id = panel.get("id")
@@ -139,9 +148,10 @@ def _dashboard_panel_records() -> dict[tuple[str, str], dict[str, object]]:
             if isinstance(panel_id, int) and isinstance(title, str):
                 key = (uid, str(panel_id))
                 if key in records:
-                    raise ValueError(f"duplicate shipped panel id: {uid}:{panel_id}")
+                    errors.append(f"duplicate shipped panel id: {uid}:{panel_id}")
+                    continue
                 records[key] = panel
-    return records
+    return records, errors
 
 
 def _iter_panels(payload: dict[str, object]) -> list[dict[str, object]]:
@@ -161,10 +171,19 @@ def _iter_panels(payload: dict[str, object]) -> list[dict[str, object]]:
     return panels
 
 
+def _is_navigation_bus_panel(key: tuple[str, str], panel: dict[str, object]) -> bool:
+    return (
+        key == ("bioetl-overview-v2", "1000")
+        and panel.get("type") == "text"
+        and panel.get("title") == ""
+    )
+
+
 def _validate_panel_record(
     *,
     key: tuple[str, str],
     record: dict[str, object],
+    dashboard_panel: dict[str, object],
     expected_title: str,
     allowed_roles: set[str],
     allowed_scopes: set[str],
@@ -175,12 +194,14 @@ def _validate_panel_record(
     prefix = f"panel-content-contract.yaml:{uid}:{panel_id}"
     errors: list[str] = []
     role = record.get("role")
-    if record.get("title") != expected_title and not (
-        role == "navigation" and expected_title == ""
+    if record.get("title") != expected_title and not _is_navigation_bus_panel(
+        key, dashboard_panel
     ):
         errors.append(f"{prefix}: title does not match dashboard JSON")
     if role not in allowed_roles:
         errors.append(f"{prefix}: role must be one of the declared allowed_roles")
+    if _is_navigation_bus_panel(key, dashboard_panel) and role != "navigation":
+        errors.append(f"{prefix}: navigation bus must declare navigation role")
     tier = record.get("tier")
     if not isinstance(tier, int) or tier not in {1, 2, 3, 4}:
         errors.append(f"{prefix}: tier must be an integer from 1 to 4")
@@ -249,7 +270,8 @@ def validate_content_contract(
     contract_records, contract_errors = _contract_panel_records(contract)
     errors.extend(inventory_errors)
     errors.extend(contract_errors)
-    dashboard_records = _dashboard_panel_records()
+    dashboard_records, dashboard_errors = _dashboard_panel_records()
+    errors.extend(dashboard_errors)
     for key, inventory_panel in sorted(inventory_records.items()):
         dashboard_panel = dashboard_records.get(key)
         if dashboard_panel is None:
@@ -257,10 +279,9 @@ def validate_content_contract(
                 f"dashboard-inventory.yaml:{key[0]}:{key[1]}: panel is missing"
             )
             continue
-        inventory_role = contract_records.get(key, {}).get("role")
-        if dashboard_panel.get("title") != inventory_panel.get("title") and not (
-            inventory_role == "navigation" and dashboard_panel.get("title") == ""
-        ):
+        if dashboard_panel.get("title") != inventory_panel.get(
+            "title"
+        ) and not _is_navigation_bus_panel(key, dashboard_panel):
             errors.append(
                 f"dashboard-inventory.yaml:{key[0]}:{key[1]}: title does not match dashboard JSON"
             )
@@ -277,6 +298,7 @@ def validate_content_contract(
             _validate_panel_record(
                 key=key,
                 record=record,
+                dashboard_panel=dashboard_panel,
                 expected_title=title,
                 allowed_roles=allowed_roles,
                 allowed_scopes=allowed_scopes,

@@ -62,6 +62,8 @@ _RENDER_PROFILES = ["full_dark", "full_light", "zoom_200"]
 
 def _iter_panels(payload: dict[str, object]) -> Iterable[dict[str, object]]:
     raw_panels = payload.get("panels", [])
+    if not isinstance(raw_panels, list):
+        return
     stack = [panel for panel in raw_panels if isinstance(panel, dict)]
     while stack:
         panel = stack.pop(0)
@@ -72,7 +74,10 @@ def _iter_panels(payload: dict[str, object]) -> Iterable[dict[str, object]]:
 
 
 def _is_ops_http(panel: dict[str, object]) -> bool:
-    for target in panel.get("targets", []):
+    targets = panel.get("targets", [])
+    if not isinstance(targets, list):
+        targets = []
+    for target in targets:
         if not isinstance(target, dict):
             continue
         url = target.get("url")
@@ -97,7 +102,10 @@ def _uses_prometheus(panel: dict[str, object]) -> bool:
         return True
     if isinstance(datasource, dict) and datasource.get("type") == "prometheus":
         return True
-    for target in panel.get("targets", []):
+    targets = panel.get("targets", [])
+    if not isinstance(targets, list):
+        targets = []
+    for target in targets:
         if not isinstance(target, dict):
             continue
         if isinstance(target.get("expr"), str) and target["expr"].strip():
@@ -252,9 +260,13 @@ def _full_contract(existing: dict[str, object]) -> dict[str, object]:
                 continue
             generated = _record(panel)
             previous = previous_panels.get(str(panel_id))
-            panels[str(panel_id)] = (
-                previous if isinstance(previous, dict) else generated
-            )
+            if isinstance(previous, dict):
+                merged = {**generated, **previous}
+                merged["title"] = generated["title"]
+                merged["evidence_source"] = generated["evidence_source"]
+                panels[str(panel_id)] = merged
+            else:
+                panels[str(panel_id)] = generated
         dashboards[uid] = {
             "panels": dict(sorted(panels.items(), key=lambda item: int(item[0])))
         }
@@ -279,8 +291,8 @@ def main(argv: list[str] | None = None) -> int:
     rendered = yaml.safe_dump(
         generated, allow_unicode=True, sort_keys=False, width=1000
     )
-    current = args.contract.read_text(encoding="utf-8")
     if args.check:
+        current = args.contract.read_text(encoding="utf-8")
         if current != rendered:
             print(f"dashboard content contract is stale: {args.contract}")
             return 1

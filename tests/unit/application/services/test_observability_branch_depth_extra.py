@@ -63,24 +63,9 @@ class _CountingMetrics:
         self.calls.append((name, dict(labels or {})))
 
 
-class _CountingTracer:
-    """Minimal TracingPort-like fake that records error attributes."""
-
-    def __init__(self, *, is_noop: bool = False) -> None:
-        self.is_noop = is_noop
-        self.events: list[dict[str, object]] = []
-
-    def record_error(self, *, run_id: str, reason: str) -> None:
-        self.events.append({"run_id": run_id, "reason": reason})
-
-
-def test_trace_identifier_failure_paths_emit_metric_and_trace_signals() -> None:
-    metrics = _CountingMetrics()
-    tracer = _CountingTracer(is_noop=True)
-
-    assert trace_identifiers_available(tracer) is False
-    metrics.inc("bioetl_trace_identifiers_disabled_total", {"reason": "noop_tracer"})
-    tracer.record_error(run_id="run-a", reason="trace_identifiers_disabled")
+def test_trace_identifier_helpers_preserve_disabled_and_empty_paths() -> None:
+    assert trace_identifiers_available(SimpleNamespace(is_noop=True)) is False
+    assert trace_identifiers_available(SimpleNamespace(is_noop=False)) is True
 
     assert (
         build_trace_ids(
@@ -90,15 +75,6 @@ def test_trace_identifier_failure_paths_emit_metric_and_trace_signals() -> None:
         )
         == []
     )
-    metrics.inc("bioetl_trace_ids_empty_total", {"reason": "no_explicit_or_generated"})
-
-    assert metrics.calls == [
-        ("bioetl_trace_identifiers_disabled_total", {"reason": "noop_tracer"}),
-        ("bioetl_trace_ids_empty_total", {"reason": "no_explicit_or_generated"}),
-    ]
-    assert tracer.events == [
-        {"run_id": "run-a", "reason": "trace_identifiers_disabled"}
-    ]
 
 
 def test_resolve_primary_composite_and_run_type_edge_branches() -> None:

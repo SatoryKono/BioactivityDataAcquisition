@@ -171,12 +171,10 @@ def test_manifest_accepts_and_validates_optional_fixture_state_provenance(
     _bind_provenance(tmp_path, manifest)
     capture_context = manifest["capture_context"]
     assert isinstance(capture_context, dict)
-    capture_context["fixture_state"] = {
-        "contract": "dashboard_state_fixture_v1",
-        "path": "tests/fixtures/grafana/dashboard_states/INDEX.json",
-        "sha256": "f" * 64,
-        "cases": ["backend_error", "ok", "telemetry_absent"],
-    }
+    fixture_state = rerender._fixture_state_evidence_from_path(
+        rerender._repo_root() / "tests/fixtures/grafana/dashboard_states/INDEX.json"
+    )
+    capture_context["fixture_state"] = fixture_state
 
     dashboards = manifest["dashboards"]
     assert isinstance(dashboards, list)
@@ -194,9 +192,7 @@ def test_manifest_accepts_and_validates_optional_fixture_state_provenance(
         is None
     )
 
-    fixture_state = capture_context["fixture_state"]
-    assert isinstance(fixture_state, dict)
-    fixture_state["sha256"] = "invalid"
+    capture_context["fixture_state"] = {**fixture_state, "sha256": "f" * 64}
     assert (
         preflight._validate_manifest_provenance(
             manifest,
@@ -204,7 +200,32 @@ def test_manifest_accepts_and_validates_optional_fixture_state_provenance(
             dashboards=indexed_dashboards,
             screenshot_dir=tmp_path,
         )
-        == "render manifest fixture-state SHA is invalid"
+        == "render manifest fixture-state SHA does not match registry"
+    )
+
+    capture_context["fixture_state"] = {**fixture_state, "cases": ["ok"]}
+    assert (
+        preflight._validate_manifest_provenance(
+            manifest,
+            expected_uids=("bioetl-runtime",),
+            dashboards=indexed_dashboards,
+            screenshot_dir=tmp_path,
+        )
+        == "render manifest fixture-state cases do not match registry"
+    )
+
+    capture_context["fixture_state"] = {
+        **fixture_state,
+        "path": "../outside/INDEX.json",
+    }
+    assert (
+        preflight._validate_manifest_provenance(
+            manifest,
+            expected_uids=("bioetl-runtime",),
+            dashboards=indexed_dashboards,
+            screenshot_dir=tmp_path,
+        )
+        == "render manifest fixture-state path is outside repository root"
     )
 
 

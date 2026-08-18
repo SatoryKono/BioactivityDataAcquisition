@@ -59,9 +59,11 @@ def _content_contract_by_panel(
 ) -> dict[tuple[str, str], dict[str, object]]:
     """Вернуть content contract records, индексированные по UID и panel ID."""
     payload = yaml.safe_load(content_contract_path.read_text(encoding="utf-8"))
-    dashboards = payload.get("dashboards", {}) if isinstance(payload, dict) else {}
+    if not isinstance(payload, dict):
+        raise ValueError(f"{content_contract_path}: expected YAML mapping")
+    dashboards = payload.get("dashboards", {})
     if not isinstance(dashboards, dict):
-        return {}
+        raise ValueError(f"{content_contract_path}: dashboards must be a mapping")
     records: dict[tuple[str, str], dict[str, object]] = {}
     for uid, dashboard in dashboards.items():
         if not isinstance(uid, str) or not isinstance(dashboard, dict):
@@ -75,10 +77,14 @@ def _content_contract_by_panel(
     return records
 
 
-def _joined_contract_list(value: object) -> str:
+def _contract_string_list(value: object) -> list[str]:
     if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
-        return ""
-    return ",".join(value)
+        return []
+    return list(value)
+
+
+def _joined_contract_list(value: object) -> str:
+    return ",".join(_contract_string_list(value))
 
 
 def _iter_panels(payload: dict[str, object]) -> list[dict[str, object]]:
@@ -182,29 +188,23 @@ def _collect_rows() -> list[dict[str, str]]:
                         if content_record is not None
                         else ""
                     ),
-                    "fixture_case_count": (
-                        str(
-                            len(
-                                _joined_contract_list(
-                                    content_record.get("fixture_cases")
-                                ).split(",")
+                    "fixture_case_count": str(
+                        len(
+                            _contract_string_list(
+                                content_record.get("fixture_cases")
+                                if content_record is not None
+                                else None
                             )
                         )
-                        if content_record is not None
-                        and _joined_contract_list(content_record.get("fixture_cases"))
-                        else "0"
                     ),
-                    "render_profile_count": (
-                        str(
-                            len(
-                                _joined_contract_list(
-                                    content_record.get("render_profiles")
-                                ).split(",")
+                    "render_profile_count": str(
+                        len(
+                            _contract_string_list(
+                                content_record.get("render_profiles")
+                                if content_record is not None
+                                else None
                             )
                         )
-                        if content_record is not None
-                        and _joined_contract_list(content_record.get("render_profiles"))
-                        else "0"
                     ),
                     "datasource_kind": _datasource_kind(panel),
                     "uses_run_id_in_promql": str("run_id=" in expr_blob),
@@ -242,7 +242,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
 
-    rows = _collect_rows()
+    try:
+        rows = _collect_rows()
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        print(f"panel audit matrix error: {exc}", file=sys.stderr)
+        return 1
     # Includes collapsed row headers. Expected count is the YAML inventory sum.
     if args.check and len(rows) != EXPECTED_PANEL_COUNT:
         print(

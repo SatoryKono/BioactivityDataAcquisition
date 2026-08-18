@@ -483,11 +483,12 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
     assert len(control_rows) >= 5
     assert all(panel.get("collapsed") is True for panel in control_rows)
     assert all(panel.get("panels") for panel in control_rows)
-    assert [panel["gridPos"]["y"] for panel in control_rows] == list(
-        range(14, 14 + len(control_rows))
-    )
     first_row_y = min(panel["gridPos"]["y"] for panel in control_rows)
-    assert first_row_y >= 0
+    # layout-budgets.yaml:first_window_y — collapsed rows start below the visual fold.
+    assert first_row_y == 18
+    assert [panel["gridPos"]["y"] for panel in control_rows] == list(
+        range(first_row_y, first_row_y + len(control_rows))
+    )
 
     overview = _load("bioetl-overview-v2.json")
     domain_tracks = _panel(overview, 9030)
