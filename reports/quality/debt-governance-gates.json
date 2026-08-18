@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "869f84e5ff8ee369f398158a4ffde6e9899f70da9f2ef3997b638bedb7bd9477",
-      "limit": "869f84e5ff8ee369f398158a4ffde6e9899f70da9f2ef3997b638bedb7bd9477",
+      "current": "08c64655a1884ebb36d7b775e863f95b994ec6b637fc4e18a0f358a7df2b42e3",
+      "limit": "08c64655a1884ebb36d7b775e863f95b994ec6b637fc4e18a0f358a7df2b42e3",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -57,13 +57,13 @@
     {
       "current": {
         "source_module_count": 2427,
-        "source_tree_sha256": "869f84e5ff8ee369f398158a4ffde6e9899f70da9f2ef3997b638bedb7bd9477",
+        "source_tree_sha256": "08c64655a1884ebb36d7b775e863f95b994ec6b637fc4e18a0f358a7df2b42e3",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2427,
-        "source_tree_sha256": "869f84e5ff8ee369f398158a4ffde6e9899f70da9f2ef3997b638bedb7bd9477",
+        "source_tree_sha256": "08c64655a1884ebb36d7b775e863f95b994ec6b637fc4e18a0f358a7df2b42e3",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -92,13 +92,13 @@
       "status": "pass"
     },
     {
-      "current": 0,
+      "current": 2,
       "limit": 0,
       "metric": "budget_warnings",
       "name": "hotspot_family_baseline_budget_warnings",
       "remediation": "Reduce hotspot-family metrics to stay at or below reviewed budgets.",
       "source_artifact": "reports/quality/hotspot-family-baseline.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": 0,
@@ -458,18 +458,20 @@
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 0,
-    "pass": 45,
+    "fail": 1,
+    "pass": 44,
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 9.41,
+    "architecture_quality_scorecard_integral_score": 9.26,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
-    "fail_count": 0,
-    "failing_gates": [],
+    "fail_count": 1,
+    "failing_gates": [
+      "hotspot_family_baseline_budget_warnings"
+    ],
     "gate_count": 45,
-    "pass_count": 45,
-    "release_gate_status": "passing",
+    "pass_count": 44,
+    "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []
   }
