@@ -42,7 +42,7 @@ max_body_lines: 120
 | `TASK` | выбрать одну карточку ниже и довести до closeout |
 | `MODE` | `implement` \| `closeout` \| `audit` |
 | `LANGUAGE` | `ru` |
-| `MONITORING` | `false` |
+| `MONITORING` | `false` (audit-rf card default is `true`) |
 | `WORK_BRANCH` | `fix/dash-v5-<slug>` (never main) |
 
 ## Куда идти
