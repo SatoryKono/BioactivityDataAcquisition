@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: "2026-04-23"
+  Last verified: "2026-08-18"
 
 ______________________________________________________________________
 
@@ -184,7 +184,11 @@ scope used by the control-plane dashboard:
 | `/ops/control-plane/failure-reasons` | fixed failure categories `api`, `dq`, `schema`, `storage`, `network`, `validation`, `unknown` |
 
 The shared response contract is
-`control_plane_validation_evidence_v1`. Validation rows use only `OK`,
+`control_plane_validation_evidence_v1`. The `trust` object also exposes
+additive first-screen fields `reasons_text` (newline-joined top-3 reason
+codes) and `reasons_truncated`; the `reasons` array remains canonical and
+the contract version is not bumped. `UNKNOWN`/`INCOMPLETE` are not OK.
+Validation rows use only `OK`,
 `WARNING`, `ERROR`, or `UNKNOWN` and a stable machine reason. Missing legacy
 checkpoint checksum evidence is `UNKNOWN` with
 `checkpoint_checksum_not_recorded`; successful parsing must not be presented as
