@@ -79,8 +79,8 @@ def collect_traceability_degradation(traceability: dict[str, object]) -> list[st
         degraded.append("correlation_anchor_gaps")
     if has_composite_correlation_policy_gap(traceability):
         degraded.append("composite_correlation_policy_gap")
-    if not traceability.get("trace_links_available", False):
-        degraded.append("trace_links_unavailable")
+    if not traceability.get("trace_identifiers_available", False):
+        degraded.append("trace_identifiers_unavailable")
     return degraded
 
 

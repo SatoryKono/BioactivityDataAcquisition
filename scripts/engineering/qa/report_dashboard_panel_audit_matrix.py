@@ -21,6 +21,14 @@ INVENTORY_CONTRACT = (
     / "contracts"
     / "dashboard-inventory.yaml"
 )
+CONTENT_CONTRACT = (
+    ROOT
+    / "docs"
+    / "03-guides"
+    / "dashboards"
+    / "contracts"
+    / "panel-content-contract.yaml"
+)
 HTTP_DATASOURCE_HINTS = (
     "quarantine explorer",
     "bioetl ops http",
@@ -44,6 +52,39 @@ def expected_panel_count_from_inventory(
 
 # Derived from dashboard-inventory.yaml. Do not hardcode a stale baseline.
 EXPECTED_PANEL_COUNT = expected_panel_count_from_inventory()
+
+
+def _content_contract_by_panel(
+    content_contract_path: Path = CONTENT_CONTRACT,
+) -> dict[tuple[str, str], dict[str, object]]:
+    """Вернуть content contract records, индексированные по UID и panel ID."""
+    payload = yaml.safe_load(content_contract_path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"{content_contract_path}: expected YAML mapping")
+    dashboards = payload.get("dashboards", {})
+    if not isinstance(dashboards, dict):
+        raise ValueError(f"{content_contract_path}: dashboards must be a mapping")
+    records: dict[tuple[str, str], dict[str, object]] = {}
+    for uid, dashboard in dashboards.items():
+        if not isinstance(uid, str) or not isinstance(dashboard, dict):
+            continue
+        panels = dashboard.get("panels", {})
+        if not isinstance(panels, dict):
+            continue
+        for panel_id, record in panels.items():
+            if isinstance(panel_id, str) and isinstance(record, dict):
+                records[(uid, panel_id)] = record
+    return records
+
+
+def _contract_string_list(value: object) -> list[str]:
+    if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+        return []
+    return list(value)
+
+
+def _joined_contract_list(value: object) -> str:
+    return ",".join(_contract_string_list(value))
 
 
 def _iter_panels(payload: dict[str, object]) -> list[dict[str, object]]:
@@ -104,6 +145,7 @@ def _panel_exprs(panel: dict[str, object]) -> list[str]:
 
 def _collect_rows() -> list[dict[str, str]]:
     rows: list[dict[str, str]] = []
+    content_contract = _content_contract_by_panel()
     for dashboard_path in sorted(DASHBOARD_DIR.glob("*.json")):
         if dashboard_path.name.endswith(".backup"):
             continue
@@ -115,6 +157,7 @@ def _collect_rows() -> list[dict[str, str]]:
             title = str(panel.get("title", ""))
             exprs = _panel_exprs(panel)
             expr_blob = " | ".join(exprs)
+            content_record = content_contract.get((uid, panel_id))
             rows.append(
                 {
                     "dashboard_uid": uid,
@@ -122,6 +165,47 @@ def _collect_rows() -> list[dict[str, str]]:
                     "panel_id": panel_id,
                     "panel_title": title,
                     "panel_type": panel_type,
+                    "content_contract_status": (
+                        "covered" if content_record is not None else "missing"
+                    ),
+                    "content_role": (
+                        str(content_record.get("role", ""))
+                        if content_record is not None
+                        else ""
+                    ),
+                    "content_tier": (
+                        str(content_record.get("tier", ""))
+                        if content_record is not None
+                        else ""
+                    ),
+                    "content_scope": (
+                        str(content_record.get("scope", ""))
+                        if content_record is not None
+                        else ""
+                    ),
+                    "content_state_model": (
+                        _joined_contract_list(content_record.get("state_model"))
+                        if content_record is not None
+                        else ""
+                    ),
+                    "fixture_case_count": str(
+                        len(
+                            _contract_string_list(
+                                content_record.get("fixture_cases")
+                                if content_record is not None
+                                else None
+                            )
+                        )
+                    ),
+                    "render_profile_count": str(
+                        len(
+                            _contract_string_list(
+                                content_record.get("render_profiles")
+                                if content_record is not None
+                                else None
+                            )
+                        )
+                    ),
                     "datasource_kind": _datasource_kind(panel),
                     "uses_run_id_in_promql": str("run_id=" in expr_blob),
                     "uses_run_type_in_promql": str(
@@ -158,7 +242,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
 
-    rows = _collect_rows()
+    try:
+        rows = _collect_rows()
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        print(f"panel audit matrix error: {exc}", file=sys.stderr)
+        return 1
     # Includes collapsed row headers. Expected count is the YAML inventory sum.
     if args.check and len(rows) != EXPECTED_PANEL_COUNT:
         print(

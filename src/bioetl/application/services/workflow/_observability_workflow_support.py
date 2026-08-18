@@ -25,7 +25,7 @@ from bioetl.application.services.workflow._observability_workflow_status_support
 )
 from bioetl.application.services.workflow._observability_workflow_traceability_support import (
     build_traceability_section,
-    trace_links_enabled,
+    trace_identifiers_enabled,
 )
 
 __all__ = [
@@ -39,5 +39,5 @@ __all__ = [
     "resolve_pipeline_name",
     "resolve_quarantine_summary_for_run",
     "resolve_run_manifest",
-    "trace_links_enabled",
+    "trace_identifiers_enabled",
 ]

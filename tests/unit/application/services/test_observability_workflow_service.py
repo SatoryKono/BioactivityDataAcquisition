@@ -30,7 +30,6 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from unittest import mock
 from types import SimpleNamespace
-from urllib.parse import parse_qs, urlsplit
 
 import pytest
 
@@ -597,8 +596,7 @@ async def test_inspect_run_dossier_aggregates_forensic_sections() -> None:
         "lineage_fragment_ids": ["fragment-1"],
         "artifact_refs": ["manifest://manifest-1", "ledger://manifest-1"],
         "trace_ids": ["abc"],
-        "trace_urls": mock.ANY,
-        "trace_links_available": True,
+        "trace_identifiers_available": True,
         "persistence_profile": {
             "attained_profile": "forensic_grade",
             "required_profile": "forensic_grade",
@@ -606,23 +604,6 @@ async def test_inspect_run_dossier_aggregates_forensic_sections() -> None:
         },
         "replay_capability": "exact_replay_supported",
     }
-    trace_url = result.traceability["trace_urls"][0]
-    parsed_query = parse_qs(urlsplit(trace_url).query)
-    assert trace_url.startswith("/a/grafana-exploretraces-app/?")
-    assert parsed_query["datasource"] == ["tempo"]
-    assert parsed_query["queryType"] == ["traceqlSearch"]
-    expected_from = datetime(2026, 4, 10, 9, 55, tzinfo=UTC)
-    expected_to = datetime(2026, 4, 10, 10, 5, tzinfo=UTC)
-    assert parsed_query["from"] == [str(int(expected_from.timestamp() * 1000))]
-    assert parsed_query["to"] == [str(int(expected_to.timestamp() * 1000))]
-    assert parsed_query["query"] == [
-        (
-            '{ span."bioetl.run_id" = "abc" && '
-            'span."bioetl.pipeline" = "chembl_activity" && '
-            'span."bioetl.run_type" = "incremental" && '
-            'span."bioetl.provider" = "chembl" }'
-        )
-    ]
     assert result.quarantine_summary == {
         "total": 3,
         "silver_filter_rejects": {
@@ -691,9 +672,8 @@ async def test_inspect_run_dossier_degrades_traceability_when_tracing_is_noop() 
     result = await service.inspect_run_dossier("abc", audit_limit=7)
 
     assert result.traceability["trace_ids"] == []
-    assert result.traceability["trace_urls"] == []
-    assert result.traceability["trace_links_available"] is False
-    assert "trace_links_unavailable" in result.degraded_evidence
+    assert result.traceability["trace_identifiers_available"] is False
+    assert "trace_identifiers_unavailable" in result.degraded_evidence
     assert "critical_dossier_evidence_gap" in result.degraded_evidence
     assert result.status["operational_success"] is False
     assert result.status["operational_success_criteria"] == {
@@ -812,14 +792,4 @@ async def test_inspect_run_dossier_surfaces_composite_projection() -> None:
 
     assert result.traceability["composite_projection"] == projection
     assert result.traceability["trace_ids"] == ["abc", "composite-run-1"]
-    trace_url = result.traceability["trace_urls"][0]
-    parsed_query = parse_qs(urlsplit(trace_url).query)
-    assert parsed_query["query"] == [
-        (
-            '{ span."bioetl.run_id" = "abc" && '
-            'span."bioetl.pipeline" = "composite_activity" && '
-            'span."bioetl.run_type" = "incremental" && '
-            'span."bioetl.provider" = "chembl" && '
-            'span."bioetl.composite_run_id" = "composite-run-1" }'
-        )
-    ]
+    assert result.traceability["trace_identifiers_available"] is True

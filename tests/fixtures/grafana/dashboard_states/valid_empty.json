@@ -1,0 +1,9 @@
+{
+  "contract": "dashboard_state_fixture_v1",
+  "case": "valid_empty",
+  "classification": "VALID_EMPTY",
+  "http_status": 200,
+  "rows": [],
+  "message": "The query completed for the selected scope and found no matching rows.",
+  "next_action": "Adjust scope only if the selected run or time range should contain evidence."
+}

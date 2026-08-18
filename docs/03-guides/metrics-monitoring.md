@@ -67,10 +67,10 @@ BioETL предоставляет комплексную систему observab
 - `bioetl diagnostics metrics` — canonical operator summary для этих
   auto-managed behaviors.
 - `bioetl diagnostics run --run-id <run-id>` показывает bounded trace
-  correlation identifiers и contextual Grafana trace links, когда tracing
-  backend включён; при `NoOpTracing` / tracing-disabled окружении команда
-  сохраняет стабильный no-link fallback (`trace_ids: []`, `trace_urls: []`,
-  `trace_links_available: False`).
+  correlation identifiers, когда tracing включён. Команда не формирует URLs
+  конкретного tracing UI; при `NoOpTracing` / tracing-disabled окружении она
+  сохраняет стабильный нейтральный fallback (`trace_ids: []`,
+  `trace_identifiers_available: False`).
 
 #### Observability verification QA
 

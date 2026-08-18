@@ -31,7 +31,7 @@ from bioetl.application.services.workflow._observability_workflow_support import
     resolve_pipeline_name,
     resolve_quarantine_summary_for_run,
     resolve_run_manifest,
-    trace_links_enabled,
+    trace_identifiers_enabled,
 )
 
 if TYPE_CHECKING:
@@ -93,7 +93,7 @@ async def inspect_run_dossier(
         run_manifest=run_manifest,
         lineage=lineage,
         audit=audit,
-        trace_links_enabled=trace_links_enabled(tracer),
+        trace_identifiers_enabled=trace_identifiers_enabled(tracer),
     )
     missing_evidence, degraded_evidence = classify_evidence_status(
         run_manifest=run_manifest,

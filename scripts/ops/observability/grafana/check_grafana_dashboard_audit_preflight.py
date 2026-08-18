@@ -54,6 +54,7 @@ DEFAULT_TIMEOUT_SECONDS = 5.0
 DEFAULT_PLAYWRIGHT_PROBE_TIMEOUT_SECONDS = 60.0
 DEFAULT_SCREENSHOT_DIR = Path("reports/observability/grafana/screenshots")
 _DASHBOARD_DIR = Path("grafana/dashboards")
+_REPO_ROOT = Path(__file__).resolve().parents[4]
 
 # Distinct non-zero outcomes so operators can separate readiness classes.
 EXIT_OK = 0
@@ -723,6 +724,32 @@ def _validate_screenshot_evidence(
     return None
 
 
+def _validate_fixture_state_provenance(fixture_state: object) -> str | None:
+    if not isinstance(fixture_state, dict):
+        return "render manifest fixture-state provenance must be a mapping"
+    fixture_path = fixture_state.get("path")
+    if not isinstance(fixture_path, str) or not fixture_path:
+        return "render manifest fixture-state path is missing"
+    relative_path = Path(fixture_path)
+    if relative_path.is_absolute() or ".." in relative_path.parts:
+        return "render manifest fixture-state path is outside repository root"
+    try:
+        expected = rerender_screenshots._fixture_state_evidence_from_path(
+            _REPO_ROOT / relative_path
+        )
+    except ValueError as exc:
+        return f"render manifest fixture-state registry is invalid: {exc}"
+    if fixture_state.get("contract") != expected["contract"]:
+        return "render manifest fixture-state contract is invalid"
+    if fixture_state.get("sha256") != expected["sha256"]:
+        return "render manifest fixture-state SHA does not match registry"
+    if fixture_state.get("cases") != expected["cases"]:
+        return "render manifest fixture-state cases do not match registry"
+    if fixture_state.get("fixtures") != expected["fixtures"]:
+        return "render manifest fixture-state fixture evidence does not match registry"
+    return None
+
+
 def _validate_manifest_provenance(
     manifest: dict[str, object],
     *,
@@ -842,6 +869,11 @@ def _validate_manifest_provenance(
         row_state.get("expand_collapsed_rows"), bool
     ):
         return "render manifest lacks row-state provenance"
+    fixture_state = capture_context.get("fixture_state")
+    if fixture_state is not None:
+        fixture_error = _validate_fixture_state_provenance(fixture_state)
+        if fixture_error is not None:
+            return fixture_error
 
     requested = manifest.get("requested")
     if not isinstance(requested, dict):

@@ -12,16 +12,9 @@ from bioetl.application.services.export_lineage.audit_inspection_service import 
 )
 from bioetl.application.services.workflow._observability_trace_support import (
     build_trace_ids,
-    build_trace_urls,
-    resolve_manifest_provider,
-    resolve_manifest_run_type,
-    resolve_primary_composite_run_id,
 )
 from bioetl.application.services.workflow._observability_trace_support import (
-    trace_links_enabled as _trace_links_enabled,
-)
-from bioetl.application.services.workflow._observability_workflow_lookup_support import (
-    resolve_pipeline_name,
+    trace_identifiers_available as _trace_identifiers_available,
 )
 
 if TYPE_CHECKING:
@@ -30,8 +23,9 @@ if TYPE_CHECKING:
     )
 
 
-def trace_links_enabled(tracer: object | None) -> bool:
-    return _trace_links_enabled(tracer)
+def trace_identifiers_enabled(tracer: object | None) -> bool:
+    """Проверить, что tracer может предоставить correlation identifiers."""
+    return _trace_identifiers_available(tracer)
 
 
 def build_traceability_section(
@@ -40,30 +34,15 @@ def build_traceability_section(
     run_manifest: RunManifestInspectionResult | None,
     lineage: LineageRunExplanationResult | None,
     audit: AuditInspectionResult,
-    trace_links_enabled: bool,
+    trace_identifiers_enabled: bool,
 ) -> dict[str, object]:
+    """Собрать нейтральные traceability facts для workflow dossier."""
     diagnostics = run_manifest.diagnostics if run_manifest is not None else {}
     identity_graph = run_manifest.identity_graph if run_manifest is not None else {}
-    provider = resolve_manifest_provider(run_manifest)
-    run_type = resolve_manifest_run_type(run_manifest)
-    composite_run_id = resolve_primary_composite_run_id(diagnostics)
-    trace_urls = (
-        build_trace_urls(
-            run_id=run_id,
-            pipeline_name=resolve_pipeline_name(run_manifest),
-            provider=provider,
-            run_type=run_type,
-            composite_run_id=composite_run_id,
-            run_manifest=run_manifest,
-            audit=audit,
-        )
-        if trace_links_enabled
-        else []
-    )
     trace_ids = build_trace_ids(
         run_id=run_id,
         diagnostics=diagnostics,
-        trace_links_available=bool(trace_urls),
+        trace_identifiers_available=trace_identifiers_enabled,
     )
     traceability = {
         "audit_entries_count": len(audit.entries),
@@ -73,8 +52,7 @@ def build_traceability_section(
         or (list(lineage.fragment_ids) if lineage is not None else []),
         "artifact_refs": diagnostics.get("artifact_refs", []),
         "trace_ids": trace_ids,
-        "trace_urls": trace_urls,
-        "trace_links_available": bool(trace_urls),
+        "trace_identifiers_available": bool(trace_ids),
         "persistence_profile": diagnostics.get("persistence_profile"),
         "replay_capability": identity_graph.get("replay_capability")
         or diagnostics.get("replay_capability"),

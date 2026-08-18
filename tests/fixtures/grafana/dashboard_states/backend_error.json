@@ -1,0 +1,9 @@
+{
+  "contract": "dashboard_state_fixture_v1",
+  "case": "backend_error",
+  "classification": "ERROR",
+  "http_status": 503,
+  "rows": [],
+  "message": "The datasource or backend failed; no business verdict can be inferred.",
+  "next_action": "Verify BioETL Ops HTTP health before retrying the query."
+}

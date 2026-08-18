@@ -85,6 +85,8 @@ class RenderConfig:
     browser_zoom: int = 100
     variables: tuple[tuple[str, str], ...] = ()
     navigation_only: bool = False
+    fixture_manifest: Path | None = None
+    fixture_state: dict[str, object] | None = None
 
 
 @dataclass(frozen=True)
@@ -114,6 +116,22 @@ def _sha256_file(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _sha256_bytes(value: bytes) -> str:
+    return hashlib.sha256(value).hexdigest()
+
+
+def _repo_relative_path(path: Path, *, root: Path) -> tuple[Path, str]:
+    resolved_root = root.resolve()
+    resolved_path = path.resolve()
+    try:
+        relative = resolved_path.relative_to(resolved_root)
+    except ValueError as exc:
+        raise ValueError(
+            f"fixture path must stay under repository root: {path}"
+        ) from exc
+    return resolved_path, str(relative)
 
 
 def _git_capture_source() -> dict[str, object]:
@@ -174,6 +192,79 @@ def _capture_id(config: RenderConfig) -> str:
         raw = f"{timestamp}-{uuid.uuid4().hex[:12]}"
     cleaned = _CAPTURE_ID_RE.sub("-", raw).strip("-._")
     return cleaned or uuid.uuid4().hex
+
+
+def _fixture_state_evidence_from_path(fixture_manifest: Path) -> dict[str, object]:
+    """Build immutable fixture provenance from one validated registry snapshot."""
+    root = _repo_root()
+    registry_path, registry_relative_path = _repo_relative_path(
+        fixture_manifest, root=root
+    )
+    try:
+        registry_bytes = registry_path.read_bytes()
+        payload = json.loads(registry_bytes.decode("utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ValueError(f"fixture manifest is unreadable: {fixture_manifest}") from exc
+    if not isinstance(payload, dict):
+        raise ValueError("fixture manifest must contain a JSON object")
+    contract = payload.get("contract")
+    cases = payload.get("cases")
+    if contract != "dashboard_state_fixture_v1" or not isinstance(cases, dict):
+        raise ValueError(
+            "fixture manifest must use dashboard_state_fixture_v1 with a cases mapping"
+        )
+    fixtures: dict[str, dict[str, str]] = {}
+    for case, metadata in sorted(cases.items()):
+        if not isinstance(case, str) or not isinstance(metadata, dict):
+            raise ValueError("fixture manifest cases must map strings to metadata")
+        fixture_path_value = metadata.get("path")
+        if not isinstance(fixture_path_value, str) or not fixture_path_value:
+            raise ValueError(f"fixture case {case!r} lacks a repository-relative path")
+        fixture_path, fixture_relative_path = _repo_relative_path(
+            root / fixture_path_value, root=root
+        )
+        try:
+            fixture_bytes = fixture_path.read_bytes()
+            fixture_payload = json.loads(fixture_bytes.decode("utf-8"))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise ValueError(
+                f"fixture case {case!r} is unreadable: {fixture_path}"
+            ) from exc
+        if not isinstance(fixture_payload, dict):
+            raise ValueError(f"fixture case {case!r} must contain a JSON object")
+        if (
+            fixture_payload.get("contract") != contract
+            or fixture_payload.get("case") != case
+        ):
+            raise ValueError(f"fixture case {case!r} contract or case value is invalid")
+        if fixture_payload.get("classification") != metadata.get("classification"):
+            raise ValueError(
+                f"fixture case {case!r} classification does not match registry"
+            )
+        if fixture_payload.get("http_status") != metadata.get("http_status"):
+            raise ValueError(
+                f"fixture case {case!r} HTTP status does not match registry"
+            )
+        fixtures[case] = {
+            "path": fixture_relative_path,
+            "sha256": _sha256_bytes(fixture_bytes),
+        }
+    return {
+        "contract": contract,
+        "path": registry_relative_path,
+        "sha256": _sha256_bytes(registry_bytes),
+        "cases": sorted(fixtures),
+        "fixtures": fixtures,
+    }
+
+
+def _fixture_state_evidence(config: RenderConfig) -> dict[str, object] | None:
+    """Вернуть проверяемую provenance привязку optional fixture registry."""
+    if config.fixture_manifest is None:
+        return None
+    return config.fixture_state or _fixture_state_evidence_from_path(
+        config.fixture_manifest
+    )
 
 
 def _write_exclusive_text(path: Path, text: str) -> None:
@@ -248,6 +339,7 @@ def _finalize_manifest(config: RenderConfig, manifest: dict[str, Any]) -> None:
                 "row_state": {
                     "expand_collapsed_rows": config.expand_collapsed_rows,
                 },
+                "fixture_state": _fixture_state_evidence(config),
             },
             "dashboards": dashboards,
         }
@@ -441,6 +533,15 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
         default=DEFAULT_OUTPUT_DIR,
         help="Screenshot output directory.",
     )
+    parser.add_argument(
+        "--fixture-manifest",
+        type=Path,
+        default=None,
+        help=(
+            "Optional dashboard_state_fixture_v1 INDEX.json bound into render "
+            "evidence provenance without changing the default live render path."
+        ),
+    )
     parser.add_argument("--width", type=int, default=DEFAULT_WIDTH)
     parser.add_argument("--height", type=int, default=DEFAULT_HEIGHT)
     parser.add_argument(
@@ -533,6 +634,17 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
     )
     args = parser.parse_args(argv)
     variables = _deduplicate_dashboard_variables(args.variables, parser=parser)
+    fixture_manifest = (
+        args.fixture_manifest.resolve() if args.fixture_manifest is not None else None
+    )
+    try:
+        fixture_state = (
+            _fixture_state_evidence_from_path(fixture_manifest)
+            if fixture_manifest is not None
+            else None
+        )
+    except ValueError as exc:
+        parser.error(str(exc))
     return RenderConfig(
         base_url=args.base_url.rstrip("/"),
         username=args.username,
@@ -557,6 +669,8 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
         browser_zoom=int(args.browser_zoom),
         variables=variables,
         navigation_only=bool(args.navigation_only),
+        fixture_manifest=fixture_manifest,
+        fixture_state=fixture_state,
     )
 
 
@@ -993,6 +1107,8 @@ def _playwright_env(config: RenderConfig) -> dict[str, str]:
     env["GRAFANA_SCREENSHOT_NAVIGATION_ONLY"] = (
         "true" if config.navigation_only else "false"
     )
+    if config.fixture_manifest is not None:
+        env["GRAFANA_SCREENSHOT_FIXTURE_MANIFEST"] = str(config.fixture_manifest)
     if config.selected_uids:
         env["GRAFANA_SCREENSHOT_UIDS"] = ",".join(config.selected_uids)
     scope_query = urlencode(_scope_query_params(config))
