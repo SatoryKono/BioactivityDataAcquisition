@@ -302,3 +302,19 @@ billing was not enabled.
 - Detail: CodeRabbit connection/WebSocket failure
 - GitHub issue: pending reconciliation
 
+## S-R-scripts-residual — connection_error
+
+- UTC: `2026-08-18T14:47:31.542723+00:00`
+- Wave: `R`
+- Files: `23`
+- Detail: CodeRabbit connection/WebSocket failure
+- GitHub issue: pending reconciliation
+
+## S-R-reports-quality-03 — connection_error
+
+- UTC: `2026-08-18T15:19:55.619380+00:00`
+- Wave: `R`
+- Files: `30`
+- Detail: CodeRabbit connection/WebSocket failure
+- GitHub issue: pending reconciliation
+
