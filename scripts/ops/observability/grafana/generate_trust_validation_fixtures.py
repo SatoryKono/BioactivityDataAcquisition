@@ -1,7 +1,7 @@
 """Generate Trust validation panel fixtures for empty/error/populated close-ups.
 
 Outputs contract-shaped JSON under tests/fixtures/grafana/control_plane_validation/
-for panels 9413–9417 (#8576 / #8578). Does not invent Prometheus metrics.
+for panels 9413–9418 (#8576 / #8578 / #8976). Does not invent Prometheus metrics.
 """
 
 from __future__ import annotations
@@ -44,6 +44,7 @@ PANEL_MAP = {
     9415: "lineage-validation",
     9416: "retention-compliance",
     9417: "failure-reasons",
+    9418: "manifest-validation",
 }
 
 
@@ -354,6 +355,26 @@ def build_matrix() -> dict[str, dict[str, dict[str, object]]]:
         "manifest-validation": {
             "populated": manifest_pop,
             "valid_empty_or_unknown": svc.manifest_validation(scope=unresolved),
+            "incomplete_reasons": _envelope(
+                "manifest-validation",
+                tuple(
+                    EvidenceCheckResult(
+                        f"trust_reason_{index}",
+                        "UNKNOWN",
+                        reason,
+                        "Missing or contradictory exact-run evidence.",
+                    )
+                    for index, reason in enumerate(
+                        (
+                            "manifest_contract_compatibility_not_verified",
+                            "checkpoint_artifact_not_observed",
+                            "lineage_closure_not_verified",
+                            "retention_plan_not_observed",
+                        )
+                    )
+                ),
+                manifest=manifest,
+            ),
             "backend_error": source_error_payload(
                 endpoint="manifest-validation",
                 scope=scope,
