@@ -46,5 +46,5 @@ Render a full inlined paste (fragments included):
 
 ## Defaults
 
-`MONITORING=false`, `LANGUAGE=ru`, `ALLOW_ISSUE_WRITE=false`,
+`MONITORING=false` except `audit-rf` (`true`), `LANGUAGE=ru`, `ALLOW_ISSUE_WRITE=false`,
 `ALLOW_PUSH=true` only on `fix/*`, never `main`.
