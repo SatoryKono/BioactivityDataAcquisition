@@ -21,7 +21,6 @@ These tests are the required check whenever grafana/dashboards/*.json changes
 
 from __future__ import annotations
 
-import json
 import re
 from pathlib import Path
 from typing import Any
@@ -69,6 +68,13 @@ STATUS_SCOPE_TOKENS = (
     "EMPTY DOMAIN",
     "FULL PATHS",
 )
+STATUS_SCOPE_AND_VERDICT_TOKENS = (
+    *STATUS_SCOPE_TOKENS,
+    "CURRENT",
+    "OK",
+    "WARN",
+    "CRIT",
+)
 FIELD_IDENTIFIERS = (
     "processing_status",
     "trust_status",
@@ -93,7 +99,6 @@ FORBIDDEN_DATETIME_UNITS = frozenset(
     }
 )
 _OVERFLOW_RE = re.compile(r"overflow(?:-[xy])?\s*:\s*(auto|scroll|hidden)", re.I)
-_STRIP_CODE_RE = re.compile(r"<code\b[^>]*>.*?</code>", re.I | re.S)
 _STRIP_HREF_RE = re.compile(r"\b(?:href|url)\s*=\s*\"[^\"]*\"", re.I)
 _NAV_MARKERS = ("bioetl-nav", "Navigate Dashboards")
 _MIN_PANEL_TITLE_LEN = 16
@@ -258,7 +263,7 @@ def test_enforced_dashboards_apply_inline_copy_roles() -> None:
                                 f"{loc} panel title {title!r} must not be bold or <code>"
                             )
 
-            for token in STATUS_SCOPE_TOKENS + ("CURRENT", "OK", "WARN", "CRIT"):
+            for token in STATUS_SCOPE_AND_VERDICT_TOKENS:
                 for match in re.finditer(re.escape(token), html):
                     if _inside_any(html, match.start(), ("b", "strong")):
                         violations.append(

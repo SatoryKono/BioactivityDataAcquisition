@@ -234,6 +234,35 @@ def grafana_is_reachable(config: FillConfig) -> bool:
         return False
 
 
+def grafana_can_query(config: FillConfig) -> str | None:
+    """Return a skip reason when Grafana health or API auth is unavailable."""
+    if not grafana_is_reachable(config):
+        return f"Grafana is not reachable at {config.grafana_base_url}/api/health"
+    url = f"{config.grafana_base_url.rstrip('/')}/api/org"
+    request = Request(
+        url,
+        headers={
+            "Authorization": live_audit._auth_header(
+                config.grafana_username, config.grafana_password
+            )
+        },
+    )
+    try:
+        with urlopen(request, timeout=min(config.request_timeout_seconds, 3.0)) as response:
+            if int(response.status) == 200:
+                return None
+            return f"Grafana /api/org returned HTTP {response.status}"
+    except HTTPError as exc:
+        if int(exc.code) in {401, 403}:
+            return (
+                "Grafana API auth failed (set GRAFANA_USERNAME/GRAFANA_PASSWORD); "
+                f"HTTP {exc.code}"
+            )
+        return f"Grafana /api/org returned HTTP {exc.code}"
+    except (URLError, OSError, TimeoutError) as exc:
+        return f"Grafana /api/org is unreachable: {exc}"
+
+
 def _is_queryable_panel(panel: dict[str, Any]) -> bool:
     if not isinstance(panel, dict):
         return False
@@ -504,11 +533,9 @@ def _report_payload(results: list[PanelFillResult]) -> dict[str, Any]:
 
 def main(argv: list[str] | None = None) -> int:
     config = _parse_args(argv)
-    if not grafana_is_reachable(config):
-        print(
-            f"Grafana is not reachable at {config.grafana_base_url}/api/health",
-            file=sys.stderr,
-        )
+    skip_reason = grafana_can_query(config)
+    if skip_reason is not None:
+        print(skip_reason, file=sys.stderr)
         return 2
     results = run_panel_fill_check(config)
     payload = _report_payload(results)

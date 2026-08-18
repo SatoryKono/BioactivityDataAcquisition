@@ -205,6 +205,52 @@ def test_build_ds_query_payload_maps_ops_http_string_datasource() -> None:
     assert "chembl_target" in query["url"]
 
 
+def test_query_panel_fill_maps_gateway_timeout_from_grafana_api(
+    monkeypatch: Any,
+) -> None:
+    panel = {
+        "id": 9401,
+        "type": "stat",
+        "title": "Monitor Replay Readiness",
+        "datasource": {"type": "prometheus", "uid": "prometheus"},
+        "targets": [{"refId": "A", "expr": "up", "instant": True}],
+    }
+
+    def _fake_post(
+        url: str,
+        payload: dict[str, Any],
+        *,
+        auth_header: str,
+        timeout_seconds: float,
+    ) -> tuple[int, object]:
+        assert url.endswith("/api/ds/query")
+        assert payload["queries"]
+        return 504, "Gateway Timeout"
+
+    monkeypatch.setattr(fill, "_post_json", _fake_post)
+    verdict = fill.query_panel_fill(panel, config=_config())
+    assert verdict.kind == "fill_error"
+    assert verdict.http_status == 504
+    assert "504" in verdict.reason
+
+
+def test_query_panel_fill_accepts_successful_empty_frames(monkeypatch: Any) -> None:
+    panel = {
+        "id": 9401,
+        "type": "stat",
+        "title": "Monitor Replay Readiness",
+        "datasource": {"type": "prometheus", "uid": "prometheus"},
+        "targets": [{"refId": "A", "expr": "up", "instant": True}],
+    }
+    monkeypatch.setattr(
+        fill,
+        "_post_json",
+        lambda *args, **kwargs: (200, {"results": {"A": {"status": 200, "frames": []}}}),
+    )
+    verdict = fill.query_panel_fill(panel, config=_config())
+    assert verdict.kind == "ok"
+
+
 def test_text_and_row_panels_are_not_queryable() -> None:
     assert fill._is_queryable_panel({"id": 1000, "type": "text", "targets": []}) is False
     assert fill._is_queryable_panel({"id": 902, "type": "row", "panels": []}) is False

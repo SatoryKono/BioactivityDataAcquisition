@@ -254,3 +254,11 @@ billing was not enabled.
 - Detail: CodeRabbit rate limit (waitTime=540s)
 - GitHub issue: pending reconciliation
 
+## S15c-tests-residual-01 — connection_error
+
+- UTC: `2026-08-17T20:35:26.456498+00:00`
+- Wave: `F`
+- Files: `300`
+- Detail: CodeRabbit connection/WebSocket failure
+- GitHub issue: pending reconciliation
+
