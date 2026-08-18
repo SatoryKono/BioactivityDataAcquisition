@@ -101,11 +101,13 @@ def deduplicate_table(
         pl = _builtin_import("polars")
         df = pl.from_arrow(table)
         original_count = df.height
+        # OPTIMIZATION: maintain_order=False avoids high FFI overhead for large cardinality data.
+        # We explicitly sort afterwards to ensure deterministic output.
         df = df.unique(
             subset=primary_keys,
             keep="last",
-            maintain_order=True,
-        )
+            maintain_order=False,
+        ).sort(primary_keys)
         dedup_count = df.height
 
         if dedup_count < original_count:
