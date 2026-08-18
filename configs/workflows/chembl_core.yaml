@@ -16,13 +16,9 @@ workflow:
     - kind: pipeline
       step_id: chembl_assay_ingest
       pipeline_name: chembl_assay
-      run_options:
-        limit: 250
     - kind: pipeline
       step_id: chembl_target_ingest
       pipeline_name: chembl_target
-      run_options:
-        limit: 250
     - kind: transform
       step_id: reconcile_assay_target_orphans
       transform_name: reconcile_foreign_keys
