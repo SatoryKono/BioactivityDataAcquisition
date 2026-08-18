@@ -608,6 +608,35 @@ def test_trust_reasons_text_caps_first_screen_lines_and_flags_truncation() -> No
     assert trust["reasons_truncated"] is True
 
 
+def test_trust_reasons_text_at_cap_is_not_truncated() -> None:
+    reasons = [
+        "alpha_unknown_reason_code",
+        "bravo_unknown_reason_code",
+        "charlie_unknown_reason_code",
+    ]
+    payload = evidence_payload(
+        endpoint="manifest-validation",
+        checks=tuple(
+            EvidenceCheckResult(
+                check=f"check_{index}",
+                status="UNKNOWN",
+                reason=reason,
+                detail="missing evidence",
+            )
+            for index, reason in enumerate(reasons)
+        ),
+        requested_pipeline="chembl_activity",
+        selected_run_id=str(_RUN_ID),
+        selected_run_types=("incremental",),
+        resolved_via="selected_run_id",
+        manifest=_manifest(),
+    )
+
+    trust = payload["trust"]
+    assert trust["reasons_text"] == "\n".join(reasons)
+    assert trust["reasons_truncated"] is False
+
+
 def test_trust_ok_has_empty_reasons_text() -> None:
     payload = evidence_payload(
         endpoint="manifest-validation",
