@@ -1,12 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-18T11:10:46.358438+00:00",
+  "generated_at": "2026-08-18T15:10:15.709499+00:00",
   "summary": {
-    "total_scripts": 603,
+    "total_scripts": 605,
     "status_counts": {
-      "active": 339,
-      "orphan": 1,
-      "supporting": 263
+      "active": 341,
+      "supporting": 264
     },
     "reference_group_coverage": {
       "agents": 5,
@@ -16,7 +15,7 @@
       "other": 78,
       "scripts": 500,
       "skills": 12,
-      "tests": 394
+      "tests": 396
     }
   },
   "scripts": [
@@ -13720,6 +13719,21 @@
       ]
     },
     {
+      "path": "scripts/engineering/qa/generate_dashboard_content_contract.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/integration/test_dashboard_content_contract.py",
+          "line": 9,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import ("
+        }
+      ]
+    },
+    {
       "path": "scripts/engineering/qa/generate_hotspot_degradation_report.py",
       "type": "py",
       "status": "active",
@@ -14736,7 +14750,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_panel_audit_matrix_contract.py",
-          "line": 8,
+          "line": 9,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import report_dashboard_panel_audit_matrix as subject"
         }
@@ -16052,6 +16066,21 @@
           "line": 18,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import test_health"
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/qa/validate_dashboard_content_contract.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/integration/test_dashboard_content_contract.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import validate_dashboard_content_contract as subject"
         }
       ]
     },
@@ -17681,7 +17710,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/test_coderabbit_run_leaves.py",
-          "line": 9,
+          "line": 11,
           "source_group": "tests",
           "text": "from scripts.ops.coderabbit.run_leaves import ("
         }
@@ -19682,13 +19711,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 16,
       "references": [
         {
           "path": "docs/03-guides/dashboards/archive/audit-protocols/dux5-screenshot-regression-protocol.md",
           "line": 39,
           "source_group": "docs",
           "text": "# python scripts/ops/observability/grafana/rerender_grafana_screenshots.py"
+        },
+        {
+          "path": "docs/03-guides/dashboards/design-system.md",
+          "line": 488,
+          "source_group": "docs",
+          "text": "`rerender_grafana_screenshots.py --fixture-manifest tests/fixtures/grafana/dashboard_states/INDEX.json`."
         },
         {
           "path": "scripts/ops/__main__.py",
@@ -19725,12 +19760,6 @@
           "line": 274,
           "source_group": "tests",
           "text": "/ \"rerender_grafana_screenshots.py\""
-        },
-        {
-          "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 324,
-          "source_group": "tests",
-          "text": "Path(\"scripts/ops/observability/grafana/rerender_grafana_screenshots.py\"),"
         }
       ]
     },
@@ -19943,13 +19972,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1337,
+          "line": 1453,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` to install repo-local \""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1424,
+          "line": 1540,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` or \""
         },
@@ -20018,10 +20047,14 @@
     {
       "path": "scripts/ops/observability/relayout_trust_review_panels.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
-      "references": []
+      "references": [],
+      "owner": "@bioetl-observability",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the bounded Trust Review* hoist helper used during first-window layout work; remove it after the Trust first-screen layout is frozen or fold it into a governed dashboard command."
     },
     {
       "path": "scripts/ops/observability/start_read_only_audit_stack.py",
@@ -21645,7 +21678,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 339,
+          "line": 431,
           "source_group": "scripts",
           "text": "\"scripts/ops/support/load_repo_env.sh or pass --username/--password \""
         },
