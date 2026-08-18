@@ -1015,6 +1015,13 @@ Common context panels on primary dashboards outside Overview:
 | `Identity Data Unavailable` | `9410` | Control Plane-only neutral fallback text shown below the identity table when the selected scope returns no visible rows. |
 | `Record Counts Unavailable` | `9411` | Control Plane-only neutral fallback text shown below the accounting table when the selected scope returns no visible rows. |
 
+Run Explorer HTTP targets (`3010` / `9402` / `9403` and the below-fold
+aliases) are locked by
+`docs/03-guides/dashboards/contracts/run-explorer-http-catalog.yaml`.
+Do not hand-edit a duplicate Infinity URL without updating that catalog;
+CI compares live JSON to the catalog and forbids unexpanded `$pipeline`
+in `noValue`.
+
 All seven shipped dashboards enforce one question/scope/evidence readability contract based
 on `4. Data Quality`: orange `4px` accent, `16px` body (12 pt equivalent),
 `18px` operator question (13.5 pt equivalent), `line-height:1.35`, normal
