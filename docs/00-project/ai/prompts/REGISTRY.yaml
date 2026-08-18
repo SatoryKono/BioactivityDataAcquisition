@@ -295,7 +295,7 @@ entries:
     status: active
     class: operator-paste
     tags: [observability, dashboard, grafana, v5, audit, rf, visual, operator]
-    summary: V5 R-F visual cycle — light theme, 200% zoom, leftover NV; not a selector refactor
+    summary: V5 R-F visual cycle — THEME dark+light, ZOOM 200, VIEWPORT 1920, leftover NV; not a selector refactor
 
   - id: prompt.observability.grafana-audit.master
     path: library/observability/grafana-audit/master.md
