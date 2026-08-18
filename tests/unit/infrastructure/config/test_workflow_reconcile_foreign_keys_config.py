@@ -184,3 +184,57 @@ def test_chembl_core_workflow_loads_without_limited_orphan_delete() -> None:
     assert steps["chembl_activity_ingest"].run_options.limit == 250
     assert steps["chembl_assay_ingest"].run_options.limit is None
     assert steps["chembl_target_ingest"].run_options.limit is None
+
+
+def test_delete_orphans_rejects_limited_pipeline_behind_intermediary() -> None:
+    payload = {
+        "schema_version": "1.0.0",
+        "workflow": {
+            "name": "limited_orphan_delete_indirect",
+            "version": "1.0.0",
+            "steps": [
+                {
+                    "kind": "pipeline",
+                    "step_id": "chembl_target_ingest",
+                    "pipeline_name": "chembl_target",
+                    "run_options": {"limit": 250},
+                },
+                {
+                    "kind": "transform",
+                    "step_id": "summarize_targets",
+                    "transform_name": "reconcile_rows",
+                    "depends_on": ["chembl_target_ingest"],
+                    "config": {
+                        "layer": "gold",
+                        "left_table": "chembl.target",
+                        "right_table": "chembl.target",
+                        "left_columns": ["target_id"],
+                        "right_columns": ["target_id"],
+                        "left_primary_keys": ["target_id"],
+                    },
+                },
+                {
+                    "kind": "transform",
+                    "step_id": "reconcile_assay_target_orphans",
+                    "transform_name": "reconcile_foreign_keys",
+                    "depends_on": ["summarize_targets"],
+                    "config": _valid_config(),
+                },
+            ],
+        },
+    }
+
+    with pytest.raises(ValidationError, match="run_options.limit"):
+        WorkflowConfigFileSchema.model_validate(payload)
+
+
+def test_cli_limit_override_rejects_chembl_core_orphan_delete() -> None:
+    from bioetl.infrastructure.config.workflow_config_api import load_workflow_config
+    from bioetl.interfaces.cli.commands._workflow_override_support import (
+        apply_cli_overrides,
+    )
+
+    workflow = load_workflow_config("chembl_core")
+    with pytest.raises(ValueError, match="run_options.limit"):
+        apply_cli_overrides(workflow, limit=250)
+
