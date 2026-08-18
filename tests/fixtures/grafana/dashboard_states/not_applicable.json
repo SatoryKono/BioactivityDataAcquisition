@@ -1,0 +1,9 @@
+{
+  "contract": "dashboard_state_fixture_v1",
+  "case": "not_applicable",
+  "classification": "N/A",
+  "http_status": 200,
+  "rows": [],
+  "message": "This shell, navigation, or collapsed-group panel has no independent runtime state.",
+  "next_action": "Use the declared navigation or expand the group to inspect evidence panels."
+}

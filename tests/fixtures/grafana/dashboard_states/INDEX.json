@@ -36,6 +36,11 @@
       "path": "tests/fixtures/grafana/dashboard_states/valid_empty.json",
       "classification": "VALID_EMPTY",
       "http_status": 200
+    },
+    "not_applicable": {
+      "path": "tests/fixtures/grafana/dashboard_states/not_applicable.json",
+      "classification": "N/A",
+      "http_status": 200
     }
   }
 }

@@ -24,8 +24,11 @@ ACTION_REQUIRED_ROLES = frozenset(
         "severity_table",
         "causes_table",
         "freshness",
+        "indicator",
     }
 )
+NON_DATA_ROLES = frozenset({"navigation", "row_group", "guidance"})
+FULL_SURFACE_COVERAGE_POLICY = "all_shipped_panels"
 
 
 def _load_mapping(path: Path) -> dict[str, object]:
@@ -121,8 +124,8 @@ def _contract_panel_records(
     return records, errors
 
 
-def _dashboard_panel_titles() -> dict[tuple[str, str], str]:
-    titles: dict[tuple[str, str], str] = {}
+def _dashboard_panel_records() -> dict[tuple[str, str], dict[str, object]]:
+    records: dict[tuple[str, str], dict[str, object]] = {}
     for dashboard_path in sorted(DASHBOARD_DIR.glob("*.json")):
         payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
         if not isinstance(payload, dict):
@@ -134,8 +137,11 @@ def _dashboard_panel_titles() -> dict[tuple[str, str], str]:
             panel_id = panel.get("id")
             title = panel.get("title")
             if isinstance(panel_id, int) and isinstance(title, str):
-                titles[(uid, str(panel_id))] = title
-    return titles
+                key = (uid, str(panel_id))
+                if key in records:
+                    raise ValueError(f"duplicate shipped panel id: {uid}:{panel_id}")
+                records[key] = panel
+    return records
 
 
 def _iter_panels(payload: dict[str, object]) -> list[dict[str, object]]:
@@ -159,8 +165,7 @@ def _validate_panel_record(
     *,
     key: tuple[str, str],
     record: dict[str, object],
-    inventory_panel: dict[str, object],
-    dashboard_title: str | None,
+    expected_title: str,
     allowed_roles: set[str],
     allowed_scopes: set[str],
     allowed_evidence_sources: set[str],
@@ -169,12 +174,9 @@ def _validate_panel_record(
     uid, panel_id = key
     prefix = f"panel-content-contract.yaml:{uid}:{panel_id}"
     errors: list[str] = []
-    expected_title = inventory_panel["title"]
     role = record.get("role")
-    if record.get("title") != expected_title:
-        errors.append(f"{prefix}: title must match inventory title {expected_title!r}")
-    if dashboard_title != expected_title and not (
-        role == "navigation" and dashboard_title == ""
+    if record.get("title") != expected_title and not (
+        role == "navigation" and expected_title == ""
     ):
         errors.append(f"{prefix}: title does not match dashboard JSON")
     if role not in allowed_roles:
@@ -196,7 +198,9 @@ def _validate_panel_record(
     required_copy = _string_list(record.get("required_copy"))
     if not required_copy:
         errors.append(f"{prefix}: required_copy must be a non-empty list")
-    elif role != "navigation" and not REQUIRED_COPY_TOKENS.issubset(required_copy):
+    elif role not in NON_DATA_ROLES and not REQUIRED_COPY_TOKENS.issubset(
+        required_copy
+    ):
         errors.append(
             f"{prefix}: required_copy must include evidence_scope and no_data"
         )
@@ -223,8 +227,12 @@ def validate_content_contract(
     inventory = _load_mapping(inventory_path)
     contract = _load_mapping(content_contract_path)
     errors: list[str] = []
-    if contract.get("schema_version") != 1:
-        errors.append("panel-content-contract.yaml: schema_version must equal 1")
+    if contract.get("schema_version") != 2:
+        errors.append("panel-content-contract.yaml: schema_version must equal 2")
+    if contract.get("coverage_policy") != FULL_SURFACE_COVERAGE_POLICY:
+        errors.append(
+            "panel-content-contract.yaml: coverage_policy must equal all_shipped_panels"
+        )
     allowed_roles = set(_string_list(contract.get("allowed_roles")) or [])
     allowed_scopes = set(_string_list(contract.get("allowed_scopes")) or [])
     allowed_evidence_sources = set(
@@ -241,29 +249,44 @@ def validate_content_contract(
     contract_records, contract_errors = _contract_panel_records(contract)
     errors.extend(inventory_errors)
     errors.extend(contract_errors)
-    dashboard_titles = _dashboard_panel_titles()
+    dashboard_records = _dashboard_panel_records()
     for key, inventory_panel in sorted(inventory_records.items()):
+        dashboard_panel = dashboard_records.get(key)
+        if dashboard_panel is None:
+            errors.append(
+                f"dashboard-inventory.yaml:{key[0]}:{key[1]}: panel is missing"
+            )
+            continue
+        inventory_role = contract_records.get(key, {}).get("role")
+        if dashboard_panel.get("title") != inventory_panel.get("title") and not (
+            inventory_role == "navigation" and dashboard_panel.get("title") == ""
+        ):
+            errors.append(
+                f"dashboard-inventory.yaml:{key[0]}:{key[1]}: title does not match dashboard JSON"
+            )
+    for key, dashboard_panel in sorted(dashboard_records.items()):
         record = contract_records.get(key)
         if record is None:
             errors.append(
-                f"panel-content-contract.yaml:{key[0]}:{key[1]}: missing inventory key panel"
+                f"panel-content-contract.yaml:{key[0]}:{key[1]}: missing shipped panel"
             )
             continue
+        title = dashboard_panel.get("title")
+        assert isinstance(title, str)
         errors.extend(
             _validate_panel_record(
                 key=key,
                 record=record,
-                inventory_panel=inventory_panel,
-                dashboard_title=dashboard_titles.get(key),
+                expected_title=title,
                 allowed_roles=allowed_roles,
                 allowed_scopes=allowed_scopes,
                 allowed_evidence_sources=allowed_evidence_sources,
                 allowed_states=allowed_states,
             )
         )
-    for key in sorted(set(contract_records) - set(inventory_records)):
+    for key in sorted(set(contract_records) - set(dashboard_records)):
         errors.append(
-            f"panel-content-contract.yaml:{key[0]}:{key[1]}: panel is not an inventory key panel"
+            f"panel-content-contract.yaml:{key[0]}:{key[1]}: panel is not shipped"
         )
     return errors
 

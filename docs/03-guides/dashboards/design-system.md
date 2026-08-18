@@ -462,11 +462,14 @@ datasource/query failure по роли панели.
 
 ### 6.0 Content contract и deterministic state fixtures
 
-Ключевые панели из `dashboard-inventory.yaml` MUST иметь запись в
+Каждая shipped Grafana-панель с integer `id`, включая row groups, navigation
+shell и nested diagnostic panels, MUST иметь запись в
 `contracts/panel-content-contract.yaml`. Запись задаёт семантическую роль,
 tier, evidence scope, разрешённые terminal states, обязательные copy-элементы,
-набор fixture cases и требуемые render profiles. Она не заменяет shipped
-Grafana JSON, а обеспечивает его статическую, fail-closed трассировку.
+набор fixture cases и требуемые render profiles. Для shell/row panels допустим
+`not_applicable`; это явное отсутствие собственного runtime verdict, а не
+пропуск contract coverage. Contract не заменяет shipped Grafana JSON, а
+обеспечивает его статическую, fail-closed трассировку.
 
 Детерминированные state fixtures находятся в
 `tests/fixtures/grafana/dashboard_states/`. Они различают `VALID_EMPTY`,
@@ -474,6 +477,7 @@ Grafana JSON, а обеспечивает его статическую, fail-cl
 как здоровое состояние. Проверки запускаются так:
 
 ```bash
+uv run python -m scripts.engineering.qa.generate_dashboard_content_contract --check
 uv run python -m scripts.engineering.qa.validate_dashboard_content_contract
 uv run python -m pytest tests/integration/test_dashboard_content_contract.py \
   tests/integration/test_dashboard_state_fixture_contract.py -q

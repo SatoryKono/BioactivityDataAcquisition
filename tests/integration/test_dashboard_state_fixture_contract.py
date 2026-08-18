@@ -57,6 +57,7 @@ def test_state_fixture_index_is_complete_and_payloads_are_well_formed() -> None:
         "backend_error",
         "populated",
         "valid_empty",
+        "not_applicable",
     }
     for case, metadata in cases.items():
         assert isinstance(metadata, dict)
@@ -89,6 +90,7 @@ def test_terminal_fixture_semantics_distinguish_empty_absence_and_error() -> Non
     telemetry_absent = _load_json(FIXTURE_ROOT / "telemetry_absent.json")
     backend_error = _load_json(FIXTURE_ROOT / "backend_error.json")
     populated = _load_json(FIXTURE_ROOT / "populated.json")
+    not_applicable = _load_json(FIXTURE_ROOT / "not_applicable.json")
 
     assert valid_empty["http_status"] == 200
     assert valid_empty["classification"] == "VALID_EMPTY"
@@ -103,3 +105,6 @@ def test_terminal_fixture_semantics_distinguish_empty_absence_and_error() -> Non
     rows = populated["rows"]
     assert isinstance(rows, list) and rows
     assert {"parameter", "value", "percentage", "row_status"}.issubset(rows[0])
+    assert not_applicable["http_status"] == 200
+    assert not_applicable["classification"] == "N/A"
+    assert not_applicable["rows"] == []
