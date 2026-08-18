@@ -39,6 +39,50 @@ class TransformerExecutionOwner(Protocol):
         """Implement entity-specific transformation logic."""
         ...
 
+    def _start_transform_span(
+        self,
+        context: PipelineContext,
+        index: int,
+    ) -> _ClosableSpan:
+        """Create and enter an OpenTelemetry span for record transformation."""
+        ...
+
+    def _apply_structural_policy(
+        self,
+        context: PipelineContext,
+        result: SilverRecord | None,
+        index: int,
+    ) -> SilverRecord | None:
+        """Apply schema-aware structural policy before structural Silver filters."""
+        ...
+
+    def _handle_transformation_error(
+        self,
+        error: TransformationError,
+        context: PipelineContext,
+        span: _ClosableSpan,
+    ) -> str:
+        """Log and annotate span for transformation errors."""
+        ...
+
+    def _handle_validation_error(
+        self,
+        error: ValueError,
+        context: PipelineContext,
+        span: _ClosableSpan,
+    ) -> str:
+        """Log and annotate span for validation errors."""
+        ...
+
+    def _record_metrics_and_close_span(
+        self,
+        start_time: float,
+        error_type: str | None,
+        span: _ClosableSpan,
+    ) -> None:
+        """Record transform duration/error metrics and close the OTEL span."""
+        ...
+
 
 def start_transform_span(
     owner: TransformerExecutionOwner,

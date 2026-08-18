@@ -16,9 +16,16 @@ from bioetl.interfaces.http.report_root_config import (
 from bioetl.interfaces.http.types import HealthResponse
 
 
+class _MetricsExposition(Protocol):
+    def build_exposition(self) -> str: ...
+
+
 class _ReadinessHost(Protocol):
-    _health_monitor: object | None
-    _metrics_exposition: object
+    @property
+    def _health_monitor(self) -> object | None: ...
+
+    @property
+    def _metrics_exposition(self) -> _MetricsExposition: ...
 
     def _response_timestamp(self) -> str: ...
     def _get_provider_statuses(self) -> dict[str, JsonDict]: ...

@@ -5,7 +5,7 @@ Extracted from SilverDQAnalyzer to keep facade focused on orchestration.
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from typing import Any
 
 import polars as pl
@@ -226,7 +226,7 @@ class SilverCheckExecutor:
         return passed, failed, warnings
 
 
-def _aggregate_check_status(statuses: object) -> DQCheckStatus:
+def _aggregate_check_status(statuses: Iterable[DQCheckStatus]) -> DQCheckStatus:
     """Aggregate FAIL > WARN > PASS from individual check statuses."""
     seen = list(statuses)
     if any(status == DQCheckStatus.FAIL for status in seen):
