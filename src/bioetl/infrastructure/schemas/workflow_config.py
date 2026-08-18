@@ -13,6 +13,7 @@ from bioetl.domain.workflow import (
     WorkflowConfig,
     WorkflowRunOptionsConfig,
     WorkflowStepConfig,
+    reject_delete_orphans_after_limited_extracts,
 )
 from bioetl.infrastructure.schemas.workflow_config_fk import (
     _normalize_fk_optional_name,
@@ -368,37 +369,12 @@ class WorkflowConfigSchema(BaseModel):
     @model_validator(mode="after")
     def validate_domain_invariants(self) -> Self:
         """Delegate duplicate/dependency/cycle checks to the domain layer."""
-        self._reject_delete_orphans_after_limited_pipeline_deps()
         try:
-            self.to_domain()
+            domain = self.to_domain()
         except ValueError as exc:
             raise ValueError(str(exc)) from exc
+        reject_delete_orphans_after_limited_extracts(domain)
         return self
-
-    def _reject_delete_orphans_after_limited_pipeline_deps(self) -> None:
-        """Fail closed when delete_orphans follows independently bounded extracts."""
-        defaults = self.defaults.to_domain()
-        steps_by_id = {step.step_id: step for step in self.steps}
-        for step in self.steps:
-            if not isinstance(step, WorkflowTransformStepSchema):
-                continue
-            if step.transform_name != "reconcile_foreign_keys":
-                continue
-            limited_deps: list[str] = []
-            for dep_id in step.depends_on:
-                dep = steps_by_id.get(dep_id)
-                if not isinstance(dep, WorkflowPipelineStepSchema):
-                    continue
-                merged = defaults.merged_with(dep.run_options.to_domain())
-                if merged.limit is not None:
-                    limited_deps.append(dep_id)
-            if limited_deps:
-                raise ValueError(
-                    "reconcile_foreign_keys action=delete_orphans cannot depend on "
-                    "pipeline steps with run_options.limit "
-                    f"({', '.join(limited_deps)}); independently bounded extracts "
-                    "make Gold FK orphans false positives"
-                )
 
     def to_domain(self) -> WorkflowConfig:
         """Convert to immutable workflow domain config."""

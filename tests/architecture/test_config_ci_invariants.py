@@ -30,6 +30,7 @@ from functools import cache
 from pathlib import Path
 from typing import Any
 
+import re
 import pytest
 import yaml
 
@@ -850,6 +851,9 @@ class TestGoldFilterFieldShape:
         for pattern in url_patterns:
             assert r"[^\s]" in pattern
             assert r"[^\\s]" not in pattern
+            compiled = re.compile(pattern)
+            assert compiled.fullmatch("https://example.org/unit")
+            assert compiled.fullmatch("https://example.org/unit with-space") is None
 
 
 def _declared_entity_fields(data: dict[str, Any]) -> set[str]:
