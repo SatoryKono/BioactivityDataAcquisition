@@ -181,7 +181,7 @@ def test_chembl_core_workflow_loads_without_limited_orphan_delete() -> None:
     workflow = load_workflow_config("chembl_core")
     steps = {step.step_id: step for step in workflow.steps}
     assert "reconcile_assay_target_orphans" in steps
-    assert steps["chembl_activity_ingest"].run_options.limit == 250
+    assert steps["chembl_activity_ingest"].run_options.limit is None
     assert steps["chembl_assay_ingest"].run_options.limit is None
     assert steps["chembl_target_ingest"].run_options.limit is None
 

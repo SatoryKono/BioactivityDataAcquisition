@@ -5,7 +5,7 @@
 - Kind: `workflow`
 - Typed identity: `workflow:chembl_core`
 - Schema: `1.0.0`
-- Source revision: `76f32bb632b55c9960491d8df05abd5a51cf8504`
+- Source revision: `4f48de22efb5481636edd9ec9ca4047e15a56759`
 
 ## Evidence
 
@@ -55,25 +55,16 @@
       {
         "kind": "pipeline",
         "pipeline_name": "chembl_activity",
-        "run_options": {
-          "limit": 250
-        },
         "step_id": "chembl_activity_ingest"
       },
       {
         "kind": "pipeline",
         "pipeline_name": "chembl_assay",
-        "run_options": {
-          "limit": 250
-        },
         "step_id": "chembl_assay_ingest"
       },
       {
         "kind": "pipeline",
         "pipeline_name": "chembl_target",
-        "run_options": {
-          "limit": 250
-        },
         "step_id": "chembl_target_ingest"
       },
       {
@@ -181,8 +172,8 @@
   "passport_schema_version": "1.0.0",
   "provenance": {
     "projector_version": "1.0.0",
-    "semantic_content_hash": "sha256:70660158eba16dccd689e75213e6619edf5777b8b5b03cee61b91e657576cf2c",
-    "source_revision": "76f32bb632b55c9960491d8df05abd5a51cf8504"
+    "semantic_content_hash": "sha256:100a47685b9d77e65251e358b03881a591b0347bd9ee2603c0c2003474268f93",
+    "source_revision": "4f48de22efb5481636edd9ec9ca4047e15a56759"
   },
   "source_references": [
     {
