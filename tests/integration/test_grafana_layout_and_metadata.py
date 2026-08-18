@@ -297,9 +297,7 @@ def test_control_plane_named_review_surfaces_are_findable() -> None:
     child_ids = [child.get("id") for child in lineage_row.get("panels") or []]
     assert 9415 in child_ids
     lineage = next(
-        child
-        for child in lineage_row.get("panels") or []
-        if child.get("id") == 9415
+        child for child in lineage_row.get("panels") or [] if child.get("id") == 9415
     )
     assert lineage.get("title") == "Review Lineage Validation"
     audit_ids = {

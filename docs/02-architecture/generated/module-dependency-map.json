@@ -1,24 +1,24 @@
 {
   "summary": {
-    "scanned_modules": 2425,
-    "total_internal_imports": 7591,
+    "scanned_modules": 2427,
+    "total_internal_imports": 7600,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
-    "cross_layer_group_edges_total": 321,
+    "cross_layer_group_edges_total": 323,
     "violations": 0,
-    "source_fingerprint": "13528c4f9a58a4785bed2e0673677698f5eee83e7833b0f9a7a115ae5aa3127c"
+    "source_fingerprint": "3f1d6ea10051b0977e3eabde8fa9a72b047e8587f48ecb71fc4e62dd1fdc4979"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1523,
+      "imports": 1525,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 974,
+      "imports": 975,
       "allowed": true
     },
     {
@@ -60,19 +60,19 @@
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 1183,
+      "imports": 1186,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "application",
-      "imports": 49,
+      "imports": 51,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "composition",
-      "imports": 55,
+      "imports": 56,
       "allowed": true
     },
     {
@@ -285,6 +285,11 @@
       "imports": 18
     },
     {
+      "source": "application.observability",
+      "target": "domain.control_plane",
+      "imports": 17
+    },
+    {
       "source": "application.pipelines",
       "target": "domain.value_objects",
       "imports": 17
@@ -298,11 +303,6 @@
       "source": "infrastructure.schemas",
       "target": "domain.config",
       "imports": 17
-    },
-    {
-      "source": "application.observability",
-      "target": "domain.control_plane",
-      "imports": 16
     },
     {
       "source": "composition.factories",

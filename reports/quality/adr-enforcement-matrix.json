@@ -1892,6 +1892,7 @@
         "configs/entities/chembl/publication_term.yaml",
         "configs/entities/chembl/target.yaml",
         "configs/quality/scripts_inventory_manifest.json",
+        "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
         "docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md",
         "docs/00-project/ai/rules/windsurf/rules/00-bioetl-core-governance.md",
@@ -1931,6 +1932,7 @@
       "implementation_owner_paths": [
         "configs/quality/constructor_waivers.yaml",
         "configs/quality/domain_aggregate_classification.yaml",
+        "docs/00-project/00-map.md",
         "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
         "docs/01-requirements/REQUIREMENTS.md",
@@ -1960,6 +1962,7 @@
       "implementation_owner_paths": [
         "configs/quality/internal_compatibility_shim_inventory.yaml",
         "configs/quality/public_lazy_facade_inventory.yaml",
+        "docs/00-project/00-map.md",
         "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
         "docs/01-requirements/REQUIREMENTS.md",
@@ -1990,6 +1993,7 @@
       "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/quality/generated_artifact_routing.yaml",
+        "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
         "docs/00-project/rules-summary.md",
         "docs/01-requirements/DASHBOARD_REQUIREMENTS.md",
@@ -2030,6 +2034,7 @@
       "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/quality/generated_artifact_routing.yaml",
+        "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
         "docs/00-project/governance/documentation-update-plan.md",
         "docs/04-reference/passports/index.md",
@@ -2053,6 +2058,7 @@
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
         "docs/04-reference/passports/index.md",
         "docs/04-reference/passports/manual/workflows/chembl_baseline.yaml",
@@ -2079,6 +2085,7 @@
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
         "docs/01-requirements/REQUIREMENTS.md",
         "docs/04-reference/contracts/README.md",
@@ -2102,6 +2109,7 @@
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
         "docs/01-requirements/REQUIREMENTS.md",
         "src/bioetl/infrastructure/config/_base.py",
