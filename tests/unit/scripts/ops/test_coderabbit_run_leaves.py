@@ -6,12 +6,16 @@ import json
 
 import pytest
 
+from pathlib import Path
+
 from scripts.ops.coderabbit.run_leaves import (
+    build_review_command,
     classify_output,
     extract_rate_limit_wait_seconds,
     has_review_completion,
     parse_backoff_schedule,
     parse_wait_time_to_seconds,
+    selected_leaves,
 )
 
 
@@ -85,6 +89,48 @@ def test_classify_output_ignores_rate_limit_text_inside_completed_review() -> No
         )
     )
     assert classify_output(0, output) == ("ok", "")
+
+
+def test_build_review_command_uses_committed_to_stay_under_file_cap() -> None:
+    command = build_review_command("/usr/bin/coderabbit", Path("prompt.md"))
+    assert command[0] == "/usr/bin/coderabbit"
+    assert command[1:4] == ["review", "--committed", "--base"]
+    assert "--agent" in command
+    assert "-c" in command
+
+
+def test_build_review_command_omits_context_files_near_cap() -> None:
+    command = build_review_command(
+        "/usr/bin/coderabbit", Path("prompt.md"), file_count=300
+    )
+    assert "--committed" in command
+    assert "-c" not in command
+
+
+def test_selected_leaves_preserves_cr_leaves_order(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("CR_LEAVES", "leaf-b,leaf-a")
+    monkeypatch.delenv("CR_WAVE", raising=False)
+    matrix = {
+        "leaves": [
+            {"id": "leaf-a", "wave": "A"},
+            {"id": "leaf-b", "wave": "A"},
+        ]
+    }
+    assert [leaf["id"] for leaf in selected_leaves(matrix)] == ["leaf-b", "leaf-a"]
+
+
+def test_classify_output_too_many_files() -> None:
+    payload = {
+        "type": "error",
+        "errorType": "review",
+        "code": "too_many_files",
+        "message": "Review failed: Too many files!",
+    }
+    status, reason = classify_output(1, json.dumps(payload))
+    assert status == "too_many_files"
+    assert "300" in reason
 
 
 def test_has_review_completion_detects_terminal_event() -> None:

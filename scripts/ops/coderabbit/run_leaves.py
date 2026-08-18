@@ -241,6 +241,8 @@ def classify_output(return_code: int, output: str) -> tuple[str, str]:
             return "rate_limit", "CodeRabbit rate limit"
         return "rate_limit", f"CodeRabbit rate limit (waitTime={int(wait)}s)"
     lowered = output.lower()
+    if error_type == "review" and "too many files" in lowered and not completed:
+        return "too_many_files", "CodeRabbit 300-file cap exceeded"
     if "all files are ignored" in lowered or "all_files_ignored" in lowered:
         return "all_files_ignored", "CodeRabbit reported all files ignored"
     if (
@@ -261,6 +263,40 @@ def classify_output(return_code: int, output: str) -> tuple[str, str]:
     if not completed:
         return "missing_output", "CodeRabbit exited 0 without review_completed"
     return "ok", ""
+
+
+def build_review_command(
+    coderabbit_bin: str,
+    prompt_path: Path,
+    *,
+    file_count: int = 0,
+) -> list[str]:
+    """Build a sequential leaf review command under the 300-file PR cap.
+
+    ``--committed`` excludes uncommitted sandbox files. Context files passed
+    via ``-c`` still count toward CodeRabbit's 300-file PR cap, so leaves at
+    or above 298 tracked files omit ``-c`` and stay reviewable.
+    """
+    command = [
+        coderabbit_bin,
+        "review",
+        "--committed",
+        "--base",
+        "main",
+        "--dir",
+        ".",
+        "--agent",
+    ]
+    if file_count < 298:
+        command.extend(
+            [
+                "-c",
+                str(ROOT / "AGENTS.md"),
+                str(ROOT / ".coderabbit.yaml"),
+                str(prompt_path),
+            ]
+        )
+    return command
 
 
 def run_leaf(leaf: dict[str, Any], base_sha: str) -> dict[str, Any]:
@@ -294,19 +330,9 @@ def run_leaf(leaf: dict[str, Any], base_sha: str) -> dict[str, Any]:
                 "elapsed_s": round(time.monotonic() - started, 1),
             }
 
-        command = [
-            CODERABBIT,
-            "review",
-            "--base",
-            "main",
-            "--dir",
-            ".",
-            "--agent",
-            "-c",
-            str(ROOT / "AGENTS.md"),
-            str(ROOT / ".coderabbit.yaml"),
-            str(PROMPT_PATH),
-        ]
+        command = build_review_command(
+            CODERABBIT, PROMPT_PATH, file_count=len(paths)
+        )
         try:
             process = subprocess.run(
                 command,
@@ -357,11 +383,13 @@ def selected_leaves(matrix: dict[str, Any]) -> list[dict[str, Any]]:
     raw_leaves = matrix.get("leaves", [])
     leaves = [leaf for leaf in raw_leaves if isinstance(leaf, dict)]
     wave = os.environ.get("CR_WAVE")
-    ids = {item for item in os.environ.get("CR_LEAVES", "").split(",") if item}
+    ids = [item for item in os.environ.get("CR_LEAVES", "").split(",") if item]
     if wave:
         leaves = [leaf for leaf in leaves if leaf.get("wave") == wave]
     if ids:
-        leaves = [leaf for leaf in leaves if leaf.get("id") in ids]
+        ordered = {leaf_id: index for index, leaf_id in enumerate(ids)}
+        selected = [leaf for leaf in leaves if leaf.get("id") in ordered]
+        return sorted(selected, key=lambda leaf: ordered[str(leaf["id"])])
     return sorted(leaves, key=lambda leaf: (str(leaf["wave"]), str(leaf["id"])))
 
 
@@ -475,8 +503,8 @@ def main() -> int:
                     break
                 if retry["status"] == "rate_limit":
                     break
-        elif result["status"] == "all_files_ignored":
-            record_blocker(leaf, "all_files_ignored", str(result["reason"]))
+        elif result["status"] in {"all_files_ignored", "too_many_files"}:
+            record_blocker(leaf, str(result["status"]), str(result["reason"]))
         elif result["status"] in {
             "auth_error",
             "timeout",
