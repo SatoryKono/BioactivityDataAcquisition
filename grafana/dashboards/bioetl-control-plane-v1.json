@@ -243,7 +243,7 @@
         "y": 8
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN HTTP trust summary on the first screen. processing_status is the data-processing outcome; trust_status is fail-closed exact-run evidence (INCOMPLETE/ERROR are not OK). Scope is exact_run when run_id resolves. First screen shows top-3 reason codes in reasons_text; the full list is in Review Manifest Validation (9414) / rows. UNKNOWN/INCOMPLETE are not OK. No-data or backend unavailable is not a health verdict.",
+      "description": "SELECTED RUN HTTP trust summary on the first screen. processing_status is the data-processing outcome; trust_status is fail-closed exact-run evidence (INCOMPLETE/ERROR/UNKNOWN are not OK). First screen shows top-3 trust.reasons_text (newline-joined); the full reason list stays in rows / panel 9414. Scope is exact_run when run_id resolves. No-data or backend unavailable is not a health verdict.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -260,12 +260,31 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "evidence_observed_at"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "time:YYYY-MM-DD HH:mm"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "processing_status"
             },
             "properties": [
               {
                 "id": "custom.width",
-                "value": 120
+                "value": 110
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           },
@@ -278,6 +297,13 @@
               {
                 "id": "custom.width",
                 "value": 110
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           },
@@ -289,7 +315,14 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 120
+                "value": 90
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           },
@@ -301,7 +334,14 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 110
+                "value": 100
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           },
@@ -320,31 +360,15 @@
                 "value": 320
               },
               {
-                "id": "custom.inspect",
-                "value": true
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
                   "wrapText": true
                 }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "evidence_observed_at"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "time:YYYY-MM-DD HH:mm"
               },
               {
-                "id": "custom.width",
-                "value": 140
+                "id": "custom.inspect",
+                "value": true
               }
             ]
           }
@@ -406,7 +430,9 @@
               "reasons_text": 4,
               "evidence_observed_at": 5
             },
-            "renameByName": {}
+            "renameByName": {
+              "reasons_text": "reasons"
+            }
           }
         }
       ]
