@@ -1,0 +1,33 @@
+{
+  "annotations": {"list": []},
+  "description": "Static fail-closed notice selected when BioETL Ops HTTP is not provisioned.",
+  "editable": false,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "description": "No Ops HTTP query is executed in the Prometheus-only dashboard profile.",
+      "gridPos": {"h": 9, "w": 24, "x": 0, "y": 0},
+      "id": 9900,
+      "options": {
+        "content": "<div role=\"alert\" style=\"border:2px solid #f59e0b;border-radius:6px;padding:18px;font-size:16px;line-height:1.5\"><div style=\"font-size:19px;font-weight:700;margin-bottom:8px\">Ops HTTP not provisioned</div><p>Grafana is running in Prometheus-only mode. This dashboard is intentionally replaced by a static notice because selected-run evidence requires a validated <code>BioETL Ops HTTP</code> datasource.</p><p>No retention, replay, identity, or run verdict can be inferred from this notice. Check <code>/var/lib/grafana/bioetl-bootstrap-status.json</code>; the full dashboard is restored only when <code>ops_http=ready</code>, <code>reason=identity_matched</code>, and <code>dashboard_profile=full</code>.</p><p>Recover with <code>python scripts/ops/runtime/docker/runtime_manager.py start --stack monitoring --timeout 180</code>, then verify <code>status --stack monitoring</code>.</p></div>",
+        "mode": "html"
+      },
+      "pluginVersion": "12.0.0",
+      "title": "",
+      "type": "text"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 41,
+  "tags": ["bioetl", "prometheus-only", "ops-http-unavailable"],
+  "templating": {"list": []},
+  "time": {"from": "now-6h", "to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "5. Incident Workspace",
+  "uid": "bioetl-incident-v1",
+  "version": 1
+}
