@@ -159,6 +159,28 @@ class TestErrorHandlerBasicFunctionality:
         assert log_context["user_id"] == "123"
         assert log_context["operation"] == "update"
 
+    def test_handle_error_does_not_mutate_caller_context(self) -> None:
+        logger = MockLoggerPort()
+        metrics = MockMetricsPort()
+        handler = ErrorHandler(logger, metrics)
+        context = {"user_id": "123"}
+
+        handler.handle_error(ValueError("Test error"), context=context, reraise=False)
+
+        assert context == {"user_id": "123"}
+        assert "error_type" not in context
+
+    def test_increment_propagates_backend_type_error(self) -> None:
+        class _StrictIncrement:
+            def increment(self, name: str, *, tags: dict | None = None) -> None:
+                raise TypeError("backend rejected tags")
+
+        logger = MockLoggerPort()
+        handler = ErrorHandler(logger, _StrictIncrement())
+
+        with pytest.raises(TypeError, match="backend rejected tags"):
+            handler.handle_error(ValueError("Test error"), reraise=False)
+
 
 class TestErrorHandlerDomainExceptions:
     """Test handling of domain-specific exceptions."""

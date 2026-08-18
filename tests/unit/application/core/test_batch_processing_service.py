@@ -1023,6 +1023,28 @@ class TestBatchProcessingRuntimeHelpers:
         assert tracing.end_span.call_args.args[0] is span
         assert isinstance(tracing.end_span.call_args.args[1], BioETLError)
 
+    async def test_execute_with_layer_span_ends_span_on_cancelled_error(self) -> None:
+        """Cancellation still closes the layer span without a policy annotation."""
+        tracing = MagicMock()
+        span = object()
+        tracing.start_layer_span.return_value = span
+
+        async def _cancel() -> object:
+            raise asyncio.CancelledError()
+
+        with pytest.raises(asyncio.CancelledError):
+            await execute_with_layer_span(
+                tracing=tracing,
+                name="silver",
+                coro=_cancel(),
+                batch_id=deterministic_batch_uuid_from_callsite(
+                    "test_batch_processing_service"
+                ),
+                count=1,
+            )
+
+        tracing.end_span.assert_called_once_with(span)
+
     def test_build_bronze_refs_normalizes_present_and_absent_results(self) -> None:
         """Writer lineage receives either one typed reference or explicit absence."""
         bronze_result = MagicMock()

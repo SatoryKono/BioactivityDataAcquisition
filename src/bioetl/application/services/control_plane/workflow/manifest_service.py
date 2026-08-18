@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass
 
 from bioetl.application.services.control_plane.manifest.service_scaffold import (
@@ -40,18 +41,24 @@ class WorkflowManifestService(ManifestServiceScaffoldMixin):
 
     def create_manifest(self, request: WorkflowManifestCreateSpec) -> WorkflowManifest:
         """Build fingerprinted workflow manifest and persist it through the port."""
+        launch_context, defaults, steps = self._isolated_manifest_payloads(request)
         manifest = WorkflowManifest(
             manifest_id=self._manifest_id_factory(),
             workflow_run_id=request.workflow_run_id,
-            execution_fingerprint=self.compute_execution_fingerprint(request),
+            execution_fingerprint=self._fingerprint_isolated_payloads(
+                request,
+                launch_context=launch_context,
+                defaults=defaults,
+                steps=steps,
+            ),
             schema_version=self.schema_version,
             created_at=self._resolve_created_at(),
             workflow_name=request.config.name,
             workflow_version=request.config.version,
-            launch_context=dict(request.launch_context),
-            defaults=request.config.defaults.to_mapping(),
+            launch_context=launch_context,
+            defaults=defaults,
             selected_step_ids=request.config.topological_step_ids,
-            steps=self._serialize_steps(request.config),
+            steps=steps,
             resumed_from_manifest_id=request.resumed_from_manifest_id,
         )
         self.manifest_port.save(manifest)
@@ -59,15 +66,40 @@ class WorkflowManifestService(ManifestServiceScaffoldMixin):
 
     def compute_execution_fingerprint(self, request: WorkflowManifestCreateSpec) -> str:
         """Compute the canonical workflow execution fingerprint."""
+        launch_context, defaults, steps = self._isolated_manifest_payloads(request)
+        return self._fingerprint_isolated_payloads(
+            request,
+            launch_context=launch_context,
+            defaults=defaults,
+            steps=steps,
+        )
+
+    def _isolated_manifest_payloads(
+        self,
+        request: WorkflowManifestCreateSpec,
+    ) -> tuple[dict[str, object], dict[str, object], tuple[WorkflowManifestStep, ...]]:
+        """Copy nested launch/default/step payloads before fingerprinting."""
+        return (
+            copy.deepcopy(dict(request.launch_context)),
+            copy.deepcopy(request.config.defaults.to_mapping()),
+            self._serialize_steps(request.config),
+        )
+
+    def _fingerprint_isolated_payloads(
+        self,
+        request: WorkflowManifestCreateSpec,
+        *,
+        launch_context: dict[str, object],
+        defaults: dict[str, object],
+        steps: tuple[WorkflowManifestStep, ...],
+    ) -> str:
         payload = {
             "workflow_name": request.config.name,
             "workflow_version": request.config.version,
-            "launch_context": self._normalize_fingerprint_launch_context(
-                request.launch_context
-            ),
-            "defaults": request.config.defaults.to_mapping(),
+            "launch_context": self._normalize_fingerprint_launch_context(launch_context),
+            "defaults": defaults,
             "selected_step_ids": list(request.config.topological_step_ids),
-            "steps": [step.to_dict() for step in self._serialize_steps(request.config)],
+            "steps": [step.to_dict() for step in steps],
         }
         return compute_execution_identity_fingerprint(payload)
 
@@ -101,11 +133,15 @@ class WorkflowManifestService(ManifestServiceScaffoldMixin):
                     else None
                 ),
                 run_options=(
-                    step.run_options.to_mapping()
+                    copy.deepcopy(step.run_options.to_mapping())
                     if isinstance(step, WorkflowStepConfig)
                     else None
                 ),
-                config=step.config if isinstance(step, TransformStepConfig) else None,
+                config=(
+                    copy.deepcopy(step.config)
+                    if isinstance(step, TransformStepConfig)
+                    else None
+                ),
             )
             for step in config.steps
         )

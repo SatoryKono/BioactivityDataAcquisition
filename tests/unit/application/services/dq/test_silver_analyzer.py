@@ -520,7 +520,10 @@ class TestCheckKeyNullability:
         df = pl.DataFrame({"other": [1, 2, 3]})
         rules = [{"field": "id", "key_type": "merge", "nullable": False}]
         result = analyzer._threshold.check_key_nullability(df, rules)
-        assert result["status"] == DQCheckStatus.PASS.value
+        assert result["status"] == DQCheckStatus.FAIL.value
+        assert result["violations"] == [
+            {"field": "id", "key_type": "merge", "missing_column": True}
+        ]
 
     def test_rules_checked_count(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"id": [1, 2, 3], "key": ["a", "b", "c"]})

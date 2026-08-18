@@ -247,8 +247,8 @@ def augment_dq_summary_with_composite_cv(
     if not cv_summary["has_signal"]:
         return dq_summary
 
-    error_records = int(cv_summary["error_records"])
-    warning_records = int(cv_summary["warning_records"])
+    error_records = max(dq_summary.error_records, int(cv_summary["error_records"]))
+    warning_records = max(dq_summary.warning_records, int(cv_summary["warning_records"]))
     total_records = dq_summary.total_records
     existing_provenance = normalize_rule_provenance_entries(dq_summary.rule_provenance)
     composite_provenance = normalize_rule_provenance_entries(
@@ -257,8 +257,8 @@ def augment_dq_summary_with_composite_cv(
     return dq_summary.model_copy(
         update={
             "valid_records": max(total_records - error_records, 0),
-            "error_records": max(dq_summary.error_records, error_records),
-            "warning_records": max(dq_summary.warning_records, warning_records),
+            "error_records": error_records,
+            "warning_records": warning_records,
             "error_rate": (error_records / total_records) if total_records else 0.0,
             "validation_passed": dq_summary.validation_passed
             and bool(cv_summary["validation_passed"]),

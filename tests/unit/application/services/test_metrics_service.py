@@ -156,7 +156,7 @@ class TestStartResult:
         result = StartResult(success=True, port=8000)
         assert result.success is True
         assert result.port == 8000
-        assert result.addr == "0.0.0.0"
+        assert result.addr == "127.0.0.1"
         assert result.already_running is False
         assert result.error is None
 
@@ -224,7 +224,7 @@ class TestMetricsService:
         assert result.already_running is False
         mock_server.start.assert_called_once_with(
             port=8000,
-            addr="0.0.0.0",
+            addr="127.0.0.1",
             started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
             fail_fast=False,
             retry_count=3,
@@ -290,7 +290,7 @@ class TestMetricsService:
 
         mock_server.start.assert_called_once_with(
             port=8080,
-            addr="0.0.0.0",
+            addr="127.0.0.1",
             started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
             fail_fast=False,
             retry_count=5,
@@ -642,7 +642,7 @@ class TestMetricsServiceEdgeCases:
         assert result.port == 8000
         mock_server.start.assert_called_with(
             port=8000,
-            addr="0.0.0.0",
+            addr="127.0.0.1",
             started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
             fail_fast=False,
             retry_count=3,

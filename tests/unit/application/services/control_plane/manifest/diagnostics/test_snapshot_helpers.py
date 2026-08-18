@@ -217,7 +217,14 @@ def test_merge_ledger_input_snapshots_into_summary_updates_snapshot_fields() -> 
     ]
     assert merged["input_snapshot_count"] == 2
     assert merged["input_snapshot_ids"] == ["snap-a", "snap-b"]
-    assert merged["input_snapshot_content_hashes"] == ["sha256:a", "sha256:b"]
+    assert merged["input_snapshot_content_hashes"] == ["sha256:old", "sha256:b"]
+    assert merged["input_snapshot_identity_conflicts"] == [
+        {
+            "snapshot_id": "snap-a",
+            "manifest_content_hash": "sha256:old",
+            "ledger_content_hash": "sha256:a",
+        }
+    ]
     assert merged["input_snapshot_identity_fingerprint"]
     assert merged["source_posture"] == LIVE_CAPTURE_SNAPSHOT_MATERIALIZED
     assert merged["snapshot_status"] == "ledger_derived"

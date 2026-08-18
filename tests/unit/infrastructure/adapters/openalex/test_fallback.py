@@ -303,7 +303,7 @@ class TestSearchByTitleEdgeCases:
     """Direct tests for _search_by_title fallback branches."""
 
     @pytest.mark.asyncio
-    async def test_returns_first_no_title_candidate_when_no_match(
+    async def test_returns_none_when_untitled_candidates_do_not_match(
         self,
         handler: OpenAlexTitleFallbackHandler,
         mock_search_fn: AsyncMock,
@@ -316,8 +316,7 @@ class TestSearchByTitleEdgeCases:
 
         result = await handler._search_by_title("Expected Title")
 
-        assert result is not None
-        assert result["id"] == "W2"
+        assert result is None
 
     @pytest.mark.asyncio
     async def test_returns_none_when_candidates_have_non_matching_titles(

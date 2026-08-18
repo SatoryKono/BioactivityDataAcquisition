@@ -79,7 +79,6 @@ def _resume_diagnostics_present(details: Mapping[str, object]) -> bool:
             "compatibility_disposition",
             "resume_rejected",
             "execution_identity_compatible",
-            "messages",
             "current_identity",
             "checkpoint_identity",
         )

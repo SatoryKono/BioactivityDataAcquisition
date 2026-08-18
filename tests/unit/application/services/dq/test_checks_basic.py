@@ -90,6 +90,15 @@ class TestCheckCompletenessDirect:
         assert result.overall_completeness_score == pytest.approx(0.0)
         assert result.status == DQCheckStatus.FAIL
 
+    def test_missing_required_fields_count_in_denominator(self) -> None:
+        df = pl.DataFrame({"id": [1, 2]})
+
+        result = check_completeness(df, ["id", "missing"], 0.5)
+
+        assert result.required_fields == pytest.approx({"id": 1.0, "missing": 0.0})
+        assert result.overall_completeness_score == pytest.approx(0.5)
+        assert result.status == DQCheckStatus.PASS
+
 
 class TestCheckDataFreshnessDirect:
     """Direct ownership tests for ``check_data_freshness``."""

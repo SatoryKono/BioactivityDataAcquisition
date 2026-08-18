@@ -209,7 +209,6 @@ class BatchProcessingService:
             gold_count=len(transform_result.gold_records),
             quarantined_count=transform_result.quarantined_count,
         )
-        self._tracing.end_span(span)
         return BatchProcessingOutcome(
             batch_id=batch_id,
             bronze_result=cast("BronzeWriteResult | None", bronze_result),

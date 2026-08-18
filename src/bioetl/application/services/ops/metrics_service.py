@@ -82,7 +82,7 @@ class StartResult:
 
     success: bool = False
     port: int = 0
-    addr: str = "0.0.0.0"
+    addr: str = "127.0.0.1"
     already_running: bool = False
     error: str | None = None
 
@@ -161,7 +161,7 @@ class _MetricsStartMixin(_MetricsTracingMixin):
     def start(
         self: _MetricsStartHost,
         port: int = 8000,
-        addr: str = "0.0.0.0",
+        addr: str = "127.0.0.1",
         *,
         fail_fast: bool = False,
         retry_count: int = 3,

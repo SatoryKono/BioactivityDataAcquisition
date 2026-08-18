@@ -258,6 +258,40 @@ class TestApplyRenamesToRecords:
 
         assert result == [{"renamed_real": 42}]
 
+    def test_rename_collision_two_sources_same_destination_raises(self):
+        """Two source keys mapping to one destination must fail closed."""
+        records = [{"src_a": 1, "src_b": 2}]
+        rename_map = {"src_a": "dest", "src_b": "dest"}
+
+        with pytest.raises(ValueError, match="Column rename collision"):
+            _Writer()._apply_renames_to_records(records, rename_map)
+
+    def test_rename_collision_with_existing_destination_raises(self):
+        """Renaming onto an existing destination column must fail closed."""
+        records = [{"old": 1, "new": 2}]
+        rename_map = {"old": "new"}
+
+        with pytest.raises(ValueError, match="Column rename collision"):
+            _Writer()._apply_renames_to_records(records, rename_map)
+
+    def test_apply_layer_renames_updates_records_order_and_schema(self):
+        """rename_map is applied to records, column_order, and schema names."""
+        schema = MagicMock()
+        schema.names = ["old_col", "keep"]
+        schema.rename_columns.return_value = "renamed-schema"
+
+        records, column_order, renamed_schema = _Writer()._apply_layer_renames(
+            [{"old_col": 1, "keep": 2}],
+            ["old_col", "keep"],
+            schema,
+            {"old_col": "new_col"},
+        )
+
+        assert records == [{"new_col": 1, "keep": 2}]
+        assert column_order == ["new_col", "keep"]
+        assert renamed_schema == "renamed-schema"
+        schema.rename_columns.assert_called_once_with(["new_col", "keep"])
+
 
 # ---------------------------------------------------------------------------
 # _get_column_order

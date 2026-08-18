@@ -91,6 +91,46 @@ class _FakeTracing:
         return self._tracer
 
 
+def test_close_span_records_cancelled_error() -> None:
+    span = _FakeSpan()
+    error = TimeoutError("cancelled-as-base")
+    close_span(span, error)
+    assert span.exited is True
+    assert span.exceptions == [error]
+    assert span.attributes["error"] is True
+
+
+@pytest.mark.asyncio
+async def test_record_processor_span_tracks_cancelled_error() -> None:
+    """CancelledError is assigned before _end_span and then re-raised."""
+    import asyncio
+    from unittest.mock import MagicMock
+
+    from bioetl.application.core._record_processor_span_support import (
+        RecordProcessorSpanExecutor,
+    )
+
+    tracer = MagicMock()
+    span = _FakeSpan()
+    tracer.get_tracer.return_value.start_as_current_span.return_value = span
+    executor = RecordProcessorSpanExecutor(tracer)
+
+    async def _cancel() -> object:
+        raise asyncio.CancelledError()
+
+    with pytest.raises(asyncio.CancelledError):
+        await executor.execute_with_span(
+            "silver",
+            _cancel(),
+            batch_id="batch-1",  # type: ignore[arg-type]
+            count=1,
+        )
+
+    assert span.exited is True
+    assert span.exceptions
+    assert isinstance(span.exceptions[0], asyncio.CancelledError)
+
+
 def test_build_pipeline_span_attributes_with_and_without_context() -> None:
     config = SimpleNamespace(
         pipeline_name="chembl_activity",

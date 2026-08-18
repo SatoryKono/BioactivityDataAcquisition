@@ -22,6 +22,11 @@ def _record_manifest_id(record: object) -> str | None:
     return cast(_ManifestRecord, record).manifest_id
 
 
+def _unique_sorted_manifest_ids(*manifest_ids: str) -> list[str]:
+    """Return deterministic unique blocked-manifest identifiers."""
+    return sorted(set(manifest_ids))
+
+
 def build_narrowed_scope_global_claim(
     *,
     unresolved_records: tuple[object, ...],
@@ -37,14 +42,14 @@ def build_narrowed_scope_global_claim(
         reason = "residual_historical_runs_lack_explicit_resolution_disposition"
     else:
         reason = "retained_certifiable_scope_still_contains_in_scope_blockers"
-    blocked_manifest_ids = [
+    blocked_manifest_ids = _unique_sorted_manifest_ids(
         *[
             manifest_id
             for record in unresolved_records
             if (manifest_id := _record_manifest_id(record)) is not None
         ],
         *narrowed_scope_blockers,
-    ]
+    )
     return {
         "claimed": claimed,
         "verdict": "claim_supported" if claimed else "claim_blocked",
@@ -126,11 +131,13 @@ def build_universal_scope_global_claim(
         "verdict": "claim_supported" if claimed else "claim_blocked",
         "reason": reason,
         "scope": "all_retained_historical_runs",
-        "blocked_manifest_ids": [
-            manifest_id
-            for record in unresolved_records
-            if (manifest_id := _record_manifest_id(record)) is not None
-        ],
+        "blocked_manifest_ids": _unique_sorted_manifest_ids(
+            *[
+                manifest_id
+                for record in unresolved_records
+                if (manifest_id := _record_manifest_id(record)) is not None
+            ]
+        ),
     }
 
 

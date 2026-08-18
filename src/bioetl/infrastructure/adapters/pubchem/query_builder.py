@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from urllib.parse import quote
+
 __all__ = [
     "build_assay_endpoint",
     "build_cid_batch_endpoint",
@@ -12,19 +14,23 @@ __all__ = [
 ]
 
 
+def _encode_path_value(query: str) -> str:
+    return quote(query, safe="")
+
+
 def build_compound_name_endpoint(query: str) -> str:
     """Build endpoint for compound name search."""
-    return f"/compound/name/{query}/JSON"
+    return f"/compound/name/{_encode_path_value(query)}/JSON"
 
 
 def build_substance_name_endpoint(query: str) -> str:
     """Build endpoint for substance name search."""
-    return f"/substance/name/{query}/JSON"
+    return f"/substance/name/{_encode_path_value(query)}/JSON"
 
 
 def build_assay_endpoint(query: str) -> str:
     """Build endpoint for assay lookup."""
-    return f"/assay/aid/{query}/JSON"
+    return f"/assay/aid/{_encode_path_value(query)}/JSON"
 
 
 def build_smiles_endpoint() -> str:
@@ -41,7 +47,5 @@ def build_cid_batch_endpoint(batch: list[int]) -> str:
     """Build endpoint for CID batch lookup."""
     if not batch:
         raise ValueError("CID batch must contain at least one CID")
-    preview = ",".join(map(str, batch[:3]))
-    if len(batch) > 3:
-        preview = f"{preview},..."
-    return f"/compound/cid/{preview}/JSON"
+    joined = ",".join(map(str, batch))
+    return f"/compound/cid/{joined}/JSON"

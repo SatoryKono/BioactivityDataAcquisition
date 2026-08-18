@@ -99,7 +99,7 @@ class TestLockConfigAdaptiveTTL:
         assert cfg.lock_ttl == 150  # 500 * 0.3, above default 90
 
     def test_ceiling_with_custom_lock_ttl(self) -> None:
-        """Even with a high lock_ttl, ceiling must not exceed 600 s."""
+        """Adaptive scaling is capped at 600 s even when configured TTL is high."""
         cfg = LockConfig.for_pipeline(
             "chembl",
             "activity",
@@ -108,3 +108,24 @@ class TestLockConfigAdaptiveTTL:
             batch_size_hint=10000,
         )
         assert cfg.lock_ttl == 600
+
+    def test_oversized_configured_ttl_preserved_without_hint(self) -> None:
+        """Explicit lock_ttl above 600 is kept when no adaptive hint is given."""
+        cfg = LockConfig.for_pipeline(
+            "chembl",
+            "activity",
+            RunType.INCREMENTAL,
+            lock_ttl=900,
+        )
+        assert cfg.lock_ttl == 900
+
+    def test_oversized_configured_ttl_preserved_with_hint(self) -> None:
+        """Adaptive ceiling must not reduce an explicit lock_ttl above 600 s."""
+        cfg = LockConfig.for_pipeline(
+            "chembl",
+            "activity",
+            RunType.INCREMENTAL,
+            lock_ttl=900,
+            batch_size_hint=100,
+        )
+        assert cfg.lock_ttl == 900

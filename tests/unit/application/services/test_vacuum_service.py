@@ -279,7 +279,7 @@ class TestVacuumServiceAsync:
         mock_logger: MagicMock,
     ) -> None:
         """Test vacuum_table handles exceptions."""
-        mock_lifecycle.vacuum = AsyncMock(side_effect=Exception("Vacuum failed"))
+        mock_lifecycle.vacuum = AsyncMock(side_effect=RuntimeError("Vacuum failed"))
 
         result = await service.vacuum_table(
             table_name="test_table",
@@ -293,6 +293,21 @@ class TestVacuumServiceAsync:
         assert "Vacuum failed" in result.error  # type: ignore[operator]
 
         mock_logger.error.assert_called_once()
+
+    async def test_vacuum_table_propagates_unexpected_attribute_error(
+        self,
+        service: VacuumService,
+        mock_lifecycle: MagicMock,
+    ) -> None:
+        mock_lifecycle.vacuum = AsyncMock(side_effect=AttributeError("missing attr"))
+
+        with pytest.raises(AttributeError, match="missing attr"):
+            await service.vacuum_table(
+                table_name="test_table",
+                layer="silver",
+                retention_days=7,
+                dry_run=False,
+            )
 
     async def test_vacuum_service_async__vacuum_all_success__0038a9bb(
         self,
@@ -328,7 +343,7 @@ class TestVacuumServiceAsync:
         """Test vacuum_all with some failures."""
         # First call succeeds, second fails
         mock_lifecycle.vacuum = AsyncMock(
-            side_effect=[5, Exception("Failed")],
+            side_effect=[5, RuntimeError("Failed")],
         )
 
         tables = [("table1", "silver"), ("table2", "gold")]

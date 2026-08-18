@@ -163,6 +163,16 @@ class TestSilverStatisticsHelpers:
         assert normalized["a"] == 2
         assert normalized["b"] == 1
 
+    def test_profile_categorical_column_keeps_empty_string_and_zero_count(self) -> None:
+        df = pl.DataFrame({"category": ["", "", "x"]})
+
+        result = profile_categorical_column(df, "category", (RuntimeError,))
+
+        assert result is not None
+        normalized = {item["value"]: item["count"] for item in result.top_values}
+        assert normalized[""] == 2
+        assert normalized["x"] == 1
+
     def test_value_distribution_to_dict_serializes_numeric_and_categorical_sections(
         self,
     ) -> None:

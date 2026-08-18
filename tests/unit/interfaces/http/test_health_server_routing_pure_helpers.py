@@ -47,6 +47,9 @@ from bioetl.interfaces.http import (
 from bioetl.interfaces.http._forensic_request_budget import (
     ForensicEndpointUnavailable,
 )
+from bioetl.interfaces.http import (
+    _health_server_checkpoint_freshness as checkpoint_freshness,
+)
 from bioetl.interfaces.http import _health_server_routing_support as routing_support
 from bioetl.interfaces.http import health_server_routing_mixin as routing_mixin_module
 from bioetl.interfaces.http.health_server_http_mixin import HealthServerHTTPMixin
@@ -625,10 +628,10 @@ async def test_routing_support_checkpoint_freshness_branches(
 ) -> None:
     host = _RoutingHost()
     writer = _Writer()
-    monkeypatch.setattr(routing_support.asyncio, "to_thread", _inline_to_thread)
+    monkeypatch.setattr(checkpoint_freshness.asyncio, "to_thread", _inline_to_thread)
     host._checkpoint_port = None
 
-    await routing_support.handle_control_plane_checkpoint_freshness(
+    await checkpoint_freshness.handle_control_plane_checkpoint_freshness(
         host,
         writer,
         {"pipeline": "chembl_activity"},
@@ -643,7 +646,7 @@ async def test_routing_support_checkpoint_freshness_branches(
         resolved_via="selected_run_id",
     )
     monkeypatch.setattr(
-        routing_support,
+        checkpoint_freshness,
         "resolve_control_plane_identity_scope",
         lambda *_args, **_kwargs: scope,
     )
@@ -674,11 +677,11 @@ async def test_routing_support_checkpoint_freshness_branches(
             return _evidence
 
         monkeypatch.setattr(
-            routing_support,
+            checkpoint_freshness,
             "load_checkpoint_freshness_evidence",
             fake_load_checkpoint_freshness_evidence,
         )
-        await routing_support.handle_control_plane_checkpoint_freshness(
+        await checkpoint_freshness.handle_control_plane_checkpoint_freshness(
             host,
             writer,
             {"pipeline": "chembl_activity"},
@@ -691,10 +694,66 @@ async def test_routing_support_checkpoint_freshness_branches(
         resolved_manifest=SimpleNamespace(pipeline_name="pubchem_compound"),
         resolved_via="latest_manifest",
     )
-    assert routing_support._resolved_scope_pipeline(scope) == "chembl_activity"
+    assert checkpoint_freshness._resolved_scope_pipeline(scope) == "chembl_activity"
     assert (
-        routing_support._resolved_scope_pipeline(resolved_scope) == "pubchem_compound"
+        checkpoint_freshness._resolved_scope_pipeline(resolved_scope)
+        == "pubchem_compound"
     )
+
+
+@pytest.mark.asyncio
+async def test_checkpoint_freshness_timeouts_fail_closed_unknown(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    host = _RoutingHost()
+    writer = _Writer()
+    host._checkpoint_port = object()
+
+    async def timeout_wait_for(_awaitable: object, timeout: float) -> object:
+        del timeout
+        if asyncio.iscoroutine(_awaitable):
+            _awaitable.close()
+        raise TimeoutError
+
+    monkeypatch.setattr(checkpoint_freshness.asyncio, "wait_for", timeout_wait_for)
+    await checkpoint_freshness.handle_control_plane_checkpoint_freshness(
+        host,
+        writer,
+        {"pipeline": "chembl_activity"},
+    )
+    assert host.sent[-1][1] == 200
+    assert host.sent[-1][2]["evidence_source"] == "scope_resolve_timeout"
+    assert host.sent[-1][2]["status"] == "UNKNOWN"
+
+    call_count = {"n": 0}
+
+    async def timeout_after_resolve(awaitable: object, timeout: float) -> object:
+        del timeout
+        call_count["n"] += 1
+        if call_count["n"] == 1:
+            return await awaitable  # type: ignore[misc]
+        if asyncio.iscoroutine(awaitable):
+            awaitable.close()
+        raise TimeoutError
+
+    monkeypatch.setattr(
+        checkpoint_freshness,
+        "resolve_control_plane_identity_scope",
+        lambda *_args, **_kwargs: SimpleNamespace(
+            requested_pipeline="chembl_activity",
+            resolved_manifest=None,
+            resolved_via="selected_run_id",
+        ),
+    )
+    monkeypatch.setattr(checkpoint_freshness.asyncio, "to_thread", _inline_to_thread)
+    monkeypatch.setattr(checkpoint_freshness.asyncio, "wait_for", timeout_after_resolve)
+    await checkpoint_freshness.handle_control_plane_checkpoint_freshness(
+        host,
+        writer,
+        {"pipeline": "chembl_activity"},
+    )
+    assert host.sent[-1][2]["evidence_source"] == "scope_resolve_timeout"
+    assert host.sent[-1][2]["pipeline"] == "chembl_activity"
 
 
 @pytest.mark.asyncio
@@ -825,6 +884,35 @@ async def test_quarantine_routing_dispatches_filtered_explorer_branches() -> Non
         "text",
         400,
         "Missing required query parameter: pipeline",
+    )
+
+
+@pytest.mark.asyncio
+async def test_quarantine_dispatch_maps_backend_errors_to_503() -> None:
+    host = _RoutingHost()
+    writer = _Writer()
+
+    class _FailingService:
+        async def list_filtered_records(self, **_kwargs: object) -> dict[str, object]:
+            raise ConnectionError("quarantine store offline")
+
+    host._quarantine_service = _FailingService()
+    await quarantine_routing.dispatch_quarantine_request(
+        host,
+        writer=writer,
+        path="/ops/quarantine/filtered-records",
+        query={"pipeline": "chembl_activity"},
+    )
+    assert host.sent[-1] == (
+        "payload",
+        503,
+        {
+            "contract": "forensic_endpoint_error_v1",
+            "status": "unavailable",
+            "endpoint": "filtered-records",
+            "reason": "backend_unavailable",
+            "retryable": True,
+        },
     )
 
 

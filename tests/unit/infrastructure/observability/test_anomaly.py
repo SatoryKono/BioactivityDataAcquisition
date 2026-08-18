@@ -343,6 +343,12 @@ class TestAnomalyDetectorValidation:
         with pytest.raises(ValueError, match="min_baseline_samples must be >= 1"):
             AnomalyDetector(min_baseline_samples=0)
 
+    def test_min_baseline_samples_above_window_raises(self):
+        with pytest.raises(
+            ValueError, match="min_baseline_samples must be <= baseline_window"
+        ):
+            AnomalyDetector(baseline_window=3, min_baseline_samples=4)
+
 
 @pytest.mark.unit
 class TestAnomalyDetectorThresholds:

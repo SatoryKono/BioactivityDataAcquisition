@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
@@ -46,7 +47,7 @@ def enrich_quarantine_summary(
     run_id: str,
     run_manifest: RunManifestInspectionResult | None,
 ) -> dict[str, object]:
-    summary = dict(stats)
+    summary = deepcopy(stats)
     summary["run_scope"] = {"run_id": run_id}
     silver_stats = summary.get("silver_filter_rejects")
     if (

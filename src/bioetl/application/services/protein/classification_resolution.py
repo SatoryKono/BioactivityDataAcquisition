@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from collections.abc import Iterable
 from dataclasses import dataclass
+from typing import Literal
 
 from bioetl.domain.mapping.protein_class_target_type import (
     PROTEIN_CLASS_TARGET_TYPE_RULE_VERSION,
@@ -19,6 +20,7 @@ from bioetl.domain.value_objects.protein_class_hierarchy import (
 )
 
 __all__ = [
+    "InvalidRecordPolicy",
     "ProteinClassificationDQIssue",
     "ProteinClassificationResolutionResult",
     "ProteinClassificationResolutionService",
@@ -28,6 +30,8 @@ __all__ = [
 _STATUS_MISSING = "missing_classification"
 _STATUS_QUARANTINED = "quarantined"
 _STATUS_RESOLVED = "resolved"
+InvalidRecordPolicy = Literal["quarantine", "missing"]
+_INVALID_RECORD_POLICIES: frozenset[str] = frozenset({"quarantine", "missing"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -220,9 +224,14 @@ class ProteinClassificationResolutionService:
         self,
         classification_port: ProteinClassificationPort,
         *,
-        invalid_record_policy: str = "quarantine",
+        invalid_record_policy: InvalidRecordPolicy = "quarantine",
         target_type_mapping_data: ProteinClassTargetTypeMappingData | None = None,
     ) -> None:
+        if invalid_record_policy not in _INVALID_RECORD_POLICIES:
+            raise ValueError(
+                "invalid_record_policy must be one of "
+                f"{sorted(_INVALID_RECORD_POLICIES)}, got {invalid_record_policy!r}"
+            )
         self._classification_port = classification_port
         self._invalid_record_policy = invalid_record_policy
         self._target_type_mapping_data = (
@@ -386,7 +395,7 @@ def _unresolved_resolution(
     *,
     target_id: str,
     dq_issues: list[ProteinClassificationDQIssue],
-    invalid_record_policy: str,
+    invalid_record_policy: InvalidRecordPolicy,
     mapping_version: str | None,
 ) -> ProteinClassificationResolutionResult:
     """Build missing/quarantined fallback rows when no hierarchy was resolved."""

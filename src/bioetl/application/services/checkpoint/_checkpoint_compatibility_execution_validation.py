@@ -31,6 +31,10 @@ def validate_execution_identity_compatibility(
         checkpoint_metadata,
         execution_identity_result,
     )
+    snapshot_messages = input_snapshot_mismatch_messages(
+        current_metadata,
+        checkpoint_metadata,
+    )
     if execution_fingerprints_present(current_metadata, checkpoint_metadata):
         fingerprint_messages: list[str] = []
         compatible = _validate_exact_replay_and_snapshots(
@@ -43,9 +47,13 @@ def validate_execution_identity_compatibility(
             *reason_messages,
             *fingerprint_messages,
             *exact_replay_mismatch_messages(current_metadata, checkpoint_metadata),
-            *input_snapshot_mismatch_messages(current_metadata, checkpoint_metadata),
+            *snapshot_messages,
         ]
-        return compatible and not fingerprint_messages, True, final_messages
+        return (
+            compatible and not fingerprint_messages and not snapshot_messages,
+            True,
+            final_messages,
+        )
 
     compatible, continuity_proven, messages = _initial_execution_identity_outcome(
         execution_identity_result,
@@ -69,9 +77,13 @@ def validate_execution_identity_compatibility(
         *messages,
         *metadata_mismatch_messages,
         *exact_replay_mismatch_messages(current_metadata, checkpoint_metadata),
-        *input_snapshot_mismatch_messages(current_metadata, checkpoint_metadata),
+        *snapshot_messages,
     ]
-    return compatible and not messages, continuity_proven, final_messages
+    return (
+        compatible and not messages and not snapshot_messages,
+        continuity_proven,
+        final_messages,
+    )
 
 
 def validate_lenient_execution_identity_compatibility(
@@ -128,7 +140,7 @@ def _initial_execution_identity_outcome(
     messages: list[str] = []
     reason = execution_identity_result["reason"]
     continuity_proven = reason != "execution_identity_not_enforced"
-    compatible = continuity_proven
+    compatible = bool(execution_identity_result["compatible"])
     if reason in {
         "checkpoint_execution_identity_fallback_mismatch",
         "degraded_runtime_anchor_fingerprint_mismatch",

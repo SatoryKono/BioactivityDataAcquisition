@@ -58,8 +58,8 @@ from bioetl.domain.control_plane.run_ledger import (
 from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
+from bioetl.interfaces.http import _health_server_checkpoint_freshness
 from bioetl.interfaces.http import _health_server_identity_evidence
-from bioetl.interfaces.http import _health_server_routing_support
 from bioetl.interfaces.http.control_plane_selector_context import (
     build_selector_filter_options_payload,
 )
@@ -80,6 +80,7 @@ from bioetl.interfaces.http.control_plane_identity.specs import (
     ANCHOR_SPECS,
     OVERVIEW_NAMES,
     SPEC_BY_NAME,
+    _anchor_specs_by_unique_name,
 )
 from bioetl.interfaces.http.control_plane_identity.types import AnchorSpec
 from bioetl.interfaces.http.health_server import HealthServer
@@ -245,6 +246,28 @@ def test_anchor_spec_accepts_legacy_aliases_and_reports_missing_fields() -> None
 
     with pytest.raises(TypeError, match="missing required AnchorSpec fields"):
         AnchorSpec(priority="P0", name="run_id")
+
+    with pytest.raises(TypeError, match="unexpected keyword argument"):
+        AnchorSpec(
+            priority="P0",
+            name="run_id",
+            label="Run ID",
+            source="manifest",
+            value_format="uuid",
+            why="identity",
+            rendering="short",
+            copy=True,
+            drilldown="overview",
+            missing_severity="ERROR",
+            unknown_field="nope",
+        )
+
+
+def test_anchor_specs_reject_duplicate_names_at_import_helper() -> None:
+    first = ANCHOR_SPECS[0]
+    with pytest.raises(ValueError, match="duplicate AnchorSpec name"):
+        _anchor_specs_by_unique_name((first, first))
+    assert _anchor_specs_by_unique_name(ANCHOR_SPECS) == SPEC_BY_NAME
 
 
 def test_control_plane_identity_checkpoint_compare_classifies_partial() -> None:
@@ -918,7 +941,7 @@ class TestHealthServerControlPlaneSelector:
         )
 
         with patch.object(
-            _health_server_routing_support,
+            _health_server_checkpoint_freshness,
             "current_utc_time",
             test_clock.now,
         ):

@@ -18,6 +18,10 @@ def calculate_dq_score(valid_count: int, total_count: int) -> float:
     Returns:
         Quality score ratio between 0.0 and 1.0 (1.0 if total is zero).
     """
+    if valid_count < 0 or total_count < 0:
+        raise ValueError("valid_count and total_count must be non-negative")
+    if valid_count > total_count:
+        raise ValueError("valid_count cannot exceed total_count")
     if total_count == 0:
         return 1.0
     return valid_count / total_count

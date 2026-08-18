@@ -76,6 +76,8 @@ class HealthAggregator:
 
         component_results: list[ComponentHealthResult] = []
         for result in results:
+            if isinstance(result, asyncio.CancelledError):
+                raise result
             if isinstance(result, BaseException):
                 component_results.append(build_parallel_exception_result(result))
             else:

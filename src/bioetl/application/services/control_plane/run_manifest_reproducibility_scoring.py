@@ -37,11 +37,22 @@ def build_reproducibility_audit_scoring(summary: JsonDict) -> JsonDict:
     required_profile = str(
         summary.get("required_persistence_profile") or "degraded_observable"
     )
-    thresholds = dict(PROFILE_SCORE_THRESHOLDS.get(required_profile, {}))
-    threshold_failures = evaluate_threshold_failures(
-        thresholds=thresholds,
-        category_scores=category_scores,
-    )
+    if required_profile not in PROFILE_SCORE_THRESHOLDS:
+        thresholds: dict[str, int] = {}
+        threshold_failures = [
+            {
+                "category": "required_profile",
+                "required": None,
+                "actual": required_profile,
+                "reason": "unknown_required_persistence_profile",
+            }
+        ]
+    else:
+        thresholds = dict(PROFILE_SCORE_THRESHOLDS[required_profile])
+        threshold_failures = evaluate_threshold_failures(
+            thresholds=thresholds,
+            category_scores=category_scores,
+        )
     overall = round(
         sum(card.score for card in score_cards) / max(len(score_cards), 1),
         1,

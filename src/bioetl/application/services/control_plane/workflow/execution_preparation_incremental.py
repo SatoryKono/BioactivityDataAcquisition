@@ -22,12 +22,14 @@ def _apply_incremental_offset(
     if new_offset is None:
         return config
 
+    inherited_offset = config.defaults.start_offset
     return replace(
         config,
         defaults=replace(config.defaults, start_offset=new_offset),
         steps=tuple(
             _workflow_step_with_start_offset(step, new_offset)
             if isinstance(step, WorkflowStepConfig)
+            and _step_inherits_incremental_offset(step, inherited_offset)
             else step
             for step in config.steps
         ),
@@ -50,6 +52,15 @@ def _offset_from_successful_state(state: WorkflowExecutionState | None) -> int |
     if state.last_limit is None:
         return None
     return (state.last_start_offset or 0) + state.last_limit
+
+
+def _step_inherits_incremental_offset(
+    step: WorkflowStepConfig,
+    inherited_offset: int | None,
+) -> bool:
+    """Return whether a pipeline step should receive the workflow-level offset."""
+    step_offset = step.run_options.start_offset
+    return step_offset is None or step_offset == inherited_offset
 
 
 def _workflow_step_with_start_offset(

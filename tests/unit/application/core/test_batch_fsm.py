@@ -96,6 +96,17 @@ class TestBatchExecutionFSM:
         r2 = fsm.advance(r1.new_state, BatchExecutionEvent.CHECKPOINT_SAVED)
         assert r2.new_state == BatchExecutionState.DONE
 
+    def test_shutdown_checkpoint_failed_transitions_to_failed(
+        self, fsm: BatchExecutionFSM
+    ) -> None:
+        """SHUTTING_DOWN + CHECKPOINT_FAILED must fail closed like evaluation."""
+        result = fsm.advance(
+            BatchExecutionState.SHUTTING_DOWN,
+            BatchExecutionEvent.CHECKPOINT_FAILED,
+        )
+        assert result.new_state == BatchExecutionState.FAILED
+        assert BatchExecutionCommand.PROPAGATE_ERROR in result.commands
+
     def test_failure_transitions(self, fsm: BatchExecutionFSM) -> None:
         """Tests that failures in critical stages propagate to FAILED state."""
         stages = [

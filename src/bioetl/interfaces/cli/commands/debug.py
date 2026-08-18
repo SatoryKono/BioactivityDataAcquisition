@@ -222,6 +222,10 @@ async def _run_debug_session(
     Returns:
         RunResult from pipeline execution.
     """
-    del mode, enabled_breakpoints
+    if mode != "log" or enabled_breakpoints:
+        raise ValueError(
+            "Unsupported debug mode or breakpoints: only mode='log' without "
+            "breakpoints is available"
+        )
     service = get_pipeline_runner_service(registry=registry)
     return await service.run(pipeline, options=options)

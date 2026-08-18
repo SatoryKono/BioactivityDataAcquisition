@@ -7,12 +7,17 @@ from collections.abc import Mapping
 from dataclasses import replace
 from pathlib import Path
 
+from typing import TYPE_CHECKING
+
 from bioetl.application.services.workflow.workflow_runner_models import (
     WorkflowRunExecutionResult,
     WorkflowStepExecutionResult,
 )
 from bioetl.domain.types import JsonDict
 from bioetl.domain.workflow import WorkflowConfig, WorkflowStepConfig
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import LoggerPort
 
 
 def _plan_steps_from_config(config: WorkflowConfig) -> list[JsonDict]:
@@ -21,15 +26,21 @@ def _plan_steps_from_config(config: WorkflowConfig) -> list[JsonDict]:
         step = config.get_step(step_id)
         if step is None:
             continue
-        kind = "pipeline" if isinstance(step, WorkflowStepConfig) else "transform"
+        if isinstance(step, WorkflowStepConfig):
+            kind = "pipeline"
+            pipeline_name = step.pipeline_name
+            transform_name = None
+        else:
+            kind = "transform"
+            pipeline_name = None
+            transform_name = step.transform_name
         plan_steps.append(
             {
                 "step_id": step.step_id,
                 "kind": kind,
-                "pipeline_name": getattr(step, "pipeline_name", None),
-                "transform_name": getattr(step, "transform_name", None)
-                or getattr(step, "name", None),
-                "depends_on": list(getattr(step, "depends_on", ()) or ()),
+                "pipeline_name": pipeline_name,
+                "transform_name": transform_name,
+                "depends_on": list(step.depends_on),
             }
         )
     return plan_steps
@@ -105,6 +116,7 @@ def attach_workflow_run_report(
     *,
     config: WorkflowConfig,
     result: WorkflowRunExecutionResult,
+    logger: LoggerPort | None = None,
 ) -> WorkflowRunExecutionResult:
     """Build and persist workflow_run_report_v1 (best-effort)."""
     try:
@@ -141,6 +153,13 @@ def attach_workflow_run_report(
             run_report_markdown_path=str(written.markdown_path),
         )
     except Exception as exc:
+        if logger is not None:
+            logger.warning(
+                "Workflow run report build failed",
+                workflow_name=result.workflow_name,
+                error_type=type(exc).__name__,
+                error=str(exc),
+            )
         # NOSONAR - mypy infers correct type; Sonar S5886 false positive on dataclass.replace()
         return replace(
             result,
