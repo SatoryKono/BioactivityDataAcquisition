@@ -243,7 +243,7 @@
         "y": 8
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN HTTP trust summary on the first screen. processing_status is the data-processing outcome; trust_status is fail-closed exact-run evidence (INCOMPLETE/ERROR/UNKNOWN are not OK). First screen shows top-3 trust.reasons_text (newline-joined); the full reason list stays in rows / panel 9414. Scope is exact_run when run_id resolves. No-data or backend unavailable is not a health verdict.",
+      "description": "SELECTED RUN HTTP trust summary on the first screen. processing_status is the data-processing outcome; trust_status is fail-closed exact-run evidence (INCOMPLETE/ERROR/UNKNOWN are not OK). First screen shows top-3 trust.reasons_text (newline-joined); the full reason list stays in rows / panel 9414. Scope is exact_run when run_id resolves. Valid empty means no selected exact-run payload; backend unavailable is not a health verdict.",
       "fieldConfig": {
         "defaults": {
           "custom": {
