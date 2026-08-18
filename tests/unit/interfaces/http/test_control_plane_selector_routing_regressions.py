@@ -10,6 +10,7 @@ import pytest
 
 from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.interfaces.http import _control_plane_selector_filters as selector_filters
+from bioetl.interfaces.http import _health_server_readiness as readiness_module
 from bioetl.interfaces.http import health_server_routing_mixin as routing_module
 from bioetl.interfaces.http import report_root_config
 from bioetl.interfaces.http._control_plane_selector_records import SelectorRecord
@@ -336,9 +337,9 @@ async def test_readiness_offloads_report_root_filesystem_io(
         assert callable(function)
         return function(*args, **kwargs)
 
-    monkeypatch.setattr(report_root_config, "report_root_readiness_check", fake_check)
-    monkeypatch.setattr(report_root_config, "enforce_report_root_marker", lambda: False)
-    monkeypatch.setattr(routing_module.asyncio, "to_thread", fake_to_thread)
+    monkeypatch.setattr(readiness_module, "report_root_readiness_check", fake_check)
+    monkeypatch.setattr(readiness_module, "enforce_report_root_marker", lambda: False)
+    monkeypatch.setattr(readiness_module.asyncio, "to_thread", fake_to_thread)
 
     ready = await host._handle_readiness()
 

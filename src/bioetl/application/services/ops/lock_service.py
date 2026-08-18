@@ -163,9 +163,9 @@ class LockService:
 
         for pipeline_id in pipeline_ids:
             # Try both regular and exclusive locks
-            if await self.release_lock(pipeline_id, owner_id, exclusive=False):
-                released.append(pipeline_id)
-            elif await self.release_lock(pipeline_id, owner_id, exclusive=True):
+            if await self.release_lock(
+                pipeline_id, owner_id, exclusive=False
+            ) or await self.release_lock(pipeline_id, owner_id, exclusive=True):
                 released.append(pipeline_id)
 
         self.logger.info(
