@@ -146,10 +146,7 @@ filters:
         max: 1
       component_ids:
         min: 1
-    ranges:
-      publication_year:
-        min: 1950
-        max: 2050
+    ranges: {}
     columns:
       component_type:
       - PROTEIN
