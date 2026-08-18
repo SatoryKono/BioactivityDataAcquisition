@@ -12,7 +12,7 @@
   "schema_version": 1,
   "source": "grafana/dashboards/*.json",
   "target_counts": {
-    "http": 32,
+    "http": 33,
     "loki": 0,
     "promql": 170,
     "tempo": 0,
@@ -1735,6 +1735,27 @@
       "query": "/ops/control-plane/failure-reasons?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
       "query_tokens": [
         "/ops/control-plane/failure-reasons",
+        "pipeline",
+        "run_type",
+        "run_id"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": "none"
+    },
+    {
+      "dashboard_uid": "bioetl-control-plane-v1",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "formula": "",
+      "kind": "http",
+      "panel_id": 9418,
+      "panel_title": "Review Selected-Run Trust",
+      "query": "/ops/control-plane/manifest-validation?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+      "query_tokens": [
+        "/ops/control-plane/manifest-validation",
         "pipeline",
         "run_type",
         "run_id"
