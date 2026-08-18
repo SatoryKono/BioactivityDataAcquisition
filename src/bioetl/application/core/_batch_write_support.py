@@ -176,8 +176,7 @@ async def safe_write_layer(
             occurred_at=ingestion_ts,
             logger=logger,
         )
-        # Gold write_gold() returns None on success; keep a truthy marker so
-        # callers can distinguish success from quarantined None.
+        # Gold returns None on success; use a marker to distinguish quarantine.
         return write_result if write_result is not None else True
     except SchemaViolationError as error:
         await _quarantine_schema_violation(

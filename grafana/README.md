@@ -649,6 +649,15 @@ providers:
       path: /var/lib/grafana/dashboards   # Mount point из docker-compose
 ```
 
+Bootstrap materializes exactly one provider file in
+`/etc/grafana/provisioning/dashboards`. With validated Ops HTTP identity and a
+ready Infinity plugin it selects the full directory above. In default soft
+fallback it selects `/var/lib/grafana/dashboards-prometheus-only`, where the
+same seven stable UIDs contain static `Ops HTTP not provisioned` notices and no
+query targets. The selected mode is recorded as `dashboard_profile=full` or
+`dashboard_profile=prometheus_only` in
+`/var/lib/grafana/bioetl-bootstrap-status.json`.
+
 ______________________________________________________________________
 
 ## 3. Быстрый запуск
@@ -768,8 +777,10 @@ ______________________________________________________________________
   - `grafana-data` → `/var/lib/grafana` (persistent данные Grafana)
   - `./grafana/provisioning/datasources-core` → bootstrap-источник обязательных datasource
   - `./grafana/provisioning/datasources-tracing` → bootstrap-источник tracing datasource
-  - `./grafana/provisioning/dashboards` → `/etc/grafana/provisioning/dashboards` (read-only)
+  - `./grafana/provisioning/dashboards` → bootstrap source `/etc/bioetl-grafana/dashboard-providers/full` (read-only)
+  - `./grafana/provisioning/dashboards-prometheus-only` → bootstrap source `/etc/bioetl-grafana/dashboard-providers/prometheus-only` (read-only)
   - `./grafana/dashboards` → `/var/lib/grafana/dashboards` (read-only, JSON-дашборды)
+  - `./grafana/dashboards-prometheus-only` → `/var/lib/grafana/dashboards-prometheus-only` (read-only, same-UID static notices)
 - Restart: `unless-stopped`
 
 **Metrics emission topology (AUD-OBS-20260727 / #6731):**
@@ -1743,6 +1754,13 @@ Shipped table cards now include explicit no-value copy and a health link:
 backend unavailable, invalid selector scope, absent exact run, and true zero
 processed records are different states. Treat generic `No data` as
 `UNKNOWN` until `/health/live` and the scoped endpoint respond.
+
+In default soft bootstrap, missing or foreign Ops HTTP identity no longer opens
+these panels with datasource errors. Grafana selects same-UID static dashboards
+with the explicit `Ops HTTP not provisioned` notice. Inspect
+`/var/lib/grafana/bioetl-bootstrap-status.json`: only
+`ops_http=ready`, `reason=identity_matched`, and `dashboard_profile=full`
+authorize interpretation of the HTTP-backed panels.
 
 ```powershell
 # Host: BioETL Ops HTTP identity backend (shipping surface after 2026-07-23)

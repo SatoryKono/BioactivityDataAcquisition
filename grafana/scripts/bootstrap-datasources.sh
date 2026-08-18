@@ -21,12 +21,13 @@
 # shellcheck disable=SC2039,SC3043
 set -u
 
-TARGET_DIR="/etc/grafana/provisioning/datasources"
-CORE_DIR="/etc/bioetl-grafana/datasources-core"
+TARGET_DIR="${BIOETL_GRAFANA_DATASOURCE_TARGET_DIR:-/etc/grafana/provisioning/datasources}"
+CORE_DIR="${BIOETL_GRAFANA_DATASOURCE_CORE_DIR:-/etc/bioetl-grafana/datasources-core}"
 DASHBOARD_PROVIDER_TARGET_DIR="${BIOETL_GRAFANA_DASHBOARD_PROVIDER_TARGET_DIR:-/etc/grafana/provisioning/dashboards}"
 DASHBOARD_PROVIDER_FULL_DIR="${BIOETL_GRAFANA_DASHBOARD_PROVIDER_FULL_DIR:-/etc/bioetl-grafana/dashboard-providers/full}"
 DASHBOARD_PROVIDER_FALLBACK_DIR="${BIOETL_GRAFANA_DASHBOARD_PROVIDER_FALLBACK_DIR:-/etc/bioetl-grafana/dashboard-providers/prometheus-only}"
 STATUS_FILE="${BIOETL_GRAFANA_BOOTSTRAP_STATUS_FILE:-/var/lib/grafana/bioetl-bootstrap-status.json}"
+RUN_SCRIPT="${BIOETL_GRAFANA_RUN_SCRIPT:-/run.sh}"
 RENDERING_SERVER_URL="${GF_RENDERING_SERVER_URL:-}"
 STALE_RENDERER_PLUGIN_DIR="/var/lib/grafana/plugins/grafana-image-renderer"
 EXPECTED_RUNTIME_SOURCE_ID="${BIOETL_EXPECTED_RUNTIME_SOURCE_ID:-unmanaged}"
@@ -230,7 +231,7 @@ EOF
 
 ensure_infinity_plugin() {
   INFINITY_PLUGIN_ID="yesoreyeram-infinity-datasource"
-  INFINITY_PLUGIN_DIR="/var/lib/grafana/plugins/${INFINITY_PLUGIN_ID}"
+  INFINITY_PLUGIN_DIR="${BIOETL_INFINITY_PLUGIN_DIR:-/var/lib/grafana/plugins/${INFINITY_PLUGIN_ID}}"
   INFINITY_PLUGIN_VERSION="${BIOETL_INFINITY_PLUGIN_VERSION:-3.8.0}"
   INFINITY_INSTALLED_VERSION=""
   if [ -f "${INFINITY_PLUGIN_DIR}/plugin.json" ]; then
@@ -378,9 +379,9 @@ fi
 
 write_bootstrap_status
 
-if [ ! -x /run.sh ] && [ ! -f /run.sh ]; then
-  log_err "/run.sh missing; cannot start Grafana"
+if [ ! -x "${RUN_SCRIPT}" ] && [ ! -f "${RUN_SCRIPT}" ]; then
+  log_err "${RUN_SCRIPT} missing; cannot start Grafana"
   exit 1
 fi
 log "starting Grafana (/run.sh) with ops_http=${OPS_HTTP_STATE} dashboard_profile=${DASHBOARD_PROFILE}"
-exec /run.sh
+exec "${RUN_SCRIPT}"

@@ -1,0 +1,45 @@
+{
+  "description": "Prometheus-only fallback for an unvalidated BioETL Ops HTTP datasource. This is an infrastructure notice, not a retention, replay, identity, or run verdict.",
+  "editable": false,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "description": "Static fail-closed notice used when Grafana bootstrap cannot provision BioETL Ops HTTP. UNKNOWN means the HTTP identity backend is absent, not that retention or replay failed.",
+      "gridPos": {
+        "h": 14,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "bioetlDisplayTitle": "Review Ops HTTP Availability",
+        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Review Ops HTTP Availability\" style=\"font-size:19px;font-weight:600;line-height:1.3;margin:0 6px 2px\">Review Ops HTTP Availability</div><p style=\"font-size:16px;line-height:1.45;margin:8px 6px\">Ops HTTP not provisioned. Dashboard <strong>0. Trust</strong> is serving the Prometheus-only notice profile because <code style=\"font-size:16px\">BioETL Ops HTTP</code> was not validated. Status: UNKNOWN.</p><p style=\"font-size:16px;line-height:1.45;margin:8px 6px\">No retention, replay, identity, or run verdict can be inferred from this notice. A missing datasource query is not a policy result.</p><p style=\"font-size:16px;line-height:1.45;margin:8px 6px\">Next action: start the monitoring stack through <code style=\"font-size:16px\">runtime_manager.py</code> so <code style=\"font-size:16px\">BIOETL_RUNTIME_SOURCE_ID</code> matches <code style=\"font-size:16px\">/ops/control-plane/ready</code>, then confirm <code style=\"font-size:16px\">ops_http=ready</code>, <code style=\"font-size:16px\">reason=identity_matched</code>, and <code style=\"font-size:16px\">dashboard_profile=full</code>.</p>",
+        "mode": "html"
+      },
+      "title": "Review Ops HTTP Availability",
+      "type": "text"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 30,
+  "style": "dark",
+  "tags": [
+    "bioetl",
+    "prometheus-only",
+    "ops-http-unavailable"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-12h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "0. Trust",
+  "uid": "bioetl-control-plane-v1",
+  "version": 1
+}
