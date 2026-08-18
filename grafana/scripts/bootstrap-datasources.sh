@@ -13,6 +13,9 @@
 # - Override: BIOETL_GRAFANA_OPS_READY_ATTEMPTS / BIOETL_GRAFANA_OPS_READY_SLEEP_SEC.
 # - Prometheus is provisioned BEFORE the Ops poll so a slow bioetl never blocks
 #   the core datasource path.
+# - Dashboard UX is fail-closed: soft fallback provisions the same seven UIDs
+#   from a static Prometheus-only notice profile. Full dashboards are selected
+#   only after Ops HTTP identity and the Infinity plugin are ready.
 # - BIOETL_OPS_HTTP_URL is validated before any HTTP probe.
 #
 # shellcheck disable=SC2039,SC3043
@@ -20,6 +23,9 @@ set -u
 
 TARGET_DIR="/etc/grafana/provisioning/datasources"
 CORE_DIR="/etc/bioetl-grafana/datasources-core"
+DASHBOARD_PROVIDER_TARGET_DIR="${BIOETL_GRAFANA_DASHBOARD_PROVIDER_TARGET_DIR:-/etc/grafana/provisioning/dashboards}"
+DASHBOARD_PROVIDER_FULL_DIR="${BIOETL_GRAFANA_DASHBOARD_PROVIDER_FULL_DIR:-/etc/bioetl-grafana/dashboard-providers/full}"
+DASHBOARD_PROVIDER_FALLBACK_DIR="${BIOETL_GRAFANA_DASHBOARD_PROVIDER_FALLBACK_DIR:-/etc/bioetl-grafana/dashboard-providers/prometheus-only}"
 STATUS_FILE="${BIOETL_GRAFANA_BOOTSTRAP_STATUS_FILE:-/var/lib/grafana/bioetl-bootstrap-status.json}"
 RENDERING_SERVER_URL="${GF_RENDERING_SERVER_URL:-}"
 STALE_RENDERER_PLUGIN_DIR="/var/lib/grafana/plugins/grafana-image-renderer"
@@ -46,6 +52,7 @@ OPS_HTTP_REASON="not_checked"
 OPS_HTTP_URL_VALID=0
 SOURCE_ID_MATCHED=0
 IDENTITY_VALID=0
+DASHBOARD_PROFILE="not_selected"
 BOOTSTRAP_ERRORS=0
 
 log() { echo "[bioetl-grafana] $*"; }
@@ -94,12 +101,68 @@ write_bootstrap_status() {
   "require_ops_http": "${REQUIRE_OPS_HTTP}",
   "expected_runtime_source_id_valid": "${IDENTITY_VALID}",
   "source_id_matched": "${SOURCE_ID_MATCHED}",
+  "dashboard_profile": "${DASHBOARD_PROFILE}",
   "ready_attempts": "${OPS_READY_ATTEMPTS}",
   "ready_sleep_sec": "${OPS_READY_SLEEP_SEC}",
   "bootstrap_errors": "${BOOTSTRAP_ERRORS}"
 }
 EOF
   log "bootstrap status written to ${STATUS_FILE} (ops_http=${OPS_HTTP_STATE})"
+}
+
+provision_dashboard_profile() {
+  _profile="$1"
+  case "${_profile}" in
+    full)
+      _source_dir="${DASHBOARD_PROVIDER_FULL_DIR}"
+      ;;
+    prometheus_only)
+      _source_dir="${DASHBOARD_PROVIDER_FALLBACK_DIR}"
+      ;;
+    *)
+      note_error "unknown dashboard profile ${_profile}"
+      return 1
+      ;;
+  esac
+
+  case "${DASHBOARD_PROVIDER_TARGET_DIR}" in
+    ""|/|/etc|/etc/grafana|/etc/grafana/provisioning)
+      note_error "refusing unsafe dashboard provider target ${DASHBOARD_PROVIDER_TARGET_DIR:-<empty>}"
+      return 1
+      ;;
+  esac
+  if [ ! -d "${_source_dir}" ]; then
+    note_error "missing dashboard provider source ${_source_dir}"
+    return 1
+  fi
+  set -- "${_source_dir}"/*.yml "${_source_dir}"/*.yaml
+  _provider_found=0
+  for _provider_file in "$@"; do
+    if [ -f "${_provider_file}" ]; then
+      _provider_found=1
+      break
+    fi
+  done
+  if [ "${_provider_found}" -ne 1 ]; then
+    note_error "dashboard provider source ${_source_dir} has no YAML files"
+    return 1
+  fi
+  if ! mkdir -p "${DASHBOARD_PROVIDER_TARGET_DIR}" 2>/dev/null; then
+    note_error "cannot create ${DASHBOARD_PROVIDER_TARGET_DIR}"
+    return 1
+  fi
+  rm -f "${DASHBOARD_PROVIDER_TARGET_DIR}"/*.yml \
+    "${DASHBOARD_PROVIDER_TARGET_DIR}"/*.yaml 2>/dev/null || true
+  for _provider_file in "$@"; do
+    if [ -f "${_provider_file}" ] && \
+      ! cp "${_provider_file}" "${DASHBOARD_PROVIDER_TARGET_DIR}/" 2>/dev/null; then
+      note_error "failed to provision ${_profile} dashboard provider"
+      return 1
+    fi
+  done
+  DASHBOARD_PROFILE="${_profile}"
+  log "provisioned dashboard profile ${DASHBOARD_PROFILE}"
+  return 0
 }
 
 fail_or_defer_ops() {
@@ -279,6 +342,28 @@ if [ "${OPS_HTTP_STATE}" = "ready" ]; then
   fi
 fi
 
+# Select exactly one dashboard provider. The Prometheus-only profile contains
+# static notices under the same seven stable UIDs and therefore never evaluates
+# an Ops HTTP panel while its datasource is intentionally absent.
+if [ "${OPS_HTTP_STATE}" = "ready" ]; then
+  if ! provision_dashboard_profile "full"; then
+    DASHBOARD_PROFILE="failed"
+    if [ "${REQUIRE_OPS_HTTP}" = "1" ]; then
+      write_bootstrap_status
+      log_err "full dashboard profile required but provisioning failed"
+      exit 1
+    fi
+    log_warn "full dashboard profile unavailable; attempting static fallback"
+    if ! provision_dashboard_profile "prometheus_only"; then
+      DASHBOARD_PROFILE="failed"
+    fi
+  fi
+else
+  if ! provision_dashboard_profile "prometheus_only"; then
+    DASHBOARD_PROFILE="failed"
+  fi
+fi
+
 log "Ops HTTP URL=${BIOETL_OPS_HTTP_URL}"  # NOSONAR - docker-internal URL echo
 if [ "${OPS_HTTP_STATE}" = "ready" ]; then
   log "provisioned Prometheus + BioETL Ops HTTP (no Loki/Tempo/Quarantine Explorer)"
@@ -297,5 +382,5 @@ if [ ! -x /run.sh ] && [ ! -f /run.sh ]; then
   log_err "/run.sh missing; cannot start Grafana"
   exit 1
 fi
-log "starting Grafana (/run.sh) with ops_http=${OPS_HTTP_STATE}"
+log "starting Grafana (/run.sh) with ops_http=${OPS_HTTP_STATE} dashboard_profile=${DASHBOARD_PROFILE}"
 exec /run.sh
