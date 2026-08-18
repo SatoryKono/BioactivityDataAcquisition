@@ -217,12 +217,12 @@ quality:
     error_message: Invalid assay parameter standard_units value
   - field: qudt_units
     type: pattern
-    pattern: '^(?:https?://[^\\s]+|[A-Za-zµ%][A-Za-z0-9µ%._/-]*|[A-Za-z][A-Za-z0-9]*_[0-9]{7})$'
+    pattern: '^(?:https?://[^\s]+|[A-Za-zµ%][A-Za-z0-9µ%._/-]*|[A-Za-z][A-Za-z0-9]*_[0-9]{7})$'
     nullable: true
     error_message: QUDT assay parameter units must be a raw QUDT URI or canonical unit token when present
   - field: qudt_unit_iri
     type: pattern
-    pattern: '^https?://[^\\s]+$'
+    pattern: '^https?://[^\s]+$'
     nullable: true
     error_message: qudt_unit_iri must be an HTTP(S) IRI when present
   - field: qudt_unit_mapping_status
@@ -240,7 +240,7 @@ quality:
     error_message: uo_units must be a canonical ontology/unit token when present
   - field: uo_unit_iri
     type: pattern
-    pattern: '^https?://[^\\s]+$'
+    pattern: '^https?://[^\s]+$'
     nullable: true
     error_message: uo_unit_iri must be an HTTP(S) IRI when present
   - field: uo_unit_mapping_status
@@ -336,10 +336,7 @@ filters:
   gold_filters:
     list_contains: {}
     list_lengths: {}
-    ranges:
-      publication_year:
-        min: 1950
-        max: 2050
+    ranges: {}
     required_fields:
     - assay_id
     - parameter_type

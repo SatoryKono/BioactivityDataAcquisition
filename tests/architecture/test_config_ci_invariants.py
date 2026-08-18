@@ -811,6 +811,65 @@ class TestGoldFilterFieldShape:
         assert "assay_description" in required_fields
         assert "description" not in required_fields
 
+    def test_gold_filter_ranges_reference_declared_schema_fields(self) -> None:
+        """Range filters must name a field declared on the entity schema."""
+        violations: list[str] = []
+        for path in sorted(ENTITIES_DIR.glob("*/*.yaml")):
+            data = _load_yaml(path)
+            filters = data.get("filters")
+            if not isinstance(filters, dict):
+                continue
+            gold_filters = filters.get("gold_filters")
+            if not isinstance(gold_filters, dict):
+                continue
+            ranges = gold_filters.get("ranges")
+            if not isinstance(ranges, dict) or not ranges:
+                continue
+            declared = _declared_entity_fields(data)
+            unknown = sorted(name for name in ranges if name not in declared)
+            if unknown:
+                violations.append(
+                    f"{_rel(path)}: gold_filters.ranges {unknown} not declared "
+                    f"in schema.column_groups or quality field validations"
+                )
+        assert not violations, "\n".join(violations)
+
+    def test_assay_parameters_url_patterns_match_non_whitespace(self) -> None:
+        """YAML single-quoted [^\\\\s] must not leak a backslash/s class."""
+        data = _load_yaml(ENTITIES_DIR / "chembl" / "assay_parameters.yaml")
+        quality = data.get("quality")
+        assert isinstance(quality, dict)
+        patterns = [
+            rule["pattern"]
+            for rule in quality.get("entity_field_validations") or []
+            if isinstance(rule, dict) and isinstance(rule.get("pattern"), str)
+        ]
+        assert patterns
+        url_patterns = [pattern for pattern in patterns if "https?" in pattern]
+        assert url_patterns
+        for pattern in url_patterns:
+            assert r"[^\s]" in pattern
+            assert r"[^\\s]" not in pattern
+
+
+def _declared_entity_fields(data: dict[str, Any]) -> set[str]:
+    names: set[str] = set()
+    schema = data.get("schema")
+    if isinstance(schema, dict):
+        for group in schema.get("column_groups") or []:
+            if not isinstance(group, dict):
+                continue
+            for field in group.get("fields") or []:
+                if isinstance(field, str):
+                    names.add(field)
+    quality = data.get("quality")
+    if isinstance(quality, dict):
+        for key in ("validations", "entity_field_validations", "field_validations"):
+            for rule in quality.get(key) or []:
+                if isinstance(rule, dict) and isinstance(rule.get("field"), str):
+                    names.add(rule["field"])
+    return names
+
 
 # ---------------------------------------------------------------------------
 # INV-CFG-007C: extraction_params stay entity-scoped (no cross-pipeline bleed)

@@ -139,3 +139,48 @@ def test_reconcile_foreign_keys_config_rejects_invalid_contract(
 
     with pytest.raises(ValidationError, match=match):
         WorkflowConfigFileSchema.model_validate(_payload(config))
+
+
+def test_delete_orphans_rejects_independently_limited_pipeline_deps() -> None:
+    payload = {
+        "schema_version": "1.0.0",
+        "workflow": {
+            "name": "limited_orphan_delete",
+            "version": "1.0.0",
+            "steps": [
+                {
+                    "kind": "pipeline",
+                    "step_id": "chembl_assay_ingest",
+                    "pipeline_name": "chembl_assay",
+                    "run_options": {"limit": 250},
+                },
+                {
+                    "kind": "pipeline",
+                    "step_id": "chembl_target_ingest",
+                    "pipeline_name": "chembl_target",
+                    "run_options": {"limit": 250},
+                },
+                {
+                    "kind": "transform",
+                    "step_id": "reconcile_assay_target_orphans",
+                    "transform_name": "reconcile_foreign_keys",
+                    "depends_on": ["chembl_assay_ingest", "chembl_target_ingest"],
+                    "config": _valid_config(),
+                },
+            ],
+        },
+    }
+
+    with pytest.raises(ValidationError, match="run_options.limit"):
+        WorkflowConfigFileSchema.model_validate(payload)
+
+
+def test_chembl_core_workflow_loads_without_limited_orphan_delete() -> None:
+    from bioetl.infrastructure.config.workflow_config_api import load_workflow_config
+
+    workflow = load_workflow_config("chembl_core")
+    steps = {step.step_id: step for step in workflow.steps}
+    assert "reconcile_assay_target_orphans" in steps
+    assert steps["chembl_activity_ingest"].run_options.limit == 250
+    assert steps["chembl_assay_ingest"].run_options.limit is None
+    assert steps["chembl_target_ingest"].run_options.limit is None
