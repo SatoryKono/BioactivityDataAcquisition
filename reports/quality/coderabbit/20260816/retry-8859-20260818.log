@@ -14,3 +14,5 @@ campaign=CR-FULL-20260816 base=6a2c8abe8ac5501bae3fef69667c3ff09280e46c planned=
 [1/18] RETRY leaf=S-R-scripts-residual after=30s
 [1/18] RETRY_RESULT leaf=S-R-scripts-residual status=connection_error
 [1/18] RETRY leaf=S-R-scripts-residual after=60s
+[1/18] RETRY_RESULT leaf=S-R-scripts-residual status=ok
+[2/18] RUN wave=R leaf=S-R-scripts-schema files=25

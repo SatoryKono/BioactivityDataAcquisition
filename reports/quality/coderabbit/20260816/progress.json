@@ -1405,12 +1405,12 @@
       "id": "S-R-scripts-residual",
       "wave": "R",
       "files": 23,
-      "status": "connection_error",
-      "reason": "CodeRabbit connection/WebSocket failure",
-      "exit_code": 1,
+      "status": "ok",
+      "reason": "",
+      "exit_code": 0,
       "log": "reports/quality/coderabbit/20260816/review_R_S-R-scripts-residual.log",
-      "bytes": 825,
-      "elapsed_s": 174.4,
+      "bytes": 66358,
+      "elapsed_s": 641.4,
       "command": [
         "/home/fedor/.local/bin/coderabbit",
         "review",
@@ -1473,5 +1473,5 @@
       ]
     }
   },
-  "updated_utc": "2026-08-18T14:50:55.896327+00:00"
+  "updated_utc": "2026-08-18T15:02:37.257709+00:00"
 }
