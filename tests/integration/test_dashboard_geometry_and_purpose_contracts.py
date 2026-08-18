@@ -27,6 +27,8 @@ from tests.integration._dashboard_layout_budgets import (
     CANONICAL_ACTION_VERBS,
     DATA_PANEL_TYPES,
     FIRST_LOAD_Y_MAX,
+    FIRST_SCREEN_MAX_PANELS,
+    FIRST_SCREEN_SHELL_PANELS,
     FIRST_WINDOW_Y,
     MIN_HEIGHT_ALLOWLIST,
     PENDING_ACTION_VERBS,
@@ -38,8 +40,10 @@ from tests.integration._dashboard_layout_budgets import (
     STRADDLE_ALLOWLIST,
     VIEWPORT_ROWS,
     answer_panels,
+    is_first_screen_budget_panel,
     is_first_window_verdict_card,
     min_height_for,
+    select_first_screen_budget_panels,
     title_leading_verb,
     trust_gate_keys,
 )
@@ -395,6 +399,52 @@ def test_fold_constants_are_distinct_and_named() -> None:
     )
     assert VIEWPORT_ROWS == 18
     assert 1 <= VIEWPORT_ROWS <= FIRST_LOAD_Y_MAX
+    assert FIRST_SCREEN_MAX_PANELS == 8
+    assert FIRST_SCREEN_SHELL_PANELS, "first_screen_shell_panels must stay explicit"
+
+
+def test_first_screen_max_panels_is_enforced() -> None:
+    """#8980: first_screen_max_panels counts non-nav, non-shell first-window panels."""
+    over: list[str] = []
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        counted = select_first_screen_budget_panels(
+            dashboard_path.name, list(dashboard.get("panels") or [])
+        )
+        if len(counted) > FIRST_SCREEN_MAX_PANELS:
+            titles = [f"{panel.get('id')}:{panel.get('title')!r}" for panel in counted]
+            over.append(
+                f"{dashboard_path.name} counted={len(counted)} "
+                f"budget={FIRST_SCREEN_MAX_PANELS} panels={titles}"
+            )
+    assert not over, "first_screen_max_panels exceeded:\n" + "\n".join(over)
+
+
+def test_first_screen_budget_excludes_nav_and_named_shell() -> None:
+    """Nav bus and named empty-title rails are outside the #8980 count set."""
+    extra_nav = {
+        "id": 1000,
+        "type": "text",
+        "title": "",
+        "gridPos": {"x": 0, "y": 0, "w": 24, "h": 4},
+    }
+    extra_shell = {
+        "id": 906,
+        "type": "text",
+        "title": "",
+        "gridPos": {"x": 0, "y": 13, "w": 24, "h": 2},
+    }
+    data = {
+        "id": 9401,
+        "type": "stat",
+        "title": "Monitor Replay Readiness",
+        "gridPos": {"x": 18, "y": 4, "w": 6, "h": 4},
+    }
+    assert is_first_screen_budget_panel("bioetl-control-plane-v1.json", extra_nav) is False
+    assert (
+        is_first_screen_budget_panel("bioetl-control-plane-v1.json", extra_shell) is False
+    )
+    assert is_first_screen_budget_panel("bioetl-control-plane-v1.json", data) is True
 
 
 def test_allowlists_carry_governance_metadata() -> None:
