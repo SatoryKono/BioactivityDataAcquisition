@@ -375,109 +375,6 @@
                 "value": true
               }
             ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "processing_status"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 110
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "trust_status"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 110
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "scope_kind"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 90
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "evidence_freshness"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 100
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "reasons_text"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "reasons"
-              },
-              {
-                "id": "custom.width",
-                "value": 320
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
-              },
-              {
-                "id": "custom.inspect",
-                "value": true
-              }
-            ]
           }
         ]
       },
@@ -537,9 +434,7 @@
               "reasons_text": 4,
               "evidence_observed_at": 5
             },
-            "renameByName": {
-              "reasons_text": "reasons"
-            }
+            "renameByName": {}
           }
         }
       ]
