@@ -45,6 +45,12 @@ from bioetl.application.services.workflow.workflow_runner_service import (
 from bioetl.application.services.workflow.workflow_transform_service import (
     WorkflowTransformExecutionResult,
 )
+from bioetl.domain.workflow import (
+    TransformStepConfig,
+    WorkflowConfig,
+    WorkflowRunOptionsConfig,
+    WorkflowStepConfig,
+)
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
     ObservabilityBackendEnsureResult,
 )
@@ -52,6 +58,42 @@ from bioetl.interfaces.cli.main import cli
 
 
 pytestmark = pytest.mark.unit
+
+
+def _limit_safe_multi_pipeline_workflow() -> WorkflowConfig:
+    """Workflow that stays valid when CLI --limit is applied to every extract.
+
+    Production chembl_core keeps delete_orphans downstream of assay/target
+    extracts; stamping --limit onto those steps is rejected by
+    reject_delete_orphans_after_limited_extracts (#8989).
+    """
+    return WorkflowConfig(
+        name="chembl_core",
+        defaults=WorkflowRunOptionsConfig(run_type="backfill"),
+        steps=(
+            WorkflowStepConfig(
+                step_id="chembl_activity_ingest",
+                pipeline_name="chembl_activity",
+            ),
+            WorkflowStepConfig(
+                step_id="chembl_assay_ingest",
+                pipeline_name="chembl_assay",
+            ),
+            WorkflowStepConfig(
+                step_id="chembl_target_ingest",
+                pipeline_name="chembl_target",
+            ),
+            TransformStepConfig(
+                step_id="summarize_core_extracts",
+                transform_name="summarize_upstream_outputs",
+                depends_on=(
+                    "chembl_activity_ingest",
+                    "chembl_assay_ingest",
+                    "chembl_target_ingest",
+                ),
+            ),
+        ),
+    )
 
 # Mirrors _WORKFLOW_PUBLICATION_METRIC_NAMES (no high-cardinality grouping).
 _EXPECTED_WORKFLOW_PUBLICATION_METRIC_NAMES = (
@@ -312,6 +354,12 @@ def test_workflow_run_accepts_pipeline_style_runtime_overrides(
         lambda registry=None: fake_service,
         raising=True,
     )
+    monkeypatch.setattr(
+        workflow_cmd,
+        "load_workflow_config",
+        lambda name: _limit_safe_multi_pipeline_workflow(),
+        raising=True,
+    )
 
     result = cli_runner.invoke(
         cli,
@@ -449,6 +497,38 @@ def test_workflow_run_accepts_pipeline_style_runtime_overrides(
         getattr(step.run_options, "debug_export_dir", None) == "artifacts/debug_exports"
         for step in pipeline_steps
     )
+
+
+def test_workflow_run_rejects_limit_when_delete_orphans_follows_extracts(
+    cli_runner: CliRunner,
+    tmp_path: Path,
+) -> None:
+    """#8989: chembl_core + --limit must fail closed, not skip the guard."""
+    from bioetl.interfaces.cli.exit_codes import ExitCode
+
+    cached_bronze_path = tmp_path / "bronze"
+    cached_bronze_path.mkdir()
+    result = cli_runner.invoke(
+        cli,
+        [
+            "workflow",
+            "run",
+            "chembl_core",
+            "--limit",
+            "1000",
+            "--required-persistence-profile",
+            "degraded_observable",
+            "--use-cached-bronze",
+            "--cached-bronze-path",
+            str(cached_bronze_path),
+        ],
+    )
+
+    assert result.exit_code == ExitCode.CONFIG_ERROR, result.output
+    assert "delete_orphans" in result.output
+    assert "run_options.limit" in result.output
+    assert "chembl_assay_ingest" in result.output
+    assert "chembl_target_ingest" in result.output
 
 
 def test_workflow_run_forwards_baseline_resume_repair_steps(
@@ -722,6 +802,12 @@ def test_workflow_run_omits_pipeline_grouping_for_multi_pipeline_workflow(
         workflow_cmd,
         "publish_metrics_safely",
         lambda **kwargs: published_calls.append(kwargs) or True,
+        raising=True,
+    )
+    monkeypatch.setattr(
+        workflow_cmd,
+        "load_workflow_config",
+        lambda name: _limit_safe_multi_pipeline_workflow(),
         raising=True,
     )
 
