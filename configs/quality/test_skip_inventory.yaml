@@ -236,6 +236,16 @@ entries:
     vcr_related: false
     review_date: "2026-08-05"
     rationale: Conditional skip when a retired dashboard JSON is absent (Phase 4 surface cleanup).
+  - path: tests/integration/test_grafana_panel_fill_errors.py
+    suite: integration
+    category: live_endpoint_unavailability
+    owner: "@bioetl-observability"
+    linked_issue: "#8969"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-08-18"
+    rationale: Live Grafana /api/ds/query fill check skips when Grafana health or API auth is unavailable.
   - path: tests/integration/test_grafana_variable_reference.py
     suite: integration
     category: live_endpoint_unavailability
