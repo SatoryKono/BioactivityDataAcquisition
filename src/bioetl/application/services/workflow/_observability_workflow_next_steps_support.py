@@ -51,7 +51,7 @@ def _degraded_evidence_steps(degraded_evidence: tuple[str, ...]) -> tuple[str, .
             "Resolve dossier evidence gaps before marking this critical run "
             "operationally successful."
         )
-    if "trace_links_unavailable" in degraded_evidence:
+    if "trace_identifiers_unavailable" in degraded_evidence:
         steps.append(
             "Use audit, manifest, and lineage sections as the current traceability "
             "fallback."
