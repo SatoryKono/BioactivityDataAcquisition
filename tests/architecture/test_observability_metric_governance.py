@@ -210,14 +210,19 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     assert report["direct_alert_inputs"]
 
     http_targets = report["http_targets"]
-    assert len(http_targets) == 32
+    assert len(http_targets) == 33
+    assert any(
+        target["dashboard_uid"] == "bioetl-control-plane-v1"
+        and target["panel_id"] == 9418
+        for target in http_targets
+    )
     assert any(target["uses_run_id_query_parameter"] for target in http_targets)
     assert all(
         str(target["url"]).startswith(("/ops/", "/health/")) for target in http_targets
     )
     assert report["typed_target_counts"] == {
         "promql": 170,
-        "http": 32,
+        "http": 33,
         "loki": 0,
         "tempo": 0,
         "unknown": 0,
