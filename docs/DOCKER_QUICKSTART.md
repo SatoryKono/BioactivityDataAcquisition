@@ -253,11 +253,16 @@ Run Explorer identity panels) is provisioned only when
 
 | Mode | Poll budget | On timeout / mismatch |
 | --- | --- | --- |
-| **Soft (default)** `REQUIRE_OPS_HTTP=0` | **5×1s ≈ 5s** | Prometheus-only, `exec /run.sh` (no crash) |
+| **Soft (default)** `REQUIRE_OPS_HTTP=0` | **5×1s ≈ 5s** | Prometheus-only, `exec /run.sh`; the same seven dashboard UIDs render static `Ops HTTP not provisioned` notices without datasource queries |
 | **Fail-closed** `REQUIRE_OPS_HTTP=1` | 30×2s ≈ 60s | `exit 1` (audit/render only) |
 
 Unmanaged / non-hex identity skips the wait entirely. Status:
-`/var/lib/grafana/bioetl-bootstrap-status.json` inside the container.
+`/var/lib/grafana/bioetl-bootstrap-status.json` inside the container. A normal
+managed start reports `ops_http=ready`, `reason=identity_matched`, and
+`dashboard_profile=full`. Soft fallback reports
+`dashboard_profile=prometheus_only`; it is an infrastructure state and never a
+retention/replay verdict. Re-run `runtime_manager start` or `recover` after the
+backend identity is available so bootstrap can restore the full provider.
 
 A long 60s soft wait was a common restart thrash: bioetl late → bootstrap
 blocks → Grafana healthcheck fails → restart → repeat. Soft mode no longer does

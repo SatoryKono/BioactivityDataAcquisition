@@ -138,6 +138,13 @@ Service ownership for this section is `@bioetl-observability`.
   scrape target `bioetl:8000`). Until healthy, classify HTTP-backed identity and
   processed-record panels as backend unavailable rather than valid-empty.
   BioETL Ops HTTP scrape/alert was removed 2026-07-23.
+- In soft bootstrap, all seven stable dashboard UIDs intentionally resolve to a
+  static `Ops HTTP not provisioned` notice profile. Confirm
+  `/var/lib/grafana/bioetl-bootstrap-status.json` contains
+  `dashboard_profile=prometheus_only`; do not treat the notice as a retention,
+  replay, identity, or run verdict. Restore the full panels through
+  `runtime_manager start|recover --stack monitoring` and require
+  `ops_http=ready`, `reason=identity_matched`, `dashboard_profile=full`.
 - `BioETLGrafanaRendererUnavailable`: verify
   `up{job="grafana-image-renderer"}`, Grafana `rendererAvailable`, and one
   server-side render probe. Until it clears, mark screenshot evidence as render

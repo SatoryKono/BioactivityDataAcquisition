@@ -12,7 +12,11 @@
 
 from __future__ import annotations
 
+import json
+import os
 from pathlib import Path
+import shutil
+import subprocess
 
 import pytest
 import yaml
@@ -341,7 +345,8 @@ def test_bootstrap_ops_http_identity_gate_is_soft_by_default() -> None:
 
 def test_monitoring_compose_exposes_ops_http_soft_gate_env() -> None:
     monitoring = _load_monitoring_compose()
-    grafana_environment = monitoring["services"]["grafana"]["environment"]
+    grafana = monitoring["services"]["grafana"]
+    grafana_environment = grafana["environment"]
     assert (
         "BIOETL_GRAFANA_REQUIRE_OPS_HTTP=${BIOETL_GRAFANA_REQUIRE_OPS_HTTP:-0}"
         in grafana_environment
@@ -353,6 +358,147 @@ def test_monitoring_compose_exposes_ops_http_soft_gate_env() -> None:
     assert any(
         "BIOETL_GRAFANA_OPS_READY_SLEEP_SEC=" in item for item in grafana_environment
     )
+    volumes = {str(item) for item in grafana["volumes"]}
+    assert (
+        "./grafana/provisioning/dashboards:"
+        "/etc/bioetl-grafana/dashboard-providers/full:ro" in volumes
+    )
+    assert (
+        "./grafana/provisioning/dashboards-prometheus-only:"
+        "/etc/bioetl-grafana/dashboard-providers/prometheus-only:ro" in volumes
+    )
+    assert (
+        "./grafana/dashboards-prometheus-only:"
+        "/var/lib/grafana/dashboards-prometheus-only:ro" in volumes
+    )
+    assert not any(
+        item.endswith(":/etc/grafana/provisioning/dashboards:ro")
+        for item in volumes
+    )
+
+
+def _run_bootstrap_profile(
+    tmp_path: Path,
+    *,
+    runtime_source_id: str,
+    ready: bool,
+) -> tuple[subprocess.CompletedProcess[str], Path, Path, Path]:
+    shell = shutil.which("sh")
+    if shell is None:
+        pytest.skip("POSIX sh is required for the Grafana bootstrap integration test")
+
+    datasource_target = tmp_path / "datasources"
+    datasource_core = tmp_path / "datasources-core"
+    provider_target = tmp_path / "dashboard-providers-target"
+    provider_full = tmp_path / "dashboard-providers-full"
+    provider_fallback = tmp_path / "dashboard-providers-prometheus-only"
+    status_file = tmp_path / "bootstrap-status.json"
+    datasource_core.mkdir()
+    provider_full.mkdir()
+    provider_fallback.mkdir()
+    (datasource_core / "prometheus.yml").write_text(
+        "apiVersion: 1\ndatasources: []\n", encoding="utf-8"
+    )
+    (provider_full / "bioetl.yaml").write_text(
+        "apiVersion: 1\nprofile: full\n", encoding="utf-8"
+    )
+    (provider_fallback / "bioetl.yaml").write_text(
+        "apiVersion: 1\nprofile: prometheus_only\n", encoding="utf-8"
+    )
+
+    env = os.environ.copy()
+    env.update(
+        {
+            "BIOETL_GRAFANA_DATASOURCE_TARGET_DIR": str(datasource_target),
+            "BIOETL_GRAFANA_DATASOURCE_CORE_DIR": str(datasource_core),
+            "BIOETL_GRAFANA_DASHBOARD_PROVIDER_TARGET_DIR": str(provider_target),
+            "BIOETL_GRAFANA_DASHBOARD_PROVIDER_FULL_DIR": str(provider_full),
+            "BIOETL_GRAFANA_DASHBOARD_PROVIDER_FALLBACK_DIR": str(
+                provider_fallback
+            ),
+            "BIOETL_GRAFANA_BOOTSTRAP_STATUS_FILE": str(status_file),
+            "BIOETL_GRAFANA_RUN_SCRIPT": shutil.which("true") or "/bin/true",
+            "BIOETL_EXPECTED_RUNTIME_SOURCE_ID": runtime_source_id,
+            "BIOETL_OPS_HTTP_URL": "http://bioetl:8000",
+            "BIOETL_GRAFANA_REQUIRE_OPS_HTTP": "0",
+            "BIOETL_GRAFANA_OPS_READY_ATTEMPTS": "1",
+            "BIOETL_GRAFANA_OPS_READY_SLEEP_SEC": "0",
+            "GF_RENDERING_SERVER_URL": "",
+        }
+    )
+    if ready:
+        fake_bin = tmp_path / "bin"
+        fake_bin.mkdir()
+        wget = fake_bin / "wget"
+        wget.write_text(
+            "#!/bin/sh\nprintf '%s\\n' "
+            f"'{{\"runtime_source_id\":\"{runtime_source_id}\"}}'\n",
+            encoding="utf-8",
+        )
+        wget.chmod(0o755)
+        plugin_dir = tmp_path / "plugins" / "yesoreyeram-infinity-datasource"
+        plugin_dir.mkdir(parents=True)
+        (plugin_dir / "plugin.json").write_text(
+            '{\n  "version": "3.8.0"\n}\n', encoding="utf-8"
+        )
+        env["PATH"] = f"{fake_bin}{os.pathsep}{env.get('PATH', '')}"
+        env["BIOETL_INFINITY_PLUGIN_DIR"] = str(plugin_dir)
+
+    result = subprocess.run(
+        [shell, str(Path("grafana/scripts/bootstrap-datasources.sh").resolve())],
+        cwd=Path.cwd(),
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=15,
+    )
+    return result, datasource_target, provider_target, status_file
+
+
+def test_bootstrap_selects_static_dashboard_profile_when_ops_http_is_deferred(
+    tmp_path: Path,
+) -> None:
+    result, datasource_target, provider_target, status_file = (
+        _run_bootstrap_profile(
+            tmp_path,
+            runtime_source_id="unmanaged",
+            ready=False,
+        )
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "profile: prometheus_only" in (
+        provider_target / "bioetl.yaml"
+    ).read_text(encoding="utf-8")
+    assert not (datasource_target / "bioetl-ops-http.yml").exists()
+    status = json.loads(status_file.read_text(encoding="utf-8"))
+    assert status["ops_http"] == "deferred"
+    assert status["reason"] == "invalid_or_unmanaged_identity"
+    assert status["dashboard_profile"] == "prometheus_only"
+
+
+def test_bootstrap_selects_full_dashboard_profile_after_identity_match(
+    tmp_path: Path,
+) -> None:
+    runtime_source_id = "a" * 64
+    result, datasource_target, provider_target, status_file = (
+        _run_bootstrap_profile(
+            tmp_path,
+            runtime_source_id=runtime_source_id,
+            ready=True,
+        )
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "profile: full" in (provider_target / "bioetl.yaml").read_text(
+        encoding="utf-8"
+    )
+    assert (datasource_target / "bioetl-ops-http.yml").exists()
+    status = json.loads(status_file.read_text(encoding="utf-8"))
+    assert status["ops_http"] == "ready"
+    assert status["reason"] == "identity_matched"
+    assert status["dashboard_profile"] == "full"
 
 
 def test_monitoring_compose_local_resource_budget() -> None:

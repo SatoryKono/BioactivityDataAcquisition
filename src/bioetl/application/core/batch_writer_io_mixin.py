@@ -41,7 +41,6 @@ _WRITE_SPAN_ERRORS = SHARED_OPERATION_ERRORS
 
 class BatchWriterIOMixin:
     """Layer write orchestration extracted from BatchWriter."""
-
     # Host attributes from BatchWriter MRO (runtime-typed by concrete class).
     _context: PipelineContext
     _storage: BatchWriteStorageProtocol
@@ -121,7 +120,6 @@ class BatchWriterIOMixin:
             self._end_span(span, error)
             raise
         except BaseException:
-            # asyncio.CancelledError (Ba
             self._end_span(span)
             raise
 
@@ -135,7 +133,6 @@ class BatchWriterIOMixin:
         """Write transformed records and explicit provenance to Silver."""
         await self._validate_lock("write_silver")
         span = self._start_span("write_silver", "silver", len(records), batch_id)
-
         try:
             silver_schema = self._silver_schema
             available_cols = (
@@ -152,7 +149,6 @@ class BatchWriterIOMixin:
             silver_schema = self._project_schema_for_layer(
                 "silver", silver_schema, column_order
             )
-
             request = SilverWriteRequest(
                 table_name=self._silver_table_name,
                 records=records,
@@ -192,7 +188,6 @@ class BatchWriterIOMixin:
         """Validate and write schema-projected records to Gold."""
         await self._validate_lock("write_gold")
         span = self._start_span("write_gold", "gold", len(records))
-
         try:
             if should_defer_gold_validation_to_storage(self):
                 available_cols = self._collect_record_columns(records)
@@ -208,7 +203,6 @@ class BatchWriterIOMixin:
                     self._gold_schema,
                     column_order_preview,
                 )
-                # Re-project/validate ag
                 if (
                     schema_payload is not None
                     and schema_payload is not self._gold_schema
@@ -226,7 +220,6 @@ class BatchWriterIOMixin:
             records, column_order, schema_payload = self._apply_layer_renames(
                 records, column_order, schema_payload, rename_map
             )
-
             await self._storage.write_gold(
                 table_name=self._gold_table_name,
                 records=records,
@@ -246,7 +239,6 @@ class BatchWriterIOMixin:
         except BaseException:
             self._end_span(span)
             raise
-
     def _prepare_gold_records(
         self,
         records: list[GoldRecord],

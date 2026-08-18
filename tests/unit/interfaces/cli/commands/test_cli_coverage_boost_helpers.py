@@ -76,7 +76,7 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 pytestmark = pytest.mark.unit
 
 
-def _make_workflow_config() -> WorkflowConfig:
+def _make_workflow_config(*, reconcile_action: str = "delete_orphans") -> WorkflowConfig:
     return WorkflowConfig(
         name="chembl_baseline",
         version="1.2.0",
@@ -95,7 +95,7 @@ def _make_workflow_config() -> WorkflowConfig:
                 step_id="reconcile",
                 transform_name="reconcile_foreign_keys",
                 depends_on=("publish",),
-                config={"action": "delete_orphans"},
+                config={"action": reconcile_action},
             ),
         ),
     )
@@ -344,7 +344,7 @@ def test_select_workflow_steps_rejects_unknown_ids() -> None:
 
 
 def test_apply_cli_overrides_and_status_render_helpers_cover_branchy_paths() -> None:
-    config = _make_workflow_config()
+    config = _make_workflow_config(reconcile_action="report_only")
     unchanged = workflow_support.apply_cli_overrides(
         config,
         dry_run=None,
