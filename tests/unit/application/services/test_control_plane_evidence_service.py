@@ -12,6 +12,13 @@ from bioetl.application.observability.control_plane_evidence import (
     ControlPlaneEvidenceService,
     EvidenceScopeContext,
 )
+from bioetl.application.observability.control_plane_evidence.checks import (
+    EvidenceCheckResult,
+)
+from bioetl.application.observability.control_plane_evidence.models import (
+    FIRST_SCREEN_TRUST_REASONS_CAP,
+    evidence_payload,
+)
 from bioetl.domain.control_plane import (
     ControlPlaneArtifactLifecycleDecision,
     ControlPlaneArtifactLifecyclePlan,
@@ -535,6 +542,13 @@ def test_trust_status_is_incomplete_when_processing_succeeds_without_evidence() 
     assert payload["evidence_freshness"] == "observed"
     assert payload["status"] == "UNKNOWN"
     assert "manifest_contract_compatibility_not_verified" in payload["trust"]["reasons"]
+    assert payload["trust"]["reasons_text"]
+    assert payload["trust"]["reasons_text"] == "\n".join(
+        payload["trust"]["reasons"][:FIRST_SCREEN_TRUST_REASONS_CAP]
+    )
+    assert payload["trust"]["reasons_truncated"] is (
+        len(payload["trust"]["reasons"]) > FIRST_SCREEN_TRUST_REASONS_CAP
+    )
 
 
 def test_trust_status_precedence_keeps_error_above_incomplete() -> None:
@@ -559,6 +573,63 @@ def test_unresolved_scope_is_not_false_ok() -> None:
     assert payload["trust_status"] == "INCOMPLETE"
     assert payload["scope_kind"] == "unresolved"
     assert payload["evidence_freshness"] == "unknown"
+
+
+def test_trust_reasons_text_caps_first_screen_lines_and_flags_truncation() -> None:
+    reasons = [
+        "alpha_unknown_reason_code",
+        "bravo_unknown_reason_code",
+        "charlie_unknown_reason_code",
+        "delta_unknown_reason_code",
+    ]
+    checks = tuple(
+        EvidenceCheckResult(
+            check=f"check_{index}",
+            status="UNKNOWN",
+            reason=reason,
+            detail="missing evidence",
+        )
+        for index, reason in enumerate(reasons)
+    )
+    payload = evidence_payload(
+        endpoint="manifest-validation",
+        checks=checks,
+        requested_pipeline="chembl_activity",
+        selected_run_id=str(_RUN_ID),
+        selected_run_types=("incremental",),
+        resolved_via="selected_run_id",
+        manifest=_manifest(),
+    )
+    trust = payload["trust"]
+    assert payload["trust_status"] == "INCOMPLETE"
+    assert trust["reasons"] == reasons
+    assert trust["reasons_text"] == "\n".join(reasons[:FIRST_SCREEN_TRUST_REASONS_CAP])
+    assert trust["reasons_text"].count("\n") == FIRST_SCREEN_TRUST_REASONS_CAP - 1
+    assert trust["reasons_truncated"] is True
+
+
+def test_trust_ok_has_empty_reasons_text() -> None:
+    payload = evidence_payload(
+        endpoint="manifest-validation",
+        checks=(
+            EvidenceCheckResult(
+                check="parse",
+                status="OK",
+                reason="ok",
+                detail="ok",
+            ),
+        ),
+        requested_pipeline="chembl_activity",
+        selected_run_id=str(_RUN_ID),
+        selected_run_types=("incremental",),
+        resolved_via="selected_run_id",
+        manifest=_manifest(),
+    )
+    trust = payload["trust"]
+    assert payload["trust_status"] == "OK"
+    assert trust["reasons"] == []
+    assert trust["reasons_text"] == ""
+    assert trust["reasons_truncated"] is False
 
 
 def test_retention_prefers_plan_for_manifest_over_full_plan() -> None:

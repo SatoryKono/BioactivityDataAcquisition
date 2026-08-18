@@ -243,7 +243,7 @@
         "y": 8
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN HTTP trust summary on the first screen. processing_status is the data-processing outcome; trust_status is fail-closed exact-run evidence (INCOMPLETE/ERROR are not OK). Scope is exact_run when run_id resolves. No-data or backend unavailable is not a health verdict.",
+      "description": "SELECTED RUN HTTP trust summary on the first screen. processing_status is the data-processing outcome; trust_status is fail-closed exact-run evidence (INCOMPLETE/ERROR/UNKNOWN are not OK). First screen shows top-3 trust.reasons_text (newline-joined); the full reason list stays in rows / panel 9414. Scope is exact_run when run_id resolves. No-data or backend unavailable is not a health verdict.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -266,6 +266,109 @@
               {
                 "id": "unit",
                 "value": "time:YYYY-MM-DD HH:mm"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "processing_status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "trust_status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "scope_kind"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "evidence_freshness"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "reasons_text"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "reasons"
+              },
+              {
+                "id": "custom.width",
+                "value": 320
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
               }
             ]
           }
@@ -309,21 +412,23 @@
         {
           "id": "limit",
           "options": {
-            "limitField": 4
+            "limitField": 1
           }
         },
         {
           "id": "organize",
           "options": {
             "excludeByName": {
-              "reasons": true
+              "reasons": true,
+              "reasons_truncated": true
             },
             "indexByName": {
-              "trust_status": 0,
-              "processing_status": 1,
+              "processing_status": 0,
+              "trust_status": 1,
               "scope_kind": 2,
               "evidence_freshness": 3,
-              "evidence_observed_at": 4
+              "reasons_text": 4,
+              "evidence_observed_at": 5
             },
             "renameByName": {}
           }

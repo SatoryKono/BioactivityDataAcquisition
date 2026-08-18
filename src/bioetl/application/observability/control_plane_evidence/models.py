@@ -19,6 +19,7 @@ from bioetl.domain.control_plane.run_ledger import (
 )
 
 CONTROL_PLANE_EVIDENCE_CONTRACT = "control_plane_validation_evidence_v1"
+FIRST_SCREEN_TRUST_REASONS_CAP = 3
 
 
 _STATUS_PRIORITY: dict[EvidenceStatus, int] = {
@@ -53,6 +54,8 @@ def evidence_payload(
     processing_status = _processing_status(manifest, ledger_entries)
     scope_kind = _scope_kind(resolved_via=resolved_via, manifest=manifest)
     evidence_freshness = _evidence_freshness(manifest)
+    reasons = _trust_reasons(checks, trust_status)
+    reasons_text, reasons_truncated = _trust_reasons_display(reasons)
     payload: dict[str, object] = {
         "contract": CONTROL_PLANE_EVIDENCE_CONTRACT,
         "endpoint": endpoint,
@@ -72,7 +75,9 @@ def evidence_payload(
             "processing_status": processing_status,
             "scope_kind": scope_kind,
             "evidence_freshness": evidence_freshness,
-            "reasons": _trust_reasons(checks, trust_status),
+            "reasons": reasons,
+            "reasons_text": reasons_text,
+            "reasons_truncated": reasons_truncated,
             "evidence_observed_at": (
                 manifest.created_at.isoformat() if manifest is not None else None
             ),
@@ -131,6 +136,14 @@ def _trust_reasons(
     else:
         wanted = {"UNKNOWN"}
     return [check.reason for check in checks if check.status in wanted][:12]
+
+
+def _trust_reasons_display(reasons: list[str]) -> tuple[str, bool]:
+    """First-screen multiline view: top-N codes, flag if the list is longer."""
+    return (
+        "\n".join(reasons[:FIRST_SCREEN_TRUST_REASONS_CAP]),
+        len(reasons) > FIRST_SCREEN_TRUST_REASONS_CAP,
+    )
 
 
 def _overall_status(checks: tuple[EvidenceCheckResult, ...]) -> EvidenceStatus:
@@ -194,6 +207,7 @@ def unresolved_scope_check(resolved_via: str) -> EvidenceCheckResult:
 
 __all__ = [
     "CONTROL_PLANE_EVIDENCE_CONTRACT",
+    "FIRST_SCREEN_TRUST_REASONS_CAP",
     "EvidenceCheckResult",
     "EvidenceStatus",
     "evidence_payload",
