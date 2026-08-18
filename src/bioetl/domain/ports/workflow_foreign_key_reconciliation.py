@@ -144,6 +144,8 @@ class ForeignKeyReconciliationRequest:
     transform_name: str | None = None
     debug_export_enabled: bool = False
     debug_export_dir: str | None = None
+    source_scope: str = "all_current"
+    source_run_ids: tuple[str, ...] = ()
     _: KW_ONLY
     source_layer: ForeignKeyReconciliationLayer = "silver"
     reference_layer: ForeignKeyReconciliationLayer = "silver"
@@ -181,6 +183,16 @@ class ForeignKeyReconciliationRequest:
         _require_optional_str(self.step_id, "step_id")
         _require_optional_str(self.transform_name, "transform_name")
         _require_optional_str(self.debug_export_dir, "debug_export_dir")
+        if self.source_scope not in {"all_current", "current_run"}:
+            raise ValueError(
+                "source_scope must be 'all_current' or 'current_run', "
+                f"got {self.source_scope!r}"
+            )
+        object.__setattr__(
+            self,
+            "source_run_ids",
+            tuple(str(item) for item in self.source_run_ids if str(item).strip()),
+        )
 
     @property
     def effective_source_keys(self) -> tuple[str, ...]:

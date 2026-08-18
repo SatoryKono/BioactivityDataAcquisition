@@ -1031,7 +1031,9 @@ aliases) are locked by
 `docs/03-guides/dashboards/contracts/run-explorer-http-catalog.yaml`.
 Do not hand-edit a duplicate Infinity URL without updating that catalog;
 CI compares live JSON to the catalog and forbids unexpanded `$pipeline`
-in `noValue`.
+in `noValue`. Selector→request snapshots for 3010/9402/9403 live in
+`tests/fixtures/grafana/run_explorer/` (generated; no hosts or secrets).
+Live browser smoke is scheduled-only (ADR-010), not default CI.
 
 All seven shipped dashboards enforce one question/scope/evidence readability contract based
 on `4. Data Quality`: orange `4px` accent, `16px` body (12 pt equivalent),

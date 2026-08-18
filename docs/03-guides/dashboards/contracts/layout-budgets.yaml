@@ -21,8 +21,22 @@ first_load_y_max: 28
 # tightening, not this constant. Equals FIRST_WINDOW_Y by design.
 viewport_rows: 18
 
-# Regression cap on always-visible root non-nav panels (current max = 8).
+# Regression cap on always-visible first-window budget panels (current max = 8).
+# Count = root non-row panels with y < first_window_y, excluding navigation
+# (id 1000 or title Navigate*) and named empty-title text rails below.
+# Do not raise this cap. #8980.
 first_screen_max_panels: 8
+
+# Empty-title text rails that are not budget panels (next-step / divider).
+# Not an exemption from an over-budget layout: they are outside the count set.
+first_screen_shell_panels:
+  - dashboard: bioetl-control-plane-v1.json
+    id: 906
+    owner: "@bioetl-observability"
+    rationale: >-
+      Next-step rail; native title omitted so h=2 does not scroll. Instruction
+      copy, not a data-bearing or nav panel.
+    retire_when: rail is merged into panel 9400 or moved to y >= first_window_y
 
 min_height:
   root:

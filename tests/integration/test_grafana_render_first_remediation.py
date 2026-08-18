@@ -20,6 +20,11 @@ from pathlib import Path
 import pytest
 import yaml
 
+from tests.integration._dashboard_layout_budgets import (
+    FIRST_WINDOW_Y,
+    collapsed_row_above_fold,
+)
+
 
 pytestmark = pytest.mark.integration
 
@@ -484,11 +489,30 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
     assert all(panel.get("collapsed") is True for panel in control_rows)
     assert all(panel.get("panels") for panel in control_rows)
     first_row_y = min(panel["gridPos"]["y"] for panel in control_rows)
-    # layout-budgets.yaml:first_window_y — collapsed rows start below the visual fold.
-    assert first_row_y == 18
+    # layout-budgets.yaml:first_window_y — collapsed rows start at the visual fold.
+    assert first_row_y == FIRST_WINDOW_Y
     assert [panel["gridPos"]["y"] for panel in control_rows] == list(
-        range(first_row_y, first_row_y + len(control_rows))
+        range(FIRST_WINDOW_Y, FIRST_WINDOW_Y + len(control_rows))
     )
+    assert not any(collapsed_row_above_fold(panel) for panel in control_rows)
+
+
+def test_rf006_collapsed_row_above_fold_fails_closed() -> None:
+    """Mutation: a collapsed diagnostic row at FIRST_WINDOW_Y - 1 is above the fold."""
+    above = {
+        "type": "row",
+        "collapsed": True,
+        "gridPos": {"x": 0, "y": FIRST_WINDOW_Y - 1, "w": 24, "h": 1},
+        "panels": [{"id": 1, "type": "stat"}],
+    }
+    at_fold = {
+        "type": "row",
+        "collapsed": True,
+        "gridPos": {"x": 0, "y": FIRST_WINDOW_Y, "w": 24, "h": 1},
+        "panels": [{"id": 1, "type": "stat"}],
+    }
+    assert collapsed_row_above_fold(above) is True
+    assert collapsed_row_above_fold(at_fold) is False
 
     overview = _load("bioetl-overview-v2.json")
     domain_tracks = _panel(overview, 9030)

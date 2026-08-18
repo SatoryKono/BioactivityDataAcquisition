@@ -8,3 +8,9 @@ campaign=CR-FULL-20260816 base=6a2c8abe8ac5501bae3fef69667c3ff09280e46c planned=
 RATE_LIMIT_PERSISTS: stopping this wave for bounded backoff
 SUMMARY {'connection_error': 1, 'ok': 55, 'rate_limit': 2, 'too_many_files': 3}
 EXIT:0
+campaign=CR-FULL-20260816 base=6a2c8abe8ac5501bae3fef69667c3ff09280e46c planned=18 sequential=true rate_limit_backoff=(1800.0, 1800.0) error_backoff=(30.0, 60.0)
+[1/18] RUN wave=R leaf=S-R-scripts-residual files=23
+[1/18] RESULT leaf=S-R-scripts-residual status=connection_error elapsed=105.3s bytes=741
+[1/18] RETRY leaf=S-R-scripts-residual after=30s
+[1/18] RETRY_RESULT leaf=S-R-scripts-residual status=connection_error
+[1/18] RETRY leaf=S-R-scripts-residual after=60s
