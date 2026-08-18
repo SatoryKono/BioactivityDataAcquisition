@@ -11,8 +11,6 @@ workflow:
     - kind: pipeline
       step_id: chembl_activity_ingest
       pipeline_name: chembl_activity
-      run_options:
-        limit: 250
     - kind: pipeline
       step_id: chembl_assay_ingest
       pipeline_name: chembl_assay
