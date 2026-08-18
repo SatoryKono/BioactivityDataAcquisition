@@ -1090,6 +1090,8 @@ mixed Docker plus host/WSL setups, prefer an explicit value over assuming
 
 - **`0. Control Plane`** uses the shared context shell and adds
   control-plane-specific trust panels for manifest/ledger/checkpoint/replay/lineage.
+  First-screen tables wrap long text in place (Trust `9418` `reasons_text` is
+  capped at 3 lines); fold geometry does not move.
   `Review First Recovery Action` occupies the rightmost shared-shell slot
   beside `ID` and `Processed Records`, while the four compact trust cards remain
   directly below the shared context shell.
