@@ -1,0 +1,62 @@
+{
+  "contract": "control_plane_validation_evidence_v1",
+  "endpoint": "manifest-validation",
+  "evidence_freshness": "observed",
+  "manifest_id": "manifest-8576-fixture",
+  "pipeline": "chembl_activity",
+  "processing_status": "unknown",
+  "resolved_via": "selected_run_id",
+  "rows": [
+    {
+      "check": "trust_reason_0",
+      "detail": "Missing or contradictory exact-run evidence.",
+      "reason": "manifest_contract_compatibility_not_verified",
+      "status": "UNKNOWN"
+    },
+    {
+      "check": "trust_reason_1",
+      "detail": "Missing or contradictory exact-run evidence.",
+      "reason": "checkpoint_artifact_not_observed",
+      "status": "UNKNOWN"
+    },
+    {
+      "check": "trust_reason_2",
+      "detail": "Missing or contradictory exact-run evidence.",
+      "reason": "lineage_closure_not_verified",
+      "status": "UNKNOWN"
+    },
+    {
+      "check": "trust_reason_3",
+      "detail": "Missing or contradictory exact-run evidence.",
+      "reason": "retention_plan_not_observed",
+      "status": "UNKNOWN"
+    }
+  ],
+  "run_id": "00000000-0000-0000-0000-000000008576",
+  "run_type": "incremental",
+  "scope_kind": "exact_run",
+  "status": "UNKNOWN",
+  "summary": {
+    "check_count": 4,
+    "error_count": 0,
+    "ok_count": 0,
+    "unknown_count": 4,
+    "warning_count": 0
+  },
+  "trust": {
+    "evidence_freshness": "observed",
+    "evidence_observed_at": "2026-08-10T00:00:00+00:00",
+    "processing_status": "unknown",
+    "reasons": [
+      "manifest_contract_compatibility_not_verified",
+      "checkpoint_artifact_not_observed",
+      "lineage_closure_not_verified",
+      "retention_plan_not_observed"
+    ],
+    "reasons_text": "manifest_contract_compatibility_not_verified\ncheckpoint_artifact_not_observed\nlineage_closure_not_verified",
+    "reasons_truncated": true,
+    "scope_kind": "exact_run",
+    "trust_status": "INCOMPLETE"
+  },
+  "trust_status": "INCOMPLETE"
+}
