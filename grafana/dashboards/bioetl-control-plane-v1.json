@@ -260,57 +260,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "evidence_observed_at"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "time:YYYY-MM-DD HH:mm"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
               "options": "processing_status"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 110
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "trust_status"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 110
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "scope_kind"
             },
             "properties": [
               {
@@ -329,12 +279,50 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "trust_status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "scope_kind"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 105
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "evidence_freshness"
             },
             "properties": [
               {
                 "id": "custom.width",
-                "value": 100
+                "value": 90
               },
               {
                 "id": "custom.cellOptions",
@@ -357,7 +345,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 320
+                "value": 280
               },
               {
                 "id": "custom.cellOptions",
@@ -368,6 +356,22 @@
               },
               {
                 "id": "custom.inspect",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "evidence_observed_at"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "time:YYYY-MM-DD HH:mm"
+              },
+              {
+                "id": "custom.hidden",
                 "value": true
               }
             ]
