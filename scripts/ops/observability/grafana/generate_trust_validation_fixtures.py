@@ -23,7 +23,6 @@ from bioetl.application.observability.control_plane_evidence.failure_reasons imp
     build_failure_reason_rows,
 )
 from bioetl.application.observability.control_plane_evidence.models import (
-    FIRST_SCREEN_TRUST_REASONS_CAP,
     evidence_payload,
 )
 from bioetl.application.observability.control_plane_evidence.service_support import (
