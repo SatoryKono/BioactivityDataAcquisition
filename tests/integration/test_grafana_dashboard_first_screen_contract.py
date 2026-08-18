@@ -680,6 +680,27 @@ def test_run_explorer_identity_is_on_the_first_screen() -> None:
     assert "last 4" in str(browse.get("title", "")).lower()
 
 
+def test_run_explorer_first_screen_empty_copy_has_no_selector_dollars() -> None:
+    """Selected-run first screen must not leak `$pipeline` / `$run_id` into noValue."""
+    dashboard = load_dashboard(_DASHBOARD_DIR / "bioetl-run-explorer-v1.json")
+    panels = {
+        panel.get("id"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if isinstance(panel.get("id"), int)
+    }
+    for panel_id in (3010, 9402, 9403):
+        no_value = str(
+            panels[panel_id]
+            .get("fieldConfig", {})
+            .get("defaults", {})
+            .get("noValue", "")
+        )
+        assert no_value, f"panel {panel_id} missing noValue"
+        assert "$" not in no_value, (
+            f"panel {panel_id} noValue still interpolates a selector: {no_value!r}"
+        )
+
+
 def test_overview_alerts_row_is_collapsed() -> None:
     """#8745: Inspect Alerts is T3, not a second first-screen question."""
     dashboard = load_dashboard(_DASHBOARD_DIR / "bioetl-overview-v2.json")

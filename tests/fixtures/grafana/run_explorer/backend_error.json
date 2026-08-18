@@ -1,0 +1,22 @@
+{
+  "contract": "run_explorer_request_snapshot_v1",
+  "endpoint": "processed_records",
+  "expected_empty_copy_tokens": [
+    "VALID EMPTY",
+    "QUERY ERROR"
+  ],
+  "method": "GET",
+  "panel_id": 9403,
+  "response_state": "query_error",
+  "root_selector": "rows",
+  "scenario": "backend_error",
+  "selectors": {
+    "pipeline": "chembl_assay",
+    "run_id": "00000000-0000-4000-8000-000000000942",
+    "run_type": "backfill",
+    "workflow": "chembl_baseline"
+  },
+  "title": "Inspect Processed Records",
+  "url": "/ops/observability/processed-records?pipeline=chembl_assay&run_type=backfill&run_id=00000000-0000-4000-8000-000000000942",
+  "url_template": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+}
