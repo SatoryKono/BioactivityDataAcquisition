@@ -368,6 +368,29 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "reason"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 280
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
+              }
+            ]
           }
         ]
       },
@@ -3635,28 +3658,46 @@
           "text": "unknown",
           "value": "unknown"
         },
-        "datasource": "Prometheus",
-        "definition": "label_values(bioetl_runtime_pipeline_run_type_universe, pipeline)",
+        "datasource": "BioETL Ops HTTP",
+        "definition": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list&workflow=${workflow}",
         "hide": 0,
         "includeAll": false,
         "label": "Pipeline",
         "multi": false,
         "name": "pipeline",
-        "options": [],
+        "options": [
+          {
+            "selected": true,
+            "text": "unknown",
+            "value": "unknown"
+          }
+        ],
         "query": {
-          "query": "label_values(bioetl_runtime_pipeline_run_type_universe, pipeline)",
-          "refId": "StandardVariableQuery"
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$.items",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list&workflow=${workflow}"
+          }
         },
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 1,
+        "sort": 0,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Core scope: pipeline selector from canonical runtime pipeline/run_type universe, including runs that emitted no records. Single-select; no All scope. Unknown is the explicit fail-closed default."
+        "description": "Core scope: pipeline option list from the local control-plane catalog (/ops/control-plane/filter-options?dimension=pipeline), not the Prometheus universe. PromQL current-state panels still match $pipeline against the shared universe metrics. Single-select unless this board documents All. Unknown is the fail-closed default until a source dashboard or the operator selects a concrete pipeline. A pasted var-pipeline value that exists in the catalog remains selectable even when Prometheus has no series."
       },
       {
         "allValue": ".*",

@@ -1,6 +1,6 @@
-# Trust validation fixtures (panels 9413–9417)
+# Trust validation fixtures (panels 9413–9418)
 
-**Issues:** #8576 (visual baseline), #8578 (Trust validation close-ups)
+**Issues:** #8576 (visual baseline), #8578 (Trust validation close-ups), #8976 (first-screen `reasons_text`)
 
 Contract: `control_plane_validation_evidence_v1`  
 Generator: `scripts/ops/observability/grafana/generate_trust_validation_fixtures.py`  
@@ -15,6 +15,7 @@ Mock server: `scripts/ops/observability/grafana/serve_trust_validation_fixtures.
 | 9415 | Review Lineage Validation | `lineage-validation` |
 | 9416 | Review Retention Compliance | `retention-compliance` |
 | 9417 | Review Bounded Failure Reasons | `failure-reasons` |
+| 9418 | Review Selected-Run Trust | `manifest-validation` |
 
 Live Grafana Infinity URL pattern:
 
@@ -32,6 +33,7 @@ Live Grafana Infinity URL pattern:
 | `backend_error` | Source parse/read failure | 200 | `ERROR` |
 | `service_unavailable` | Evidence service down (QUERY_ERROR path) | **503** | `ERROR` |
 | `empty_rows` | Synthetic `rows=[]` for Infinity `noValue` | 200 | `UNKNOWN` |
+| `incomplete_reasons` | manifest-validation only: INCOMPLETE trust, `reasons_text` capped at 3 lines | 200 | `UNKNOWN` |
 | `aggregate_scope_unknown` | checkpoint only: aggregate scope | 200 | `UNKNOWN` |
 
 **Do not** treat `UNKNOWN` or empty as green OK.  

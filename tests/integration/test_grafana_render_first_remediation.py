@@ -623,6 +623,57 @@ def test_rf007_counts_and_dense_legends_are_bounded() -> None:
         )
 
 
+def _limit_field(panel: dict[str, object]) -> int | None:
+    for transform in panel.get("transformations") or []:
+        if isinstance(transform, dict) and transform.get("id") == "limit":
+            options = transform.get("options") or {}
+            if isinstance(options, dict) and isinstance(options.get("limitField"), int):
+                return int(options["limitField"])
+    return None
+
+
+def _wrapped_field_names(panel: dict[str, object]) -> set[str]:
+    names: set[str] = set()
+    overrides = (
+        panel.get("fieldConfig", {}).get("overrides", [])
+        if isinstance(panel.get("fieldConfig"), dict)
+        else []
+    )
+    for override in overrides:
+        if not isinstance(override, dict):
+            continue
+        matcher = override.get("matcher") or {}
+        name = matcher.get("options") if isinstance(matcher, dict) else None
+        for prop in override.get("properties") or []:
+            if not isinstance(prop, dict) or prop.get("id") != "custom.cellOptions":
+                continue
+            value = prop.get("value")
+            if isinstance(value, dict) and value.get("wrapText") is True:
+                assert isinstance(name, str), panel.get("id")
+                names.add(name)
+    return names
+
+
+def _override_width(panel: dict[str, object], field_name: str) -> int | None:
+    overrides = (
+        panel.get("fieldConfig", {}).get("overrides", [])
+        if isinstance(panel.get("fieldConfig"), dict)
+        else []
+    )
+    for override in overrides:
+        if not isinstance(override, dict):
+            continue
+        matcher = override.get("matcher") or {}
+        if not isinstance(matcher, dict) or matcher.get("options") != field_name:
+            continue
+        for prop in override.get("properties") or []:
+            if isinstance(prop, dict) and prop.get("id") == "custom.width":
+                value = prop.get("value")
+                if isinstance(value, int):
+                    return value
+    return None
+
+
 def test_operator_critical_tables_expose_full_values() -> None:
     expected_panels = {
         "bioetl-dq-v2.json": (9102,),
@@ -638,6 +689,30 @@ def test_operator_critical_tables_expose_full_values() -> None:
             assert custom["inspect"] is True
             if dashboard_name != "bioetl-run-explorer-v1.json":
                 assert custom["cellOptions"]["wrapText"] is True
+
+
+def test_first_window_named_text_columns_wrap_without_table_default() -> None:
+    """#8977: wrap only the named first-window text column; do not grow h."""
+    cases = (
+        ("bioetl-runtime.json", 9101, frozenset({"reason"})),
+        ("bioetl-provider-health-v2.json", 9103, frozenset({"cause"})),
+        ("bioetl-run-explorer-v1.json", 3010, frozenset({"message"})),
+    )
+    for dashboard_name, panel_id, allowed in cases:
+        panel = _panel(_load(dashboard_name), panel_id)
+        grid = panel["gridPos"]
+        assert int(grid["h"]) == 5, (dashboard_name, panel_id, grid)
+        custom = (panel.get("fieldConfig") or {}).get("defaults", {}).get("custom", {})
+        assert custom.get("cellOptions", {}).get("wrapText") is not True
+        wrapped = _wrapped_field_names(panel)
+        assert wrapped == allowed, (dashboard_name, panel_id, wrapped)
+        assert any((_override_width(panel, name) or 0) >= 260 for name in wrapped)
+
+
+def test_trust_9416_detail_is_not_wrapped_at_four_rows() -> None:
+    panel = _panel(_load("bioetl-control-plane-v1.json"), 9416)
+    assert _limit_field(panel) == 4
+    assert "detail" not in _wrapped_field_names(panel)
 
 
 def test_incident_ranked_suspects_hides_merged_activation_fields() -> None:

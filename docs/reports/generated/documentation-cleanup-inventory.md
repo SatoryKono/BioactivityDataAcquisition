@@ -7,19 +7,19 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3153 |
-| Tracked doc-like files | 3148 |
+| Doc-like files | 3181 |
+| Tracked doc-like files | 3176 |
 | Ignored local docs/reports files | 5 |
 | Duplicate groups | 9 |
 | Generated without route or exception | 0 |
-| Generated routes | 70 |
+| Generated routes | 71 |
 
 ## Tracking State
 
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 5 |
-| tracked | 3148 |
+| tracked | 3176 |
 
 ## Lifecycle Counts
 
@@ -28,7 +28,7 @@
 | active_backlog | 1 |
 | active_draft | 272 |
 | active_quality_baseline | 57 |
-| closeout_evidence | 87 |
+| closeout_evidence | 88 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 10 |
 | docs_reports_generated_or_route_owned | 7 |
@@ -43,7 +43,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 21 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 626 |
+| working_report | 652 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -59,32 +59,32 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 739 |
+| Active | 740 |
 | Archived | 169 |
 | Canonical | 70 |
 | Deprecated | 8 |
 | Generated | 1055 |
-| Working | 1112 |
+| Working | 1139 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 739 |
+| active | 740 |
 | archive | 169 |
 | canonical | 70 |
 | duplicate | 8 |
 | generated | 1055 |
-| working | 1112 |
+| working | 1139 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 326 |
-| archive-after-migration | 638 |
+| archive-after-migration | 664 |
 | generate-automatically | 1055 |
-| keep | 1122 |
+| keep | 1124 |
 | reconcile-with-github-state | 4 |
 | replace-with-link | 8 |
 
@@ -399,6 +399,7 @@
 | grafana-dashboard-release-gate-report | `scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py` | working_output |
 | grafana-dashboard-screenshot-report | `scripts/ops/observability/grafana/rerender_grafana_screenshots.py` | working_output |
 | grafana-live-panel-audit-report | `scripts/ops/observability/grafana/audit_live_grafana_panels.py` | working_output |
+| grafana-panel-fill-error-report | `scripts/ops/observability/grafana/check_dashboard_panel_fill.py` | working_output |
 | hotspot-family-baseline-quality-report | `scripts/engineering/qa/report_hotspot_family_baseline.py` | tracked_quality_baseline |
 | invariant-audit-rebaseline-quality-report | `scripts/engineering/qa/report_invariant_audit_rebaseline.py` | tracked_quality_baseline |
 | matrix-dictionaries-curated-docs | `scripts/docs/matrix/build_matrix_dicts.py` | tracked_curated_generated_doc |

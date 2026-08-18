@@ -147,7 +147,7 @@ first_window_summary_tables:
     bind: filter
   - dashboard: bioetl-control-plane-v1.json
     id: 9418
-    max_rows: 4
+    max_rows: 1
     owner: "@bioetl-observability"
     bind: limit
   - dashboard: bioetl-control-plane-v1.json

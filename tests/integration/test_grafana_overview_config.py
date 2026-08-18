@@ -90,7 +90,7 @@ def test_overview_uses_frozen_v3_selector_set() -> None:
 
     assert list(variables) == ["workflow", "pipeline", "run_type", "run_id"]
 
-    for name in ("workflow", "pipeline", "run_type"):
+    for name in ("workflow", "run_type"):
         variable = variables[name]
         assert variable.get("datasource") == {
             "type": "prometheus",
@@ -99,6 +99,17 @@ def test_overview_uses_frozen_v3_selector_set() -> None:
         assert variable.get("includeAll") is True
         assert variable.get("current", {}).get("text") == "All"
         assert variable.get("current", {}).get("value") == "$__all"
+
+    pipeline = variables["pipeline"]
+    assert pipeline.get("datasource") == "BioETL Ops HTTP"
+    assert pipeline.get("includeAll") is True
+    assert pipeline.get("current", {}).get("text") == "All"
+    assert pipeline.get("current", {}).get("value") == "$__all"
+    pipeline_query = pipeline.get("query", {})
+    assert isinstance(pipeline_query, dict)
+    infinity = pipeline_query.get("infinityQuery", {})
+    assert isinstance(infinity, dict)
+    assert "dimension=pipeline" in str(infinity.get("url", ""))
 
     assert variables["workflow"].get("multi") is False
     assert variables["pipeline"].get("multi") is False

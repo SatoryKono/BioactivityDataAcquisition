@@ -114,6 +114,84 @@ def test_every_first_window_table_owns_a_row_cap() -> None:
     assert not extra, f"row-cap contract refers to missing dashboards: {extra}"
 
 
+def test_trust_9418_wraps_only_bounded_reasons_without_moving_fold() -> None:
+    """#8975: one Trust row exposes top-3 reasons on the shipped first-screen grid."""
+    dashboard_path = next(
+        path
+        for path in get_dashboard_files()
+        if path.name == "bioetl-control-plane-v1.json"
+    )
+    dashboard = load_dashboard(dashboard_path)
+    panel = next(item for item in _root_panels(dashboard) if item.get("id") == 9418)
+
+    assert panel.get("gridPos") == {"h": 5, "w": 12, "x": 0, "y": 8}
+    assert panel.get("options", {}).get("cellHeight") == "sm"
+    defaults = panel.get("fieldConfig", {}).get("defaults", {}).get("custom", {})
+    assert defaults.get("inspect") is True
+    assert defaults.get("cellOptions", {}).get("wrapText") is not True
+
+    limit = next(
+        transform
+        for transform in panel.get("transformations", [])
+        if transform.get("id") == "limit"
+    )
+    assert limit.get("options", {}).get("limitField") == 1
+    organize = next(
+        transform
+        for transform in panel.get("transformations", [])
+        if transform.get("id") == "organize"
+    ).get("options", {})
+    assert organize.get("excludeByName") == {
+        "reasons": True,
+        "reasons_truncated": True,
+    }
+    assert organize.get("indexByName") == {
+        "processing_status": 0,
+        "trust_status": 1,
+        "scope_kind": 2,
+        "evidence_freshness": 3,
+        "reasons_text": 4,
+        "evidence_observed_at": 5,
+    }
+
+    override_properties = {
+        override.get("matcher", {}).get("options"): {
+            prop.get("id"): prop.get("value")
+            for prop in override.get("properties", [])
+        }
+        for override in panel.get("fieldConfig", {}).get("overrides", [])
+    }
+    assert override_properties["reasons_text"]["custom.cellOptions"] == {
+        "type": "auto",
+        "wrapText": True,
+    }
+    assert override_properties["reasons_text"]["custom.inspect"] is True
+    assert override_properties["reasons_text"]["custom.width"] >= 280
+    assert override_properties["evidence_observed_at"]["custom.hidden"] is True
+    assert override_properties["evidence_observed_at"]["unit"] == (
+        "time:YYYY-MM-DD HH:mm"
+    )
+    assert {
+        field
+        for field, properties in override_properties.items()
+        if properties.get("custom.cellOptions", {}).get("wrapText") is True
+    } == {"reasons_text"}
+    enum_fields = (
+        "processing_status",
+        "trust_status",
+        "scope_kind",
+        "evidence_freshness",
+    )
+    assert all(
+        override_properties[field]["custom.cellOptions"].get("wrapText") is False
+        for field in enum_fields
+    )
+    assert sum(
+        int(override_properties[field]["custom.width"])
+        for field in (*enum_fields, "reasons_text")
+    ) == 655
+
+
 def test_row_cap_contracts_are_unique_and_owned() -> None:
     seen: set[tuple[str, int]] = set()
     for item in first_window_summary_tables():

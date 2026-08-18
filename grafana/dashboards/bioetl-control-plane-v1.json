@@ -243,7 +243,7 @@
         "y": 8
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN HTTP trust summary on the first screen. processing_status is the data-processing outcome; trust_status is fail-closed exact-run evidence (INCOMPLETE/ERROR are not OK). Scope is exact_run when run_id resolves. No-data or backend unavailable is not a health verdict.",
+      "description": "SELECTED RUN HTTP trust summary on the first screen. processing_status is the data-processing outcome; trust_status is fail-closed exact-run evidence (INCOMPLETE/ERROR/UNKNOWN are not OK). First screen shows top-3 trust.reasons_text (newline-joined); the full reason list stays in rows / panel 9414. Scope is exact_run when run_id resolves. Valid empty means no selected exact-run payload; backend unavailable is not a health verdict.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -260,12 +260,119 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "processing_status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "trust_status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "scope_kind"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 105
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "evidence_freshness"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "reasons_text"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "reasons"
+              },
+              {
+                "id": "custom.width",
+                "value": 280
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "evidence_observed_at"
             },
             "properties": [
               {
                 "id": "unit",
                 "value": "time:YYYY-MM-DD HH:mm"
+              },
+              {
+                "id": "custom.hidden",
+                "value": true
               }
             ]
           }
@@ -309,21 +416,23 @@
         {
           "id": "limit",
           "options": {
-            "limitField": 4
+            "limitField": 1
           }
         },
         {
           "id": "organize",
           "options": {
             "excludeByName": {
-              "reasons": true
+              "reasons": true,
+              "reasons_truncated": true
             },
             "indexByName": {
-              "trust_status": 0,
-              "processing_status": 1,
+              "processing_status": 0,
+              "trust_status": 1,
               "scope_kind": 2,
               "evidence_freshness": 3,
-              "evidence_observed_at": 4
+              "reasons_text": 4,
+              "evidence_observed_at": 5
             },
             "renameByName": {}
           }
@@ -5090,28 +5199,46 @@
           "text": "unknown",
           "value": "unknown"
         },
-        "datasource": "Prometheus",
-        "definition": "label_values(bioetl_control_plane_run_type_universe, pipeline)",
+        "datasource": "BioETL Ops HTTP",
+        "definition": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list&workflow=${workflow}",
         "hide": 0,
         "includeAll": false,
         "label": "Pipeline",
         "multi": false,
         "name": "pipeline",
-        "options": [],
+        "options": [
+          {
+            "selected": true,
+            "text": "unknown",
+            "value": "unknown"
+          }
+        ],
         "query": {
-          "query": "label_values(bioetl_control_plane_run_type_universe, pipeline)",
-          "refId": "StandardVariableQuery"
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$.items",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list&workflow=${workflow}"
+          }
         },
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 1,
+        "sort": 0,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Core scope: pipeline selector for pipeline-centric control-plane metrics. Values come from the active control-plane pipeline/run_type universe so stale historical pipelines do not appear as selectable trust scopes. Single-select; no All scope. Default unknown is fail-closed until a source dashboard passes a pipeline or the operator selects one."
+        "description": "Core scope: pipeline option list from the local control-plane catalog (/ops/control-plane/filter-options?dimension=pipeline), not the Prometheus universe. PromQL current-state panels still match $pipeline against the shared universe metrics. Single-select unless this board documents All. Unknown is the fail-closed default until a source dashboard or the operator selects a concrete pipeline. A pasted var-pipeline value that exists in the catalog remains selectable even when Prometheus has no series."
       },
       {
         "allValue": ".*",
