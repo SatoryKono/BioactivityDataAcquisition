@@ -1851,16 +1851,38 @@ def _status_grafana_bootstrap_findings(
         ]
     ops_http = str(payload.get("ops_http") or "").strip()
     reason = str(payload.get("reason") or "").strip()
+    dashboard_profile = str(payload.get("dashboard_profile") or "").strip()
     if ops_http in {"deferred", "failed"}:
+        if dashboard_profile == "prometheus_only":
+            profile_message = "; static Prometheus-only dashboard notices are active"
+        elif dashboard_profile == "failed":
+            profile_message = "; dashboard profile provisioning failed"
+        else:
+            profile_message = "; Infinity/full dashboards may be unavailable"
         return [
             {
                 "cause": "grafana_ops_http_bootstrap",
                 "code": "GRAFANA_OPS_HTTP_BOOTSTRAP",
                 "ops_http": ops_http,
                 "reason": reason,
+                "dashboard_profile": dashboard_profile or "unknown",
                 "message": (
                     f"Grafana Ops HTTP bootstrap is {ops_http}"
-                    f" ({reason or 'unspecified'}); Infinity may be absent"
+                    f" ({reason or 'unspecified'}){profile_message}"
+                ),
+            }
+        ]
+    if ops_http == "ready" and dashboard_profile not in {"", "full"}:
+        return [
+            {
+                "cause": "grafana_dashboard_profile",
+                "code": "GRAFANA_DASHBOARD_PROFILE",
+                "ops_http": ops_http,
+                "reason": reason,
+                "dashboard_profile": dashboard_profile,
+                "message": (
+                    "Grafana Ops HTTP is ready but the full dashboard profile "
+                    f"is not active ({dashboard_profile})"
                 ),
             }
         ]

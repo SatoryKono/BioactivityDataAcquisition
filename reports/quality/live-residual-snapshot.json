@@ -12,11 +12,11 @@
   },
   "hotspot_families": {
     "application_core": {
-      "files_ge_250_loc": 4,
+      "files_ge_250_loc": 0,
       "max_internal_fan_in": 6,
-      "helper_function_ratio": 0.37,
+      "helper_function_ratio": 0.369,
       "files": 192,
-      "total_loc": 23393,
+      "total_loc": 23364,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 10
     },
@@ -39,11 +39,11 @@
       "budget_max_internal_fan_in": 3
     },
     "application_services_control_plane": {
-      "files_ge_250_loc": 1,
+      "files_ge_250_loc": 0,
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.429,
       "files": 139,
-      "total_loc": 16294,
+      "total_loc": 16285,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 2
     },

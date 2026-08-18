@@ -165,9 +165,7 @@ def record_transform_commit(
             "confirmation. Resume requires explicit --repair-steps or "
             "--force-steps for the ambiguous step."
         ),
-        ambiguous_step_ids=tuple(
-            dict.fromkeys((*context.state.ambiguous_step_ids, commit.step_id))
-        ),
+        ambiguous_step_ids=tuple(dict.fromkeys((*context.state.ambiguous_step_ids, commit.step_id))),
     )
     context.state_port.save(context.state)
 
@@ -192,10 +190,7 @@ def record_workflow_finished(
         )
         return
     _record_workflow_failure(
-        context,
-        result=result,
-        completed_at=completed_at,
-        summary=summary,
+        context, result=result, completed_at=completed_at, summary=summary
     )
 
 
@@ -208,16 +203,12 @@ def _record_workflow_success(
     last_limit: int | object | None = _UNSET_CURSOR,
 ) -> None:
     entry = context.ledger.record_workflow_finished(details=summary)
-    resolved_start_offset = (
-        context.state.last_start_offset
-        if last_start_offset is _UNSET_CURSOR
-        else cast("int | None", last_start_offset)
-    )
-    resolved_limit = (
-        context.state.last_limit
-        if last_limit is _UNSET_CURSOR
-        else cast("int | None", last_limit)
-    )
+    resolved_start_offset = context.state.last_start_offset
+    if last_start_offset is not _UNSET_CURSOR:
+        resolved_start_offset = cast("int | None", last_start_offset)
+    resolved_limit = context.state.last_limit
+    if last_limit is not _UNSET_CURSOR:
+        resolved_limit = cast("int | None", last_limit)
     context.state = replace(
         context.state,
         status="success",

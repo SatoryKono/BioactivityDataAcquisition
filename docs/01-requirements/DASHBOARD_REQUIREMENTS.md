@@ -4,7 +4,7 @@ Version: 1.0.0
 Status: active
 Class: normative
 Owner: BioETL Team
-Last verified: 2026-08-14
+Last verified: 2026-08-18
 
 ______________________________________________________________________
 
@@ -70,6 +70,7 @@ size option.
 | `DASH-DATA-002` | `run_id`, `manifest_id`, record identifiers, hashes, and filesystem paths MUST NOT be used as Prometheus labels or label filters. Exact-run identity belongs to Ops HTTP/control-plane evidence. |
 | `DASH-STATE-001` | Missing required evidence MUST remain `UNKNOWN`, `INCOMPLETE`, or an explicit error; it MUST NOT become a healthy zero. |
 | `DASH-STATE-004` | Present zero, absent telemetry, endpoint unavailable, and exact-run `processing_status` MUST remain distinct from `trust_status`. Terminal processing success MUST NOT be presented as lineage closure, retention compliance, or replay readiness. |
+| `DASH-STATE-005` | When soft Grafana bootstrap cannot provision validated BioETL Ops HTTP, it MUST select a static Prometheus-only dashboard profile under the same seven stable UIDs. That profile MUST contain no datasource/query targets, MUST state that Ops HTTP is not provisioned, and MUST state that no retention, replay, identity, or run verdict can be inferred. The full dashboard provider MAY be selected only after managed runtime identity and the Infinity dependency are ready; bootstrap status MUST expose the selected `dashboard_profile`. |
 | `DASH-ZERO-001` | Synthetic zero is allowed only for documented zero-valid event counters. Status, cause, freshness, latency, and trust panels MUST preserve absence. |
 | `DASH-DATA-003` | Removed datasources MUST stay removed (ADR-010): no panel or target MUST reference a `loki`/`tempo` datasource or the `:8081` quarantine-explorer endpoint. |
 | `DASH-DATA-004` | Every panel/target datasource MUST be an allowlisted identity — the Prometheus object/string, `BioETL Ops HTTP`, or the built-in Grafana datasource. Unknown UIDs and `${DS_*}` export artifacts are forbidden. |
@@ -264,6 +265,7 @@ The §7 answers map to these root first-window panels. Ids are locked by
 | Query scope and duplication | `report-dashboard-promql-scope --check`; `report-dashboard-query-duplicates --check` |
 | Performance | `python -m scripts.engineering.qa check-dashboard-performance-budgets` |
 | Full release render | `python -m scripts.ops run-grafana-audit-cycle` on the supported monitoring host |
+| Soft Prometheus-only fallback (`DASH-STATE-005`) | `tests/integration/test_grafana_dashboard_provisioning.py` + `tests/integration/test_grafana_datasource_provisioning.py` |
 | Structural & integrity invariants (`DASH-DATA-003/004`, `DASH-SEC-001`, `DASH-STATE-003`, `DASH-META-002`, `DASH-LAYOUT-002`, `DASH-LINK-001/002`, `DASH-VIZ-001/002`, `DASH-PERF-002`, `DASH-COPY-002`) | `tests/integration/test_dashboard_structural_invariants.py` |
 | Geometry & purpose regression locks (`DASH-LAYOUT-003/004`, `DASH-FIT-001/002/003/004/005`, `DASH-COPY-003/004/005/006/007`, `DASH-PERF-003`) | `tests/integration/test_dashboard_geometry_and_purpose_contracts.py` + `tests/integration/test_dashboard_first_window_containment.py` + [`layout-budgets.yaml`](../03-guides/dashboards/contracts/layout-budgets.yaml) |
 | Operator readability (`DASH-COPY-008`, `DASH-TIME-001`, static `DASH-FIT-004`) | `tests/integration/test_dashboard_operator_readability.py` — required on every `grafana/dashboards/**` change |
