@@ -491,10 +491,8 @@ def _assert_standard_variable_contract(
     assert pipeline_var is not None, (
         f"Dashboard {dashboard_path.name} must define 'pipeline' variable"
     )
-    pipeline_query = pipeline_var.get("query", {})
-    pipeline_query_text = (
-        pipeline_query.get("query", "") if isinstance(pipeline_query, dict) else ""
-    )
+    _assert_pipeline_filter_options_shell(dashboard_path, pipeline_var)
+
     expected_pipeline_metric_by_dashboard = {
         "bioetl-control-plane-v1.json": "bioetl_control_plane_run_type_universe",
         "bioetl-runtime.json": "bioetl_runtime_pipeline_run_type_universe",
@@ -502,10 +500,6 @@ def _assert_standard_variable_contract(
     expected_pipeline_metric = expected_pipeline_metric_by_dashboard.get(
         dashboard_path.name,
         "bioetl_overview_pipeline_run_type_universe",
-    )
-    assert expected_pipeline_metric in pipeline_query_text, (
-        f"Dashboard {dashboard_path.name} 'pipeline' query must use "
-        f"{expected_pipeline_metric}"
     )
 
     run_type_var = variable_map.get("run_type")
@@ -553,6 +547,30 @@ def _assert_run_id_filter_options_url(query_url: str) -> None:
     assert "workflow=${workflow}" in query_url
     assert "pipeline=${pipeline}" in query_url
     assert "run_type=${run_type:csv}" in query_url
+
+
+def _assert_pipeline_filter_options_url(query_url: str) -> None:
+    assert "/ops/control-plane/filter-options" in query_url
+    assert "dimension=pipeline" in query_url
+    assert "response_shape=list" in query_url
+    assert "workflow=${workflow}" in query_url
+
+
+def _assert_pipeline_filter_options_shell(
+    dashboard_path: Path, pipeline_var: dict[str, object]
+) -> None:
+    assert pipeline_var.get("type") == "query"
+    assert pipeline_var.get("datasource") == "BioETL Ops HTTP", (
+        f"Dashboard {dashboard_path.name} 'pipeline' must use BioETL Ops HTTP"
+    )
+    assert pipeline_var.get("multi") is False
+    query = pipeline_var.get("query", {})
+    assert isinstance(query, dict)
+    assert query.get("queryType") == "infinity"
+    infinity_query = query.get("infinityQuery", {})
+    assert isinstance(infinity_query, dict)
+    assert infinity_query.get("root_selector") == "$.items"
+    _assert_pipeline_filter_options_url(str(infinity_query.get("url", "")))
 
 
 def _assert_run_id_infinity_shell(
@@ -606,7 +624,7 @@ def _assert_provider_health_pipeline_run_type(
     assert pipeline_var is not None, (
         f"Dashboard {dashboard_path.name} must define shared 'pipeline' context"
     )
-    assert "bioetl_overview_pipeline_run_type_universe" in _query_text(pipeline_var)
+    _assert_pipeline_filter_options_shell(dashboard_path, pipeline_var)
 
     run_type_var = variable_map.get("run_type")
     assert run_type_var is not None, (

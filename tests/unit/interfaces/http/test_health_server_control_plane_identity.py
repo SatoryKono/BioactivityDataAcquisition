@@ -1366,7 +1366,7 @@ class TestHealthServerControlPlaneSelector:
 
         assert status_code == 200
         data = json.loads(body)
-        assert data == {"items": ["chembl_activity"]}
+        assert data == {"items": ["unknown", "chembl_activity"]}
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_filter_options_exposes_provider_dimension(

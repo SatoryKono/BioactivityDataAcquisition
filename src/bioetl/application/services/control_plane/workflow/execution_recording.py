@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import datetime
+from typing import cast
 
 from bioetl.application.services.control_plane.workflow.execution_recording_context import (
     WorkflowExecutionRecorder,
@@ -210,10 +211,12 @@ def _record_workflow_success(
     resolved_start_offset = (
         context.state.last_start_offset
         if last_start_offset is _UNSET_CURSOR
-        else last_start_offset
+        else cast("int | None", last_start_offset)
     )
     resolved_limit = (
-        context.state.last_limit if last_limit is _UNSET_CURSOR else last_limit
+        context.state.last_limit
+        if last_limit is _UNSET_CURSOR
+        else cast("int | None", last_limit)
     )
     context.state = replace(
         context.state,

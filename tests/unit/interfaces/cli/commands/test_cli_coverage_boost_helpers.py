@@ -347,7 +347,7 @@ def test_apply_cli_overrides_and_status_render_helpers_cover_branchy_paths() -> 
     config = _make_workflow_config()
     unchanged = workflow_support.apply_cli_overrides(
         config,
-        dry_run=False,
+        dry_run=None,
         run_type=None,
         start_offset=None,
         limit=None,

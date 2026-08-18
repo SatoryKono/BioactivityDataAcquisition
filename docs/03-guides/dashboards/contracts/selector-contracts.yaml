@@ -115,6 +115,10 @@ operator_context_shell:
 pipeline_universe_contract:
   status: shipped
   canonical_user_facing_metric: bioetl_overview_pipeline_run_type_universe
+  option_list_source: control_plane_filter_options_api
+  option_list_endpoint: /ops/control-plane/filter-options
+  option_list_dimension: pipeline
+  option_list_fail_closed_default: unknown
   canonical_relation:
     "bioetl_overview_pipeline_run_type_universe is an exact recording-rule
     alias
@@ -396,7 +400,7 @@ shipped_selector_registry:
       - run_id
     query_source_families:
       workflow: prometheus_workflow_runs_total
-      pipeline: prometheus_control_plane_run_type_universe
+      pipeline: control_plane_filter_options_api
       run_type: prometheus_control_plane_run_type_universe
       run_id: control_plane_filter_options_api
   bioetl-overview-v2:
@@ -415,7 +419,7 @@ shipped_selector_registry:
       - run_id
     query_source_families:
       workflow: prometheus_workflow_runs_total
-      pipeline: prometheus_overview_pipeline_run_type_universe
+      pipeline: control_plane_filter_options_api
       run_type: prometheus_overview_pipeline_run_type_universe
       run_id: control_plane_filter_options_api
   bioetl-runtime:
@@ -437,7 +441,7 @@ shipped_selector_registry:
       - stage
     query_source_families:
       workflow: prometheus_workflow_runs_total
-      pipeline: prometheus_runtime_pipeline_run_type_universe
+      pipeline: control_plane_filter_options_api
       run_type: prometheus_runtime_pipeline_run_type_universe
       run_id: control_plane_filter_options_api
       stage: prometheus_pipeline_stage_expected
@@ -462,7 +466,7 @@ shipped_selector_registry:
       - provider
     query_source_families:
       workflow: prometheus_workflow_runs_total
-      pipeline: prometheus_overview_pipeline_run_type_universe
+      pipeline: control_plane_filter_options_api
       run_type: prometheus_overview_pipeline_run_type_universe
       run_id: control_plane_filter_options_api
       provider: prometheus_provider_health_union
@@ -486,7 +490,7 @@ shipped_selector_registry:
       - stage
     query_source_families:
       workflow: prometheus_workflow_runs_total
-      pipeline: prometheus_overview_pipeline_run_type_universe
+      pipeline: control_plane_filter_options_api
       run_type: prometheus_overview_pipeline_run_type_universe
       run_id: control_plane_filter_options_api
       stage: prometheus_records_processed_total
@@ -508,7 +512,7 @@ shipped_selector_registry:
       - provider
     query_source_families:
       workflow: prometheus_workflow_runs_total
-      pipeline: prometheus_overview_pipeline_run_type_universe
+      pipeline: control_plane_filter_options_api
       run_type: prometheus_overview_pipeline_run_type_universe
       run_id: control_plane_filter_options_api
       provider: prometheus_provider_health_union
@@ -528,7 +532,7 @@ shipped_selector_registry:
       - run_id
     query_source_families:
       workflow: prometheus_workflow_runs_total
-      pipeline: prometheus_overview_pipeline_run_type_universe
+      pipeline: control_plane_filter_options_api
       run_type: prometheus_overview_pipeline_run_type_universe
       run_id: control_plane_filter_options_api
 ship_now_selector_contract_by_uid:

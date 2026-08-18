@@ -3799,11 +3799,8 @@
           "text": "All",
           "value": "$__all"
         },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "definition": "label_values(bioetl_overview_pipeline_run_type_universe, pipeline)",
+        "datasource": "BioETL Ops HTTP",
+        "definition": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list&workflow=${workflow}",
         "hide": 0,
         "includeAll": true,
         "label": "Pipeline",
@@ -3811,19 +3808,31 @@
         "name": "pipeline",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_overview_pipeline_run_type_universe, pipeline)",
-          "refId": "StandardVariableQuery"
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$.items",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list&workflow=${workflow}"
+          }
         },
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 1,
+        "sort": 0,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Core scope: pipeline selector for pipeline-centric dashboards; default is All pipelines on overview so the landing page renders meaningful L0 state instead of a fail-closed empty scope."
+        "description": "Overview landing keeps Include All / default All so L0 fleet state renders. Option list comes from the control-plane catalog, not the Prometheus universe, so a concrete pipeline remains selectable when Prom is empty."
       },
       {
         "allValue": ".*",

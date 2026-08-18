@@ -1753,7 +1753,7 @@ def test_selected_range_kpis_follow_declared_counter_window_intent() -> None:
 
 
 def test_all_max_over_time_counter_expressions_are_reviewed() -> None:
-    """Every Counter used with max_over_time must match the reviewed policy."""
+    """Every Counter used with max_over_time must match the reviewed ID registry."""
     policy = yaml.safe_load(MAX_OVER_TIME_COUNTER_POLICY_PATH.read_text("utf-8"))
     allowed_metrics = set(policy["allowed_counter_metrics"])
     counter_metrics = set(COUNTERS)
@@ -1777,14 +1777,21 @@ def test_all_max_over_time_counter_expressions_are_reviewed() -> None:
 
     rules = yaml.safe_load(RULES_PATH.read_text(encoding="utf-8"))
     for group in rules.get("groups", []):
-        for rule in group.get("rules", []):
+        for rule_index, rule in enumerate(group.get("rules", [])):
             expression = str(rule.get("expr", ""))
             matched = set(_MAX_OVER_TIME_METRIC_RE.findall(expression))
             matched &= counter_metrics
             if matched:
                 rule_name = rule.get("record") or rule.get("alert")
-                source = f"{group.get('name')}:{rule_name}"
+                source = f"{group.get('name')}:{rule_name}:rule_index={rule_index}"
                 reviewed.append((source, matched, expression))
+
+    registry = policy["reviewed_expressions"]
+    assert isinstance(registry, list)
+    assert policy["reviewed_expression_count"] == len(registry)
+    registry_ids = [str(row["id"]) for row in registry]
+    live_ids = [source for source, _matched, _expression in reviewed]
+    assert live_ids == registry_ids
 
     unexpected = {
         metric
@@ -1792,7 +1799,6 @@ def test_all_max_over_time_counter_expressions_are_reviewed() -> None:
         for metric in matched - allowed_metrics
     }
     assert not unexpected
-    assert len(reviewed) == policy["reviewed_expression_count"]
     assert policy["event_delta_function"] == "increase"
     assert policy["exact_multi_run_total_source"] == "RunLedger"
 

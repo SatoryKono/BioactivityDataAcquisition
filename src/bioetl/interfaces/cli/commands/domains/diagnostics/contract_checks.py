@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -70,11 +71,11 @@ def run_observability_contract_checks(
 
 def _safe_contract_check(
     name: str,
-    checker: object,
+    checker: Callable[[Path], ContractCheck],
     repo_root: Path,
 ) -> ContractCheck:
     try:
-        return checker(repo_root)  # type: ignore[operator]
+        return checker(repo_root)
     except (OSError, ValueError, yaml.YAMLError) as exc:
         return ContractCheck(
             name=name,

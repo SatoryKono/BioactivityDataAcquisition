@@ -37,6 +37,7 @@ def build_reproducibility_audit_scoring(summary: JsonDict) -> JsonDict:
     required_profile = str(
         summary.get("required_persistence_profile") or "degraded_observable"
     )
+    threshold_failures: list[dict[str, object]]
     if required_profile not in PROFILE_SCORE_THRESHOLDS:
         thresholds: dict[str, int] = {}
         threshold_failures = [

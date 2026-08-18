@@ -996,7 +996,7 @@ default.
 | Variable | Primary dashboards | Source | Semantics |
 | --- | --- | --- | --- |
 | `$workflow` | `0..6` | `label_values(bioetl_workflow_universe, workflow)` on query-backed dashboards; HTTP-backed identity surfaces use the bounded Ops API. | Context/evidence unless a panel documents truthful current-status intersection. The universe includes terminal workflow outcomes and started workflows published through `bioetl_workflow_expected`. |
-| `$pipeline` | `0..6` | Dashboard-bounded Prometheus universe: Overview/DQ/Provider/Incident use `bioetl_overview_pipeline_run_type_universe`; Pipeline Diagnostics uses `bioetl_runtime_pipeline_run_type_universe`; Trust uses `bioetl_control_plane_run_type_universe`; Run Explorer uses the Ops API. | Canonical pipeline context; Overview may default to `All`, non-Overview dashboards fail-close to `unknown`. Planned workflow child pipelines appear after `bioetl_workflow_pipeline_expected` is published. |
+| `$pipeline` | `0..6` | BioETL Ops HTTP `/ops/control-plane/filter-options?dimension=pipeline&response_shape=list&workflow=${workflow}` (catalog option list). PromQL current-state panels still match `$pipeline` against the dashboard-bounded universe metrics. | Canonical pipeline context; Overview may default to `All`, non-Overview dashboards fail-close to `unknown`. A catalog pipeline stays selectable when Prometheus has no series. |
 | `$run_type` | `0..6` | Same bounded universe as `$pipeline` for the dashboard role. | Multi-select Include All. Overview default `All`; other boards default `backfill`. Never `unknown`. |
 | `$run_id` | `0..6` | BioETL Ops HTTP `/ops/control-plane/filter-options?dimension=run_id...&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}` | Preserved HTTP identity context for `ID`/details panels; no Include All; default `-`; options start-time desc (`sort=0`); never a Prometheus label. |
 
@@ -1014,6 +1014,13 @@ Common context panels on primary dashboards outside Overview:
 | `Processed Records` | `9403` | Current Bronze -> Silver -> Gold accounting table from `/ops/observability/processed-records`; exact `$run_id` scopes resolve from RunLedger evidence, while aggregate scopes use `bioetl_processed_records_*` recording rules. Every `Inspect`/`Review Processed Records` table displays `parameter`, right-aligned `value`, and right-aligned canonical `percentage`. Zero-valued outcome rows remain visible and missing accounting series are UNKNOWN/no-data, not OK. |
 | `Identity Data Unavailable` | `9410` | Control Plane-only neutral fallback text shown below the identity table when the selected scope returns no visible rows. |
 | `Record Counts Unavailable` | `9411` | Control Plane-only neutral fallback text shown below the accounting table when the selected scope returns no visible rows. |
+
+Run Explorer HTTP targets (`3010` / `9402` / `9403` and the below-fold
+aliases) are locked by
+`docs/03-guides/dashboards/contracts/run-explorer-http-catalog.yaml`.
+Do not hand-edit a duplicate Infinity URL without updating that catalog;
+CI compares live JSON to the catalog and forbids unexpanded `$pipeline`
+in `noValue`.
 
 All seven shipped dashboards enforce one question/scope/evidence readability contract based
 on `4. Data Quality`: orange `4px` accent, `16px` body (12 pt equivalent),

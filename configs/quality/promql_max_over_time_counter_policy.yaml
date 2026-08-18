@@ -1,19 +1,157 @@
 schema_version: 1
-reviewed_expression_count: 41
-reviewed_on: "2026-08-17"
+reviewed_on: '2026-08-18'
 
+# reviewed_expression_count MUST equal len(reviewed_expressions).
+# Do not raise the count to make CI green; add a reviewed ID
+# for each new max_over_time(Counter) expression.
 # These are the only Counter families allowed inside max_over_time().
-# Any new expression changes reviewed_expression_count and forces a new review.
+reviewed_expression_count: 41
+reviewed_expressions:
+- id: bioetl-dq-v2.json:panel=154:target=A
+  metrics:
+  - bioetl_dq_records_quarantined_total
+  - bioetl_records_processed_total
+- id: bioetl-dq-v2.json:panel=6:target=A
+  metrics:
+  - bioetl_dq_records_quarantined_total
+- id: bioetl-dq-v2.json:panel=117:target=A
+  metrics:
+  - bioetl_records_processed_total
+- id: bioetl-dq-v2.json:panel=118:target=A
+  metrics:
+  - bioetl_records_processed_total
+- id: bioetl-dq-v2.json:panel=1:target=A
+  metrics:
+  - bioetl_records_processed_total
+- id: bioetl-dq-v2.json:panel=3:target=A
+  metrics:
+  - bioetl_records_processed_total
+- id: bioetl-dq-v2.json:panel=4:target=A
+  metrics:
+  - bioetl_records_processed_total
+- id: bioetl-dq-v2.json:panel=9:target=A
+  metrics:
+  - bioetl_dq_records_quarantined_total
+- id: bioetl-overview-v2.json:panel=9015:target=A
+  metrics:
+  - bioetl_records_processed_total
+- id: bioetl-overview-v2.json:panel=9015:target=B
+  metrics:
+  - bioetl_records_processed_total
+- id: bioetl-runtime.json:panel=240:target=A
+  metrics:
+  - bioetl_records_processed_total
+- id: bioetl-runtime.json:panel=243:target=B
+  metrics:
+  - bioetl_stage_records_total
+- id: bioetl_runtime_dashboard_recording:bioetl_runtime_error_rate_30m:rule_index=3
+  metrics:
+  - bioetl_records_processed_total
+- id: bioetl_runtime_dashboard_recording:bioetl_runtime_alert_condition_runtime_error_rate_high_30m:rule_index=4
+  metrics:
+  - bioetl_records_processed_total
+- id: bioetl_runtime_dashboard_recording:bioetl_gold_terminal_records_15m:rule_index=15
+  metrics:
+  - bioetl_stage_records_total
+- id: bioetl_runtime_dashboard_recording:bioetl_runtime_alert_condition_no_terminal_run_30m:rule_index=16
+  metrics:
+  - bioetl_records_processed_total
+- id: bioetl_runtime_dashboard_recording:bioetl_l1_gold_lifecycle_status:rule_index=55
+  metrics:
+  - bioetl_stage_records_total
+- id: bioetl_runtime_dashboard_recording:bioetl_l1_gold_lifecycle_status:rule_index=56
+  metrics:
+  - bioetl_stage_records_total
+- id: bioetl_runtime_dashboard_recording:bioetl_dq_current_activity_15m:rule_index=94
+  metrics:
+  - bioetl_records_processed_total
+- id: bioetl_runtime_dashboard_recording:bioetl_dq_current_degraded_signals_15m:rule_index=97
+  metrics:
+  - bioetl_dq_records_quarantined_total
+  - bioetl_silver_filter_rejections_total
+- id: bioetl_runtime_dashboard_recording:bioetl_dq_current_reason:rule_index=103
+  metrics:
+  - bioetl_dq_records_quarantined_total
+- id: bioetl_runtime_dashboard_recording:bioetl_dq_current_reason:rule_index=104
+  metrics:
+  - bioetl_silver_filter_rejections_total
+- id: bioetl_runtime_dashboard_recording:bioetl_dq_current_reason:rule_index=105
+  metrics:
+  - bioetl_stage_records_total
+- id: bioetl_runtime_dashboard_recording:bioetl_silver_filter_rejects_stage_total_15m:rule_index=124
+  metrics:
+  - bioetl_records_processed_total
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_bronze_current:rule_index=127
+  metrics:
+  - bioetl_stage_records_total
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_silver_valid_current:rule_index=128
+  metrics:
+  - bioetl_stage_records_total
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_silver_quarantined_current:rule_index=129
+  metrics:
+  - bioetl_stage_records_total
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_silver_skipped_current:rule_index=130
+  metrics:
+  - bioetl_stage_records_total
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_silver_filtered_out_current:rule_index=131
+  metrics:
+  - bioetl_stage_records_total
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_silver_deduplicated_current:rule_index=132
+  metrics:
+  - bioetl_stage_records_total
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_silver_accounted_current:rule_index=133
+  metrics:
+  - bioetl_stage_records_total
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_gold_written_current:rule_index=135
+  metrics:
+  - bioetl_stage_records_total
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_gold_quarantined_current:rule_index=136
+  metrics:
+  - bioetl_stage_records_total
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_gold_skipped_current:rule_index=137
+  metrics:
+  - bioetl_stage_records_total
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_gold_excluded_by_contract_current:rule_index=138
+  metrics:
+  - bioetl_stage_records_total
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_gold_deduplicated_current:rule_index=139
+  metrics:
+  - bioetl_stage_records_total
+- id: bioetl_runtime_dashboard_recording:bioetl_processed_records_gold_accounted_current:rule_index=140
+  metrics:
+  - bioetl_stage_records_total
+- id: bioetl_pipeline_runtime_observability:BioETLNoRecordsProcessed:rule_index=3
+  metrics:
+  - bioetl_records_processed_total
+- id: bioetl_pipeline_runtime_observability:BioETLRuntimeErrorRateHigh:rule_index=4
+  metrics:
+  - bioetl_records_processed_total
+- id: bioetl_dq_observability:BioETLDQQuarantineRateHigh:rule_index=1
+  metrics:
+  - bioetl_dq_records_quarantined_total
+  - bioetl_records_processed_total
+- id: bioetl_dq_observability:BioETLDQQuarantineRateCritical:rule_index=2
+  metrics:
+  - bioetl_dq_records_quarantined_total
+  - bioetl_records_processed_total
 allowed_counter_metrics:
   bioetl_records_processed_total:
-    intents: [pushed_snapshot_evidence, snapshot_denominator, event_presence]
+    intents:
+    - pushed_snapshot_evidence
+    - snapshot_denominator
+    - event_presence
   bioetl_stage_records_total:
     intents:
-      [pushed_snapshot_evidence, current_state_projection, event_presence]
+    - pushed_snapshot_evidence
+    - current_state_projection
+    - event_presence
   bioetl_dq_records_quarantined_total:
-    intents: [pushed_snapshot_evidence, snapshot_denominator, event_presence]
+    intents:
+    - pushed_snapshot_evidence
+    - snapshot_denominator
+    - event_presence
   bioetl_silver_filter_rejections_total:
-    intents: [event_presence]
-
+    intents:
+    - event_presence
 event_delta_function: increase
 exact_multi_run_total_source: RunLedger
