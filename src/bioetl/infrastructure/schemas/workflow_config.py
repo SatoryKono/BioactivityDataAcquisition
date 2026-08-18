@@ -13,6 +13,7 @@ from bioetl.domain.workflow import (
     WorkflowConfig,
     WorkflowRunOptionsConfig,
     WorkflowStepConfig,
+    reject_delete_orphans_after_limited_extracts,
 )
 from bioetl.infrastructure.schemas.workflow_config_fk import (
     _normalize_fk_optional_name,
@@ -369,9 +370,10 @@ class WorkflowConfigSchema(BaseModel):
     def validate_domain_invariants(self) -> Self:
         """Delegate duplicate/dependency/cycle checks to the domain layer."""
         try:
-            self.to_domain()
+            domain = self.to_domain()
         except ValueError as exc:
             raise ValueError(str(exc)) from exc
+        reject_delete_orphans_after_limited_extracts(domain)
         return self
 
     def to_domain(self) -> WorkflowConfig:
