@@ -88,7 +88,7 @@ invariant violations, not documentation conventions.
 | `chembl_baseline` | `configs/workflows/chembl_baseline.yaml` | 7 | `chembl_assay`, `chembl_target`, `chembl_publication` | `reconcile_foreign_keys` x4 | 8 | Baseline ChEMBL DAG with bidirectional Gold foreign-key reconciliation after source pipeline steps. |
 | `chembl_cell_line` | `configs/workflows/chembl_cell_line.yaml` | 1 | `chembl_cell_line` | - | 0 | Single-pipeline workflow wrapper. |
 | `chembl_compound_record` | `configs/workflows/chembl_compound_record.yaml` | 1 | `chembl_compound_record` | - | 0 | Single-pipeline workflow wrapper. |
-| `chembl_core` | `configs/workflows/chembl_core.yaml` | 5 | `chembl_activity`, `chembl_assay`, `chembl_target` | `reconcile_foreign_keys`, `summarize_upstream_outputs` | 5 | Core ChEMBL DAG with activity/assay/target ingests, assay-target reconciliation, and output summary. |
+| `chembl_core` | `configs/workflows/chembl_core.yaml` | 5 | `chembl_activity`, `chembl_assay`, `chembl_target` | `reconcile_foreign_keys`, `summarize_upstream_outputs` | 5 | Core ChEMBL DAG with unbounded activity/assay/target ingests, assay-target reconciliation, and output summary. |
 | `chembl_molecule` | `configs/workflows/chembl_molecule.yaml` | 1 | `chembl_molecule` | - | 0 | Single-pipeline workflow wrapper. |
 | `chembl_protein_class` | `configs/workflows/chembl_protein_class.yaml` | 1 | `chembl_protein_class` | - | 0 | Single-pipeline workflow wrapper. |
 | `chembl_publication` | `configs/workflows/chembl_publication.yaml` | 1 | `chembl_publication` | - | 0 | Single-pipeline workflow wrapper. |
