@@ -89,6 +89,10 @@ docs/00-project/ai/prompts/
 | `prompt.observability.dashboard-panel-audit` | [library/observability/dashboard-panel-audit.md](library/observability/dashboard-panel-audit.md) | Grafana panel audit (5 phases, v1.1) |
 | `prompt.observability.bi-dashboard-acceptance` | [library/observability/bi-dashboard-acceptance.md](library/observability/bi-dashboard-acceptance.md) | BI acceptance: visual / layout / data |
 | `prompt.observability.dashboard-audit-cycle` | [library/observability/dashboard-audit-cycle.md](library/observability/dashboard-audit-cycle.md) | Exhaustive cyclic audit (v2.0) of every panel × viewport × theme × zoom (Tier-1 100% / Tier-2 200%) — density, typography, color, scroll, whitespace, data, render |
+| `prompt.observability.dashboard-v5.pack` | [library/observability/dashboard-v5/pack.md](library/observability/dashboard-v5/pack.md) | V5 residual router (R-A/R-E/R-B landed; R-C PR; R-D/R-F leftover) |
+| `prompt.observability.dashboard-v5.implement` | [library/observability/dashboard-v5/implement.md](library/observability/dashboard-v5/implement.md) | Implement leftover V5 — babysit #8987, optional R-D |
+| `prompt.observability.dashboard-v5.closeout` | [library/observability/dashboard-v5/closeout.md](library/observability/dashboard-v5/closeout.md) | Close V5 residuals against origin/main |
+| `prompt.observability.dashboard-v5.audit-rf` | [library/observability/dashboard-v5/audit-rf.md](library/observability/dashboard-v5/audit-rf.md) | R-F light / 200% / leftover NV cycle |
 | `prompt.observability.grafana-audit.master` | [library/observability/grafana-audit/master.md](library/observability/grafana-audit/master.md) | Complete evidence-based read-only Grafana audit |
 | `prompt.observability.grafana-audit.visual` | [library/observability/grafana-audit/visual.md](library/observability/grafana-audit/visual.md) | Palette, WCAG contrast, typography, visual encoding |
 | `prompt.observability.grafana-audit.layout` | [library/observability/grafana-audit/layout.md](library/observability/grafana-audit/layout.md) | Composition, first viewport, variables, drill-down |
