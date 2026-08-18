@@ -6,7 +6,6 @@ import json
 from collections.abc import Mapping
 from dataclasses import replace
 from pathlib import Path
-
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.workflow.workflow_runner_models import (

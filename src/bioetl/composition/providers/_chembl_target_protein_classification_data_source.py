@@ -9,6 +9,7 @@ from typing import cast
 
 import pyarrow as pa
 from bioetl.application.services.protein.classification_resolution import (
+    InvalidRecordPolicy,
     ProteinClassificationResolutionService,
 )
 from bioetl.domain.mapping.protein_class_target_type import (
@@ -47,7 +48,7 @@ class TargetProteinClassificationSnapshotDataSource:
         *,
         delta_reader: DeltaReaderPort,
         logger: LoggerPort,
-        invalid_record_policy: str = "quarantine",
+        invalid_record_policy: InvalidRecordPolicy = "quarantine",
         target_type_mapping_data: ProteinClassTargetTypeMappingData | None = None,
     ) -> None:
         self._delta_reader = delta_reader

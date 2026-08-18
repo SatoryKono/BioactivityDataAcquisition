@@ -1,0 +1,112 @@
+# Canonical Run Explorer Infinity HTTP targets (V5 R-B).
+# Source of truth for panel URL / root_selector / empty-state taxonomy.
+# Dashboard JSON stays hand-edited for layout; CI fails if a target drifts.
+
+schema_version: 1
+dashboard_uid: bioetl-run-explorer-v1
+dashboard_path: grafana/dashboards/bioetl-run-explorer-v1.json
+
+infinity:
+  type: json
+  source: url
+  format: table
+  parser: backend
+  method: GET
+
+# Shared URL templates. Panels bind to one endpoint; duplicates must share
+# the same endpoint_id so identity/accounting/report slices cannot drift apart.
+endpoints:
+  pipeline_run_reports:
+    path: /ops/observability/pipeline-run-reports
+    required_query: [pipeline]
+  identity_table:
+    path: /ops/control-plane/identity-table
+    required_query: [pipeline, run_type, run_id]
+  processed_records:
+    path: /ops/observability/processed-records
+    required_query: [pipeline, run_type, run_id]
+  pipeline_run_report:
+    path: /ops/observability/pipeline-run-report
+    required_query: [pipeline, run_id]
+  workflow_run_reports:
+    path: /ops/observability/workflow-run-reports
+    required_query: [workflow]
+
+panels:
+  - id: 3010
+    title: Inspect Recent Runs (last 4)
+    endpoint: pipeline_run_reports
+    url: /ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=4
+    root_selector: items
+    no_value_tokens: [VALID EMPTY]
+    copy_tokens: [TREE_MISSING, LAYOUT_UNHEALTHY]
+  - id: 9402
+    title: Inspect Run Identity
+    endpoint: identity_table
+    url: /ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}
+    root_selector: rows
+    no_value_tokens: [SELECT RUN, VALID EMPTY]
+    copy_tokens: []
+  - id: 9403
+    title: Inspect Processed Records
+    endpoint: processed_records
+    url: /ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}
+    root_selector: rows
+    no_value_tokens: [VALID EMPTY, QUERY ERROR]
+    copy_tokens: []
+  - id: 3021
+    title: Inspect Recent Runs (last 20)
+    endpoint: pipeline_run_reports
+    url: /ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=20
+    root_selector: items
+    no_value_tokens: [VALID EMPTY]
+    copy_tokens: [TREE_MISSING, LAYOUT_UNHEALTHY]
+  - id: 3022
+    title: Inspect Full Run Identity
+    endpoint: identity_table
+    url: /ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}
+    root_selector: rows
+    no_value_tokens: [SELECT RUN, VALID EMPTY]
+    copy_tokens: []
+  - id: 3023
+    title: Inspect Full Processed Records
+    endpoint: processed_records
+    url: /ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}
+    root_selector: rows
+    no_value_tokens: [VALID EMPTY, QUERY ERROR]
+    copy_tokens: []
+  - id: 3011
+    title: Inspect Stage Funnel
+    endpoint: pipeline_run_report
+    url: /ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}
+    root_selector: funnel
+    no_value_tokens: [VALID EMPTY, QUERY ERROR]
+    copy_tokens: []
+  - id: 3012
+    title: Inspect Top Run Reasons
+    endpoint: pipeline_run_report
+    url: /ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}
+    root_selector: reasons_top_n
+    no_value_tokens: [VALID EMPTY, QUERY ERROR]
+    copy_tokens: []
+  - id: 3015
+    title: Inspect Reconciliation
+    endpoint: pipeline_run_report
+    url: /ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}
+    root_selector: reconciliation
+    no_value_tokens: [VALID EMPTY, QUERY ERROR]
+    copy_tokens: []
+  - id: 3013
+    title: Inspect Run Artifacts
+    endpoint: pipeline_run_report
+    url: /ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}
+    root_selector: artifacts
+    no_value_tokens: [VALID EMPTY, QUERY ERROR]
+    copy_tokens: []
+  - id: 3020
+    title: Inspect Recent Workflow Runs (last 20)
+    endpoint: workflow_run_reports
+    url: /ops/observability/workflow-run-reports?workflow=${workflow}&limit=20
+    root_selector: items
+    no_value_tokens: [VALID EMPTY]
+    copy_tokens: [TREE_MISSING, LAYOUT_UNHEALTHY]
