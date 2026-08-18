@@ -48550,7 +48550,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-17",
-  "source_tree_sha256": "869f84e5ff8ee369f398158a4ffde6e9899f70da9f2ef3997b638bedb7bd9477",
+  "source_tree_sha256": "2915beea22b8bf4f3d89cb2d36ff62166da48cb8c8137b9195a10291fc42c8c8",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
