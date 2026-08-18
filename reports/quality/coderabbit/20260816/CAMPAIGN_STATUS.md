@@ -5,28 +5,30 @@
 | Campaign | `CR-FULL-20260816` |
 | Parent issue | #8859 |
 | BASE_SHA | `6a2c8abe8ac5501bae3fef69667c3ff09280e46c` |
-| Closeout checkout | `origin/main@6ddd5185552cd98a29ff33ecb64d4b0d9b960143` |
+| Closeout checkout | `origin/main@3809e140aa514d89d4e26eb69b637a83938b04b6` |
 | Matrix leaves | 88 |
 | Exact cover assignment | `coverage_ok=True` |
-| Review terminal status | **partial** (43 ok / 5 timeout / 1 rate_limit / 39 never started) |
-| Closeout UTC | `2026-08-17` |
-| Campaign status | `partial_complete_with_service_residual` |
-| CodeRabbit CLI | `0.7.3` (resume); `0.7.2` at campaign start |
+| Review terminal status | **partial** (55 ok / 3 too_many_files / 2 rate_limit / 1 connection_error / 27 never started) |
+| Status UTC | `2026-08-18` |
+| Campaign status | `retry_in_progress_service_residual` |
+| CodeRabbit CLI | `0.7.3` |
 | Auth | Pro seat assigned; no `.env*` mutation; usage-based billing **not** enabled |
 
 ## Leaf execution
 
 | Status | Count |
 | --- | ---: |
-| ok | 43 |
-| timeout | 5 |
-| rate_limit | 1 |
-| never started | 39 |
+| ok | 55 |
+| too_many_files | 3 |
+| rate_limit | 2 |
+| connection_error | 1 |
+| never started | 27 |
 | Total matrix leaves | 88 |
 
-Timeouts: `S16b-configs-other`, `S17-docs-00-project-01`, `S17-docs-decisions`, `S18-grafana`, `S19-github-workflows`.
-
-Live rate_limit: `S12-tests-architecture-02` (`waitTime=2s` at last attempt).
+Retry 2026-08-18 landed `S-R-scripts-docs` as terminal `ok`. Live blocker is
+CodeRabbit Pro included-review quota (`S15c-tests-residual-03` `waitTime=1620s`).
+300-file leaves still need the runner `--committed` + omit-`-c` path; they were
+not re-attempted after the quota stop.
 
 Never-started leaves are listed in `progress.json` (absent keys) and `01-scope-matrix.md`.
 

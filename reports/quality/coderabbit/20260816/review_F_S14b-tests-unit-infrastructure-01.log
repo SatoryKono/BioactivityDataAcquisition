@@ -1,4 +1,4 @@
-{"type":"review_context","reviewType":"all","currentBranch":"audit-leaf","baseBranch":"main","workingDirectory":"/tmp/bioetl-cr-S14b-tests-unit-infrastructure-0-qicx_yio"}
+{"type":"review_context","reviewType":"committed","currentBranch":"audit-leaf","baseBranch":"main","workingDirectory":"/tmp/bioetl-cr-S14b-tests-unit-infrastructure-0-bppus3n1"}
 {"type":"status","phase":"connecting","status":"connecting_to_review_service"}
 {"type":"status","phase":"setup","status":"setting_up"}
 {"type":"error","errorType":"review","code":"too_many_files","message":"Review failed: Too many files!\n\nThis PR contains 303 files, which is 3 over the limit of 300.\n\nTo get a review, narrow the scope:\n  • coderabbit review --committed          # exclude uncommitted changes\n  • coderabbit review --dir <path>         # limit to a subdirectory\n  • coderabbit review --base <branch>      # compare against a closer base\nPrevious local review has no stored findings.","recoverable":false,"retryable":false,"actionRequired":true,"actualFiles":303,"maxFiles":300,"details":{}}

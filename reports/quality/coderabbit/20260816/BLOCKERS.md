@@ -262,3 +262,43 @@ billing was not enabled.
 - Detail: CodeRabbit connection/WebSocket failure
 - GitHub issue: pending reconciliation
 
+## S-R-scripts-residual — connection_error
+
+- UTC: `2026-08-18T13:41:34.774501+00:00`
+- Wave: `R`
+- Files: `23`
+- Detail: CodeRabbit connection/WebSocket failure
+- GitHub issue: pending reconciliation
+
+## S13-tests-unit-domain-01 — too_many_files
+
+- UTC: `2026-08-18T13:44:14.979439+00:00`
+- Wave: `F`
+- Files: `300`
+- Detail: CodeRabbit 300-file cap exceeded
+- GitHub issue: pending reconciliation
+
+## S14-tests-unit-application-01 — too_many_files
+
+- UTC: `2026-08-18T13:44:51.862046+00:00`
+- Wave: `F`
+- Files: `300`
+- Detail: CodeRabbit 300-file cap exceeded
+- GitHub issue: pending reconciliation
+
+## S14b-tests-unit-infrastructure-01 — too_many_files
+
+- UTC: `2026-08-18T13:45:23.896634+00:00`
+- Wave: `F`
+- Files: `300`
+- Detail: CodeRabbit 300-file cap exceeded
+- GitHub issue: pending reconciliation
+
+## S15c-tests-residual-03 — connection_error
+
+- UTC: `2026-08-18T14:10:08.739832+00:00`
+- Wave: `F`
+- Files: `300`
+- Detail: CodeRabbit connection/WebSocket failure
+- GitHub issue: pending reconciliation
+
