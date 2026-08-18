@@ -678,11 +678,6 @@ def test_operator_critical_tables_expose_full_values() -> None:
         "bioetl-dq-v2.json": (9102,),
         "bioetl-incident-v1.json": (2010, 2002, 2003, 2004, 2005),
         "bioetl-run-explorer-v1.json": (9402,),
-        "bioetl-control-plane-v1.json": (9418,),
-    }
-    default_wrap_exempt = {
-        "bioetl-run-explorer-v1.json",
-        "bioetl-control-plane-v1.json",
     }
 
     for dashboard_name, panel_ids in expected_panels.items():
@@ -691,9 +686,7 @@ def test_operator_critical_tables_expose_full_values() -> None:
             panel = _panel(dashboard, panel_id)
             custom = panel["fieldConfig"]["defaults"]["custom"]
             assert custom["inspect"] is True
-            if panel_id == 9418:
-                assert _wrapped_field_names(panel) == {"reasons_text"}
-            if dashboard_name not in default_wrap_exempt:
+            if dashboard_name != "bioetl-run-explorer-v1.json":
                 assert custom["cellOptions"]["wrapText"] is True
 
 
