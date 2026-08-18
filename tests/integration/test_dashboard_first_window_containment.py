@@ -189,7 +189,7 @@ def test_trust_9418_wraps_only_bounded_reasons_without_moving_fold() -> None:
     assert sum(
         int(override_properties[field]["custom.width"])
         for field in (*enum_fields, "reasons_text")
-    ) >= 655
+    ) == 655
 
 
 def test_row_cap_contracts_are_unique_and_owned() -> None:
