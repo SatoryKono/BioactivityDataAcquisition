@@ -122,6 +122,12 @@
         "row_count": 0,
         "status": "UNKNOWN"
       },
+      "incomplete_reasons": {
+        "http_status": 200,
+        "path": "tests/fixtures/grafana/control_plane_validation/manifest-validation/incomplete_reasons.json",
+        "row_count": 4,
+        "status": "UNKNOWN"
+      },
       "populated": {
         "http_status": 200,
         "path": "tests/fixtures/grafana/control_plane_validation/manifest-validation/populated.json",
@@ -183,7 +189,8 @@
     "9414": "manifest-validation",
     "9415": "lineage-validation",
     "9416": "retention-compliance",
-    "9417": "failure-reasons"
+    "9417": "failure-reasons",
+    "9418": "manifest-validation"
   },
   "related_issue": "#8578",
   "schema_version": 1,
@@ -191,6 +198,7 @@
     "aggregate_scope_unknown": "checkpoint only: aggregate scope needs exact pipeline.",
     "backend_error": "Source read/parse failure as ERROR row (HTTP 200 body).",
     "empty_rows": "Synthetic rows=[] for Infinity noValue visual path.",
+    "incomplete_reasons": "manifest-validation only: INCOMPLETE trust with >3 UNKNOWN reasons so first-screen reasons_text is capped (#8976).",
     "populated": "OK check rows for selected exact run (operator-readable).",
     "service_unavailable": "Service missing; HTTP 503 body for QUERY_ERROR path.",
     "valid_empty_or_unknown": "Scope unresolved / evidence absent; UNKNOWN, not green.",

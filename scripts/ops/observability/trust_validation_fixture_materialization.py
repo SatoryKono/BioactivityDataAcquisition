@@ -40,6 +40,10 @@ def materialize_trust_validation_fixture_matrix(
             "aggregate_scope_unknown": (
                 "checkpoint only: aggregate scope needs exact pipeline."
             ),
+            "incomplete_reasons": (
+                "manifest-validation only: INCOMPLETE trust with >3 UNKNOWN "
+                "reasons so first-screen reasons_text is capped (#8976)."
+            ),
         },
         "endpoints": {},
     }

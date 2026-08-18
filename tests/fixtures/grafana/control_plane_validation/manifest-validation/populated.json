@@ -1,8 +1,10 @@
 {
   "contract": "control_plane_validation_evidence_v1",
   "endpoint": "manifest-validation",
+  "evidence_freshness": "observed",
   "manifest_id": "manifest-8576-fixture",
   "pipeline": "chembl_activity",
+  "processing_status": "unknown",
   "resolved_via": "selected_run_id",
   "rows": [
     {
@@ -38,6 +40,7 @@
   ],
   "run_id": "00000000-0000-0000-0000-000000008576",
   "run_type": "incremental",
+  "scope_kind": "exact_run",
   "status": "OK",
   "summary": {
     "check_count": 5,
@@ -45,5 +48,16 @@
     "ok_count": 5,
     "unknown_count": 0,
     "warning_count": 0
-  }
+  },
+  "trust": {
+    "evidence_freshness": "observed",
+    "evidence_observed_at": "2026-08-10T00:00:00+00:00",
+    "processing_status": "unknown",
+    "reasons": [],
+    "reasons_text": "",
+    "reasons_truncated": false,
+    "scope_kind": "exact_run",
+    "trust_status": "OK"
+  },
+  "trust_status": "OK"
 }
