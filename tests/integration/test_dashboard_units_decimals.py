@@ -10,6 +10,8 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Integration tests for Grafana dashboard units and decimals consistency."""
 
+from pathlib import Path
+
 import pytest
 
 from tests.integration._grafana_test_support import (
@@ -93,6 +95,53 @@ def test_shipped_dashboards_do_not_use_iso_datetime_unit():
                         f"{dashboard_path.name}:panel={panel.get('id')} "
                         f"datetime unit must be {DASHBOARD_DATETIME_UNIT}, got {unit!r}"
                     )
+
+
+def test_trust_evidence_observed_at_is_converted_to_time():
+    """Trust first-screen ISO evidence_observed_at must become YYYY-MM-DD HH:mm."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panel = next(
+        item for item in get_dashboard_panels(dashboard) if item.get("id") == 9418
+    )
+    conversions = [
+        conversion
+        for transform in panel.get("transformations") or []
+        if isinstance(transform, dict) and transform.get("id") == "convertFieldType"
+        for conversion in (transform.get("options") or {}).get("conversions") or []
+        if isinstance(conversion, dict)
+    ]
+    assert any(
+        conversion.get("targetField") == "evidence_observed_at"
+        and conversion.get("destinationType") == "time"
+        for conversion in conversions
+    )
+    units = _iter_field_units(panel)
+    assert DASHBOARD_DATETIME_UNIT in units
+
+
+def test_run_explorer_completed_at_is_converted_to_time():
+    """ISO completed_at strings must become time fields before unit formatting."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-run-explorer-v1.json"))
+    required = {3010, 3020, 3021}
+    seen: set[int] = set()
+    for panel in get_dashboard_panels(dashboard):
+        panel_id = panel.get("id")
+        if panel_id not in required:
+            continue
+        seen.add(int(panel_id))
+        conversions = [
+            conversion
+            for transform in panel.get("transformations") or []
+            if isinstance(transform, dict) and transform.get("id") == "convertFieldType"
+            for conversion in (transform.get("options") or {}).get("conversions") or []
+            if isinstance(conversion, dict)
+        ]
+        assert any(
+            conversion.get("targetField") == "completed_at"
+            and conversion.get("destinationType") == "time"
+            for conversion in conversions
+        ), f"panel {panel_id} must convert completed_at to time"
+    assert seen == required
 
 
 def test_fraction_panels_have_consistent_units():
