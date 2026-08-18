@@ -140,6 +140,14 @@ async def test_all_control_plane_validation_routes_publish_stable_contract(
             }
             assert payload["scope_kind"] == "exact_run"
             assert "trust" in payload
+            trust = payload["trust"]
+            assert isinstance(trust, dict)
+            assert "reasons" in trust
+            assert "reasons_text" in trust
+            assert "reasons_truncated" in trust
+            assert isinstance(trust["reasons"], list)
+            assert isinstance(trust["reasons_text"], str)
+            assert isinstance(trust["reasons_truncated"], bool)
         _, failure_payload = await _get_json(
             server,
             "/ops/control-plane/failure-reasons?pipeline=chembl_activity"

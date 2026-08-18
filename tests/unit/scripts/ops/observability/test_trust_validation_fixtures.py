@@ -10,6 +10,9 @@ from unittest import mock
 
 import pytest
 
+from bioetl.application.observability.control_plane_evidence.models import (
+    FIRST_SCREEN_TRUST_REASONS_CAP,
+)
 from scripts.ops.observability.grafana.serve_trust_validation_fixtures import (
     FixtureHandler,
 )
@@ -26,6 +29,7 @@ PANEL_MAP = {
     9415: "lineage-validation",
     9416: "retention-compliance",
     9417: "failure-reasons",
+    9418: "manifest-validation",
 }
 REQUIRED_STATES = {
     "populated",
@@ -103,6 +107,22 @@ def test_failure_reasons_zero_failures_has_zero_counts() -> None:
         "validation",
         "unknown",
     }
+
+
+def test_manifest_validation_incomplete_reasons_is_three_line_text() -> None:
+    payload = json.loads(
+        (ROOT / "manifest-validation" / "incomplete_reasons.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    trust = payload["trust"]
+    assert payload["trust_status"] == "INCOMPLETE"
+    assert payload["status"] == "UNKNOWN"
+    assert len(trust["reasons"]) > FIRST_SCREEN_TRUST_REASONS_CAP
+    assert trust["reasons_text"] == "\n".join(
+        trust["reasons"][:FIRST_SCREEN_TRUST_REASONS_CAP]
+    )
+    assert trust["reasons_truncated"] is True
 
 
 def test_empty_rows_fixture_is_empty_list() -> None:
