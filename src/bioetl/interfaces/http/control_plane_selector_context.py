@@ -101,9 +101,11 @@ def _apply_exact_run_only_fallback(
 
 
 def _prefix_run_id_no_selection(dimension: str, values: list[str]) -> list[str]:
-    if dimension != "run_id":
-        return values
-    return [RUN_ID_NO_SELECTION, *[value for value in values if value]]
+    if dimension == "run_id":
+        return [RUN_ID_NO_SELECTION, *[value for value in values if value]]
+    if dimension == "pipeline":
+        return [UNKNOWN_SCOPE, *[value for value in values if value and value != UNKNOWN_SCOPE]]
+    return values
 
 
 def _dimension_option_values(
