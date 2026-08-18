@@ -128,6 +128,14 @@ class HistoricalReplayCorpusService:
                     "Historical replay bulk certification is outside the published "
                     f"certified tranche for manifest {spec.manifest_id!r}"
                 )
+            if inventory_record.certification_status == "needs_operator_review":
+                records.append(
+                    self._build_skipped_record(
+                        inventory_record=inventory_record,
+                        status="skipped_needs_operator_review",
+                    )
+                )
+                continue
             result = self._apply_one_certification(
                 certification_service=self.certification_service,
                 manifest=manifest,

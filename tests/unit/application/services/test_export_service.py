@@ -353,6 +353,25 @@ class TestExportService:
         assert result.row_count == 0
         assert result.error == "Storage error"
 
+    async def test_export_propagates_unexpected_attribute_error(self) -> None:
+        mock_reader = AsyncMock()
+        mock_catalog = MagicMock()
+        mock_writer = MagicMock()
+        mock_logger = MagicMock()
+        mock_reader.table_exists.side_effect = AttributeError("missing reader attr")
+        mock_catalog.resolve_table_path.return_value = "data/silver/activity"
+        service = ExportService(
+            reader=mock_reader,
+            catalog=mock_catalog,
+            writer=mock_writer,
+            logger=mock_logger,
+            silver_path=Path("data/silver"),
+            gold_path=Path("data/gold"),
+        )
+
+        with pytest.raises(AttributeError, match="missing reader attr"):
+            await service.export("activity", layer="silver")
+
     async def test_export_redacts_sensitive_columns_for_viewer_and_records_governance(
         self,
     ):

@@ -10,6 +10,7 @@ REQ-OBS-001: Errors should be logged with full context
 
 from __future__ import annotations
 
+import inspect
 from collections.abc import Callable
 from typing import Any
 
@@ -173,17 +174,7 @@ class ErrorHandlerService:
         if not callable(increment):
             return
 
-        for kwargs in (
-            {"value": float(value), "_tags": labels},
-            {"tags": labels},
-            {"_tags": labels},
-            {},
-        ):
-            try:
-                increment(name, **kwargs)
-                return
-            except TypeError:
-                continue
+        increment(name, **_legacy_increment_kwargs(increment, value, labels))
 
     def _prepare_log_context(
         self,
@@ -198,7 +189,7 @@ class ErrorHandlerService:
         Any,  # Any: Prepared log context remains a heterogeneous structured payload.
     ]:
         """Prepare context dictionary for logging."""
-        log_context = context or {}
+        log_context = dict(context or {})
 
         # Add basic exception information
         log_context.update(
@@ -312,6 +303,26 @@ class ErrorHandlerService:
             context=context or {},
         )
         self.handle_error(error, context, reraise=True)
+
+
+def _legacy_increment_kwargs(
+    increment: Callable[..., object],
+    value: int,
+    labels: dict[str, str] | None,
+) -> dict[str, object]:
+    """Select one increment() keyword shape from the callable signature."""
+    try:
+        params = inspect.signature(increment).parameters
+    except (TypeError, ValueError):
+        return {}
+    kwargs: dict[str, object] = {}
+    if "value" in params:
+        kwargs["value"] = float(value)
+    if "_tags" in params:
+        kwargs["_tags"] = labels
+    elif "tags" in params:
+        kwargs["tags"] = labels
+    return kwargs
 
 
 ErrorHandler = ErrorHandlerService

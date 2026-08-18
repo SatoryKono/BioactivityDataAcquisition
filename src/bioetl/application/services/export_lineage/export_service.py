@@ -48,7 +48,6 @@ _EXPORT_OPERATION_ERRORS = (
     RuntimeError,
     ValueError,
     TypeError,
-    Exception,
 )
 
 

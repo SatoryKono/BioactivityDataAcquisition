@@ -114,9 +114,10 @@ def validate_molecular_weight(
         return None
 
     min_mw, max_mw, precision = _molecular_weight_bounds(config)
-    if not (min_mw < mw < max_mw):
+    rounded = round(mw, precision)
+    if not (min_mw < rounded < max_mw):
         return None
-    return round(mw, precision)
+    return rounded
 
 
 def _molecular_weight_bounds(

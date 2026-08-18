@@ -52,8 +52,7 @@ class TestBuildCompoundNameEndpoint:
 
     def test_query_with_spaces(self) -> None:
         result = build_compound_name_endpoint("acetic acid")
-        assert "compound/name/acetic acid" in result
-        assert result.endswith("/JSON")
+        assert result == "/compound/name/acetic%20acid/JSON"
 
 
 @pytest.mark.unit
@@ -111,12 +110,11 @@ class TestBuildCidBatchEndpoint:
         result = build_cid_batch_endpoint(cids)
         assert result == "/compound/cid/42/JSON"
 
-    def test_large_batch_truncated_to_preview(self) -> None:
-        """Only first 3 CIDs appear in endpoint preview."""
+    def test_large_batch_includes_every_cid(self) -> None:
         cids = list(range(1, 101))
         result = build_cid_batch_endpoint(cids)
-        assert "cid/1,2,3,..." in result
-        assert "100" not in result
+        assert result == "/compound/cid/" + ",".join(map(str, cids)) + "/JSON"
+        assert "..." not in result
 
     def test_empty_batch_raises_value_error(self) -> None:
         with pytest.raises(ValueError, match="at least one CID"):

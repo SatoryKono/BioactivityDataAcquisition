@@ -207,9 +207,13 @@ def _resolve_explain_identifier(
     manifest_id: str | None,
 ) -> str | None:
     """Resolve exactly one explain identifier from CLI options."""
-    if bool(run_id) == bool(manifest_id):
+    normalized_run_id = run_id.strip() if isinstance(run_id, str) else None
+    normalized_manifest_id = (
+        manifest_id.strip() if isinstance(manifest_id, str) else None
+    )
+    if bool(normalized_run_id) == bool(normalized_manifest_id):
         return None
-    return run_id if run_id is not None else manifest_id
+    return normalized_run_id or normalized_manifest_id
 
 
 @typed_click_group()

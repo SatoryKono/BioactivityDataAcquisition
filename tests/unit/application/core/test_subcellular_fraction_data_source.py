@@ -267,6 +267,21 @@ class TestSubcellularFractionDataSourceFetch:
         assert len(records) == 1
 
     @pytest.mark.asyncio
+    async def test_data_source_fetch__applies_offset_before_limit(self) -> None:
+        source = MockDataSource(assays=[ASSAY_WITH_FRACTION, ASSAY_WITH_FRACTION_2])
+        wrapper = SubcellularFractionDataSource(data_source=source)
+
+        records = [
+            record
+            async for record in wrapper.fetch(
+                "subcellular_fraction", limit=1, offset=1
+            )
+        ]
+
+        assert len(records) == 1
+        assert records[0]["subcellular_fraction"] == "Cytosol"
+
+    @pytest.mark.asyncio
     async def test_data_source_fetch__entity_delegates__af71f01b(self) -> None:
         source = MockDataSource(assays=[ASSAY_WITH_FRACTION])
         wrapper = SubcellularFractionDataSource(data_source=source)

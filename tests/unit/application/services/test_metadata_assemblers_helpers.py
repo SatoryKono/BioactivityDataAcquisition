@@ -533,3 +533,43 @@ def test_build_gold_output_sets_composite_run_id_none_when_no_composite_ext() ->
     )
     assert output.record_count == 4
     assert output.composite_run_id is None
+
+
+@pytest.mark.unit
+def test_augment_dq_summary_uses_max_error_count_consistently(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from bioetl.application.services.lineage import metadata_assembler_support
+    from bioetl.application.services.lineage.metadata_assembler_support import (
+        augment_dq_summary_with_composite_cv,
+    )
+
+    monkeypatch.setattr(
+        metadata_assembler_support,
+        "summarize_composite_cv_dq",
+        lambda *_args, **_kwargs: {
+            "has_signal": True,
+            "error_records": 1,
+            "warning_records": 0,
+            "validation_passed": False,
+            "rule_provenance": [],
+        },
+    )
+    summary = DQSummary(
+        total_records=10,
+        valid_records=6,
+        error_records=4,
+        warning_records=0,
+        error_rate=0.4,
+    )
+
+    result = augment_dq_summary_with_composite_cv(
+        dq_summary=summary,
+        records=[{"id": 1}],
+        contract_version="v1",
+        dq_report_path=None,
+    )
+
+    assert result.error_records == 4
+    assert result.valid_records == 6
+    assert result.error_rate == pytest.approx(0.4)

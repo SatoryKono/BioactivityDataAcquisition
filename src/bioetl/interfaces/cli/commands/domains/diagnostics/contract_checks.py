@@ -53,14 +53,34 @@ def run_observability_contract_checks(
     """Run the public diagnostics contract check set."""
     root = repo_root or Path.cwd()
     checks = (
-        _check_metric_inventory(root),
-        _check_slo_alert_contract(root),
-        _check_tracing_coverage_contract(root),
+        _safe_contract_check("metric_inventory_drift", _check_metric_inventory, root),
+        _safe_contract_check("slo_alert_contract", _check_slo_alert_contract, root),
+        _safe_contract_check(
+            "mandatory_tracing_coverage",
+            _check_tracing_coverage_contract,
+            root,
+        ),
     )
     return ObservabilityContractCheckReport(
         passed=all(check.passed for check in checks),
         checks=checks,
     )
+
+
+
+def _safe_contract_check(
+    name: str,
+    checker: object,
+    repo_root: Path,
+) -> ContractCheck:
+    try:
+        return checker(repo_root)  # type: ignore[operator]
+    except (OSError, ValueError, yaml.YAMLError) as exc:
+        return ContractCheck(
+            name=name,
+            passed=False,
+            details={"error": str(exc)},
+        )
 
 
 def render_contract_check_report(report: ObservabilityContractCheckReport) -> str:
@@ -204,7 +224,10 @@ def _check_tracing_file_entry(
 
 
 def _load_yaml(path: Path) -> dict[str, object]:
-    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    try:
+        payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError) as exc:
+        raise ValueError(f"Unable to load YAML from {path}: {exc}") from exc
     return payload if isinstance(payload, dict) else {}
 
 

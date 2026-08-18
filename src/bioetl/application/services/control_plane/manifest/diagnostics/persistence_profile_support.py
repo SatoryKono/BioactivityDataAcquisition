@@ -81,21 +81,17 @@ def resolve_persistence_inputs(
             base_summary.get("append_mode_semantic_sinks", [])
         ),
         exact_replay_supported=bool(base_summary.get("exact_replay_eligible", False)),
-        strict_replay_execution_context_supported=bool(
-            replay_family_contract.get(
-                "strict_exact_replay_supported",
-                exact_replay_boundary == "snapshot_backed_source_runs_only",
-            )
+        strict_replay_execution_context_supported=_bool_or_default(
+            replay_family_contract.get("strict_exact_replay_supported"),
+            default=exact_replay_boundary == "snapshot_backed_source_runs_only",
         ),
         produced_artifact_trace_present=bool(artifact_refs),
         artifact_lineage_links_complete=not artifact_refs
         or (missing_link_count == 0 and bool(lineage_fragment_ids)),
         composite_execution_context=composite_execution_context,
-        composite_resume_rich_replay_supported=bool(
-            base_summary.get(
-                "composite_resume_rich_replay_supported",
-                not composite_execution_context,
-            )
+        composite_resume_rich_replay_supported=_bool_or_default(
+            base_summary.get("composite_resume_rich_replay_supported"),
+            default=not composite_execution_context,
         ),
     )
 
@@ -183,6 +179,13 @@ def build_composite_resume_reconstructability(
         ],
         "forensic_grade_supported": False,
     }
+
+
+def _bool_or_default(value: object, *, default: bool) -> bool:
+    """Treat explicit None as absent while preserving provided booleans."""
+    if value is None:
+        return default
+    return bool(value)
 
 
 def resolve_attained_profile(

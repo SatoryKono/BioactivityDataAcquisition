@@ -47,6 +47,7 @@ from bioetl.domain.value_objects.dq_report import (
     SilverDQCheckType,
     TypeConformanceResult,
     UniquenessResult,
+    ValueDistributionResult,
 )
 
 
@@ -84,13 +85,17 @@ class TestSilverCheckExecutorDirect:
         statistics.check_null_rates.return_value = (
             [
                 NullRateResult(
-                    column_name="id", null_rate=0.0, status=DQCheckStatus.PASS
+                    column_name="id", null_rate=0.4, status=DQCheckStatus.WARN
                 )
             ],
-            0.0,
+            0.4,
         )
         distribution_payload = {"status": "pass", "numeric_columns": {}}
-        statistics.check_value_distribution.return_value = object()
+        statistics.check_value_distribution.return_value = ValueDistributionResult(
+            numeric_columns={},
+            categorical_columns={},
+            status=DQCheckStatus.PASS,
+        )
         statistics.distribution_to_dict.return_value = distribution_payload
         threshold_checker.check_key_nullability.return_value = {
             "status": DQCheckStatus.WARN.value,
@@ -113,10 +118,10 @@ class TestSilverCheckExecutorDirect:
         )
 
         assert checks["record_count"]["status"] == DQCheckStatus.PASS.value
-        assert checks["null_rate"]["status"] == DQCheckStatus.PASS.value
+        assert checks["null_rate"]["status"] == DQCheckStatus.WARN.value
         assert checks["value_distribution"] == distribution_payload
         assert checks["key_nullability"]["status"] == DQCheckStatus.WARN.value
-        assert (passed, failed, warnings) == (3, 0, 1)
+        assert (passed, failed, warnings) == (2, 0, 2)
 
     def test_execute_checks_passes_empty_rules_list_when_none_provided(self) -> None:
         executor, _statistics, threshold_checker = _build_executor()

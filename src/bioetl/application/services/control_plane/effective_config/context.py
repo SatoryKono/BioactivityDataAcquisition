@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass
 
 from bioetl.application.services.control_plane.effective_config.provenance_support import (
@@ -72,13 +73,15 @@ def build_effective_config_context(
 ) -> EffectiveConfigContext:
     """Build derived snapshots and semantic payload context for one artifact."""
     resolved_policy = resolve_resolution_policy(resolution_policy)
+    isolated_resolved_config = copy.deepcopy(resolved_config)
+    isolated_runtime_overrides = copy.deepcopy(runtime_overrides)
     resolved_snapshot = build_resolved_config_snapshot(
         pipeline_kind=pipeline_kind,
-        resolved_config=resolved_config,
+        resolved_config=isolated_resolved_config,
     )
-    overrides_snapshot = build_runtime_override_snapshot(runtime_overrides)
+    overrides_snapshot = build_runtime_override_snapshot(isolated_runtime_overrides)
     semantic_runtime_overrides = normalize_runtime_overrides_for_semantic_identity(
-        runtime_overrides
+        isolated_runtime_overrides
     )
     semantic_overrides_snapshot = build_runtime_override_snapshot(
         semantic_runtime_overrides
@@ -88,7 +91,7 @@ def build_effective_config_context(
         required_persistence_profile=required_persistence_profile,
     )
     effective_snapshot = build_effective_execution_config(
-        resolved_config=resolved_config,
+        resolved_config=isolated_resolved_config,
         runtime_overrides=semantic_runtime_overrides,
     )
     dq_policy_refs, dq_policy_snapshots, dq_rule_bundle_versions = build_dq_components(

@@ -186,6 +186,16 @@ def test_narrow_manifest_catalog_applies_each_scope_and_fail_open_policy() -> No
         )
         == ()
     )
+    assert (
+        subject.narrow_manifest_catalog(
+            manifests,
+            selected_workflows=(),
+            selected_pipelines=(),
+            selected_run_types=(),
+            selected_run_id="missing-run",
+        )
+        == ()
+    )
 
 
 def test_build_workflow_aliases_honors_selection_defaults_and_deduplication() -> None:

@@ -198,7 +198,7 @@ class BatchTracingManagerService:
             quarantined_count=quarantined_count,
         )
 
-    def end_span(self, span: Span | None, error: Exception | None = None) -> None:
+    def end_span(self, span: Span | None, error: BaseException | None = None) -> None:
         """End a tracing span and optionally record an error."""
         close_span(cast("_ClosableSpan | None", span), error)
 

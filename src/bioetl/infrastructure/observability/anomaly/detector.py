@@ -51,6 +51,10 @@ class AnomalyDetector:
             raise ValueError("z_score_threshold must be >= 0")
         if min_baseline_samples < 1:
             raise ValueError("min_baseline_samples must be >= 1")
+        if min_baseline_samples > baseline_window:
+            raise ValueError(
+                "min_baseline_samples must be <= baseline_window"
+            )
 
         self.baseline_window = baseline_window
         self.z_score_threshold = z_score_threshold

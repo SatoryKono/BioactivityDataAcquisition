@@ -89,8 +89,11 @@ def test_processed_record_selector_and_formatting_edges() -> None:
     assert support.read_processed_records_run_id("not-a-uuid") is None
 
     assert support.selector_tokens(" $__all ") == ()
+    assert support.selector_tokens("all") == ()
+    assert support.selector_tokens(" ALL ") == ()
     assert support.selector_tokens("{a,b,a}") == ("a", "b")
     assert support.selector_tokens("a,*,b") == ()
+    assert support.selector_tokens("a,all,b") == ()
     assert support.selector_tokens(" , ") == ()
     assert support.is_unknown_scope(" unknown ") is True
 

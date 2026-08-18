@@ -227,7 +227,13 @@ class HealthServer(
                 )
             raise
         if self._control_plane_integrity_refresher is not None:
-            await refresh_control_plane_metrics(self._control_plane_integrity_refresher)
+            try:
+                await refresh_control_plane_metrics(
+                    self._control_plane_integrity_refresher
+                )
+            except BaseException:
+                await self.stop()
+                raise
             self._control_plane_integrity_refresh_task = asyncio.create_task(
                 run_periodic_control_plane_metrics_refresh(
                     self._control_plane_integrity_refresher,

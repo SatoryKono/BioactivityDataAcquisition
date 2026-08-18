@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from time import perf_counter
-from typing import TYPE_CHECKING, Protocol
+from typing import Protocol
 from uuid import UUID
 
 from bioetl.application.services.checkpoint._checkpoint_service_support import (
@@ -11,10 +11,28 @@ from bioetl.application.services.checkpoint._checkpoint_service_support import (
 )
 from bioetl.application.services.checkpoint.checkpoint_models import CheckpointInfo
 from bioetl.domain.ports import CheckpointPort, LoggerPort
-from bioetl.domain.types import RunID
+from bioetl.domain.types import JsonDict, RunID
 
-if TYPE_CHECKING:
-    from bioetl.domain.types import JsonDict
+
+def _resolve_checkpoint_owner_pipeline(
+    *,
+    caller_pipeline_name: str,
+    metadata: JsonDict,
+) -> str:
+    """Return the checkpoint owner pipeline, rejecting caller/payload mismatches."""
+    owner = metadata.get("pipeline_name")
+    run_context = metadata.get("run_context")
+    if owner is None and isinstance(run_context, dict):
+        owner = run_context.get("pipeline_name")
+    if not isinstance(owner, str) or not owner.strip():
+        return caller_pipeline_name
+    owner_pipeline = owner.strip()
+    if caller_pipeline_name and owner_pipeline != caller_pipeline_name:
+        raise ValueError(
+            "Checkpoint pipeline owner mismatch: "
+            f"caller={caller_pipeline_name}, checkpoint={owner_pipeline}"
+        )
+    return owner_pipeline
 
 
 class _CheckpointServiceRuntimeHost(Protocol):
@@ -202,9 +220,13 @@ async def get_checkpoint_for_manifest_id_impl(
             )
             return None
 
+        owner_pipeline = _resolve_checkpoint_owner_pipeline(
+            caller_pipeline_name=pipeline_name,
+            metadata=checkpoint_data[1],
+        )
         host.logger.info(
             "Got checkpoint for manifest",
-            pipeline=pipeline_name,
+            pipeline=owner_pipeline,
             manifest_id=manifest_id,
         )
         host._record_operator_metrics(
@@ -213,7 +235,7 @@ async def get_checkpoint_for_manifest_id_impl(
             duration_seconds=perf_counter() - start_time,
         )
         return host._checkpoint_info_from_data(
-            pipeline_name=pipeline_name,
+            pipeline_name=owner_pipeline,
             checkpoint_data=checkpoint_data,
         )
     except _CHECKPOINT_OPERATOR_ERRORS:

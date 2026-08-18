@@ -203,19 +203,16 @@ class TestSearchByTitle:
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_search_returns_first_result_when_no_title_match(
+    async def test_search_returns_none_when_no_title_match(
         self, handler: PubMedTitleFallbackHandler, mock_search_fn: AsyncMock
     ) -> None:
-        """Should return first result when no title matches (API may vary format)."""
         mock_search_fn.return_value = [
             {"pmid": "12345678", "article_title": "Completely Different Title"}
         ]
 
         result = await handler._search_by_title("Test Publication Title")
 
-        # Returns first result even without match (PubMed title format may differ)
-        assert result is not None
-        assert result["pmid"] == "12345678"
+        assert result is None
 
     @pytest.mark.asyncio
     async def test_search_handles_exception(
@@ -565,10 +562,9 @@ class TestSearchByTitleMatchingPriority:
         assert result["pmid"] == "22222222"
 
     @pytest.mark.asyncio
-    async def test_returns_first_when_all_titles_empty(
+    async def test_returns_none_when_all_titles_empty(
         self, mock_logger: MagicMock
     ) -> None:
-        """Should return first result when all results have empty titles."""
         mock_search_fn = AsyncMock(
             return_value=[
                 {"pmid": "11111111", "article_title": ""},
@@ -581,9 +577,7 @@ class TestSearchByTitleMatchingPriority:
 
         result = await handler._search_by_title("Test Title")
 
-        # Falls back to first result
-        assert result is not None
-        assert result["pmid"] == "11111111"
+        assert result is None
 
     @pytest.mark.asyncio
     async def test_handles_whitespace_in_titles(self, mock_logger: MagicMock) -> None:

@@ -387,7 +387,7 @@ class TestQuarantineServiceFilteredExplorer:
         assert result["bronze_records"] == 0
         assert result["reject_ratio"] == 0.0
         assert "run_ids" not in result
-        mock_run_manifest_service.show.assert_not_called()
+        assert mock_run_manifest_service.show.call_count == 2
         mock_run_manifest_service.manifest_port.list_all.assert_not_called()
 
     @pytest.mark.asyncio
@@ -709,6 +709,20 @@ class TestQuarantineServiceMarkAsReprocessed:
             "bioetl_quarantine_operator_operations_total",
             1,
             labels={"operation": "mark_reprocessed", "status": "partial"},
+        )
+
+    def test_mark_as_reprocessed_records_failed_metric(
+        self, quarantine_service, mock_quarantine_port
+    ) -> None:
+        mock_quarantine_port.update_status.side_effect = RuntimeError("port down")
+
+        with pytest.raises(RuntimeError, match="port down"):
+            quarantine_service.mark_as_reprocessed([{"payload_hash": "hash1"}])
+
+        quarantine_service.metrics.increment_counter.assert_called_with(
+            "bioetl_quarantine_operator_operations_total",
+            1,
+            labels={"operation": "mark_reprocessed", "status": "failed"},
         )
 
 

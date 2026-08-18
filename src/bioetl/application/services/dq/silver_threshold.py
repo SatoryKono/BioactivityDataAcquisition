@@ -84,6 +84,13 @@ class SilverThresholdChecker:
             field = str(rule.get("field", ""))
             key_type = str(rule.get("key_type", "merge"))
             if field not in df.columns:
+                violations.append(
+                    {
+                        "field": field,
+                        "key_type": key_type,
+                        "missing_column": True,
+                    }
+                )
                 continue
             null_count = int(df[field].null_count())
             if null_count > 0:

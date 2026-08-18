@@ -94,6 +94,11 @@ def compute_publication_term_entity_id(
     normalized_publication_id = _normalize_publication_id(publication_id)
     normalized_term_type = _normalize_publication_term_identity_component(term_type)
     normalized_term = _normalize_publication_term_value(term)
+    if not normalized_publication_id or not normalized_term_type or not normalized_term:
+        raise ValueError(
+            "publication-term identity requires non-empty publication_id, "
+            "term_type, and term after normalization"
+        )
     composite = f"{normalized_publication_id}:{normalized_term_type}:{normalized_term}"
     return hashlib.sha256(composite.encode()).hexdigest()[:16]
 

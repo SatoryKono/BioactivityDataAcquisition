@@ -133,6 +133,14 @@ def test_resolver_publishes_path_fields_and_legacy_projection() -> None:
     assert row["l3_id"] is None
 
 
+def test_resolver_rejects_invalid_record_policy() -> None:
+    with pytest.raises(ValueError, match="invalid_record_policy"):
+        ResolveProteinClassificationUseCase(
+            _FakeClassificationPort({}),
+            invalid_record_policy="quarantaine",  # type: ignore[arg-type]
+        )
+
+
 def test_resolver_deduplicates_and_sorts_multiple_classifications() -> None:
     use_case = ResolveProteinClassificationUseCase(
         _FakeClassificationPort(

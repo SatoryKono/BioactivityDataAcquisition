@@ -56,26 +56,36 @@ async def write_silver_then_gold(
 ) -> None:
     """Write Silver first, then pass lineage refs into Gold."""
     silver_result: SilverWriteResult | None = None
+    silver_written = 0
+    gold_written = 0
     if transform_result.silver_records:
-        silver_result = cast(
-            "SilverWriteResult | None",
-            await safe_write_layer(
-                execute_with_span=execute_with_span,
-                writer=writer,
-                quarantine_manager=quarantine_manager,
-                logger=logger,
-                run_id=run_id,
-                domain_event_emitter=domain_event_emitter,
-                layer="silver",
-                records=transform_result.silver_records,
-                batch_id=batch_id,
-                ingestion_ts=ingestion_ts,
-                bronze_refs=bronze_refs,
-                operation_errors=_OPERATION_ERRORS,
-            ),
+        silver_outcome = await safe_write_layer(
+            execute_with_span=execute_with_span,
+            writer=writer,
+            quarantine_manager=quarantine_manager,
+            logger=logger,
+            run_id=run_id,
+            domain_event_emitter=domain_event_emitter,
+            layer="silver",
+            records=transform_result.silver_records,
+            batch_id=batch_id,
+            ingestion_ts=ingestion_ts,
+            bronze_refs=bronze_refs,
+            operation_errors=_OPERATION_ERRORS,
         )
+        if silver_outcome is None:
+            track_storage_write_metrics(
+                batch_metrics,
+                transform_result=transform_result,
+                silver_written=0,
+                gold_written=0,
+            )
+            return
+        if silver_outcome is not True:
+            silver_result = cast("SilverWriteResult", silver_outcome)
+        silver_written = len(transform_result.silver_records)
     if transform_result.gold_records:
-        await safe_write_layer(
+        gold_outcome = await safe_write_layer(
             execute_with_span=execute_with_span,
             writer=writer,
             quarantine_manager=quarantine_manager,
@@ -90,7 +100,11 @@ async def write_silver_then_gold(
             silver_refs=[silver_result] if silver_result is not None else None,
             operation_errors=_OPERATION_ERRORS,
         )
+        if gold_outcome is not None:
+            gold_written = len(transform_result.gold_records)
     track_storage_write_metrics(
         batch_metrics,
         transform_result=transform_result,
+        silver_written=silver_written,
+        gold_written=gold_written,
     )

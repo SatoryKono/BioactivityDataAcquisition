@@ -142,6 +142,9 @@ def _source_request_attributes(
             "api_request_count": 0,
             "total_requests": None,
             "total_response_bytes": None,
+            "input_snapshot_count": 0,
+            "input_snapshot_ids": [],
+            "input_snapshot_content_hashes": [],
         }
     return {
         "url": source_metadata.url,

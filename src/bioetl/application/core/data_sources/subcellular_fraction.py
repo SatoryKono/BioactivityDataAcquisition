@@ -51,11 +51,20 @@ class SubcellularFractionDataSource(
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[JsonDict]:
-        _ = offset
+        skip = max(0, offset or 0)
+        seen = 0
+        emitted = 0
+        fetch_limit = None if limit is None else (limit + skip)
         async for record in self._fetch_subcellular_fractions(
-            limit, query, filter_ids, filter_field
+            fetch_limit, query, filter_ids, filter_field
         ):
+            if seen < skip:
+                seen += 1
+                continue
             yield record
+            emitted += 1
+            if limit is not None and emitted >= limit:
+                return
 
     async def _fetch_subcellular_fractions(
         self,

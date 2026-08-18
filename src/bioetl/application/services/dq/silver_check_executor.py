@@ -76,8 +76,12 @@ class SilverCheckExecutor:
             failed,
             warnings,
         )
-        passed = self._run_null_rate_check(df, enabled_checks, checks, passed)
-        passed = self._run_value_distribution_check(df, enabled_checks, checks, passed)
+        passed, failed, warnings = self._run_null_rate_check(
+            df, enabled_checks, checks, passed, failed, warnings
+        )
+        passed, failed, warnings = self._run_value_distribution_check(
+            df, enabled_checks, checks, passed, failed, warnings
+        )
         passed, failed, warnings = self._run_key_nullability_check(
             df,
             enabled_checks,
@@ -158,17 +162,20 @@ class SilverCheckExecutor:
         enabled_checks: set[SilverDQCheckType],
         checks: JsonDict,
         passed: int,
-    ) -> int:
-        """Run null rate check (always PASS, custom dict format)."""
+        failed: int,
+        warnings: int,
+    ) -> tuple[int, int, int]:
+        """Run null rate check and derive aggregate status from column results."""
         if SilverDQCheckType.NULL_RATE in enabled_checks:
             null_results, overall_rate = self._statistics.check_null_rates(df)
+            status = _aggregate_check_status(result.status for result in null_results)
             checks["null_rate"] = {
                 "columns": {r.column_name: to_dict(r) for r in null_results},
                 "overall_null_rate": overall_rate,
-                "status": DQCheckStatus.PASS.value,
+                "status": status.value,
             }
-            passed += 1
-        return passed
+            passed, failed, warnings = update_counts(status, passed, failed, warnings)
+        return passed, failed, warnings
 
     def _run_value_distribution_check(
         self,
@@ -176,15 +183,22 @@ class SilverCheckExecutor:
         enabled_checks: set[SilverDQCheckType],
         checks: JsonDict,
         passed: int,
-    ) -> int:
-        """Run value distribution check (always PASS, custom serializer)."""
+        failed: int,
+        warnings: int,
+    ) -> tuple[int, int, int]:
+        """Run value distribution check and count the serialized result status."""
         if SilverDQCheckType.VALUE_DISTRIBUTION in enabled_checks:
             distribution_result = self._statistics.check_value_distribution(df)
             checks["value_distribution"] = self._statistics.distribution_to_dict(
                 distribution_result
             )
-            passed += 1
-        return passed
+            passed, failed, warnings = update_counts(
+                distribution_result.status,
+                passed,
+                failed,
+                warnings,
+            )
+        return passed, failed, warnings
 
     def _run_key_nullability_check(
         self,
@@ -210,6 +224,16 @@ class SilverCheckExecutor:
                 warnings,
             )
         return passed, failed, warnings
+
+
+def _aggregate_check_status(statuses: object) -> DQCheckStatus:
+    """Aggregate FAIL > WARN > PASS from individual check statuses."""
+    seen = list(statuses)
+    if any(status == DQCheckStatus.FAIL for status in seen):
+        return DQCheckStatus.FAIL
+    if any(status == DQCheckStatus.WARN for status in seen):
+        return DQCheckStatus.WARN
+    return DQCheckStatus.PASS
 
 
 __all__ = ["SilverCheckExecutor"]

@@ -110,6 +110,7 @@ def config_service(mock_logger: MagicMock) -> ConfigService:
                 table=TableConfig(
                     primary_keys=("activity_id",),
                     silver_table="chembl_activity_silver",
+                    gold_table="chembl_activity_gold",
                 ),
             )
         ),
@@ -240,7 +241,18 @@ class TestConfigServiceValidatePipelineConfig:
             logger=mock_logger,
             _settings_loader=MagicMock(),
             _pipeline_config_loader=MagicMock(return_value=yaml_config),
-            _domain_config_mapper=MagicMock(),
+            _domain_config_mapper=MagicMock(
+                return_value=PipelineConfig(
+                    pipeline_name="chembl_target",
+                    provider="chembl",
+                    entity_type="target",
+                    table=TableConfig(
+                        primary_keys=("target_id",),
+                        silver_table="chembl_target_silver",
+                        gold_table=None,
+                    ),
+                )
+            ),
             _registry_accessor=MagicMock(),
         )
 

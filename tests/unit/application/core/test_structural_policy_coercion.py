@@ -36,6 +36,12 @@ import pytest
 from bioetl.application.core.base_transformer._structural_policy_coercion import (
     coerce_value,
 )
+from bioetl.application.core.base_transformer._structural_policy_contracts import (
+    resolve_logical_type,
+)
+from bioetl.application.core.base_transformer._structural_policy_events import (
+    preview_value,
+)
 from bioetl.application.core.base_transformer._structural_policy_types import (
     LogicalType,
     StructuralFieldSpec,
@@ -149,6 +155,15 @@ def test_boolean_coercion_honors_custom_vocabularies() -> None:
     assert coerce_value("yes", contract) is None
 
 
+def test_boolean_coercion_lowercases_configured_vocabularies() -> None:
+    contract = _contract("boolean", true_values=("Yes", "ON"), false_values=("No", "OFF"))
+
+    assert coerce_value("YES", contract) is True
+    assert coerce_value("on", contract) is True
+    assert coerce_value("No", contract) is False
+    assert coerce_value("off", contract) is False
+
+
 def test_boolean_coercion_can_disable_string_inputs() -> None:
     assert (
         coerce_value("yes", _contract("boolean", coercion_policy="no_string_coercion"))
@@ -160,3 +175,30 @@ def test_unknown_logical_type_returns_original_value() -> None:
     value = {"raw": "value"}
 
     assert coerce_value(value, _contract("unknown")) is value
+
+
+@pytest.mark.parametrize(
+    ("physical_type", "expected"),
+    [
+        ("UInt64", "integer"),
+        ("uint32[pyarrow]", "integer"),
+        ("Float64", "float"),
+        ("double", "float"),
+        ("decimal128(10, 2)", "float"),
+        ("datetime64[ns]", "string"),
+        ("Date", "string"),
+        ("category", "string"),
+        ("object", "unknown"),
+    ],
+)
+def test_resolve_logical_type_classifies_extended_pandera_dtypes(
+    physical_type: str,
+    expected: str,
+) -> None:
+    assert resolve_logical_type(physical_type) == expected
+
+
+def test_preview_value_redacts_unseparated_apikey_field() -> None:
+    assert preview_value("secret-token", field_name="apikey") == "<redacted>"
+    assert preview_value("secret-token", field_name="api_key") == "<redacted>"
+    assert preview_value("visible", field_name="molecule_id") == "'visible'"

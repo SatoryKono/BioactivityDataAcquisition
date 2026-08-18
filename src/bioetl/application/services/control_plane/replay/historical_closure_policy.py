@@ -56,6 +56,11 @@ def resolve_closure_verdict(
     disposition_map: dict[str, HistoricalReplayResidualDispositionRecord],
     claim_scope_mode: HistoricalReplayClaimScopeMode,
 ) -> tuple[str, str]:
+    if inventory.manifest_count == 0:
+        return (
+            "no_retained_historical_runs",
+            "inventory_contains_no_retained_historical_runs",
+        )
     if (
         inventory.certified_count + inventory.replayable_count
         == inventory.manifest_count

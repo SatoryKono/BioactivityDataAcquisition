@@ -59,8 +59,9 @@ class LockConfig:
         """Create LockConfig for a pipeline.
         Generates appropriate lock key based on provider, entity, and run type.
         When ``batch_size_hint`` is provided, the TTL is scaled adaptively to
-        accommodate larger batches while respecting the configured minimum and a
-        hard ceiling of 600 seconds.
+        accommodate larger batches while respecting the configured minimum. The
+        600-second ceiling applies only to the adaptive increment; an explicit
+        configured ``lock_ttl`` above that ceiling is preserved.
         Args:
             provider: Name of the data provider.
             entity_type: Type of entity being processed.
@@ -82,9 +83,11 @@ class LockConfig:
         if exclusive:
             lock_key = f"{lock_key}:exclusive"
         if batch_size_hint is not None and batch_size_hint > 0:
-            # Scale TTL: ~0.3s per record, minimum is the configured lock_ttl
-            adaptive_ttl = int(batch_size_hint * 0.3)
-            lock_ttl = min(max(lock_ttl, adaptive_ttl), 600)  # ceiling 600s
+            # Scale TTL: ~0.3s per record, minimum is the configured lock_ttl.
+            # The 600s ceiling applies only to adaptive scaling; an explicit
+            # configured lock_ttl above that ceiling is preserved.
+            adaptive_ttl = min(int(batch_size_hint * 0.3), 600)
+            lock_ttl = max(lock_ttl, adaptive_ttl)
         return cls(
             lock_key=lock_key,
             exclusive=exclusive,

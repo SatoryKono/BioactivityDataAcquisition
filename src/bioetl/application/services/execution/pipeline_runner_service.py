@@ -198,7 +198,20 @@ class PipelineRunnerService:
                 options=effective_options,
             )
 
-        runner = _require_execution_runner(self.runner_factory.create(context))
+        try:
+            runner = _require_execution_runner(self.runner_factory.create(context))
+        except Exception as exc:
+            await _record_pipeline_audit_event(
+                self.audit,
+                event_name="PipelineRunCompleted",
+                pipeline_name=pipeline_name,
+                run_id=effective_run_id,
+                run_type=effective_options.run_type,
+                status="failed",
+                timestamp=self.clock.now(),
+                error_type=type(exc).__name__,
+            )
+            raise
         accounting = StageAccountingAccumulator()
         accounting_token = bind_stage_accounting(accounting)
         try:

@@ -60,12 +60,29 @@ def resolve_logical_type(physical_type: str) -> LogicalType:
     normalized = physical_type.lower()
     if normalized == "str" or "string" in normalized:
         return "string"
-    if normalized.startswith("int"):
+    if (
+        normalized.startswith("uint")
+        or normalized.startswith("int")
+        or "uint" in normalized
+    ):
         return "integer"
-    if normalized.startswith("float"):
+    if (
+        normalized.startswith("float")
+        or "double" in normalized
+        or "decimal" in normalized
+    ):
         return "float"
     if normalized == "bool" or "boolean" in normalized or normalized.startswith("bool"):
         return "boolean"
+    if (
+        "datetime" in normalized
+        or "timestamp" in normalized
+        or normalized == "date"
+        or normalized.startswith("date")
+    ):
+        return "string"
+    if "category" in normalized or "categorical" in normalized:
+        return "string"
     return "unknown"
 
 

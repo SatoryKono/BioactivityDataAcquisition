@@ -231,3 +231,60 @@ async def test_write_silver_gold_concurrent_stops_on_silver_failure(
         )
 
     writer.write_gold.assert_not_awaited()
+
+
+@pytest.mark.unit
+async def test_write_silver_gold_skips_gold_when_silver_quarantined(
+    mock_context: MagicMock,
+    mock_services: MagicMock,
+    mock_batch_metrics: MagicMock,
+    mock_transformer: MagicMock,
+) -> None:
+    """A quarantined Silver write (None) must not proceed to Gold."""
+    from datetime import UTC, datetime
+
+    from bioetl.domain.exceptions import SchemaViolationError
+
+    writer = MagicMock()
+    writer.write_silver = AsyncMock(
+        side_effect=SchemaViolationError("silver", ["bad column"])
+    )
+    writer.write_gold = AsyncMock()
+    writer.track_batch_written = MagicMock()
+    writer.track_batch_failed = MagicMock()
+
+    async def execute_with_span(_name, coro, *_args, **_kwargs):  # type: ignore[no-untyped-def]
+        return await coro
+
+    support = BatchProcessingSupportService(
+        services=mock_services,
+        logger=MagicMock(),
+        batch_metrics=mock_batch_metrics,
+        transformer=mock_transformer,
+        writer=writer,
+        tracing=MagicMock(),
+        quarantine_manager=AsyncMock(),
+        run_id=mock_context.run_id,
+    )
+    support._execute_with_span = execute_with_span  # type: ignore[method-assign]
+
+    await support.write_silver_gold_concurrent(
+        transform_result=_make_transform_result(),
+        batch_id=deterministic_batch_uuid_from_callsite(
+            "test_write_silver_gold_quarantine"
+        ),
+        ingestion_ts=datetime(2026, 1, 1, tzinfo=UTC),
+        bronze_refs=None,
+    )
+
+    writer.write_gold.assert_not_awaited()
+    mock_batch_metrics.track_stage_records.assert_any_call(
+        stage="storage",
+        outcome="silver_written",
+        count=0,
+    )
+    mock_batch_metrics.track_stage_records.assert_any_call(
+        stage="storage",
+        outcome="gold_written",
+        count=0,
+    )

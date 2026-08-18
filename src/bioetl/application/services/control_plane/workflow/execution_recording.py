@@ -32,6 +32,8 @@ from bioetl.application.services.workflow.workflow_runner_service import (
 from bioetl.domain.control_plane import WorkflowStepState
 from bioetl.domain.workflow import TransformStepConfig, WorkflowStepConfig
 
+_UNSET_CURSOR = object()
+
 __all__ = [
     "WorkflowExecutionRecorder",
     "record_step_completed",
@@ -174,8 +176,8 @@ def record_workflow_finished(
     result: WorkflowRunExecutionResult,
     *,
     completed_at: datetime,
-    last_start_offset: int | None = None,
-    last_limit: int | None = None,
+    last_start_offset: int | object | None = _UNSET_CURSOR,
+    last_limit: int | object | None = _UNSET_CURSOR,
 ) -> None:
     """Record the final workflow result and persist terminal state."""
     summary = _build_result_summary(result)
@@ -201,10 +203,18 @@ def _record_workflow_success(
     *,
     completed_at: datetime,
     summary: dict[str, object],
-    last_start_offset: int | None = None,
-    last_limit: int | None = None,
+    last_start_offset: int | object | None = _UNSET_CURSOR,
+    last_limit: int | object | None = _UNSET_CURSOR,
 ) -> None:
     entry = context.ledger.record_workflow_finished(details=summary)
+    resolved_start_offset = (
+        context.state.last_start_offset
+        if last_start_offset is _UNSET_CURSOR
+        else last_start_offset
+    )
+    resolved_limit = (
+        context.state.last_limit if last_limit is _UNSET_CURSOR else last_limit
+    )
     context.state = replace(
         context.state,
         status="success",
@@ -213,8 +223,8 @@ def _record_workflow_success(
         last_event_id=entry.entry_id,
         last_error_type=None,
         last_error_message=None,
-        last_start_offset=last_start_offset,
-        last_limit=last_limit,
+        last_start_offset=resolved_start_offset,
+        last_limit=resolved_limit,
     )
     context.state_port.save(context.state)
 

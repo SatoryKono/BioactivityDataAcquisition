@@ -56,15 +56,20 @@ def build_historical_replay_universe_exact_replay_claim(
         durable_supported = bool(
             summary.get("historical_replay_universe_durable_evidence_claimed", False)
         )
-        fully_claimed = exact_replay_supported and durable_supported
+        governed_gate_satisfied = bool(governed_gate.get("satisfied"))
+        fully_claimed = (
+            exact_replay_supported and durable_supported and governed_gate_satisfied
+        )
         if fully_claimed:
             claim_reason = (
                 "latest_historical_replay_universe_artifact_supports_universal_claim"
             )
         elif not exact_replay_supported:
             claim_reason = "historical_replay_universe_artifact_blocks_universal_claim"
-        else:
+        elif not durable_supported:
             claim_reason = "durable_evidence_coverage_blocks_universal_claim"
+        else:
+            claim_reason = "governed_full_corpus_gate_unsatisfied"
         return {
             "scope": str(
                 historical_universe_claim.get("scope") or "all_known_historical_runs"

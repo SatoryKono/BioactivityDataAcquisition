@@ -71,30 +71,49 @@ def build_step_completion_details(
     return details or None
 
 
+def _pipeline_child_id(
+    result: WorkflowStepExecutionResult,
+    *,
+    direct_field: str,
+    payload_field: str,
+) -> str | None:
+    """Resolve one reciprocal child identifier from the step result."""
+    value = getattr(result, direct_field, None)
+    if value is None:
+        payload = result.payload
+        value = (
+            payload.get(payload_field)
+            if isinstance(payload, dict)
+            else getattr(payload, payload_field, None)
+        )
+    return None if value is None else str(value)
+
+
 def _pipeline_child_details(
     result: WorkflowStepExecutionResult,
     *,
     fingerprint: str | None,
 ) -> dict[str, object] | None:
     """Return reciprocal child-run anchors for a terminal pipeline step."""
-    details: dict[str, object] = {}
+    child_run_id = _pipeline_child_id(
+        result,
+        direct_field="child_run_id",
+        payload_field="run_id",
+    )
+    child_manifest_id = _pipeline_child_id(
+        result,
+        direct_field="child_manifest_id",
+        payload_field="manifest_id",
+    )
+    if child_run_id is None or child_manifest_id is None:
+        return None
+    details: dict[str, object] = {
+        "child_run_id": child_run_id,
+        "child_manifest_id": child_manifest_id,
+    }
     if fingerprint is not None:
         details["fingerprint"] = fingerprint
-    for direct_field, payload_field, detail_field in (
-        ("child_run_id", "run_id", "child_run_id"),
-        ("child_manifest_id", "manifest_id", "child_manifest_id"),
-    ):
-        value = getattr(result, direct_field, None)
-        if value is None:
-            payload = result.payload
-            value = (
-                payload.get(payload_field)
-                if isinstance(payload, dict)
-                else getattr(payload, payload_field, None)
-            )
-        if value is not None:
-            details[detail_field] = str(value)
-    return details or None
+    return details
 
 
 def _transform_result_summary(output: dict[str, object]) -> dict[str, object]:

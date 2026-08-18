@@ -85,12 +85,20 @@ class BatchExecutionRunService:
             raise
         except asyncio.CancelledError:
             # After start_execution, always finalize so spans/checkpoints close.
-            await self._finalize(
-                execution_state,
-                lifecycle_context,
-                memory_state,
-                shutdown=True,
+            # Shield a separate task so a second cancel cannot abort persistence.
+            finalize_task = asyncio.create_task(
+                self._finalize(
+                    execution_state,
+                    lifecycle_context,
+                    memory_state,
+                    shutdown=True,
+                )
             )
+            try:
+                await asyncio.shield(finalize_task)
+            except asyncio.CancelledError:
+                await finalize_task
+                raise
             raise
         except PIPELINE_EXECUTION_ERRORS as error:
             await self._finalize(

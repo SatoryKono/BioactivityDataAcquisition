@@ -49,14 +49,26 @@ class QuarantineServiceStatusSyncMixin:
         started_monotonic: float,
     ) -> int:
         """Implement reprocessed status updates without tracing concerns."""
-        count = 0
-        for rec in records:
-            payload_hash = rec.get("payload_hash")
-            if payload_hash and self.quarantine_port.update_status(
-                payload_hash,
-                QuarantineRecordStatus.REPROCESSED,
-            ):
-                count += 1
+        try:
+            count = 0
+            for rec in records:
+                payload_hash = rec.get("payload_hash")
+                if payload_hash and self.quarantine_port.update_status(
+                    payload_hash,
+                    QuarantineRecordStatus.REPROCESSED,
+                ):
+                    count += 1
+        except _QUARANTINE_OPERATOR_ERRORS:
+            _, duration_seconds = self._derive_operator_completion(
+                started_at=started_at,
+                started_monotonic=started_monotonic,
+            )
+            self._record_operator_metrics(
+                operation="mark_reprocessed",
+                status="failed",
+                duration_seconds=duration_seconds,
+            )
+            raise
 
         completed_at, duration_seconds = self._derive_operator_completion(
             started_at=started_at,

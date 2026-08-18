@@ -426,6 +426,17 @@ class TestSourceRequestNode:
 
         assert result is None
 
+    def test_source_request_node_none_metadata_includes_snapshot_keys(self):
+        from bioetl.application.services.lineage.metadata_lineage_anchor_nodes import (
+            _source_request_attributes,
+        )
+
+        attributes = _source_request_attributes(None)
+
+        assert attributes["input_snapshot_count"] == 0
+        assert attributes["input_snapshot_ids"] == []
+        assert attributes["input_snapshot_content_hashes"] == []
+
 
 class TestBronzeBatchNodeFromInput:
     """Tests for bronze_batch_node_from_input function."""

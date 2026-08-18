@@ -166,7 +166,7 @@ class LockService:
             if await self.release_lock(pipeline_id, owner_id, exclusive=False):
                 released.append(pipeline_id)
             elif await self.release_lock(pipeline_id, owner_id, exclusive=True):
-                released.append(f"{pipeline_id}:exclusive")
+                released.append(pipeline_id)
 
         self.logger.info(
             "Force release complete",
