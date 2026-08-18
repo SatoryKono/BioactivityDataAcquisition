@@ -1,0 +1,36 @@
+{
+  "catalog_path": "docs/03-guides/dashboards/contracts/run-explorer-http-catalog.yaml",
+  "contract": "run_explorer_request_snapshot_v1",
+  "dashboard_uid": "bioetl-run-explorer-v1",
+  "first_screen_panel_ids": [
+    3010,
+    9402,
+    9403
+  ],
+  "scenarios": {
+    "backend_error": {
+      "panel_id": 9403,
+      "path": "backend_error.json"
+    },
+    "empty_selection": {
+      "panel_id": 9402,
+      "path": "empty_selection.json"
+    },
+    "selected_identity": {
+      "panel_id": 9402,
+      "path": "selected_identity.json"
+    },
+    "selected_processed_records": {
+      "panel_id": 9403,
+      "path": "selected_processed_records.json"
+    },
+    "selected_recent_runs": {
+      "panel_id": 3010,
+      "path": "selected_recent_runs.json"
+    },
+    "valid_empty": {
+      "panel_id": 3010,
+      "path": "valid_empty.json"
+    }
+  }
+}
