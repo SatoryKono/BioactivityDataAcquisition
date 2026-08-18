@@ -19,6 +19,7 @@ __all__ = [
     "WorkflowRunOptionsConfig",
     "WorkflowStep",
     "WorkflowStepConfig",
+    "reject_delete_orphans_after_limited_extracts",
 ]
 
 if TYPE_CHECKING:
@@ -307,3 +308,54 @@ class WorkflowConfig:
             if step.step_id == step_id:
                 return step
         return None
+
+def reject_delete_orphans_after_limited_extracts(config: WorkflowConfig) -> None:
+    """Reject delete_orphans when any reachable pipeline extract is limited.
+
+    Independently bounded extracts make Gold FK orphans false positives.
+    Walks the full upstream DAG so an intermediary transform cannot hide a
+    limited producer. CLI --limit must call this after overrides apply.
+    """
+    steps_by_id = {step.step_id: step for step in config.steps}
+    for step in config.steps:
+        if not isinstance(step, TransformStepConfig):
+            continue
+        if step.transform_name != "reconcile_foreign_keys":
+            continue
+        action = None if step.config is None else step.config.get("action")
+        if action != "delete_orphans":
+            continue
+        limited = _limited_upstream_pipeline_ids(step.step_id, config, steps_by_id)
+        if limited:
+            raise ValueError(
+                "reconcile_foreign_keys action=delete_orphans cannot depend on "
+                "pipeline steps with run_options.limit "
+                f"({", ".join(limited)}); independently bounded extracts "
+                "make Gold FK orphans false positives"
+            )
+
+
+def _limited_upstream_pipeline_ids(
+    start_id: str,
+    config: WorkflowConfig,
+    steps_by_id: dict[str, WorkflowStep],
+) -> list[str]:
+    limited: list[str] = []
+    seen: set[str] = set()
+    stack = list(reversed(steps_by_id[start_id].depends_on))
+    while stack:
+        dep_id = stack.pop()
+        if dep_id in seen:
+            continue
+        seen.add(dep_id)
+        dep = steps_by_id.get(dep_id)
+        if dep is None:
+            continue
+        stack.extend(reversed(dep.depends_on))
+        if not isinstance(dep, WorkflowStepConfig):
+            continue
+        merged = config.defaults.merged_with(dep.run_options)
+        if merged.limit is not None:
+            limited.append(dep_id)
+    return limited
+
