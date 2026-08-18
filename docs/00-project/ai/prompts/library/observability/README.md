@@ -51,6 +51,18 @@ map them and do **not** double-count findings:
 | `grafana-six.reverify` | grafana-audit.regression |
 | `grafana-six.pack` | this README + grafana-audit.master |
 
+## V5 residual pack (2026-08-18)
+
+Full paste texts: `library/observability/dashboard-v5/`.
+Do not reopen `#8944`–`#8948`. Default `MONITORING=false`.
+
+| Id | Role |
+| --- | --- |
+| `prompt.observability.dashboard-v5.pack` | Route one leftover |
+| `prompt.observability.dashboard-v5.implement` | Babysit `#8987` / optional R-D |
+| `prompt.observability.dashboard-v5.closeout` | Close vs `origin/main` |
+| `prompt.observability.dashboard-v5.audit-rf` | R-F light / 200% / NV |
+
 ## Focused cards (outside the numbered sequence)
 
 - `prompt.observability.group-scalar-density-audit` — re-measure scalar
