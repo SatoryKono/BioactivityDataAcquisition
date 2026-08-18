@@ -484,7 +484,7 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
     assert all(panel.get("collapsed") is True for panel in control_rows)
     assert all(panel.get("panels") for panel in control_rows)
     assert [panel["gridPos"]["y"] for panel in control_rows] == list(
-        range(14, 14 + len(control_rows))
+        range(18, 18 + len(control_rows))
     )
     first_row_y = min(panel["gridPos"]["y"] for panel in control_rows)
     assert first_row_y >= 0

@@ -56,7 +56,15 @@ def _dashboard_variables(dashboard_file: str) -> dict[str, dict]:
 def _variable_query_text(dashboard_file: str, variable_name: str) -> str:
     variable = _dashboard_variables(dashboard_file)[variable_name]
     query = variable.get("query", {})
-    return str(query.get("query", "") if isinstance(query, dict) else query)
+    if isinstance(query, dict):
+        infinity = query.get("infinityQuery")
+        if isinstance(infinity, dict) and infinity.get("url"):
+            return str(infinity.get("url"))
+        if query.get("query"):
+            return str(query.get("query"))
+    if isinstance(query, str) and query:
+        return query
+    return str(variable.get("definition") or "")
 
 
 def _record_expression(rules_file: str, record_name: str) -> str:
@@ -127,20 +135,20 @@ def test_pipeline_universe_contract_matches_shipped_query_sources() -> None:
         "bioetl-incident-v1": "bioetl-incident-v1.json",
         "bioetl-run-explorer-v1": "bioetl-run-explorer-v1.json",
     }
-    for uid, metric in shared.items():
+    option_list_source = contract.get("option_list_source")
+    option_list_endpoint = contract.get("option_list_endpoint")
+    option_list_dimension = contract.get("option_list_dimension")
+    assert option_list_source == "control_plane_filter_options_api"
+    assert option_list_endpoint == "/ops/control-plane/filter-options"
+    assert option_list_dimension == "pipeline"
+    for uid in list(shared) + list(exceptions):
         if uid not in file_by_uid:
             continue  # retired shipping UIDs (workflow-overview / alerts-slo)
         query = _variable_query_text(file_by_uid[uid], "pipeline")
-        assert metric in query
+        assert option_list_endpoint in query
+        assert f"dimension={option_list_dimension}" in query
         source_family = registry[uid]["query_source_families"]["pipeline"]
-        assert source_family == f"prometheus_{metric.removeprefix('bioetl_')}"
-    for uid, payload in exceptions.items():
-        assert isinstance(payload, dict)
-        query = _variable_query_text(file_by_uid[uid], "pipeline")
-        metric = payload.get("query_metric")
-        assert metric in query
-        source_family = registry[uid]["query_source_families"]["pipeline"]
-        assert source_family == f"prometheus_{metric.removeprefix('bioetl_')}"
+        assert source_family == "control_plane_filter_options_api"
 
     control_plane = exceptions["bioetl-control-plane-v1"]
     assert control_plane.get("required_relation") == "provenance_gated_overlap"
