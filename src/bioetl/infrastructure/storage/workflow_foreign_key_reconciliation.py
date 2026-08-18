@@ -23,6 +23,7 @@ from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support i
     build_reconciliation_result,
     complete_dry_run,
     complete_without_mutation,
+    filter_source_rows_to_current_run,
     partition_source_rows,
     reference_value_set,
 )
@@ -172,6 +173,22 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
                 mutation_mode="missing_source",
             )
 
+        scoped_rows, scope_disposition = filter_source_rows_to_current_run(
+            source_rows,
+            source_scope=request.source_scope,
+            source_run_ids=request.source_run_ids,
+        )
+        if scope_disposition == "blocked":
+            self._log(
+                "warning",
+                "workflow foreign-key reconciliation current_run scope unbound; "
+                "falling back to all current source rows",
+                source_table=request.source_table,
+                reference_table=request.reference_table,
+                source_scope=request.source_scope,
+            )
+        else:
+            source_rows = scoped_rows
         if not source_rows:
             self._record_metrics(scanned=0, retained=0, deleted=0)
             self._log(

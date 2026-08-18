@@ -8,6 +8,7 @@ from bioetl.domain.workflow.config import (
     WorkflowRunOptionsConfig,
     WorkflowStep,
     WorkflowStepConfig,
+    mark_delete_orphans_current_run_scope,
     reject_delete_orphans_after_limited_extracts,
 )
 from bioetl.domain.workflow.dag import (
@@ -29,6 +30,7 @@ __all__ = [
     "WorkflowStepConfig",
     "WorkflowTransformSpec",
     "build_workflow_transform_fingerprint",
+    "mark_delete_orphans_current_run_scope",
     "reject_delete_orphans_after_limited_extracts",
     "topologically_sorted_step_ids",
     "validate_workflow_dag",

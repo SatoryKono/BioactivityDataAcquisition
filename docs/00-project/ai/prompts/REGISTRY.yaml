@@ -269,6 +269,34 @@ entries:
     tags: [observability, dashboard, grafana, audit, sequential, operator]
     summary: Sequential observability folder run — unique cards, issue/close gates, DASH-AUTO appendix
 
+  - id: prompt.observability.dashboard-v5.pack
+    path: library/observability/dashboard-v5/pack.md
+    status: active
+    class: operator-paste
+    tags: [observability, dashboard, grafana, v5, pack, operator]
+    summary: Route V5 Grafana residuals — R-A/R-E/R-B landed; R-C PR; R-D/R-F leftover
+
+  - id: prompt.observability.dashboard-v5.implement
+    path: library/observability/dashboard-v5/implement.md
+    status: active
+    class: operator-paste
+    tags: [observability, dashboard, grafana, v5, implement, operator]
+    summary: Implement leftover V5 residuals — babysit #8987, optional R-D validator
+
+  - id: prompt.observability.dashboard-v5.closeout
+    path: library/observability/dashboard-v5/closeout.md
+    status: active
+    class: operator-paste
+    tags: [observability, dashboard, grafana, v5, closeout, operator]
+    summary: Close V5 residual issues/PRs with origin/main evidence only
+
+  - id: prompt.observability.dashboard-v5.audit-rf
+    path: library/observability/dashboard-v5/audit-rf.md
+    status: active
+    class: operator-paste
+    tags: [observability, dashboard, grafana, v5, audit, rf, visual, operator]
+    summary: V5 R-F visual cycle — light theme, 200% zoom, leftover NV; not a selector refactor
+
   - id: prompt.observability.grafana-audit.master
     path: library/observability/grafana-audit/master.md
     status: active

@@ -108,7 +108,6 @@ def build_reconcile_foreign_keys_executor(
         upstream_outputs: Mapping[str, object],
         runtime_context: WorkflowTransformRuntimeContext | None = None,
     ) -> dict[str, object]:
-        del upstream_outputs
         workflow_name = (
             getattr(runtime_context, "workflow_name", None)
             if runtime_context is not None
@@ -124,6 +123,12 @@ def build_reconcile_foreign_keys_executor(
                 runtime_context, "debug_export_enabled", False
             ),
             debug_export_dir=_optional_runtime_str(runtime_context, "debug_export_dir"),
+            source_run_ids=_run_ids_from_upstream(
+                upstream_outputs,
+                workflow_run_id=_optional_runtime_str(
+                    runtime_context, "workflow_run_id"
+                ),
+            ),
         )
         result = await reconciliation_port.reconcile_foreign_keys(request)
         payload = _build_reconcile_payload(
@@ -156,6 +161,7 @@ def _build_request(
     manifest_id: str | None = None,
     debug_export_enabled: bool = False,
     debug_export_dir: str | None = None,
+    source_run_ids: tuple[str, ...] = (),
 ) -> ForeignKeyReconciliationRequest:
     config = spec.config or {}
     source_table = _required_str(config, "source_table")
@@ -189,6 +195,8 @@ def _build_request(
         transform_name=spec.transform_name,
         debug_export_enabled=debug_export_enabled,
         debug_export_dir=debug_export_dir,
+        source_scope=_source_scope(config),
+        source_run_ids=source_run_ids,
     )
 
 
@@ -250,6 +258,36 @@ async def _persist_reconcile_result_artifact(
         payload=payload,
     )
     return artifact_refs_as_dicts(tuple(refs))  # pyright: ignore[reportArgumentType]
+
+
+
+def _source_scope(config: Mapping[str, object]) -> str:
+    raw = config.get("source_scope", "all_current")
+    if raw in {"all_current", "current_run"}:
+        return str(raw)
+    raise ValueError(
+        "reconcile_foreign_keys source_scope must be all_current or current_run"
+    )
+
+
+def _run_ids_from_upstream(
+    upstream_outputs: Mapping[str, object],
+    *,
+    workflow_run_id: str | None,
+) -> tuple[str, ...]:
+    collected: list[str] = []
+    if workflow_run_id:
+        collected.append(workflow_run_id)
+    for payload in upstream_outputs.values():
+        raw = getattr(payload, "run_id", None)
+        if raw is None and isinstance(payload, Mapping):
+            raw = payload.get("run_id")
+        if raw is None:
+            continue
+        value = str(raw).strip()
+        if value and value not in collected:
+            collected.append(value)
+    return tuple(collected)
 
 
 def _require_delete_orphans_action(config: Mapping[str, object]) -> None:

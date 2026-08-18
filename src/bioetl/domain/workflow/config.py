@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, fields, replace
 from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.types import JsonDict
@@ -19,6 +19,7 @@ __all__ = [
     "WorkflowRunOptionsConfig",
     "WorkflowStep",
     "WorkflowStepConfig",
+    "mark_delete_orphans_current_run_scope",
     "reject_delete_orphans_after_limited_extracts",
 ]
 
@@ -309,12 +310,46 @@ class WorkflowConfig:
                 return step
         return None
 
+def mark_delete_orphans_current_run_scope(config: WorkflowConfig) -> WorkflowConfig:
+    """Scope delete_orphans to the current run when an extract is limited.
+
+    CLI ``--limit`` is allowed together with ``delete_orphans``. Mutations then
+    apply only to source rows from this workflow run, so independently bounded
+    extracts cannot delete historical Gold as false-positive orphans.
+    """
+    updated_steps: list[WorkflowStep] = []
+    changed = False
+    steps_by_id = {item.step_id: item for item in config.steps}
+    for step in config.steps:
+        if not isinstance(step, TransformStepConfig):
+            updated_steps.append(step)
+            continue
+        if step.transform_name != "reconcile_foreign_keys":
+            updated_steps.append(step)
+            continue
+        action = None if step.config is None else step.config.get("action")
+        if action != "delete_orphans":
+            updated_steps.append(step)
+            continue
+        if not _limited_upstream_pipeline_ids(step.step_id, config, steps_by_id):
+            updated_steps.append(step)
+            continue
+        scoped = dict(step.config or {})
+        scoped["source_scope"] = "current_run"
+        updated_steps.append(replace(step, config=scoped))
+        changed = True
+    if not changed:
+        return config
+    return replace(config, steps=tuple(updated_steps))
+
+
 def reject_delete_orphans_after_limited_extracts(config: WorkflowConfig) -> None:
-    """Reject delete_orphans when any reachable pipeline extract is limited.
+    """Reject committed YAML that bakes delete_orphans onto limited extracts.
 
     Independently bounded extracts make Gold FK orphans false positives.
     Walks the full upstream DAG so an intermediary transform cannot hide a
-    limited producer. CLI --limit must call this after overrides apply.
+    limited producer. CLI ``--limit`` does not use this reject; it scopes
+    mutations to the current run instead.
     """
     steps_by_id = {step.step_id: step for step in config.steps}
     for step in config.steps:

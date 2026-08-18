@@ -64,6 +64,31 @@ def _string_set(payload: dict[str, Any], key: str) -> frozenset[str]:
     return frozenset(value)
 
 
+def _named_panel_set(
+    payload: dict[str, Any], key: str
+) -> dict[tuple[str, int], dict[str, str]]:
+    """Load a top-level dashboard+id list that requires governance metadata."""
+    entries = payload.get(key)
+    if not isinstance(entries, list):
+        raise ValueError(f"{LAYOUT_BUDGETS_PATH}:{key} must be a list")
+    out: dict[tuple[str, int], dict[str, str]] = {}
+    for entry in entries:
+        if not isinstance(entry, dict):
+            raise ValueError(f"{LAYOUT_BUDGETS_PATH}:{key} entries must be maps")
+        dashboard = entry.get("dashboard")
+        panel_id = entry.get("id")
+        if not isinstance(dashboard, str) or not isinstance(panel_id, int):
+            raise ValueError(f"{LAYOUT_BUDGETS_PATH}:{key} needs dashboard+int id")
+        meta = {item: str(entry.get(item) or "") for item in _REQUIRED_ALLOWLIST_KEYS}
+        if any(not meta[item].strip() for item in _REQUIRED_ALLOWLIST_KEYS):
+            raise ValueError(
+                f"{LAYOUT_BUDGETS_PATH}:{key} {dashboard}:{panel_id} "
+                "needs owner, rationale, and retire_when"
+            )
+        out[(dashboard, panel_id)] = meta
+    return out
+
+
 def _allowlist(
     payload: dict[str, Any], key: str
 ) -> dict[tuple[str, int], dict[str, str]]:
@@ -101,6 +126,7 @@ FIRST_WINDOW_Y = _require_int(_PAYLOAD, "first_window_y")
 FIRST_LOAD_Y_MAX = _require_int(_PAYLOAD, "first_load_y_max")
 VIEWPORT_ROWS = _optional_int(_PAYLOAD, "viewport_rows")
 FIRST_SCREEN_MAX_PANELS = _require_int(_PAYLOAD, "first_screen_max_panels")
+FIRST_SCREEN_SHELL_PANELS = _named_panel_set(_PAYLOAD, "first_screen_shell_panels")
 
 CANONICAL_ACTION_VERBS = _string_set(_PAYLOAD, "canonical_action_verbs")
 PENDING_ACTION_VERBS = _string_set(_PAYLOAD, "pending_action_verbs")
@@ -194,6 +220,63 @@ def is_first_window_panel(
 ) -> bool:
     """Root-style first-window test: non-row and ``gridPos.y < FIRST_WINDOW_Y``."""
     if panel.get("type") == "row":
+        return False
+    fold = FIRST_WINDOW_Y if first_window_y is None else first_window_y
+    grid = panel.get("gridPos")
+    if not isinstance(grid, dict):
+        return False
+    y = grid.get("y")
+    return isinstance(y, int) and y < fold
+
+
+def is_navigation_panel(panel: dict[str, Any]) -> bool:
+    """Navigation bus: panel id 1000 or a Navigate* title."""
+    if panel.get("id") == 1000:
+        return True
+    title = panel.get("title")
+    return isinstance(title, str) and title.startswith("Navigate")
+
+
+def is_first_screen_shell_panel(dashboard: str, panel: dict[str, Any]) -> bool:
+    """Named empty-title text rail excluded from first_screen_max_panels."""
+    panel_id = panel.get("id")
+    if not isinstance(panel_id, int):
+        return False
+    return (dashboard, panel_id) in FIRST_SCREEN_SHELL_PANELS
+
+
+def is_first_screen_budget_panel(
+    dashboard: str, panel: dict[str, Any], *, first_window_y: int | None = None
+) -> bool:
+    """Root first-window panel that counts toward first_screen_max_panels."""
+    if not is_first_window_panel(panel, first_window_y=first_window_y):
+        return False
+    if is_navigation_panel(panel):
+        return False
+    return not is_first_screen_shell_panel(dashboard, panel)
+
+
+def select_first_screen_budget_panels(
+    dashboard: str,
+    panels: list[Any],
+    *,
+    first_window_y: int | None = None,
+) -> list[dict[str, Any]]:
+    """Select root panels counted by first_screen_max_panels."""
+    selected: list[dict[str, Any]] = []
+    for panel in panels or []:
+        if isinstance(panel, dict) and is_first_screen_budget_panel(
+            dashboard, panel, first_window_y=first_window_y
+        ):
+            selected.append(panel)
+    return selected
+
+
+def collapsed_row_above_fold(
+    panel: dict[str, Any], *, first_window_y: int | None = None
+) -> bool:
+    """True when a collapsed row header sits strictly above the visual fold."""
+    if panel.get("type") != "row" or panel.get("collapsed") is not True:
         return False
     fold = FIRST_WINDOW_Y if first_window_y is None else first_window_y
     grid = panel.get("gridPos")

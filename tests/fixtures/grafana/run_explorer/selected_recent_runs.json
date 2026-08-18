@@ -1,0 +1,21 @@
+{
+  "contract": "run_explorer_request_snapshot_v1",
+  "endpoint": "pipeline_run_reports",
+  "expected_empty_copy_tokens": [
+    "VALID EMPTY"
+  ],
+  "method": "GET",
+  "panel_id": 3010,
+  "response_state": "ok",
+  "root_selector": "items",
+  "scenario": "selected_recent_runs",
+  "selectors": {
+    "pipeline": "chembl_assay",
+    "run_id": "00000000-0000-4000-8000-000000000942",
+    "run_type": "backfill",
+    "workflow": "chembl_baseline"
+  },
+  "title": "Inspect Recent Runs (last 4)",
+  "url": "/ops/observability/pipeline-run-reports?pipeline=chembl_assay&limit=4",
+  "url_template": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=4"
+}

@@ -65,6 +65,7 @@ Three contours (visual / layout / data) × quick/detailed/auto, WCAG-oriented
 checks, multi-BI notes. **Archived campaign** — active paste:
 `prompt.observability.bi-dashboard-acceptance`; engineering loop:
 `prompt.observability.dashboard-panel-audit`.
+V5 leftover pack: `prompt.observability.dashboard-v5.pack`.
 
 ### Diagram Expansion Archive
 
