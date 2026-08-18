@@ -1,9 +1,10 @@
-{"type":"review_context","reviewType":"committed","currentBranch":"audit-leaf","baseBranch":"main","workingDirectory":"/tmp/bioetl-cr-S-R-scripts-residual-x2n__ezs"}
+{"type":"review_context","reviewType":"committed","currentBranch":"audit-leaf","baseBranch":"main","workingDirectory":"/tmp/bioetl-cr-S-R-scripts-residual-9nc71tk_"}
 {"type":"status","phase":"connecting","status":"connecting_to_review_service"}
 {"type":"status","phase":"setup","status":"setting_up"}
 {"type":"status","phase":"setup","status":"preparing_sandbox"}
 {"type":"status","phase":"analyzing","status":"summarizing"}
 {"type":"status","phase":"analyzing","status":"reviewing"}
+{"type":"heartbeat","status":"reviewing"}
 {"type":"heartbeat","status":"reviewing"}
 {"type":"heartbeat","status":"reviewing"}
 {"type":"error","errorType":"connection","message":"Connection failed: WebSocket closed","recoverable":true,"details":{"cause":{"name":"TRPCWebSocketClosedError"},"name":"TRPCClientError"}}

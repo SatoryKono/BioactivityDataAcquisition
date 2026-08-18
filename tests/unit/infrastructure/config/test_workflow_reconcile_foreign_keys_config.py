@@ -228,13 +228,41 @@ def test_delete_orphans_rejects_limited_pipeline_behind_intermediary() -> None:
         WorkflowConfigFileSchema.model_validate(payload)
 
 
-def test_cli_limit_override_rejects_chembl_core_orphan_delete() -> None:
+def test_cli_limit_override_scopes_delete_orphans_to_current_run() -> None:
     from bioetl.infrastructure.config.workflow_config_api import load_workflow_config
     from bioetl.interfaces.cli.commands._workflow_override_support import (
         apply_cli_overrides,
     )
 
     workflow = load_workflow_config("chembl_core")
-    with pytest.raises(ValueError, match="run_options.limit"):
-        apply_cli_overrides(workflow, limit=250)
+    updated = apply_cli_overrides(workflow, limit=250)
+    steps = {step.step_id: step for step in updated.steps}
+    assert steps["chembl_assay_ingest"].run_options.limit == 250
+    assert steps["chembl_target_ingest"].run_options.limit == 250
+    reconcile = steps["reconcile_assay_target_orphans"]
+    assert reconcile.config is not None
+    assert reconcile.config["action"] == "delete_orphans"
+    assert reconcile.config["source_scope"] == "current_run"
+
+
+def test_cli_limit_override_allows_chembl_baseline_delete_orphans() -> None:
+    from bioetl.infrastructure.config.workflow_config_api import load_workflow_config
+    from bioetl.interfaces.cli.commands._workflow_override_support import (
+        apply_cli_overrides,
+    )
+
+    workflow = load_workflow_config("chembl_baseline")
+    updated = apply_cli_overrides(workflow, limit=1000)
+    scoped = [
+        step.step_id
+        for step in updated.steps
+        if getattr(step, "transform_name", None) == "reconcile_foreign_keys"
+        and (step.config or {}).get("source_scope") == "current_run"
+    ]
+    assert scoped == [
+        "reconcile_assay_target_orphans",
+        "reconcile_assay_publication_orphans",
+        "reconcile_target_assay_orphans",
+        "reconcile_publication_assay_orphans",
+    ]
 

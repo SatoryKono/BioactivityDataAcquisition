@@ -1409,8 +1409,8 @@
       "reason": "CodeRabbit connection/WebSocket failure",
       "exit_code": 1,
       "log": "reports/quality/coderabbit/20260816/review_R_S-R-scripts-residual.log",
-      "bytes": 783,
-      "elapsed_s": 233.0,
+      "bytes": 825,
+      "elapsed_s": 174.4,
       "command": [
         "/home/fedor/.local/bin/coderabbit",
         "review",
@@ -1473,5 +1473,5 @@
       ]
     }
   },
-  "updated_utc": "2026-08-18T14:10:56.869421+00:00"
+  "updated_utc": "2026-08-18T14:50:55.896327+00:00"
 }
