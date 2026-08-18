@@ -13,35 +13,46 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 
 import pytest
 
 from scripts.ops.observability.grafana.check_dashboard_panel_fill import (
-    DEFAULT_REQUEST_TIMEOUT_SECONDS,
     FillConfig,
-    grafana_is_reachable,
+    grafana_can_query,
     run_panel_fill_check,
 )
 
 pytestmark = pytest.mark.integration
 
 
+def _dotenv_value(name: str) -> str:
+    path = Path(".env")
+    if not path.is_file():
+        return ""
+    prefix = f"{name}="
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.startswith(prefix):
+            return line[len(prefix) :].strip().strip('"').strip("'")
+    return ""
+
+
+def _setting(name: str, default: str = "") -> str:
+    return os.getenv(name, "").strip() or _dotenv_value(name) or default
+
+
 def _fill_config() -> FillConfig:
-    base = (
-        os.getenv("GRAFANA_BASE_URL", "").strip()
-        or os.getenv("GRAFANA_URL", "").strip()
-        or "http://127.0.0.1:3000"
-    )
+    base = _setting("GRAFANA_BASE_URL") or _setting("GRAFANA_URL") or "http://127.0.0.1:3000"
     return FillConfig(
         grafana_base_url=base.rstrip("/"),
-        grafana_username=os.getenv("GRAFANA_USERNAME", "admin").strip() or "admin",
-        grafana_password=os.getenv("GRAFANA_PASSWORD", "").strip(),
-        pipeline=os.getenv("BIOETL_PANEL_FILL_PIPELINE", "chembl_target"),
-        run_type=os.getenv("BIOETL_PANEL_FILL_RUN_TYPE", "incremental"),
-        run_id=os.getenv("BIOETL_PANEL_FILL_RUN_ID", "-"),
-        workflow=os.getenv("BIOETL_PANEL_FILL_WORKFLOW", "All"),
+        grafana_username=_setting("GRAFANA_USERNAME", "admin") or "admin",
+        grafana_password=_setting("GRAFANA_PASSWORD"),
+        pipeline=_setting("BIOETL_PANEL_FILL_PIPELINE", "chembl_target"),
+        run_type=_setting("BIOETL_PANEL_FILL_RUN_TYPE", "incremental"),
+        run_id=_setting("BIOETL_PANEL_FILL_RUN_ID", "-"),
+        workflow=_setting("BIOETL_PANEL_FILL_WORKFLOW", "All"),
         range_hours=24,
-        request_timeout_seconds=DEFAULT_REQUEST_TIMEOUT_SECONDS,
+        request_timeout_seconds=8.0,
         output_path=None,
     )
 
@@ -53,8 +64,9 @@ def test_every_dashboard_panel_fill_has_no_gateway_or_query_error() -> None:
     this test does not start docker-compose.monitoring.yml.
     """
     config = _fill_config()
-    if not grafana_is_reachable(config):
-        pytest.skip(f"Grafana is not reachable at {config.grafana_base_url}/api/health")
+    skip_reason = grafana_can_query(config)
+    if skip_reason is not None:
+        pytest.skip(skip_reason)
 
     results = run_panel_fill_check(config)
     assert results, "expected at least one queryable shipped panel"
