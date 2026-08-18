@@ -103,10 +103,7 @@ async def resolve_execution_offset(
     """Resolve executor start offset from runtime overrides or checkpoint."""
     start_offset = getattr(host._runtime, "start_offset", None)
     if start_offset is not None:
-        host._logger.info(
-            "Using manual start offset",
-            offset=start_offset,
-        )
+        host._logger.info("Using manual start offset", offset=start_offset)
         return int(start_offset)
 
     checkpoint_meta = await load_checkpoint(host._checkpoint_manager)
@@ -137,10 +134,7 @@ def emit_pipeline_start(host: _PipelineRunnerFlowHostProtocol) -> None:
 
 def emit_pipeline_completion(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Emit the pipeline completion event."""
-    host._logger.debug(
-        PipelineEvent.COMPLETE,
-        records_fetched=host._executor.records_fetched,
-    )
+    host._logger.debug(PipelineEvent.COMPLETE, records_fetched=host._executor.records_fetched)
 
 
 def record_run_started(host: _PipelineRunnerFlowHostProtocol) -> None:
@@ -200,18 +194,13 @@ def record_run_finished(host: _PipelineRunnerFlowHostProtocol) -> None:
 
     _record_run_metrics_event(host, _record_finished)
     try:
-        _record_output_ready(host)
-        _record_flow_invariants(host)
+        _record_output_ready_impl(host)
+        _record_flow_invariants_impl(host, current_time_fn=current_utc_time)
     except _FLOW_ERRORS:
         host._logger.warning(
             "finished_flow_projections_failed",
             run_id=str(host._context.run_id),
         )
-
-
-def _record_output_ready(host: _PipelineRunnerFlowHostProtocol) -> None:
-    return _record_output_ready_impl(host)
-
 
 def record_run_shutdown(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Append graceful shutdown ledger entry."""
@@ -225,7 +214,7 @@ def record_run_shutdown(host: _PipelineRunnerFlowHostProtocol) -> None:
         ),
     )
     try:
-        _record_flow_invariants(host)
+        _record_flow_invariants_impl(host, current_time_fn=current_utc_time)
     except _FLOW_ERRORS:
         host._logger.warning(
             "shutdown_flow_invariants_failed",
@@ -239,7 +228,7 @@ def record_run_failed(
 ) -> None:
     """Append failed completion ledger entry."""
     try:
-        _record_flow_invariants(host)
+        _record_flow_invariants_impl(host, current_time_fn=current_utc_time)
     except _FLOW_ERRORS:
         host._logger.warning(
             "failed_flow_invariants_failed",
@@ -255,7 +244,3 @@ def record_run_failed(
             )
         ),
     )
-
-
-def _record_flow_invariants(host: _PipelineRunnerFlowHostProtocol) -> None:
-    return _record_flow_invariants_impl(host, current_time_fn=current_utc_time)

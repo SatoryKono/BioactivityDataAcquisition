@@ -49,15 +49,15 @@
     },
     {
       "evidence_metrics": {
-        "hotspot_budget_warning_count": 2,
+        "hotspot_budget_warning_count": 0,
         "hotspot_family_count": 5,
         "total_duplicate_clusters": 0
       },
       "id": "module_boundaries_coupling",
       "name": "Module boundaries / coupling",
-      "score": 8.5,
+      "score": 9.5,
       "weight": 0.14,
-      "weighted_score": 1.19
+      "weighted_score": 1.33
     },
     {
       "evidence_metrics": {
@@ -112,7 +112,7 @@
     {
       "evidence_metrics": {
         "expired_compat_count": 0,
-        "hotspot_budget_warning_count": 2,
+        "hotspot_budget_warning_count": 0,
         "public_entrypoint_growth_count": 0,
         "public_export_facade_conflict_count": 0,
         "public_export_facade_growth_count": 0,
@@ -123,9 +123,9 @@
       },
       "id": "debt_burden_evolution_friction",
       "name": "Debt burden / evolution friction",
-      "score": 9.7,
+      "score": 9.9,
       "weight": 0.06,
-      "weighted_score": 0.582
+      "weighted_score": 0.594
     }
   ],
   "debt_budget_policy": {
@@ -162,7 +162,7 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.26,
+  "integral_score": 9.41,
   "interpretation": "good_targeted_improvements",
   "metrics": {
     "accepted_adr_count": 55,
@@ -178,7 +178,7 @@
       "application_services_control_plane"
     ],
     "families_at_budget_count": 1,
-    "hotspot_budget_warning_count": 2,
+    "hotspot_budget_warning_count": 0,
     "hotspot_family_count": 5,
     "layer_violations": 0,
     "public_entrypoint_growth_count": 0,
@@ -233,14 +233,14 @@
       "total_duplicate_clusters": 0
     },
     "hotspot_family_baseline": {
-      "budget_warnings": 2,
+      "budget_warnings": 0,
       "path": "reports/quality/hotspot-family-baseline.json",
       "snapshot_date": "2026-07-27"
     },
     "module_coverage_inventory": {
       "coverage_xml_sha256": "6feef0f5973a2f6ee1f82c08a72da9af24404a4a595d966071fd7602eda2f103",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "08c64655a1884ebb36d7b775e863f95b994ec6b637fc4e18a0f358a7df2b42e3"
+      "source_tree_sha256": "db0cf473d1f10663296ee18592cb6bdabe4e72ca4a0da4c9a35cff519c5facea"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

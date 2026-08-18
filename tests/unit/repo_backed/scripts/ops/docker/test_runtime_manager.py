@@ -503,7 +503,11 @@ def test_status_origin_findings_ignore_foreign_stack_projects(
 
 def test_status_grafana_bootstrap_deferred_is_finding() -> None:
     findings = runtime_manager._status_grafana_bootstrap_findings(
-        {"ops_http": "deferred", "reason": "identity_mismatch"},
+        {
+            "ops_http": "deferred",
+            "reason": "identity_mismatch",
+            "dashboard_profile": "prometheus_only",
+        },
         readable=True,
         grafana_running=True,
     )
@@ -511,15 +515,38 @@ def test_status_grafana_bootstrap_deferred_is_finding() -> None:
     assert findings[0]["ops_http"] == "deferred"
     assert findings[0]["reason"] == "identity_mismatch"
     assert findings[0]["code"] == "GRAFANA_OPS_HTTP_BOOTSTRAP"
+    assert findings[0]["dashboard_profile"] == "prometheus_only"
+    assert "static Prometheus-only dashboard notices are active" in findings[0][
+        "message"
+    ]
 
 
 def test_status_grafana_bootstrap_ready_has_no_finding() -> None:
     findings = runtime_manager._status_grafana_bootstrap_findings(
-        {"ops_http": "ready", "reason": "identity_matched"},
+        {
+            "ops_http": "ready",
+            "reason": "identity_matched",
+            "dashboard_profile": "full",
+        },
         readable=True,
         grafana_running=True,
     )
     assert findings == []
+
+
+def test_status_grafana_bootstrap_ready_reports_non_full_profile() -> None:
+    findings = runtime_manager._status_grafana_bootstrap_findings(
+        {
+            "ops_http": "ready",
+            "reason": "identity_matched",
+            "dashboard_profile": "failed",
+        },
+        readable=True,
+        grafana_running=True,
+    )
+
+    assert findings[0]["code"] == "GRAFANA_DASHBOARD_PROFILE"
+    assert findings[0]["dashboard_profile"] == "failed"
 
 
 def test_status_grafana_bootstrap_ignored_when_grafana_stopped() -> None:

@@ -12,7 +12,9 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
+from typing import Any
 
 import pytest
 import yaml
@@ -22,6 +24,11 @@ pytestmark = pytest.mark.integration
 _PROVISIONING_DIR = Path("grafana/provisioning/dashboards")
 _CANONICAL_PROVIDER_FILE = _PROVISIONING_DIR / "bioetl.yaml"
 _REMOVED_DUPLICATE_PROVIDER_FILE = _PROVISIONING_DIR / "dashboards.yml"
+_PROMETHEUS_ONLY_PROVISIONING_FILE = Path(
+    "grafana/provisioning/dashboards-prometheus-only/bioetl.yaml"
+)
+_DASHBOARD_DIR = Path("grafana/dashboards")
+_PROMETHEUS_ONLY_DASHBOARD_DIR = Path("grafana/dashboards-prometheus-only")
 
 
 def _provider_paths(payload: object) -> list[str]:
@@ -81,3 +88,64 @@ def test_single_canonical_dashboard_provider_owns_shipped_json_directory() -> No
     assert len(all_paths) == len(set(all_paths)), (
         "two providers must not target the same effective dashboard directory"
     )
+
+
+def _walk_objects(value: object) -> list[dict[str, Any]]:
+    objects: list[dict[str, Any]] = []
+    if isinstance(value, dict):
+        objects.append(value)
+        for nested in value.values():
+            objects.extend(_walk_objects(nested))
+    elif isinstance(value, list):
+        for nested in value:
+            objects.extend(_walk_objects(nested))
+    return objects
+
+
+def test_prometheus_only_provider_targets_static_notice_directory() -> None:
+    payload = yaml.safe_load(
+        _PROMETHEUS_ONLY_PROVISIONING_FILE.read_text(encoding="utf-8")
+    )
+    assert isinstance(payload, dict)
+    providers = payload.get("providers")
+    assert isinstance(providers, list) and len(providers) == 1
+    provider = providers[0]
+    assert isinstance(provider, dict)
+    assert provider.get("name") == "BioETL"
+    assert provider.get("folderUid") == "bioetl"
+    assert provider.get("options", {}).get("path") == (
+        "/var/lib/grafana/dashboards-prometheus-only"
+    )
+
+
+def test_prometheus_only_profile_preserves_uids_without_query_targets() -> None:
+    full_dashboards = {
+        path.name: json.loads(path.read_text(encoding="utf-8"))
+        for path in sorted(_DASHBOARD_DIR.glob("*.json"))
+    }
+    fallback_dashboards = {
+        path.name: json.loads(path.read_text(encoding="utf-8"))
+        for path in sorted(_PROMETHEUS_ONLY_DASHBOARD_DIR.glob("*.json"))
+    }
+
+    assert fallback_dashboards.keys() == full_dashboards.keys()
+    assert len(fallback_dashboards) == 7
+    for name, fallback in fallback_dashboards.items():
+        full = full_dashboards[name]
+        assert fallback["uid"] == full["uid"]
+        assert fallback["title"] == full["title"]
+        assert fallback["tags"] == [
+            "bioetl",
+            "prometheus-only",
+            "ops-http-unavailable",
+        ]
+        assert len(fallback["panels"]) == 1
+        panel = fallback["panels"][0]
+        assert panel["type"] == "text"
+        content = panel["options"]["content"]
+        assert "Ops HTTP not provisioned" in content
+        assert "dashboard_profile=full" in content
+        assert "No retention, replay, identity, or run verdict" in content
+        for item in _walk_objects(fallback):
+            assert "datasource" not in item
+            assert not item.get("targets")

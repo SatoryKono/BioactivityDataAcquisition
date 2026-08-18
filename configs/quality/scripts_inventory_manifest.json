@@ -1,10 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-17T19:53:51.720776+00:00",
+  "generated_at": "2026-08-18T11:10:46.358438+00:00",
   "summary": {
-    "total_scripts": 602,
+    "total_scripts": 603,
     "status_counts": {
       "active": 339,
+      "orphan": 1,
       "supporting": 263
     },
     "reference_group_coverage": {
@@ -15813,7 +15814,7 @@
       "references": [
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 301,
+          "line": 305,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_closure_campaign.py --require-global-claim`"
         },
@@ -15852,19 +15853,19 @@
       "references": [
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 298,
+          "line": 302,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py` persists"
         },
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 304,
+          "line": 308,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py --require-universal-claim`"
         },
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 307,
+          "line": 311,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py --require-durable-evidence-coverage`"
         },
@@ -19336,7 +19337,7 @@
       "references": [
         {
           "path": "docs/01-requirements/DASHBOARD_REQUIREMENTS.md",
-          "line": 261,
+          "line": 262,
           "source_group": "docs",
           "text": "| Computed title/body font floors | `scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs` plus `check_grafana_dashboard_audit_preflight.py` and their unit tests |"
         },
@@ -19487,13 +19488,13 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 164,
+          "line": 184,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/generate_trust_validation_fixtures.py\""
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 179,
+          "line": 199,
           "source_group": "tests",
           "text": "\"generate_trust_validation_fixtures.py must not call write_text; \""
         }
@@ -19512,13 +19513,13 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 399,
+          "line": 404,
           "source_group": "docs",
           "text": "# .\\scripts\\ops\\observability\\grafana\\recover_renderer.ps1"
         },
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 244,
+          "line": 248,
           "source_group": "tests",
           "text": "recover_ps1 = Path(\"scripts/ops/observability/grafana/recover_renderer.ps1\")"
         }
@@ -19537,13 +19538,13 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 395,
+          "line": 400,
           "source_group": "docs",
           "text": "python scripts/ops/observability/grafana/recover_renderer.py"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 401,
+          "line": 406,
           "source_group": "docs",
           "text": "3. Check only: `python scripts/ops/observability/grafana/recover_renderer.py --check-only`"
         },
@@ -19561,7 +19562,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 2011,
+          "line": 2033,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import recover_renderer as rr"
         },
@@ -19586,7 +19587,7 @@
       "references": [
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 245,
+          "line": 249,
           "source_group": "tests",
           "text": "recover_sh = Path(\"scripts/ops/observability/grafana/recover_renderer.sh\")"
         }
@@ -19874,7 +19875,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 13,
+          "line": 16,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana.serve_trust_validation_fixtures import ("
         }
@@ -20015,6 +20016,14 @@
       "next_step": "Retain only as the bounded #8576 JSON-source evidence refresher; remove it after visual-baseline closeout or consolidate it into the canonical dashboard audit command."
     },
     {
+      "path": "scripts/ops/observability/relayout_trust_review_panels.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/ops/observability/start_read_only_audit_stack.py",
       "type": "py",
       "status": "active",
@@ -20050,13 +20059,13 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 16,
+          "line": 19,
           "source_group": "tests",
           "text": "from scripts.ops.observability.trust_validation_fixture_materialization import ("
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 161,
+          "line": 181,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/trust_validation_fixture_materialization.py\""
         }
@@ -20290,13 +20299,13 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 328,
+          "line": 333,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\apply-docker-stable-mcp.ps1 -Profile stable -WithNeo4j"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 337,
+          "line": 342,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\apply-docker-stable-mcp.ps1 -Profile shared -TransportMode shared -WithSharedMcp -SkipEnsureStable"
         }
@@ -20370,7 +20379,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 329,
+          "line": 334,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\cleanup-mcp-orphans.ps1 -IncludeGatewayHint"
         },
@@ -20515,13 +20524,13 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 319,
+          "line": 324,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\ensure-stable.ps1 -WithNeo4j"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 322,
+          "line": 327,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\ensure-stable.ps1 -RestartWsl -WithNeo4j"
         },
@@ -20554,13 +20563,13 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 325,
+          "line": 330,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\harden-desktop-host.ps1 -RegisterWatchdog"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 344,
+          "line": 349,
           "source_group": "docs",
           "text": "`harden-desktop-host.ps1` sets Resource Saver effectively off"
         },
@@ -20649,7 +20658,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 332,
+          "line": 337,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\reset-mcp-host-sessions.ps1"
         }
@@ -20698,7 +20707,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 302,
+          "line": 307,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\restart-docker.ps1 -TimeoutSeconds 180"
         },
@@ -20721,7 +20730,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 84,
+      "reference_count": 91,
       "references": [
         {
           "path": "Makefile",
@@ -20830,7 +20839,7 @@
         },
         {
           "path": "grafana/README.md",
-          "line": 2616,
+          "line": 2643,
           "source_group": "other",
           "text": "`python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay`."
         }
@@ -20938,7 +20947,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 339,
+          "line": 344,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\apply-shared-to-grok.ps1 -DisableDockerGateways"
         },
@@ -20993,7 +21002,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 338,
+          "line": 343,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\health-shared.ps1"
         },
@@ -21093,7 +21102,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 336,
+          "line": 341,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\start-shared.ps1"
         },
@@ -22367,7 +22376,7 @@
         },
         {
           "path": "tests/architecture/test_config_ci_invariants.py",
-          "line": 61,
+          "line": 62,
           "source_group": "tests",
           "text": "from scripts.schema.validation import ("
         }
@@ -22406,7 +22415,7 @@
         },
         {
           "path": "tests/architecture/test_config_ci_invariants.py",
-          "line": 64,
+          "line": 65,
           "source_group": "tests",
           "text": "from scripts.schema.validation import check_config_invariants as invariant_script"
         }
@@ -22433,7 +22442,7 @@
         },
         {
           "path": "tests/architecture/test_config_ci_invariants.py",
-          "line": 65,
+          "line": 66,
           "source_group": "tests",
           "text": "from scripts.schema.validation import ("
         }
