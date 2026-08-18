@@ -835,29 +835,6 @@
                 "value": true
               }
             ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Cause"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 280
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
-              },
-              {
-                "id": "custom.inspect",
-                "value": true
-              }
-            ]
           }
         ]
       },

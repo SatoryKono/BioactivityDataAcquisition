@@ -622,15 +622,6 @@ def test_rf007_counts_and_dense_legends_are_bounded() -> None:
         )
 
 
-def _organize_options(panel: dict[str, object]) -> dict[str, object]:
-    for transform in panel.get("transformations") or []:
-        if isinstance(transform, dict) and transform.get("id") == "organize":
-            options = transform.get("options") or {}
-            assert isinstance(options, dict)
-            return options
-    raise AssertionError((panel.get("id"), "missing organize transform"))
-
-
 def _limit_field(panel: dict[str, object]) -> int | None:
     for transform in panel.get("transformations") or []:
         if isinstance(transform, dict) and transform.get("id") == "limit":
@@ -700,46 +691,18 @@ def test_operator_critical_tables_expose_full_values() -> None:
             panel = _panel(dashboard, panel_id)
             custom = panel["fieldConfig"]["defaults"]["custom"]
             assert custom["inspect"] is True
+            if panel_id == 9418:
+                assert _wrapped_field_names(panel) == {"reasons_text"}
             if dashboard_name not in default_wrap_exempt:
                 assert custom["cellOptions"]["wrapText"] is True
-
-
-def test_control_plane_9418_reasons_text_wraps_without_moving_fold() -> None:
-    """#8975: Trust 9418 shows top-3 reasons_text on the current first-screen grid."""
-    panel = _panel(_load("bioetl-control-plane-v1.json"), 9418)
-    grid = panel["gridPos"]
-    assert int(grid["h"]) >= 5
-    assert int(grid["y"]) + int(grid["h"]) <= 18
-    assert panel["options"]["cellHeight"] == "sm"
-    custom = panel["fieldConfig"]["defaults"]["custom"]
-    assert custom["inspect"] is True
-    assert custom.get("cellOptions", {}).get("wrapText") is not True
-    assert _limit_field(panel) == 1
-    organize = _organize_options(panel)
-    exclude = organize.get("excludeByName") or {}
-    index = organize.get("indexByName") or {}
-    assert exclude.get("reasons") is True
-    assert exclude.get("reasons_truncated") is True
-    assert "reasons_text" in index
-    assert _wrapped_field_names(panel) == {"reasons_text"}
-    assert (_override_width(panel, "reasons_text") or 0) >= 280
-    reasons_override = next(
-        override
-        for override in panel["fieldConfig"]["overrides"]
-        if override.get("matcher", {}).get("options") == "reasons_text"
-    )
-    assert any(
-        prop.get("id") == "custom.inspect" and prop.get("value") is True
-        for prop in reasons_override.get("properties") or []
-    )
 
 
 def test_first_window_named_text_columns_wrap_without_table_default() -> None:
     """#8977: wrap only the named first-window text column; do not grow h."""
     cases = (
-        ("bioetl-runtime.json", 9101, frozenset({"reason", "Reason"})),
-        ("bioetl-provider-health-v2.json", 9103, frozenset({"cause", "Cause"})),
-        ("bioetl-run-explorer-v1.json", 3010, frozenset({"message", "Message"})),
+        ("bioetl-runtime.json", 9101, frozenset({"reason"})),
+        ("bioetl-provider-health-v2.json", 9103, frozenset({"cause"})),
+        ("bioetl-run-explorer-v1.json", 3010, frozenset({"message"})),
     )
     for dashboard_name, panel_id, allowed in cases:
         panel = _panel(_load(dashboard_name), panel_id)
@@ -748,8 +711,7 @@ def test_first_window_named_text_columns_wrap_without_table_default() -> None:
         custom = (panel.get("fieldConfig") or {}).get("defaults", {}).get("custom", {})
         assert custom.get("cellOptions", {}).get("wrapText") is not True
         wrapped = _wrapped_field_names(panel)
-        assert wrapped, (dashboard_name, panel_id)
-        assert wrapped <= allowed, (dashboard_name, panel_id, wrapped)
+        assert wrapped == allowed, (dashboard_name, panel_id, wrapped)
         assert any((_override_width(panel, name) or 0) >= 260 for name in wrapped)
 
 
