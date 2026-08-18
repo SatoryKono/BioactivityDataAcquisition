@@ -157,8 +157,12 @@ services:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning/datasources-core:/etc/bioetl-grafana/datasources-core:ro
       - ./grafana/scripts/bootstrap-datasources.sh:/usr/local/bin/bioetl-bootstrap-grafana.sh:ro
-      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      # Bootstrap selects exactly one provider: full dashboards only after
+      # managed Ops HTTP identity, otherwise same-UID static notices.
+      - ./grafana/provisioning/dashboards:/etc/bioetl-grafana/dashboard-providers/full:ro
+      - ./grafana/provisioning/dashboards-prometheus-only:/etc/bioetl-grafana/dashboard-providers/prometheus-only:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./grafana/dashboards-prometheus-only:/var/lib/grafana/dashboards-prometheus-only:ro
     entrypoint: ["/bin/sh", "/usr/local/bin/bioetl-bootstrap-grafana.sh"]
     # Renderer optional: do not health-gate Grafana on Chromium (was 180s wait).
     depends_on:
