@@ -30,6 +30,20 @@ def test_shipped_dashboard_panel_matrix_matches_baseline(tmp_path: Path) -> None
     }
     keys = [(row["dashboard_uid"], row["panel_id"]) for row in rows]
     assert len(keys) == len(set(keys))
+    content_records = subject._content_contract_by_panel()
+    covered_rows = {
+        (row["dashboard_uid"], row["panel_id"]): row
+        for row in rows
+        if row["content_contract_status"] == "covered"
+    }
+    assert set(covered_rows) == set(content_records)
+    for row in covered_rows.values():
+        assert row["content_role"]
+        assert row["content_tier"] in {"1", "2", "3", "4"}
+        assert row["content_scope"]
+        assert row["content_state_model"]
+        assert int(row["fixture_case_count"]) > 0
+        assert int(row["render_profile_count"]) > 0
 
 
 def test_dashboard_panel_matrix_check_fails_closed_on_count_drift(

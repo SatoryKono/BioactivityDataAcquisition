@@ -1,0 +1,324 @@
+# Content contract for the key panels listed in dashboard-inventory.yaml.
+# Dashboard JSON remains the shipped presentation source of truth.
+schema_version: 1
+allowed_roles:
+  - verdict
+  - confidence
+  - next_action
+  - navigation
+  - selected_range_count
+  - selected_range_duration
+  - identity_table
+  - accounting_table
+  - severity_table
+  - causes_table
+  - freshness
+  - forensic_table
+  - alert_timeline
+allowed_scopes:
+  - current
+  - selected_run
+  - time_range
+  - global
+allowed_evidence_sources:
+  - prometheus
+  - ops_http
+  - grafana_builtin
+allowed_states:
+  - OK
+  - WARN
+  - CRIT
+  - UNKNOWN
+  - INCOMPLETE
+  - ERROR
+  - VALID_EMPTY
+  - TELEMETRY_ABSENT
+  - N/A
+
+dashboards:
+  bioetl-control-plane-v1:
+    panels:
+      "891":
+        title: Monitor Replay Safety
+        role: verdict
+        tier: 1
+        scope: current
+        evidence_source: prometheus
+        state_model: [OK, WARN, CRIT, UNKNOWN, INCOMPLETE, ERROR]
+        required_copy: [state_mapping, evidence_scope, no_data, next_action]
+        fixture_cases: [ok, warn, crit, telemetry_absent, backend_error]
+        render_profiles: [first_window_dark, first_window_light, zoom_200]
+      "130":
+        title: Track Replay Blockers
+        role: selected_range_count
+        tier: 3
+        scope: time_range
+        evidence_source: prometheus
+        state_model: [OK, WARN, CRIT, VALID_EMPTY, UNKNOWN, ERROR]
+        required_copy: [evidence_scope, no_data, next_action]
+        fixture_cases: [populated, valid_empty, telemetry_absent, backend_error]
+        render_profiles: [full_dark]
+      "9402":
+        title: Review Run Summary
+        role: identity_table
+        tier: 2
+        scope: selected_run
+        evidence_source: ops_http
+        state_model: [VALID_EMPTY, ERROR]
+        required_copy: [evidence_scope, no_data]
+        required_columns: [parameter, value]
+        fixture_cases: [populated, valid_empty, backend_error]
+        render_profiles: [full_dark]
+      "9403":
+        title: Review Processed Records
+        role: accounting_table
+        tier: 2
+        scope: current
+        evidence_source: ops_http
+        state_model: [VALID_EMPTY, TELEMETRY_ABSENT, ERROR]
+        required_copy: [evidence_scope, no_data]
+        required_columns: [parameter, value, percentage]
+        hidden_columns: [row_status]
+        fixture_cases: [populated, valid_empty, telemetry_absent, backend_error]
+        render_profiles: [full_dark]
+      "9401":
+        title: Monitor Replay Readiness
+        role: confidence
+        tier: 1
+        scope: current
+        evidence_source: prometheus
+        state_model: [OK, WARN, CRIT, UNKNOWN, INCOMPLETE, ERROR]
+        required_copy: [state_mapping, evidence_scope, no_data, next_action]
+        fixture_cases: [ok, warn, crit, telemetry_absent, backend_error]
+        render_profiles: [first_window_dark, first_window_light, zoom_200]
+
+  bioetl-overview-v2:
+    panels:
+      "214":
+        title: Monitor Fleet Health
+        role: verdict
+        tier: 1
+        scope: current
+        evidence_source: prometheus
+        state_model: [OK, WARN, CRIT, UNKNOWN, ERROR]
+        required_copy: [state_mapping, evidence_scope, no_data, next_action]
+        fixture_cases: [ok, warn, crit, telemetry_absent, backend_error]
+        render_profiles: [first_window_dark, first_window_light, zoom_200]
+      "215":
+        title: Review First Action
+        role: next_action
+        tier: 1
+        scope: current
+        evidence_source: prometheus
+        state_model: [OK, WARN, CRIT, UNKNOWN, ERROR]
+        required_copy: [evidence_scope, no_data, next_action]
+        fixture_cases: [populated, valid_empty, backend_error]
+        render_profiles: [first_window_dark, first_window_light]
+      "1000":
+        title: Navigate Dashboards
+        role: navigation
+        tier: 2
+        scope: global
+        evidence_source: grafana_builtin
+        state_model: [N/A]
+        required_copy: [evidence_scope, next_action]
+        fixture_cases: [populated]
+        render_profiles: [first_window_dark, first_window_light, zoom_200]
+
+  bioetl-runtime:
+    panels:
+      "9401":
+        title: Monitor Pipeline Status
+        role: verdict
+        tier: 1
+        scope: current
+        evidence_source: prometheus
+        state_model: [OK, WARN, CRIT, UNKNOWN, INCOMPLETE, ERROR]
+        required_copy: [state_mapping, evidence_scope, no_data, next_action]
+        fixture_cases: [ok, warn, crit, telemetry_absent, backend_error]
+        render_profiles: [first_window_dark, first_window_light, zoom_200]
+      "205":
+        title: Monitor Failed Runs
+        role: selected_range_count
+        tier: 3
+        scope: time_range
+        evidence_source: prometheus
+        state_model: [OK, WARN, CRIT, VALID_EMPTY, UNKNOWN, ERROR]
+        required_copy: [evidence_scope, no_data, next_action]
+        fixture_cases: [populated, valid_empty, telemetry_absent, backend_error]
+        render_profiles: [full_dark]
+      "237":
+        title: Monitor Worst Stage Lag
+        role: selected_range_duration
+        tier: 3
+        scope: time_range
+        evidence_source: prometheus
+        state_model: [OK, WARN, CRIT, VALID_EMPTY, UNKNOWN, ERROR]
+        required_copy: [evidence_scope, no_data, next_action]
+        fixture_cases: [populated, valid_empty, telemetry_absent, backend_error]
+        render_profiles: [full_dark]
+      "9102":
+        title: Monitor Metrics Coverage
+        role: confidence
+        tier: 2
+        scope: current
+        evidence_source: prometheus
+        state_model: [OK, WARN, CRIT, UNKNOWN, INCOMPLETE, ERROR]
+        required_copy: [state_mapping, evidence_scope, no_data, next_action]
+        fixture_cases: [ok, warn, crit, telemetry_absent, backend_error]
+        render_profiles: [first_window_dark, first_window_light]
+
+  bioetl-provider-health-v2:
+    panels:
+      "9101":
+        title: Monitor Fleet Severity
+        role: severity_table
+        tier: 1
+        scope: current
+        evidence_source: ops_http
+        state_model: [OK, WARN, CRIT, UNKNOWN, VALID_EMPTY, ERROR]
+        required_copy: [state_mapping, evidence_scope, no_data, next_action]
+        fixture_cases: [populated, valid_empty, backend_error]
+        render_profiles: [first_window_dark, first_window_light]
+      "9103":
+        title: Inspect Top Provider Causes
+        role: causes_table
+        tier: 1
+        scope: current
+        evidence_source: ops_http
+        state_model: [VALID_EMPTY, ERROR]
+        required_copy: [evidence_scope, no_data, next_action]
+        fixture_cases: [populated, valid_empty, backend_error]
+        render_profiles: [first_window_dark, first_window_light]
+
+  bioetl-dq-v2:
+    panels:
+      "9401":
+        title: Monitor Current DQ Status
+        role: verdict
+        tier: 1
+        scope: current
+        evidence_source: prometheus
+        state_model: [OK, WARN, CRIT, UNKNOWN, ERROR]
+        required_copy: [state_mapping, evidence_scope, no_data, next_action]
+        fixture_cases: [ok, warn, crit, telemetry_absent, backend_error]
+        render_profiles: [first_window_dark, first_window_light, zoom_200]
+      "9101":
+        title: Monitor DQ Threshold State
+        role: confidence
+        tier: 1
+        scope: current
+        evidence_source: prometheus
+        state_model: [OK, WARN, CRIT, UNKNOWN, ERROR]
+        required_copy: [state_mapping, evidence_scope, no_data, next_action]
+        fixture_cases: [ok, warn, crit, telemetry_absent, backend_error]
+        render_profiles: [first_window_dark, first_window_light]
+      "9102":
+        title: Inspect Current DQ Reasons
+        role: causes_table
+        tier: 2
+        scope: current
+        evidence_source: ops_http
+        state_model: [VALID_EMPTY, ERROR]
+        required_copy: [evidence_scope, no_data, next_action]
+        fixture_cases: [populated, valid_empty, backend_error]
+        render_profiles: [full_dark]
+      "8":
+        title: Monitor Worst Freshness Age
+        role: freshness
+        tier: 2
+        scope: time_range
+        evidence_source: prometheus
+        state_model: [OK, WARN, CRIT, VALID_EMPTY, UNKNOWN, ERROR]
+        required_copy: [evidence_scope, no_data, next_action]
+        fixture_cases: [populated, valid_empty, telemetry_absent, backend_error]
+        render_profiles: [full_dark]
+
+  bioetl-incident-v1:
+    panels:
+      "2010":
+        title: Inspect Ranked Suspects
+        role: forensic_table
+        tier: 1
+        scope: time_range
+        evidence_source: ops_http
+        state_model: [VALID_EMPTY, ERROR]
+        required_copy: [evidence_scope, no_data, next_action]
+        fixture_cases: [populated, valid_empty, backend_error]
+        render_profiles: [first_window_dark, first_window_light]
+      "2005":
+        title: Monitor Current Alerts
+        role: causes_table
+        tier: 1
+        scope: current
+        evidence_source: prometheus
+        state_model: [VALID_EMPTY, UNKNOWN, ERROR]
+        required_copy: [evidence_scope, no_data, next_action]
+        fixture_cases: [populated, valid_empty, telemetry_absent, backend_error]
+        render_profiles: [first_window_dark, first_window_light]
+      "2006":
+        title: Track Alert State History
+        role: alert_timeline
+        tier: 3
+        scope: time_range
+        evidence_source: prometheus
+        state_model: [VALID_EMPTY, UNKNOWN, ERROR]
+        required_copy: [evidence_scope, no_data, next_action]
+        fixture_cases: [populated, valid_empty, telemetry_absent, backend_error]
+        render_profiles: [full_dark]
+
+  bioetl-run-explorer-v1:
+    panels:
+      "9402":
+        title: Inspect Run Identity
+        role: identity_table
+        tier: 1
+        scope: selected_run
+        evidence_source: ops_http
+        state_model: [VALID_EMPTY, ERROR]
+        required_copy: [evidence_scope, no_data]
+        required_columns: [parameter, value]
+        fixture_cases: [populated, valid_empty, backend_error]
+        render_profiles: [first_window_dark, first_window_light]
+      "9403":
+        title: Inspect Processed Records
+        role: accounting_table
+        tier: 1
+        scope: selected_run
+        evidence_source: ops_http
+        state_model: [VALID_EMPTY, TELEMETRY_ABSENT, ERROR]
+        required_copy: [evidence_scope, no_data]
+        required_columns: [parameter, value, percentage]
+        hidden_columns: [row_status]
+        fixture_cases: [populated, valid_empty, telemetry_absent, backend_error]
+        render_profiles: [first_window_dark, first_window_light]
+      "3010":
+        title: Inspect Recent Runs (last 4)
+        role: forensic_table
+        tier: 1
+        scope: selected_run
+        evidence_source: ops_http
+        state_model: [VALID_EMPTY, ERROR]
+        required_copy: [evidence_scope, no_data, next_action]
+        fixture_cases: [populated, valid_empty, backend_error]
+        render_profiles: [first_window_dark, first_window_light]
+      "3020":
+        title: Inspect Recent Workflow Runs (last 20)
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        evidence_source: ops_http
+        state_model: [VALID_EMPTY, ERROR]
+        required_copy: [evidence_scope, no_data]
+        fixture_cases: [populated, valid_empty, backend_error]
+        render_profiles: [full_dark]
+      "3011":
+        title: Inspect Stage Funnel
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        evidence_source: ops_http
+        state_model: [VALID_EMPTY, ERROR]
+        required_copy: [evidence_scope, no_data]
+        fixture_cases: [populated, valid_empty, backend_error]
+        render_profiles: [full_dark]

@@ -35,10 +35,8 @@ import pytest
 
 from bioetl.application.services.workflow._observability_trace_support import (
     build_trace_ids,
-    build_trace_urls,
-    resolve_manifest_run_type,
     resolve_primary_composite_run_id,
-    trace_links_enabled,
+    trace_identifiers_available,
 )
 from bioetl.application.services.workflow._observability_workflow_checkpoint_support import (
     _checkpoint_capability_taxonomy,
@@ -76,42 +74,31 @@ class _CountingTracer:
         self.events.append({"run_id": run_id, "reason": reason})
 
 
-def test_trace_links_and_ids_failure_paths_emit_metric_and_trace_signals() -> None:
+def test_trace_identifier_failure_paths_emit_metric_and_trace_signals() -> None:
     metrics = _CountingMetrics()
     tracer = _CountingTracer(is_noop=True)
 
-    assert trace_links_enabled(tracer) is False
-    metrics.inc("bioetl_trace_links_disabled_total", {"reason": "noop_tracer"})
-    tracer.record_error(run_id="run-a", reason="trace_links_disabled")
+    assert trace_identifiers_available(tracer) is False
+    metrics.inc("bioetl_trace_identifiers_disabled_total", {"reason": "noop_tracer"})
+    tracer.record_error(run_id="run-a", reason="trace_identifiers_disabled")
 
     assert (
         build_trace_ids(
             run_id="",
             diagnostics={"trace_ids": []},
-            trace_links_available=False,
+            trace_identifiers_available=False,
         )
         == []
     )
     metrics.inc("bioetl_trace_ids_empty_total", {"reason": "no_explicit_or_generated"})
 
-    urls = build_trace_urls(
-        run_id="",
-        pipeline_name=None,
-        provider=None,
-        run_type=None,
-        composite_run_id=None,
-        run_manifest=None,
-        audit=SimpleNamespace(entries=[]),
-    )
-    assert urls == []
-    metrics.inc("bioetl_trace_url_build_failed_total", {"reason": "empty_run_id"})
-
     assert metrics.calls == [
-        ("bioetl_trace_links_disabled_total", {"reason": "noop_tracer"}),
+        ("bioetl_trace_identifiers_disabled_total", {"reason": "noop_tracer"}),
         ("bioetl_trace_ids_empty_total", {"reason": "no_explicit_or_generated"}),
-        ("bioetl_trace_url_build_failed_total", {"reason": "empty_run_id"}),
     ]
-    assert tracer.events == [{"run_id": "run-a", "reason": "trace_links_disabled"}]
+    assert tracer.events == [
+        {"run_id": "run-a", "reason": "trace_identifiers_disabled"}
+    ]
 
 
 def test_resolve_primary_composite_and_run_type_edge_branches() -> None:
@@ -124,12 +111,6 @@ def test_resolve_primary_composite_and_run_type_edge_branches() -> None:
     assert (
         resolve_primary_composite_run_id(
             {"composite_dossier_projection": {"composite_run_ids": ["", " "]}}
-        )
-        is None
-    )
-    assert (
-        resolve_manifest_run_type(
-            SimpleNamespace(manifest=SimpleNamespace(run_type=None))
         )
         is None
     )

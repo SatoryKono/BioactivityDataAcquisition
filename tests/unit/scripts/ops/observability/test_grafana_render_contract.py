@@ -164,6 +164,50 @@ def test_manifest_accepts_explicit_terminal_evidence_gaps(
     assert error is None
 
 
+def test_manifest_accepts_and_validates_optional_fixture_state_provenance(
+    tmp_path: Path,
+) -> None:
+    manifest = _manifest()
+    _bind_provenance(tmp_path, manifest)
+    capture_context = manifest["capture_context"]
+    assert isinstance(capture_context, dict)
+    capture_context["fixture_state"] = {
+        "contract": "dashboard_state_fixture_v1",
+        "path": "tests/fixtures/grafana/dashboard_states/INDEX.json",
+        "sha256": "f" * 64,
+        "cases": ["backend_error", "ok", "telemetry_absent"],
+    }
+
+    dashboards = manifest["dashboards"]
+    assert isinstance(dashboards, list)
+    dashboard = dashboards[0]
+    assert isinstance(dashboard, dict)
+    indexed_dashboards = {"bioetl-runtime": dashboard}
+    (tmp_path / "bioetl-runtime.png").write_bytes(_png())
+    assert (
+        preflight._validate_manifest_provenance(
+            manifest,
+            expected_uids=("bioetl-runtime",),
+            dashboards=indexed_dashboards,
+            screenshot_dir=tmp_path,
+        )
+        is None
+    )
+
+    fixture_state = capture_context["fixture_state"]
+    assert isinstance(fixture_state, dict)
+    fixture_state["sha256"] = "invalid"
+    assert (
+        preflight._validate_manifest_provenance(
+            manifest,
+            expected_uids=("bioetl-runtime",),
+            dashboards=indexed_dashboards,
+            screenshot_dir=tmp_path,
+        )
+        == "render manifest fixture-state SHA is invalid"
+    )
+
+
 def test_manifest_requires_expanded_rows_and_exact_panel_coverage() -> None:
     manifest = _manifest()
     manifest["expand_collapsed_rows"] = False

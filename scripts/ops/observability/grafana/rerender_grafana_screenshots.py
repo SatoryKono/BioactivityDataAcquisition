@@ -85,6 +85,7 @@ class RenderConfig:
     browser_zoom: int = 100
     variables: tuple[tuple[str, str], ...] = ()
     navigation_only: bool = False
+    fixture_manifest: Path | None = None
 
 
 @dataclass(frozen=True)
@@ -176,6 +177,35 @@ def _capture_id(config: RenderConfig) -> str:
     return cleaned or uuid.uuid4().hex
 
 
+def _fixture_state_evidence(config: RenderConfig) -> dict[str, object] | None:
+    """Вернуть проверяемую provenance привязку optional fixture registry."""
+    fixture_manifest = config.fixture_manifest
+    if fixture_manifest is None:
+        return None
+    try:
+        payload = json.loads(fixture_manifest.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"fixture manifest is unreadable: {fixture_manifest}") from exc
+    if not isinstance(payload, dict):
+        raise ValueError("fixture manifest must contain a JSON object")
+    contract = payload.get("contract")
+    cases = payload.get("cases")
+    if contract != "dashboard_state_fixture_v1" or not isinstance(cases, dict):
+        raise ValueError(
+            "fixture manifest must use dashboard_state_fixture_v1 with a cases mapping"
+        )
+    try:
+        source_path = str(fixture_manifest.relative_to(_repo_root()))
+    except ValueError:
+        source_path = fixture_manifest.name
+    return {
+        "contract": contract,
+        "path": source_path,
+        "sha256": _sha256_file(fixture_manifest),
+        "cases": sorted(str(case) for case in cases),
+    }
+
+
 def _write_exclusive_text(path: Path, text: str) -> None:
     """Create immutable evidence once; a repeated occurrence must fail closed."""
     flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
@@ -248,6 +278,7 @@ def _finalize_manifest(config: RenderConfig, manifest: dict[str, Any]) -> None:
                 "row_state": {
                     "expand_collapsed_rows": config.expand_collapsed_rows,
                 },
+                "fixture_state": _fixture_state_evidence(config),
             },
             "dashboards": dashboards,
         }
@@ -441,6 +472,15 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
         default=DEFAULT_OUTPUT_DIR,
         help="Screenshot output directory.",
     )
+    parser.add_argument(
+        "--fixture-manifest",
+        type=Path,
+        default=None,
+        help=(
+            "Optional dashboard_state_fixture_v1 INDEX.json bound into render "
+            "evidence provenance without changing the default live render path."
+        ),
+    )
     parser.add_argument("--width", type=int, default=DEFAULT_WIDTH)
     parser.add_argument("--height", type=int, default=DEFAULT_HEIGHT)
     parser.add_argument(
@@ -557,6 +597,11 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
         browser_zoom=int(args.browser_zoom),
         variables=variables,
         navigation_only=bool(args.navigation_only),
+        fixture_manifest=(
+            args.fixture_manifest.resolve()
+            if args.fixture_manifest is not None
+            else None
+        ),
     )
 
 
@@ -993,6 +1038,8 @@ def _playwright_env(config: RenderConfig) -> dict[str, str]:
     env["GRAFANA_SCREENSHOT_NAVIGATION_ONLY"] = (
         "true" if config.navigation_only else "false"
     )
+    if config.fixture_manifest is not None:
+        env["GRAFANA_SCREENSHOT_FIXTURE_MANIFEST"] = str(config.fixture_manifest)
     if config.selected_uids:
         env["GRAFANA_SCREENSHOT_UIDS"] = ",".join(config.selected_uids)
     scope_query = urlencode(_scope_query_params(config))

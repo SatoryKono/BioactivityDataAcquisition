@@ -842,6 +842,27 @@ def _validate_manifest_provenance(
         row_state.get("expand_collapsed_rows"), bool
     ):
         return "render manifest lacks row-state provenance"
+    fixture_state = capture_context.get("fixture_state")
+    if fixture_state is not None:
+        if not isinstance(fixture_state, dict):
+            return "render manifest fixture-state provenance must be a mapping"
+        if fixture_state.get("contract") != "dashboard_state_fixture_v1":
+            return "render manifest fixture-state contract is invalid"
+        fixture_path = fixture_state.get("path")
+        fixture_sha = fixture_state.get("sha256")
+        fixture_cases = fixture_state.get("cases")
+        if not isinstance(fixture_path, str) or not fixture_path:
+            return "render manifest fixture-state path is missing"
+        if not isinstance(fixture_sha, str) or not _RUNTIME_SOURCE_ID_PATTERN.fullmatch(
+            fixture_sha
+        ):
+            return "render manifest fixture-state SHA is invalid"
+        if (
+            not isinstance(fixture_cases, list)
+            or not fixture_cases
+            or not all(isinstance(case, str) for case in fixture_cases)
+        ):
+            return "render manifest fixture-state cases are invalid"
 
     requested = manifest.get("requested")
     if not isinstance(requested, dict):

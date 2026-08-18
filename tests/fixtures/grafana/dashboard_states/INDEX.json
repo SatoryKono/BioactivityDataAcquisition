@@ -1,0 +1,41 @@
+{
+  "contract": "dashboard_state_fixture_v1",
+  "description": "Reusable deterministic state fixtures for content-contract panel roles.",
+  "cases": {
+    "ok": {
+      "path": "tests/fixtures/grafana/dashboard_states/ok.json",
+      "classification": "OK",
+      "http_status": 200
+    },
+    "warn": {
+      "path": "tests/fixtures/grafana/dashboard_states/warn.json",
+      "classification": "WARN",
+      "http_status": 200
+    },
+    "crit": {
+      "path": "tests/fixtures/grafana/dashboard_states/crit.json",
+      "classification": "CRIT",
+      "http_status": 200
+    },
+    "telemetry_absent": {
+      "path": "tests/fixtures/grafana/dashboard_states/telemetry_absent.json",
+      "classification": "TELEMETRY_ABSENT",
+      "http_status": 200
+    },
+    "backend_error": {
+      "path": "tests/fixtures/grafana/dashboard_states/backend_error.json",
+      "classification": "ERROR",
+      "http_status": 503
+    },
+    "populated": {
+      "path": "tests/fixtures/grafana/dashboard_states/populated.json",
+      "classification": "POPULATED",
+      "http_status": 200
+    },
+    "valid_empty": {
+      "path": "tests/fixtures/grafana/dashboard_states/valid_empty.json",
+      "classification": "VALID_EMPTY",
+      "http_status": 200
+    }
+  }
+}

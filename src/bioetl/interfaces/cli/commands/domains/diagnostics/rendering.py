@@ -255,8 +255,8 @@ def _render_traceability_lines(traceability: object) -> list[str]:
         f"  lineage_fragment_ids: {traceability.get('lineage_fragment_ids')}",
         f"  artifact_refs: {traceability.get('artifact_refs')}",
         f"  trace_ids: {traceability.get('trace_ids')}",
-        f"  trace_urls: {traceability.get('trace_urls')}",
-        f"  trace_links_available: {traceability.get('trace_links_available')}",
+        f"  trace_identifiers_available: "
+        f"{traceability.get('trace_identifiers_available')}",
         f"  correlation_anchor_gaps: {traceability.get('correlation_anchor_gaps')}",
         f"  composite_projection: {traceability.get('composite_projection')}",
     ]

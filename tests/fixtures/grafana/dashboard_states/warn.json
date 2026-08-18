@@ -1,0 +1,15 @@
+{
+  "contract": "dashboard_state_fixture_v1",
+  "case": "warn",
+  "classification": "WARN",
+  "http_status": 200,
+  "message": "Current evidence requires operator attention before degradation escalates.",
+  "next_action": "Inspect the linked current-cause evidence.",
+  "rows": [
+    {
+      "state": "WARN",
+      "message": "Current evidence requires operator attention before degradation escalates.",
+      "next_action": "Inspect the linked current-cause evidence."
+    }
+  ]
+}
