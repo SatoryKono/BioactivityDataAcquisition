@@ -1084,6 +1084,56 @@ async def test_pipeline_run_report_route_returns_versioned_payload(
 
 
 @pytest.mark.asyncio
+async def test_pipeline_run_report_route_summary_view_projects_compact_rows(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    host = _RoutingHost()
+    writer = _Writer()
+    payload = {
+        "schema_version": "pipeline_run_report_v1",
+        "identity": {
+            "run_id": "run-1",
+            "status": "success",
+            "started_at": "2026-07-24T00:00:00+00:00",
+            "completed_at": "2026-07-24T00:01:00+00:00",
+        },
+        "funnel": [
+            {
+                "stage_id": "gold",
+                "records_out": 12,
+                "removals": [{"outcome": "excluded_by_contract", "count": 3}],
+            }
+        ],
+    }
+    monkeypatch.setattr(
+        observability_routing,
+        "load_pipeline_run_report_payload",
+        lambda **_kwargs: payload,
+    )
+
+    await observability_routing.dispatch_observability_request(
+        host,
+        writer=writer,
+        path="/ops/observability/pipeline-run-report",
+        query={
+            "pipeline": "chembl_activity",
+            "run_id": "run-1",
+            "view": "summary",
+            "from": "1784851200000",
+            "to": "1784851260000",
+        },
+    )
+
+    status_code = host.sent[-1][1]
+    body = host.sent[-1][2]
+    assert status_code == 200
+    assert body["view"] == "summary"
+    assert body["summary"][0]["gold_records_out"] == "12"
+    assert body["summary"][0]["excluded_by_contract"] == "3"
+    assert body["summary"][0]["covers_selected_run"] == "yes"
+
+
+@pytest.mark.asyncio
 async def test_pipeline_run_report_route_requires_pipeline_selector() -> None:
     host = _RoutingHost()
     writer = _Writer()

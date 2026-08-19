@@ -48,6 +48,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: prometheus
         state_model:
         - OK
@@ -77,6 +78,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -103,6 +105,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -129,6 +132,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -155,6 +159,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -177,6 +182,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -199,6 +205,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -221,6 +228,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -247,6 +255,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -273,6 +282,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -299,6 +309,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -325,6 +336,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -347,6 +359,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -369,6 +382,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -391,6 +405,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -413,6 +428,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -435,6 +451,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -457,6 +474,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -479,6 +497,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -501,6 +520,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -527,6 +547,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -553,6 +574,7 @@ dashboards:
         role: freshness
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -579,6 +601,7 @@ dashboards:
         role: selected_range_count
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -603,6 +626,7 @@ dashboards:
         role: trend
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: prometheus
         state_model:
         - OK
@@ -625,6 +649,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: prometheus
         state_model:
         - OK
@@ -651,6 +676,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -677,6 +703,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -699,6 +726,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -721,6 +749,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -747,6 +776,7 @@ dashboards:
         role: freshness
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -773,6 +803,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -792,6 +823,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -805,6 +837,7 @@ dashboards:
         role: verdict
         tier: 1
         scope: current
+        scope_class: current
         evidence_source: prometheus
         state_model:
         - OK
@@ -833,6 +866,7 @@ dashboards:
         role: freshness
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -859,6 +893,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: prometheus
         state_model:
         - OK
@@ -885,6 +920,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -898,6 +934,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -911,6 +948,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -924,6 +962,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -937,6 +976,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -950,6 +990,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -963,6 +1004,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -976,6 +1018,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -1002,6 +1045,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -1021,6 +1065,7 @@ dashboards:
         role: navigation
         tier: 3
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -1034,6 +1079,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -1047,6 +1093,7 @@ dashboards:
         role: confidence
         tier: 1
         scope: current
+        scope_class: current
         evidence_source: prometheus
         state_model:
         - OK
@@ -1075,6 +1122,7 @@ dashboards:
         role: identity_table
         tier: 2
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -1096,6 +1144,7 @@ dashboards:
         role: accounting_table
         tier: 2
         scope: current
+        scope_class: current
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -1122,6 +1171,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -1141,6 +1191,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -1160,6 +1211,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -1179,6 +1231,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -1198,6 +1251,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -1217,6 +1271,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -1236,6 +1291,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -1249,6 +1305,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -1262,6 +1319,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -1275,6 +1333,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -1294,6 +1353,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -1313,6 +1373,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -1332,6 +1393,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -1351,6 +1413,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -1370,6 +1433,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -1389,6 +1453,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -1404,6 +1469,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -1426,6 +1492,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -1452,6 +1519,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -1478,6 +1546,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -1504,6 +1573,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -1530,6 +1600,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -1556,6 +1627,7 @@ dashboards:
         role: freshness
         tier: 2
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -1580,6 +1652,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -1606,6 +1679,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -1628,6 +1702,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -1650,6 +1725,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -1676,6 +1752,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -1702,6 +1779,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -1715,6 +1793,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -1741,6 +1820,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -1760,6 +1840,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -1779,6 +1860,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -1798,6 +1880,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: prometheus
         state_model:
         - N/A
@@ -1811,6 +1894,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -1837,6 +1921,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -1863,6 +1948,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -1885,6 +1971,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -1911,6 +1998,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -1933,6 +2021,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -1952,6 +2041,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -1965,6 +2055,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -1978,6 +2069,7 @@ dashboards:
         role: navigation
         tier: 3
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -1991,6 +2083,7 @@ dashboards:
         role: confidence
         tier: 1
         scope: current
+        scope_class: current
         evidence_source: prometheus
         state_model:
         - OK
@@ -2017,6 +2110,7 @@ dashboards:
         role: causes_table
         tier: 2
         scope: current
+        scope_class: current
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -2036,6 +2130,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -2049,6 +2144,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -2062,6 +2158,7 @@ dashboards:
         role: verdict
         tier: 1
         scope: current
+        scope_class: current
         evidence_source: prometheus
         state_model:
         - OK
@@ -2089,6 +2186,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -2108,6 +2206,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -2127,6 +2226,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -2140,6 +2240,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -2148,6 +2249,29 @@ dashboards:
         fixture_cases:
         - not_applicable
         render_profiles: *id001
+      '9406':
+        title: Review Selected Run Summary
+        role: evidence_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: &id002
+        - full_dark
+        - full_light
+        - zoom_200
   bioetl-incident-v1:
     panels:
       '1000':
@@ -2155,6 +2279,7 @@ dashboards:
         role: navigation
         tier: 3
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -2168,6 +2293,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -2181,6 +2307,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -2200,6 +2327,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -2219,6 +2347,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -2238,6 +2367,7 @@ dashboards:
         role: causes_table
         tier: 1
         scope: current
+        scope_class: current
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -2260,6 +2390,7 @@ dashboards:
         role: alert_timeline
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -2281,6 +2412,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -2294,6 +2426,7 @@ dashboards:
         role: forensic_table
         tier: 1
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -2314,6 +2447,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -2327,6 +2461,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -2335,11 +2470,46 @@ dashboards:
         fixture_cases:
         - not_applicable
         render_profiles: *id001
+      '2100':
+        title: Inspect Selected Run Summary
+        role: row_group
+        tier: 4
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: grafana_builtin
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id002
+      '2101':
+        title: Review Selected Run Summary
+        role: evidence_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id002
       '9400':
         title: Understand Incident Scope
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -2353,6 +2523,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -2381,6 +2552,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -2394,6 +2566,7 @@ dashboards:
         role: verdict
         tier: 1
         scope: current
+        scope_class: current
         evidence_source: prometheus
         state_model:
         - OK
@@ -2421,6 +2594,7 @@ dashboards:
         role: next_action
         tier: 1
         scope: current
+        scope_class: current
         evidence_source: prometheus
         state_model:
         - OK
@@ -2444,6 +2618,7 @@ dashboards:
         role: navigation
         tier: 2
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -2461,6 +2636,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -2480,6 +2656,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -2499,6 +2676,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -2518,6 +2696,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -2537,6 +2716,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -2556,6 +2736,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -2575,6 +2756,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -2588,6 +2770,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -2607,6 +2790,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -2626,6 +2810,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -2639,6 +2824,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -2658,6 +2844,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -2684,6 +2871,7 @@ dashboards:
         role: state_timeline
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: prometheus
         state_model:
         - OK
@@ -2706,6 +2894,7 @@ dashboards:
         role: state_timeline
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -2728,6 +2917,7 @@ dashboards:
         role: state_timeline
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -2750,6 +2940,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -2763,6 +2954,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -2776,6 +2968,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -2795,6 +2988,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -2814,6 +3008,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -2833,6 +3028,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -2846,6 +3042,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -2865,6 +3062,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -2873,6 +3071,26 @@ dashboards:
         fixture_cases:
         - not_applicable
         render_profiles: *id001
+      '9603':
+        title: Review Selected Run Summary
+        role: evidence_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id002
   bioetl-provider-health-v2:
     panels:
       '1':
@@ -2880,6 +3098,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -2902,6 +3121,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -2928,6 +3148,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -2954,6 +3175,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -2980,6 +3202,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -3002,6 +3225,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -3015,6 +3239,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -3041,6 +3266,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -3067,6 +3293,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -3093,6 +3320,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -3115,6 +3343,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -3134,6 +3363,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -3153,6 +3383,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -3175,6 +3406,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -3197,6 +3429,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -3219,6 +3452,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -3241,6 +3475,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -3267,6 +3502,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -3286,6 +3522,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -3308,6 +3545,7 @@ dashboards:
         role: navigation
         tier: 3
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -3321,6 +3559,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -3334,6 +3573,7 @@ dashboards:
         role: severity_table
         tier: 1
         scope: current
+        scope_class: current
         evidence_source: prometheus
         state_model:
         - OK
@@ -3359,6 +3599,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -3378,6 +3619,7 @@ dashboards:
         role: causes_table
         tier: 1
         scope: current
+        scope_class: current
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -3398,6 +3640,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -3424,6 +3667,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -3432,11 +3676,49 @@ dashboards:
         fixture_cases:
         - not_applicable
         render_profiles: *id001
+      '9106':
+        title: Inspect Fleet Non-OK and Causes
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+      '9107':
+        title: Inspect Status Reason
+        role: forensic_table
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id002
       '9111':
         title: Inspect Full Fleet Severity
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -3456,6 +3738,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -3475,6 +3758,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -3494,6 +3778,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -3507,6 +3792,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -3533,6 +3819,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -3552,6 +3839,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -3571,6 +3859,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -3584,6 +3873,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -3599,6 +3889,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -3612,6 +3903,7 @@ dashboards:
         role: navigation
         tier: 3
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -3625,6 +3917,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -3638,6 +3931,7 @@ dashboards:
         role: forensic_table
         tier: 1
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -3658,6 +3952,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -3676,6 +3971,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -3695,6 +3991,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -3714,6 +4011,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -3727,6 +4025,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -3746,6 +4045,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -3759,6 +4059,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -3777,6 +4078,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -3796,6 +4098,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -3815,6 +4118,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -3834,6 +4138,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -3847,6 +4152,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -3860,6 +4166,7 @@ dashboards:
         role: identity_table
         tier: 1
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -3882,6 +4189,7 @@ dashboards:
         role: accounting_table
         tier: 1
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -3911,6 +4219,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -3937,6 +4246,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -3963,6 +4273,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -3989,6 +4300,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -4015,6 +4327,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: prometheus
         state_model:
         - OK
@@ -4041,6 +4354,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -4067,6 +4381,7 @@ dashboards:
         role: selected_range_count
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -4091,6 +4406,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -4113,6 +4429,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -4135,6 +4452,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -4157,6 +4475,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: prometheus
         state_model:
         - OK
@@ -4183,6 +4502,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -4209,6 +4529,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: prometheus
         state_model:
         - OK
@@ -4235,6 +4556,7 @@ dashboards:
         role: selected_range_duration
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -4259,6 +4581,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -4281,6 +4604,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -4303,6 +4627,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -4325,6 +4650,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -4344,6 +4670,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -4363,6 +4690,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -4382,6 +4710,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -4395,6 +4724,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -4408,6 +4738,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -4421,6 +4752,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -4440,6 +4772,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -4466,6 +4799,7 @@ dashboards:
         role: navigation
         tier: 3
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -4479,6 +4813,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -4492,6 +4827,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -4505,6 +4841,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -4518,6 +4855,7 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: prometheus
         state_model:
         - VALID_EMPTY
@@ -4537,6 +4875,7 @@ dashboards:
         role: confidence
         tier: 2
         scope: current
+        scope_class: current
         evidence_source: prometheus
         state_model:
         - OK
@@ -4564,6 +4903,7 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -4586,6 +4926,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -4599,6 +4940,7 @@ dashboards:
         role: verdict
         tier: 1
         scope: current
+        scope_class: current
         evidence_source: prometheus
         state_model:
         - OK
@@ -4627,6 +4969,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -4646,6 +4989,7 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
         state_model:
         - VALID_EMPTY
@@ -4665,6 +5009,7 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -4678,6 +5023,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -4691,6 +5037,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -4704,6 +5051,7 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
         state_model:
         - N/A
@@ -4717,6 +5065,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: prometheus
         state_model:
         - OK
@@ -4743,6 +5092,7 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
         state_model:
         - OK
@@ -4764,3 +5114,23 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id001
+      '9998':
+        title: Review Selected Run Summary
+        role: evidence_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id002

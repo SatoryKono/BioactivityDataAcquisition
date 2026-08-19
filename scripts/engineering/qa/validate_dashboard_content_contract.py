@@ -208,6 +208,15 @@ def _validate_panel_record(
     scope = record.get("scope")
     if scope not in allowed_scopes:
         errors.append(f"{prefix}: scope must be one of the declared allowed_scopes")
+    scope_class = record.get("scope_class", scope)
+    if scope_class not in allowed_scopes:
+        errors.append(
+            f"{prefix}: scope_class must be one of the declared allowed_scopes"
+        )
+    elif scope_class != scope:
+        errors.append(
+            f"{prefix}: scope_class must match scope (scope is the SSOT)"
+        )
     evidence_source = record.get("evidence_source")
     if evidence_source not in allowed_evidence_sources:
         errors.append(

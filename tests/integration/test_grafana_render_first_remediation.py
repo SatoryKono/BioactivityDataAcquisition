@@ -561,12 +561,13 @@ def test_audit_followup_action_first_layout_contracts() -> None:
     provider_rows = [
         panel for panel in provider.get("panels", []) if panel.get("type") == "row"
     ]
-    assert [panel.get("id") for panel in provider_rows] == [9105, 91, 9404, 9405]
+    assert [panel.get("id") for panel in provider_rows] == [9106, 9105, 91, 9404, 9405]
     assert [panel.get("gridPos", {}).get("y") for panel in provider_rows] == [
         18,
         19,
         20,
         21,
+        22,
     ]
     assert all(panel.get("collapsed") is True for panel in provider_rows)
     for panel_id in (9101, 9102, 9103):
@@ -719,7 +720,7 @@ def test_first_window_named_text_columns_wrap_without_table_default() -> None:
     """#8977: wrap only the named first-window text column; do not grow h."""
     cases = (
         ("bioetl-runtime.json", 9101, frozenset({"reason"})),
-        ("bioetl-provider-health-v2.json", 9103, frozenset({"cause"})),
+        ("bioetl-provider-health-v2.json", 9107, frozenset({"reason"})),
         ("bioetl-run-explorer-v1.json", 3010, frozenset({"message"})),
     )
     for dashboard_name, panel_id, allowed in cases:

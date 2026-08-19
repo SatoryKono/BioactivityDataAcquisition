@@ -118,8 +118,15 @@
       "description": "processing_status is whether the pipeline finished. trust_status is whether this run's evidence is complete enough to replay. Monitor Replay Readiness (9401) is CURRENT Prometheus for pipeline x run_type; run_id never filters Prometheus. First-screen SELECTED RUN tables: Review Selected-Run Trust (9418) and Review Retention Compliance (9416). Review Lineage Validation is the first collapsed row and contains table 9415. UNKNOWN/INCOMPLETE is missing or contradictory evidence, never healthy.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Can this run be replayed safely?</div><div>SELECTED RUN tables on this screen: <em>Review Selected-Run Trust</em> · <em>Review Retention Compliance</em>. CURRENT = pipeline replay readiness now, not this run.</div><div>Then expand the row <em>Review Lineage Validation</em>. INCOMPLETE or UNKNOWN = incomplete evidence — not OK.</div></div></div>"
-      }
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Can this run be replayed safely?</div><div>SELECTED RUN tables on this screen: <em>Review Selected-Run Trust</em> · <em>Review Retention Compliance</em>. CURRENT = pipeline replay readiness now, not this run.</div><div>Then expand the row <em>Review Lineage Validation</em>. INCOMPLETE or UNKNOWN = incomplete evidence — not OK.<div><span>Run coverage:</span> SELECTED RUN <code>${run_id}</code> may sit outside TIME RANGE. Set range to run: open <b>6. Run Explorer</b>, then set From/To to started_at-5m .. <code style='font-size:16px'>completed_at</code>+5m. Do not treat CURRENT Prometheus as that UUID.</div><div><span>Effective refresh:</span> 60s · timezone: browser</div></div></div></div>"
+      },
+      "links": [
+        {
+          "title": "Set range to run — open 6. Run Explorer",
+          "url": "/d/bioetl-run-explorer-v1?var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}",
+          "targetBlank": false
+        }
+      ]
     },
     {
       "id": 9401,
@@ -135,7 +142,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT Prometheus replay/resume readiness for pipeline×run_type (not the selected-run HTTP trust_status). Status mapping: 0=OK, 1=WARN, 2=CRIT, 3=INCOMPLETE, null=UNKNOWN. Exact-run Trust comes from Ops HTTP processing_status/trust_status. UNKNOWN/INCOMPLETE is not healthy.",
+      "description": "CURRENT Prometheus replay/resume readiness for pipeline×run_type (not the selected-run HTTP trust_status). Status mapping: 0=OK, 1=WARN, 2=CRIT, 3=INCOMPLETE, null=UNKNOWN. Exact-run Trust comes from Ops HTTP processing_status/trust_status. UNKNOWN/INCOMPLETE is not healthy; missing evidence is not OK.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -254,7 +261,15 @@
             "inspect": true
           },
           "unit": "none",
-          "noValue": "No selected-run trust payload. Select an exact run; UNAVAILABLE/INCOMPLETE is not OK."
+          "noValue": "No selected-run trust payload. Select an exact run; UNAVAILABLE/INCOMPLETE is not OK.",
+          "links": [
+            {
+              "title": "Open 6. Run Explorer for selected run",
+              "url": "/d/bioetl-run-explorer-v1?${__url_time_range}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}&viewPanel=9402",
+              "targetBlank": false,
+              "includeVars": false
+            }
+          ]
         },
         "overrides": [
           {
@@ -441,7 +456,7 @@
     },
     {
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN retention policy, reproducibility evidence floor, required evidence, and archive support. First-screen table — not inside a collapsed row. UNKNOWN is not a healthy zero. No matching rows are a valid empty result; backend unavailable means the query could not be evaluated.",
+      "description": "TIME RANGE · SELECTED RUN retention policy, reproducibility evidence floor, required evidence, and archive support. First-screen table — not inside a collapsed row. UNKNOWN is not a healthy zero. No matching rows are a valid empty result; backend unavailable means the query could not be evaluated.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -572,7 +587,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Shows current replay/resume blockers from the last 15 minutes. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Do not trust zero when telemetry coverage is missing.",
+      "description": "CURRENT · Shows current replay/resume blockers from the last 15 minutes. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Do not trust zero when telemetry coverage is missing.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -673,7 +688,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Shows the age of the latest persisted checkpoint in seconds from selected-range samples for the selected pipeline. Lower is fresher. Run ID does not filter this panel. No data means checkpoint evidence is unavailable; inspect checkpoint artifacts before replay or resume.",
+      "description": "TIME RANGE · Shows the age of the latest persisted checkpoint in seconds from selected-range samples for the selected pipeline. Lower is fresher. Run ID does not filter this panel. No data means checkpoint evidence is unavailable; inspect checkpoint artifacts before replay or resume.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -783,7 +798,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Shows manifest-write and ledger-append failures from the last 15 minutes. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Use run evidence to verify integrity for an exact run.",
+      "description": "SELECTED RUN · Shows manifest-write and ledger-append failures from the last 15 minutes. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Use run evidence to verify integrity for an exact run.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -884,7 +899,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Shows whether required manifest and ledger telemetry is available. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Do not trust zero blocker cards when this panel is not OK; validate Prometheus scrape/rules.",
+      "description": "TIME RANGE · Shows whether required manifest and ledger telemetry is available. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Do not trust zero blocker cards when this panel is not OK; validate Prometheus scrape/rules.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -995,7 +1010,7 @@
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN lineage closure, identity consistency, cycle freedom, and persistence profile. Lives in the collapsed row titled Review Lineage Validation (not Inspect Audit & Lineage Evidence). UNKNOWN is not a healthy zero. No matching rows are a valid empty result; backend unavailable means the query could not be evaluated.",
+          "description": "TIME RANGE · SELECTED RUN lineage closure, identity consistency, cycle freedom, and persistence profile. Lives in the collapsed row titled Review Lineage Validation (not Inspect Audit & Lineage Evidence). UNKNOWN is not a healthy zero. No matching rows are a valid empty result; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -1102,7 +1117,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Counts replay write risk, manifest/ledger integrity, checkpoint, manifest, ledger, drift, and lineage blockers during the selected time range. Zero means no blocker evidence was recorded; verify telemetry coverage before treating it as safe. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero.",
+          "description": "TIME RANGE · Counts replay write risk, manifest/ledger integrity, checkpoint, manifest, ledger, drift, and lineage blockers during the selected time range. Zero means no blocker evidence was recorded; verify telemetry coverage before treating it as safe. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1185,7 +1200,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Counts incompatible checkpoint decisions during the selected range. Any non-zero value blocks resume. Run Type does not affect this panel.",
+          "description": "TIME RANGE · Counts incompatible checkpoint decisions during the selected range. Any non-zero value blocks resume. Run Type does not affect this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1277,7 +1292,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Counts replay attempts that could not be reconstructed during the selected range. Any non-zero value blocks replay. Run Type does not affect this panel.",
+          "description": "TIME RANGE · Counts replay attempts that could not be reconstructed during the selected range. Any non-zero value blocks replay. Run Type does not affect this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1368,7 +1383,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Counts replay-drift events during the selected range. Any non-zero value requires stopping replay and inspecting the drift type.",
+          "description": "TIME RANGE · Counts replay-drift events during the selected range. Any non-zero value requires stopping replay and inspecting the drift type.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1459,7 +1474,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Counts failed checkpoint loads during the selected range. Run Type does not affect this panel.",
+          "description": "TIME RANGE · Counts failed checkpoint loads during the selected range. Run Type does not affect this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1550,7 +1565,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Counts failed checkpoint saves during the selected range. Run Type does not affect this panel.",
+          "description": "TIME RANGE · Counts failed checkpoint saves during the selected range. Run Type does not affect this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1641,7 +1656,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Counts failed checkpoint administration operations across all pipelines during the selected range. Pipeline and Run Type filters do not affect this panel. Zero means no failures were recorded in the selected range; it does not prove telemetry completeness. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero.",
+          "description": "TIME RANGE · Counts failed checkpoint administration operations across all pipelines during the selected range. Pipeline and Run Type filters do not affect this panel. Zero means no failures were recorded in the selected range; it does not prove telemetry completeness. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1732,7 +1747,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows the highest replay lag during the selected range. Below 300s is normal, 300–899s is elevated, and >=900s is critical. No data means lag telemetry is unavailable.",
+          "description": "TIME RANGE · Shows the highest replay lag during the selected range. Below 300s is normal, 300–899s is elevated, and >=900s is critical. No data means lag telemetry is unavailable.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1823,7 +1838,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows checkpoint compatibility decisions by outcome during the selected range. The no_events series means no decisions were recorded; confirm telemetry before treating it as healthy. Run Type does not affect this panel.",
+          "description": "TIME RANGE · Shows checkpoint compatibility decisions by outcome during the selected range. The no_events series means no decisions were recorded; confirm telemetry before treating it as healthy. Run Type does not affect this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1876,7 +1891,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows replay-drift events grouped by capability, drift type, and status. No data means either no events occurred or drift telemetry is unavailable.",
+          "description": "TIME RANGE · Shows replay-drift events grouped by capability, drift type, and status. No data means either no events occurred or drift telemetry is unavailable.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1943,7 +1958,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows replay lag over time by replay capability and status. No data means replay-lag telemetry is unavailable.",
+          "description": "TIME RANGE · Shows replay lag over time by replay capability and status. No data means replay-lag telemetry is unavailable.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2013,7 +2028,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows p50, p95, and p99 checkpoint-save latency for the selected range. No data means no latency samples were recorded, not zero latency. Run Type does not affect this panel.",
+          "description": "TIME RANGE · Shows p50, p95, and p99 checkpoint-save latency for the selected range. No data means no latency samples were recorded, not zero latency. Run Type does not affect this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2095,7 +2110,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows p50, p95, and p99 administration latency across all pipelines during the selected range. Filters do not affect this panel. No data is expected when no administration operations occurred in the selected range.",
+          "description": "TIME RANGE · Shows p50, p95, and p99 administration latency across all pipelines during the selected range. Filters do not affect this panel. No data is expected when no administration operations occurred in the selected range.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2174,7 +2189,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "Validates checkpoint parse, schema, checksum, and required identity anchors for the selected run. UNKNOWN is not a healthy zero. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+          "description": "TIME RANGE · Validates checkpoint parse, schema, checksum, and required identity anchors for the selected run. UNKNOWN is not a healthy zero. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -2255,7 +2270,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows terminal run events by status during the selected range. Pipeline applies; Run Type does not. Use run evidence to verify ordering for an exact run.",
+          "description": "SELECTED RUN · Shows terminal run events by status during the selected range. Pipeline applies; Run Type does not. Use run evidence to verify ordering for an exact run.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2328,7 +2343,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Counts failed ledger appends during the selected range. Any non-zero value requires checking the run ledger. Run Type does not affect this panel.",
+          "description": "TIME RANGE · Counts failed ledger appends during the selected range. Any non-zero value requires checking the run ledger. Run Type does not affect this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2419,7 +2434,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Counts failed manifest writes during the selected range. Any non-zero value requires checking manifest persistence before replay or resume.",
+          "description": "SELECTED RUN · Counts failed manifest writes during the selected range. Any non-zero value requires checking manifest persistence before replay or resume.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2510,7 +2525,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows manifest writes over time by status and run type. This is historical evidence; use the first-screen failure card for the current verdict.",
+          "description": "SELECTED RUN · Shows manifest writes over time by status and run type. This is historical evidence; use the first-screen failure card for the current verdict.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2563,7 +2578,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows ledger appends over time by event type and status. This is historical evidence. Run Type does not affect this panel.",
+          "description": "TIME RANGE · Shows ledger appends over time by event type and status. This is historical evidence. Run Type does not affect this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2616,7 +2631,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows manifest-write failure severity over the last 30 minutes. Status mapping: 0=OK, 1=WARN, 2=CRIT, null=UNKNOWN. Confirm telemetry coverage before trusting OK.",
+          "description": "SELECTED RUN · Shows manifest-write failure severity over the last 30 minutes. Status mapping: 0=OK, 1=WARN, 2=CRIT, null=UNKNOWN. Confirm telemetry coverage before trusting OK.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2707,7 +2722,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows ledger-append failure severity over the last 30 minutes. Status mapping: 0=OK, 1=WARN, 2=CRIT, null=UNKNOWN. Run Type does not affect this panel.",
+          "description": "TIME RANGE · Shows ledger-append failure severity over the last 30 minutes. Status mapping: 0=OK, 1=WARN, 2=CRIT, null=UNKNOWN. Run Type does not affect this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2795,7 +2810,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "Validates manifest parsing, structure, schema-version support, and contract compatibility for the selected run. UNKNOWN is not a healthy zero. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+          "description": "SELECTED RUN · Validates manifest parsing, structure, schema-version support, and contract compatibility for the selected run. UNKNOWN is not a healthy zero. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -2876,7 +2891,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Counts failed reads across all control-plane stores during the selected range. Pipeline and Run Type filters do not apply.",
+          "description": "TIME RANGE · Counts failed reads across all control-plane stores during the selected range. Pipeline and Run Type filters do not apply.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2967,7 +2982,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows global read failure severity over the last 30 minutes. Status mapping: 0=OK at <=5%, 1=WARN at >5%, 2=CRIT at >10%, null=UNKNOWN.",
+          "description": "TIME RANGE · Shows global read failure severity over the last 30 minutes. Status mapping: 0=OK at <=5%, 1=WARN at >5%, 2=CRIT at >10%, null=UNKNOWN.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3058,7 +3073,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows read operations by store, operation, and status across all pipelines. Dashboard filters do not apply.",
+          "description": "TIME RANGE · Shows read operations by store, operation, and status across all pipelines. Dashboard filters do not apply.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3111,7 +3126,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows p50, p95, and p99 read latency across all control-plane stores during the selected range. Filters do not apply. No data means no latency samples were recorded in the selected range.",
+          "description": "TIME RANGE · Shows p50, p95, and p99 read latency across all control-plane stores during the selected range. Filters do not apply. No data means no latency samples were recorded in the selected range.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3208,7 +3223,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Counts missing upstream lineage references during the selected range. Any non-zero value makes replay evidence incomplete. Run Type does not affect this panel.",
+          "description": "TIME RANGE · Counts missing upstream lineage references during the selected range. Any non-zero value makes replay evidence incomplete. Run Type does not affect this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3300,7 +3315,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Counts failed lineage-fragment writes during the selected range. Run Type does not affect this panel.",
+          "description": "TIME RANGE · Counts failed lineage-fragment writes during the selected range. Run Type does not affect this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3391,7 +3406,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows missing lineage references recorded during the selected range, grouped by layer and reference type. No rows can mean either no gaps or missing lineage telemetry; check fragment activity. Run Type does not affect this panel.",
+          "description": "TIME RANGE · Shows missing lineage references recorded during the selected range, grouped by layer and reference type. No rows can mean either no gaps or missing lineage telemetry; check fragment activity. Run Type does not affect this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3498,7 +3513,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows audit-write outcomes across all pipelines. Dashboard filters do not apply. This is supporting evidence, not the replay verdict.",
+          "description": "TIME RANGE · Shows audit-write outcomes across all pipelines. Dashboard filters do not apply. This is supporting evidence, not the replay verdict.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3551,7 +3566,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows audit-query outcomes across all pipelines. Dashboard filters do not apply. This is supporting evidence, not the replay verdict.",
+          "description": "TIME RANGE · Shows audit-query outcomes across all pipelines. Dashboard filters do not apply. This is supporting evidence, not the replay verdict.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3604,7 +3619,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows p50, p95, and p99 audit-write latency across all pipelines during the selected range. No data means no latency samples were recorded in the selected range.",
+          "description": "TIME RANGE · Shows p50, p95, and p99 audit-write latency across all pipelines during the selected range. No data means no latency samples were recorded in the selected range.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3685,7 +3700,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows p50, p95, and p99 audit-query latency across all pipelines during the selected range. No data means no latency samples were recorded in the selected range.",
+          "description": "TIME RANGE · Shows p50, p95, and p99 audit-query latency across all pipelines during the selected range. No data means no latency samples were recorded in the selected range.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3766,7 +3781,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows lineage-fragment writes by layer and status during the selected range. Run Type does not affect this panel.",
+          "description": "TIME RANGE · Shows lineage-fragment writes by layer and status during the selected range. Run Type does not affect this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3831,7 +3846,7 @@
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "Summarizes the selected run’s identity and replay anchors. Short values are shown in the table; full values remain available for copying. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+          "description": "TIME RANGE · Summarizes the selected run’s identity and replay anchors. Short values are shown in the table; full values remain available for copying. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3964,7 +3979,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "Provides full run IDs, hashes, artifact references, lineage references, snapshots, and checkpoint values for copying. These values come from BioETL Ops HTTP and are never Prometheus labels. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+          "description": "TIME RANGE · Provides full run IDs, hashes, artifact references, lineage references, snapshots, and checkpoint values for copying. These values come from BioETL Ops HTTP and are never Prometheus labels. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4159,7 +4174,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "Lists missing run, manifest, configuration, contract, snapshot, replay, composite, and checkpoint anchors. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+          "description": "TIME RANGE · Lists missing run, manifest, configuration, contract, snapshot, replay, composite, and checkpoint anchors. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4248,7 +4263,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "Compares current runtime anchors with anchors stored in the checkpoint. MISMATCH=CRIT; MISSING or PARTIAL=WARN; no data=UNKNOWN. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+          "description": "TIME RANGE · Compares current runtime anchors with anchors stored in the checkpoint. MISMATCH=CRIT; MISSING or PARTIAL=WARN; no data=UNKNOWN. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4337,7 +4352,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "Shows the primary evidence required for replay: source configuration, DQ policy, input snapshots, replay blockers, lineage, artifacts, and ledger watermark. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+          "description": "TIME RANGE · Shows the primary evidence required for replay: source configuration, DQ policy, input snapshots, replay blockers, lineage, artifacts, and ledger watermark. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4426,7 +4441,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "Shows additional investigation details such as runtime hashes, artifacts, component runs, checkpoint files, DQ reports, and Bronze batch IDs. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+          "description": "TIME RANGE · Shows additional investigation details such as runtime hashes, artifacts, component runs, checkpoint files, DQ reports, and Bronze batch IDs. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4556,7 +4571,7 @@
             "h": 6
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "Shows identity details for the selected run. An exact Run ID resolves one run; an aggregate pipeline scope does not guess a manifest. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+          "description": "SELECTED RUN · Shows identity details for the selected run. An exact Run ID resolves one run; an aggregate pipeline scope does not guess a manifest. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4584,6 +4599,12 @@
                   "title": "Open monitoring backend setup docs",
                   "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
                   "targetBlank": true
+                },
+                {
+                  "title": "Open 6. Run Explorer for selected run",
+                  "url": "/d/bioetl-run-explorer-v1?${__url_time_range}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}&viewPanel=9402",
+                  "targetBlank": false,
+                  "includeVars": false
                 }
               ]
             },
@@ -4699,6 +4720,13 @@
                 }
               }
             }
+          ],
+          "links": [
+            {
+              "title": "Open 6. Run Explorer for selected run",
+              "url": "/d/bioetl-run-explorer-v1?${__url_time_range}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}&viewPanel=9402",
+              "targetBlank": false
+            }
           ]
         },
         {
@@ -4712,7 +4740,7 @@
             "h": 6
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "Shows Bronze, Silver, and Gold record counts and outcomes for the selected scope. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Use Run Explorer for full run details.",
+          "description": "CURRENT · Shows Bronze, Silver, and Gold record counts and outcomes for the selected scope. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Use Run Explorer for full run details.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -5052,7 +5080,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "Summarizes selected-run failures into the fixed categories api, dq, schema, storage, network, validation, and unknown. Every category row carries bounded status and reason evidence; an UNKNOWN backend verdict must remain visible in the rows and must not look like a healthy zero. Raw exception messages and identifiers are excluded. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+          "description": "TIME RANGE · Summarizes selected-run failures into the fixed categories api, dq, schema, storage, network, validation, and unknown. Every category row carries bounded status and reason evidence; an UNKNOWN backend verdict must remain visible in the rows and must not look like a healthy zero. Raw exception messages and identifiers are excluded. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
