@@ -19,7 +19,9 @@ from bioetl.application.services.control_plane.workflow.execution_recording_payl
 )
 from bioetl.application.services.control_plane.workflow.execution_recording_state import (
     _apply_completed_step_state,
+    _clear_ambiguous_step,
     _find_step_state,
+    _record_completed_transform_fingerprint,
     _record_step_state,
     _remove_step_ids,
 )
@@ -32,6 +34,10 @@ from bioetl.domain.control_plane import WorkflowStepState
 from bioetl.domain.workflow import TransformStepConfig, WorkflowStepConfig
 
 _UNSET_CURSOR = object()
+_RECORDING_HELPER_REEXPORTS = (
+    _clear_ambiguous_step,
+    _record_completed_transform_fingerprint,
+)
 
 __all__ = [
     "WorkflowExecutionRecorder",
