@@ -68,8 +68,7 @@ regexes = [
     '''secret[_-]?api[_-]?key[_-]?\d+''',
     '''test[_-]?value[_-]?for[_-]?masking''',
 
-    # Example API keys used in tests and documentation
-    '''sk-[a-zA-Z0-9]+''',
+    # Mock keys used in tests (do not allowlist live `sk-` prefixes)
     '''msk-[a-zA-Z0-9]+''',
 
     # AWS example access key (from AWS documentation)
@@ -93,8 +92,6 @@ regexes = [
     # Settings object references
     '''settings\.[a-z_]+''',
 
-    # Git commit hashes (40-char hex strings in docs)
-    '''[a-f0-9]{40}''',
 ]
 
 # Stopwords to ignore

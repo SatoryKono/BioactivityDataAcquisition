@@ -80,10 +80,9 @@ RUN apt-get update \
 # Copy virtual environment from builder
 COPY --from=builder /app/.venv /app/.venv
 
-# Copy application source code as root-owned runtime assets. Default directory
-# and file modes keep them readable/traversable while the non-root user cannot
-# mutate them.
-COPY --chown=root:root src/ ./src/
+# Runtime executes the wheel installed into the builder venv. Copy configs as
+# root-owned data; do not copy src/ or set PYTHONPATH to /app/src (that would
+# shadow the wheel).
 COPY --chown=root:root configs/ ./configs/
 
 # Create logs directory
@@ -91,7 +90,6 @@ RUN mkdir -p /app/logs && chown bioetl:bioetl /app/logs
 
 # Enable the venv
 ENV PATH="/app/.venv/bin:$PATH"
-ENV PYTHONPATH="/app/src"
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 

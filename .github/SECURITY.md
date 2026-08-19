@@ -62,7 +62,7 @@ import os
 api_key = os.environ.get("BIOETL_CHEMBL_API_KEY")
 
 # INCORRECT: Hardcoded value
-api_key = "sk-1234567890"  # NEVER do this
+api_key = "sk-EXAMPLE_DO_NOT_USE"  # NEVER do this
 ```
 
 ## Data Validation
