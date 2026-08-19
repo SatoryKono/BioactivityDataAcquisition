@@ -24,6 +24,7 @@ from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support i
     complete_dry_run,
     complete_without_mutation,
     filter_source_rows_to_current_run,
+    log_reconciliation_started,
     partition_source_rows,
     reference_value_set,
 )
@@ -129,8 +130,6 @@ def filter_current_rows(
 
 @dataclass(slots=True)
 class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
-    """Reconcile Silver/Gold foreign keys through existing storage seams."""
-
     silver_writer: SilverWriter
     logger: LoggerPort
     metrics: MetricsPort | None = None
@@ -147,19 +146,7 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             raise ValueError(
                 "SilverForeignKeyReconciliationAdapter supports only delete_orphans"
             )
-
-        self._log(
-            "info",
-            "workflow foreign-key reconciliation started",
-            source_table=request.source_table,
-            reference_table=request.reference_table,
-            source_layer=request.source_layer,
-            reference_layer=request.reference_layer,
-            mutation_layer=request.effective_mutation_layer,
-            source_keys=list(request.effective_source_keys),
-            reference_keys=list(request.effective_reference_keys),
-            nulls_equal=request.nulls_equal,
-        )
+        log_reconciliation_started(self, request)
 
         source_rows = await self._read_source_rows(request)
         if source_rows is None:

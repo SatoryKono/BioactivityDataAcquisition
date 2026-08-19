@@ -19,8 +19,6 @@ __all__ = [
     "WorkflowRunOptionsConfig",
     "WorkflowStep",
     "WorkflowStepConfig",
-    "mark_delete_orphans_current_run_scope",
-    "reject_delete_orphans_after_limited_extracts",
 ]
 
 if TYPE_CHECKING:
@@ -84,100 +82,17 @@ class WorkflowRunOptionsConfig:
         self, override: WorkflowRunOptionsConfig
     ) -> WorkflowRunOptionsConfig:
         """Return a merged config where non-null override values win."""
-        return WorkflowRunOptionsConfig(
-            run_type=prefer_override(self.run_type, override.run_type),
-            resume=prefer_override(self.resume, override.resume),
-            start_offset=prefer_override(self.start_offset, override.start_offset),
-            limit=prefer_override(self.limit, override.limit),
-            dry_run=prefer_override(self.dry_run, override.dry_run),
-            input_csv=prefer_override(self.input_csv, override.input_csv),
-            filter_column=prefer_override(
-                self.filter_column,
-                override.filter_column,
-            ),
-            filter_field=prefer_override(self.filter_field, override.filter_field),
-            filter_ids=prefer_override(self.filter_ids, override.filter_ids),
-            multi_filter_ids=prefer_override(
-                self.multi_filter_ids,
-                override.multi_filter_ids,
-            ),
-            fallback_column=prefer_override(
-                self.fallback_column,
-                override.fallback_column,
-            ),
-            fallback_mapping=prefer_override(
-                self.fallback_mapping,
-                override.fallback_mapping,
-            ),
-            vacuum_after_run=prefer_override(
-                self.vacuum_after_run,
-                override.vacuum_after_run,
-            ),
-            vacuum_retention_days=prefer_override(
-                self.vacuum_retention_days,
-                override.vacuum_retention_days,
-            ),
-            log_level=prefer_override(self.log_level, override.log_level),
-            ignore_yaml_filter=prefer_override(
-                self.ignore_yaml_filter,
-                override.ignore_yaml_filter,
-            ),
-            skip_gold=prefer_override(self.skip_gold, override.skip_gold),
-            execution_context=prefer_override(
-                self.execution_context,
-                override.execution_context,
-            ),
-            use_cached_bronze=prefer_override(
-                self.use_cached_bronze,
-                override.use_cached_bronze,
-            ),
-            cached_bronze_path=prefer_override(
-                self.cached_bronze_path,
-                override.cached_bronze_path,
-            ),
-            cached_bronze_date=prefer_override(
-                self.cached_bronze_date,
-                override.cached_bronze_date,
-            ),
-            replay_of_run_id=prefer_override(
-                self.replay_of_run_id,
-                override.replay_of_run_id,
-            ),
-            replay_of_manifest_id=prefer_override(
-                self.replay_of_manifest_id,
-                override.replay_of_manifest_id,
-            ),
-            resume_run_id=prefer_override(
-                self.resume_run_id,
-                override.resume_run_id,
-            ),
-            resume_manifest_id=prefer_override(
-                self.resume_manifest_id,
-                override.resume_manifest_id,
-            ),
-            exact_replay=prefer_override(self.exact_replay, override.exact_replay),
-            required_persistence_profile=prefer_stricter_persistence_profile(
-                self.required_persistence_profile,
-                override.required_persistence_profile,
-            ),
-            enable_tracing=prefer_override(
-                self.enable_tracing,
-                override.enable_tracing,
-            ),
-            debug_export_enabled=prefer_override(
-                self.debug_export_enabled,
-                override.debug_export_enabled,
-            ),
-            debug_export_formats=prefer_override(
-                self.debug_export_formats,
-                override.debug_export_formats,
-            ),
-            debug_export_dir=prefer_override(
-                self.debug_export_dir,
-                override.debug_export_dir,
-            ),
-            workflow_id=prefer_override(self.workflow_id, override.workflow_id),
-        )
+        updates: dict[str, object] = {}
+        for field in fields(self):
+            current = getattr(self, field.name)
+            incoming = getattr(override, field.name)
+            if field.name == "required_persistence_profile":
+                updates[field.name] = prefer_stricter_persistence_profile(
+                    current, incoming
+                )
+            else:
+                updates[field.name] = prefer_override(current, incoming)
+        return replace(self, **updates)
 
     def to_mapping(self) -> JsonDict:
         """Return non-null options as a plain mapping."""
@@ -309,88 +224,3 @@ class WorkflowConfig:
             if step.step_id == step_id:
                 return step
         return None
-
-
-def mark_delete_orphans_current_run_scope(config: WorkflowConfig) -> WorkflowConfig:
-    """Scope delete_orphans to the current run when an extract is limited.
-
-    CLI ``--limit`` is allowed together with ``delete_orphans``. Mutations then
-    apply only to source rows from this workflow run, so independently bounded
-    extracts cannot delete historical Gold as false-positive orphans.
-    """
-    updated_steps: list[WorkflowStep] = []
-    changed = False
-    steps_by_id = {item.step_id: item for item in config.steps}
-    for step in config.steps:
-        if not isinstance(step, TransformStepConfig):
-            updated_steps.append(step)
-            continue
-        if step.transform_name != "reconcile_foreign_keys":
-            updated_steps.append(step)
-            continue
-        action = None if step.config is None else step.config.get("action")
-        if action != "delete_orphans":
-            updated_steps.append(step)
-            continue
-        if not _limited_upstream_pipeline_ids(step.step_id, config, steps_by_id):
-            updated_steps.append(step)
-            continue
-        scoped = dict(step.config or {})
-        scoped["source_scope"] = "current_run"
-        updated_steps.append(replace(step, config=scoped))
-        changed = True
-    if not changed:
-        return config
-    return replace(config, steps=tuple(updated_steps))
-
-
-def reject_delete_orphans_after_limited_extracts(config: WorkflowConfig) -> None:
-    """Reject committed YAML that bakes delete_orphans onto limited extracts.
-
-    Independently bounded extracts make Gold FK orphans false positives.
-    Walks the full upstream DAG so an intermediary transform cannot hide a
-    limited producer. CLI ``--limit`` does not use this reject; it scopes
-    mutations to the current run instead.
-    """
-    steps_by_id = {step.step_id: step for step in config.steps}
-    for step in config.steps:
-        if not isinstance(step, TransformStepConfig):
-            continue
-        if step.transform_name != "reconcile_foreign_keys":
-            continue
-        action = None if step.config is None else step.config.get("action")
-        if action != "delete_orphans":
-            continue
-        limited = _limited_upstream_pipeline_ids(step.step_id, config, steps_by_id)
-        if limited:
-            raise ValueError(
-                "reconcile_foreign_keys action=delete_orphans cannot depend on "
-                "pipeline steps with run_options.limit "
-                f"({', '.join(limited)}); independently bounded extracts "
-                "make Gold FK orphans false positives"
-            )
-
-
-def _limited_upstream_pipeline_ids(
-    start_id: str,
-    config: WorkflowConfig,
-    steps_by_id: dict[str, WorkflowStep],
-) -> list[str]:
-    limited: list[str] = []
-    seen: set[str] = set()
-    stack = list(reversed(steps_by_id[start_id].depends_on))
-    while stack:
-        dep_id = stack.pop()
-        if dep_id in seen:
-            continue
-        seen.add(dep_id)
-        dep = steps_by_id.get(dep_id)
-        if dep is None:
-            continue
-        stack.extend(reversed(dep.depends_on))
-        if not isinstance(dep, WorkflowStepConfig):
-            continue
-        merged = config.defaults.merged_with(dep.run_options)
-        if merged.limit is not None:
-            limited.append(dep_id)
-    return limited

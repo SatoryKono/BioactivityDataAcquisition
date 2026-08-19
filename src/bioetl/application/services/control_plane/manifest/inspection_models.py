@@ -15,8 +15,6 @@ from bioetl.domain.types import RunID
 
 
 class RunManifestInspectionCorruptionError(ValueError):
-    """Raised when manifest storage is structurally corrupted during inspection."""
-
     def __init__(self, identifier: str, reason: str) -> None:
         self.identifier = identifier
         self.reason = reason
@@ -27,21 +25,16 @@ class RunManifestInspectionCorruptionError(ValueError):
 
 @dataclass(frozen=True, slots=True)
 class RunManifestDiffEntry:
-    """One top-level manifest field difference."""
-
     field: str
     left: object
     right: object
 
     def to_dict(self) -> dict[str, object]:
-        """Return JSON/YAML-safe payload for CLI presentation."""
         return {"field": self.field, "left": self.left, "right": self.right}
 
 
 @dataclass(frozen=True, slots=True)
 class RunManifestDiffResult:
-    """Top-level diff between two resolved manifests."""
-
     left_manifest_id: str
     right_manifest_id: str
     differences: tuple[RunManifestDiffEntry, ...]
@@ -55,7 +48,6 @@ class RunManifestDiffResult:
     cross_surface_replay_diff: dict[str, object] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, object]:
-        """Return JSON/YAML-safe payload for CLI presentation."""
         return {
             "left_manifest_id": self.left_manifest_id,
             "right_manifest_id": self.right_manifest_id,
@@ -74,8 +66,6 @@ class RunManifestDiffResult:
 
 @dataclass(frozen=True, slots=True)
 class RunManifestVerifyResult:
-    """Cross-store replay evidence verification for two resolved manifests."""
-
     left_manifest_id: str
     right_manifest_id: str
     left_run_id: str
@@ -91,7 +81,6 @@ class RunManifestVerifyResult:
     right_authoritative_replay_dossier: dict[str, object] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, object]:
-        """Return JSON/YAML-safe payload for CLI presentation."""
         return {
             "left_manifest_id": self.left_manifest_id,
             "right_manifest_id": self.right_manifest_id,
@@ -216,16 +205,16 @@ def json_equal(left: object, right: object) -> bool:
     )
 
 
-def _normalize_jsonable(value: object) -> object:
-    """Normalize supported values without collapsing distinct types."""
+def _normalize_scalar_jsonable(value: object) -> object | None:
     if value is None or isinstance(value, bool | int | float | str):
         return value
     if isinstance(value, datetime):
+        tzinfo = value.tzinfo
         return {
             "__type__": "datetime",
             "isoformat": value.isoformat(),
-            "aware": value.tzinfo is not None,
-            "tz": None if value.tzinfo is None else str(value.tzinfo),
+            "aware": tzinfo is not None,
+            "tz": None if tzinfo is None else str(tzinfo),
         }
     if isinstance(value, date):
         return {"__type__": "date", "isoformat": value.isoformat()}
@@ -233,6 +222,14 @@ def _normalize_jsonable(value: object) -> object:
         return {"__type__": "uuid", "value": str(value)}
     if isinstance(value, bytes):
         return {"__type__": "bytes", "hex": value.hex()}
+    return None
+
+
+def _normalize_jsonable(value: object) -> object:
+    """Normalize supported values without collapsing distinct types."""
+    scalar = _normalize_scalar_jsonable(value)
+    if scalar is not None or value is None:
+        return scalar
     if isinstance(value, dict):
         return {str(key): _normalize_jsonable(item) for key, item in value.items()}
     if isinstance(value, list | tuple):

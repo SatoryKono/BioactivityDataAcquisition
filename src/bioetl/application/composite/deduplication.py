@@ -1,8 +1,4 @@
-"""Enricher deduplication logic for composite pipelines.
-
-Provides functionality to deduplicate enricher tables before join
-to prevent fan-out when enricher has duplicate values by join keys.
-"""
+"""Deduplicate enricher tables before join to prevent fan-out."""
 
 from __future__ import annotations
 
@@ -16,14 +12,10 @@ __all__ = ["EnricherDeduplicatorService"]
 
 
 class EnricherDeduplicatorService:
-    """Handles deduplication of enricher tables before join operations."""
+    """Deduplicate enricher tables before join operations."""
 
     def __init__(self, logger: LoggerPort) -> None:
-        """Initialize deduplicator with logger.
-
-        Args:
-            logger: Logger port for warning messages.
-        """
+        """Initialize deduplicator with logger."""
         self._logger = logger
 
     def deduplicate(

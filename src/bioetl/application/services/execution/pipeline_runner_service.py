@@ -176,7 +176,7 @@ class PipelineRunnerService:
             status="started",
             timestamp=started_at,
         )
-        dry_run_result = self._maybe_dry_run_result(
+        dry_run_result = await self._complete_dry_run_if_needed(
             pipeline_name=pipeline_name,
             run_id=effective_run_id,
             options=effective_options,
@@ -184,19 +184,7 @@ class PipelineRunnerService:
             run_logger=run_logger,
         )
         if dry_run_result is not None:
-            await _record_pipeline_audit_event(
-                self.audit,
-                event_name="PipelineRunCompleted",
-                pipeline_name=pipeline_name,
-                run_id=effective_run_id,
-                run_type=effective_options.run_type,
-                status=dry_run_result.status.value,
-                timestamp=dry_run_result.completed_at,
-            )
-            return finalize_pipeline_run_report(
-                result=dry_run_result,
-                options=effective_options,
-            )
+            return dry_run_result
 
         try:
             runner = _require_execution_runner(self.runner_factory.create(context))
@@ -265,6 +253,38 @@ class PipelineRunnerService:
             options=options,
             started_at=started_at,
             run_logger=run_logger,
+        )
+
+    async def _complete_dry_run_if_needed(
+        self,
+        *,
+        pipeline_name: str,
+        run_id: RunID,
+        options: RunOptions,
+        started_at: datetime,
+        run_logger: LoggerPort,
+    ) -> RunResult | None:
+        dry_run_result = self._maybe_dry_run_result(
+            pipeline_name=pipeline_name,
+            run_id=run_id,
+            options=options,
+            started_at=started_at,
+            run_logger=run_logger,
+        )
+        if dry_run_result is None:
+            return None
+        await _record_pipeline_audit_event(
+            self.audit,
+            event_name="PipelineRunCompleted",
+            pipeline_name=pipeline_name,
+            run_id=run_id,
+            run_type=options.run_type,
+            status=dry_run_result.status.value,
+            timestamp=dry_run_result.completed_at,
+        )
+        return finalize_pipeline_run_report(
+            result=dry_run_result,
+            options=options,
         )
 
     def list_pipelines(self) -> list[str]:

@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
+from bioetl.domain.workflow._delete_orphans_scope import (
+    mark_delete_orphans_current_run_scope,
+    reject_delete_orphans_after_limited_extracts,
+)
 from bioetl.domain.workflow.config import (
     TransformStepConfig,
     WorkflowConfig,
     WorkflowRunOptionsConfig,
     WorkflowStep,
     WorkflowStepConfig,
-    mark_delete_orphans_current_run_scope,
-    reject_delete_orphans_after_limited_extracts,
 )
 from bioetl.domain.workflow.dag import (
     WorkflowDagValidationError,
