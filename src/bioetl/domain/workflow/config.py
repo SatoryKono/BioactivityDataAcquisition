@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, fields, replace
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.domain.types import JsonDict
 from bioetl.domain.workflow._run_options_support import (
@@ -92,7 +92,9 @@ class WorkflowRunOptionsConfig:
                 )
             else:
                 updates[field.name] = prefer_override(current, incoming)
-        return replace(self, **updates)
+        return replace(
+            self, **cast(Any, updates)
+        )  # Any: field-loop kwargs for frozen replace
 
     def to_mapping(self) -> JsonDict:
         """Return non-null options as a plain mapping."""
