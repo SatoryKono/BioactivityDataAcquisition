@@ -16,15 +16,40 @@ from scripts.engineering.qa.observability_metric_inventory_report import (
 from scripts.engineering.qa.observability_metric_inventory_runtime import (
     RuntimeCardinalityReviewSummary,
 )
-from scripts.engineering.qa.report_observability_metric_inventory import (
+from scripts.engineering.qa.observability_metric_inventory_shared import (
     MetricInventoryReport,
     _ALLOWLIST_METADATA_REQUIRED_KEYS,
     _CHECK_DRIFT_KEYS,
     _DEFAULT_DRIFT_ALLOWLIST,
     _PROMETHEUS_BASE_URL_ENV_VAR,
-    _build_runtime_cardinality_review_summary as _build_runtime_cardinality_review_summary,
-    collect_metric_inventory as collect_metric_inventory,
 )
+
+
+def collect_metric_inventory(repo_root: Path) -> MetricInventoryReport:
+    """Bind the facade collector without a static import cycle."""
+    from importlib import import_module
+
+    module = import_module("scripts.engineering.qa.report_observability_metric_inventory")
+    return module.collect_metric_inventory(repo_root)
+
+
+def _build_runtime_cardinality_review_summary(
+    report: MetricInventoryReport,
+    *,
+    repo_root: Path,
+    prometheus_base_url: str | None,
+    allow_local_cardinality_fallback: bool = False,
+) -> RuntimeCardinalityReviewSummary:
+    """Bind the facade review summary without a static import cycle."""
+    from importlib import import_module
+
+    module = import_module("scripts.engineering.qa.report_observability_metric_inventory")
+    return module._build_runtime_cardinality_review_summary(
+        report,
+        repo_root=repo_root,
+        prometheus_base_url=prometheus_base_url,
+        allow_local_cardinality_fallback=allow_local_cardinality_fallback,
+    )
 
 
 def _build_parser() -> argparse.ArgumentParser:

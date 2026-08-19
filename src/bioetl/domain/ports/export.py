@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Awaitable
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import Literal, Protocol, runtime_checkable
+
+from bioetl.domain.types.debug_export import DebugExportPack, DebugExportResult
 
 __all__ = [
     "DebugExportPort",
@@ -134,7 +137,9 @@ class ExportWriterPort(Protocol):
 class DebugExportPort(Protocol):
     """Persist deterministic debug-export audit packs."""
 
-    def write_pack(self, *, pack: object) -> object:
+    def write_pack(
+        self, *, pack: DebugExportPack
+    ) -> DebugExportResult | Awaitable[DebugExportResult]:
         """Persist the provided audit pack and return artifact metadata."""
         ...
 
