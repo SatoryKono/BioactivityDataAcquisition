@@ -49,15 +49,15 @@
     },
     {
       "evidence_metrics": {
-        "hotspot_budget_warning_count": 0,
+        "hotspot_budget_warning_count": 4,
         "hotspot_family_count": 5,
         "total_duplicate_clusters": 0
       },
       "id": "module_boundaries_coupling",
       "name": "Module boundaries / coupling",
-      "score": 9.5,
+      "score": 7.5,
       "weight": 0.14,
-      "weighted_score": 1.33
+      "weighted_score": 1.05
     },
     {
       "evidence_metrics": {
@@ -112,7 +112,7 @@
     {
       "evidence_metrics": {
         "expired_compat_count": 0,
-        "hotspot_budget_warning_count": 0,
+        "hotspot_budget_warning_count": 4,
         "public_entrypoint_growth_count": 0,
         "public_export_facade_conflict_count": 0,
         "public_export_facade_growth_count": 0,
@@ -123,9 +123,9 @@
       },
       "id": "debt_burden_evolution_friction",
       "name": "Debt burden / evolution friction",
-      "score": 9.9,
+      "score": 9.6,
       "weight": 0.06,
-      "weighted_score": 0.594
+      "weighted_score": 0.576
     }
   ],
   "debt_budget_policy": {
@@ -162,7 +162,7 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.41,
+  "integral_score": 9.11,
   "interpretation": "good_targeted_improvements",
   "metrics": {
     "accepted_adr_count": 55,
@@ -174,11 +174,9 @@
     "dashboarded_without_emission_count": 0,
     "dq_blocking_issue_count": 0,
     "expired_compat_count": 0,
-    "families_at_budget": [
-      "application_services_control_plane"
-    ],
-    "families_at_budget_count": 1,
-    "hotspot_budget_warning_count": 0,
+    "families_at_budget": [],
+    "families_at_budget_count": 0,
+    "hotspot_budget_warning_count": 4,
     "hotspot_family_count": 5,
     "layer_violations": 0,
     "public_entrypoint_growth_count": 0,
@@ -225,7 +223,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "9340020273f934eb2d4bb7964c7e110d19e3f604384b20790b5cfe88a152f95c"
+      "source_fingerprint": "e91a8032e39483b3a56ae9a91f01e14c0f50aed176194231166a8cb56e066c17"
     },
     "duplication_baseline": {
       "path": "reports/quality/full-app-duplication-baseline.json",
@@ -233,14 +231,14 @@
       "total_duplicate_clusters": 0
     },
     "hotspot_family_baseline": {
-      "budget_warnings": 0,
+      "budget_warnings": 4,
       "path": "reports/quality/hotspot-family-baseline.json",
       "snapshot_date": "2026-07-27"
     },
     "module_coverage_inventory": {
       "coverage_xml_sha256": "6feef0f5973a2f6ee1f82c08a72da9af24404a4a595d966071fd7602eda2f103",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "2c399309d413f372e608a6b0f5841d82aba6801498e076c93223ceafc5b11fe2"
+      "source_tree_sha256": "4404c256523d1da266a76704b6bb0d2dafb6fc459c3e9fe54ae2a637dee265ec"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,
