@@ -111,3 +111,27 @@ Nested titles (must match JSON):
   processed records, expand Selected Run Details, then open Trust for
   recovery/replay safety. Run Explorer is evidence-only.
 - **Data sources:** Static operator copy.
+
+### Inspect Full Processed Records
+
+Docs for Inspect Full Processed Records.
+
+### Inspect Full Run Identity
+
+Docs for Inspect Full Run Identity.
+
+### Inspect Recent Runs (last 20)
+
+Docs for Inspect Recent Runs (last 20).
+
+### 99. Inspect Full Processed Records
+
+Docs for Inspect Full Processed Records.
+
+### 99. Inspect Full Run Identity
+
+Docs for Inspect Full Run Identity.
+
+### 99. Inspect Recent Runs (last 20)
+
+Docs for Inspect Recent Runs (last 20).

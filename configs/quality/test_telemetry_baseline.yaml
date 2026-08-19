@@ -1,27 +1,72 @@
-version: 1
-policy_scope: test_telemetry_baseline
-workflow_path: .github/workflows/tests.yml
-source_branch: main
-refreshed_at_utc: '2026-08-18T07:19:16.305713+00:00'
-refresh_status: captured
-source_commit: 9336cd7e24b05a8b96f7708701df96226b739882
-source_run_id: '32106880089'
-source_tree_sha256: f12302e872714e665373d4b3be77b519e201c298c3078967ba62c37f7f910335
-freshness_guard:
-  timestamp_field: refreshed_at_utc
-  max_age_days: 45
 artifact_inputs:
-  coverage_xml: reports/coverage/coverage.xml
   coverage_log: null
-  coverage_percent_fallback: 95.69
-  slowest_tests_json: reports/test-telemetry/slowest-tests.json
+  coverage_percent_fallback: null
+  coverage_xml: reports/coverage/coverage.xml
   junit_inputs: []
+  slowest_tests_json: reports/test-telemetry/slowest-tests.json
+branch_accurate_guard:
+  enforced: true
+  refresh_command: python -m scripts.engineering.ci.update_test_telemetry_baseline
+    --source-commit <sha> --source-run-id <run-id>
+  require_source_commit_equals_head: false
+  require_source_commit_is_ancestor: true
+  require_source_tree_match: true
 coverage:
+  actual_percent: 85.0
   threshold_percent: 85.0
-  actual_percent: 95.69
-  threshold_satisfied: true
+  threshold_satisfied: null
 duration_telemetry:
-  total_cases: 47415
+  execution_context:
+    executed_count: 47415
+    explicit_exclusions:
+    - lane: live-provider-contracts
+      reason: scheduled network-owned workflow
+    - lane: performance
+      reason: benchmark-owned non-blocking workflow
+    - lane: manual-e2e
+      reason: operator-triggered external-runtime lane
+    junit_source_count: 12
+    junit_sources:
+    - junit-contract-confidence.xml
+    - junit-fast.xml
+    - junit-memory.xml
+    - junit-repo-backed-unit.xml
+    - junit-track-d.xml
+    - junit-unit-scripts-tooling.xml
+    - junit.integration.xml
+    - junit.security.xml
+    - junit.unit-application.xml
+    - junit.unit-domain.xml
+    - junit.unit-infrastructure.xml
+    - junit.unit-other.xml
+    junit_testcase_duration_sum_s:
+      junit-contract-confidence.xml: 82.154
+      junit-fast.xml: 135.432
+      junit-memory.xml: 0.35
+      junit-repo-backed-unit.xml: 119.2
+      junit-track-d.xml: 7.121
+      junit-unit-scripts-tooling.xml: 132.966
+      junit.integration.xml: 126.864
+      junit.security.xml: 9.947
+      junit.unit-application.xml: 49.39
+      junit.unit-domain.xml: 132.093
+      junit.unit-infrastructure.xml: 42.231
+      junit.unit-other.xml: 64.561
+    lane_wall_time_s:
+      junit-contract-confidence.xml: 82.154
+      junit-fast.xml: 135.432
+      junit-memory.xml: 0.35
+      junit-repo-backed-unit.xml: 119.2
+      junit-track-d.xml: 7.121
+      junit-unit-scripts-tooling.xml: 132.966
+      junit.integration.xml: 126.864
+      junit.security.xml: 9.947
+      junit.unit-application.xml: 49.39
+      junit.unit-domain.xml: 132.093
+      junit.unit-infrastructure.xml: 42.231
+      junit.unit-other.xml: 64.561
+    lane_wall_time_source: junit_testcase_duration_sum_fallback
+    worker_mode: 'mixed: xdist unit/integration; serial contracts/repo-backed/memory'
   top_slowest:
   - duration_s: 21.344
     source: junit-unit-scripts-tooling.xml
@@ -102,127 +147,82 @@ duration_telemetry:
     source: junit-unit-scripts-tooling.xml
     test: tests.unit.scripts.qa.test_report_normalization_fallback_inventory::test_main_writes_deterministic_artifacts
   top_slowest_zones:
-  - zone: tests.unit.scripts.docs.passports.test_passport_projector
+  - max_duration_s: 21.344
     test_count: 3
     total_duration_s: 43.499
-    max_duration_s: 21.344
-  - zone: tests.unit.repo_backed.scripts.ai.mcp.test_mcp_wrapper_contracts
+    zone: tests.unit.scripts.docs.passports.test_passport_projector
+  - max_duration_s: 7.021
     test_count: 2
     total_duration_s: 14.009
-    max_duration_s: 7.021
-  - zone: tests.integration.ci.test_track_d_fixture_control_plane_linkage
+    zone: tests.unit.repo_backed.scripts.ai.mcp.test_mcp_wrapper_contracts
+  - max_duration_s: 8.296
     test_count: 2
     total_duration_s: 13.947
-    max_duration_s: 8.296
-  - zone: tests.contract.test_normalization_cross_layer_contracts
+    zone: tests.integration.ci.test_track_d_fixture_control_plane_linkage
+  - max_duration_s: 4.341
     test_count: 3
     total_duration_s: 12.818
-    max_duration_s: 4.341
-  - zone: tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery
+    zone: tests.contract.test_normalization_cross_layer_contracts
+  - max_duration_s: 10.71
     test_count: 1
     total_duration_s: 10.71
-    max_duration_s: 10.71
-  - zone: tests.contract.test_provider_contract_drift_replay
+    zone: tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery
+  - max_duration_s: 9.786
     test_count: 1
     total_duration_s: 9.786
-    max_duration_s: 9.786
-  - zone: tests.unit.scripts.qa.test_report_normalization_fallback_inventory
+    zone: tests.contract.test_provider_contract_drift_replay
+  - max_duration_s: 4.177
     test_count: 2
     total_duration_s: 8.207
-    max_duration_s: 4.177
-  - zone: tests.unit.composition.factories.pipeline.test_registry
+    zone: tests.unit.scripts.qa.test_report_normalization_fallback_inventory
+  - max_duration_s: 6.917
     test_count: 1
     total_duration_s: 6.917
-    max_duration_s: 6.917
-  - zone: tests.unit.composition.bootstrap.test_runner_bootstrap.TestBootstrapPipelineRunnerServiceIntegration
+    zone: tests.unit.composition.factories.pipeline.test_registry
+  - max_duration_s: 6.731
     test_count: 1
     total_duration_s: 6.731
-    max_duration_s: 6.731
-  - zone: tests.unit.scripts.ops.test_recover_renderer
+    zone: tests.unit.composition.bootstrap.test_runner_bootstrap.TestBootstrapPipelineRunnerServiceIntegration
+  - max_duration_s: 6.004
     test_count: 1
     total_duration_s: 6.004
-    max_duration_s: 6.004
-  execution_context:
-    executed_count: 47415
-    explicit_exclusions:
-    - lane: live-provider-contracts
-      reason: scheduled network-owned workflow
-    - lane: performance
-      reason: benchmark-owned non-blocking workflow
-    - lane: manual-e2e
-      reason: operator-triggered external-runtime lane
-    junit_source_count: 12
-    junit_sources:
-    - junit-contract-confidence.xml
-    - junit-fast.xml
-    - junit-memory.xml
-    - junit-repo-backed-unit.xml
-    - junit-track-d.xml
-    - junit-unit-scripts-tooling.xml
-    - junit.integration.xml
-    - junit.security.xml
-    - junit.unit-application.xml
-    - junit.unit-domain.xml
-    - junit.unit-infrastructure.xml
-    - junit.unit-other.xml
-    junit_testcase_duration_sum_s:
-      junit-contract-confidence.xml: 82.154
-      junit-fast.xml: 135.432
-      junit-memory.xml: 0.35
-      junit-repo-backed-unit.xml: 119.2
-      junit-track-d.xml: 7.121
-      junit-unit-scripts-tooling.xml: 132.966
-      junit.integration.xml: 126.864
-      junit.security.xml: 9.947
-      junit.unit-application.xml: 49.39
-      junit.unit-domain.xml: 132.093
-      junit.unit-infrastructure.xml: 42.231
-      junit.unit-other.xml: 64.561
-    worker_mode: 'mixed: xdist unit/integration; serial contracts/repo-backed/memory'
-    lane_wall_time_s:
-      junit-contract-confidence.xml: 82.154
-      junit-fast.xml: 135.432
-      junit-memory.xml: 0.35
-      junit-repo-backed-unit.xml: 119.2
-      junit-track-d.xml: 7.121
-      junit-unit-scripts-tooling.xml: 132.966
-      junit.integration.xml: 126.864
-      junit.security.xml: 9.947
-      junit.unit-application.xml: 49.39
-      junit.unit-domain.xml: 132.093
-      junit.unit-infrastructure.xml: 42.231
-      junit.unit-other.xml: 64.561
-    lane_wall_time_source: junit_testcase_duration_sum_fallback
+    zone: tests.unit.scripts.ops.test_recover_renderer
+  total_cases: 47415
+freshness_guard:
+  max_age_days: 45
+  timestamp_field: refreshed_at_utc
+policy_scope: test_telemetry_baseline
+refresh_status: captured
+refreshed_at_utc: '2026-08-19T14:10:52.989641+00:00'
 slow_governance_cache_probe:
   issue_ref: '#4663'
-  refreshed_at_utc: '2026-05-26T04:32:00+00:00'
-  source: local_direct_probe
-  probes:
-  - name: collect_test_governance_report
-    scope: architecture-slow-governance
-    cache_mode: in_process_cache
-    first_duration_s: 28.676
-    second_duration_s: 0.001
-    improvement_factor: 34900.14
   lane_isolation:
     fast_boundary_suite_name: architecture-fast-boundary
-    slow_governance_suite_name: architecture-slow-governance
     isolated: true
+    slow_governance_suite_name: architecture-slow-governance
+  probes:
+  - cache_mode: in_process_cache
+    first_duration_s: 28.676
+    improvement_factor: 34900.14
+    name: collect_test_governance_report
+    scope: architecture-slow-governance
+    second_duration_s: 0.001
+  refreshed_at_utc: '2026-05-26T04:32:00+00:00'
+  source: local_direct_probe
   subprocess_cache:
+    ci_persistence:
+      action: .github/actions/architecture-governance-cache
+      cache_key: source_tree_sha256 from module-coverage-inventory.json
+      cache_path: .cache/bioetl-architecture-governance
+      workflow_owner: .github/workflows/tests.yml#test-fast
     entrypoints:
     - tests.architecture.conftest.cached_subprocess_run
     - tests.architecture.conftest._run_cached_subprocess
     note: Disk-backed subprocess reuse now backs repo-wide scanner calls for detect-secrets,
       ruff, and mypy-style architecture governance checks.
-    ci_persistence:
-      action: .github/actions/architecture-governance-cache
-      cache_path: .cache/bioetl-architecture-governance
-      cache_key: source_tree_sha256 from module-coverage-inventory.json
-      workflow_owner: .github/workflows/tests.yml#test-fast
-branch_accurate_guard:
-  enforced: true
-  require_source_commit_equals_head: false
-  require_source_tree_match: true
-  require_source_commit_is_ancestor: true
-  refresh_command: python -m scripts.engineering.ci.update_test_telemetry_baseline
-    --source-commit <sha> --source-run-id <run-id>
+source_branch: main
+source_commit: 9ac1c4d100184b6cfb2535b542bfb77902775b9b
+source_run_id: '1'
+source_tree_sha256: 4913dafdbdccedf6ffb2080f0385d6e04cce62ee738ff2d4f14a757adaff7f2e
+version: 1
+workflow_path: .github/workflows/tests.yml

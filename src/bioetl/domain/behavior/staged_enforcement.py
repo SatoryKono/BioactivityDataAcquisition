@@ -6,6 +6,10 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import TypedDict
 
+from bioetl.domain.behavior._staged_enforcement_diagnostics import (
+    _build_diagnostics_report,
+    _group_results_by_check,
+)
 from bioetl.domain.types import JsonDict
 
 
@@ -271,13 +275,3 @@ def _build_default_policies() -> dict[str, EnforcementPolicy]:
     }
 
 
-from bioetl.domain.behavior._staged_enforcement_diagnostics import (
-    _build_diagnostics_report,
-    _calculate_pass_rate,
-    _check_details,
-    _failed_checks,
-    _group_results_by_check,
-    _pass_rates,
-    _passed_checks,
-    _serialize_policies,
-)

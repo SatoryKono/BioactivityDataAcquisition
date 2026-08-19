@@ -2,7 +2,7 @@
   "annotations": {
     "list": []
   },
-  "description": "Incident Workspace — read-only triage. First screen answers the highest-confidence active suspect. Current alerts, alert history, and impact notes sit in collapsed Review Alert Evidence. Not a lifecycle/working record.",
+  "description": "Incident Workspace \u2014 read-only triage. First screen answers the highest-confidence active suspect. Current alerts, alert history, and impact notes sit in collapsed Review Alert Evidence. Not a lifecycle/working record.",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -23,7 +23,7 @@
         "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1.3;margin:0 6px 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:2px 6px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview)\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$__all&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health)\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality)\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$__all&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><a class=\"bioetl-nav-current\" href=\"#bioetl-incident-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"5. Incident Workspace (Incident Workspace)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">5. Incident Workspace (current)</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer)\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">6. Run Explorer</a></div>"
       },
       "title": "",
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0\u20134: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5\u20136: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
       "type": "text",
       "links": [
         {
@@ -107,14 +107,14 @@
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">What is the highest-confidence active suspect?</div><div><b>Scope:</b> <b>CURRENT</b> = Status/active suspects · <b>SELECTED RUN</b> = exact-run proof</div><div><b>EMPTY DOMAIN</b> = no active suspects, not a healthy-fleet verdict</div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">What is the highest-confidence active suspect?</div><div><b>Scope:</b> <b>CURRENT</b> = Status/active suspects \u00b7 <b>SELECTED RUN</b> = exact-run proof</div><div><b>EMPTY DOMAIN</b> = no active suspects, not a healthy-fleet verdict</div></div></div>"
       }
     },
     {
       "id": 9401,
       "type": "stat",
       "title": "Monitor Incident Status",
-      "description": "Pair with Provenance reason + action; never read as OK. Not a healthy OK. Ranked suspects may be WORKFLOW/GLOBAL blast radius — check scope labels on tables. Incident header status (labelled only). Map 0=OK,1=WARN,2=CRIT,3/null=UNKNOWN. Never bare numbers. Confidence from missing telemetry / VALID_EMPTY suspects. Read-only workspace",
+      "description": "Pair with Provenance reason + action; never read as OK. Not a healthy OK. Ranked suspects may be WORKFLOW/GLOBAL blast radius \u2014 check scope labels on tables. Incident header status (labelled only). Map 0=OK,1=WARN,2=CRIT,3/null=UNKNOWN. Never bare numbers. Confidence from missing telemetry / VALID_EMPTY suspects. Read-only workspace",
       "gridPos": {
         "h": 4,
         "w": 8,
@@ -224,7 +224,7 @@
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:16px;white-space:normal;overflow-wrap:anywhere\"><strong>Next best actions (≤4, read-only)</strong> — 1) Read labelled <strong>Status</strong> · 2) Open top Ranked Active Suspect domain · 3) Confirm Current Alerts age/severity · 4) Run Explorer for exact-run proof</div>"
+        "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:16px;white-space:normal;overflow-wrap:anywhere\"><strong>Next best actions (\u22644, read-only)</strong> \u2014 1) Read labelled <strong>Status</strong> \u00b7 2) Open top Ranked Active Suspect domain \u00b7 3) Confirm Current Alerts age/severity \u00b7 4) Run Explorer for exact-run proof</div>"
       },
       "links": []
     },
@@ -232,7 +232,7 @@
       "id": 2010,
       "type": "table",
       "title": "Inspect Ranked Suspects",
-      "description": "Selected pipeline may differ from row pipeline (blast radius). Cross-domain first-screen ranking capped at five active suspects. Domain and signal labels identify source; row links preserve scope. VALID_EMPTY when no active suspects — empty domains are not a healthy-fleet verdict. Complete per-domain evidence stays in Domain Suspect Details.",
+      "description": "Selected pipeline may differ from row pipeline (blast radius). Cross-domain first-screen ranking capped at five active suspects. Domain and signal labels identify source; row links preserve scope. VALID_EMPTY when no active suspects \u2014 empty domains are not a healthy-fleet verdict. Complete per-domain evidence stays in Domain Suspect Details.",
       "gridPos": {
         "h": 7,
         "w": 24,
@@ -296,7 +296,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "noValue": "EMPTY DOMAIN — no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
+          "noValue": "EMPTY DOMAIN \u2014 no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
           "custom": {
             "align": "left",
             "cellOptions": {
@@ -350,7 +350,7 @@
             },
             {
               "title": "Open Run Explorer",
-              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=$run_id",
+              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id",
               "targetBlank": false,
               "includeVars": false
             }
@@ -361,7 +361,7 @@
               "options": {
                 "match": "null+nan",
                 "result": {
-                  "text": "—",
+                  "text": "\u2014",
                   "color": "transparent",
                   "index": 0
                 }
@@ -477,7 +477,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "EMPTY DOMAIN — no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
+              "noValue": "EMPTY DOMAIN \u2014 no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
               "custom": {
                 "align": "left",
                 "cellOptions": {
@@ -562,7 +562,7 @@
           "targets": [
             {
               "expr": "ALERTS{alertstate=~\"firing|pending\"}",
-              "legendFormat": "{{alertstate}} · {{alertname}}",
+              "legendFormat": "{{alertstate}} \u00b7 {{alertname}}",
               "refId": "A",
               "instant": false,
               "range": true
@@ -570,7 +570,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "EMPTY DOMAIN — no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
+              "noValue": "EMPTY DOMAIN \u2014 no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
               "custom": {
                 "fillOpacity": 0,
                 "lineWidth": 0
@@ -736,7 +736,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "EMPTY DOMAIN — no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
+              "noValue": "EMPTY DOMAIN \u2014 no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
               "custom": {
                 "align": "left",
                 "cellOptions": {
@@ -783,7 +783,7 @@
                   "options": {
                     "match": "null+nan",
                     "result": {
-                      "text": "—",
+                      "text": "\u2014",
                       "color": "transparent",
                       "index": 0
                     }
@@ -914,7 +914,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "EMPTY DOMAIN — no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
+              "noValue": "EMPTY DOMAIN \u2014 no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
               "custom": {
                 "align": "left",
                 "cellOptions": {
@@ -961,7 +961,7 @@
                   "options": {
                     "match": "null+nan",
                     "result": {
-                      "text": "—",
+                      "text": "\u2014",
                       "color": "transparent",
                       "index": 0
                     }
@@ -1074,7 +1074,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "EMPTY DOMAIN — no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
+              "noValue": "EMPTY DOMAIN \u2014 no active suspects. Not a healthy-fleet verdict; require Status/Telemetry Presence first.",
               "custom": {
                 "align": "left",
                 "cellOptions": {
@@ -1121,7 +1121,7 @@
                   "options": {
                     "match": "null+nan",
                     "result": {
-                      "text": "—",
+                      "text": "\u2014",
                       "color": "transparent",
                       "index": 0
                     }

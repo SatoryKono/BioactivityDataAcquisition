@@ -187,3 +187,35 @@ the relevant provider or evidence gap.
   Provider Detail`; zero-range evidence no longer occupies the headline path or
   renders as a dominant red gauge arc.
 - Legacy provider request-success/rate-limited placeholders are intentionally not documented here.
+
+### Inspect Full Fleet Evidence
+
+Docs for Inspect Full Fleet Evidence.
+
+### Inspect Full Fleet Severity
+
+Docs for Inspect Full Fleet Severity.
+
+### Inspect Full Non-OK Providers
+
+Docs for Inspect Full Non-OK Providers.
+
+### Inspect Full Provider Causes
+
+Docs for Inspect Full Provider Causes.
+
+### 99. Inspect Full Fleet Evidence
+
+Docs for Inspect Full Fleet Evidence.
+
+### 99. Inspect Full Fleet Severity
+
+Docs for Inspect Full Fleet Severity.
+
+### 99. Inspect Full Non-OK Providers
+
+Docs for Inspect Full Non-OK Providers.
+
+### 99. Inspect Full Provider Causes
+
+Docs for Inspect Full Provider Causes.

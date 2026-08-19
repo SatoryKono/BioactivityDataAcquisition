@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Hybrid L0 overview / Fleet Command Center. First screen: status strip, compact First Action route, and Review Domain Status evidence matrix above fold. Aggregate-first triage; exact run forensics via Run Explorer and Trust. run_id is HTTP identity context only — never a Prometheus label.",
+  "description": "Hybrid L0 overview / Fleet Command Center. First screen: status strip, compact First Action route, and Review Domain Status evidence matrix above fold. Aggregate-first triage; exact run forensics via Run Explorer and Trust. run_id is HTTP identity context only \u2014 never a Prometheus label.",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
@@ -33,7 +33,7 @@
         "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1.3;margin:0 6px 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:2px 6px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Trust</a><a class=\"bioetl-nav-current\" href=\"#bioetl-overview-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"1. Overview (Overview)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">1. Overview (current)</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$__all&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health)\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality)\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$__all&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer)\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">6. Run Explorer</a></div>"
       },
       "title": "",
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0\u20134: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5\u20136: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
       "type": "text",
       "links": [
         {
@@ -113,10 +113,10 @@
       },
       "id": 99,
       "options": {
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">What is broken or degraded right now?</div><div><b>Scope:</b> <b>CURRENT</b> = Status + First Action · <b>SELECTED RUN</b> = exact-run evidence</div><div><b>TIME RANGE</b> = Review Domain Status and trends</div></div></div>",
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">What is broken or degraded right now?</div><div><b>Scope:</b> <b>CURRENT</b> = Status + First Action \u00b7 <b>SELECTED RUN</b> = exact-run evidence</div><div><b>TIME RANGE</b> = Review Domain Status and trends</div></div></div>",
         "mode": "html"
       },
-      "description": "Distinguishes CURRENT Prometheus state, SELECTED RUN persisted HTTP evidence, and TIME RANGE history. Pipeline and Run Type affect current and historical evidence; Run ID never filters Prometheus. UNKNOWN means missing or stale evidence, never healthy. To inspect a selected run, set a concrete run_id (not -) after choosing pipeline/run_type. Default run_id=- keeps fleet/current status only — exact identity/processed-record panels stay empty until a run is selected.",
+      "description": "Distinguishes CURRENT Prometheus state, SELECTED RUN persisted HTTP evidence, and TIME RANGE history. Pipeline and Run Type affect current and historical evidence; Run ID never filters Prometheus. UNKNOWN means missing or stale evidence, never healthy. To inspect a selected run, set a concrete run_id (not -) after choosing pipeline/run_type. Default run_id=- keeps fleet/current status only \u2014 exact identity/processed-record panels stay empty until a run is selected.",
       "title": "Inspect Scope & Evidence",
       "type": "text"
     },
@@ -701,7 +701,7 @@
           }
         }
       ],
-      "description": "Open Action on the top row first — routes are ranked by urgency (RUNTIME > CP > GOLD > DQ > PROV > WF > MON). MON/NR means keep watching when Fleet Health is OK.  Scope: current fleet/status verdict for selected pipeline, workflow, and time range; not a per-run_id metric. NO_ROUTE/no_route appears only when the selected scope has no route series (absent(route)*no_route); it is not a healthy empty and does not mean the dashboard selector widget is blank.",
+      "description": "Open Action on the top row first \u2014 routes are ranked by urgency (RUNTIME > CP > GOLD > DQ > PROV > WF > MON). MON/NR means keep watching when Fleet Health is OK.  Scope: current fleet/status verdict for selected pipeline, workflow, and time range; not a per-run_id metric. NO_ROUTE/no_route appears only when the selected scope has no route series (absent(route)*no_route); it is not a healthy empty and does not mean the dashboard selector widget is blank.",
       "links": [
         {
           "title": "Open Runtime",
@@ -814,7 +814,7 @@
             ]
           },
           "unit": "none",
-          "noValue": "UNKNOWN — no domain status for this scope"
+          "noValue": "UNKNOWN \u2014 no domain status for this scope"
         },
         "overrides": [
           {
@@ -1057,7 +1057,7 @@
                   "options": {
                     "match": "null+nan",
                     "result": {
-                      "text": "—",
+                      "text": "\u2014",
                       "color": "transparent",
                       "index": 0
                     }
@@ -1308,7 +1308,7 @@
                 ]
               },
               "unit": "none",
-              "noValue": "UNKNOWN — no domain status for this scope"
+              "noValue": "UNKNOWN \u2014 no domain status for this scope"
             },
             "overrides": [
               {
@@ -3227,7 +3227,7 @@
             "y": 45
           },
           "options": {
-            "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:16px;white-space:normal\"><strong>Next dashboard:</strong> Trust for evidence confidence · Pipeline Diagnostics for runtime blockers · Data Quality for DQ reasons · Provider Health for provider causes. Scope and time range are preserved.</div>",
+            "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:16px;white-space:normal\"><strong>Next dashboard:</strong> Trust for evidence confidence \u00b7 Pipeline Diagnostics for runtime blockers \u00b7 Data Quality for DQ reasons \u00b7 Provider Health for provider causes. Scope and time range are preserved.</div>",
             "mode": "html"
           },
           "links": [],
@@ -3269,7 +3269,7 @@
                 "inspect": true
               },
               "unit": "none",
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity.",
+              "noValue": "SELECT RUN \u2014 no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity.",
               "links": [
                 {
                   "title": "Copy/Open full value (plain text)",
@@ -3426,7 +3426,7 @@
               },
               "decimals": 0,
               "unit": "none",
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run in Inspect Recent Runs. UNKNOWN/QUERY ERROR if a selected run has no accounting.",
+              "noValue": "SELECT RUN \u2014 no exact Run ID selected. Choose a run in Inspect Recent Runs. UNKNOWN/QUERY ERROR if a selected run has no accounting.",
               "links": [
                 {
                   "title": "Check BioETL Ops HTTP health",

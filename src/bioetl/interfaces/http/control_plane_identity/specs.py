@@ -14,6 +14,7 @@ from bioetl.interfaces.http.control_plane_identity.spec_constants import (
 )
 from bioetl.interfaces.http.control_plane_identity.types import AnchorSpec
 
+
 def _anchor_specs_by_unique_name(
     specs: tuple[AnchorSpec, ...],
 ) -> dict[str, AnchorSpec]:

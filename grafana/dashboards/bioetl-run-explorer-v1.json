@@ -91,7 +91,7 @@
           "tags": []
         }
       ],
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light."
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0\u20134: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5\u20136: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light."
     },
     {
       "id": 1,
@@ -105,7 +105,7 @@
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which exact run should be inspected?</div><div><b>Scope:</b> <b>BROWSE</b> = recent runs · <b>SELECTED RUN</b> = identity/accounting · <b>FULL PATHS</b> = report artifacts, not triage bodies</div><div><b>Fail-closed:</b> <code style=\"font-size:16px\">pipeline=unknown</code> and <code style=\"font-size:16px\">run_id=-</code> show no runs — not a missing store and not a healthy run.</div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which exact run should be inspected?</div><div><b>Scope:</b> <b>BROWSE</b> = recent runs \u00b7 <b>SELECTED RUN</b> = identity/accounting \u00b7 <b>FULL PATHS</b> = report artifacts, not triage bodies</div><div><b>Fail-closed:</b> <code style=\"font-size:16px\">pipeline=unknown</code> and <code style=\"font-size:16px\">run_id=-</code> show no runs \u2014 not a missing store and not a healthy run.</div></div></div>"
       },
       "description": "Run Explorer has two modes. Browse mode lists recent run-report artifacts for the selected pipeline. Selected-run mode uses BioETL Ops HTTP to show identity, accounting, reasons, reconciliation, and artifacts for one exact run. Fail-closed empty state: default pipeline=unknown and run_id=- intentionally show no runs (not a missing data store and not a healthy run). Select a real pipeline from the dropdown (e.g. chembl_assay, chembl_activity), keep run_type compatible (often backfill), then pick a concrete run_id (not -). Expand Selected Run Details for the last-20 browser and full identity/accounting. Run ID is never a Prometheus label. Full filesystem paths belong to report-artifact Open/Copy actions, not scan-oriented cells."
     },
@@ -113,7 +113,7 @@
       "id": 3010,
       "type": "table",
       "title": "Inspect Recent Runs (last 4)",
-      "description": "Browse mode: latest four pipeline-run reports found on disk for the selected pipeline. $pipeline is a pipeline name (chembl_assay, chembl_target, chembl_publication), not a workflow (chembl_baseline). Workflow artifacts live under reports/run-reports/workflow/<name>/ and GET /ops/observability/workflow-run-reports. Choose a row to set the run ID and open exact-run evidence. An empty table is valid when no matching reports exist for this pipeline (index_state=valid_empty). A TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is bind or origin failure, not a selector problem — run python scripts/ops/runtime/docker/verify_report_bind.py from the checkout you are viewing. If reports are expected and the table is empty without that row, treat backend unavailable as a distinct failure and verify BioETL Ops HTTP at /health/live. Has reports: chembl_assay, chembl_target, chembl_publication. chembl_activity may appear in run_id (control-plane) but has no report artifacts yet. First screen is bounded to the last 4 artifacts (limit=4). The complete last-20 browser is in Selected Run Details. Older runs are omitted by design; they are not a missing backend.",
+      "description": "Browse mode: latest four pipeline-run reports found on disk for the selected pipeline. $pipeline is a pipeline name (chembl_assay, chembl_target, chembl_publication), not a workflow (chembl_baseline). Workflow artifacts live under reports/run-reports/workflow/<name>/ and GET /ops/observability/workflow-run-reports. Choose a row to set the run ID and open exact-run evidence. An empty table is valid when no matching reports exist for this pipeline (index_state=valid_empty). A TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is bind or origin failure, not a selector problem \u2014 run python scripts/ops/runtime/docker/verify_report_bind.py from the checkout you are viewing. If reports are expected and the table is empty without that row, treat backend unavailable as a distinct failure and verify BioETL Ops HTTP at /health/live. Has reports: chembl_assay, chembl_target, chembl_publication. chembl_activity may appear in run_id (control-plane) but has no report artifacts yet. First screen is bounded to the last 4 artifacts (limit=4). The complete last-20 browser is in Selected Run Details. Older runs are omitted by design; they are not a missing backend.",
       "gridPos": {
         "h": 5,
         "w": 24,
@@ -127,7 +127,7 @@
             "align": "left",
             "inspect": true
           },
-          "noValue": "VALID EMPTY — no pipeline-run-report artifacts for the selected pipeline under reports/run-reports/pipeline/<name>/ (first screen is last 4)."
+          "noValue": "VALID EMPTY \u2014 no pipeline-run-report artifacts for the selected pipeline under reports/run-reports/pipeline/<name>/ (first screen is last 4)."
         },
         "overrides": [
           {
@@ -319,7 +319,7 @@
             "inspect": true
           },
           "unit": "none",
-          "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity.",
+          "noValue": "SELECT RUN \u2014 no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity.",
           "links": [
             {
               "title": "Copy/Open full value (plain text)",
@@ -500,7 +500,7 @@
           },
           "decimals": 0,
           "unit": "none",
-          "noValue": "VALID EMPTY — selected run has no accounting rows. Select a Run ID first; backend failure renders as QUERY ERROR.",
+          "noValue": "VALID EMPTY \u2014 selected run has no accounting rows. Select a Run ID first; backend failure renders as QUERY ERROR.",
           "links": [
             {
               "title": "Check BioETL Ops HTTP health",
@@ -868,7 +868,7 @@
                 "align": "left",
                 "inspect": true
               },
-              "noValue": "VALID EMPTY — no pipeline-run-report artifacts for the selected pipeline under reports/run-reports/pipeline/<name>/ (index is last 20)."
+              "noValue": "VALID EMPTY \u2014 no pipeline-run-report artifacts for the selected pipeline under reports/run-reports/pipeline/<name>/ (index is last 20)."
             },
             "overrides": [
               {
@@ -959,7 +959,7 @@
                 "align": "left",
                 "inspect": true
               },
-              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity."
+              "noValue": "SELECT RUN \u2014 no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity."
             }
           },
           "options": {
@@ -1004,7 +1004,7 @@
                 "align": "left",
                 "inspect": true
               },
-              "noValue": "VALID EMPTY — selected run has no accounting rows. Select a Run ID first; backend failure renders as QUERY ERROR."
+              "noValue": "VALID EMPTY \u2014 selected run has no accounting rows. Select a Run ID first; backend failure renders as QUERY ERROR."
             }
           },
           "options": {
@@ -1049,7 +1049,7 @@
                 "align": "left",
                 "inspect": false
               },
-              "noValue": "VALID EMPTY — selected run report has no stage funnel rows. Backend failure renders as QUERY ERROR."
+              "noValue": "VALID EMPTY \u2014 selected run report has no stage funnel rows. Backend failure renders as QUERY ERROR."
             },
             "overrides": [
               {
@@ -1108,7 +1108,7 @@
                 "align": "left",
                 "inspect": false
               },
-              "noValue": "VALID EMPTY — selected run report has no reason rows. Backend failure renders as QUERY ERROR."
+              "noValue": "VALID EMPTY \u2014 selected run report has no reason rows. Backend failure renders as QUERY ERROR."
             },
             "overrides": [
               {
@@ -1167,7 +1167,7 @@
                 "align": "left",
                 "inspect": false
               },
-              "noValue": "VALID EMPTY — selected run report has no reconciliation rows. Backend failure renders as QUERY ERROR."
+              "noValue": "VALID EMPTY \u2014 selected run report has no reconciliation rows. Backend failure renders as QUERY ERROR."
             },
             "overrides": [
               {
@@ -1302,7 +1302,7 @@
                 "align": "left",
                 "inspect": false
               },
-              "noValue": "VALID EMPTY — selected run report has no artifact rows. Backend failure renders as QUERY ERROR."
+              "noValue": "VALID EMPTY \u2014 selected run report has no artifact rows. Backend failure renders as QUERY ERROR."
             },
             "overrides": [
               {
@@ -1369,7 +1369,7 @@
           "id": 3014,
           "type": "text",
           "title": "Inspect Timings & Failure",
-          "description": "Selected run: Optional stage-timing and failure evidence recorded for the selected run. Empty means the report did not record these optional blocks—not zero duration and not proof of success. Selection required when no run ID is set. Open the JSON or Markdown report for exact details.",
+          "description": "Selected run: Optional stage-timing and failure evidence recorded for the selected run. Empty means the report did not record these optional blocks\u2014not zero duration and not proof of success. Selection required when no run ID is set. Open the JSON or Markdown report for exact details.",
           "gridPos": {
             "h": 4,
             "w": 24,
@@ -1378,7 +1378,7 @@
           },
           "options": {
             "mode": "html",
-            "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:16px;white-space:normal\"><strong>Timings &amp; failure:</strong> optional blocks on <code style=\"font-size:16px\">pipeline_run_report_v1</code>. Empty means not recorded — not zero duration and not proof of success. Open the JSON or Markdown report for exact details.</div>"
+            "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:16px;white-space:normal\"><strong>Timings &amp; failure:</strong> optional blocks on <code style=\"font-size:16px\">pipeline_run_report_v1</code>. Empty means not recorded \u2014 not zero duration and not proof of success. Open the JSON or Markdown report for exact details.</div>"
           }
         },
         {
@@ -1393,7 +1393,7 @@
           },
           "options": {
             "mode": "html",
-            "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:16px;overflow:hidden\"><strong>Continue Run Investigation</strong> — 1) Pick a recent run · 2) Verify Run Identity and Processed Records · 3) Expand Selected Run Details · 4) Open Trust for recovery/replay safety. Run Explorer is evidence-only.</div>"
+            "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:16px;overflow:hidden\"><strong>Continue Run Investigation</strong> \u2014 1) Pick a recent run \u00b7 2) Verify Run Identity and Processed Records \u00b7 3) Expand Selected Run Details \u00b7 4) Open Trust for recovery/replay safety. Run Explorer is evidence-only.</div>"
           },
           "links": [],
           "description": "Choose a recent run in Browse mode, verify Run Identity and Processed Records in Selected run mode, expand the stage/reason/reconciliation/artifact details, then open Trust to review recovery or replay safety. Run Explorer is evidence-only and does not execute resume or replay actions."
@@ -1417,7 +1417,7 @@
           "id": 3020,
           "type": "table",
           "title": "Inspect Recent Workflow Runs (last 20)",
-          "description": "Browse mode for workflow-run reports. $workflow is a workflow name (e.g. chembl_baseline), not a pipeline. This panel calls GET /ops/observability/workflow-run-reports?workflow=${workflow}&limit=20. Panel 3010 remains pipeline-only. An empty table is valid when no matching workflow reports exist (index_state=valid_empty). A TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is bind or origin failure, not a selector problem — run python scripts/ops/runtime/docker/verify_report_bind.py from the checkout you are viewing. Backend unavailable is a distinct failure — verify BioETL Ops HTTP at /health/live.",
+          "description": "Browse mode for workflow-run reports. $workflow is a workflow name (e.g. chembl_baseline), not a pipeline. This panel calls GET /ops/observability/workflow-run-reports?workflow=${workflow}&limit=20. Panel 3010 remains pipeline-only. An empty table is valid when no matching workflow reports exist (index_state=valid_empty). A TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is bind or origin failure, not a selector problem \u2014 run python scripts/ops/runtime/docker/verify_report_bind.py from the checkout you are viewing. Backend unavailable is a distinct failure \u2014 verify BioETL Ops HTTP at /health/live.",
           "gridPos": {
             "h": 5,
             "w": 24,
@@ -1431,7 +1431,7 @@
                 "align": "left",
                 "inspect": true
               },
-              "noValue": "VALID EMPTY — no workflow-run-report artifacts for the selected workflow under reports/run-reports/workflow/<name>/ (index is last 20)."
+              "noValue": "VALID EMPTY \u2014 no workflow-run-report artifacts for the selected workflow under reports/run-reports/workflow/<name>/ (index is last 20)."
             },
             "overrides": [
               {
