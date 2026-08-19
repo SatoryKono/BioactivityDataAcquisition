@@ -114,13 +114,21 @@ async function main() {
       "reports/observability/grafana/visual-baseline-20260811/trust-closeups-by-state",
     ),
   );
-  const states = arg(
-    "--states",
-    "populated,valid_empty_or_unknown,backend_error,service_unavailable,empty_rows",
+  const fixtureCase = arg("--fixture-case", "").trim();
+  const states = (fixtureCase
+    ? fixtureCase
+    : arg(
+        "--states",
+        "populated,valid_empty_or_unknown,backend_error,service_unavailable,empty_rows",
+      )
   )
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
+  if (fixtureCase && states.length !== 1) {
+    console.error("--fixture-case must select exactly one case_id");
+    process.exit(2);
+  }
 
   const localNm = path.join(
     process.env.LOCALAPPDATA || "",

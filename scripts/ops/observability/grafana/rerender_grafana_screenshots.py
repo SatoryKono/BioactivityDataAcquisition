@@ -87,6 +87,7 @@ class RenderConfig:
     navigation_only: bool = False
     fixture_manifest: Path | None = None
     fixture_state: dict[str, object] | None = None
+    fixture_case: str = ""
 
 
 @dataclass(frozen=True)
@@ -542,6 +543,16 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
             "evidence provenance without changing the default live render path."
         ),
     )
+    parser.add_argument(
+        "--fixture-case",
+        default="",
+        help=(
+            "Select one dashboard_state_fixture_v2 case_id. Requires "
+            "--fixture-manifest pointing at a v2 INDEX.json. Binds the case "
+            "response digest into evidence and fail-closes on digest mismatch. "
+            "Does not change the default live render path when omitted."
+        ),
+    )
     parser.add_argument("--width", type=int, default=DEFAULT_WIDTH)
     parser.add_argument("--height", type=int, default=DEFAULT_HEIGHT)
     parser.add_argument(
@@ -637,12 +648,24 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
     fixture_manifest = (
         args.fixture_manifest.resolve() if args.fixture_manifest is not None else None
     )
+    fixture_case = str(getattr(args, "fixture_case", "") or "").strip()
     try:
-        fixture_state = (
-            _fixture_state_evidence_from_path(fixture_manifest)
-            if fixture_manifest is not None
-            else None
-        )
+        if fixture_case:
+            if fixture_manifest is None:
+                parser.error("--fixture-case requires --fixture-manifest")
+            from scripts.ops.observability.grafana.dashboard_state_fixture_v2 import (
+                fixture_case_evidence,
+                load_v2_case,
+            )
+            fixture_state = fixture_case_evidence(
+                load_v2_case(fixture_manifest, fixture_case)
+            )
+        else:
+            fixture_state = (
+                _fixture_state_evidence_from_path(fixture_manifest)
+                if fixture_manifest is not None
+                else None
+            )
     except ValueError as exc:
         parser.error(str(exc))
     return RenderConfig(
@@ -671,6 +694,7 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
         navigation_only=bool(args.navigation_only),
         fixture_manifest=fixture_manifest,
         fixture_state=fixture_state,
+        fixture_case=fixture_case,
     )
 
 
