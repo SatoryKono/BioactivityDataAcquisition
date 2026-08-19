@@ -111,4 +111,9 @@ def resolve_protected_refs_for_manifest(
     artifact_id = getattr(provenance, "effective_config_artifact_id", None)
     if isinstance(artifact_id, str) and artifact_id.strip():
         refs.effective_config_artifact_ids.add(artifact_id.strip())
+    for source in getattr(manifest, "source_refs", ()) or ():
+        for snapshot in getattr(source, "input_snapshots", ()) or ():
+            snapshot_id = getattr(snapshot, "snapshot_id", None)
+            if isinstance(snapshot_id, str) and snapshot_id.strip():
+                refs.input_snapshot_ids.add(snapshot_id.strip())
     return refs.freeze()

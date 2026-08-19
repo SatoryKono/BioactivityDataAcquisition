@@ -3,6 +3,7 @@
 Used by the optional Grafana renderer --fixture-case path (#8984).
 Does not change the default live render path.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -64,7 +65,9 @@ def _read_case_file(index_path: Path, rel: str) -> str:
     raise ValueError(f"fixture case file missing: {rel}")
 
 
-def validate_v2_case(payload: Mapping[str, Any], *, expected_case_id: str) -> dict[str, Any]:
+def validate_v2_case(
+    payload: Mapping[str, Any], *, expected_case_id: str
+) -> dict[str, Any]:
     if payload.get("contract") != CONTRACT:
         raise ValueError(f"case must use {CONTRACT}")
     case_id = str(payload.get("case_id") or "").strip()
@@ -77,7 +80,9 @@ def validate_v2_case(payload: Mapping[str, Any], *, expected_case_id: str) -> di
     if not isinstance(expected_panels, list) or not expected_panels:
         raise ValueError("expected_panels must be a non-empty list")
     tokens = payload.get("expected_copy_tokens")
-    if not isinstance(tokens, list) or not all(isinstance(item, str) for item in tokens):
+    if not isinstance(tokens, list) or not all(
+        isinstance(item, str) for item in tokens
+    ):
         raise ValueError("expected_copy_tokens must be a list of strings")
     scope = str(payload.get("scope") or "").strip()
     if not scope:
@@ -141,7 +146,9 @@ class _StubHandler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
 
-def start_stub_server(case: Mapping[str, Any], *, host: str = "127.0.0.1", port: int = 0) -> ThreadingHTTPServer:
+def start_stub_server(
+    case: Mapping[str, Any], *, host: str = "127.0.0.1", port: int = 0
+) -> ThreadingHTTPServer:
     _StubHandler.response_payload = dict(case["datasource_response"])
     _StubHandler.status_code = int(case["http_status"])
     server = ThreadingHTTPServer((host, port), _StubHandler)

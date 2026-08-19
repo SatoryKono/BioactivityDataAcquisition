@@ -248,7 +248,9 @@ def grafana_can_query(config: FillConfig) -> str | None:
         },
     )
     try:
-        with urlopen(request, timeout=min(config.request_timeout_seconds, 3.0)) as response:
+        with urlopen(
+            request, timeout=min(config.request_timeout_seconds, 3.0)
+        ) as response:
             if int(response.status) == 200:
                 return None
             return f"Grafana /api/org returned HTTP {response.status}"
@@ -469,7 +471,9 @@ def _parse_args(argv: list[str] | None) -> FillConfig:
     parser.add_argument("--pipeline", default=live_audit.DEFAULT_PIPELINE)
     parser.add_argument("--run-type", default=live_audit.DEFAULT_RUN_TYPE)
     parser.add_argument("--run-id", default=live_audit.DEFAULT_RUN_ID)
-    parser.add_argument("--range-hours", type=int, default=live_audit.DEFAULT_RANGE_HOURS)
+    parser.add_argument(
+        "--range-hours", type=int, default=live_audit.DEFAULT_RANGE_HOURS
+    )
     parser.add_argument(
         "--request-timeout-seconds",
         type=float,

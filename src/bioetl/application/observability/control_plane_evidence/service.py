@@ -29,6 +29,7 @@ from bioetl.application.observability.control_plane_evidence.models import (
 from bioetl.application.observability.control_plane_evidence.retention import (
     ControlPlaneLifecyclePlanner,
     build_retention_checks,
+    serialize_resolution_issues,
     summarize_retention_artifacts,
 )
 from bioetl.application.observability.control_plane_evidence.service_support import (
@@ -198,6 +199,7 @@ class ControlPlaneEvidenceService:
                 "cutoff": plan.cutoff.isoformat(),
                 "artifacts": summarize_retention_artifacts(relevant_artifacts),
                 "retention_plan_scope": "manifest",
+                "resolution_issues": serialize_resolution_issues(plan),
             },
             ledger_entries=ledger_entries(self.ledger_port, scope.manifest),
         )

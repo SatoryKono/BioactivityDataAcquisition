@@ -330,9 +330,7 @@ def run_leaf(leaf: dict[str, Any], base_sha: str) -> dict[str, Any]:
                 "elapsed_s": round(time.monotonic() - started, 1),
             }
 
-        command = build_review_command(
-            CODERABBIT, PROMPT_PATH, file_count=len(paths)
-        )
+        command = build_review_command(CODERABBIT, PROMPT_PATH, file_count=len(paths))
         try:
             process = subprocess.run(
                 command,

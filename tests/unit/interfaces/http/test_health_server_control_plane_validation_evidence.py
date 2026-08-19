@@ -271,7 +271,9 @@ async def test_missing_evidence_service_returns_unknown_table_contract() -> None
 async def test_retention_deadline_returns_table_row_and_keeps_504(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from bioetl.interfaces.http import _health_server_control_plane_evidence_routing as routing
+    from bioetl.interfaces.http import (
+        _health_server_control_plane_evidence_routing as routing,
+    )
     from bioetl.interfaces.http._forensic_request_budget import (
         ForensicEndpointUnavailable,
     )
@@ -313,4 +315,3 @@ async def test_retention_deadline_returns_table_row_and_keeps_504(
         assert payload_ok["rows"][0]["check"] == "endpoint_availability"
     finally:
         await server.stop()
-
