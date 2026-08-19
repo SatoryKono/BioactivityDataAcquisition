@@ -16,6 +16,7 @@ from bioetl.interfaces.http._forensic_request_budget import (
 from bioetl.interfaces.http._pipeline_run_report_table import (
     _is_unresolved_run_scope,
     _not_found_pipeline_run_report_shell,
+    _summary_rows_pipeline_run_report,
     _table_shape_pipeline_run_report,
     _unresolved_pipeline_run_report_shell,
 )
@@ -35,6 +36,7 @@ from bioetl.interfaces.http.run_report_ops import (
 __all__ = (
     "_is_unresolved_run_scope",
     "_not_found_pipeline_run_report_shell",
+    "_summary_rows_pipeline_run_report",
     "_table_shape_pipeline_run_report",
     "_unresolved_pipeline_run_report_shell",
 )
@@ -117,13 +119,26 @@ async def handle_pipeline_run_report(
     """Serve stored pipeline_run_report_v1 JSON for a completed run."""
     run_id = host._read_required_param(query, "run_id")
     pipeline = host._read_required_param(query, "pipeline")
+    view_summary = str(query.get("view") or "").strip().lower() == "summary"
+
+    def _present(payload: dict[str, object]) -> dict[str, object]:
+        if view_summary:
+            return _summary_rows_pipeline_run_report(
+                payload,
+                grafana_from=query.get("from"),
+                grafana_to=query.get("to"),
+            )
+        return _table_shape_pipeline_run_report(payload)
+
     if _is_unresolved_run_scope(run_id):
         # Default Grafana run_id is "-" — return empty shell (HTTP 200) so
         # Run Explorer detail tables show No data, not QUERY_ERROR/404.
         await host._send_payload_response(
             writer,
             200,
-            _unresolved_pipeline_run_report_shell(run_id=run_id, pipeline=pipeline),
+            _present(
+                _unresolved_pipeline_run_report_shell(run_id=run_id, pipeline=pipeline)
+            ),
         )
         return
     try:
@@ -151,14 +166,12 @@ async def handle_pipeline_run_report(
         await host._send_payload_response(
             writer,
             200,
-            _not_found_pipeline_run_report_shell(run_id=run_id, pipeline=pipeline),
+            _present(
+                _not_found_pipeline_run_report_shell(run_id=run_id, pipeline=pipeline)
+            ),
         )
         return
-    await host._send_payload_response(
-        writer,
-        200,
-        _table_shape_pipeline_run_report(payload),
-    )
+    await host._send_payload_response(writer, 200, _present(payload))
 
 
 async def handle_workflow_run_report(
