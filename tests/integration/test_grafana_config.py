@@ -70,7 +70,13 @@ NAVIGATION_CONTRACT_PATH = Path(
 EXPECTED_VARS_BY_DASHBOARD = {
     "bioetl-alerts-slo.json": {"workflow", "pipeline", "run_type"},
     "bioetl-overview-v2.json": {"workflow", "pipeline", "run_type", "run_id"},
-    "bioetl-dq-v2.json": {"workflow", "pipeline", "run_type", "run_id", "stage"},
+    "bioetl-dq-v2.json": {
+        "workflow",
+        "pipeline",
+        "run_type",
+        "run_id",
+        "stage",
+    },
     "bioetl-runtime.json": {
         "workflow",
         "pipeline",

@@ -19,6 +19,7 @@ from bioetl.application.services.workflow.workflow_runner_service import (
 
 _UNSET_CURSOR = object()
 
+
 def _record_workflow_success(
     context: WorkflowExecutionRecorder,
     *,

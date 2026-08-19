@@ -31,11 +31,16 @@ def test_file_recorder_writes_sidecar(tmp_path: Path) -> None:
 
 def test_file_recorder_identical_retry_is_noop(tmp_path: Path) -> None:
     recorder = FileContractEvidenceRecorder(base_path=tmp_path)
-    evidence = {"contract_comparison_status": "compatible", "resume_contract": "resume_not_requested"}
+    evidence = {
+        "contract_comparison_status": "compatible",
+        "resume_contract": "resume_not_requested",
+    }
     recorder.record("manifest-1", evidence)
     first = (tmp_path / "manifest-1.contract-evidence.json").read_text(encoding="utf-8")
     recorder.record("manifest-1", evidence)
-    second = (tmp_path / "manifest-1.contract-evidence.json").read_text(encoding="utf-8")
+    second = (tmp_path / "manifest-1.contract-evidence.json").read_text(
+        encoding="utf-8"
+    )
     assert first == second
 
 
@@ -46,8 +51,11 @@ def test_file_recorder_conflict_preserves_original(tmp_path: Path) -> None:
 
     recorder = FileContractEvidenceRecorder(base_path=tmp_path)
     recorder.record("manifest-1", {"contract_comparison_status": "compatible"})
-    original = (tmp_path / "manifest-1.contract-evidence.json").read_text(encoding="utf-8")
+    original = (tmp_path / "manifest-1.contract-evidence.json").read_text(
+        encoding="utf-8"
+    )
     with pytest.raises(ContractEvidenceConflictError):
         recorder.record("manifest-1", {"contract_comparison_status": "UNKNOWN"})
-    assert (tmp_path / "manifest-1.contract-evidence.json").read_text(encoding="utf-8") == original
-
+    assert (tmp_path / "manifest-1.contract-evidence.json").read_text(
+        encoding="utf-8"
+    ) == original

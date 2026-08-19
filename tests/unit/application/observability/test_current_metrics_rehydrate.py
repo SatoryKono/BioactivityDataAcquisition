@@ -92,9 +92,7 @@ def test_rehydrate_increments_pipeline_runs_total_once(tmp_path: Path) -> None:
         {"pipeline": "chembl_assay", "run_type": "backfill"},
     )
     counter_names = [
-        call.args[0]
-        for call in metrics.increment_counter.call_args_list
-        if call.args
+        call.args[0] for call in metrics.increment_counter.call_args_list if call.args
     ]
     assert "bioetl_pipeline_runs_total" not in counter_names
     assert "bioetl_health_check_success_total" not in counter_names
@@ -120,9 +118,7 @@ def test_rehydrate_seeds_provider_universe_and_stage_series(tmp_path: Path) -> N
         {"provider": "chembl"},
     )
     counter_names = [
-        call.args[0]
-        for call in metrics.increment_counter.call_args_list
-        if call.args
+        call.args[0] for call in metrics.increment_counter.call_args_list if call.args
     ]
     assert counter_names == []
 
