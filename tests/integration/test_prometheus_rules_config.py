@@ -1178,9 +1178,19 @@ def test_provider_current_status_preserves_provider_health_status_mapping() -> N
     assert "bioetl_provider_health_status == bool 2" in expr
     assert "* 0" in expr
     assert "max by (provider)" in expr
-    assert "bioetl_provider_health_check_provider_universe_15m * 0" in expr
-    assert "/" in expr
+    assert "bioetl_provider_health_check_provider_universe_15m * 0 + 3" in expr
+    assert "/" not in expr
     assert " or " in expr
+    info_rules = [
+        rule
+        for group in payload.get("groups", [])
+        for rule in group.get("rules", [])
+        if rule.get("record") == "bioetl_provider_current_status_info"
+    ]
+    assert info_rules
+    reasons = {rule.get("labels", {}).get("reason") for rule in info_rules}
+    assert "missing_health_status" in reasons
+    assert "observed_health_status" in reasons
 
 
 def test_provider_current_status_fails_closed_on_missing_raw_status_series() -> None:
@@ -1189,8 +1199,9 @@ def test_provider_current_status_fails_closed_on_missing_raw_status_series() -> 
     expr = record_map["bioetl_provider_current_status"].get("expr", "")
 
     assert "bioetl_provider_health_check_provider_universe_15m" in expr
-    assert "(bioetl_provider_health_check_provider_universe_15m * 0)" in expr
+    assert "bioetl_provider_health_check_provider_universe_15m * 0 + 3" in expr
     assert "bioetl_provider_health_status" in expr
+    assert "/" not in expr
 
 
 def test_overview_l0_status_aggregates_selected_scope_rows() -> None:

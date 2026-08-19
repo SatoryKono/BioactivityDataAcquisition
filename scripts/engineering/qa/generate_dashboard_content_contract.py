@@ -211,11 +211,13 @@ def _record(panel: dict[str, object]) -> dict[str, object]:
     if not isinstance(panel_id, int) or not isinstance(title, str):
         raise ValueError("contractable panel requires integer id and string title")
     role = _role(title, panel)
+    scope = _scope(title, panel)
     return {
         "title": title,
         "role": role,
         "tier": 4 if role in {"row_group", "guidance"} else 3,
-        "scope": _scope(title, panel),
+        "scope": scope,
+        "scope_class": scope,
         "evidence_source": _evidence_source(panel),
         "state_model": _state_model(role),
         "required_copy": _required_copy(role),
@@ -264,6 +266,7 @@ def _full_contract(existing: dict[str, object]) -> dict[str, object]:
                 merged = {**generated, **previous}
                 merged["title"] = generated["title"]
                 merged["evidence_source"] = generated["evidence_source"]
+                merged["scope_class"] = merged.get("scope", generated["scope"])
                 panels[str(panel_id)] = merged
             else:
                 panels[str(panel_id)] = generated

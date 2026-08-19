@@ -1246,6 +1246,7 @@ def test_provider_severity_matrix_preserves_unknown_and_critical_mapping() -> No
         {"color": "green", "value": 0},
         {"color": "orange", "value": 1},
         {"color": "red", "value": 2},
+        {"color": "gray", "value": 3},
     ]
     special_mappings = [
         mapping.get("options", {})
@@ -1336,6 +1337,7 @@ def test_provider_critical_table_keeps_severity_only_scope() -> None:
         {"color": "green", "value": 0},
         {"color": "orange", "value": 1},
         {"color": "red", "value": 2},
+        {"color": "gray", "value": 3},
     ]
 
     description = str(panel.get("description", ""))

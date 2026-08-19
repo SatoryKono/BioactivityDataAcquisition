@@ -116,8 +116,15 @@
       "description": "Distinguishes CURRENT Prometheus state, SELECTED RUN HTTP evidence, and selected-range history for Pipeline and Run Type. Run ID never filters Prometheus; Stage and collection states are context, not delivery proof. UNKNOWN means evidence is incomplete",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Is the pipeline progressing, and what is blocking delivery?</div><div><b>Scope:</b> <b>CURRENT</b> = health/phase/blockers · <b>SELECTED RUN</b> = ID/accounting</div><div><b>STAGE</b> = diagnostic context · <b>SCRAPING</b> does not mean delivery OK</div></div></div>"
-      }
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Is the pipeline progressing, and what is blocking delivery?</div><div><b>Scope:</b> <b>CURRENT</b> = health/phase/blockers · <b>SELECTED RUN</b> = ID/accounting</div><div><b>STAGE</b> = diagnostic context · <b>SCRAPING</b> does not mean delivery OK<div><span>Run coverage:</span> SELECTED RUN <code>${run_id}</code> may sit outside TIME RANGE. Set range to run: open <b>6. Run Explorer</b>, then set From/To to started_at-5m .. <code style='font-size:16px'>completed_at</code>+5m. Do not treat CURRENT Prometheus as that UUID.</div><div><span>Effective refresh:</span> 60s · timezone: browser</div><div><span>Effective filters:</span> stage=<code>${stage}</code> · provider_hint=<code>${provider_hint}</code></div></div></div></div>"
+      },
+      "links": [
+        {
+          "title": "Set range to run — open 6. Run Explorer",
+          "url": "/d/bioetl-run-explorer-v1?var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}",
+          "targetBlank": false
+        }
+      ]
     },
     {
       "id": 9401,
@@ -133,7 +140,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Shows the sole current Pipeline Health verdict. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. A telemetry gap makes the verdict incomplete; use First Action and Runtime Blockers to continue",
+      "description": "CURRENT · Shows the sole current Pipeline Health verdict. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. A telemetry gap makes the verdict incomplete; use First Action and Runtime Blockers to continue",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -286,7 +293,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Lists current runtime blockers for Pipeline and Run Type. An empty list is healthy only when Pipeline Health is OK and Metrics Coverage is complete; otherwise it is inconclusive. Open the matching detection or localization panel",
+      "description": "SELECTED RUN · Lists current runtime blockers for Pipeline and Run Type. An empty list is healthy only when Pipeline Health is OK and Metrics Coverage is complete; otherwise it is inconclusive. Open the matching detection or localization panel",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -460,7 +467,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Shows Prometheus scrape vs recording-rule/series coverage. Mapping: 0=SCRAPING (metrics present), 1=RULE/SERIES GAP (pipeline_runs_total absent or BioETL rule-group stale/failing), 2=RULE+SERIES GAP (both), null=UNKNOWN. Value 1 is inconclusive about scrape-target health: the job can be up while rules/series are missing. This is evidence confidence, not Pipeline Health.",
+      "description": "CURRENT · Shows Prometheus scrape vs recording-rule/series coverage. Mapping: 0=SCRAPING (metrics present), 1=RULE/SERIES GAP (pipeline_runs_total absent or BioETL rule-group stale/failing), 2=RULE+SERIES GAP (both), null=UNKNOWN. Value 1 is inconclusive about scrape-target health: the job can be up while rules/series are missing. This is evidence confidence, not Pipeline Health.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -572,7 +579,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows selected-range stage backlog by Stage for Pipeline and Run Type. An empty chart can mean no backlog samples or missing telemetry, not a healthy zero. Use current blocker and coverage panels to decide which case applies",
+          "description": "TIME RANGE · Shows selected-range stage backlog by Stage for Pipeline and Run Type. An empty chart can mean no backlog samples or missing telemetry, not a healthy zero. Use current blocker and coverage panels to decide which case applies",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -646,7 +653,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows selected-range processed records by Stage for Pipeline and Run Type. An empty chart means no matching samples or unavailable telemetry; it does not prove successful delivery. Run ID never filters Prometheus",
+          "description": "TIME RANGE · Shows selected-range processed records by Stage for Pipeline and Run Type. An empty chart means no matching samples or unavailable telemetry; it does not prove successful delivery. Run ID never filters Prometheus",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -720,7 +727,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Lists current runtime blocker rules for Pipeline and applicable Run Type labels. An empty table is valid only when Pipeline Health is OK and Metrics Coverage is complete; otherwise inspect telemetry or selector scope",
+          "description": "SELECTED RUN · Lists current runtime blocker rules for Pipeline and applicable Run Type labels. An empty table is valid only when Pipeline Health is OK and Metrics Coverage is complete; otherwise inspect telemetry or selector scope",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -926,7 +933,7 @@
           "id": 9105,
           "type": "timeseries",
           "title": "Track Stage Lag",
-          "description": "Shows selected-range stage lag in seconds for Pipeline, Run Type, and Stage. No data means no emitted lag samples or unavailable telemetry, never zero lag. Use Worst Stage Lag and current blockers for severity",
+          "description": "TIME RANGE · Shows selected-range stage lag in seconds for Pipeline, Run Type, and Stage. No data means no emitted lag samples or unavailable telemetry, never zero lag. Use Worst Stage Lag and current blockers for severity",
           "gridPos": {
             "x": 0,
             "y": 33,
@@ -1014,7 +1021,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Compares expected and observed stages for the selected Pipeline. Gold can be expected, disabled, pending while a run is active, or missing after completion; these are context states, not delivery proof. Use Run Explorer for exact-run chronology",
+          "description": "TIME RANGE · Compares expected and observed stages for the selected Pipeline. Gold can be expected, disabled, pending while a run is active, or missing after completion; these are context states, not delivery proof. Use Run Explorer for exact-run chronology",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1207,7 +1214,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows the current 30-minute Runtime Error Rate for Pipeline; Run Type does not affect this panel. Below 5%=OK, >=5%=WARN, >=20%=CRIT when the Bronze denominator is at least 20; insufficient or missing input is UNKNOWN. Review errors by Stage and code next",
+          "description": "SELECTED RUN · Shows the current 30-minute Runtime Error Rate for Pipeline; Run Type does not affect this panel. Below 5%=OK, >=5%=WARN, >=20%=CRIT when the Bronze denominator is at least 20; insufficient or missing input is UNKNOWN. Review errors by Stage and code next",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1299,7 +1306,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows p50, p95, and p99 phase duration for the selected Pipeline and range. Run Type does not affect this panel. No data can mean an active run, no emitted samples, or a label mismatch; it is not zero duration",
+          "description": "TIME RANGE · Shows p50, p95, and p99 phase duration for the selected Pipeline and range. Run Type does not affect this panel. No data can mean an active run, no emitted samples, or a label mismatch; it is not zero duration",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1383,7 +1390,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows p50, p95, and p99 completed pipeline duration by Stage for Pipeline and Run Type over the selected range. No data can mean an active run, no terminal samples, unavailable telemetry, or a label mismatch; it is not zero duration",
+          "description": "TIME RANGE · Shows p50, p95, and p99 completed pipeline duration by Stage for Pipeline and Run Type over the selected range. No data can mean an active run, no terminal samples, unavailable telemetry, or a label mismatch; it is not zero duration",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1467,7 +1474,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Lists selected-range error samples grouped by Stage and error code for Pipeline and Run Type. An empty table means no matching samples, not guaranteed Pipeline Health. Check Metrics Coverage before treating it as valid empty evidence",
+          "description": "TIME RANGE · Lists selected-range error samples grouped by Stage and error code for Pipeline and Run Type. An empty table means no matching samples, not guaranteed Pipeline Health. Check Metrics Coverage before treating it as valid empty evidence",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1650,7 +1657,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Compares selected-range processed-record totals by Stage and Run Type for the selected Pipeline. An empty chart means no matching samples or unavailable telemetry, not successful processing. Use Run Explorer for exact-run counts",
+          "description": "SELECTED RUN · Compares selected-range processed-record totals by Stage and Run Type for the selected Pipeline. An empty chart means no matching samples or unavailable telemetry, not successful processing. Use Run Explorer for exact-run counts",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1818,7 +1825,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Summarizes Runtime-owned preflight, infrastructure, failed-run, and error-rate conditions for Pipeline and Run Type. Zero means no condition is firing only when coverage and selected scope exist; UNKNOWN is inconclusive. Review active blocker detail next. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero.",
+          "description": "TIME RANGE · Summarizes Runtime-owned preflight, infrastructure, failed-run, and error-rate conditions for Pipeline and Run Type. Zero means no condition is firing only when coverage and selected scope exist; UNKNOWN is inconclusive. Review active blocker detail next. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1905,7 +1912,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows no-records runs from the last 30 minutes for Pipeline and Run Type. Zero is valid only when runs and telemetry exist; UNKNOWN, no matching scope, or a run not started is inconclusive. Inspect checkpoint/resume and stage expectedness next",
+          "description": "SELECTED RUN · Shows no-records runs from the last 30 minutes for Pipeline and Run Type. Zero is valid only when runs and telemetry exist; UNKNOWN, no matching scope, or a run not started is inconclusive. Inspect checkpoint/resume and stage expectedness next",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2075,7 +2082,7 @@
               }
             ]
           },
-          "description": "Shows current memory-pressure state by Pipeline and Stage. Mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN; Run Type does not affect this panel. Review structured report files and checkpoint/resume pressure before retrying",
+          "description": "TIME RANGE · Shows current memory-pressure state by Pipeline and Stage. Mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN; Run Type does not affect this panel. Review structured report files and checkpoint/resume pressure before retrying",
           "targets": [
             {
               "expr": "max(max_over_time(bioetl_memory_pressure_state{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",stage=~\"$stage\"}[15m]))",
@@ -2107,7 +2114,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows Data Quality handoff conditions for the selected Pipeline. Zero means no condition is firing only when DQ telemetry is present; UNKNOWN is inconclusive. Open Data Quality for rule, threshold, and Silver reject evidence. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero.",
+          "description": "TIME RANGE · Shows Data Quality handoff conditions for the selected Pipeline. Zero means no condition is firing only when DQ telemetry is present; UNKNOWN is inconclusive. Open Data Quality for rule, threshold, and Silver reject evidence. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2194,7 +2201,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows Trust handoff conditions for manifest, checkpoint, replay, and lineage evidence for Pipeline and Run Type. Zero is conclusive only when telemetry is present; UNKNOWN is inconclusive. Open Trust to decide replay or resume safety",
+          "description": "TIME RANGE · Shows Trust handoff conditions for manifest, checkpoint, replay, and lineage evidence for Pipeline and Run Type. Zero is conclusive only when telemetry is present; UNKNOWN is inconclusive. Open Trust to decide replay or resume safety",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2275,7 +2282,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows provider conditions for the provider inferred from the selected Pipeline. Zero is valid only when that provider scope and telemetry exist; UNKNOWN means a missing or unknown provider hint. Open Provider Health for diagnosis",
+          "description": "TIME RANGE · Shows provider conditions for the provider inferred from the selected Pipeline. Zero is valid only when that provider scope and telemetry exist; UNKNOWN means a missing or unknown provider hint. Open Provider Health for diagnosis",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2363,7 +2370,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows global provider-independent latency and rate-limiter conditions. Pipeline and Run Type filters do not affect this panel. Zero is valid only when provider telemetry exists; UNKNOWN means the global provider anchor is missing",
+          "description": "TIME RANGE · Shows global provider-independent latency and rate-limiter conditions. Pipeline and Run Type filters do not affect this panel. Zero is valid only when provider telemetry exists; UNKNOWN means the global provider anchor is missing",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2451,7 +2458,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Counts selected-Pipeline entities with freshness lag over 24 hours. Zero means none are stale only when freshness telemetry is available; UNKNOWN means target-domain evidence is missing. Open Data Quality or Provider Health for diagnosis",
+          "description": "TIME RANGE · Counts selected-Pipeline entities with freshness lag over 24 hours. Zero means none are stale only when freshness telemetry is available; UNKNOWN means target-domain evidence is missing. Open Data Quality or Provider Health for diagnosis",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2556,7 +2563,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows global graceful-shutdown starts grouped by reason over the selected range. Pipeline and Run Type filters do not affect this panel. An empty chart can mean no starts or unavailable telemetry; compare with completions without treating it as an alert verdict",
+          "description": "TIME RANGE · Shows global graceful-shutdown starts grouped by reason over the selected range. Pipeline and Run Type filters do not affect this panel. An empty chart can mean no starts or unavailable telemetry; compare with completions without treating it as an alert verdict",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2635,7 +2642,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows global graceful-shutdown completions grouped by reason over the selected range. Pipeline and Run Type filters do not affect this panel. An empty chart can mean no completions or unavailable telemetry; compare with starts for incomplete shutdown context",
+          "description": "TIME RANGE · Shows global graceful-shutdown completions grouped by reason over the selected range. Pipeline and Run Type filters do not affect this panel. An empty chart can mean no completions or unavailable telemetry; compare with starts for incomplete shutdown context",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2729,7 +2736,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows the worst stage lag over the last 15 minutes for Pipeline and Run Type across all stages. Mapping: <300s=OK, 300–899s=WARN, >=900s=CRIT, null=UNKNOWN. No data is missing lag evidence; inspect stage lag and backlog next",
+          "description": "TIME RANGE · Shows the worst stage lag over the last 15 minutes for Pipeline and Run Type across all stages. Mapping: <300s=OK, 300–899s=WARN, >=900s=CRIT, null=UNKNOWN. No data is missing lag evidence; inspect stage lag and backlog next",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2804,7 +2811,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Counts active canonical runtime blockers over the last 15 minutes for Pipeline and Run Type. This is a count: 0=OK only with healthy status and coverage, >=1=CRIT, null=UNKNOWN. Inspect blocker detail for the owning condition",
+          "description": "SELECTED RUN · Counts active canonical runtime blockers over the last 15 minutes for Pipeline and Run Type. This is a count: 0=OK only with healthy status and coverage, >=1=CRIT, null=UNKNOWN. Inspect blocker detail for the owning condition",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2894,7 +2901,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Counts failed runs over the selected window for Pipeline and Run Type. Zero means no matching failures only when telemetry and scope exist; No data or UNKNOWN is inconclusive. Use the failure runbook or Run Explorer",
+          "description": "TIME RANGE · Counts failed runs over the selected window for Pipeline and Run Type. Zero means no matching failures only when telemetry and scope exist; No data or UNKNOWN is inconclusive. Use the failure runbook or Run Explorer",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2996,7 +3003,7 @@
             "h": 6
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "Shows HTTP-backed identity for an exact Run ID. Aggregate Pipeline scope does not guess a run. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live and continue in Run Explorer",
+          "description": "TIME RANGE · Shows HTTP-backed identity for an exact Run ID. Aggregate Pipeline scope does not guess a run. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live and continue in Run Explorer",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3024,6 +3031,12 @@
                   "title": "Open monitoring backend setup docs",
                   "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
                   "targetBlank": true
+                },
+                {
+                  "title": "Open 6. Run Explorer for selected run",
+                  "url": "/d/bioetl-run-explorer-v1?${__url_time_range}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}&viewPanel=9402",
+                  "targetBlank": false,
+                  "includeVars": false
                 }
               ]
             },
@@ -3139,6 +3152,13 @@
                 }
               }
             }
+          ],
+          "links": [
+            {
+              "title": "Open 6. Run Explorer for selected run",
+              "url": "/d/bioetl-run-explorer-v1?${__url_time_range}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}&viewPanel=9402",
+              "targetBlank": false
+            }
           ]
         },
         {
@@ -3152,7 +3172,7 @@
             "h": 6
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "Shows HTTP-backed Bronze input, Silver accepted/rejected, and Gold output counts and outcomes. Zero is a recorded count. No matching rows can mean a valid empty result, unresolved scope, or backend failure (backend unavailable); verify /health/live and use Run Explorer before classifying the result.",
+          "description": "TIME RANGE · Shows HTTP-backed Bronze input, Silver accepted/rejected, and Gold output counts and outcomes. Zero is a recorded count. No matching rows can mean a valid empty result, unresolved scope, or backend failure (backend unavailable); verify /health/live and use Run Explorer before classifying the result.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3415,6 +3435,143 @@
               }
             }
           ]
+        },
+        {
+          "id": 9998,
+          "type": "table",
+          "title": "Review Selected Run Summary",
+          "gridPos": {
+            "x": 0,
+            "y": 134,
+            "w": 24,
+            "h": 5
+          },
+          "datasource": "BioETL Ops HTTP",
+          "description": "SELECTED RUN · Compact pipeline_run_report_v1 projection (identity, times, gold out, contract exclusions, coverage). Missing run is VALID EMPTY / SELECT RUN, not OK. Set range to run opens 6. Run Explorer at started_at-5m .. <code style='font-size:16px'>completed_at</code>+5m. Do not treat CURRENT Prometheus as this UUID. Backend unavailable means the query could not be evaluated. Verify /health/live.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": true
+              },
+              "unit": "none",
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no report.",
+              "links": [
+                {
+                  "title": "Open 6. Run Explorer for selected run",
+                  "url": "/d/bioetl-run-explorer-v1?${__url_time_range}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}&viewPanel=9402",
+                  "targetBlank": false,
+                  "includeVars": false
+                },
+                {
+                  "title": "Set range to run",
+                  "url": "/d/bioetl-run-explorer-v1?from=${__data.fields.from_ms}&to=${__data.fields.to_ms}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}&viewPanel=9402",
+                  "targetBlank": false,
+                  "includeVars": false
+                }
+              ]
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "set_range_to_run"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Set range to run",
+                        "url": "/d/bioetl-run-explorer-v1?from=${__data.fields.from_ms}&to=${__data.fields.to_ms}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}&viewPanel=9402",
+                        "targetBlank": false,
+                        "includeVars": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "run_id"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Open 6. Run Explorer for selected run",
+                        "url": "/d/bioetl-run-explorer-v1?${__url_time_range}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}&viewPanel=9402",
+                        "targetBlank": false,
+                        "includeVars": false
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false
+            },
+            "cellHeight": "sm"
+          },
+          "targets": [
+            {
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "summary",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}&view=summary&from=${__from}&to=${__to}",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              },
+              "expr": ""
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "Value": true
+                },
+                "indexByName": {
+                  "run_id": 0,
+                  "status": 1,
+                  "started_at": 2,
+                  "completed_at": 3,
+                  "gold_records_out": 4,
+                  "excluded_by_contract": 5,
+                  "covers_selected_run": 6,
+                  "coverage_offset": 7,
+                  "set_range_to_run": 8,
+                  "from_ms": 9,
+                  "to_ms": 10
+                },
+                "renameByName": {}
+              }
+            }
+          ],
+          "links": [
+            {
+              "title": "Open 6. Run Explorer for selected run",
+              "url": "/d/bioetl-run-explorer-v1?${__url_time_range}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}&viewPanel=9402",
+              "targetBlank": false,
+              "includeVars": false
+            }
+          ]
         }
       ],
       "description": "Contains compact HTTP-backed evidence for the selected run. Run Explorer is the canonical exact-run surface; aggregate scope does not guess an exact manifest, and Run ID never becomes a Prometheus label"
@@ -3514,7 +3671,7 @@
           ],
           "title": "Track Failed Workflow Runs",
           "type": "stat",
-          "description": "Counts failed Workflow runs in the selected range for Workflow and Pipeline. Zero means no matching failures in the selected range, including when an empty selected-range result is rendered through noValue; it is neutral range evidence, not current Workflow or Pipeline Health. Use runtime localization or Trust evidence when non-zero, and use Metrics Evidence to assess telemetry confidence."
+          "description": "SELECTED RUN · Counts failed Workflow runs in the selected range for Workflow and Pipeline. Zero means no matching failures in the selected range, including when an empty selected-range result is rendered through noValue; it is neutral range evidence, not current Workflow or Pipeline Health. Use runtime localization or Trust evidence when non-zero, and use Metrics Evidence to assess telemetry confidence."
         },
         {
           "datasource": {
@@ -3599,7 +3756,7 @@
           ],
           "title": "Track Failed Workflow Steps",
           "type": "stat",
-          "description": "Counts failed Workflow pipeline steps in the selected range for Workflow and Pipeline. The metric has no Stage label. Zero means no matching failures in the selected range, including when an empty selected-range result is rendered through noValue; it is neutral range evidence, not stage success or current Pipeline Health. Use runtime localization or Trust evidence when non-zero, and use Metrics Evidence to assess telemetry confidence."
+          "description": "TIME RANGE · Counts failed Workflow pipeline steps in the selected range for Workflow and Pipeline. The metric has no Stage label. Zero means no matching failures in the selected range, including when an empty selected-range result is rendered through noValue; it is neutral range evidence, not stage success or current Pipeline Health. Use runtime localization or Trust evidence when non-zero, and use Metrics Evidence to assess telemetry confidence."
         }
       ],
       "description": "Contains selected-range workflow failure evidence merged into Pipeline Diagnostics. These panels support localization and do not determine current Pipeline Health"
