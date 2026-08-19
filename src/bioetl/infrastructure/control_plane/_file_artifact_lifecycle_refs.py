@@ -191,42 +191,47 @@ def _append_lineage_candidates(
                 candidates.append((ControlPlaneArtifactSurface.LINEAGE, path))
 
 
-def _append_checkpoint_candidates(
+def _append_latest_checkpoint_if_matching(
+    candidates: list[tuple[ControlPlaneArtifactSurface, Path]],
+    checkpoint_root: Path,
+    manifest: RunManifest,
+    read_json_file,
+) -> None:
+    latest = checkpoint_root / f"{manifest.pipeline_name}.json"
+    if not latest.is_file():
+        return
+    try:
+        latest_payload = read_json_file(latest)
+    except (OSError, ValueError, TypeError):
+        latest_payload = {}
+    if str(latest_payload.get("run_id") or "") == str(manifest.run_id):
+        candidates.append((ControlPlaneArtifactSurface.CHECKPOINT, latest))
+
+
+def _append_checkpoint_history_dir(
+    candidates: list[tuple[ControlPlaneArtifactSurface, Path]],
+    checkpoint_root: Path,
+    manifest: RunManifest,
+    history_run_dir,
+) -> None:
+    run_dir = history_run_dir(checkpoint_root, manifest.pipeline_name, manifest.run_id)
+    if not run_dir.is_dir():
+        return
+    for path in run_dir.iterdir():
+        if path.is_file():
+            candidates.append((ControlPlaneArtifactSurface.CHECKPOINT, path))
+
+
+def _append_checkpoint_manifest_index(
     candidates: list[tuple[ControlPlaneArtifactSurface, Path]],
     issues: list[ControlPlaneArtifactResolutionIssue],
-    base_path: Path,
+    checkpoint_root: Path,
     manifest: RunManifest,
+    *,
+    history_path_from_manifest_index,
+    manifest_index_path,
+    read_json_file,
 ) -> None:
-    from bioetl.infrastructure.checkpoint._local_checkpoint_io import (
-        history_path_from_manifest_index,
-        history_run_dir,
-        manifest_index_path,
-        read_json_file,
-    )
-
-    checkpoint_root = base_path.parent / "checkpoints"
-    if not checkpoint_root.exists():
-        issues.append(
-            _resolution_issue(
-                ControlPlaneArtifactResolutionIssueCode.CHECKPOINT_INDEX_MISSING,
-                ControlPlaneArtifactSurface.CHECKPOINT,
-                "Checkpoint manifest index is not recorded for this manifest.",
-            )
-        )
-        return
-    latest = checkpoint_root / f"{manifest.pipeline_name}.json"
-    if latest.is_file():
-        try:
-            latest_payload = read_json_file(latest)
-        except (OSError, ValueError, TypeError):
-            latest_payload = {}
-        if str(latest_payload.get("run_id") or "") == str(manifest.run_id):
-            candidates.append((ControlPlaneArtifactSurface.CHECKPOINT, latest))
-    run_dir = history_run_dir(checkpoint_root, manifest.pipeline_name, manifest.run_id)
-    if run_dir.is_dir():
-        for path in run_dir.iterdir():
-            if path.is_file():
-                candidates.append((ControlPlaneArtifactSurface.CHECKPOINT, path))
     index_path = manifest_index_path(checkpoint_root, manifest.manifest_id)
     if not index_path.is_file():
         issues.append(
@@ -264,6 +269,46 @@ def _append_checkpoint_candidates(
     )
     if history_path.is_file():
         candidates.append((ControlPlaneArtifactSurface.CHECKPOINT, history_path))
+
+
+def _append_checkpoint_candidates(
+    candidates: list[tuple[ControlPlaneArtifactSurface, Path]],
+    issues: list[ControlPlaneArtifactResolutionIssue],
+    base_path: Path,
+    manifest: RunManifest,
+) -> None:
+    from bioetl.infrastructure.checkpoint._local_checkpoint_io import (
+        history_path_from_manifest_index,
+        history_run_dir,
+        manifest_index_path,
+        read_json_file,
+    )
+
+    checkpoint_root = base_path.parent / "checkpoints"
+    if not checkpoint_root.exists():
+        issues.append(
+            _resolution_issue(
+                ControlPlaneArtifactResolutionIssueCode.CHECKPOINT_INDEX_MISSING,
+                ControlPlaneArtifactSurface.CHECKPOINT,
+                "Checkpoint manifest index is not recorded for this manifest.",
+            )
+        )
+        return
+    _append_latest_checkpoint_if_matching(
+        candidates, checkpoint_root, manifest, read_json_file
+    )
+    _append_checkpoint_history_dir(
+        candidates, checkpoint_root, manifest, history_run_dir
+    )
+    _append_checkpoint_manifest_index(
+        candidates,
+        issues,
+        checkpoint_root,
+        manifest,
+        history_path_from_manifest_index=history_path_from_manifest_index,
+        manifest_index_path=manifest_index_path,
+        read_json_file=read_json_file,
+    )
 
 
 def _append_cached_bronze_candidates(
