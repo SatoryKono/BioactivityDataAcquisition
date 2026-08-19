@@ -216,9 +216,9 @@ normalize_repo_env_aliases() {
   if [[ -z "${GITHUB_PERSONAL_ACCESS_TOKEN:-}" && -n "${GITHUB_CDX_PERSONAL_ACCESS_TOKEN:-}" ]]; then
     export GITHUB_PERSONAL_ACCESS_TOKEN="${GITHUB_CDX_PERSONAL_ACCESS_TOKEN}"
   fi
-  # Historical typo key kept for local compat only.
-  if [[ -z "${GITHUB_PERSONAL_ACCESS_TOKEN:-}" && -n "${GITHUB_ANY_PERSONAL_ADjCCESS_TOKEN:-}" ]]; then
-    export GITHUB_PERSONAL_ACCESS_TOKEN="${GITHUB_ANY_PERSONAL_ADjCCESS_TOKEN}"
+  # Local-compat alias; do not introduce this key in new .env files.
+  if [[ -z "${GITHUB_PERSONAL_ACCESS_TOKEN:-}" && -n "${GITHUB_ANY_PERSONAL_ACCESS_TOKEN:-}" ]]; then
+    export GITHUB_PERSONAL_ACCESS_TOKEN="${GITHUB_ANY_PERSONAL_ACCESS_TOKEN}"
   fi
 
   if [[ -z "${CONTEXT7_API_KEY:-}" ]]; then
