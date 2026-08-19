@@ -86,6 +86,16 @@ def _build_parser() -> argparse.ArgumentParser:
         default=PROMETHEUS_IMAGE,
         help="Docker image for --runner docker.",
     )
+    parser.add_argument(
+        "--expr-parity",
+        action="store_true",
+        help="Compare live /api/v1/rules to tracked YAML (skips if Prometheus is down).",
+    )
+    parser.add_argument(
+        "--prometheus-url",
+        default="http://127.0.0.1:9090",
+        help="Prometheus base URL for --expr-parity.",
+    )
     return parser
 
 
@@ -640,6 +650,27 @@ def _run_docker(
     )
 
 
+
+def _run_expr_parity(*, prometheus_url: str) -> int:
+    from scripts.ops.observability.check_prometheus_rules_health import (
+        check_rules_health,
+    )
+
+    report = check_rules_health(
+        prometheus_url=prometheus_url,
+        expr_parity=True,
+        skip_if_unreachable=True,
+    )
+    print(
+        "expr-parity checked="
+        f"{report.expr_parity_checked} skipped={report.expr_parity_skipped} "
+        f"sha256={report.tracked_rules_sha256} issues={len(report.expr_parity_issues)}"
+    )
+    for issue in report.expr_parity_issues:
+        print(f"expr-parity violation: {issue}")
+    return 0 if report.ok else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     """Validate Prometheus rules and test coverage.
 
@@ -688,6 +719,10 @@ def main(argv: list[str] | None = None) -> int:
         for violation in expr_violations:
             print(f"Rule expr violation: {violation}", file=sys.stderr)
         return 1
+    if args.expr_parity:
+        parity_rc = _run_expr_parity(prometheus_url=args.prometheus_url)
+        if parity_rc != 0:
+            return parity_rc
     if args.runner == "docker":
         return _run_docker(
             image=args.image,

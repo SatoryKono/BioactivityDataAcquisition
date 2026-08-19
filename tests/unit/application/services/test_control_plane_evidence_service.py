@@ -206,7 +206,7 @@ def test_manifest_validation_does_not_overclaim_registry_compatibility() -> None
     )
 
     assert payload["status"] == "UNKNOWN"
-    assert "manifest_contract_compatibility_not_verified" in _reasons(payload)
+    assert "contract_evidence_not_finalized" in _reasons(payload)
 
 
 class _CompatibleInspector:
@@ -541,7 +541,7 @@ def test_trust_status_is_incomplete_when_processing_succeeds_without_evidence() 
     assert payload["scope_kind"] == "exact_run"
     assert payload["evidence_freshness"] == "observed"
     assert payload["status"] == "UNKNOWN"
-    assert "manifest_contract_compatibility_not_verified" in payload["trust"]["reasons"]
+    assert "contract_evidence_not_finalized" in payload["trust"]["reasons"]
     assert payload["trust"]["reasons_text"]
     assert payload["trust"]["reasons_text"] == "\n".join(
         payload["trust"]["reasons"][:FIRST_SCREEN_TRUST_REASONS_CAP]
