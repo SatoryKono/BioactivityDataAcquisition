@@ -89,6 +89,7 @@ docs/00-project/ai/prompts/
 | `prompt.observability.dashboard-panel-audit` | [library/observability/dashboard-panel-audit.md](library/observability/dashboard-panel-audit.md) | Grafana panel audit (5 phases, v1.1) |
 | `prompt.observability.bi-dashboard-acceptance` | [library/observability/bi-dashboard-acceptance.md](library/observability/bi-dashboard-acceptance.md) | BI acceptance: visual / layout / data |
 | `prompt.observability.dashboard-audit-cycle` | [library/observability/dashboard-audit-cycle.md](library/observability/dashboard-audit-cycle.md) | Exhaustive cyclic audit (v2.0) of every panel × viewport × theme × zoom (Tier-1 100% / Tier-2 200%) — density, typography, color, scroll, whitespace, data, render |
+| `prompt.observability.dashboard-operator-playbook` | [library/observability/dashboard-operator-playbook.md](library/observability/dashboard-operator-playbook.md) | Per-panel operator questions, analysis order, 5–10 value-dependent scenarios |
 | `prompt.observability.dashboard-v5.pack` | [library/observability/dashboard-v5/pack.md](library/observability/dashboard-v5/pack.md) | V5 residual router (R-A/R-E/R-B landed; R-C PR; R-D/R-F leftover) |
 | `prompt.observability.dashboard-v5.implement` | [library/observability/dashboard-v5/implement.md](library/observability/dashboard-v5/implement.md) | Implement leftover V5 — babysit #8987, optional R-D |
 | `prompt.observability.dashboard-v5.closeout` | [library/observability/dashboard-v5/closeout.md](library/observability/dashboard-v5/closeout.md) | Close V5 residuals against origin/main |
@@ -179,6 +180,7 @@ Artifacts → `reports/audit/<domain>/` or `reports/audit-runs/<run_id>/`.
 | **Cyclic** audit → issues → fix → re-verify | `prompt.observability.dashboard-audit-cycle` |
 | Per-panel render/query → issues → fix (one shot) | `prompt.observability.dashboard-panel-audit` |
 | Acceptance only: a11y, layout, data DQ | `prompt.observability.bi-dashboard-acceptance` |
+| Per-panel operator questions + value-dependent scenarios | `prompt.observability.dashboard-operator-playbook` |
 | Full BI matrices / multi-tool notes | archive `bi-dashboard-audit-kit-2026-08-11.md` |
 
 Folder index and **sequential run order**:
