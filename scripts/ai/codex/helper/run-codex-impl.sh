@@ -74,7 +74,11 @@ if [[ -n "${BIOETL_CODEX_DIRECT_BIN:-}" ]]; then
         exit 1
     fi
     direct_codex_bin="${BIOETL_CODEX_DIRECT_BIN}"
+    direct_codex_prefix="$(cd "$(dirname "${direct_codex_bin}")/.." && pwd)"
     unset BIOETL_CODEX_DIRECT_BIN
+    export NPM_CONFIG_PREFIX="${direct_codex_prefix}"
+    export npm_config_prefix="${direct_codex_prefix}"
+    export PATH="${direct_codex_prefix}/bin:${PATH}"
     ensure_mcp_ready "${direct_codex_bin}" || exit 1
     exec "${direct_codex_bin}" "$@"
 fi
