@@ -454,6 +454,13 @@ entries:
     tags: [audit, cycle, pack, operator]
     summary: Pack of cyclic domain audits — 10-domain prompt.audit.cycle.* program
 
+  - id: prompt.audit.project.pack
+    path: library/audit/project/pack.md
+    status: active
+    class: operator-paste
+    tags: [audit, project, pack, tech-debt, tests, docs, diagrams, operator]
+    summary: Full project-audit paste pack — tech-debt, tests, docs, diagrams, and the 10-domain cycle
+
   - id: prompt.audit.sequential-run
     path: library/audit/sequential-run.md
     status: active

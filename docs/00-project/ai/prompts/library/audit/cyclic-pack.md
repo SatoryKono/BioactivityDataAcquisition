@@ -24,6 +24,8 @@ max_body_lines: 160
 
 # Cyclic audit pack (tests / docs / tech-debt / repo hygiene / …)
 
+Полные paste-тексты (фрагменты inlined): [project/full/](project/full/) (`prompt.audit.project.pack`).
+
 **Десять** канонических циклических аудитов живут в
 [cycle/](cycle/README.md) (`prompt.audit.cycle.*`). Старые циклы
 (`docs-cycle`, `tests-cycle`, …) остаются совместимыми one-family cards.

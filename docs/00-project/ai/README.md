@@ -94,6 +94,8 @@ See [AI Runtime Mirror Ownership](agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
   `repo-tree`, `github-actions`, `agents-runtime`, `diagrams`, `docs-pipeline`
 - Ten-domain cyclic pack: `prompt.audit.cycle.*` in
   [prompts/library/audit/cycle/](prompts/library/audit/cycle/README.md)
+- Full project-audit pastes: `prompt.audit.project.pack`
+  ([prompts/library/audit/project/](prompts/library/audit/project/README.md))
 - Orchestrated loop: `prompt.audit.orchestrator`
 - BI acceptance: `prompt.observability.bi-dashboard-acceptance`
 - Cyclic dashboards: `prompt.audit.cycle.dashboards` (alias:
