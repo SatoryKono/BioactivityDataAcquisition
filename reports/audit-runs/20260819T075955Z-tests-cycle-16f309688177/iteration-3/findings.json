@@ -1,0 +1,26 @@
+[
+  {
+    "id": "TEST-SYS-003",
+    "path": "tests/unit/interfaces/cli/test_workflow_cli.py:503",
+    "observation": "Unit test ожидал CONFIG_ERROR для поддерживаемого limit + delete_orphans workflow.",
+    "method": "canonical unit-fast, then exact-test rerun",
+    "expected": "CLI builds current-run-scoped reconciliation config and exits successfully.",
+    "actual": "Stale assertion expected rejection and made unit-fast red near 97%.",
+    "impact": "Core regression lane was persistently red and could not distinguish real regressions.",
+    "confidence": "high",
+    "confidence_score": 1.0,
+    "status": "PROVEN",
+    "priority": "P1",
+    "severity": "High",
+    "category": "stale_test_contract",
+    "evidence": [{"path": "tests/unit/interfaces/cli/test_workflow_cli.py", "line": 503, "command": "pytest exact node N=10", "observation": "10 failures before fix; final assertion validates source_scope=current_run."}],
+    "root_cause": "Runtime contract changed, but the CLI-level regression test retained the obsolete rejection behavior.",
+    "remediation": "Assert the supported scoped config at the service boundary.",
+    "effort": "S",
+    "automation": "unit-fast",
+    "automated_fix_possible": true,
+    "dependencies": [],
+    "validation": ["pytest tests/unit/interfaces/cli/test_workflow_cli.py::test_workflow_run_scopes_delete_orphans_when_limit_follows_extracts -q", "canonical unit-fast"],
+    "resolution_state": "RESOLVED"
+  }
+]

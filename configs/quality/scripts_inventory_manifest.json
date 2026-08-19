@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-19T09:37:06.682016+00:00",
+  "generated_at": "2026-08-19T11:00:41.693301+00:00",
   "summary": {
     "total_scripts": 607,
     "status_counts": {
@@ -15,7 +15,7 @@
       "other": 78,
       "scripts": 502,
       "skills": 12,
-      "tests": 397
+      "tests": 398
     }
   },
   "scripts": [
@@ -15286,11 +15286,17 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "tests/architecture/test_live_residual_snapshot.py",
           "line": 120,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.report_live_residual_snapshot import ("
+        },
+        {
+          "path": "tests/architecture/test_live_residual_snapshot.py",
+          "line": 151,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_live_residual_snapshot import ("
         }
@@ -16100,13 +16106,19 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "tests/integration/test_dashboard_content_contract.py",
           "line": 12,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import validate_dashboard_content_contract as subject"
+        },
+        {
+          "path": "tests/integration/test_dashboard_scope_refactor.py",
+          "line": 19,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import validate_dashboard_content_contract as content"
         }
       ],
       "owner": "@bioetl-observability",
@@ -16421,7 +16433,7 @@
         },
         {
           "path": "tests/unit/infrastructure/test_cr_8917_secret_redaction.py",
-          "line": 14,
+          "line": 12,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.vcr.check_vcr_secrets import _looks_redacted"
         }
@@ -18743,7 +18755,7 @@
         },
         {
           "path": "tests/unit/infrastructure/test_cr_8917_secret_redaction.py",
-          "line": 15,
+          "line": 13,
           "source_group": "tests",
           "text": "from scripts.ops.maintenance.security.salt_rotate import ("
         }
@@ -19380,13 +19392,13 @@
           "text": "from scripts.ops.observability.grafana.check_dashboard_panel_fill import ("
         },
         {
-          "path": "tests/unit/scripts/ops/observability/test_check_dashboard_panel_fill.py",
+          "path": "tests/unit/repo_backed/scripts/ops/observability/test_check_dashboard_panel_fill.py",
           "line": 17,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana import check_dashboard_panel_fill as fill"
         },
         {
-          "path": "tests/unit/scripts/ops/observability/test_check_dashboard_panel_fill.py",
+          "path": "tests/unit/repo_backed/scripts/ops/observability/test_check_dashboard_panel_fill.py",
           "line": 49,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/check_dashboard_panel_fill.py\","
@@ -20114,8 +20126,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/unit/scripts/ops/observability/test_relayout_trust_review_panels.py",
+          "line": 7,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability import relayout_trust_review_panels as subject"
+        }
+      ],
       "owner": "@bioetl-observability",
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
@@ -20579,7 +20598,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1098,
+          "line": 1100,
           "source_group": "tests",
           "text": "probe = (ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\").read_text("
         },
@@ -22705,7 +22724,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1035,
+          "line": 1037,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -22773,7 +22792,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1035,
+          "line": 1037,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },

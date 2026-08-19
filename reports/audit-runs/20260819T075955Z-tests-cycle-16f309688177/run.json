@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "run_id": "20260819T075955Z-tests-cycle-16f309688177",
+  "domain": "tests-system",
+  "language": "ru",
+  "mode": "full",
+  "lane": "unit",
+  "iteration_count": 10,
+  "initial_base_sha": "16f309688177",
+  "audited_base_sha": "21dcaa936808fba3e3368136b8865db180ee36e1",
+  "work_branch": "fix/audit-project-16f309688177",
+  "prompt_source": "prompt.audit.cycle.tests",
+  "prompt_source_file_sha256": "f651f006a5f1e3602a556aac7b81ad5141983eb37ee3336af2567d2a93c4da7f",
+  "rendered_prompt_sha256": "7af1b1fe3739596350d5895565c9e29fd82373a7cbce9c42f9c742870ca33acf",
+  "allow_issue_write": true,
+  "allow_push": true,
+  "allow_merge": false,
+  "allow_close": true,
+  "surface_score": 1,
+  "status": "completed_with_external_blockers",
+  "proof_or_stop": {
+    "outcome": "STOP",
+    "claim_qualified": false,
+    "errors": [
+      "failed_receipt:governance"
+    ],
+    "degradations": [
+      "trust_tier:local_single_host"
+    ],
+    "bundle": "reports/quality/proof-or-stop/20260819T075955Z-tests-cycle-16f309688177/bundle.json"
+  },
+  "open_issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8619",
+  "pull_request": {
+    "number": 9039,
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/pull/9039",
+    "draft": true,
+    "merge_state": "BLOCKED",
+    "merge_performed": false
+  },
+  "created_issues": [
+    "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9040",
+    "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9041",
+    "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9042"
+  ],
+  "ci_blockers": [
+    "git_lfs_budget_exhausted",
+    "current_main_quality_gates_red",
+    "forbidden_python_under_reports"
+  ],
+  "live_enforcement_closeout": {
+    "branch_protection_required_status_checks": "HTTP_404_NOT_PROTECTED",
+    "main_ruleset": "disabled",
+    "root_hygiene_required_check_ruleset": "active",
+    "acceptance_met": false
+  },
+  "agent_merge_performed": false,
+  "external_merge_observed": {
+    "merge_sha": "21dcaa936808fba3e3368136b8865db180ee36e1",
+    "merged_commit": "d94e49c623ae39b4819bcfdbc9033b1daeb194fe",
+    "observation": "origin/main acquired the first audit commit while the audit was still running; this agent did not invoke merge"
+  },
+  "budget_delta": "unchanged_or_reduced",
+  "env_files_modified": false
+}

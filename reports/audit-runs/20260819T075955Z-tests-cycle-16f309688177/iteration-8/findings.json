@@ -1,0 +1,25 @@
+[
+  {
+    "id": "TEST-SYS-008",
+    "path": "reports/quality/contract-coverage-matrix.json",
+    "observation": "Contract matrix and integration/e2e surface inventory lagged new tests.",
+    "method": "report-contract-coverage-matrix --check and integration VCR policy architecture test",
+    "expected": "Generated contract counts and exact tracked_suite_inventory match live tests.",
+    "actual": "chembl/composite assay test counts and five dashboard integration paths were stale.",
+    "impact": "Contract and replay lane ownership reports understate regression coverage.",
+    "confidence": "high",
+    "status": "PROVEN",
+    "priority": "P2",
+    "severity": "Medium",
+    "category": "contract_coverage",
+    "evidence": [{"path": "configs/quality/integration_vcr_policy.yaml", "line": 151, "command": "contract generator + VCR policy sync", "observation": "Final checks pass exactly."}],
+    "root_cause": "New test surfaces were merged without regenerating dependent inventories.",
+    "remediation": "Run canonical contract and VCR policy generators.",
+    "effort": "S",
+    "automation": "generated-artifact drift workflow",
+    "automated_fix_possible": true,
+    "dependencies": [],
+    "validation": ["report-contract-coverage-matrix --check", "sync-integration-vcr-policy --check", "pytest tests/smoke -m 'not memory' -q"],
+    "resolution_state": "RESOLVED"
+  }
+]
