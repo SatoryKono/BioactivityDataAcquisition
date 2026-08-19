@@ -1,0 +1,44 @@
+{
+  "run_id": "20260819T082349Z-configs-cycle-592bf60",
+  "prompt_id": "prompt.audit.cycle.configs",
+  "prompt_version": "1.0.0",
+  "audit_prompt_sha256": "843ae0d742e04566cae8952650a7ea57f601936b6a123ef2284fdc5d1b2e2c16",
+  "started_at_utc": "2026-08-19T08:23:49Z",
+  "completed_at_utc": "2026-08-19T09:34:02Z",
+  "base_branch": "main",
+  "base_sha": "592bf60b74adf0a643a744ce3b7fc1b0c5a36c23",
+  "work_branch": "fix/audit-project-51eaed1f-configs",
+  "scope_requested": "Schema/config",
+  "scope_resolved": [
+    "configs/**",
+    "scripts/schema/** (read-only validation)",
+    "related config/schema tests and normative docs (read-only)",
+    "canonical generated config artifacts",
+    "reports/audit-runs/** and reports/audit/configs/**"
+  ],
+  "n": 10,
+  "mode": "full",
+  "audit_mode": "full",
+  "allow_issue_write": true,
+  "allow_push": true,
+  "allow_merge": false,
+  "allow_close": true,
+  "surface_score": 3,
+  "findings": {
+    "total": 1,
+    "resolved": 1,
+    "open": 0
+  },
+  "debt_outcome": "unchanged",
+  "env_files_touched": false,
+  "monitoring_started": false,
+  "proof_or_stop": {
+    "outcome": "STOP",
+    "claim_qualified": false,
+    "trust_tier": "local_single_host",
+    "errors": [
+      "failed_receipt:docs_runtime",
+      "failed_receipt:governance"
+    ]
+  }
+}
