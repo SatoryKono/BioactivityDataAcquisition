@@ -218,7 +218,7 @@ class OrphanResult:
 
 # ── Diagram type detection ────────────────────────────────────────────────────
 
-_SUPPORTED_TYPES = {"flowchart", "graph", "sequencediagram"}
+_SUPPORTED_TYPES = {"flowchart", "graph"}
 _SKIP_TYPES = {
     "classdiagram",
     "statediagram",
@@ -238,10 +238,10 @@ def detect_diagram_type(lines: list[str]) -> str:
         if not s or s.startswith("%%"):
             continue
         first_word = s.split()[0]
-        if first_word in _SUPPORTED_TYPES or first_word in {"graph"}:
-            return "flowchart" if first_word in {"flowchart", "graph"} else first_word
         if first_word == "sequencediagram":
             return "sequence"
+        if first_word in _SUPPORTED_TYPES:
+            return "flowchart"
         if first_word in _SKIP_TYPES or any(s.startswith(t) for t in _SKIP_TYPES):
             return "skip"
         break

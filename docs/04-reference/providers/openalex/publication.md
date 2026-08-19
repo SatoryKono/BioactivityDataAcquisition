@@ -64,7 +64,7 @@ ______________________________________________________________________
 | ------------------ | ------------- | -------------------------------------------------------------------- |
 | `publication_year` | `int \| None` | Год публикации (валидируется: 1500-2100)                             |
 | `publication_date` | `str \| None` | Дата публикации (YYYY-MM-DD)                                         |
-| `publication_type` | `str \| None` | Нормализованный тип OpenAlex (`journal-article`, `preprint`, и т.д.) |
+| `publication_type` | `str \| None` | Сырой тип OpenAlex (`article`, `book`, `dataset`, и т.д.) |
 
 ### Open Access
 
@@ -88,7 +88,6 @@ ______________________________________________________________________
 | -------------------------- | ------------- | ------------------------------------------------------------------ |
 | `citations_received`       | `int \| None` | Количество цитирований                                             |
 | `publication_class`        | `str`         | Класс публикации: EXP, REV, PEER                                   |
-| `publication_type`         | `str \| None` | Сырой тип OpenAlex (article, book, и т.д.)                         |
 | `publication_type_unified` | `str`         | Унифицированный тип: `PUBLICATION`, `PREPRINT`, `DATASET`, `OTHER` |
 | `subject_topics`           | `str \| None` | JSON-массив тем (4-уровневая иерархия)                             |
 | `primary_topic`            | `str \| None` | Основная тема                                                      |
@@ -404,7 +403,7 @@ ______________________________________________________________________
   "publisher": "Springer Nature",
   "publication_year": 2020,
   "publication_date": "2020-02-03",
-  "publication_type": "journal-article",
+  "publication_type": "article",
   "publication_type_unified": "PUBLICATION",
   "publication_class": "PEER",
   "is_oa": true,

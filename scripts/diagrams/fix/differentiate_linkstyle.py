@@ -134,6 +134,22 @@ def build_node_layer_map(lines: list[str]) -> dict[str, str]:
     return node_layer
 
 
+_ARROW_ANY_RE = re.compile(
+    r"(?:x-->|o-->|<-->|-.->|==>|-->|---|-.-|===|~~~|--o|--x)"
+)
+
+
+def count_mermaid_arrows(lines: list[str]) -> int:
+    """Count flowchart arrow tokens, ignoring comments and linkStyle lines."""
+    total = 0
+    for ln in lines:
+        stripped = ln.strip()
+        if not stripped or stripped.startswith("%%") or _LINKSTYLE_LINE.match(ln):
+            continue
+        total += len(_ARROW_ANY_RE.findall(stripped))
+    return total
+
+
 def parse_connections(lines: list[str]) -> list[tuple[str, str, str, str]]:
     """Return list of (src, arrow, label, tgt) for every connection line."""
     conns: list[tuple[str, str, str, str]] = []
@@ -297,6 +313,9 @@ def process_file(fpath: Path, dry_run: bool = False) -> tuple[bool, str]:
         return False, "already_differentiated"
 
     conns = parse_connections(lines)
+    arrow_count = count_mermaid_arrows(lines)
+    if arrow_count != len(conns):
+        return False, f"unparsed_arrows ({arrow_count} tokens, {len(conns)} parsed)"
     if len(conns) <= 5:
         return False, f"too_few ({len(conns)})"
 
