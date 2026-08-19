@@ -442,7 +442,7 @@ def test_control_plane_provider_health_handoff_omits_adapter_fallback() -> None:
         if item.get("title") == "3. Provider Health"
     )
     provider_nav_url = str(provider_nav.get("url", ""))
-    assert "var-provider=unknown" in provider_nav_url
+    assert "var-provider=$provider" in provider_nav_url
     assert "var-pipeline_context=" in provider_nav_url
     assert "var-adapter=" not in provider_nav_url
 
@@ -466,7 +466,7 @@ def test_control_plane_provider_health_handoff_omits_adapter_fallback() -> None:
     )
     assert link is not None, "Overview First Action must hand off to Provider Health"
     url = str(link.get("url", ""))
-    assert "var-provider=unknown" in url
+    assert "var-provider=$provider" in url
     assert "var-pipeline_context=$pipeline" in url
     assert "var-adapter=" not in url
 
@@ -927,7 +927,7 @@ def test_provider_health_handoff_fail_closes_and_remembers_return_context() -> N
     )
     url = str(link.get("url", ""))
     tooltip = str(link.get("tooltip", ""))
-    assert "var-provider=unknown" in url
+    assert "var-provider=$provider" in url
     assert "var-pipeline_context=$pipeline" in url
     assert "var-provider=All" not in url
     # Tooltip is optional on dataLinks; URL fail-closed vars are mandatory.
