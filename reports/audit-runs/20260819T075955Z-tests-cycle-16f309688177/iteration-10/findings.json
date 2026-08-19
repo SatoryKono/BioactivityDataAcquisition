@@ -5,7 +5,7 @@
     "observation": "Post-audit live merge enforcement remains disabled.",
     "method": "Final GitHub API state and externally observed merge 21dcaa9368",
     "expected": "No audit commit reaches main before PR required checks.",
-    "actual": "d94e49c623 entered origin/main during the run without a merge action by this agent.",
+    "actual": "d94e49c623 entered origin/main during the run without a merge action by this agent; closeout API still returns branch protection 404 and main ruleset disabled, while root-hygiene-required-check is active.",
     "impact": "Local green evidence is not an enforced merge precondition.",
     "confidence": "high",
     "status": "PROVEN",

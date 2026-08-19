@@ -47,6 +47,12 @@
     "current_main_quality_gates_red",
     "forbidden_python_under_reports"
   ],
+  "live_enforcement_closeout": {
+    "branch_protection_required_status_checks": "HTTP_404_NOT_PROTECTED",
+    "main_ruleset": "disabled",
+    "root_hygiene_required_check_ruleset": "active",
+    "acceptance_met": false
+  },
   "agent_merge_performed": false,
   "external_merge_observed": {
     "merge_sha": "21dcaa936808fba3e3368136b8865db180ee36e1",
