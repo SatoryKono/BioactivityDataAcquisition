@@ -90,36 +90,9 @@ class HistoricalReplayCorpusService:
         for spec in ordered_specs:
             manifest = manifest_by_id[spec.manifest_id]
             inventory_record = status_by_manifest_id[spec.manifest_id]
-            if inventory_record.certification_status == "already_certified":
-                records.append(
-                    self._build_skipped_record(
-                        inventory_record=inventory_record,
-                        status="skipped_already_certified",
-                    )
-                )
-                continue
-            if inventory_record.certification_status == "already_replayable":
-                records.append(
-                    self._build_skipped_record(
-                        inventory_record=inventory_record,
-                        status="skipped_already_replayable",
-                    )
-                )
-                continue
-            if inventory_record.certification_status == (
-                "outside_certified_historical_scope"
-            ):
-                raise ValueError(
-                    "Historical replay bulk certification is outside the published "
-                    f"certified tranche for manifest {spec.manifest_id!r}"
-                )
-            if inventory_record.certification_status == "needs_operator_review":
-                records.append(
-                    self._build_skipped_record(
-                        inventory_record=inventory_record,
-                        status="skipped_needs_operator_review",
-                    )
-                )
+            skipped = self._skipped_bulk_record(inventory_record)
+            if skipped is not None:
+                records.append(skipped)
                 continue
             result = self._apply_one_certification(
                 certification_service=self.certification_service,

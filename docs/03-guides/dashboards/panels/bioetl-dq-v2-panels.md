@@ -230,3 +230,8 @@ query, links, and operator fact.
   Range`, and `Track: DQ Blocked Records in Range (Evidence)` render a zero as
   neutral valid-empty TIME RANGE evidence. They do not override a CURRENT
   WARN/CRIT verdict.
+
+## Additional shipped panels
+### 38. Review Selected Run Summary
+
+Shipped in `bioetl-dq-v2.json`.

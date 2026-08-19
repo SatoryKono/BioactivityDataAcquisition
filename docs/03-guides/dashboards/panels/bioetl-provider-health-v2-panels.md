@@ -187,3 +187,23 @@ the relevant provider or evidence gap.
   Provider Detail`; zero-range evidence no longer occupies the headline path or
   renders as a dominant red gauge arc.
 - Legacy provider request-success/rate-limited placeholders are intentionally not documented here.
+
+## Additional shipped panels
+### 32. Inspect Status Reason
+
+Shipped in `bioetl-provider-health-v2.json`.
+### 33. Inspect Fleet Non-OK and Causes
+
+Shipped in `bioetl-provider-health-v2.json`.
+### 34. Inspect Full Fleet Evidence
+
+Shipped in `bioetl-provider-health-v2.json`.
+### 35. Inspect Full Fleet Severity
+
+Shipped in `bioetl-provider-health-v2.json`.
+### 36. Inspect Full Non-OK Providers
+
+Shipped in `bioetl-provider-health-v2.json`.
+### 37. Inspect Full Provider Causes
+
+Shipped in `bioetl-provider-health-v2.json`.

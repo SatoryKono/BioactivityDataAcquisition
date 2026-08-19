@@ -71,7 +71,7 @@ else:
 
 ensure_repo_imports()
 
-from scripts.docs.common.markdown import (  # noqa: E402
+from scripts.docs.common.markdown import (
     FENCE_END_RE,
     INLINE_CODE_RE,
     MD_LINK_RE,
@@ -79,7 +79,7 @@ from scripts.docs.common.markdown import (  # noqa: E402
     PYTHON_FENCE_START_RE,
     extract_md_heading,
 )
-from scripts.docs.common.paths import (  # noqa: E402
+from scripts.docs.common.paths import (
     DOCS_DIR,
     PROJECT_ROOT,
     is_generated_docs_artifact,
@@ -130,10 +130,7 @@ CHEMBL_PROVIDER_LINK_RE = re.compile(r"\(chembl/([a-z0-9-]+)\.md\)")
 WORKFLOW_FILE_RE = re.compile(r"`([A-Za-z0-9._-]+\.yml)`")
 
 DRIFT_SKIP_DIRS = frozenset({"99-archive", "reports", "plans", "skills"})
-NOT_IN_NAV_GROWTH_EXCLUDED_PREFIXES = (
-    "reports/",
-    "00-project/ai/prompts/",
-)
+NOT_IN_NAV_GROWTH_EXCLUDED_PREFIXES = ("reports/", "00-project/ai/prompts/")
 
 ALLOW_LEGACY_MARKER = "doc-lint: allow-legacy"
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")

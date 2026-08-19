@@ -66,6 +66,8 @@ from bioetl.infrastructure.storage.gold.writer_schema_helpers import (
     _resolve_active_gold_schema,
 )
 
+_GOLD_WRITER_REEXPORTS = (TableNotFoundError, coerce_null_types_for_delta)
+
 if TYPE_CHECKING:
     import pyarrow as pa
     from deltalake import DeltaTable as DeltaTableType

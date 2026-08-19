@@ -393,3 +393,9 @@ promtool test rules grafana/prometheus-rules/tests/bioetl_observability.test.yml
 
 Если локальный `promtool` не найден, команда fail-fast возвращает понятную
 инструкцию. В CI используется тот же entry point с `--runner docker`.
+
+Для bounded Trust Review first-window hoist во время layout work
+используется supporting helper
+`scripts/ops/observability/relayout_trust_review_panels.py`.
+Он не является shipped operator command; после заморозки first-screen
+layout helper удаляется или складывается в governed dashboard command.

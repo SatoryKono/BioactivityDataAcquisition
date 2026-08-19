@@ -240,3 +240,37 @@ def build_pipeline_run_result(
     if write_report:
         return finalize_pipeline_run_report(result=result, options=options)
     return result
+
+
+async def complete_pipeline_dry_run(
+    *,
+    audit: object,
+    pipeline_name: str,
+    run_id: object,
+    options: RunOptions,
+    dry_run_result: RunResult,
+    record_event,
+) -> RunResult:
+    """Record dry-run completion and finalize the pipeline run report."""
+    await record_event(
+        audit,
+        event_name="PipelineRunCompleted",
+        pipeline_name=pipeline_name,
+        run_id=run_id,
+        run_type=options.run_type,
+        status=dry_run_result.status.value,
+        timestamp=dry_run_result.completed_at,
+    )
+    return finalize_pipeline_run_report(
+        result=dry_run_result,
+        options=options,
+    )
+
+
+async def create_execution_runner_audited(create_runner, *, record_failure):
+    """Create a runner and audit unexpected constructor failures."""
+    try:
+        return create_runner()
+    except Exception as exc:
+        await record_failure(exc)
+        raise

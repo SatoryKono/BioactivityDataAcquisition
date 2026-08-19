@@ -23,6 +23,22 @@ def _claim_evidence_refs(
     return sorted(dict.fromkeys(refs))
 
 
+def _blocked_historical_governed_gate() -> JsonDict:
+    """Default blocked gate when the authoritative artifact is missing."""
+    return {
+        "gate_kind": "universal_historical_exact_replay",
+        "scope": "all_known_historical_runs",
+        "authoritative_truth_surface": "historical_replay_universe_closure_report",
+        "required_claims": {
+            "universal_claim": False,
+            "durable_evidence_coverage_claim": False,
+        },
+        "satisfied": False,
+        "verdict": "gate_blocked",
+        "reason": "authoritative_historical_replay_universe_artifact_unavailable",
+    }
+
+
 def build_historical_replay_universe_exact_replay_claim(
     *,
     summary: JsonDict,
@@ -32,18 +48,7 @@ def build_historical_replay_universe_exact_replay_claim(
     historical_universe_source = summary.get("historical_replay_universe_claim_source")
     governed_gate = summary.get("historical_replay_universe_governed_full_corpus_gate")
     if not isinstance(governed_gate, dict):
-        governed_gate = {
-            "gate_kind": "universal_historical_exact_replay",
-            "scope": "all_known_historical_runs",
-            "authoritative_truth_surface": "historical_replay_universe_closure_report",
-            "required_claims": {
-                "universal_claim": False,
-                "durable_evidence_coverage_claim": False,
-            },
-            "satisfied": False,
-            "verdict": "gate_blocked",
-            "reason": "authoritative_historical_replay_universe_artifact_unavailable",
-        }
+        governed_gate = _blocked_historical_governed_gate()
     if isinstance(historical_universe_claim, dict):
         claim_refs = _claim_evidence_refs(
             evidence_refs=evidence_refs,
