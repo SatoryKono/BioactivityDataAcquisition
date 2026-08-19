@@ -223,56 +223,11 @@ class PipelineRunner(PipelineRunnerSupportMixin):
 
     def _finalize_contract_evidence(self) -> None:
         """Write the immutable sidecar after lock acquire and before extract."""
-        recorder = self._contract_evidence_recorder
-        manifest_id = self.manifest_id
-        if recorder is None or not manifest_id:
-            return
-        from bioetl.application.services.control_plane.manifest.contract_evidence import (
-            build_runtime_contract_evidence,
-        )
+        from bioetl.application.core._runner_finalize import finalize_contract_evidence
 
-        lock = self._lock_runtime_service.get_context()
-        lock_owner_id = None if lock is None else str(lock.owner_id)
-        recorder.record(
-            manifest_id,
-            build_runtime_contract_evidence(
-                manifest_id=manifest_id,
-                contract_ref=getattr(self._context, "contract_ref", None),
-                contract_schema_hash=getattr(
-                    self._context, "contract_schema_hash", None
-                ),
-                resume_requested=bool(getattr(self._context, "resume", False)),
-                lock_owner_id=lock_owner_id,
-            ),
-        )
+        finalize_contract_evidence(self)
 
     async def _finalize_debug_export(self, status: str) -> None:
-        finalize = getattr(self._executor, "finalize_debug_export", None)
-        if not callable(finalize):
-            return
-        try:
-            from collections.abc import Awaitable, Callable
+        from bioetl.application.core._runner_finalize import finalize_debug_export
 
-            finalize_fn = cast(Callable[..., Awaitable[object]], finalize)
-            result = await finalize_fn(status=status, manifest_id=self.manifest_id)
-        except _RUN_FAILURE_EXCEPTIONS as error:
-            self._logger.warning(
-                "debug_export_finalize_failed",
-                error=str(error),
-                error_type=type(error).__name__,
-                run_id=str(self._context.run_id),
-            )
-            return
-        if not isinstance(result, DebugExportResult):
-            return
-        if self._run_ledger_service is not None:
-            self._run_ledger_service.record_artifact_published(
-                layer="debug_export",
-                artifact_path=result.root_path,
-                artifact_content_hash=result.debug_export_hash,
-                dataset_ref=f"debug_export:{self._config.pipeline_name}@{self.run_id}",
-                details={
-                    "manifest_path": result.manifest_path,
-                    "debug_export_hash": result.debug_export_hash,
-                },
-            )
+        await finalize_debug_export(self, status)
