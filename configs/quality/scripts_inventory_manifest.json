@@ -1,19 +1,19 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-19T07:56:30.016222+00:00",
+  "generated_at": "2026-08-19T08:40:41.977612+00:00",
   "summary": {
-    "total_scripts": 605,
+    "total_scripts": 606,
     "status_counts": {
       "active": 338,
-      "supporting": 267
+      "supporting": 268
     },
     "reference_group_coverage": {
-      "agents": 5,
+      "agents": 7,
       "build": 17,
       "ci": 81,
       "docs": 256,
       "other": 78,
-      "scripts": 500,
+      "scripts": 501,
       "skills": 12,
       "tests": 396
     }
@@ -2591,7 +2591,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 269,
+          "line": 270,
           "source_group": "docs",
           "text": ".\\.venv-win\\Scripts\\python.exe scripts\\ai\\generate_project_domain_audit_workflow.py"
         }
@@ -2610,7 +2610,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/README.md",
-          "line": 106,
+          "line": 108,
           "source_group": "docs",
           "text": "- Install skills: `.\\scripts\\ai\\grok\\install_skills.ps1`"
         },
@@ -2652,7 +2652,7 @@
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 247,
+          "line": 248,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\grok\\install_skills.ps1"
         }
@@ -2710,7 +2710,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 37,
+      "reference_count": 42,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -4971,11 +4971,11 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 42,
+      "reference_count": 65,
       "references": [
         {
           "path": "docs/00-project/ai/README.md",
-          "line": 107,
+          "line": 109,
           "source_group": "docs",
           "text": "- CLI: `python -m scripts.ai.prompts list|render|check`"
         },
@@ -4987,37 +4987,37 @@
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 158,
+          "line": 159,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.audit.dual-agent-cycle \\"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 198,
+          "line": 199,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts list"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 199,
+          "line": 200,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts show prompt.audit.grok-cycle"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 200,
+          "line": 201,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.session.grok-bootstrap \\"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 202,
+          "line": 203,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.audit.grok-cycle --param SCOPE=\"src/bioetl/domain\""
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 203,
+          "line": 204,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.closeout.grok --param SCOPE=\"issues: #NNNN\""
         }
@@ -5791,7 +5791,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 74,
+      "reference_count": 76,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -7733,7 +7733,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 186,
+      "reference_count": 191,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -7959,7 +7959,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 39,
+      "reference_count": 40,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -10726,9 +10726,17 @@
       "path": "scripts/engineering/dev/run_mypy.sh",
       "type": "sh",
       "status": "active",
-      "agent_usage": [],
-      "reference_count": 19,
+      "agent_usage": [
+        "CODEX-RUNTIME"
+      ],
+      "reference_count": 20,
       "references": [
+        {
+          "path": ".codex/agents/CODEX-RUNTIME.md",
+          "line": 110,
+          "source_group": "agents",
+          "text": "(matching `scripts/engineering/dev/run_pytest.sh` / `run_mypy.sh`) and fall back"
+        },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
           "line": 172,
@@ -10770,12 +10778,6 @@
           "line": 650,
           "source_group": "docs",
           "text": "./run_mypy.sh"
-        },
-        {
-          "path": "docs/03-guides/getting-started.md",
-          "line": 101,
-          "source_group": "docs",
-          "text": "bash scripts/engineering/dev/run_mypy.sh"
         }
       ]
     },
@@ -10898,10 +10900,17 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [
+        "CODEX-RUNTIME",
         "py-test-bot"
       ],
-      "reference_count": 54,
+      "reference_count": 56,
       "references": [
+        {
+          "path": ".codex/agents/CODEX-RUNTIME.md",
+          "line": 110,
+          "source_group": "agents",
+          "text": "(matching `scripts/engineering/dev/run_pytest.sh` / `run_mypy.sh`) and fall back"
+        },
         {
           "path": ".codex/skills/py-test-bot/SKILL.md",
           "line": 47,
@@ -10940,12 +10949,6 @@
         },
         {
           "path": "docs/00-project/ai/prompts/library/audit/cycle/run/tests.md",
-          "line": 90,
-          "source_group": "docs",
-          "text": "- Runners: `scripts/engineering/dev/run_pytest.sh` / `.ps1`"
-        },
-        {
-          "path": "docs/00-project/ai/prompts/library/audit/cycle/tests.md",
           "line": 90,
           "source_group": "docs",
           "text": "- Runners: `scripts/engineering/dev/run_pytest.sh` / `.ps1`"
@@ -12043,7 +12046,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 344,
+      "reference_count": 347,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -17455,7 +17458,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 9,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
@@ -17494,10 +17497,16 @@
           "text": "| **C Memory** | Catalog ↔ schema. Smoke `python -m memory.tooling.workflow smoke` (or `run_workflow.sh smoke`). Check actor provenance, promote-only durable knowledge, no secrets in notes/handoffs, n"
         },
         {
-          "path": "scripts/memory/README.md",
-          "line": 14,
-          "source_group": "scripts",
-          "text": "- `bash scripts/memory/run_workflow.sh …` — preferred agent entry for"
+          "path": "docs/00-project/ai/prompts/library/audit/project/full/audit-cycle-agents-memory.md",
+          "line": 337,
+          "source_group": "docs",
+          "text": "- Helper: `bash scripts/memory/run_workflow.sh …` (venv + `PYTHONPATH=src`)"
+        },
+        {
+          "path": "docs/00-project/ai/prompts/library/audit/project/full/audit-cycle-agents-memory.md",
+          "line": 359,
+          "source_group": "docs",
+          "text": "| **C Memory** | Catalog ↔ schema. Smoke `python -m memory.tooling.workflow smoke` (or `run_workflow.sh smoke`). Check actor provenance, promote-only durable knowledge, no secrets in notes/handoffs, n"
         }
       ]
     },
@@ -19427,6 +19436,25 @@
       ]
     },
     {
+      "path": "scripts/ops/observability/grafana/dashboard_state_fixture_v2.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
+          "line": 656,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.dashboard_state_fixture_v2 import ("
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-17",
+      "next_step": "Retain as the dashboard_state_fixture_v2 loader used by rerender --fixture-case (#8984); not a standalone entrypoint."
+    },
+    {
       "path": "scripts/ops/observability/grafana/ensure_quarantine_explorer.py",
       "type": "py",
       "status": "supporting",
@@ -19984,13 +20012,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1453,
+          "line": 1477,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` to install repo-local \""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1540,
+          "line": 1564,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` or \""
         },
@@ -21690,7 +21718,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 431,
+          "line": 432,
           "source_group": "scripts",
           "text": "\"scripts/ops/support/load_repo_env.sh or pass --username/--password \""
         },

@@ -56,6 +56,9 @@ def test_shipped_dashboard_panel_matrix_matches_baseline(tmp_path: Path) -> None
         assert row["content_state_model"]
         assert int(row["fixture_case_count"]) > 0
         assert int(row["render_profile_count"]) > 0
+        assert row["eligible"] == "true"
+        assert row["enrolled"] == "true"
+        assert row["coverage_reason"] == "all_shipped_panels"
 
 
 def test_dashboard_panel_matrix_check_fails_closed_when_contract_cannot_load(
