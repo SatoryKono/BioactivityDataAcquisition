@@ -54,9 +54,7 @@ async def fetch_multi_column(
     state._ensure_filterable_adapter("Multi-column filtering")
     adapter = cast("FilterableDataSourcePort", state._data_source)
     if state._multi_filter_ids is None:
-        raise ValueError(
-            "multi_filter_ids must be loaded before multi-column fetch."
-        )
+        raise ValueError("multi_filter_ids must be loaded before multi-column fetch.")
     fetched_count = 0
     async for record in adapter.fetch_multi_filtered(
         entity_type=entity_type,
@@ -87,9 +85,7 @@ async def fetch_single_column(
             "when filtering is enabled."
         )
     if state._filter_ids is None:
-        raise ValueError(
-            "filter_ids must be loaded before single-column fetch."
-        )
+        raise ValueError("filter_ids must be loaded before single-column fetch.")
     if state._fallback_mapping:
         async for record in adapter.fetch_filtered_with_fallback(
             entity_type=entity_type,

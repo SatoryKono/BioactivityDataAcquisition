@@ -273,9 +273,7 @@ class TestSubcellularFractionDataSourceFetch:
 
         records = [
             record
-            async for record in wrapper.fetch(
-                "subcellular_fraction", limit=1, offset=1
-            )
+            async for record in wrapper.fetch("subcellular_fraction", limit=1, offset=1)
         ]
 
         assert len(records) == 1

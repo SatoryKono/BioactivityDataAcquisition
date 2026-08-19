@@ -130,7 +130,10 @@ CHEMBL_PROVIDER_LINK_RE = re.compile(r"\(chembl/([a-z0-9-]+)\.md\)")
 WORKFLOW_FILE_RE = re.compile(r"`([A-Za-z0-9._-]+\.yml)`")
 
 DRIFT_SKIP_DIRS = frozenset({"99-archive", "reports", "plans", "skills"})
-NOT_IN_NAV_GROWTH_EXCLUDED_PREFIXES = ("reports/",)
+NOT_IN_NAV_GROWTH_EXCLUDED_PREFIXES = (
+    "reports/",
+    "00-project/ai/prompts/",
+)
 
 ALLOW_LEGACY_MARKER = "doc-lint: allow-legacy"
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")

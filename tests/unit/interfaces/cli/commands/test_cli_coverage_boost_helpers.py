@@ -76,7 +76,9 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 pytestmark = pytest.mark.unit
 
 
-def _make_workflow_config(*, reconcile_action: str = "delete_orphans") -> WorkflowConfig:
+def _make_workflow_config(
+    *, reconcile_action: str = "delete_orphans"
+) -> WorkflowConfig:
     return WorkflowConfig(
         name="chembl_baseline",
         version="1.2.0",

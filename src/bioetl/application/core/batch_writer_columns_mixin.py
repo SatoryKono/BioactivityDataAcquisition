@@ -64,6 +64,7 @@ class BatchWriterColumnsMixin:
         """Project a PyArrow schema while preserving metadata when available."""
         try:
             import pyarrow as pa
+
             if not isinstance(schema, pa.Schema):
                 return None
             names = getattr(schema, "names", ())
