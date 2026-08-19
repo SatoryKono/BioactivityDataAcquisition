@@ -95,6 +95,19 @@ def _manifest(
 
 def verify_backup(bundle_path: Path) -> dict[str, Any]:
     """Verify manifest identity and every payload file."""
+    manifest = _load_backup_manifest(bundle_path)
+    files = manifest.get("files")
+    if not isinstance(files, list):
+        raise BackupVerificationError("backup manifest files must be a list")
+    normalized_files = _verify_backup_files(bundle_path, files)
+    root_digest = _backup_identity_digest(manifest, normalized_files)
+    if root_digest != manifest.get("root_digest"):
+        raise BackupVerificationError("backup root digest mismatch")
+    return manifest
+
+
+def _load_backup_manifest(bundle_path: Path) -> dict[str, Any]:
+    """Load and validate the top-level backup manifest shape."""
     manifest_path = bundle_path / MANIFEST_NAME
     try:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -102,9 +115,14 @@ def verify_backup(bundle_path: Path) -> dict[str, Any]:
         raise BackupVerificationError("backup manifest is unreadable") from exc
     if not isinstance(manifest, dict) or manifest.get("schema_version") != 1:
         raise BackupVerificationError("unsupported backup manifest")
-    files = manifest.get("files")
-    if not isinstance(files, list):
-        raise BackupVerificationError("backup manifest files must be a list")
+    return manifest
+
+
+def _verify_backup_files(
+    bundle_path: Path,
+    files: list[object],
+) -> list[dict[str, Any]]:
+    """Verify every listed payload and return canonical file identities."""
     normalized_files: list[dict[str, Any]] = []
     for entry in files:
         if not isinstance(entry, dict):
@@ -127,6 +145,14 @@ def verify_backup(bundle_path: Path) -> dict[str, Any]:
                 "size": payload_path.stat().st_size,
             }
         )
+    return normalized_files
+
+
+def _backup_identity_digest(
+    manifest: dict[str, Any],
+    normalized_files: list[dict[str, Any]],
+) -> str:
+    """Return the canonical digest for a verified backup manifest."""
     identity = json.dumps(
         {
             "files": normalized_files,
@@ -136,10 +162,7 @@ def verify_backup(bundle_path: Path) -> dict[str, Any]:
         separators=(",", ":"),
         sort_keys=True,
     ).encode()
-    root_digest = hashlib.sha256(identity).hexdigest()
-    if root_digest != manifest.get("root_digest"):
-        raise BackupVerificationError("backup root digest mismatch")
-    return manifest
+    return hashlib.sha256(identity).hexdigest()
 
 
 def create_backup(

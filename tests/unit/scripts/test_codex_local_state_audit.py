@@ -131,3 +131,18 @@ def test_restore_rejects_backup_outside_private_codex_backup_root(
 
     with pytest.raises(ValueError, match="under the Codex backups directory"):
         local_state_audit.restore_backup(home, tmp_path / "unsafe-backup")
+
+
+@pytest.mark.parametrize(
+    "candidate",
+    (
+        "/tmp/job.py",
+        "/var/tmp/job.py",
+        r"C:\\Users\\runner\\AppData\\Local\\Temp\\job.py",
+    ),
+)
+def test_rule_classifier_rejects_temporary_path_tokens(candidate: str) -> None:
+    assert local_state_audit._rule_class(["python", candidate], "allow") == (
+        "REMOVE",
+        "temporary_path",
+    )

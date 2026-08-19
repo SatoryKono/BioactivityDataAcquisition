@@ -13,6 +13,8 @@ from pathlib import Path
 
 import yaml
 
+from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
 ALLOWED_COMPATIBILITY_STATUSES = frozenset(
     {
         "deprecated-warn",
@@ -487,7 +489,8 @@ def _candidate_import_paths_via_rg(
     measured_module_names: set[str],
 ) -> tuple[Path, ...] | None:
     """Use ripgrep when available to avoid opening every source file in Python."""
-    if shutil.which("rg") is None or not measured_module_names:
+    rg_binary = shutil.which("rg")
+    if rg_binary is None or not measured_module_names:
         return None
     invalid_names = sorted(
         name
@@ -497,8 +500,11 @@ def _candidate_import_paths_via_rg(
     if invalid_names:
         raise ValueError(f"invalid measured module names: {invalid_names!r}")
     pattern = "|".join(re.escape(name) for name in sorted(measured_module_names))
+    command = ensure_safe_cli_argv(
+        [rg_binary, "-l", "-g", "*.py", "-e", pattern, str(src_root.resolve())]
+    )
     result = subprocess.run(
-        ["rg", "-l", "-g", "*.py", "-e", pattern, str(src_root)],
+        command,
         capture_output=True,
         text=True,
         encoding="utf-8",

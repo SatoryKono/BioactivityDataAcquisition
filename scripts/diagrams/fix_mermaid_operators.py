@@ -11,6 +11,8 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from scripts.engineering.common.repo_paths import resolve_cli_path
+
 
 @dataclass
 class ArrowIssue:
@@ -89,18 +91,9 @@ def fix_file(path: Path, dry_run: bool = False) -> int:
     """
     repo_root = _repo_root()
 
-    # Check for parent traversal in the original path first
     if ".." in path.parts:
         raise ValueError(f"Path {path} contains parent traversal")
-
-    # Resolve path to check if it's outside repo
-    resolved_path = path.resolve()
-
-    # Check if path is outside repo
-    try:
-        resolved_path.relative_to(repo_root.resolve())
-    except ValueError as err:
-        raise ValueError(f"Path {path} is outside repository root {repo_root}") from err
+    resolved_path = resolve_cli_path(path, root=repo_root)
 
     content = resolved_path.read_text(encoding="utf-8")
 

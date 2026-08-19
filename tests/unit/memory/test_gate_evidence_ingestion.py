@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from memory.proof import (
+    ReceiptInput,
     assemble_bundle,
     build_receipt,
     load_policy,
@@ -40,17 +41,19 @@ def _artifacts(tmp_path: Path) -> tuple[Path, Path, Path]:
         policy=policy,
         task_id="task-1",
         claim="tested",
-        receipt_id="tests-1",
-        producer="test_health",
-        evidence_kind="tests",
-        command="python -m scripts.engineering.qa run-tests --suite fast",
-        argv=[],
-        cwd=str(repo),
-        started_at=FIXED_TEST_TIME.isoformat(),
-        duration_ms=1,
-        exit_code=0,
-        status="pass",
-        output_path=None,
+        receipt_input=ReceiptInput(
+            receipt_id="tests-1",
+            producer="test_health",
+            evidence_kind="tests",
+            command="python -m scripts.engineering.qa run-tests --suite fast",
+            argv=[],
+            cwd=str(repo),
+            started_at=FIXED_TEST_TIME.isoformat(),
+            duration_ms=1,
+            exit_code=0,
+            status="pass",
+            output_path=None,
+        ),
         trust_tier="ci",
         ci_run_id="ci-1",
     )

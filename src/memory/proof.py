@@ -52,6 +52,25 @@ class VerificationResult:
         }
 
 
+@dataclass(frozen=True, slots=True)
+class ReceiptInput:
+    """Producer execution fields normalized into one evidence receipt."""
+
+    receipt_id: str
+    producer: str
+    evidence_kind: str
+    command: str
+    argv: list[str]
+    cwd: str
+    started_at: str
+    duration_ms: int
+    exit_code: int | None
+    status: str
+    output_path: Path | None
+    skip_reason: str | None = None
+    follow_up: str | None = None
+
+
 def canonical_digest(payload: Any) -> str:
     """Hash one JSON-compatible payload using the canonical encoding."""
     encoded = json.dumps(
@@ -315,25 +334,13 @@ def build_receipt(
     policy: dict[str, Any],
     task_id: str,
     claim: str,
-    receipt_id: str,
-    producer: str,
-    evidence_kind: str,
-    command: str,
-    argv: list[str],
-    cwd: str,
-    started_at: str,
-    duration_ms: int,
-    exit_code: int | None,
-    status: str,
-    output_path: Path | None,
+    receipt_input: ReceiptInput,
     trust_tier: str,
-    skip_reason: str | None = None,
-    follow_up: str | None = None,
     ci_run_id: str | None = None,
 ) -> dict[str, Any]:
     """Normalize one producer result into a source-bound receipt."""
-    if status not in {"pass", "fail", "skip", "unavailable"}:
-        raise ProofError(f"unsupported receipt status: {status}")
+    if receipt_input.status not in {"pass", "fail", "skip", "unavailable"}:
+        raise ProofError(f"unsupported receipt status: {receipt_input.status}")
     repository, source = discover_context(
         repo_root, policy=policy, claim=claim, ci_run_id=ci_run_id
     )
@@ -342,19 +349,19 @@ def build_receipt(
     if not isinstance(tier, dict):
         raise ProofError(f"unsupported trust tier: {trust_tier}")
     receipt = {
-        "receipt_id": receipt_id,
-        "producer": producer,
-        "evidence_kind": evidence_kind,
-        "command": command,
-        "argv": argv,
-        "cwd": cwd,
-        "started_at": started_at,
-        "duration_ms": duration_ms,
-        "exit_code": exit_code,
-        "status": status,
-        "skip_reason": skip_reason,
-        "follow_up": follow_up,
-        "output_digest": file_digest(output_path),
+        "receipt_id": receipt_input.receipt_id,
+        "producer": receipt_input.producer,
+        "evidence_kind": receipt_input.evidence_kind,
+        "command": receipt_input.command,
+        "argv": receipt_input.argv,
+        "cwd": receipt_input.cwd,
+        "started_at": receipt_input.started_at,
+        "duration_ms": receipt_input.duration_ms,
+        "exit_code": receipt_input.exit_code,
+        "status": receipt_input.status,
+        "skip_reason": receipt_input.skip_reason,
+        "follow_up": receipt_input.follow_up,
+        "output_digest": file_digest(receipt_input.output_path),
         "source": source,
         "repository": repository,
         "task_id": task_id,
@@ -407,20 +414,22 @@ def emit_receipt_from_environment(
         policy=policy,
         task_id=task_id,
         claim=claim,
-        receipt_id=receipt_id,
-        producer=producer,
-        evidence_kind=evidence_kind,
-        command=command,
-        argv=[],
-        cwd=str(repo_root.resolve()),
-        started_at=datetime_now_utc(),
-        duration_ms=duration_ms,
-        exit_code=exit_code,
-        status=status,
-        output_path=output_path,
+        receipt_input=ReceiptInput(
+            receipt_id=receipt_id,
+            producer=producer,
+            evidence_kind=evidence_kind,
+            command=command,
+            argv=[],
+            cwd=str(repo_root.resolve()),
+            started_at=datetime_now_utc(),
+            duration_ms=duration_ms,
+            exit_code=exit_code,
+            status=status,
+            output_path=output_path,
+            skip_reason=skip_reason,
+            follow_up=follow_up,
+        ),
         trust_tier=trust_tier,
-        skip_reason=skip_reason,
-        follow_up=follow_up,
         ci_run_id=ci_run_id,
     )
     receipt_dir = Path(

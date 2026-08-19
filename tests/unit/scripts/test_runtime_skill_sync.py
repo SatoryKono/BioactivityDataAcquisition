@@ -79,3 +79,12 @@ def test_sync_devin_copies_missing_required_file(tmp_path: Path) -> None:
     runtime_skill_sync._sync_devin(tmp_path, contract)
 
     assert (tmp_path / ".devin/skills/demo/references/new.md").read_text() == "new\n"
+
+
+def test_write_report_confines_destination_to_runtime_root(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="refusing path outside"):
+        runtime_skill_sync._write_report(
+            tmp_path.parent / "escape.json",
+            {"status": "blocked"},
+            root=tmp_path,
+        )

@@ -97,6 +97,17 @@ def timeline_events_ready(events_dir: Path, *, repo_root: Path | None = None) ->
     entries = manifest.get("files")
     if manifest.get("schema_version") != 1 or not isinstance(entries, list):
         return False
+    if not _timeline_manifest_files_valid(events_dir, event_files, entries):
+        return False
+    return _timeline_manifest_matches_repository(manifest, resolved_root)
+
+
+def _timeline_manifest_files_valid(
+    events_dir: Path,
+    event_files: list[Path],
+    entries: list[object],
+) -> bool:
+    """Validate the manifest inventory and each timeline event artifact."""
     expected_names = {path.name for path in event_files}
     if {
         entry.get("path") for entry in entries if isinstance(entry, dict)
@@ -113,6 +124,14 @@ def timeline_events_ready(events_dir: Path, *, repo_root: Path | None = None) ->
             or not _valid_timeline_jsonl(path)
         ):
             return False
+    return True
+
+
+def _timeline_manifest_matches_repository(
+    manifest: dict[str, object],
+    resolved_root: Path | None,
+) -> bool:
+    """Validate repository identity when timeline events are repo-bound."""
     if resolved_root is None:
         return True
     current = capture_rag_git_identity(resolved_root)

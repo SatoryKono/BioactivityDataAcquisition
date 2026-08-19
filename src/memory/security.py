@@ -69,12 +69,12 @@ _RULES: tuple[tuple[FindingKind, str, re.Pattern[str]], ...] = (
     (
         FindingKind.SECRET,
         "secret-github-token",
-        re.compile(r"\b(?:gh[opusr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,})\b"),
+        re.compile(r"\b(?:gh[opusr]_\w{20,}|github_pat_\w{20,})\b", re.ASCII),
     ),
     (
         FindingKind.SECRET,
         "secret-bearer-token",
-        re.compile(r"\bBearer\s+[A-Za-z0-9._~+/=-]{16,}", re.IGNORECASE),
+        re.compile(r"\bBearer\s+[\w.~+/=-]{16,}", re.IGNORECASE | re.ASCII),
     ),
     (
         FindingKind.PII,
@@ -84,17 +84,17 @@ _RULES: tuple[tuple[FindingKind, str, re.Pattern[str]], ...] = (
     (
         FindingKind.PII,
         "pii-international-phone-number",
-        re.compile(r"(?<!\w)\+(?:[0-9][ -]?){7,14}[0-9](?!\w)"),
+        re.compile(r"(?<!\w)\+(?:\d[ -]?){7,14}\d(?!\w)", re.ASCII),
     ),
     (
         FindingKind.PII,
         "pii-posix-user-home-path",
-        re.compile(r"(?<![A-Za-z0-9_])/home/[^/\s]+/"),
+        re.compile(r"(?<!\w)/home/[^/\s]+/", re.ASCII),
     ),
     (
         FindingKind.PII,
         "pii-windows-user-home-path",
-        re.compile(r"\b[A-Za-z]:\\Users\\[^\\\s]+\\", re.IGNORECASE),
+        re.compile(r"\b[a-z]:\\Users\\[^\\\s]+\\", re.IGNORECASE),
     ),
 )
 

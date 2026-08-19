@@ -52,35 +52,15 @@ def replay_decision(root: Path, decision_digest: str) -> ReplayResult:
     decision_path = root / "decisions.jsonl"
     if not decision_path.exists():
         raise KeyError(decision_digest)
-    matched: dict[str, Any] | None = None
-    for line in decision_path.read_text(encoding="utf-8").splitlines():
-        if not line.strip():
-            continue
-        row = json.loads(line)
-        if isinstance(row, dict) and row.get("decision_digest") == decision_digest:
-            matched = row
-            break
-    if matched is None:
-        raise KeyError(decision_digest)
+    matched = _load_decision(decision_path, decision_digest)
     content = {key: value for key, value in matched.items() if key != "decision_digest"}
     if _digest(content) != decision_digest:
         raise ValueError("decision digest mismatch")
-
-    raw_digests = matched.get("evidence_digests")
-    if not isinstance(raw_digests, list) or not raw_digests:
-        raise ValueError("decision has no replayable evidence")
-    evidence_digests = tuple(str(value) for value in raw_digests)
+    evidence_digests = _decision_evidence_digests(matched)
     envelope = matched.get("envelope")
     if not isinstance(envelope, dict):
         raise ValueError("decision envelope is missing")
-    store = EvidenceStore(root)
-    for evidence_digest in evidence_digests:
-        evidence = store.resolve_evidence(evidence_digest)
-        evidence_envelope = evidence.get("envelope")
-        if not isinstance(evidence_envelope, dict) or not _same_scope(
-            evidence_envelope, envelope
-        ):
-            raise ValueError("decision evidence scope mismatch")
+    _verify_decision_evidence(root, evidence_digests, envelope)
     return ReplayResult(
         decision_digest=decision_digest,
         decision=str(matched.get("decision") or ""),
@@ -89,3 +69,38 @@ def replay_decision(root: Path, decision_digest: str) -> ReplayResult:
         repository_commit=str(envelope.get("git_commit") or ""),
         task_id=str(envelope.get("task_id") or ""),
     )
+
+
+def _load_decision(decision_path: Path, decision_digest: str) -> dict[str, Any]:
+    """Return the decision row matching an exact digest."""
+    for line in decision_path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        row = json.loads(line)
+        if isinstance(row, dict) and row.get("decision_digest") == decision_digest:
+            return row
+    raise KeyError(decision_digest)
+
+
+def _decision_evidence_digests(matched: dict[str, Any]) -> tuple[str, ...]:
+    """Validate and normalize a decision's evidence digest list."""
+    raw_digests = matched.get("evidence_digests")
+    if not isinstance(raw_digests, list) or not raw_digests:
+        raise ValueError("decision has no replayable evidence")
+    return tuple(str(value) for value in raw_digests)
+
+
+def _verify_decision_evidence(
+    root: Path,
+    evidence_digests: tuple[str, ...],
+    envelope: dict[str, Any],
+) -> None:
+    """Require every cited evidence record to share the decision scope."""
+    store = EvidenceStore(root)
+    for evidence_digest in evidence_digests:
+        evidence = store.resolve_evidence(evidence_digest)
+        evidence_envelope = evidence.get("envelope")
+        if not isinstance(evidence_envelope, dict) or not _same_scope(
+            evidence_envelope, envelope
+        ):
+            raise ValueError("decision evidence scope mismatch")

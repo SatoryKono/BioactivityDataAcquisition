@@ -17,6 +17,7 @@ from memory.security import (
 from memory.storage import StorageConflictError, append_jsonl
 
 _SHA256_HEX_LENGTH = 64
+DECISION_EXISTS_MESSAGE = "decision record already exists"
 
 
 def _canonical_digest(payload: dict[str, Any]) -> str:
@@ -200,7 +201,7 @@ class EvidenceStore:
         }
         record_id = record.envelope.record_id
         if record_id in known_decision_ids:
-            raise ValueError("decision record already exists")
+            raise ValueError(DECISION_EXISTS_MESSAGE)
         missing_superseded = sorted(
             set(record.envelope.supersedes) - known_decision_ids
         )
@@ -224,10 +225,10 @@ class EvidenceStore:
                 reject_if=lambda row: (
                     row.get("envelope", {}).get("record_id") == record_id
                 ),
-                conflict_message="decision record already exists",
+                conflict_message=DECISION_EXISTS_MESSAGE,
             )
         except StorageConflictError as exc:
-            raise ValueError("decision record already exists") from exc
+            raise ValueError(DECISION_EXISTS_MESSAGE) from exc
         return record.decision_digest
 
     def resolve_evidence(self, digest: str) -> dict[str, Any]:

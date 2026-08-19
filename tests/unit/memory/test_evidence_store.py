@@ -7,7 +7,13 @@ from pathlib import Path
 import pytest
 
 from memory.evidence import DecisionRecord, EvidenceEvent, EvidenceStore
-from memory.records import ActorIdentity, RecordEnvelope, RecordType, TrustLevel
+from memory.records import (
+    ActorIdentity,
+    RecordEnvelope,
+    RecordScope,
+    RecordType,
+    TrustLevel,
+)
 
 pytestmark = pytest.mark.unit
 _COMMIT = "a" * 40
@@ -23,11 +29,7 @@ def _envelope(
     return RecordEnvelope.create(
         record_id=record_id,
         record_type=record_type,
-        repo_id=repo_id,
-        git_commit=_COMMIT,
-        branch="main",
-        worktree_id="worktree-a",
-        task_id="issue-7187",
+        scope=RecordScope(repo_id, _COMMIT, "main", "worktree-a", "issue-7187"),
         actor=ActorIdentity(runtime="codex", agent="test", model=None),
         source_refs=("src/memory/README.md",),
         trust=TrustLevel.TRUSTED_REPOSITORY,

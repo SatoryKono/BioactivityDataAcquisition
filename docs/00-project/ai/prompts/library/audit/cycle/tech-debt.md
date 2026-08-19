@@ -6,18 +6,18 @@ class: operator-paste
 owner: BioETL Team
 runtimes: [grok, codex, any]
 params:
-  - N
-  - SCOPE
-  - MODE
-  - LANGUAGE
-  - AUDIT_MODE
-  - ALLOW_ISSUE_WRITE
-  - ALLOW_PUSH
-  - ALLOW_MERGE
-  - ALLOW_CLOSE
-  - MAX_ISSUES_PER_ITERATION
-  - BASE_BRANCH
-  - REPO
+  - N = `10`
+  - SCOPE =  `src/bioetl/ configs/quality/` 
+  - MODE = `full`
+  - LANGUAGE  = `ru` 
+  - AUDIT_MODE = `full`
+  - ALLOW_ISSUE_WRITE = `true` 
+  - ALLOW_PUSH = `true` 
+  - ALLOW_MERGE = `true` 
+  - ALLOW_CLOSE = `true` 
+  - MAX_ISSUES_PER_ITERATION  = `10`
+  - BASE_BRANCH = `main`
+  - REPO = `SatoryKono/BioactivityDataAcquisition` 
 includes:
   - fragments/read-order.md
   - fragments/git-safety.md

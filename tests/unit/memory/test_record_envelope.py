@@ -8,7 +8,13 @@ from pathlib import Path
 import jsonschema
 import pytest
 
-from memory.records import ActorIdentity, RecordEnvelope, RecordType, TrustLevel
+from memory.records import (
+    ActorIdentity,
+    RecordEnvelope,
+    RecordScope,
+    RecordType,
+    TrustLevel,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -17,11 +23,13 @@ def _envelope() -> RecordEnvelope:
     return RecordEnvelope.create(
         record_id="record-1",
         record_type=RecordType.EVIDENCE,
-        repo_id="bioactivitydataacquisition",
-        git_commit="a" * 40,
-        branch="main",
-        worktree_id="worktree-1",
-        task_id="task-1",
+        scope=RecordScope(
+            "bioactivitydataacquisition",
+            "a" * 40,
+            "main",
+            "worktree-1",
+            "task-1",
+        ),
         actor=ActorIdentity(runtime="codex", agent="py-plan-bot", model=None),
         source_refs=("src/memory/README.md",),
         source_hashes={"src/memory/README.md": "b" * 64},
@@ -58,11 +66,13 @@ def test_record_envelope_digest_changes_with_provenance() -> None:
     changed = RecordEnvelope.create(
         record_id=original.record_id,
         record_type=original.record_type,
-        repo_id=original.repo_id,
-        git_commit="c" * 40,
-        branch=original.branch,
-        worktree_id=original.worktree_id,
-        task_id=original.task_id,
+        scope=RecordScope(
+            original.repo_id,
+            "c" * 40,
+            original.branch,
+            original.worktree_id,
+            original.task_id,
+        ),
         actor=original.actor,
         source_refs=original.source_refs,
         source_hashes=original.source_hashes,

@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 
 from memory.freshness import FreshnessStatus, evaluate_freshness
-from memory.records import ActorIdentity, RecordEnvelope, RecordType
+from memory.records import ActorIdentity, RecordEnvelope, RecordScope, RecordType
 from memory.scope import RepositoryScope
 
 pytestmark = pytest.mark.unit
@@ -22,14 +22,16 @@ def _envelope(**overrides: str) -> RecordEnvelope:
     return RecordEnvelope.create(
         record_id="record",
         record_type=RecordType.KNOWLEDGE,
-        task_id="task",
+        scope=RecordScope(
+            values["repo_id"],
+            values["git_commit"],
+            values["branch"],
+            values["worktree_id"],
+            "task",
+        ),
         actor=ActorIdentity(runtime="test", agent="test"),
         source_refs=("source",),
         created_at="2026-07-29T00:00:00+00:00",
-        repo_id=values["repo_id"],
-        git_commit=values["git_commit"],
-        branch=values["branch"],
-        worktree_id=values["worktree_id"],
     )
 
 

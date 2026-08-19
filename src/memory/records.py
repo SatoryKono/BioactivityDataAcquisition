@@ -55,6 +55,17 @@ class ActorIdentity:
 
 
 @dataclass(frozen=True, slots=True)
+class RecordScope:
+    """Repository and task binding shared by one record envelope."""
+
+    repo_id: str
+    git_commit: str
+    branch: str
+    worktree_id: str
+    task_id: str
+
+
+@dataclass(frozen=True, slots=True)
 class RecordEnvelope:
     """Common identity, provenance, and lifecycle metadata."""
 
@@ -81,11 +92,7 @@ class RecordEnvelope:
         *,
         record_id: str,
         record_type: RecordType,
-        repo_id: str,
-        git_commit: str,
-        branch: str,
-        worktree_id: str,
-        task_id: str,
+        scope: RecordScope,
         actor: ActorIdentity,
         source_refs: tuple[str, ...],
         source_hashes: dict[str, str] | None = None,
@@ -95,19 +102,15 @@ class RecordEnvelope:
         supersedes: tuple[str, ...] = (),
         created_at: str | None = None,
     ) -> RecordEnvelope:
-        """Create an envelope with a canonical UTC timestamp.
-
-        NOSONAR - S107: 15 parameters are intentional for comprehensive record envelope creation;
-        each parameter represents a distinct domain field required for memory records.
-        """
+        """Create an envelope with a canonical UTC timestamp."""
         return cls(
             record_id=record_id,
             record_type=record_type,
-            repo_id=repo_id,
-            git_commit=git_commit,
-            branch=branch,
-            worktree_id=worktree_id,
-            task_id=task_id,
+            repo_id=scope.repo_id,
+            git_commit=scope.git_commit,
+            branch=scope.branch,
+            worktree_id=scope.worktree_id,
+            task_id=scope.task_id,
             actor=actor,
             created_at=created_at or datetime.now(UTC).isoformat(),
             source_refs=source_refs,

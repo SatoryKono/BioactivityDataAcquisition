@@ -195,3 +195,30 @@ def test_repository_env_loader_is_whitelisted_and_local_overrides(
         names=(RUNTIME_SOURCE_ID_ENV,),
     )
     assert loaded == {RUNTIME_SOURCE_ID_ENV: "b" * 64}
+
+
+@pytest.mark.parametrize(
+    ("raw_value", "expected"),
+    [
+        ("value # inline comment", "value"),
+        ("value#literal", "value#literal"),
+        ('"value # literal"', "value # literal"),
+        ("'value # literal'", "value # literal"),
+    ],
+)
+def test_repository_env_loader_preserves_hash_literal_semantics(
+    tmp_path: Path,
+    raw_value: str,
+    expected: str,
+) -> None:
+    (tmp_path / ".env").write_text(
+        f"TEST_VALUE={raw_value}\n",
+        encoding="utf-8",
+    )
+
+    loaded = load_repository_source_environment(
+        tmp_path,
+        names=("TEST_VALUE",),
+    )
+
+    assert loaded == {"TEST_VALUE": expected}

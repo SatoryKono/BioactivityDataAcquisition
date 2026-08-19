@@ -10,6 +10,7 @@ import pytest
 
 from memory.proof_gate import ProofIngestionAuthorizationError, ingest_bundle
 from memory.proof import (
+    ReceiptInput,
     assemble_bundle,
     build_receipt,
     load_schema,
@@ -49,20 +50,22 @@ def _bundle(tmp_path: Path, *, status: str = "pass") -> tuple[Path, dict[str, ob
         policy=policy,
         task_id="task-1",
         claim="tested",
-        receipt_id="tests-1",
-        producer="test_health",
-        evidence_kind="tests",
-        command="python -m scripts.engineering.qa run-tests --suite fast",
-        argv=[],
-        cwd=str(repo),
-        started_at=FIXED_TEST_TIME.isoformat(),
-        duration_ms=1,
-        exit_code=0 if status == "pass" else 1 if status == "fail" else None,
-        status=status,
-        output_path=None,
+        receipt_input=ReceiptInput(
+            receipt_id="tests-1",
+            producer="test_health",
+            evidence_kind="tests",
+            command="python -m scripts.engineering.qa run-tests --suite fast",
+            argv=[],
+            cwd=str(repo),
+            started_at=FIXED_TEST_TIME.isoformat(),
+            duration_ms=1,
+            exit_code=0 if status == "pass" else 1 if status == "fail" else None,
+            status=status,
+            output_path=None,
+            skip_reason=skip_reason,
+            follow_up=follow_up,
+        ),
         trust_tier="ci",
-        skip_reason=skip_reason,
-        follow_up=follow_up,
         ci_run_id="ci-1",
     )
     bundle = assemble_bundle(
