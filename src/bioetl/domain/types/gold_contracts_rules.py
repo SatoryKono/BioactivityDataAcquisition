@@ -201,7 +201,5 @@ def _is_numeric_bound(value: object) -> TypeGuard[int | float]:
 def _reject_inverted_numeric_range(minimum: object, maximum: object) -> None:
     if not (_is_numeric_bound(minimum) and _is_numeric_bound(maximum)):
         return
-    numeric_minimum = cast("int | float", minimum)
-    numeric_maximum = cast("int | float", maximum)
-    if numeric_minimum > numeric_maximum:
+    if minimum > maximum:
         raise ValueError("minimum cannot exceed maximum")

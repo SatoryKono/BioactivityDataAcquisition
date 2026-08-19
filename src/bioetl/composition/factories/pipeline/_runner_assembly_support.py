@@ -41,7 +41,7 @@ from bioetl.composition.factories.services.pipeline_builder import (
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.locking import LockContextHolder
 from bioetl.domain.medallion import WriteModePolicy
-from bioetl.domain.ports import LoggerPort
+from bioetl.domain.ports import HealthMonitorPort, LoggerPort, MetricsPort
 from bioetl.domain.types import GoldSchemaType
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.time import SystemClock
@@ -88,7 +88,7 @@ def build_lock_runtime_service(
     )
 
 
-def _build_preflight_health_monitor(metrics: object) -> object:
+def _build_preflight_health_monitor(metrics: MetricsPort) -> HealthMonitorPort:
     from bioetl.infrastructure.control_plane.provider_health_evidence import (
         PersistingProviderHealthMonitor,
     )

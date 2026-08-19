@@ -134,6 +134,15 @@ log_test.txt
 /reports/quality/*
 
 # Sonar residual ledgers (SNR-R / SNR-R2)
+
+# TYP-RF typing/evidence campaign baseline
+!/reports/quality/typ-rf/
+/reports/quality/typ-rf/*
+!/reports/quality/typ-rf/BASELINE.md
+!/reports/quality/typ-rf/mypy-inventory.json
+!/reports/quality/typ-rf/mypy-baseline.txt
+!/reports/quality/typ-rf/mypy-after.txt
+
 !/reports/quality/sonar/
 /reports/quality/sonar/*
 !/reports/quality/sonar/live-issues-*.json

@@ -29,6 +29,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from bioetl.application.services.protein.classification_resolution import (
@@ -191,3 +193,20 @@ def test_resolver_emits_quarantine_row_for_invalid_chain() -> None:
     assert result.rows[0].classification_status == "quarantined"
     assert result.dq_issues[0].error_code == "protein_classification_resolution_failed"
     assert "broken parent chain" in result.dq_issues[0].message
+
+
+def test_classification_resolution_support_uses_canonical_hierarchy_type() -> None:
+    from bioetl.application.services.protein import _classification_resolution_support as support
+
+    source = Path(support.__file__).read_text(encoding="utf-8")
+    assert "bioetl.domain.chembl.protein_classification" not in source
+    assert "bioetl.domain.value_objects.protein_class_hierarchy" in source
+    hierarchy = _hierarchy(7)
+    assert isinstance(hierarchy, ProteinClassHierarchy)
+    by_leaf_id: dict[int, tuple[int, ProteinClassHierarchy]] = {}
+    support.record_component_hierarchies(
+        by_leaf_id=by_leaf_id,
+        component_id=3,
+        hierarchies=(hierarchy,),
+    )
+    assert by_leaf_id[7] == (3, hierarchy)

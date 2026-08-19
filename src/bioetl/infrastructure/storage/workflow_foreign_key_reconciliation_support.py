@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from math import isnan
 from typing import Protocol
 
@@ -10,6 +11,19 @@ from bioetl.domain.ports import (
     ForeignKeyReconciliationRequest,
     ForeignKeyReconciliationResult,
 )
+
+
+class _ReconcileDebugArtifactSink(Protocol):
+    def write_reconcile_debug_artifacts(
+        self,
+        *,
+        context: object,
+        request: ForeignKeyReconciliationRequest,
+        result: ForeignKeyReconciliationResult,
+        retained_rows: tuple[Mapping[str, object], ...],
+        orphan_rows: tuple[Mapping[str, object], ...],
+    ) -> object: ...
+
 
 NULL_TOKEN = object()
 
@@ -315,6 +329,27 @@ def record_reconciliation_metrics(
     increment(deleted_metric, deleted, {})
 
 
+
+def log_reconciliation_started(
+    adapter: object,
+    request: ForeignKeyReconciliationRequest,
+) -> None:
+    """Log the start of one foreign-key reconciliation request."""
+    logger = getattr(adapter, "logger", None)
+    log_reconciliation(
+        logger,
+        "info",
+        "foreign_key_reconciliation_started",
+        action=request.action,
+        source_table=request.source_table,
+        reference_table=request.reference_table,
+        source_key=request.source_key,
+        reference_key=request.reference_key,
+        workflow_run_id=request.workflow_run_id,
+        step_id=request.step_id,
+    )
+
+
 def log_reconciliation(
     logger: object, level: str, message: str, **context: object
 ) -> None:
@@ -324,7 +359,7 @@ def log_reconciliation(
 
 
 def emit_reconcile_debug_artifacts(
-    artifact_sink: object | None,
+    artifact_sink: _ReconcileDebugArtifactSink | None,
     request: ForeignKeyReconciliationRequest,
     result: ForeignKeyReconciliationResult,
     *,
