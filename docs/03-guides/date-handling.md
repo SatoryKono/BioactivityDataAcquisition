@@ -32,7 +32,7 @@ When a date has incomplete precision (e.g., only year or year-month), BioETL nor
 | Input        | Output       | Rationale                            |
 | ------------ | ------------ | ------------------------------------ |
 | `2024-03-15` | `2024-03-15` | Full date, unchanged                 |
-| `2024-03`    | `2024-03-30` | End of month (day 30 for simplicity) |
+| `2024-03`    | `2024-03-31` | End of month (last calendar day)     |
 | `2024`       | `2024-12-31` | End of year                          |
 
 **Why end-of-period?**
@@ -99,7 +99,7 @@ from bioetl.domain.behavior.data-normalization-service import (
 service = DefaultDataNormalizer()
 
 service.normalize-partial-date("2024-03-15")  # → "2024-03-15"
-service.normalize-partial-date("2024-03")     # → "2024-03-30"
+service.normalize-partial-date("2024-03")     # → "2024-03-31"
 service.normalize-partial-date("2024")        # → "2024-12-31"
 service.normalize-partial-date(None)          # → None
 ```
@@ -251,7 +251,7 @@ class TestNewProviderDateHandling:
         assert transformer.-normalize-partial-date("2024-03-15") == "2024-03-15"
 
     def test-partial-month-normalized(self, transformer):
-        assert transformer.-normalize-partial-date("2024-03") == "2024-03-30"
+        assert transformer.-normalize-partial-date("2024-03") == "2024-03-31"
 
     def test-year-only-normalized(self, transformer):
         assert transformer.-normalize-partial-date("2024") == "2024-12-31"
