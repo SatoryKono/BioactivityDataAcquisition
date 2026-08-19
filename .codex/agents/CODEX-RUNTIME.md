@@ -105,8 +105,10 @@ assemble and verify their normalized receipts:
   --bundle reports/quality/proof-or-stop/<run-id>/bundle.json
 ```
 
-Use `.venv-win/Scripts/python.exe` on native Windows and
-`.venv/bin/python` in WSL/Linux. `ADMIT` is the only outcome that can qualify a
+Use `.venv-win/Scripts/python.exe` on native Windows. In WSL/Linux prefer the
+canonical dev interpreter `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python`
+(matching `scripts/engineering/dev/run_pytest.sh` / `run_mypy.sh`) and fall back
+to `.venv/bin/python` only when that venv is absent. `ADMIT` is the only outcome that can qualify a
 lifecycle transition at the policy-required trust tier. `DEGRADED` and `STOP`
 must be reported with reasons and follow-up; unavailable evidence is never
 pass. Optional vendor evaluators may add receipts but cannot override the core

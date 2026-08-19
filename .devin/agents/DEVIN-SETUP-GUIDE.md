@@ -263,6 +263,13 @@ Devin CLI `v3000.3+` splits project settings from MCP servers:
   daily servers available and marks optional servers disabled without changing
   the tracked inventory.
 
+`.devin/config.local.json` is **not** a supported project-settings override:
+only `.devin/config.json` (tracked) and the generated `.devin/mcp_config.local.json`
+overlay are materialized (see `tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py`).
+If a machine-local `config.local.json` exists, it MUST preserve the same `.env`
+guardrail as the tracked `config.json` — keep `ask`/`deny` on `Read`/`Write(**/.env*)`
+so a local override never silently weakens the repository env-file protection.
+
 Secrets are never committed. Token-bearing HTTP headers use Devin's
 `${env:VAR}` expansion and must be supplied through the environment or Devin
 Secrets. The repository `.env` guardrail remains in force: Devin asks before
