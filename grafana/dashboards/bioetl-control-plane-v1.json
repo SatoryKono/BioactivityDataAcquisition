@@ -459,7 +459,8 @@
             {
               "title": "Retry selected-run retention",
               "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?viewPanel=9416&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}&var-workflow=$workflow",
-              "targetBlank": false
+              "targetBlank": false,
+              "includeVars": false
             }
           ]
         },
