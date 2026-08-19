@@ -118,7 +118,7 @@
       "description": "processing_status is whether the pipeline finished. trust_status is whether this run's evidence is complete enough to replay. Monitor Replay Readiness (9401) is CURRENT Prometheus for pipeline x run_type; run_id never filters Prometheus. First-screen SELECTED RUN tables: Review Selected-Run Trust (9418) and Review Retention Compliance (9416). Review Lineage Validation is the first collapsed row and contains table 9415. UNKNOWN/INCOMPLETE is missing or contradictory evidence, never healthy.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Can this run be replayed safely?</div><div>SELECTED RUN tables on this screen: <em>Review Selected-Run Trust</em> · <em>Review Retention Compliance</em>. CURRENT = pipeline replay readiness now, not this run.</div><div>Then expand the row <em>Review Lineage Validation</em>. INCOMPLETE or UNKNOWN = incomplete evidence — not OK.<div><span>Run coverage:</span> Coverage uses selected-run timestamps via <em>Review Run Summary</em> (<code>covers_selected_run</code>). Chip IN RANGE / OUT OF RANGE / UNKNOWN comes from Review Selected Run Summary (<code>coverage_chip</code>). A run inside the window is IN RANGE and must not show an outside-range warning. OUT OF RANGE still offers Set range to run. Do not treat CURRENT Prometheus as that UUID.</div><div><span>Effective refresh:</span> 60s · timezone: browser</div></div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Can this run be replayed safely?</div><div>SELECTED RUN tables on this screen: <em>Review Selected-Run Trust</em> · <em>Review Retention Compliance</em>. CURRENT = pipeline replay readiness now, not this run.</div><div>Then expand the row <em>Review Lineage Validation</em>. INCOMPLETE or UNKNOWN = incomplete evidence — not OK.<div><span>Run coverage:</span> Chip IN RANGE / OUT OF RANGE / UNKNOWN on Selected Run Summary. Set range to run when OUT OF RANGE. Do not treat CURRENT Prometheus as that UUID.</div><div><span>Effective refresh:</span> 60s · timezone: browser</div></div></div></div>"
       },
       "links": []
     },
@@ -238,7 +238,7 @@
       "type": "table",
       "title": "Review Selected-Run Trust",
       "gridPos": {
-        "h": 5,
+        "h": 7,
         "w": 12,
         "x": 0,
         "y": 8
@@ -480,7 +480,7 @@
         ]
       },
       "gridPos": {
-        "h": 5,
+        "h": 7,
         "w": 12,
         "x": 12,
         "y": 8
@@ -572,50 +572,6 @@
           }
         }
       ]
-    },
-    {
-      "id": 906,
-      "type": "text",
-      "title": "",
-      "gridPos": {
-        "h": 2,
-        "w": 24,
-        "x": 0,
-        "y": 13
-      },
-      "options": {
-        "bioetlDisplayTitle": "Review Recovery Action",
-        "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:16px;white-space:normal;overflow-wrap:anywhere\">Do not replay this run if its Trust status is INCOMPLETE or UNKNOWN. This-screen tables: <em>Review Selected-Run Trust</em> and <em>Review Retention Compliance</em>. Then expand the row <em>Review Lineage Validation</em>.</div>",
-        "mode": "html",
-        "dataLinks": [
-          {
-            "title": "Open Replay Safety Diagnostics",
-            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&viewPanel=130&${__url_time_range}",
-            "targetBlank": false,
-            "includeVars": false
-          },
-          {
-            "title": "Open Selected-Run Trust",
-            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&viewPanel=9418&${__url_time_range}",
-            "targetBlank": false,
-            "includeVars": false
-          },
-          {
-            "title": "Open Lineage Validation",
-            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&viewPanel=9415&${__url_time_range}",
-            "targetBlank": false,
-            "includeVars": false
-          },
-          {
-            "title": "Open Retention Compliance",
-            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&viewPanel=9416&${__url_time_range}",
-            "targetBlank": false,
-            "includeVars": false
-          }
-        ]
-      },
-      "transparent": false,
-      "description": "Next-step rail (native title omitted so h=2 does not scroll). Do not replay this run if its Trust status is INCOMPLETE or UNKNOWN. First-screen tables: Review Selected-Run Trust (9418) and Review Retention Compliance (9416). Review Lineage Validation is the first collapsed row (9419) and contains table 9415. Monitor Replay Readiness (9401) is current Prometheus for the pipeline, not this run."
     },
     {
       "datasource": {
@@ -1043,6 +999,50 @@
       "type": "row",
       "description": "Expand for the Review Lineage Validation table (9415). This row is named after that table; it is not Inspect Audit & Lineage Evidence.",
       "panels": [
+        {
+          "id": 906,
+          "type": "text",
+          "title": "",
+          "gridPos": {
+            "h": 2,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "options": {
+            "bioetlDisplayTitle": "Review Recovery Action",
+            "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:16px;white-space:normal;overflow-wrap:anywhere\">Do not replay this run if its Trust status is INCOMPLETE or UNKNOWN. This-screen tables: <em>Review Selected-Run Trust</em> and <em>Review Retention Compliance</em>. Then expand the row <em>Review Lineage Validation</em>.</div>",
+            "mode": "html",
+            "dataLinks": [
+              {
+                "title": "Open Replay Safety Diagnostics",
+                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&viewPanel=130&${__url_time_range}",
+                "targetBlank": false,
+                "includeVars": false
+              },
+              {
+                "title": "Open Selected-Run Trust",
+                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&viewPanel=9418&${__url_time_range}",
+                "targetBlank": false,
+                "includeVars": false
+              },
+              {
+                "title": "Open Lineage Validation",
+                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&viewPanel=9415&${__url_time_range}",
+                "targetBlank": false,
+                "includeVars": false
+              },
+              {
+                "title": "Open Retention Compliance",
+                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&viewPanel=9416&${__url_time_range}",
+                "targetBlank": false,
+                "includeVars": false
+              }
+            ]
+          },
+          "transparent": false,
+          "description": "Next-step rail (native title omitted so h=2 does not scroll). Do not replay this run if its Trust status is INCOMPLETE or UNKNOWN. First-screen tables: Review Selected-Run Trust (9418) and Review Retention Compliance (9416). Review Lineage Validation is the first collapsed row (9419) and contains table 9415. Monitor Replay Readiness (9401) is current Prometheus for the pipeline, not this run."
+        },
         {
           "datasource": "BioETL Ops HTTP",
           "description": "TIME RANGE · SELECTED RUN lineage closure, identity consistency, cycle freedom, and persistence profile. Lives in the collapsed row titled Review Lineage Validation (not Inspect Audit & Lineage Evidence). UNKNOWN is not a healthy zero. No matching rows are a valid empty result; backend unavailable means the query could not be evaluated. SELECT RUN / VALID EMPTY is not OK.",

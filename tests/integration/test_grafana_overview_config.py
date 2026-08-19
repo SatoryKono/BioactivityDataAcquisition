@@ -159,9 +159,9 @@ def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() 
     assert panels["Review Domain Status"].get("id") == 9002
     assert panels["Inspect Scope & Evidence"].get("gridPos", {}).get("y") == 4
     assert panels["Review Selected Run Summary"].get("id") == 9603
-    assert panels["Review Selected Run Summary"].get("gridPos", {}).get("y") == 8
-    assert panels["Monitor Fleet Health"].get("gridPos", {}).get("y") == 13
-    assert panels["Review First Action"].get("gridPos", {}).get("y") == 13
+    assert panels["Review Selected Run Summary"].get("gridPos", {}).get("y") == 7
+    assert panels["Monitor Fleet Health"].get("gridPos", {}).get("y") == 12
+    assert panels["Review First Action"].get("gridPos", {}).get("y") == 12
     assert panels["Review Domain Status"].get("gridPos", {}).get("y") == panels[
         "Review First Action"
     ].get("gridPos", {}).get("y")
