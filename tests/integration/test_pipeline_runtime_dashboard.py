@@ -123,11 +123,11 @@ def test_pipeline_runtime_variables_use_runtime_universe() -> None:
         if variable.get("name")
     }
 
-    pipeline_query = variables["pipeline"].get("query", {}).get("query", "")
+    pipeline_query = str(variables["pipeline"].get("definition") or "")
     run_type_query = variables["run_type"].get("query", {}).get("query", "")
     stage_query = variables["stage"].get("query", {}).get("query", "")
 
-    assert "bioetl_runtime_pipeline_run_type_universe" in pipeline_query
+    assert "filter-options?dimension=pipeline" in pipeline_query
     assert "bioetl_runtime_pipeline_run_type_universe" in run_type_query
     assert "bioetl_records_processed_total" not in pipeline_query
     assert "bioetl_records_processed_total" not in run_type_query

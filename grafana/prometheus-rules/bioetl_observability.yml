@@ -667,7 +667,17 @@ groups:
         expr: bioetl_runtime_current_blocker_reason
 
       - record: bioetl_provider_current_status
-        expr: ((max by (provider) (bioetl_provider_health_status == bool 0) * 2) + max by (provider) (bioetl_provider_health_status == bool 1) + (max by (provider) (bioetl_provider_health_status == bool 2) * 0)) or ((bioetl_provider_health_check_provider_universe_15m * 0) / (bioetl_provider_health_check_provider_universe_15m * 0))
+        expr: ((max by (provider) (bioetl_provider_health_status == bool 0) * 2) + max by (provider) (bioetl_provider_health_status == bool 1) + (max by (provider) (bioetl_provider_health_status == bool 2) * 0)) or (bioetl_provider_health_check_provider_universe_15m * 0 + 3)
+      - record: bioetl_provider_current_status_info
+        labels:
+          reason: missing_health_status
+          source_state: unknown
+        expr: (bioetl_provider_health_check_provider_universe_15m * 0 + 3) unless on (provider) bioetl_provider_health_status
+      - record: bioetl_provider_current_status_info
+        labels:
+          reason: observed_health_status
+          source_state: observed
+        expr: bioetl_provider_current_status and on (provider) bioetl_provider_health_status
 
       - record: bioetl_provider_current_cause
         labels:

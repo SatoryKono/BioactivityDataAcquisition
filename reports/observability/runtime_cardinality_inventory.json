@@ -55,6 +55,7 @@
     "bioetl_prometheus_rule_evaluation_failures_10m",
     "bioetl_prometheus_rule_iterations_missed_10m",
     "bioetl_prometheus_rule_partial_error_active_10m",
+    "bioetl_provider_current_status",
     "bioetl_provider_health_check_degraded_12h",
     "bioetl_provider_health_check_degraded_15m",
     "bioetl_provider_health_check_failures_12h",
@@ -288,6 +289,7 @@
     "bioetl_processed_records_silver_valid_current",
     "bioetl_provider_current_cause",
     "bioetl_provider_current_status",
+    "bioetl_provider_current_status_info",
     "bioetl_provider_health_check_provider_universe_15m",
     "bioetl_provider_health_status",
     "bioetl_provider_range_operational_ok",
@@ -630,6 +632,7 @@
     "bioetl_prometheus_rule_partial_error_active_10m",
     "bioetl_provider_current_cause",
     "bioetl_provider_current_status",
+    "bioetl_provider_current_status_info",
     "bioetl_provider_health_check_degraded_12h",
     "bioetl_provider_health_check_degraded_15m",
     "bioetl_provider_health_check_failures_12h",
@@ -1914,6 +1917,10 @@
       "grafana/dashboards/bioetl-provider-health-v2.json",
       "grafana/dashboards/bioetl-runtime.json"
     ],
+    "bioetl_provider_current_status_info": [
+      "docs/03-guides/dashboards/panel-contract-inventory.json",
+      "grafana/dashboards/bioetl-provider-health-v2.json"
+    ],
     "bioetl_provider_health_check_provider_universe_15m": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "grafana/README.md",
@@ -3115,6 +3122,7 @@
     "bioetl_prometheus_rule_partial_error_active_10m",
     "bioetl_provider_current_cause",
     "bioetl_provider_current_status",
+    "bioetl_provider_current_status_info",
     "bioetl_provider_health_check_degraded_12h",
     "bioetl_provider_health_check_degraded_15m",
     "bioetl_provider_health_check_failures_12h",
@@ -3417,6 +3425,9 @@
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_prometheus_rule_partial_error_active_10m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_provider_current_status": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_provider_health_check_degraded_12h": [
