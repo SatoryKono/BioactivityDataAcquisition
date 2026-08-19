@@ -15,8 +15,10 @@ from types import MappingProxyType
 from bioetl.domain.normalization.profiles._chembl_policy_family_mapping import (
     family_mapping_by_name,
 )
-from bioetl.domain.normalization.profiles.chembl_policy_registry_data import (
+from bioetl.domain.normalization.profiles._chembl_policy_registry_defaults import (
     DEFAULT_CHEMBL_POLICY_REGISTRY_DATA,
+)
+from bioetl.domain.normalization.profiles.chembl_policy_registry_data import (
     ChemblControlledVocabularyFamily,
     ChemblOntologyPolicyFamily,
     ChemblPolicyRegistryData,

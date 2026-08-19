@@ -5943,7 +5943,7 @@
       "missing_lines": 1,
       "module": "bioetl.application.services.control_plane.replay.historical_universe_service",
       "path": "src/bioetl/application/services/control_plane/replay/historical_universe_service.py",
-      "source_lines": 216
+      "source_lines": 218
     },
     {
       "coverage_percent": 100.0,
@@ -30255,7 +30255,7 @@
       "missing_lines": 1,
       "module": "bioetl.application.services.control_plane.replay.historical_universe_service",
       "path": "src/bioetl/application/services/control_plane/replay/historical_universe_service.py",
-      "source_lines": 216
+      "source_lines": 218
     },
     {
       "coverage_percent": 100.0,
@@ -48630,7 +48630,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-17",
-  "source_tree_sha256": "4690f95f41096554a18ed62f6194cc5ddf20ba24478de80b5543e1dc2509d322",
+  "source_tree_sha256": "c7138b9871246a61f56ad1f08a0927e526a399d0a5761d770182827ecc2dbc82",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

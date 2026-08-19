@@ -7,7 +7,6 @@ from __future__ import annotations
 
 __all__ = ["BasePipeline"]
 
-from abc import ABC
 from datetime import UTC, date, datetime
 from typing import TYPE_CHECKING, Self
 
@@ -35,7 +34,7 @@ def _resolve_replay_timestamp_anchor(runtime: RuntimeConfig) -> datetime | None:
     return datetime.combine(replay_date, datetime.min.time(), tzinfo=UTC)
 
 
-class BasePipeline(ABC):
+class BasePipeline:
     """Base class for ETL pipelines.
     Acts as a container for:
     - Configuration (Static & Runtime)

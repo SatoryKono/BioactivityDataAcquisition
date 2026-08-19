@@ -161,7 +161,7 @@ def test_issue_6034_composition_runtime_seams_keep_headroom() -> None:
 
 
 def test_issue_6037_runtime_scc_acceptances_are_fresh_and_not_growing() -> None:
-    assert len(ACCEPTED_RUNTIME_SCCS) == 2
+    assert len(ACCEPTED_RUNTIME_SCCS) == 1
     assert len(ACCEPTED_RUNTIME_SCCS) <= REVIEWED_RUNTIME_SCC_BUDGET_MAX
 
     metadata = next(
