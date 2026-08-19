@@ -195,4 +195,3 @@ def test_table_error_as_http_ok_accepts_grafana_flag() -> None:
 
 def test_forensic_deadline_remains_twelve_seconds() -> None:
     assert FORENSIC_ENDPOINT_TIMEOUT_SECONDS == 12.0
-
