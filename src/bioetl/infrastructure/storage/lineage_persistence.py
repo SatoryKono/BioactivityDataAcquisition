@@ -221,6 +221,39 @@ def resolve_metadata_and_lineage_fragment[MetadataT](
     return fallback_factory(), None
 
 
+def _raise_if_required(required: bool, message: str) -> None:
+    """Raise RuntimeError when a required lineage persistence precondition fails."""
+    if required:
+        raise RuntimeError(message)
+
+
+def _reject_incomplete_lineage_fragment(
+    lineage_fragment: LineageGraphFragment,
+    *,
+    metrics: MetricsPort | None,
+    pipeline_name: str | None,
+    layer: str | None,
+    required: bool,
+) -> bool:
+    """Emit failure metric and optionally raise; True means caller should return."""
+    preflight_error = _lineage_fragment_preflight_error(lineage_fragment)
+    if preflight_error is None:
+        return False
+    _emit_lineage_fragment_metric(
+        metrics,
+        pipeline_name=pipeline_name,
+        layer=layer,
+        status="failed",
+    )
+    _raise_if_required(
+        required,
+        "Strict metadata publication rejected an incomplete lineage "
+        f"fragment: pipeline={pipeline_name or 'unknown'}, "
+        f"layer={layer or 'unknown'}, reason={preflight_error}",
+    )
+    return True
+
+
 async def persist_lineage_fragment_if_present(
     *,
     lineage_store: LineageStorePort | None,
@@ -232,33 +265,26 @@ async def persist_lineage_fragment_if_present(
 ) -> None:
     """Persist one lineage fragment when lineage storage is configured."""
     if lineage_fragment is None:
-        if required:
-            raise RuntimeError(
-                "Strict metadata publication requires a lineage fragment: "
-                f"pipeline={pipeline_name or 'unknown'}, layer={layer or 'unknown'}"
-            )
+        _raise_if_required(
+            required,
+            "Strict metadata publication requires a lineage fragment: "
+            f"pipeline={pipeline_name or 'unknown'}, layer={layer or 'unknown'}",
+        )
         return
     if lineage_store is None:
-        if required:
-            raise RuntimeError(
-                "Strict metadata publication requires a lineage store: "
-                f"pipeline={pipeline_name or 'unknown'}, layer={layer or 'unknown'}"
-            )
-        return
-    preflight_error = _lineage_fragment_preflight_error(lineage_fragment)
-    if preflight_error is not None:
-        _emit_lineage_fragment_metric(
-            metrics,
-            pipeline_name=pipeline_name,
-            layer=layer,
-            status="failed",
+        _raise_if_required(
+            required,
+            "Strict metadata publication requires a lineage store: "
+            f"pipeline={pipeline_name or 'unknown'}, layer={layer or 'unknown'}",
         )
-        if required:
-            raise RuntimeError(
-                "Strict metadata publication rejected an incomplete lineage "
-                f"fragment: pipeline={pipeline_name or 'unknown'}, "
-                f"layer={layer or 'unknown'}, reason={preflight_error}"
-            )
+        return
+    if _reject_incomplete_lineage_fragment(
+        lineage_fragment,
+        metrics=metrics,
+        pipeline_name=pipeline_name,
+        layer=layer,
+        required=required,
+    ):
         return
     try:
         # Keep blocking lineage store I/O off the event loop (ARCH-CR-01 / #6863).

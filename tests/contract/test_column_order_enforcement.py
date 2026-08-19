@@ -96,8 +96,8 @@ def test_canonical_column_order_places_lookup_fields_before_business_columns() -
     ]
 
 
-def test_canonical_column_order_deduplicates_duplicate_inputs() -> None:
-    ordered = canonical_column_order(
-        ["entity_id", "entity_id", "_dq_error", "name", "name", "content_hash"]
-    )
-    assert ordered == ["entity_id", "content_hash", "name", "_dq_error"]
+def test_canonical_column_order_rejects_duplicate_inputs() -> None:
+    with pytest.raises(ValueError, match="does not allow duplicate names"):
+        canonical_column_order(
+            ["entity_id", "entity_id", "_dq_error", "name", "name", "content_hash"]
+        )

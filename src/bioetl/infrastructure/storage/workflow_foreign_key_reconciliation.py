@@ -23,8 +23,11 @@ from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support i
     build_reconciliation_result,
     complete_dry_run,
     complete_without_mutation,
+    emit_reconcile_debug_artifacts,
     filter_source_rows_to_current_run,
+    log_reconciliation,
     partition_source_rows,
+    record_reconciliation_metrics,
     reference_value_set,
 )
 
@@ -218,28 +221,18 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
         )
 
     def _record_metrics(self, *, scanned: int, retained: int, deleted: int) -> None:
-        if self.metrics is None:
-            return
-        self.metrics.increment_counter(
-            _RECONCILIATION_ROWS_SCANNED_TOTAL,
-            scanned,
-            {},
-        )
-        self.metrics.increment_counter(
-            _RECONCILIATION_ROWS_RETAINED_TOTAL,
-            retained,
-            {},
-        )
-        self.metrics.increment_counter(
-            _RECONCILIATION_ROWS_DELETED_TOTAL,
-            deleted,
-            {},
+        record_reconciliation_metrics(
+            self.metrics,
+            scanned=scanned,
+            retained=retained,
+            deleted=deleted,
+            scanned_metric=_RECONCILIATION_ROWS_SCANNED_TOTAL,
+            retained_metric=_RECONCILIATION_ROWS_RETAINED_TOTAL,
+            deleted_metric=_RECONCILIATION_ROWS_DELETED_TOTAL,
         )
 
     def _log(self, level: str, message: str, **context: object) -> None:
-        log_method = getattr(self.logger, level, None)
-        if callable(log_method):
-            log_method(message, **context)
+        log_reconciliation(self.logger, level, message, **context)
 
     async def _read_source_rows(
         self,
@@ -422,20 +415,12 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
         retained_rows: list[dict[str, object]],
         orphan_rows: list[dict[str, object]],
     ) -> None:
-        if self.artifact_sink is None:
-            return
-        if (
-            not request.debug_export_enabled
-            or request.workflow_run_id is None
-            or request.step_id is None
-        ):
-            return
-        self.artifact_sink.write_reconcile_debug_artifacts(
-            context=request,
-            request=request,
-            result=result,
-            retained_rows=tuple(retained_rows),
-            orphan_rows=tuple(orphan_rows),
+        emit_reconcile_debug_artifacts(
+            self.artifact_sink,
+            request,
+            result,
+            retained_rows=retained_rows,
+            orphan_rows=orphan_rows,
         )
 
 

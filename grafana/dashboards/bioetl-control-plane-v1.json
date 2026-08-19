@@ -120,13 +120,7 @@
         "mode": "html",
         "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Can this run be replayed safely?</div><div>SELECTED RUN tables on this screen: <em>Review Selected-Run Trust</em> · <em>Review Retention Compliance</em>. CURRENT = pipeline replay readiness now, not this run.</div><div>Then expand the row <em>Review Lineage Validation</em>. INCOMPLETE or UNKNOWN = incomplete evidence — not OK.<div><span>Run coverage:</span> SELECTED RUN <code>${run_id}</code> may sit outside TIME RANGE. Set range to run: open <b>6. Run Explorer</b>, then set From/To to started_at-5m .. <code style='font-size:16px'>completed_at</code>+5m. Do not treat CURRENT Prometheus as that UUID.</div><div><span>Effective refresh:</span> 60s · timezone: browser</div></div></div></div>"
       },
-      "links": [
-        {
-          "title": "Set range to run — open 6. Run Explorer",
-          "url": "/d/bioetl-run-explorer-v1?var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}",
-          "targetBlank": false
-        }
-      ]
+      "links": []
     },
     {
       "id": 9401,
@@ -262,14 +256,7 @@
           },
           "unit": "none",
           "noValue": "No selected-run trust payload. Select an exact run; UNAVAILABLE/INCOMPLETE is not OK.",
-          "links": [
-            {
-              "title": "Open 6. Run Explorer for selected run",
-              "url": "/d/bioetl-run-explorer-v1?${__url_time_range}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}&viewPanel=9402",
-              "targetBlank": false,
-              "includeVars": false
-            }
-          ]
+          "links": []
         },
         "overrides": [
           {
@@ -4599,12 +4586,6 @@
                   "title": "Open monitoring backend setup docs",
                   "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
                   "targetBlank": true
-                },
-                {
-                  "title": "Open 6. Run Explorer for selected run",
-                  "url": "/d/bioetl-run-explorer-v1?${__url_time_range}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}&viewPanel=9402",
-                  "targetBlank": false,
-                  "includeVars": false
                 }
               ]
             },
@@ -4721,13 +4702,7 @@
               }
             }
           ],
-          "links": [
-            {
-              "title": "Open 6. Run Explorer for selected run",
-              "url": "/d/bioetl-run-explorer-v1?${__url_time_range}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}&viewPanel=9402",
-              "targetBlank": false
-            }
-          ]
+          "links": []
         },
         {
           "id": 9403,

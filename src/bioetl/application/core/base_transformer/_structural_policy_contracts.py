@@ -60,30 +60,48 @@ def resolve_logical_type(physical_type: str) -> LogicalType:
     normalized = physical_type.lower()
     if normalized == "str" or "string" in normalized:
         return "string"
-    if (
+    if _is_integer_physical_type(normalized):
+        return "integer"
+    if _is_float_physical_type(normalized):
+        return "float"
+    if _is_boolean_physical_type(normalized):
+        return "boolean"
+    if _is_stringy_physical_type(normalized):
+        return "string"
+    return "unknown"
+
+
+def _is_integer_physical_type(normalized: str) -> bool:
+    return (
         normalized.startswith("uint")
         or normalized.startswith("int")
         or "uint" in normalized
-    ):
-        return "integer"
-    if (
+    )
+
+
+def _is_float_physical_type(normalized: str) -> bool:
+    return (
         normalized.startswith("float")
         or "double" in normalized
         or "decimal" in normalized
-    ):
-        return "float"
-    if normalized == "bool" or "boolean" in normalized or normalized.startswith("bool"):
-        return "boolean"
-    if (
+    )
+
+
+def _is_boolean_physical_type(normalized: str) -> bool:
+    return (
+        normalized == "bool" or "boolean" in normalized or normalized.startswith("bool")
+    )
+
+
+def _is_stringy_physical_type(normalized: str) -> bool:
+    return (
         "datetime" in normalized
         or "timestamp" in normalized
         or normalized == "date"
         or normalized.startswith("date")
-    ):
-        return "string"
-    if "category" in normalized or "categorical" in normalized:
-        return "string"
-    return "unknown"
+        or "category" in normalized
+        or "categorical" in normalized
+    )
 
 
 def is_missing_value(

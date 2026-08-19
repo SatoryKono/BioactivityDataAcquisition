@@ -48630,7 +48630,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-17",
-  "source_tree_sha256": "4690f95f41096554a18ed62f6194cc5ddf20ba24478de80b5543e1dc2509d322",
+  "source_tree_sha256": "3dc040de4c40f1df674989c13d54dd5cb0d5033fdeebfada2461be430fc20706",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

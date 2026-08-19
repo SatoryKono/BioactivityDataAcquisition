@@ -216,10 +216,8 @@ def json_equal(left: object, right: object) -> bool:
     )
 
 
-def _normalize_jsonable(value: object) -> object:
-    """Normalize supported values without collapsing distinct types."""
-    if value is None or isinstance(value, bool | int | float | str):
-        return value
+def _normalize_typed_jsonable(value: object) -> object | None:
+    """Normalize datetime/date/UUID/bytes values; return None for other types."""
     if isinstance(value, datetime):
         return {
             "__type__": "datetime",
@@ -233,6 +231,16 @@ def _normalize_jsonable(value: object) -> object:
         return {"__type__": "uuid", "value": str(value)}
     if isinstance(value, bytes):
         return {"__type__": "bytes", "hex": value.hex()}
+    return None
+
+
+def _normalize_jsonable(value: object) -> object:
+    """Normalize supported values without collapsing distinct types."""
+    if value is None or isinstance(value, bool | int | float | str):
+        return value
+    typed = _normalize_typed_jsonable(value)
+    if typed is not None:
+        return typed
     if isinstance(value, dict):
         return {str(key): _normalize_jsonable(item) for key, item in value.items()}
     if isinstance(value, list | tuple):

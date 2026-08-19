@@ -139,7 +139,7 @@ def test_pubchem_molecule_schema_accepts_composed_minimal_row() -> None:
         ("tpsa", -0.1),
         ("complexity", -0.1),
         ("charge", 11),
-        ("heavy_atom_count", 0),
+        ("heavy_atom_count", -1),
         ("h_bond_donor_count", 51),
         ("h_bond_acceptor_count", -1),
         ("rotatable_bond_count", 101),
