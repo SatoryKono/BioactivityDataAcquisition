@@ -3468,6 +3468,26 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
+      "covered_lines": 42,
+      "executable_lines": 42,
+      "missing_lines": 0,
+      "module": "bioetl.application.observability.current_metrics_reconciliation",
+      "path": "src/bioetl/application/observability/current_metrics_reconciliation.py",
+      "source_lines": 123
+    },
+    {
+      "coverage_percent": 89.38,
+      "coverage_status": "partially_covered",
+      "covered_lines": 101,
+      "executable_lines": 113,
+      "missing_lines": 12,
+      "module": "bioetl.application.observability.current_metrics_rehydrate",
+      "path": "src/bioetl/application/observability/current_metrics_rehydrate.py",
+      "source_lines": 232
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
       "covered_lines": 5,
       "executable_lines": 5,
       "missing_lines": 0,
@@ -23826,6 +23846,16 @@
       "source_lines": 108
     },
     {
+      "coverage_percent": 79.66,
+      "coverage_status": "partially_covered",
+      "covered_lines": 47,
+      "executable_lines": 59,
+      "missing_lines": 12,
+      "module": "bioetl.interfaces.http._health_server_checkpoint_freshness",
+      "path": "src/bioetl/interfaces/http/_health_server_checkpoint_freshness.py",
+      "source_lines": 209
+    },
+    {
       "coverage_percent": 86.96,
       "coverage_status": "partially_covered",
       "covered_lines": 20,
@@ -23934,6 +23964,16 @@
       "module": "bioetl.interfaces.http._health_server_quarantine_routing",
       "path": "src/bioetl/interfaces/http/_health_server_quarantine_routing.py",
       "source_lines": 230
+    },
+    {
+      "coverage_percent": 96.77,
+      "coverage_status": "partially_covered",
+      "covered_lines": 30,
+      "executable_lines": 31,
+      "missing_lines": 1,
+      "module": "bioetl.interfaces.http._health_server_readiness",
+      "path": "src/bioetl/interfaces/http/_health_server_readiness.py",
+      "source_lines": 67
     },
     {
       "coverage_percent": 100.0,
@@ -27740,6 +27780,26 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
+      "covered_lines": 42,
+      "executable_lines": 42,
+      "missing_lines": 0,
+      "module": "bioetl.application.observability.current_metrics_reconciliation",
+      "path": "src/bioetl/application/observability/current_metrics_reconciliation.py",
+      "source_lines": 123
+    },
+    {
+      "coverage_percent": 89.38,
+      "coverage_status": "partially_covered",
+      "covered_lines": 101,
+      "executable_lines": 113,
+      "missing_lines": 12,
+      "module": "bioetl.application.observability.current_metrics_rehydrate",
+      "path": "src/bioetl/application/observability/current_metrics_rehydrate.py",
+      "source_lines": 232
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
       "covered_lines": 5,
       "executable_lines": 5,
       "missing_lines": 0,
@@ -48098,6 +48158,16 @@
       "source_lines": 108
     },
     {
+      "coverage_percent": 79.66,
+      "coverage_status": "partially_covered",
+      "covered_lines": 47,
+      "executable_lines": 59,
+      "missing_lines": 12,
+      "module": "bioetl.interfaces.http._health_server_checkpoint_freshness",
+      "path": "src/bioetl/interfaces/http/_health_server_checkpoint_freshness.py",
+      "source_lines": 209
+    },
+    {
       "coverage_percent": 86.96,
       "coverage_status": "partially_covered",
       "covered_lines": 20,
@@ -48206,6 +48276,16 @@
       "module": "bioetl.interfaces.http._health_server_quarantine_routing",
       "path": "src/bioetl/interfaces/http/_health_server_quarantine_routing.py",
       "source_lines": 230
+    },
+    {
+      "coverage_percent": 96.77,
+      "coverage_status": "partially_covered",
+      "covered_lines": 30,
+      "executable_lines": 31,
+      "missing_lines": 1,
+      "module": "bioetl.interfaces.http._health_server_readiness",
+      "path": "src/bioetl/interfaces/http/_health_server_readiness.py",
+      "source_lines": 67
     },
     {
       "coverage_percent": 100.0,
@@ -48705,12 +48785,12 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2427,
+    "source_module_count": 2431,
     "status_counts": {
       "coverage_xml_missing": 0,
-      "fully_covered": 1546,
+      "fully_covered": 1547,
       "no_executable_lines": 3,
-      "partially_covered": 878,
+      "partially_covered": 881,
       "uncovered": 0,
       "unmeasured": 0
     },
