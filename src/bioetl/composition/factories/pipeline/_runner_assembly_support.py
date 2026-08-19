@@ -29,6 +29,7 @@ from bioetl.application.services.medallion.medallion_lifecycle import (
 from bioetl.composition.bootstrap_contexts import DQConfigsContext
 from bioetl.composition.factories.dq.context_resolver import extract_dq_output_paths
 from bioetl.composition.factories.pipeline.postrun_assembly import build_postrun_service
+from bioetl.composition.factories.pipeline._preflight_health_monitor import build_preflight_health_monitor
 from bioetl.composition.factories.pipeline.runner_constructor import (
     RunnerAssemblyParts,
     RunnerConstructorPayload,
@@ -41,7 +42,7 @@ from bioetl.composition.factories.services.pipeline_builder import (
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.locking import LockContextHolder
 from bioetl.domain.medallion import WriteModePolicy
-from bioetl.domain.ports import HealthMonitorPort, LoggerPort, MetricsPort
+from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import GoldSchemaType
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.time import SystemClock
@@ -88,36 +89,12 @@ def build_lock_runtime_service(
     )
 
 
-def _build_preflight_health_monitor(metrics: MetricsPort) -> HealthMonitorPort:
-    from bioetl.infrastructure.control_plane.provider_health_evidence import (
-        PersistingProviderHealthMonitor,
-    )
-    from bioetl.composition.runtime_builders import control_plane_root
-    from bioetl.composition.runtime_builders.config_access import get_settings
-    from bioetl.infrastructure.adapters.http.health_monitor import (
-        ProviderHealthMonitor,
-    )
-    from bioetl.infrastructure.control_plane.file_provider_health_evidence import (
-        FileProviderHealthEvidenceStore,
-    )
-
-    inner = ProviderHealthMonitor(metrics=metrics)
-    try:
-        settings = get_settings()
-        store = FileProviderHealthEvidenceStore(
-            base_path=control_plane_root(settings, "provider_health")
-        )
-    except (OSError, RuntimeError, TypeError, ValueError):
-        return inner
-    return PersistingProviderHealthMonitor(inner=inner, store=store)
-
-
 def build_preflight_service(context: RunnerAssemblyContext) -> PreflightService:
     """Build the preflight service for a pipeline runner."""
     pipeline = context.pipeline
     health_aggregator = HealthAggregator(
         logger=context.logger_port,
-        health_monitor=_build_preflight_health_monitor(pipeline.services.metrics),
+        health_monitor=build_preflight_health_monitor(pipeline.services.metrics),
         health_check_mode=pipeline.runtime.health_check_mode,
         clock=SystemClock(),
     )
