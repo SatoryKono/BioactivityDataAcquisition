@@ -1,0 +1,1 @@
+{"iteration":9,"commands":["check-required-fields","audit-optionality --check","check-config-paths configs","verify-schema-parity --mode blocking","pytest tests/integration/config"],"outcome":"pass_with_nonblocking_parity_warnings","findings":[]}
