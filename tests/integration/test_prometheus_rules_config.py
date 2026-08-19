@@ -1190,11 +1190,14 @@ def test_provider_current_status_preserves_provider_health_status_mapping() -> N
     ]
     assert info_rules
     reasons = {rule.get("labels", {}).get("reason") for rule in info_rules}
-    assert (
-        "missing_or_stale_health_status" in reasons
-        or "missing_health_status" in reasons
-    )
+    assert "missing_health_status" in reasons
     assert "observed_health_status" in reasons
+    completeness = {rule.get("labels", {}).get("completeness") for rule in info_rules}
+    assert completeness == {"incomplete", "complete"}
+    health_present = {
+        rule.get("labels", {}).get("health_status_present") for rule in info_rules
+    }
+    assert health_present == {"0", "1"}
 
 
 def test_provider_current_status_fails_closed_on_missing_raw_status_series() -> None:
@@ -1974,3 +1977,25 @@ def test_threshold_smoke_examples_cover_warning_and_critical_boundaries() -> Non
             _classify_retry_exhaustions(case["exhaustions_per_hour"])
             == case["expected"]
         )
+
+
+def test_recording_and_alert_rules_forbid_run_id_promql_filter() -> None:
+    payload = _load_rules()
+    offenders: list[str] = []
+    for group in payload.get("groups", []):
+        if not isinstance(group, dict):
+            continue
+        for rule in group.get("rules", []):
+            if not isinstance(rule, dict):
+                continue
+            expr = str(rule.get("expr") or "").replace(" ", "")
+            name = str(rule.get("record") or rule.get("alert") or "?")
+            if "run_id=" in expr:
+                offenders.append(name)
+            labels = str(rule.get("labels") or {})
+            annotations = str(rule.get("annotations") or {})
+            if "run_id" in labels or "run_id" in annotations:
+                offenders.append(f"{name}:labels")
+    assert not offenders, "PromQL/recording-rule run_id= is forbidden:\n" + "\n".join(
+        offenders
+    )

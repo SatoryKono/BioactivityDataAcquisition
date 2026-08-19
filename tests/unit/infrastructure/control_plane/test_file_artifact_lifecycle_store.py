@@ -720,6 +720,48 @@ def test_plan_for_manifest_does_not_call_rglob_or_unbounded_glob(
     assert glob_calls == []
 
 
+def test_plan_for_manifest_reuses_warm_cache_for_same_manifest(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from uuid import UUID
+
+    from bioetl.domain.control_plane import RunCodeProvenance, RunManifest
+    from bioetl.domain.types import RunID, RunType
+
+    control_root = tmp_path / "control"
+    now = datetime(2026, 4, 22, tzinfo=UTC)
+    _write_json(
+        control_root / "run_manifest" / "manifest-selected.json",
+        {"manifest_id": "manifest-selected", "created_at": now.isoformat()},
+    )
+    store = FileControlPlaneArtifactLifecycleStore(base_path=control_root)
+    manifest = RunManifest(
+        manifest_id="manifest-selected",
+        execution_fingerprint="fp",
+        schema_version="1.0",
+        created_at=now,
+        run_id=RunID(UUID("00000000-0000-0000-0000-000000000001")),
+        run_type=RunType.INCREMENTAL,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        code_provenance=RunCodeProvenance(),
+    )
+    policy = ControlPlaneArtifactLifecyclePolicy(retention_days=30, now=now)
+    first = store.plan_for_manifest(policy, manifest=manifest, dry_run=True)
+    glob_calls: list[object] = []
+    original_glob = Path.glob
+
+    def _glob(self: Path, pattern: str, *args: object, **kwargs: object):
+        glob_calls.append((str(self), pattern))
+        return original_glob(self, pattern, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "glob", _glob)
+    second = store.plan_for_manifest(policy, manifest=manifest, dry_run=True)
+    assert second is first
+    assert glob_calls == []
+
+
 def test_plan_for_manifest_ignores_thousands_of_unrelated_files(tmp_path: Path) -> None:
     from uuid import UUID
 

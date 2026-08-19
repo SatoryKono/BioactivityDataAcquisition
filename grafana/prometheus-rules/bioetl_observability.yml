@@ -670,13 +670,19 @@ groups:
         expr: ((max by (provider) (bioetl_provider_health_status == bool 0) * 2) + max by (provider) (bioetl_provider_health_status == bool 1) + (max by (provider) (bioetl_provider_health_status == bool 2) * 0)) or (bioetl_provider_observed_universe * 0 + 3) or (bioetl_provider_health_check_provider_universe_15m * 0 + 3)
       - record: bioetl_provider_current_status_info
         labels:
-          reason: missing_or_stale_health_status
+          reason: missing_health_status
           source_state: unknown
+          completeness: incomplete
+          scrape_present: "1"
+          health_status_present: "0"
         expr: ((bioetl_provider_observed_universe * 0 + 3) or (bioetl_provider_health_check_provider_universe_15m * 0 + 3)) unless on (provider) bioetl_provider_health_status
       - record: bioetl_provider_current_status_info
         labels:
           reason: observed_health_status
           source_state: observed
+          completeness: complete
+          scrape_present: "1"
+          health_status_present: "1"
         expr: bioetl_provider_current_status and on (provider) bioetl_provider_health_status
 
       - record: bioetl_provider_current_cause

@@ -166,6 +166,15 @@ def _coverage_offset_outside(
     return "partial", "overlaps window"
 
 
+def _coverage_chip(covers: str) -> str:
+    """Map coverage projection to the first-window IN RANGE / OUT OF RANGE chip."""
+    if covers == "yes":
+        return "IN RANGE"
+    if covers in {"outside", "partial"}:
+        return "OUT OF RANGE"
+    return "UNKNOWN"
+
+
 def _coverage_fields(
     *,
     started_ms: int | None,
@@ -278,6 +287,7 @@ def _summary_rows_pipeline_run_report(
         status=status,
     )
     set_range = "Set range to run (started_at-5m .. completed_at+5m)"
+    coverage_chip = _coverage_chip(covers)
     summary_row = {
         "run_id": run_id,
         "status": status,
@@ -286,6 +296,7 @@ def _summary_rows_pipeline_run_report(
         "gold_records_out": str(gold_out),
         "excluded_by_contract": str(excluded),
         "covers_selected_run": covers,
+        "coverage_chip": coverage_chip,
         "coverage_offset": offset,
         "from_ms": str(from_ms),
         "to_ms": str(to_ms),

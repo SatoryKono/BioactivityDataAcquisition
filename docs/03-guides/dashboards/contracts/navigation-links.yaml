@@ -100,6 +100,7 @@ required_link_vars_by_target_uid:
     - workflow
     - pipeline
     - run_type
+    - run_id
   bioetl-runtime:
     - workflow
     - pipeline
@@ -122,6 +123,7 @@ required_link_vars_by_target_uid:
     - workflow
     - pipeline
     - run_type
+    - run_id
 allowed_dashboard_link_vars:
   bioetl-overview-v2:
     - workflow
@@ -317,11 +319,19 @@ required_panel_links_by_uid:
       target_uid: bioetl-provider-health-v2
       link_titles:
         - Open Provider Health
+    - panel_id: 9603
+      target_uid: bioetl-run-explorer-v1
+      link_titles:
+        - Open Run Explorer
   bioetl-dq-v2:
     - panel_id: 116
       target_uid: bioetl-control-plane-v1
       link_titles:
         - Open Control Plane lineage diagnostics
+    - panel_id: 9406
+      target_uid: bioetl-run-explorer-v1
+      link_titles:
+        - Open Run Explorer
   bioetl-runtime:
     - panel_id: 230
       target_uid: bioetl-runtime
@@ -344,6 +354,10 @@ required_panel_links_by_uid:
       link_titles:
         - Inspect stage expectedness
     - panel_id: 9101
+      target_uid: bioetl-run-explorer-v1
+      link_titles:
+        - Open Run Explorer
+    - panel_id: 9998
       target_uid: bioetl-run-explorer-v1
       link_titles:
         - Open Run Explorer
@@ -370,6 +384,10 @@ required_panel_links_by_uid:
       link_titles:
         - Open Data Quality
     - panel_id: 2010
+      target_uid: bioetl-run-explorer-v1
+      link_titles:
+        - Open Run Explorer
+    - panel_id: 2101
       target_uid: bioetl-run-explorer-v1
       link_titles:
         - Open Run Explorer

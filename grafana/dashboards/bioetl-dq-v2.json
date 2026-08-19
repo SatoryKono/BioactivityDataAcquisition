@@ -30,7 +30,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1.3;margin:0 6px 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:2px 6px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview)\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$__all&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health)\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">3. Provider Health</a><a class=\"bioetl-nav-current\" href=\"#bioetl-dq-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"4. Data Quality (Data Quality)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">4. Data Quality (current)</a><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer)\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">6. Run Explorer</a></div>"
+        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1.3;margin:0 6px 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:2px 6px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview)\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" href=\"/d/bioetl-runtime/bioetl-runtime?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-stage=$__all&amp;${__url_time_range}\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health)\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;${__url_time_range}\">3. Provider Health</a><a class=\"bioetl-nav-current\" href=\"#bioetl-dq-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"4. Data Quality (Data Quality)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">4. Data Quality (current)</a><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer)\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">6. Run Explorer</a></div>"
       },
       "title": "",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
@@ -38,7 +38,7 @@
       "links": [
         {
           "title": "0. Trust",
-          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -49,7 +49,7 @@
         },
         {
           "title": "1. Overview",
-          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -60,7 +60,7 @@
         },
         {
           "title": "2. Pipeline Diagnostics",
-          "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+          "url": "/d/bioetl-runtime/bioetl-runtime?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&var-stage=$__all&${__url_time_range}",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -71,7 +71,7 @@
         },
         {
           "title": "3. Provider Health",
-          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-provider=unknown&var-pipeline_context=$pipeline&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&var-provider=unknown&var-pipeline_context=$pipeline&${__url_time_range}",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -82,7 +82,7 @@
         },
         {
           "title": "5. Incident Workspace",
-          "url": "/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+          "url": "/d/bioetl-incident-v1/bioetl-incident-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -93,7 +93,7 @@
         },
         {
           "title": "6. Run Explorer",
-          "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+          "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -117,7 +117,7 @@
       "description": "Current panels show the latest DQ verdict and reasons for the selected pipeline. Selected-run panels use HTTP-backed identity and record accounting; run ID never filters Prometheus. Selected-range panels show scores, freshness, rejects, and delivery impact. These scopes answer different questions and must not be compared as equivalent status signals. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Is data conformant, and what impact needs action?</div><div><b>Scope:</b> <b>CURRENT</b> = Status/reasons · <b>SELECTED RUN</b> = accounting</div><div><b>TIME RANGE</b> = score/freshness/impact; scopes are not peers<div><span>Run coverage:</span> Coverage uses selected-run timestamps via <em>Review Run Summary</em> (<code>covers_selected_run</code>). This banner is not a coverage verdict. Do not treat CURRENT Prometheus as that UUID.</div><div><span>Effective refresh:</span> 60s · timezone: browser</div><div><span>Effective filters:</span> stage=<code>${stage}</code></div></div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Is data conformant, and what impact needs action?</div><div><b>Scope:</b> <b>CURRENT</b> = Status/reasons · <b>SELECTED RUN</b> = accounting</div><div><b>TIME RANGE</b> = score/freshness/impact; scopes are not peers<div><span>Run coverage:</span> Coverage uses selected-run timestamps via <em>Review Run Summary</em> (<code>covers_selected_run</code>). Chip IN RANGE / OUT OF RANGE / UNKNOWN comes from Review Selected Run Summary (<code>coverage_chip</code>). A run inside the window is IN RANGE and must not show an outside-range warning. OUT OF RANGE still offers Set range to run. Do not treat CURRENT Prometheus as that UUID.</div><div><span>Effective refresh:</span> 60s · timezone: browser</div><div><span>Effective filters:</span> stage=<code>${stage}</code></div></div></div></div>"
       },
       "links": []
     },
@@ -202,13 +202,13 @@
         "dataLinks": [
           {
             "title": "Inspect DQ Current Status",
-            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?viewPanel=9401&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}&var-workflow=$workflow",
+            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&viewPanel=9401&${__url_time_range}",
             "targetBlank": false,
             "includeVars": false
           },
           {
             "title": "Inspect DQ Current Reasons",
-            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?viewPanel=9102&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}&var-workflow=$workflow",
+            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&viewPanel=9102&${__url_time_range}",
             "targetBlank": false,
             "includeVars": false
           }
@@ -251,13 +251,13 @@
       "links": [
         {
           "title": "Review current status",
-          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?viewPanel=9401&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}&var-workflow=$workflow",
+          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&viewPanel=9401&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false
         },
         {
           "title": "Inspect current reasons",
-          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?viewPanel=9102&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}&var-workflow=$workflow",
+          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&viewPanel=9102&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false
         }
@@ -270,7 +270,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Current DQ threshold state for the selected pipeline. Mapping: `0=OK`, `1=WARN`, `2=CRIT`, `null=UNKNOWN`. Hard-fail reasons map to CRIT, warning-only reasons map to WARN. Disabled or noop DQ monitoring is treated as WARN, not unconditional green. This is pipeline-wide; use selected-range panels below for scoped evidence. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
+      "description": "TIME RANGE · CURRENT · Current DQ threshold state for the selected pipeline. Mapping: `0=OK`, `1=WARN`, `2=CRIT`, `null=UNKNOWN`. Hard-fail reasons map to CRIT, warning-only reasons map to WARN. Disabled or noop DQ monitoring is treated as WARN, not unconditional green. This is pipeline-wide; use selected-range panels below for scoped evidence. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -545,7 +545,7 @@
             "h": 6
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "TIME RANGE · Selected run: Bronze/Silver/Gold stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors mean the BioETL Ops HTTP backend may be unavailable; verify /health/live before interpreting as expected empty. Fail-closed: timeout, empty, or unresolved identity must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero.",
+          "description": "SELECTED RUN · TIME RANGE · Selected run: Bronze/Silver/Gold stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors mean the BioETL Ops HTTP backend may be unavailable; verify /health/live before interpreting as expected empty. Fail-closed: timeout, empty, or unresolved identity must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -882,7 +882,7 @@
             "h": 5
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Compact pipeline_run_report_v1 projection (identity, times, gold out, contract exclusions, coverage). Missing run is VALID EMPTY / SELECT RUN, not OK. Set range to run opens 6. Run Explorer at started_at-5m .. <code style='font-size:16px'>completed_at</code>+5m. Do not treat CURRENT Prometheus as this UUID. Backend unavailable means the query could not be evaluated. Verify /health/live.",
+          "description": "SELECTED RUN · Compact pipeline_run_report_v1 projection (identity, times, gold out, contract exclusions, coverage). Missing run is VALID EMPTY / SELECT RUN, not OK. Set range to run opens 6. Run Explorer at started_at-5m .. <code style='font-size:16px'>completed_at</code>+5m. Do not treat CURRENT Prometheus as this UUID. Backend unavailable means the query could not be evaluated. Verify /health/live. Coverage chip is IN RANGE / OUT OF RANGE / UNKNOWN from covers_selected_run. Set range to run opens Run Explorer 9402 at from_ms..to_ms. A covered run does not show an outside-range warning.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -894,7 +894,20 @@
               },
               "unit": "none",
               "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no report.",
-              "links": []
+              "links": [
+                {
+                  "title": "Set range to run",
+                  "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&viewPanel=9402&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
+                  "targetBlank": false,
+                  "includeVars": false
+                },
+                {
+                  "title": "Open Run Explorer",
+                  "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}",
+                  "targetBlank": false,
+                  "includeVars": false
+                }
+              ]
             },
             "overrides": [
               {
@@ -905,7 +918,14 @@
                 "properties": [
                   {
                     "id": "links",
-                    "value": []
+                    "value": [
+                      {
+                        "title": "Set range to run",
+                        "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&viewPanel=9402&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
+                        "targetBlank": false,
+                        "includeVars": false
+                      }
+                    ]
                   }
                 ]
               },
@@ -920,6 +940,40 @@
                     "value": []
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "coverage_chip"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "coverage"
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "IN RANGE": {
+                            "text": "IN RANGE",
+                            "color": "green"
+                          },
+                          "OUT OF RANGE": {
+                            "text": "OUT OF RANGE",
+                            "color": "orange"
+                          },
+                          "UNKNOWN": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -928,7 +982,21 @@
             "footer": {
               "show": false
             },
-            "cellHeight": "sm"
+            "cellHeight": "sm",
+            "dataLinks": [
+              {
+                "title": "Set range to run",
+                "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&viewPanel=9402&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
+                "targetBlank": false,
+                "includeVars": false
+              },
+              {
+                "title": "Open Run Explorer",
+                "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}",
+                "targetBlank": false,
+                "includeVars": false
+              }
+            ]
           },
           "targets": [
             {
@@ -962,17 +1030,28 @@
                   "completed_at": 3,
                   "gold_records_out": 4,
                   "excluded_by_contract": 5,
-                  "covers_selected_run": 6,
-                  "coverage_offset": 7,
-                  "set_range_to_run": 8,
-                  "from_ms": 9,
-                  "to_ms": 10
+                  "covers_selected_run": 7,
+                  "coverage_offset": 8,
+                  "set_range_to_run": 9,
+                  "from_ms": 10,
+                  "to_ms": 11,
+                  "coverage_chip": 6
                 },
-                "renameByName": {}
+                "renameByName": {
+                  "coverage_chip": "coverage",
+                  "covers_selected_run": "covers_selected_run"
+                }
               }
             }
           ],
-          "links": []
+          "links": [
+            {
+              "title": "Set range to run",
+              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&viewPanel=9402&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
+              "targetBlank": false,
+              "includeVars": false
+            }
+          ]
         }
       ],
       "description": "Expand after selecting an exact Run ID for HTTP-backed identity and accounting evidence."
@@ -994,7 +1073,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "CURRENT · Current: Bounded reason and action rows for WARN/CRIT. If a non-OK current status has no active reason series, a fail-safe reason_evidence_unavailable row directs the operator to verify recording rules. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
+          "description": "CURRENT · Current: Bounded reason and action rows for WARN/CRIT. If a non-OK current status has no active reason series, a fail-safe reason_evidence_unavailable row directs the operator to verify recording rules. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1388,7 +1467,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE delivery impact: Blocked-record evidence. Counts Silver filter rejects plus DQ quarantine records for the pipeline/run_type window without applying entity YAML thresholds. Read alongside the adjacent Track: Source Records in Range (Bronze) panel for denominator context, and rely on Monitor DQ Current Status / Monitor DQ Threshold State for the soft/hard severity verdict instead of the absolute count. 0 means no blocked records were observed in the selected window. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
+          "description": "TIME RANGE delivery impact: Blocked-record evidence. Counts Silver filter rejects plus DQ quarantine records for the pipeline/run_type window without applying entity YAML thresholds. Read alongside the adjacent Track: Source Records in Range (Bronze) panel for denominator context, and rely on Monitor DQ Current Status / Monitor DQ Threshold State for the soft/hard severity verdict instead of the absolute count. 0 means no blocked records were observed in the selected window. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1475,7 +1554,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE delivery impact: Quarantine count. Non-zero means records were withheld from normal promotion and require quarantine triage even when Silver filter rejects remain zero; 0 means no quarantined records were reported in the selected window. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
+          "description": "TIME RANGE delivery impact: Quarantine count. Non-zero means records were withheld from normal promotion and require quarantine triage even when Silver filter rejects remain zero; 0 means no quarantined records were reported in the selected window. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1633,7 +1712,7 @@
           ],
           "title": "Monitor Silver Filter Rejects",
           "type": "stat",
-          "description": "TIME RANGE delivery impact: Silver structural reject count from the filtered_out path only. FILTERED_OUT_SILVER is a legacy alias for this Silver structural path and is not a Gold contract/semantic reject code. A zero here does not refute current CRIT because quarantine, Gold reject outcomes, and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation/Gold panels before assuming the incident is filter-driven. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges."
+          "description": "TIME RANGE delivery impact: Silver structural reject count from the filtered_out path only. FILTERED_OUT_SILVER is a legacy alias for this Silver structural path and is not a Gold contract/semantic reject code. A zero here does not refute current CRIT because quarantine, Gold reject outcomes, and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation/Gold panels before assuming the incident is filter-driven. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. VALID EMPTY (no events) is not TELEMETRY MISSING."
         }
       ],
       "description": "Expand for selected-range impact and freshness after resolving the current reason lane."
@@ -1655,7 +1734,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Selected range: Silver structural reject reconciliation signal. Non-zero means the stage-total filtered_out counter diverges from the bounded Silver reject breakdown metric over the selected range. Gold contract and semantic reject outcomes are excluded from this guardrail. Zero or empty means none observed, not started, or not available—not bare success. Red only for validated failure. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
+          "description": "TIME RANGE · Selected range: Silver structural reject reconciliation signal. Non-zero means the stage-total filtered_out counter diverges from the bounded Silver reject breakdown metric over the selected range. Gold contract and semantic reject outcomes are excluded from this guardrail. Zero or empty means none observed, not started, or not available—not bare success. Red only for validated failure. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. VALID EMPTY (no events) is not TELEMETRY MISSING.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1853,7 +1932,7 @@
           ],
           "title": "Inspect Top Silver Reject Reasons",
           "type": "table",
-          "description": "TIME RANGE · Selected range: Silver structural reject reasons ranked by count in the selected range. Gold contract and semantic rejects are excluded. No data means no bounded reason samples were observed; it must not create a synthetic reason. For record-level evidence run `bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only` with the relevant run/reason filters. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges."
+          "description": "TIME RANGE · Selected range: Silver structural reject reasons ranked by count in the selected range. Gold contract and semantic rejects are excluded. No data means no bounded reason samples were observed; it must not create a synthetic reason. For record-level evidence run `bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only` with the relevant run/reason filters. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. VALID EMPTY (no events) is not TELEMETRY MISSING."
         },
         {
           "datasource": {
@@ -1961,14 +2040,14 @@
           ],
           "title": "Inspect Top Silver Reject Fields",
           "type": "table",
-          "description": "TIME RANGE · Selected range: Silver structural rejects grouped by schema field in the selected range. Gold contract and semantic rejects are excluded. No data means no bounded field samples were observed. For record-level evidence use `bioetl quarantine inspect` with the relevant pipeline, run, and field filters. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges."
+          "description": "TIME RANGE · Selected range: Silver structural rejects grouped by schema field in the selected range. Gold contract and semantic rejects are excluded. No data means no bounded field samples were observed. For record-level evidence use `bioetl quarantine inspect` with the relevant pipeline, run, and field filters. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. VALID EMPTY (no events) is not TELEMETRY MISSING."
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Selected range: Pipeline breakdown of Silver structural rejects from the filtered_out stage-total counter. This is a scope/distribution panel, not a reason_code summary, and it intentionally excludes Gold contract/semantic rejects. No data means no filtered_out samples were observed in the active window; the panel must not invent a synthetic pipeline row. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges.",
+          "description": "TIME RANGE · Selected range: Pipeline breakdown of Silver structural rejects from the filtered_out stage-total counter. This is a scope/distribution panel, not a reason_code summary, and it intentionally excludes Gold contract/semantic rejects. No data means no filtered_out samples were observed in the active window; the panel must not invent a synthetic pipeline row. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. VALID EMPTY (no events) is not TELEMETRY MISSING.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2076,7 +2155,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Gold contract quarantine and semantic exclusion outcomes by pipeline in the selected range. These are separate from Silver structural FILTERED_OUT_SILVER rejects. Use this panel when DQ impact is not explained by Silver reject evidence. No data means no Gold reject outcome samples were observed.",
+          "description": "TIME RANGE · Gold contract quarantine and semantic exclusion outcomes by pipeline in the selected range. These are separate from Silver structural FILTERED_OUT_SILVER rejects. Use this panel when DQ impact is not explained by Silver reject evidence. No data means no Gold reject outcome samples were observed. VALID EMPTY (no events) is not TELEMETRY MISSING.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2222,7 +2301,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Selected-range evidence only. This panel no longer drives current DQ status; use Monitor DQ Current Status for incident state. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row",
+          "description": "TIME RANGE · Selected-range evidence only. This panel no longer drives current DQ status; use Monitor DQ Current Status for incident state. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2257,7 +2336,8 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "short",
+              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
             },
             "overrides": []
           },
@@ -2305,7 +2385,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Selected-range Bronze denominator for DQ triage. 0 means no Bronze records were observed inside the active window; it does not prove DQ metrics are missing. Compare with Gold output and blocked-share panels below",
+          "description": "TIME RANGE · Selected-range Bronze denominator for DQ triage. 0 means no Bronze records were observed inside the active window; it does not prove DQ metrics are missing. Compare with Gold output and blocked-share panels below TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2375,7 +2455,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Selected-range Gold output count for DQ deliverability triage. 0 means no Gold records were observed inside the active window; it does not prove the current DQ verdict is OK or UNKNOWN. Compare with Bronze denominator, blocked-share, and the shared Processed Records table before interpreting data loss",
+          "description": "TIME RANGE · Selected-range Gold output count for DQ deliverability triage. 0 means no Gold records were observed inside the active window; it does not prove the current DQ verdict is OK or UNKNOWN. Compare with Bronze denominator, blocked-share, and the shared Processed Records table before interpreting data loss TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2502,7 +2582,7 @@
               {
                 "targetBlank": false,
                 "title": "Open DQ Current Reasons",
-                "url": "/d/bioetl-dq-v2/bioetl-dq-v2?viewPanel=9102&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}&var-workflow=$workflow",
+                "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&viewPanel=9102&${__url_time_range}",
                 "includeVars": false
               }
             ],
@@ -2534,7 +2614,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Quarantined records grouped by error type in the selected range. Use it to identify dominant quarantine signatures. No data means no matching quarantine samples were observed; it must not create a synthetic error type. For row-level evidence use `bioetl quarantine inspect`.",
+          "description": "TIME RANGE · Quarantined records grouped by error type in the selected range. Use it to identify dominant quarantine signatures. No data means no matching quarantine samples were observed; it must not create a synthetic error type. For row-level evidence use `bioetl quarantine inspect`. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2600,7 +2680,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Selected-range count of canonical Silver validation failures. Non-zero means Silver validation blocked or degraded promotion and should be correlated with current DQ reasons and reject/quarantine evidence. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero.",
+          "description": "TIME RANGE · Selected-range count of canonical Silver validation failures. Non-zero means Silver validation blocked or degraded promotion and should be correlated with current DQ reasons and reject/quarantine evidence. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero. VALID EMPTY (no events) is not TELEMETRY MISSING.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2693,7 +2773,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Selected-range Gold strict-validation hard-fail count. Non-zero means Gold promotion was blocked. Zero means no hard-fail samples were observed in the selected window; it does not prove Gold validation ran or that Gold output exists. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero.",
+          "description": "TIME RANGE · Selected-range Gold strict-validation hard-fail count. Non-zero means Gold promotion was blocked. Zero means no hard-fail samples were observed in the selected window; it does not prove Gold validation ran or that Gold output exists. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero. VALID EMPTY (no events) is not TELEMETRY MISSING.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2776,7 +2856,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Selected-range anomaly counts by severity and anomaly type. WARN-only anomalies indicate drift; CRIT anomalies are blocking and should be correlated with current DQ reasons before replay or promotion. No data means no anomaly events were observed in the current window; the panel must not invent a synthetic severity/type series. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row",
+          "description": "TIME RANGE · Selected-range anomaly counts by severity and anomaly type. WARN-only anomalies indicate drift; CRIT anomalies are blocking and should be correlated with current DQ reasons before replay or promotion. No data means no anomaly events were observed in the current window; the panel must not invent a synthetic severity/type series. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2855,7 +2935,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Selected-range p95 duration of DQ checks. This is a diagnostics/performance surface, not a quality outcome; use it when DQ checks themselves look slow or noisy during an incident. Samples exist only when the runtime emitted bioetl_dq_check_duration_ms, which requires an active DQ monitor path rather than disabled/noop monitoring. No data means no DQ duration samples were observed in range or DQ timing telemetry is absent; it is not equivalent to fast checks. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row",
+          "description": "TIME RANGE · Selected-range p95 duration of DQ checks. This is a diagnostics/performance surface, not a quality outcome; use it when DQ checks themselves look slow or noisy during an incident. Samples exist only when the runtime emitted bioetl_dq_check_duration_ms, which requires an active DQ monitor path rather than disabled/noop monitoring. No data means no DQ duration samples were observed in range or DQ timing telemetry is absent; it is not equivalent to fast checks. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2934,7 +3014,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Selected-range trend of domain-emitted DQ threshold events. Uses bioetl_dq_soft_threshold_exceeded_total and hard_fail validation counters only; Grafana does not recompute entity YAML thresholds here. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row",
+          "description": "TIME RANGE · Selected-range trend of domain-emitted DQ threshold events. Uses bioetl_dq_soft_threshold_exceeded_total and hard_fail validation counters only; Grafana does not recompute entity YAML thresholds here. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row VALID EMPTY (no events) is not TELEMETRY MISSING.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2962,7 +3042,8 @@
                     }
                   }
                 }
-              ]
+              ],
+              "noValue": "VALID EMPTY — no events in the selected range (not missing telemetry)"
             },
             "overrides": []
           },
@@ -3007,7 +3088,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Do not read dual 100% as “all healthy” when Status is UNKNOWN/INCOMPLETE. Quality score trend over selected time range. Kept separate from operational gating indicators. Score thresholds: <0.80=CRIT, 0.80-0.95=WARN, >=0.95=OK; null=UNKNOWN. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row",
+          "description": "TIME RANGE · Do not read dual 100% as “all healthy” when Status is UNKNOWN/INCOMPLETE. Quality score trend over selected time range. Kept separate from operational gating indicators. Score thresholds: <0.80=CRIT, 0.80-0.95=WARN, >=0.95=OK; null=UNKNOWN. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3045,7 +3126,8 @@
                     }
                   }
                 }
-              ]
+              ],
+              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
             },
             "overrides": []
           },
@@ -3107,7 +3189,7 @@
               "targetBlank": false,
               "title": "Open Control Plane lineage diagnostics",
               "tooltip": "Canonical lineage/replay trust surface. Opens the Control Plane dashboard focused on its lineage diagnostics row.",
-              "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?viewPanel=904&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id"
+              "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&viewPanel=904&${__url_time_range}"
             }
           ],
           "options": {
@@ -3118,7 +3200,7 @@
                 "targetBlank": false,
                 "title": "Open Control Plane lineage diagnostics",
                 "tooltip": "Canonical lineage/replay trust surface. Opens the Control Plane dashboard focused on its lineage diagnostics row.",
-                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?viewPanel=904&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id"
+                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&viewPanel=904&${__url_time_range}"
               }
             ],
             "mode": "html"
@@ -3322,7 +3404,7 @@
           }
         },
         "refresh": 1,
-        "regex": "",
+        "regex": "/^\\s*(\\S(?:.*\\S)?)\\s*$/",
         "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
