@@ -151,13 +151,7 @@ class ForeignKeyReconciliationRequest:
     reference_layer: ForeignKeyReconciliationLayer = "silver"
     mutation_layer: ForeignKeyReconciliationLayer | None = None
 
-    def __post_init__(self) -> None:
-        _require_non_empty_str(self.source_table, "source_table")
-        _require_non_empty_str(self.reference_table, "reference_table")
-        _require_non_empty_str(self.source_key, "source_key")
-        _require_non_empty_str(self.reference_key, "reference_key")
-        _require_non_empty_primary_keys(self.primary_keys)
-
+    def _bind_normalized_layers(self) -> None:
         source_layer = _normalize_layer(self.source_layer, "source_layer")
         reference_layer = _normalize_layer(self.reference_layer, "reference_layer")
         mutation_layer = (
@@ -170,6 +164,14 @@ class ForeignKeyReconciliationRequest:
         object.__setattr__(self, "source_layer", source_layer)
         object.__setattr__(self, "reference_layer", reference_layer)
         object.__setattr__(self, "mutation_layer", mutation_layer)
+
+    def __post_init__(self) -> None:
+        _require_non_empty_str(self.source_table, "source_table")
+        _require_non_empty_str(self.reference_table, "reference_table")
+        _require_non_empty_str(self.source_key, "source_key")
+        _require_non_empty_str(self.reference_key, "reference_key")
+        _require_non_empty_primary_keys(self.primary_keys)
+        self._bind_normalized_layers()
 
         _validate_optional_source_reference_keys_pair(
             source_keys=self.source_keys,

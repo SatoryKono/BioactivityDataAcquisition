@@ -1,5 +1,3 @@
-"""Corpus-wide historical replay inventory and bulk certification workflows."""
-
 from __future__ import annotations
 
 from collections.abc import Mapping
@@ -42,7 +40,6 @@ def build_diagnostics_summary(*args: object, **kwargs: object) -> dict[str, obje
 
 _build_diagnostics_summary = build_diagnostics_summary
 
-
 __all__ = [
     "HistoricalReplayBulkCertificationRecord",
     "HistoricalReplayBulkCertificationResult",
@@ -56,14 +53,11 @@ __all__ = [
 
 @dataclass(slots=True)
 class HistoricalReplayCorpusService:
-    """Operate on retained manifests as a bounded historical replay corpus."""
-
     manifest_port: RunManifestPort
     ledger_port: RunLedgerPort
     certification_service: HistoricalReplayCertificationService
 
     def build_certifiability_inventory(self) -> HistoricalReplayCertifiabilityInventory:
-        """Inventory retained manifests against the certified replay tranche."""
         records = tuple(
             self._record(manifest) for manifest in self.manifest_port.list_all()
         )
@@ -74,7 +68,6 @@ class HistoricalReplayCorpusService:
         *,
         specs: tuple[HistoricalReplayBulkCertificationSpec, ...],
     ) -> HistoricalReplayBulkCertificationResult:
-        """Apply deterministic bulk certification across retained manifests."""
         inventory_before = self.build_certifiability_inventory()
         status_by_manifest_id = {
             record.manifest_id: record for record in inventory_before.records
@@ -82,19 +75,11 @@ class HistoricalReplayCorpusService:
         manifest_by_id = {
             manifest.manifest_id: manifest for manifest in self.manifest_port.list_all()
         }
-        # Validate all specs before sorting so missing keys raise explicit
-        # ValueError instead of KeyError during sort key evaluation.
-        for spec in specs:
-            if spec.manifest_id not in manifest_by_id:
-                raise ValueError(
-                    f"Historical replay bulk certification could not find manifest "
-                    f"{spec.manifest_id!r}"
-                )
-            if spec.manifest_id not in status_by_manifest_id:
-                raise ValueError(
-                    f"Historical replay inventory is missing manifest "
-                    f"{spec.manifest_id!r}"
-                )
+        self.validate_bulk_manifests(
+            specs,
+            manifest_by_id=manifest_by_id,
+            status_by_manifest_id=status_by_manifest_id,
+        )
         ordered_specs = tuple(
             sorted(
                 specs,
@@ -158,6 +143,24 @@ class HistoricalReplayCorpusService:
             inventory_after=self.build_certifiability_inventory(),
             records=tuple(records),
         )
+
+    def validate_bulk_manifests(
+        self,
+        specs: tuple[HistoricalReplayBulkCertificationSpec, ...],
+        *,
+        manifest_by_id: Mapping[str, RunManifest],
+        status_by_manifest_id: Mapping[str, object],
+    ) -> None:
+        for spec in specs:
+            mid = spec.manifest_id
+            if mid not in manifest_by_id:
+                raise ValueError(
+                    f"Historical replay bulk certification could not find manifest {mid!r}"
+                )
+            if mid not in status_by_manifest_id:
+                raise ValueError(
+                    f"Historical replay inventory is missing manifest {mid!r}"
+                )
 
     def _apply_one_certification(
         self,
