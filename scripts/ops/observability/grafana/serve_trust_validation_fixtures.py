@@ -142,7 +142,7 @@ def main() -> int:
         flush=True,
     )
     try:
-        server.serve_forever()
+        server.serve_forever()  # NOSONAR -- host is validated as loopback-only above
     except KeyboardInterrupt:
         print("stopped", flush=True)
     return 0

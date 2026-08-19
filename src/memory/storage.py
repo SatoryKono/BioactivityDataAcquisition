@@ -89,29 +89,13 @@ def exclusive_lock(
     """Acquire a portable sidecar lock using exclusive file creation."""
     target.parent.mkdir(parents=True, exist_ok=True)
     lock_path = target.with_name(f".{target.name}.lock")
-    deadline = time.monotonic() + timeout_seconds
-    lock_fd: int | None = None
-    while lock_fd is None:
-        try:
-            lock_fd = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
-        except FileExistsError as exc:
-            if _recover_orphaned_lock(
-                lock_path, stale_after_seconds=stale_after_seconds
-            ):
-                continue
-            if time.monotonic() >= deadline:
-                raise StorageConflictError(
-                    f"timed out acquiring lock: {target}"
-                ) from exc
-            time.sleep(poll_seconds)
-        except PermissionError as exc:
-            # On Windows, a contender reading the existing sidecar can make
-            # O_EXCL surface access denied instead of file-exists.
-            if time.monotonic() >= deadline:
-                raise StorageConflictError(
-                    f"timed out acquiring lock: {target}"
-                ) from exc
-            time.sleep(poll_seconds)
+    lock_fd = _acquire_lock_fd(
+        target,
+        lock_path,
+        timeout_seconds=timeout_seconds,
+        poll_seconds=poll_seconds,
+        stale_after_seconds=stale_after_seconds,
+    )
     try:
         payload = {
             "pid": os.getpid(),
@@ -130,17 +114,55 @@ def exclusive_lock(
         yield
     finally:
         os.close(lock_fd)
-        release_deadline = time.monotonic() + 1.0
-        while True:
-            try:
-                lock_path.unlink(missing_ok=True)
-                break
-            except PermissionError:
-                # Windows denies unlink while a contender briefly has the
-                # sidecar open to inspect owner metadata.
-                if time.monotonic() >= release_deadline:
-                    raise
-                time.sleep(poll_seconds)
+        _release_lock(lock_path, poll_seconds=poll_seconds)
+
+
+def _acquire_lock_fd(
+    target: Path,
+    lock_path: Path,
+    *,
+    timeout_seconds: float,
+    poll_seconds: float,
+    stale_after_seconds: float,
+) -> int:
+    """Acquire one exclusive sidecar descriptor within the timeout."""
+    deadline = time.monotonic() + timeout_seconds
+    while True:
+        try:
+            return os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+        except FileExistsError as exc:
+            if _recover_orphaned_lock(
+                lock_path, stale_after_seconds=stale_after_seconds
+            ):
+                continue
+            _wait_for_lock_or_raise(target, deadline, poll_seconds, exc)
+        except PermissionError as exc:
+            # Windows can surface access denied while a contender inspects the lock.
+            _wait_for_lock_or_raise(target, deadline, poll_seconds, exc)
+
+
+def _wait_for_lock_or_raise(
+    target: Path,
+    deadline: float,
+    poll_seconds: float,
+    error: OSError,
+) -> None:
+    if time.monotonic() >= deadline:
+        raise StorageConflictError(f"timed out acquiring lock: {target}") from error
+    time.sleep(poll_seconds)
+
+
+def _release_lock(lock_path: Path, *, poll_seconds: float) -> None:
+    """Remove a sidecar after transient Windows readers release it."""
+    release_deadline = time.monotonic() + 1.0
+    while True:
+        try:
+            lock_path.unlink(missing_ok=True)
+            return
+        except PermissionError:
+            if time.monotonic() >= release_deadline:
+                raise
+            time.sleep(poll_seconds)
 
 
 def atomic_write_bytes(

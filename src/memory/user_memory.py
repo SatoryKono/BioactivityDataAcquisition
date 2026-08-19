@@ -11,7 +11,7 @@ import json
 import re
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from memory.access import AccessAction, AccessContext, require_access
 from memory.freshness import FreshnessResult, evaluate_freshness
@@ -124,7 +124,7 @@ class UserMemoryStore:
             owner_id=user_id,
             repo_id=context.repo_id,
         )
-        self.grant_consent(replace(consent, active=False))
+        self.grant_consent(cast("UserMemoryConsent", replace(consent, active=False)))
 
     def put(
         self,
@@ -224,7 +224,9 @@ class UserMemoryStore:
             json.dumps(content, sort_keys=True),
             trust=current.envelope.trust,
         )
-        corrected = replace(current, content=dict(content))
+        corrected = cast(
+            "UserMemoryRecord", replace(current, content=dict(content))
+        )
         atomic_write_json(
             self._record_path(owner_id, context.repo_id, record_id),
             corrected.to_dict(),
@@ -247,11 +249,14 @@ class UserMemoryStore:
             repo_id=context.repo_id,
         )
         current = self._read_record(owner_id, context.repo_id, record_id)
-        tombstoned = replace(
-            current,
-            envelope=replace(current.envelope, status=RecordStatus.ARCHIVED),
-            content={},
-            tombstoned=True,
+        tombstoned = cast(
+            "UserMemoryRecord",
+            replace(
+                current,
+                envelope=replace(current.envelope, status=RecordStatus.ARCHIVED),
+                content={},
+                tombstoned=True,
+            ),
         )
         atomic_write_json(
             self._record_path(owner_id, context.repo_id, record_id),

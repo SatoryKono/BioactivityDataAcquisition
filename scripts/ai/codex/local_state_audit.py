@@ -33,10 +33,6 @@ UUID_PATTERN: Final = re.compile(
     re.I,
 )
 SHELLS: Final = {"bash", "sh", "zsh", "pwsh", "powershell", "cmd", "cmd.exe"}
-TEMPORARY_PATH_PREFIXES: Final = (
-    "/tmp/",
-    "/var/tmp/",
-)  # NOSONAR -- strings are classifier data; this code does not access them
 SENSITIVE_DIRS: Final = (
     "sessions",
     "archived_sessions",
@@ -123,6 +119,20 @@ def _parse_rule(line: str) -> tuple[list[str], str] | None:
     return pattern, match.group(2)
 
 
+def _looks_like_temporary_path(value: str) -> bool:
+    """Classify temporary-path tokens without accessing a shared directory."""
+    parts = tuple(
+        part for part in value.replace("\\", "/").casefold().split("/") if part
+    )
+    if not parts:
+        return False
+    if parts[0] in {"tmp", "temp"}:
+        return True
+    if len(parts) >= 2 and parts[:2] == ("var", "tmp"):
+        return True
+    return "temp" in parts
+
+
 def _rule_class(pattern: list[str], decision: str) -> tuple[str, str]:
     if decision != "allow":
         return "KEEP", "non_allow_policy"
@@ -132,10 +142,7 @@ def _rule_class(pattern: list[str], decision: str) -> tuple[str, str]:
         return "SECRET_REVIEW", "credential_like"
     if any("bioactivitydataacquisition2" in item.casefold() for item in pattern):
         return "REMOVE", "obsolete_checkout"
-    if any(
-        item.startswith(TEMPORARY_PATH_PREFIXES) or "\\temp\\" in item.casefold()
-        for item in pattern
-    ):
+    if any(_looks_like_temporary_path(item) for item in pattern):
         return "REMOVE", "temporary_path"
     executable = Path(pattern[0]).name.casefold() if pattern else ""
     if executable in SHELLS and (

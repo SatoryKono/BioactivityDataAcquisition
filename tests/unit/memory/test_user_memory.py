@@ -10,6 +10,7 @@ from memory.access import AccessAction, AccessContext, AccessDeniedError
 from memory.records import (
     ActorIdentity,
     RecordEnvelope,
+    RecordScope,
     RecordStatus,
     RecordType,
     TrustLevel,
@@ -43,11 +44,7 @@ def _envelope(
     return RecordEnvelope.create(
         record_id=record_id,
         record_type=RecordType.KNOWLEDGE,
-        repo_id=repo_id,
-        git_commit="a" * 40,
-        branch="main",
-        worktree_id="wt-a",
-        task_id="task-a",
+        scope=RecordScope(repo_id, "a" * 40, "main", "wt-a", "task-a"),
         actor=ActorIdentity(runtime="test", agent="test-agent"),
         source_refs=("explicit-user-input",),
         trust=TrustLevel.TRUSTED_REPOSITORY,
