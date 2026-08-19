@@ -1,4 +1,4 @@
-"""Application service for target protein classification hierarchy resolution."""
+"""Target protein classification hierarchy resolution."""
 
 from __future__ import annotations
 
@@ -36,8 +36,6 @@ _INVALID_RECORD_POLICIES: frozenset[str] = frozenset({"quarantine", "missing"})
 
 @dataclass(frozen=True, slots=True)
 class ProteinClassificationDQIssue:
-    """DQ issue raised while resolving target protein classifications."""
-
     component_id: int | None
     error_code: str
     message: str
@@ -45,8 +43,6 @@ class ProteinClassificationDQIssue:
 
 @dataclass(frozen=True, slots=True)
 class TargetProteinClassificationRecord:
-    """Gold-facing target protein classification relation row."""
-
     target_id: str
     classification_status: str
     component_id: int | None = None
@@ -86,7 +82,6 @@ class TargetProteinClassificationRecord:
         *,
         mapping_version: str | None = None,
     ) -> TargetProteinClassificationRecord:
-        """Build a sentinel row for targets without classification evidence."""
         return cls(
             target_id=target_id,
             classification_status=_STATUS_MISSING,
@@ -105,7 +100,6 @@ class TargetProteinClassificationRecord:
         *,
         mapping_version: str | None = None,
     ) -> TargetProteinClassificationRecord:
-        """Build a sentinel row for targets whose classification failed DQ."""
         return cls(
             target_id=target_id,
             classification_status=_STATUS_QUARANTINED,
@@ -205,21 +199,16 @@ class TargetProteinClassificationRecord:
 
 @dataclass(frozen=True, slots=True)
 class ProteinClassificationResolutionResult:
-    """Resolution result for one target."""
-
     target_id: str
     rows: tuple[TargetProteinClassificationRecord, ...]
     dq_issues: tuple[ProteinClassificationDQIssue, ...] = ()
 
     @property
     def has_quarantine(self) -> bool:
-        """Return True when resolution encountered hard DQ issues."""
         return bool(self.dq_issues)
 
 
 class ProteinClassificationResolutionService:
-    """Resolve deterministic L1-L5 protein classification rows for a target."""
-
     def __init__(
         self,
         classification_port: ProteinClassificationPort,
@@ -416,5 +405,4 @@ ResolveProteinClassificationUseCase = ProteinClassificationResolutionService
 
 
 def _json_array(values: Iterable[object]) -> str:
-    """Return a stable JSON array for publication in scalar contract fields."""
     return json.dumps(tuple(values), ensure_ascii=False, separators=(",", ":"))

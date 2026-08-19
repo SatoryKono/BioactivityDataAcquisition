@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.base_transformer.field_policy import FieldPolicyResolver
@@ -55,34 +56,22 @@ def resolve_field_contracts(
     return contracts
 
 
+_LOGICAL_TYPE_RULES: tuple[tuple[re.Pattern[str], LogicalType], ...] = (
+    (re.compile(r"string|^str$"), "string"),
+    (re.compile(r"^u?int|uint"), "integer"),
+    (re.compile(r"float|double|decimal"), "float"),
+    (re.compile(r"bool"), "boolean"),
+    (re.compile(r"timestamp|^date"), "string"),
+    (re.compile(r"categor"), "string"),
+)
+
+
 def resolve_logical_type(physical_type: str) -> LogicalType:
     """Map Pandera dtype text to logical business type."""
     normalized = physical_type.lower()
-    if normalized == "str" or "string" in normalized:
-        return "string"
-    if (
-        normalized.startswith("uint")
-        or normalized.startswith("int")
-        or "uint" in normalized
-    ):
-        return "integer"
-    if (
-        normalized.startswith("float")
-        or "double" in normalized
-        or "decimal" in normalized
-    ):
-        return "float"
-    if normalized == "bool" or "boolean" in normalized or normalized.startswith("bool"):
-        return "boolean"
-    if (
-        "datetime" in normalized
-        or "timestamp" in normalized
-        or normalized == "date"
-        or normalized.startswith("date")
-    ):
-        return "string"
-    if "category" in normalized or "categorical" in normalized:
-        return "string"
+    for pattern, logical in _LOGICAL_TYPE_RULES:
+        if pattern.search(normalized):
+            return logical
     return "unknown"
 
 

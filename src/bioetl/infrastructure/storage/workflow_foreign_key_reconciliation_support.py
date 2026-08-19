@@ -279,10 +279,33 @@ def normalize_value(value: object) -> object | None:
     return ("other", type(value).__name__, rendered)
 
 
+class _ReconciliationLogger(Protocol):
+    def _log(self, level: str, message: str, **fields: object) -> None: ...
+
+
+def log_reconciliation_started(
+    adapter: _ReconciliationLogger,
+    request: ForeignKeyReconciliationRequest,
+) -> None:
+    adapter._log(
+        "info",
+        "workflow foreign-key reconciliation started",
+        source_table=request.source_table,
+        reference_table=request.reference_table,
+        source_layer=request.source_layer,
+        reference_layer=request.reference_layer,
+        mutation_layer=request.effective_mutation_layer,
+        source_keys=list(request.effective_source_keys),
+        reference_keys=list(request.effective_reference_keys),
+        nulls_equal=request.nulls_equal,
+    )
+
+
 __all__ = [
     "build_reconciliation_result",
     "complete_dry_run",
     "complete_without_mutation",
+    "log_reconciliation_started",
     "normalize_row_key",
     "normalize_value",
     "partition_source_rows",
