@@ -1,0 +1,38 @@
+{
+  "run_id": "20260819T080519Z-agents-memory-cycle-51eaed1f81",
+  "audit": "prompt.audit.cycle.agents-memory",
+  "audit_prompt_source": "docs/00-project/ai/prompts/library/audit/project/full/audit-cycle-agents-memory.md",
+  "audit_prompt_sha256": "2ac0e4d1c3a36090b7c666efb26d683563e88f9cd0e6d6ef960774b8bdf0a097",
+  "started_at": "2026-08-19T08:05:19Z",
+  "completed_at": "2026-08-19T09:38:26Z",
+  "base_branch": "main",
+  "base_sha": "51eaed1f81183e8ad150e622fab1fba19afb0550",
+  "work_branch": "fix/audit-project-51eaed1f81",
+  "repository": "SatoryKono/BioactivityDataAcquisition",
+  "mode": "full",
+  "audit_mode": "full",
+  "iteration_count": 10,
+  "contours": ["runtime", "scripts", "memory"],
+  "scope": [
+    "AGENTS.md",
+    ".codex/",
+    ".junie/",
+    ".devin/",
+    "docs/00-project/ai/",
+    "scripts/ai/",
+    "src/memory/",
+    "scripts/memory/"
+  ],
+  "allow_issue_write": true,
+  "allow_push": true,
+  "allow_merge": false,
+  "allow_close": true,
+  "result": {
+    "proven_findings": 5,
+    "remediated_pending_merge": 4,
+    "open_findings": 1,
+    "surface_score": 1,
+    "proof_or_stop": "STOP",
+    "publication": "draft_pr"
+  }
+}

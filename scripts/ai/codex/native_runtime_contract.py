@@ -56,6 +56,17 @@ ACTIVE_RUNTIME_TEXT_PATHS = (
     "docs/00-project/ai/memory/agent-memory.md",
     *tuple(f"docs/00-project/ai/memory/memory-{name}.md" for name in AGENT_NAMES),
 )
+AI_LAUNCHER_TEXT_PATHS = (
+    "scripts/ai/vibe/launch.sh",
+    "scripts/ai/vibe/launch.ps1",
+)
+UNSAFE_LAUNCHER_PATTERNS = {
+    "full prompt logging": re.compile(r"Prompt:\s*\$\*"),
+    "pipe-to-shell installer guidance": re.compile(
+        r"curl[^\n|]*\|[^\n]*(?:bash|sh)",
+        re.I,
+    ),
+}
 STALE_RUNTIME_PATTERNS = {
     "provider-specific model label": re.compile(r"\b(?:opus|sonnet)\b", re.I),
     "obsolete runtime/tool wording": re.compile(
@@ -182,6 +193,30 @@ def validate_runtime_context(repo_root: Path = REPO_ROOT) -> list[Finding]:
                     Finding(
                         "context.stale",
                         f"contains {label}: {match.group(0)!r}",
+                        relative,
+                    )
+                )
+    return findings
+
+
+def validate_ai_launcher_safety(repo_root: Path = REPO_ROOT) -> list[Finding]:
+    """Reject AI launchers that expose prompt content or pipe downloads to shells."""
+
+    findings: list[Finding] = []
+    for relative in AI_LAUNCHER_TEXT_PATHS:
+        path = repo_root / relative
+        if not path.is_file():
+            findings.append(
+                Finding("launcher.missing", "AI launcher is missing", relative)
+            )
+            continue
+        content = path.read_text(encoding="utf-8")
+        for label, pattern in UNSAFE_LAUNCHER_PATTERNS.items():
+            if pattern.search(content):
+                findings.append(
+                    Finding(
+                        "launcher.unsafe",
+                        f"contains {label}",
                         relative,
                     )
                 )
@@ -358,4 +393,5 @@ def validate_native_runtime(repo_root: Path = REPO_ROOT) -> list[Finding]:
         *validate_agents(repo_root),
         *validate_canonical_skills(repo_root),
         *validate_runtime_context(repo_root),
+        *validate_ai_launcher_safety(repo_root),
     ]
