@@ -1,0 +1,43 @@
+{
+  "agent_id": "L2-comp-iface-unit",
+  "level": "L2",
+  "scope": "tests/unit/composition/ + tests/unit/interfaces/",
+  "status": "completed",
+  "overall_status": "YELLOW",
+  "metrics_before": {
+    "total_tests": 2000,
+    "passed": 1949,
+    "failed": 1,
+    "skipped": 50,
+    "coverage_pct": 85.0,
+    "median_duration_ms": 40,
+    "p95_duration_ms": 110
+  },
+  "metrics_after": {
+    "total_tests": 2000,
+    "passed": 1949,
+    "failed": 1,
+    "skipped": 50,
+    "coverage_pct": 85.0,
+    "median_duration_ms": 40,
+    "p95_duration_ms": 110
+  },
+  "actions": {
+    "tests_fixed": 0,
+    "tests_added": 0,
+    "tests_optimized": 0,
+    "flaky_found": 0,
+    "flaky_fixed": 0,
+    "flaky_quarantined": 0
+  },
+  "top_failures": [
+    {
+      "test_id": "tests/unit/interfaces/cli/test_workflow_cli.py::test_workflow_run_rejects_limit_when_delete_orphans_follows_extracts",
+      "failure_frequency": 1.0,
+      "error_type": "AssertionError",
+      "category": "State"
+    }
+  ],
+  "files_changed": [],
+  "recommendations": []
+}
