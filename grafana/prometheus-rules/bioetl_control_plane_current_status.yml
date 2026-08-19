@@ -25,6 +25,8 @@ groups:
       - record: bioetl_control_plane_run_type_universe
         expr: >-
           group by (pipeline, run_type) (
+            bioetl_control_plane_manifest_present
+            or on (pipeline, run_type)
             bioetl_control_plane_manifest_writes_total
             or on (pipeline, run_type)
             bioetl_manifest_ledger_integrity_ratio
@@ -271,3 +273,18 @@ groups:
 
       - record: bioetl_terminal_events_15m
         expr: sum by (pipeline) (increase(bioetl_control_plane_terminal_events_total[15m]))
+
+      - record: bioetl_control_plane_current_evidence_status
+        expr: >-
+          (
+            bioetl_control_plane_manifest_present * 0
+          )
+          or
+          (
+            (
+              bioetl_control_plane_run_type_universe
+              unless on (pipeline, run_type)
+              bioetl_control_plane_manifest_present
+            ) * 0 + 3
+          )
+

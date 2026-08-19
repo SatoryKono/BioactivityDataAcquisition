@@ -86,21 +86,18 @@ def test_rehydrate_increments_pipeline_runs_total_once(tmp_path: Path) -> None:
 
     assert first.pipeline_runs_seeded == 1
     assert second.pipeline_runs_seeded == 0
-    metrics.increment_counter.assert_any_call(
-        "bioetl_pipeline_runs_total",
-        1,
-        {
-            "pipeline": "chembl_assay",
-            "run_type": "backfill",
-            "status": "success",
-        },
+    metrics.set_gauge.assert_any_call(
+        "bioetl_control_plane_manifest_present",
+        1.0,
+        {"pipeline": "chembl_assay", "run_type": "backfill"},
     )
-    run_calls = [
-        call
+    counter_names = [
+        call.args[0]
         for call in metrics.increment_counter.call_args_list
-        if call.args and call.args[0] == "bioetl_pipeline_runs_total"
+        if call.args
     ]
-    assert len(run_calls) == 1
+    assert "bioetl_pipeline_runs_total" not in counter_names
+    assert "bioetl_health_check_success_total" not in counter_names
 
 
 def test_rehydrate_seeds_provider_universe_and_stage_series(tmp_path: Path) -> None:
@@ -116,22 +113,18 @@ def test_rehydrate_seeds_provider_universe_and_stage_series(tmp_path: Path) -> N
     metrics = MagicMock()
     result = rehydrate_current_pipeline_run_metrics(metrics, root=tmp_path)
     assert result.provider_universe_seeded == 1
-    assert result.stage_series_seeded >= 1
-    metrics.increment_counter.assert_any_call(
-        "bioetl_health_check_success_total",
-        1,
+    assert result.stage_series_seeded == 0
+    metrics.set_gauge.assert_any_call(
+        "bioetl_provider_observed_universe",
+        1.0,
         {"provider": "chembl"},
     )
-    metrics.increment_counter.assert_any_call(
-        "bioetl_stage_records_total",
-        0,
-        {
-            "pipeline": "chembl_assay",
-            "run_type": "backfill",
-            "stage": "gold",
-            "outcome": "excluded_by_contract",
-        },
-    )
+    counter_names = [
+        call.args[0]
+        for call in metrics.increment_counter.call_args_list
+        if call.args
+    ]
+    assert counter_names == []
 
 
 def test_reconciliation_reports_gap_when_success_lacks_scrape_sample(
@@ -174,8 +167,9 @@ def test_rehydrate_writes_scrape_sample_to_prometheus_registry(
     assert result.error is None
     assert result.pipeline_runs_seeded == 1
     body = build_health_server_metrics_exposition()
-    assert 'bioetl_pipeline_runs_total{pipeline="obs_fill_rehydrate_probe"' in body
-    assert 'run_type="backfill"' in body
+    assert "bioetl_provider_observed_universe" in body
+    assert 'provider="chembl"' in body
+    assert "bioetl_health_check_success_total{" not in body
 
 
 def test_reconciliation_aligned_when_labeled_sample_present(tmp_path: Path) -> None:

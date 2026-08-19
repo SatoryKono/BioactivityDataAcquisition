@@ -1,0 +1,9 @@
+{
+  "schema_version": "observability_qa_context_v1",
+  "pipeline": "chembl_assay",
+  "run_type": "backfill",
+  "provider": "chembl",
+  "run_id": "-",
+  "from": "now-6h",
+  "to": "now"
+}

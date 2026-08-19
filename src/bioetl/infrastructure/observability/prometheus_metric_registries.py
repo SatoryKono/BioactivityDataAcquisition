@@ -106,6 +106,15 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
     gauges={
         "bioetl_memory_pressure_state": _metrics.MEMORY_PRESSURE_STATE,
         "bioetl_control_plane_lifecycle_delete_candidates": _metrics.CONTROL_PLANE_LIFECYCLE_DELETE_CANDIDATES,
+        "bioetl_control_plane_manifest_present": _metrics.CONTROL_PLANE_MANIFEST_PRESENT,
+        "bioetl_control_plane_ledger_present": _metrics.CONTROL_PLANE_LEDGER_PRESENT,
+        "bioetl_control_plane_integrity_pair_present": (
+            _metrics.CONTROL_PLANE_INTEGRITY_PAIR_PRESENT
+        ),
+        "bioetl_control_plane_checkpoint_present": _metrics.CONTROL_PLANE_CHECKPOINT_PRESENT,
+        "bioetl_control_plane_last_observed_timestamp_seconds": (
+            _metrics.CONTROL_PLANE_LAST_OBSERVED_TIMESTAMP_SECONDS
+        ),
         "bioetl_observability_runtime_status": _metrics.OBSERVABILITY_RUNTIME_STATUS,
         "bioetl_pipeline_stage_expected": _metrics.PIPELINE_STAGE_EXPECTED,
         "bioetl_stage_backlog_records": _metrics.STAGE_BACKLOG_RECORDS,
@@ -206,6 +215,10 @@ HTTP_ADAPTER_REGISTRY = MetricRegistryFamily(
     },
     gauges={
         "bioetl_provider_health_status": _metrics.PROVIDER_HEALTH_STATUS,
+        "bioetl_provider_observed_universe": _metrics.PROVIDER_OBSERVED_UNIVERSE,
+        "bioetl_provider_health_observed_timestamp_seconds": (
+            _metrics.PROVIDER_HEALTH_OBSERVED_TIMESTAMP_SECONDS
+        ),
         "bioetl_adapter_fallback_hit_rate": _metrics.ADAPTER_FALLBACK_HIT_RATE,
         "bioetl_rate_limiter_tokens_available": _metrics.RATE_LIMITER_TOKENS_AVAILABLE,
     },
