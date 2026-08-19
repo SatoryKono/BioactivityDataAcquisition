@@ -7,7 +7,13 @@ from pathlib import Path
 import pytest
 
 from memory.evidence import DecisionRecord, EvidenceEvent, EvidenceStore
-from memory.records import ActorIdentity, RecordEnvelope, RecordType, TrustLevel
+from memory.records import (
+    ActorIdentity,
+    RecordEnvelope,
+    RecordScope,
+    RecordType,
+    TrustLevel,
+)
 from memory.replay import replay_decision
 
 pytestmark = pytest.mark.integration
@@ -17,11 +23,7 @@ def _envelope(record_id: str, record_type: RecordType) -> RecordEnvelope:
     return RecordEnvelope.create(
         record_id=record_id,
         record_type=record_type,
-        repo_id="bioetl",
-        git_commit="a" * 40,
-        branch="main",
-        worktree_id="tree-a",
-        task_id="task-replay",
+        scope=RecordScope("bioetl", "a" * 40, "main", "tree-a", "task-replay"),
         actor=ActorIdentity(runtime="test", agent="replay"),
         source_refs=("docs/00-project/RULES.md",),
         trust=TrustLevel.TRUSTED_REPOSITORY,
