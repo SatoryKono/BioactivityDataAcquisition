@@ -1,0 +1,145 @@
+version: 1
+source: grafana/dashboards/*.json
+mode: error
+note: >-
+  DASH-QA #9095 C2. Disposition of CURRENT Prometheus cards after A/B lanes
+  are independently trustworthy. Do not raise first_screen_max_panels.
+  Canonical Overview CURRENT answer remains 214/215 (DASH-FIT-003).
+
+entries:
+  - dashboard: bioetl-overview-v2.json
+    id: 214
+    disposition: keep
+    owner: "@bioetl-observability"
+    freshness_slo: 60s
+    reason: DASH-FIT-003 sole CURRENT fleet-health answer for pipeline x run_type.
+  - dashboard: bioetl-overview-v2.json
+    id: 215
+    disposition: keep
+    owner: "@bioetl-observability"
+    freshness_slo: 60s
+    reason: DASH-FIT-003 CURRENT first-action route table; not the selected UUID.
+  - dashboard: bioetl-overview-v2.json
+    id: 9002
+    disposition: keep
+    owner: "@bioetl-observability"
+    freshness_slo: 60s
+    reason: First-window CURRENT domain matrix; nested 9003-9007/9013 expand this card.
+  - dashboard: bioetl-overview-v2.json
+    id: 9031
+    disposition: collapse
+    collapse_into: bioetl-overview-v2.json:9002
+    owner: "@bioetl-observability"
+    freshness_slo: 60s
+    reason: Below-fold "all domain status" repeats 9002; keep as expansion only.
+  - dashboard: bioetl-overview-v2.json
+    id: 9003
+    disposition: keep
+    owner: "@bioetl-observability"
+    freshness_slo: 60s
+    reason: Nested runtime domain track owned by 9002; not a second first-window verdict.
+  - dashboard: bioetl-overview-v2.json
+    id: 9004
+    disposition: keep
+    owner: "@bioetl-observability"
+    freshness_slo: 60s
+    reason: Nested DQ domain track owned by 9002.
+  - dashboard: bioetl-overview-v2.json
+    id: 9006
+    disposition: keep
+    owner: "@bioetl-observability"
+    freshness_slo: 60s
+    reason: Nested control-plane domain track owned by 9002.
+  - dashboard: bioetl-overview-v2.json
+    id: 9007
+    disposition: keep
+    owner: "@bioetl-observability"
+    freshness_slo: 60s
+    reason: Nested provider domain track owned by 9002.
+  - dashboard: bioetl-runtime.json
+    id: 9401
+    disposition: keep
+    owner: "@bioetl-observability"
+    freshness_slo: 60s
+    reason: Runtime-owned CURRENT pipeline status; Overview 214 is the L0 rollup.
+  - dashboard: bioetl-runtime.json
+    id: 9101
+    disposition: keep
+    owner: "@bioetl-observability"
+    freshness_slo: 60s
+    reason: First-window CURRENT blocker table for this pipeline.
+  - dashboard: bioetl-runtime.json
+    id: 16
+    disposition: collapse
+    collapse_into: bioetl-runtime.json:9101
+    owner: "@bioetl-observability"
+    freshness_slo: 60s
+    reason: Below-fold Monitor Runtime Blockers duplicates 9101.
+  - dashboard: bioetl-provider-health-v2.json
+    id: 9401
+    disposition: keep
+    owner: "@bioetl-observability"
+    freshness_slo: 60s
+    reason: Selected-provider CURRENT status enum 0/1/2/3.
+  - dashboard: bioetl-provider-health-v2.json
+    id: 9101
+    disposition: keep
+    owner: "@bioetl-observability"
+    freshness_slo: 60s
+    reason: First-window fleet severity filtered to $provider excluding synthetic test.
+  - dashboard: bioetl-provider-health-v2.json
+    id: 9107
+    disposition: keep
+    owner: "@bioetl-observability"
+    freshness_slo: 60s
+    reason: CURRENT completeness/reason including missing_health_status.
+  - dashboard: bioetl-provider-health-v2.json
+    id: 9104
+    disposition: keep
+    owner: "@bioetl-observability"
+    freshness_slo: 60s
+    reason: Presence of raw health_status; PRESENT is not a healthy verdict.
+  - dashboard: bioetl-provider-health-v2.json
+    id: 9111
+    disposition: collapse
+    collapse_into: bioetl-provider-health-v2.json:9101
+    owner: "@bioetl-observability"
+    freshness_slo: 60s
+    reason: Full-fleet severity below fold duplicates 9101.
+  - dashboard: bioetl-dq-v2.json
+    id: 9401
+    disposition: keep
+    owner: "@bioetl-observability"
+    freshness_slo: 60s
+    reason: DQ-owned CURRENT status; Overview 9002 is the L0 rollup.
+  - dashboard: bioetl-dq-v2.json
+    id: 9101
+    disposition: keep
+    owner: "@bioetl-observability"
+    freshness_slo: 60s
+    reason: CURRENT DQ threshold state for the selected pipeline.
+  - dashboard: bioetl-control-plane-v1.json
+    id: 9401
+    disposition: keep
+    owner: "@bioetl-observability"
+    freshness_slo: 60s
+    reason: CURRENT replay-readiness for pipeline x run_type; 9418 is SELECTED RUN.
+  - dashboard: bioetl-control-plane-v1.json
+    id: 891
+    disposition: keep
+    owner: "@bioetl-observability"
+    freshness_slo: 60s
+    reason: CURRENT replay-safety chip complementary to 9401, not a second fleet SSOT.
+  - dashboard: bioetl-incident-v1.json
+    id: 9401
+    disposition: collapse
+    collapse_into: bioetl-overview-v2.json:214
+    owner: "@bioetl-observability"
+    freshness_slo: 60s
+    reason: Incident CURRENT status uses the same l0_status family as Overview 214.
+  - dashboard: bioetl-run-explorer-v1.json
+    id: 3010
+    disposition: keep
+    owner: "@bioetl-observability"
+    freshness_slo: 60s
+    reason: Browse-mode Ops HTTP index, not a CURRENT Prometheus card.

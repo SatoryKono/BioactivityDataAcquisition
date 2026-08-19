@@ -91,6 +91,32 @@ def _first_window_blob(dashboard: dict[str, object]) -> str:
     return "\n".join(parts)
 
 
+def test_overview_selected_run_summary_is_in_first_window() -> None:
+    dashboard = _load(DASHBOARD_DIR / "bioetl-overview-v2.json")
+    root = _root_panels(dashboard)
+    panel = next((item for item in root if item.get("id") == 9603), None)
+    assert panel is not None, "9603 must be a root panel"
+    assert panel.get("type") != "row"
+    y = int((panel.get("gridPos") or {}).get("y") or 99)
+    assert y < FIRST_WINDOW_Y, f"9603 must sit in first window, got y={y}"
+    fleet_y = int(
+        next(item for item in root if item.get("id") == 214)["gridPos"]["y"]
+    )
+    action_y = int(
+        next(item for item in root if item.get("id") == 215)["gridPos"]["y"]
+    )
+    assert y < fleet_y, "SELECTED RUN summary must sit above Monitor Fleet Health"
+    assert y < action_y, "SELECTED RUN summary must sit above Review First Action"
+    blob = f"{panel.get('title') or ''}\n{panel.get('description') or ''}"
+    assert "SELECTED RUN" in blob
+    urls = [
+        str(target.get("url") or "")
+        for target in (panel.get("targets") or [])
+        if isinstance(target, dict)
+    ]
+    assert any("view=summary" in url for url in urls)
+
+
 def test_query_panels_declare_scope_class_matching_scope() -> None:
     contract = yaml.safe_load(CONTRACT_PATH.read_text(encoding="utf-8"))
     assert isinstance(contract, dict)
@@ -144,6 +170,8 @@ def test_first_window_coverage_set_range_and_refresh_copy() -> None:
         "60s",
         "timezone",
         "Run coverage",
+        "IN RANGE",
+        "OUT OF RANGE",
     )
     missing: list[str] = []
     for path in get_dashboard_files():

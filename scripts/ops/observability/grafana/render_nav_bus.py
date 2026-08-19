@@ -14,6 +14,10 @@ import json
 import sys
 from pathlib import Path
 
+from scripts.ops.observability.grafana.dashboard_context_links import (
+    build_handoff_url,
+)
+
 ROOT = Path(__file__).resolve().parents[4]
 if __package__ in {None, ""}:
     root_str = str(ROOT)
@@ -106,58 +110,8 @@ NAV_DESCRIPTION = (
 )
 
 
-def _pipeline_var(source_uid: str) -> str:
-    """Provider board scopes outbound pipeline via pipeline_context."""
-    if source_uid == "bioetl-provider-health-v2":
-        return "$pipeline_context"
-    return "$pipeline"
-
-
 def _url_for(target: dict[str, str], *, source_uid: str) -> str:
-    dollar = "$"
-    pipe = _pipeline_var(source_uid)
-    base = f"/d/{target['uid']}/{target['path']}"
-    uid = target["uid"]
-    if uid == "bioetl-runtime":
-        # Stage is multi/includeAll on Runtime + DQ; $__all preserves all-stage
-        # evidence. Literal "unknown" is not a stage label and empties panels.
-        return (
-            f"{base}?var-pipeline={pipe}&var-run_type={dollar}run_type"
-            f"&var-stage={dollar}__all&{dollar}{{__url_time_range}}"
-            f"&var-workflow={dollar}workflow&var-run_id={dollar}run_id"
-        )
-    if uid == "bioetl-dq-v2":
-        return (
-            f"{base}?var-pipeline={pipe}&var-run_type={dollar}run_type"
-            f"&var-stage={dollar}__all&{dollar}{{__url_time_range}}"
-            f"&var-workflow={dollar}workflow&var-run_id={dollar}run_id"
-        )
-
-    if uid == "bioetl-provider-health-v2":
-        # Fail-closed context mapping from non-provider sources.
-        provider = (
-            f"{dollar}provider"
-            if source_uid in _PROVIDER_VARIABLE_UIDS
-            else "unknown"
-        )
-        return (
-            f"{base}?var-pipeline={pipe}&var-run_type={dollar}run_type"
-            f"&var-provider={provider}&var-pipeline_context={pipe}"
-            f"&{dollar}{{__url_time_range}}"
-            f"&var-workflow={dollar}workflow&var-run_id={dollar}run_id"
-        )
-    if uid in {"bioetl-incident-v1", "bioetl-run-explorer-v1"}:
-        return (
-            f"{base}?var-pipeline={pipe}&var-run_type={dollar}run_type"
-            f"&{dollar}{{__url_time_range}}&var-workflow={dollar}workflow"
-            f"&var-run_id={dollar}run_id"
-        )
-    # Trust / Overview
-    return (
-        f"{base}?var-pipeline={pipe}&var-run_type={dollar}run_type"
-        f"&{dollar}{{__url_time_range}}&var-workflow={dollar}workflow"
-        f"&var-run_id={dollar}run_id"
-    )
+    return build_handoff_url(target["uid"], source_uid=source_uid, template=True)
 
 
 def _html_href(url: str) -> str:

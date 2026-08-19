@@ -36,8 +36,17 @@ def test_summary_rows_pipeline_run_report_projects_funnel_and_coverage() -> None
     assert row["gold_records_out"] == "820"
     assert row["excluded_by_contract"] == "30"
     assert row["covers_selected_run"] == "outside"
+    assert row["coverage_chip"] == "OUT OF RANGE"
     assert "before window" in row["coverage_offset"]
     assert row["from_ms"] == str(started_ms - 5 * 60 * 1000)
     assert row["to_ms"] == str(started_ms + 60_000 + 5 * 60 * 1000)
     params = {item["parameter"]: item["value"] for item in payload["rows"]}
     assert params["set_range_to_run"].startswith("Set range to run")
+    in_range = _summary_rows_pipeline_run_report(
+        golden,
+        grafana_from=str(started_ms - 3_600_000),
+        grafana_to=str(started_ms + 3_600_000),
+    )
+    in_row = in_range["summary"][0]
+    assert in_row["covers_selected_run"] == "yes"
+    assert in_row["coverage_chip"] == "IN RANGE"
